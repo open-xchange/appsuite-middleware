@@ -83,7 +83,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class DefaultCalendarSession implements CalendarSession {
 
     private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
-    private static final CalendarUtilities CALENDAR_UTILITIES = new DefaultCalendarUtilities();
 
     private final CalendarService calendarService;
     private final Map<String, Object> parameters;
@@ -129,7 +128,7 @@ public class DefaultCalendarSession implements CalendarSession {
 
     @Override
     public CalendarUtilities getUtilities() {
-        return CALENDAR_UTILITIES;
+        return new DefaultCalendarUtilities(Services.getServiceLookup(), this);
     }
 
     @Override

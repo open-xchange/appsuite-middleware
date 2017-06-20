@@ -67,6 +67,9 @@ public enum Constants {
     /** The static identifier of the single default account in the internal calendar provider */
     static final int ACCOUNT_ID = 0;
 
+    /** The static qualified identifier of the single default account in the internal calendar provider */
+    static final String QUALIFIED_ACCOUNT_ID = "cal://0";
+
     /** The identifier of the folder tree the calendar provider is using */
     static final String TREE_ID = "1";
 

@@ -78,10 +78,12 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -113,7 +115,6 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private final ServiceLookup services;
     private final Context context;
-    private final ServerSession session;
     private final Map<Integer, Group> knownGroups;
     private final Map<Integer, User> knownUsers;
     private final Map<Integer, Resource> knownResources;
@@ -125,12 +126,31 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param services A service lookup reference
      */
     public DefaultEntityResolver(ServerSession session, ServiceLookup services) {
+        this(session.getContext(), services);
+        knownUsers.put(I(session.getUserId()), session.getUser());
+    }
+
+    /**
+     * Initializes a new {@link DefaultEntityResolver}.
+     *
+     * @param contextId The context identifier
+     * @param services A service lookup reference
+     */
+    public DefaultEntityResolver(int contextId, ServiceLookup services) throws OXException {
+        this(services.getService(ContextService.class).getContext(contextId), services);
+    }
+
+    /**
+     * Initializes a new {@link DefaultEntityResolver}.
+     *
+     * @param context The context
+     * @param services A service lookup reference
+     */
+    public DefaultEntityResolver(Context context, ServiceLookup services) {
         super();
         this.services = services;
-        this.session = session;
-        this.context = session.getContext();
+        this.context = context;
         knownUsers = new HashMap<Integer, User>();
-        knownUsers.put(I(session.getUserId()), session.getUser());
         knownGroups = new HashMap<Integer, Group>();
         knownResources = new HashMap<Integer, Resource>();
     }
@@ -364,8 +384,9 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * build increment arguments for the use count service for all added attendees
          */
-        boolean collectEmailAddresses = session.getUserConfiguration().isCollectEmailAddresses();
-        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(attendees, collectEmailAddresses);
+        CalendarSession session = result.getSession();
+        boolean collectEmailAddresses = session.getConfig().isCollectEmailAddresses();
+        List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(session, attendees, collectEmailAddresses);
         if (0 < incrementArguments.size()) {
             ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
             if (null == useCountService) {
@@ -376,7 +397,7 @@ public class DefaultEntityResolver implements EntityResolver {
                  */
                 try {
                     for (IncrementArguments arguments : incrementArguments) {
-                        useCountService.incrementObjectUseCount(session, arguments);
+                        useCountService.incrementObjectUseCount(session.getSession(), arguments);
                     }
                 } catch (OXException e) {
                     LOG.warn("Error incrementing object use count", e);
@@ -394,7 +415,7 @@ public class DefaultEntityResolver implements EntityResolver {
                 if (null == contactCollectorService) {
                     LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
                 } else {
-                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session);
+                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session.getSession());
                 }
             }
         }
@@ -727,11 +748,12 @@ public class DefaultEntityResolver implements EntityResolver {
     /**
      * Prepares a list of increment arguments for the supplied list of attendees for use with the object use count service.
      *
+     * @param session The underlying calendar session
      * @param attendees The attendees to get the increment arguments for
      * @param skipExternals <code>true</code> to only consider <i>internal</i> attendees, <code>false</code>, otherwise
      * @return The increment arguments, or an empty list if no suitable attendees contained
      */
-    private List<IncrementArguments> getUseCountIncrementArguments(List<Attendee> attendees, boolean skipExternals) {
+    private List<IncrementArguments> getUseCountIncrementArguments(CalendarSession session, List<Attendee> attendees, boolean skipExternals) {
         if (null == attendees || 0 == attendees.size()) {
             return Collections.emptyList();
         }

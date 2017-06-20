@@ -98,7 +98,7 @@ public abstract class IDBasedCalendarAction extends ChronosAction {
         }
         AppointmentAJAXRequest request = AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session);
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(request);
-        if (false == super.initSession(request).getConfig().isUseIDBasedAccess()) {
+        if (1 == 1 || false == super.initSession(request).getConfig().isUseIDBasedAccess()) {
             return super.perform(requestData, session);
         }
         try {

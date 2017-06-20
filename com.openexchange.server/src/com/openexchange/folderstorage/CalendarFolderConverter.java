@@ -61,7 +61,6 @@ import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.folderstorage.calendar.CalendarContentType;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -75,19 +74,23 @@ import com.openexchange.folderstorage.type.SharedType;
  */
 public class CalendarFolderConverter {
 
+    //    private static final ContentType STORAGE_CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
+    //    // private static final ContentType CALENDAR_CONTENT_TYPE = com.openexchange.folderstorage.calendar.CalendarContentType.getInstance();
+    //
     /**
      * Converts a calendar folder into a folder-storage compatible folder.
      *
      * @param treeId The identifier of the folder tree to take over
-     * @param accountId The identifier of the account the folder
+     * @param accountId The fully-qualified account identifier to take over
+     * @param contentType The context type to take over
      * @param calendarFolder The calendar folder to convert
      * @return The folder-storage compatible folder
      */
-    public static Folder getStorageFolder(String treeId, CalendarFolder calendarFolder) {
+    public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, CalendarFolder calendarFolder) {
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
-            return getStorageFolder(treeId, (GroupwareCalendarFolder) calendarFolder);
+            return getStorageFolder(treeId, accountId, contentType, (GroupwareCalendarFolder) calendarFolder);
         }
-        Folder folder = newStorageFolder(treeId);
+        Folder folder = newStorageFolder(treeId, accountId, contentType);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setParentID(CalendarFolderStorage.PRIVATE_ID);
@@ -108,14 +111,14 @@ public class CalendarFolderConverter {
      * Converts a groupware calendar folder into a folder-storage compatible folder.
      *
      * @param treeId The identifier of the folder tree to take over
+     * @param accountId The fully-qualified account identifier to take over
+     * @param contentType The context type to take over
      * @param calendarFolder The groupware calendar folder to convert
      * @return The folder-storage compatible folder
      */
-    public static Folder getStorageFolder(String treeId, GroupwareCalendarFolder calendarFolder) {
-
-        //        Folder folder = getStorageFolder(treeId, (CalendarFolder) calendarFolder);
-
-        Folder folder = newStorageFolder(treeId);
+    public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, GroupwareCalendarFolder calendarFolder) {
+        Folder folder = newStorageFolder(treeId, accountId, contentType);
+        folder.setAccountID(accountId);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setCreatedBy(calendarFolder.getCreatedBy());
@@ -285,9 +288,11 @@ public class CalendarFolderConverter {
      * Initializes a new folder as used by the internal folder storage.
      *
      * @param treeId The identifier of the folder tree to take over
+     * @param accountId The fully-qualified account identifier to take over
+     * @param contentType The context type to take over
      * @return A new folder instance
      */
-    private static Folder newStorageFolder(String treeId) {
+    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType) {
         Folder folder = new AbstractFolder() {
 
             private static final long serialVersionUID = 4412370864216762652L;
@@ -298,9 +303,10 @@ public class CalendarFolderConverter {
             }
         };
         folder.setTreeID(treeId);
+        folder.setAccountID(accountId);
         folder.setSubscribed(true);
-        folder.setContentType(CalendarContentType.getInstance());
-        folder.setDefaultType(CalendarContentType.getInstance().getModule());
+        folder.setContentType(contentType);
+        folder.setDefaultType(contentType.getModule());
         return folder;
     }
 

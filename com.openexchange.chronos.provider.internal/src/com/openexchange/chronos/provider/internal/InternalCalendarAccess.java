@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.internal;
 
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.internal.Constants.PUBLIC_FOLDER_ID;
+import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
@@ -132,6 +133,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
 
     @Override
     public List<? extends CalendarFolder> getVisibleFolders() throws OXException {
+        //TODO
         return getCalendarFolders(getFolderService().getAllVisibleFolders(TREE_ID, null, session.getSession(), initDecorator()));
     }
 
@@ -154,14 +156,14 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
     @Override
     public String updateFolder(String folderId, CalendarFolder folder) throws OXException {
         Date timestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Date.class);
-        Folder storageFolder = getStorageFolder(TREE_ID, folder);
+        Folder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         getFolderService().updateFolder(storageFolder, timestamp, session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
     @Override
     public String createFolder(String parentFolderId, CalendarFolder folder) throws OXException {
-        Folder folderToCreate = getStorageFolder(TREE_ID, folder);
+        Folder folderToCreate = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         folderToCreate.setParentID(parentFolderId);
         FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
         return response.getResponse();
