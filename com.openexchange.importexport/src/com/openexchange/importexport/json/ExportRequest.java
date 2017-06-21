@@ -71,7 +71,7 @@ public class ExportRequest {
 		this.setSession(session);
 		this.setRequest(request);
 
-		String vcardStr = request.getParameter(AJAXServlet.PARAMETER_VCARD_EXPORT);
+		String vcardStr = request.getParameter(AJAXServlet.PARAMETER_IDS);
         if(vcardStr != null && vcardStr.length() > 0) {            
             String[] split = vcardStr.split(",");
             batchIds = new HashMap<String, List<String>>();
