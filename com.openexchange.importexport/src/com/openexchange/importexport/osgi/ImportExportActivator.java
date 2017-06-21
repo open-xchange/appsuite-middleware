@@ -59,6 +59,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -87,7 +88,8 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			ConfigurationService.class,
 			ICalEmitter.class,
 			ConfigViewFactory.class,
-			VCardService.class
+			VCardService.class,
+			FolderService.class
 		};
 	}
 

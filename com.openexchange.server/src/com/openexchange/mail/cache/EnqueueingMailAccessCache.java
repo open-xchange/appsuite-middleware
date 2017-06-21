@@ -55,6 +55,10 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -64,6 +68,7 @@ import com.openexchange.mail.cache.queue.MailAccessQueue;
 import com.openexchange.mail.cache.queue.MailAccessQueueImpl;
 import com.openexchange.mail.cache.queue.SingletonMailAccessQueue;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -89,16 +94,6 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * Drop those queues of which all elements timed-out.
      */
     private static final boolean DROP_TIMED_OUT_QUEUES = false;
-
-    /**
-     * Creates a new {@link EnqueueingMailAccessCache}
-     *
-     * @return A new {@link EnqueueingMailAccessCache}
-     * @throws OXException If initialization fails
-     */
-    public static EnqueueingMailAccessCache newInstance(final int queueCapacity) throws OXException {
-        return new EnqueueingMailAccessCache(queueCapacity);
-    }
 
     private static volatile EnqueueingMailAccessCache singleton;
 
@@ -145,11 +140,36 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         }
     }
 
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                EnqueueingMailAccessCache tmp = singleton;
+                if (null != tmp) {
+                    try {
+                        int shrinkerSeconds = configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3);
+                        int idleSeconds = configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4);
+
+                        tmp.setIdleAndShrinkerSeconds(idleSeconds, shrinkerSeconds, false);
+                    } catch (OXException e) {
+                        LOG.error("Failed to re-initialize singleton mail-access cache", e);
+                    }
+                }
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
+            }
+        });
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<Key, MailAccessQueue> map;
-    private final int defaultIdleSeconds;
-    private final ScheduledTimerTask timerTask;
+    private volatile int defaultIdleSeconds;
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * The number of {@link MailAccess} instances which may be concurrently active/opened per account for a user.
@@ -166,16 +186,24 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         super();
         this.fallbackQueueCapacity = fallbackQueueCapacity;
         map = new NonBlockingHashMap<Key, MailAccessQueue>();
-        final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
-        defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
-        /*
-         * Add timer task
-         */
-        final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-        final int configuredShrinkerSeconds = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
-        final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
-        timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
+        setIdleAndShrinkerSeconds(MailProperties.getInstance().getMailAccessCacheIdleSeconds(), MailProperties.getInstance().getMailAccessCacheShrinkerSeconds(), true);
     }
+
+    private void setIdleAndShrinkerSeconds(int idleSeconds, int shrinkerSeconds, boolean withInitialDelay) throws OXException {
+        TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel();
+            service.purge();
+        }
+
+        defaultIdleSeconds = idleSeconds <= 0 ? 7 : idleSeconds;
+        int shrinkerMillis = (shrinkerSeconds <= 0 ? 3 : shrinkerSeconds) * 1000;
+        this.timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), withInitialDelay ? shrinkerMillis : 0L, shrinkerMillis);
+    }
+
 
     @Override
     public int numberOfMailAccesses(Session session, int accountId) throws OXException {

@@ -60,7 +60,7 @@ import com.openexchange.groupware.modules.Module;
 public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
     protected int folderID;
-
+    protected int secondFolderID;
 
     @Before
     public void setUp() throws Exception {
@@ -70,14 +70,22 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
         FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
+        
+        folder = ftm.generatePublicFolder("ManagedContactTest2_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
+        secondFolderID = folder.getObjectID();
     }
 
     protected Contact generateContact(String lastname) {
+        return this.generateContact(lastname, folderID);
+    }
+    
+    protected Contact generateContact(String lastname, int folderId){
         Contact contact = new Contact();
         contact.setSurName(lastname);
         contact.setGivenName("Given name");
         contact.setDisplayName(contact.getSurName() + ", " + contact.getGivenName());
-        contact.setParentFolderID(folderID);
+        contact.setParentFolderID(folderId);
         return contact;
     }
 

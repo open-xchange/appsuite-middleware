@@ -63,6 +63,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
@@ -283,7 +284,7 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
@@ -355,5 +356,27 @@ public class CSVContactExporter implements Exporter {
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
         return bob.toString();
     }
+
+    @Override
+    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
+        return createExportFileName(session, folder, null);
+    }
+    
+    private String createExportFileName(ServerSession session, String folder, String batchId) throws OXException {
+        FolderService folderService = ImportExportServices.getFolderService();
+        final StringBuilder sb = new StringBuilder();
+        try {
+            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());    
+            sb.append(folderObj.getFolderName());
+        } catch (OXException e) {
+            throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
+        } finally {
+            sb.append("export");
+        }
+        sb.append(".");
+        return sb.toString();
+    }
+    
+    
 
 }

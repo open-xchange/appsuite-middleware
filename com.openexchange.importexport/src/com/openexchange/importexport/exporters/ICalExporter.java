@@ -66,6 +66,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -201,11 +202,11 @@ public class ICalExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams);
+        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams, null);
     }
 
     @Override
-    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException {
         FolderObject folder = getFolder(session, folderID);
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -215,7 +216,7 @@ public class ICalExporter implements Exporter {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=export." + Format.ICAL.getExtension());
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+createExportFileName(session, folderID, null) + Format.ICAL.getExtension());
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
@@ -406,6 +407,26 @@ public class ICalExporter implements Exporter {
             return false;
         }
         return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+    }
+
+    @Override
+    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
+        return createExportFileName(session, folder, null);
+    }
+    
+    private String createExportFileName(ServerSession session, String folder, String batchId) throws OXException {
+        FolderService folderService = ImportExportServices.getFolderService();
+        final StringBuilder sb = new StringBuilder();
+        try {
+            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());    
+            sb.append(folderObj.getFolderName());
+        } catch (OXException e) {
+            throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
+        } finally {
+            sb.append("export");
+        }
+        sb.append(".");
+        return sb.toString();
     }
 
 }

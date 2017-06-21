@@ -124,13 +124,14 @@ public class Slf4jAuditLogService implements AuditLogService, Runnable {
         rollingPolicy.setParent(rollingFileAppender);
 
         encoder.start();
+        triggeringPolicy.start();
         rollingPolicy.start();
         rollingFileAppender.start();
 
         List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
         if (null != statuses && false == statuses.isEmpty()) {
             for (Status status : statuses) {
-                if (status instanceof ErrorStatus) {
+                if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ErrorStatus)) {
                     ErrorStatus errorStatus = (ErrorStatus) status;
                     Throwable throwable = errorStatus.getThrowable();
                     if (null == throwable) {

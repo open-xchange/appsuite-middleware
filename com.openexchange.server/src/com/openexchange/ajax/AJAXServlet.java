@@ -396,6 +396,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_AUTH_TOKEN = "cryptoauth";
 
     /**
+     * The parameter 'ids' delivers a comma-separated list of identifiers
+     */
+    public static final String PARAMETER_IDS = "ids";
+
+    /**
      * The <code><b>&quot;delivery&quot;</b></code> parameter specifies how to deliver binary data; e.g. <code>&quot;view&quot;</code> for
      * inlined display or <code>&quot;download&quot;</code>.
      */
