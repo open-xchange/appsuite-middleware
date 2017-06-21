@@ -83,6 +83,10 @@ public enum WebSocketExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid path filter expression: %1$s
      */
     INVALID_PATH_FILTER("Invalid path filter expression: %1$s", null, Category.CATEGORY_ERROR, 5),
+    /**
+     * Web Socket is not connected.
+     */
+    NOT_CONNECTED("Web Socket is not connected.", null, Category.CATEGORY_ERROR, 6),
 
     ;
 
