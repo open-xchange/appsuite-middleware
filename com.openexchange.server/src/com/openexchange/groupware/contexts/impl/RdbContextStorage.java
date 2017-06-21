@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
-import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -72,6 +71,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -81,26 +81,28 @@ public class RdbContextStorage extends ContextStorage {
      * SQL select statement for loading a context.
      */
     private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=? AND context_server2db_pool.server_id=?";
+    
+    /**
+     * SQL select statement for retrieving the server identifier for the specified context
+     */
+    private static final String FIND_SERVER_OF_CONTEXT = "SELECT server_id FROM context_server2db_pool WHERE cid = ?";
 
     /**
      * SQL select statement for resolving the login info to the context
      * identifier.
      */
-    private static final String RESOLVE_CONTEXT =
-        "SELECT cid FROM login2context WHERE login_info=?";
+    private static final String RESOLVE_CONTEXT = "SELECT cid FROM login2context WHERE login_info=?";
 
     /**
      * SQL select statement for resolving the identifier of the contexts
      * mailadmin.
      */
-    private static final String GET_MAILADMIN =
-        "SELECT user FROM user_setting_admin WHERE cid=?";
+    private static final String GET_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid=?";
 
     /**
      * SQL select statement for reading the login information of a context.
      */
-    private static final String GET_LOGININFOS =
-        "SELECT login_info FROM login2context WHERE cid=?";
+    private static final String GET_LOGININFOS = "SELECT login_info FROM login2context WHERE cid=?";
 
     /**
      * Default constructor.
@@ -206,14 +208,14 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            while(result.next()) {
+            while (result.next()) {
                 final String name = result.getString(1);
                 final String value = result.getString(2);
                 ctx.addAttribute(name, value);
             }
         } catch (final SQLException e) {
             try {
-                if(!Tools.tableExists(con, "contextAttribute")) {
+                if (!Tools.tableExists(con, "contextAttribute")) {
                     // This would be an explanation for the exception. Will
                     // happen once for every schema.
                     return;
@@ -249,21 +251,31 @@ public class RdbContextStorage extends ContextStorage {
             stmt.setInt(1, contextId);
             stmt.setInt(2, databseService.getServerId());
             result = stmt.executeQuery();
-            if (result.next()) {
-                context = new ContextImpl(contextId);
-                int pos = 1;
-                context.setName(result.getString(pos++));
-                context.setEnabled(result.getBoolean(pos++));
-                context.setFilestoreId(result.getInt(pos++));
-                context.setFilestoreName(result.getString(pos++));
-                final String[] auth = new String[2];
-                auth[0] = result.getString(pos++);
-                auth[1] = result.getString(pos++);
-                context.setFilestoreAuth(auth);
-                context.setFileStorageQuota(result.getLong(pos++));
-            } else {
-                throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
+            if (!result.next()) {
+                // Collect more information on which server the context is located, if existing at all
+                closeSQLStuff(result, stmt);
+
+                stmt = con.prepareCall(FIND_SERVER_OF_CONTEXT);
+                stmt.setInt(1, contextId);
+                result = stmt.executeQuery();
+                if (!result.next()) {
+                    throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
+                }
+                int serverId = result.getInt(1);
+                throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
             }
+
+            context = new ContextImpl(contextId);
+            int pos = 1;
+            context.setName(result.getString(pos++));
+            context.setEnabled(result.getBoolean(pos++));
+            context.setFilestoreId(result.getInt(pos++));
+            context.setFilestoreName(result.getString(pos++));
+            final String[] auth = new String[2];
+            auth[0] = result.getString(pos++);
+            auth[1] = result.getString(pos++);
+            context.setFilestoreAuth(auth);
+            context.setFileStorageQuota(result.getLong(pos++));
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
