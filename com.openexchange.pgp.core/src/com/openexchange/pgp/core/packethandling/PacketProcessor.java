@@ -158,21 +158,31 @@ public class PacketProcessor {
     }
 
     /**
-     * Process all packets within a given InputStream and writes modified packets back to the OutputStream
+     * Processes all PGP packets within a given InputStream
      *
      * @param in The stream to parse the PGP packets from
-     * @param out The stream to write modified packages to, or for not writing any data
+     * @param handler A handler called for each iterated PGP packet
+     * @throws Exception
+     */
+    public void process(InputStream in, PacketProcessorHandler handler) throws Exception {
+        process(in, null, handler, false);
+    }
+
+    /**
+     * Processes all PGP packets within a given InputStream and writes modified packets back to the OutputStream.
+     *
+     * @param in The stream to parse the PGP packets from
+     * @param out The stream to write modified packages to, or <code>null</code> for not writing any data.
      * @param handler A handler defining how to modify the packages within the InputStream while writing them to the OutputStream
      * @param armored True, if the data should be written as ASCII-Armored to the output stream, false for plain binary
      * @throws IOException
      */
     public void process(InputStream in, OutputStream out, PacketProcessorHandler handler, boolean armored) throws Exception {
-        try (BCPGOutputStream bcOut = out == null ? null :
-                new BCPGOutputStream(armored ? new ArmoredOutputStream(out) : out);) {
+        try (BCPGOutputStream bcOut = out == null ? null : new BCPGOutputStream(armored ? new ArmoredOutputStream(out) : out);) {
 
             //We wrap the InputStream in a RememberingInputStream in order to restore packet header later, which has been parsed by BC.
-            try (RememberingInputStream rememberingStream = new RememberingInputStream(PGPUtil.getDecoderStream(in));
-                BCPGInputStream bcIn = new BCPGInputStream(rememberingStream);) {
+            try (RememberingInputStream rememberingStream = new RememberingInputStream(
+                PGPUtil.getDecoderStream(in)); BCPGInputStream bcIn = new BCPGInputStream(rememberingStream);) {
 
                 PGPPacket packet = parseNextPackage(bcIn, rememberingStream);
                 handlePacket(packet, bcOut, handler);
