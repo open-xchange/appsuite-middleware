@@ -1260,8 +1260,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
                     throw AdminCache.parseDataTruncation(e);
                 } catch (final OXException e) {
-                    LOG.error("Error", e);
-                    throw new StorageException(e.toString());
+                    SQLException sqle = DBUtils.extractSqlException(e);
+                    if (!condition.isFailedTransactionRollback(sqle)) {
+                        LOG.error("Error", e);
+                        throw new StorageException(e.toString());
+                    }
                 } catch (final StorageException e) {
                     SQLException sqle = DBUtils.extractSqlException(e);
                     if (!condition.isFailedTransactionRollback(sqle)) {
