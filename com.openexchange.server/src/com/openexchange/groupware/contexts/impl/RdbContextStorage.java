@@ -78,6 +78,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -86,27 +87,29 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * SQL select statement for loading a context.
      */
-    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max,server_id FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=?";
+
+    /**
+     * SQL select statement for retrieving the server identifier for the specified context
+     */
+    private static final String FIND_SERVER_OF_CONTEXT = "SELECT server_id FROM context_server2db_pool WHERE cid = ?";
 
     /**
      * SQL select statement for resolving the login info to the context
      * identifier.
      */
-    private static final String RESOLVE_CONTEXT =
-        "SELECT cid FROM login2context WHERE login_info=?";
+    private static final String RESOLVE_CONTEXT = "SELECT cid FROM login2context WHERE login_info=?";
 
     /**
      * SQL select statement for resolving the identifier of the contexts
      * mailadmin.
      */
-    private static final String GET_MAILADMIN =
-        "SELECT user FROM user_setting_admin WHERE cid=?";
+    private static final String GET_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid=?";
 
     /**
      * SQL select statement for reading the login information of a context.
      */
-    private static final String GET_LOGININFOS =
-        "SELECT login_info FROM login2context WHERE cid=?";
+    private static final String GET_LOGININFOS = "SELECT login_info FROM login2context WHERE cid=?";
 
     /**
      * Default constructor.
@@ -212,14 +215,14 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            while(result.next()) {
+            while (result.next()) {
                 final String name = result.getString(1);
                 final String value = result.getString(2);
                 ctx.addAttribute(name, value);
             }
         } catch (final SQLException e) {
             try {
-                if(!Tools.tableExists(con, "contextAttribute")) {
+                if (!Tools.tableExists(con, "contextAttribute")) {
                     // This would be an explanation for the exception. Will
                     // happen once for every schema.
                     return;
@@ -246,34 +249,41 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     public ContextImpl loadContextData(final Connection con, final int contextId) throws OXException {
-        ContextImpl context = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(SELECT_CONTEXT);
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                context = new ContextImpl(contextId);
-                int pos = 1;
-                context.setName(result.getString(pos++));
-                context.setEnabled(result.getBoolean(pos++));
-                context.setFilestoreId(result.getInt(pos++));
-                context.setFilestoreName(result.getString(pos++));
-                final String[] auth = new String[2];
-                auth[0] = result.getString(pos++);
-                auth[1] = result.getString(pos++);
-                context.setFilestoreAuth(auth);
-                context.setFileStorageQuota(result.getLong(pos++));
-            } else {
+
+            // Check if such a context exists
+            if (false == result.next()) {
                 throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
             }
+
+            // Check if context-associated server matches this node's one
+            int serverId = result.getInt(8);
+            if (serverId != DBPool.getServerId()) {
+                throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
+            }
+
+            ContextImpl context = new ContextImpl(contextId);
+            int pos = 1;
+            context.setName(result.getString(pos++));
+            context.setEnabled(result.getBoolean(pos++));
+            context.setFilestoreId(result.getInt(pos++));
+            context.setFilestoreName(result.getString(pos++));
+            final String[] auth = new String[2];
+            auth[0] = result.getString(pos++);
+            auth[1] = result.getString(pos++);
+            context.setFilestoreAuth(auth);
+            context.setFileStorageQuota(result.getLong(pos++));
+            return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return context;
     }
 
     /**
