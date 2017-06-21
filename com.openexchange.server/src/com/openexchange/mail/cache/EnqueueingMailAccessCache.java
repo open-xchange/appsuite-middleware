@@ -201,7 +201,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
         defaultIdleSeconds = idleSeconds <= 0 ? 7 : idleSeconds;
         int shrinkerMillis = (shrinkerSeconds <= 0 ? 3 : shrinkerSeconds) * 1000;
-        timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), withInitialDelay ? shrinkerMillis : 0L, shrinkerMillis);
+        this.timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), withInitialDelay ? shrinkerMillis : 0L, shrinkerMillis);
     }
 
 
