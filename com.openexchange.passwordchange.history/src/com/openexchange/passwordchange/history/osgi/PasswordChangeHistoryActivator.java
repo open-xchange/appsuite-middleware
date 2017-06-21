@@ -54,11 +54,13 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.history.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
+import com.openexchange.passwordchange.history.tracker.DatabasePasswordChangeTracker;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
@@ -81,7 +83,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class };
+        return new Class<?>[] { ConfigViewFactory.class, ContextService.class };
     }
 
     @Override
@@ -93,7 +95,8 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
         // Register a password change registry  
         PasswordChangeTrackerRegistry registry = new PasswordChangeTrackerRegistryImpl();
-        registerService(PasswordChangeTrackerRegistry.class, registry);
+        registry.register("DB", new DatabasePasswordChangeTracker());
+        addService(PasswordChangeTrackerRegistry.class, registry);
 
         // Register event for password change
         PasswordChangeEventListener handler = new PasswordChangeEventListener();
