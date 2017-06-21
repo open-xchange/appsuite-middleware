@@ -241,7 +241,7 @@ public class VCardExporter implements Exporter {
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         return exportData(session, format, folder, 0, fieldsToBeExported, optionalParams, null);
-    } 
+    }
 
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
@@ -303,7 +303,7 @@ public class VCardExporter implements Exporter {
 
         // Get required contact service
         ContactService contactService = ImportExportServices.getContactService();
-        
+
         // Either export a single contact...
         if (objectId != null) {
             Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
@@ -315,11 +315,11 @@ public class VCardExporter implements Exporter {
             }
             return;
         }
-        
+
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         VCardService vCardService = ImportExportServices.getVCardService();
-        
-        //or export a batch of contacts...        
+
+        //or export a batch of contacts...
         if(batchIds != null){
             try {
                 Iterator<String> folderIterator = batchIds.keySet().iterator();
@@ -328,7 +328,7 @@ public class VCardExporter implements Exporter {
                     List<String> contacts = batchIds.get(folder);
                     String[] contactsId = new String[contacts.size()];
                     contactsId = contacts.toArray(contactsId);
-                    SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));            
+                    SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
                     while(contactBatchIterator.hasNext()){
                         Contact contact = contactBatchIterator.next();
                         try {
@@ -356,8 +356,8 @@ public class VCardExporter implements Exporter {
         }
         // ... or export a collection of contacts
         SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
-        
-        try {   
+
+        try {
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 try {
@@ -431,46 +431,44 @@ public class VCardExporter implements Exporter {
         retval[fields.length] = fieldToAdd;
         return retval;
     }
-    
+
     @Override
-    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException{
-        if(null == folder){
-            if(batchIds.size() == 1) {
-                //exactly one contact to export, file name equals contact name
-                String folderId = batchIds.keySet().iterator().next();
-                String batchId = batchIds.get(folderId).get(0);
-                return createVcardName(session, folderId, batchId);
-            } else {
-                //batch of contact ids, file name is set to a default
-                return "Batch Contacts";
-            }
-        } else {
+    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
+        if (null != folder) {
             //case export complete folder, file name equals folder name
             return createVcardName(session, folder, null);
         }
-    }    
-    
+
+        if (batchIds.size() == 1) {
+            //exactly one contact to export, file name equals contact name
+            String folderId = batchIds.keySet().iterator().next();
+            String batchId = batchIds.get(folderId).get(0);
+            return createVcardName(session, folderId, batchId);
+        }
+
+        //batch of contact ids, file name is set to a default
+        return "Batch Contacts";
+    }
+
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
         ContactService contactService = ImportExportServices.getContactService();
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
-        if (null == batchId || batchId.equals("") ) {
+        if (null == batchId || batchId.equals("")) {
             try {
                 FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
                 sb.append(folderObj.getFolderName());
-            } catch (OXException e) {
-                    throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);            
-            } finally {
                 sb.append("export");
-            }
-        } else {                         
-            try {
-                Contact contactObj = contactService.getContact(session, folder, batchId, null);
-                sb.append(contactObj.getGivenName()+" "+contactObj.getSurName());
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-            } finally {
+            }
+        } else {
+            try {
+                Contact contactObj = contactService.getContact(session, folder, batchId, null);
+                sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
                 sb.append("export");
+            } catch (OXException e) {
+                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
         }
         sb.append(".");
