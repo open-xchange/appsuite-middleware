@@ -451,11 +451,11 @@ public class VCardExporter implements Exporter {
     }
 
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
-        ContactService contactService = ImportExportServices.getContactService();
-        FolderService folderService = ImportExportServices.getFolderService();
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
+
         if (null == batchId || batchId.equals("")) {
             try {
+                FolderService folderService = ImportExportServices.getFolderService();
                 FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
                 sb.append(folderObj.getFolderName());
                 sb.append("export");
@@ -464,6 +464,7 @@ public class VCardExporter implements Exporter {
             }
         } else {
             try {
+                ContactService contactService = ImportExportServices.getContactService();
                 Contact contactObj = contactService.getContact(session, folder, batchId, null);
                 sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
                 sb.append("export");
@@ -471,7 +472,8 @@ public class VCardExporter implements Exporter {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
         }
-        sb.append(".");
+
+        sb.append('.');
         return sb.toString();
     }
 }
