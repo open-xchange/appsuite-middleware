@@ -50,6 +50,7 @@
 package com.openexchange.passwordchange.history.events;
 
 import java.sql.Timestamp;
+import java.util.List;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -105,7 +106,7 @@ public final class PasswordChangeUtility {
             tracker.trackPasswordChange(contextID, userID, info);
         } catch (Exception e) {
             // IF this happens some property won't be there ..
-            LOG.warn("Error while tracking password change for user {} in context {}", userID, contextID);
+            LOG.debug("Error while tracking password change for user {} in context {}", userID, contextID);
         }
     }
 
@@ -145,14 +146,15 @@ public final class PasswordChangeUtility {
             throw PasswordChangeHistoryException.MISSING_CONFIGURATION.create(userID, contextID);
         }
         // Load registry to get the fitting tracker
-        PasswordChangeTrackerRegistry trackerRegistry = Services.getOptionalService(PasswordChangeTrackerRegistry.class);
+        PasswordChangeTrackerRegistry trackerRegistry = Services.getService(PasswordChangeTrackerRegistry.class);
         if (null == trackerRegistry) {
             LOG.debug("Could not get PasswordChangeTrackerRegistry");
             throw PasswordChangeHistoryException.MISSING_SERVICE.create("PasswordChangeTrackerRegistry");
         }
         PasswordChangeTracker tracker = trackerRegistry.getTracker(symbolicTrackerName);
         if (null == tracker) {
-            LOG.error("Could not load {} for user {} in context {}", symbolicTrackerName, userID, contextID);
+            // If no tracker available, there should be no tracking
+            LOG.debug("Could not load {} for user {} in context {}", symbolicTrackerName, userID, contextID);
             throw PasswordChangeHistoryException.MISSING_TRACKER.create(symbolicTrackerName);
         }
         return tracker;
