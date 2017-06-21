@@ -60,7 +60,6 @@ import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
-import org.glassfish.grizzly.websockets.Utf8Utils;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import com.google.common.collect.ImmutableMap;
@@ -192,7 +191,15 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
     }
 
     private void blockingSend(String message) throws OXException {
-        GrizzlyFuture<DataFrame> grizzlyFuture = send(Utf8Utils.encode(DataFrame.STRICT_UTF8_CHARSET, message));
+        if (false == isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
+        }
+
+        ProtocolHandler protocolHandler = this.protocolHandler;
+        DataFrame frameToSend = protocolHandler.toDataFrame(message);
+        frameToSend.getBytes();
+
+        GrizzlyFuture<DataFrame> grizzlyFuture = protocolHandler.send(frameToSend);
         try {
             grizzlyFuture.get();
         } catch (InterruptedException e) {
@@ -215,6 +222,10 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
 
     @Override
     public SendControl sendMessageAsync(String message) throws OXException {
+        if (false == isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
+        }
+
         MessageTranscoder transcoder = this.transcoder;
 
         String transcoded = null == transcoder ? message : transcoder.onOutboundMessage(this, message);
@@ -222,7 +233,11 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
             return new SendControlImpl<>(new GetFuture<Void>(null));
         }
 
-        GrizzlyFuture<DataFrame> f = send(Utf8Utils.encode(DataFrame.STRICT_UTF8_CHARSET, transcoded));
+        ProtocolHandler protocolHandler = this.protocolHandler;
+        DataFrame frameToSend = protocolHandler.toDataFrame(transcoded);
+        frameToSend.getBytes();
+
+        GrizzlyFuture<DataFrame> f = protocolHandler.send(frameToSend);
         return new SendControlImpl<>(f);
     }
 
