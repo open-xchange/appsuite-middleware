@@ -74,14 +74,13 @@ import static com.openexchange.ajax.fields.AppointmentFields.*;
  */
 public class Details implements ChangeDescriptionGenerator {
 
-    private static final String[] FIELDS = {TITLE, LOCATION, NOTE, NUMBER_OF_ATTACHMENTS};
+    private static final String[] FIELDS = {TITLE, LOCATION, NOTE};
 
     private static final Map<String, String> MESSAGE_MAP = new HashMap<String, String>(){{
         put(TITLE, Messages.HAS_CHANGED_TITLE);
         put(LOCATION, Messages.HAS_CHANGED_LOCATION);
         put(NOTE, Messages.HAS_CHANGED_NOTE);
         put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
-        put(NUMBER_OF_ATTACHMENTS, "Blubb");
     }};
 
     @Override
@@ -91,7 +90,6 @@ public class Details implements ChangeDescriptionGenerator {
         add(LOCATION, diff, changes, true);
         add(TIMEZONE, diff, changes, true);
         add(NOTE, diff, changes, false);
-        add(NUMBER_OF_ATTACHMENTS, diff, changes, false);
 
         return changes;
     }

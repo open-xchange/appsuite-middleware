@@ -55,9 +55,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.OAuthConfigurationProperty;
@@ -66,6 +66,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -155,13 +156,13 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         /*
          * check config cascade for specific "enabled" property
          */
-        final ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
-        final ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
-        if (!property.isDefined()) {
-            return true;
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
 
-        return property.get().booleanValue();
+        ConfigView view = viewFactory.getView(userId, contextId);
+        return ConfigViews.getDefinedBoolPropertyFrom(getEnabledProperty(), true, view);
     }
 
     /**
@@ -181,15 +182,49 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * @return The property's value
      * @throws OXException
      */
-    private String getFromConfigViewFactory(final Session session, OAuthPropertyID propertyId) throws OXException {
+    protected String getFromConfigViewFactory(final Session session, OAuthPropertyID propertyId) throws OXException {
         OAuthConfigurationProperty oauthProperty = getOAuthProperty(propertyId);
         if (session == null) {
             return oauthProperty.getValue();
         }
-        int context = 0, user = 0;
-        context = session.getContextId();
-        user = session.getUserId();
-        return Services.getService(ConfigViewFactory.class).getView(user, context).get(oauthProperty.getName(), String.class);
+
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        String propValue = ConfigViews.getDefinedStringPropertyFrom(oauthProperty.getName(), null, view);
+        return null == propValue ? oauthProperty.getValue() : (OAuthPropertyID.redirectUrl == propertyId ? urlEncode(propValue) : propValue);
+    }
+
+    /**
+     * Get the OAuthProperty from the ConfigViewFactory (if such a property exists)
+     *
+     * @param session The session
+     * @param def The default value to return
+     * @param propertyId The property identifier
+     * @return The property's value or specified default value
+     * @throws OXException
+     */
+    protected String optFromConfigViewFactory(Session session, String def, OAuthPropertyID propertyId) throws OXException {
+        OAuthConfigurationProperty oauthProperty = getOAuthProperty(propertyId);
+        if (null == oauthProperty) {
+            return def;
+        }
+
+        if (session == null) {
+            return oauthProperty.getValue();
+        }
+
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        String propValue = ConfigViews.getDefinedStringPropertyFrom(oauthProperty.getName(), null, view);
+        return null == propValue ? oauthProperty.getValue() : (OAuthPropertyID.redirectUrl == propertyId ? urlEncode(propValue) : propValue);
     }
 
     @Override
@@ -203,23 +238,18 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String getConsumerKey() {
-        return getOAuthProperty(OAuthPropertyID.consumerKey).getValue();
+    public String getConsumerKey(final Session session) throws OXException {
+        return getFromConfigViewFactory(session, OAuthPropertyID.consumerKey);
     }
 
     @Override
-    public String getConsumerSecret() {
-        return getOAuthProperty(OAuthPropertyID.consumerKey).getValue();
+    public String getConsumerSecret(final Session session) throws OXException {
+        return getFromConfigViewFactory(session, OAuthPropertyID.consumerKey);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getProductName()
-     */
     @Override
-    public String getProductName() {
-        return getOAuthProperty(OAuthPropertyID.productName).getValue();
+    public String getProductName(Session session) throws OXException {
+        return getFromConfigViewFactory(session, OAuthPropertyID.productName);
     }
 
     /**
@@ -267,7 +297,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String processAuthorizationURL(final String authUrl) {
+    public String processAuthorizationURL(final String authUrl, final Session session) throws OXException {
         return authUrl;
     }
 

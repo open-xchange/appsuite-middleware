@@ -159,11 +159,10 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         byte[] encryptedTestData  = encryptedDataStream.toByteArray();
 
         //Extracting the session data out of the PGP Stream
-        ByteArrayOutputStream extractedData = new ByteArrayOutputStream();
         PacketProcessor packetProcessor = new PacketProcessor();
         ExtractSessionProcessorHandler extractSessionProcessorHandler = new ExtractSessionProcessorHandler();
         packetProcessor.process(new ByteArrayInputStream(encryptedTestData),
-            extractedData,
+            null,
             extractSessionProcessorHandler,
             armored);
         EncryptedSession encryptedPgpSession =

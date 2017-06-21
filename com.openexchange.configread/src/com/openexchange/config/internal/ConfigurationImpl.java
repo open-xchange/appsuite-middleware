@@ -853,14 +853,14 @@ public final class ConfigurationImpl implements ConfigurationService {
             for (String nameOfChangedProperties : namesOfChangedProperties) {
                 // Now check for prefix matches
                 if (!matchingPrefixProperty.isEmpty()) {
-                    int pos = nameOfChangedProperties.lastIndexOf('/');
+                    int pos = nameOfChangedProperties.lastIndexOf('.');
                     while (pos > 0) {
                         String prefix = nameOfChangedProperties.substring(0, pos);
                         List<Reloadable> interestedReloadables = matchingPrefixProperty.get(prefix);
                         if (null != interestedReloadables) {
                             toTrigger.addAll(interestedReloadables);
                         }
-                        pos = prefix.lastIndexOf('/');
+                        pos = prefix.lastIndexOf('.');
                     }
                 }
 

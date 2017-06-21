@@ -53,6 +53,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * {@link Delegator} - Allows to automatically delegate the method call to the correct matching method. See <a href="http://www.javaspecialists.eu/archive/Issue168.html">http://www.javaspecialists.eu/archive/Issue168.html</a>.
@@ -84,16 +93,63 @@ import java.lang.reflect.Method;
  */
 public class Delegator<C> {
 
+    private static Set<Method> getAllMethodsRecursively(Class<?> cl) {
+        Set<Method> methods = new LinkedHashSet<>();
+        for (Class<?> current = cl; current != null; current = current.getSuperclass()) {
+            Collections.addAll(methods, current.getMethods());
+            Collections.addAll(methods, current.getDeclaredMethods());
+        }
+        return methods;
+    }
+
+    private static Map<String, List<Method>> getAllMethods(Class<?> cl) {
+        Set<Method> declaredMethods = getAllMethodsRecursively(cl);
+        Map<String, List<Method>> m = new LinkedHashMap<>(declaredMethods.size());
+        for (Method method : declaredMethods) {
+            String name = method.getName();
+            List<Method> list = m.get(name);
+            if (null == list) {
+                list = new ArrayList<>(2);
+                m.put(name, list);
+            }
+            list.add(method);
+        }
+
+        ImmutableMap.Builder<String, List<Method>> b = ImmutableMap.builder();
+        for (Map.Entry<String, List<Method>> e : m.entrySet()) {
+            b.put(e.getKey(), ImmutableList.copyOf(e.getValue()));
+        }
+        return b.build();
+    }
+
+    // -----------------------------------------------------------------------------------
+
     private final Object source;
     private final Object delegate;
-    private final Class<C> superclass;
+    final Class<C> superclass;
+    private final Map<String, List<Method>> declaredMethods;
 
+    /**
+     * Initializes a new {@link Delegator}.
+     *
+     * @param source The source instance that wants to delegate
+     * @param superclass The type to which shall be delegated
+     * @param delegate The instance to which shall be delegated
+     */
     public Delegator(Object source, Class<C> superclass, Object delegate) {
         this.source = source;
         this.superclass = superclass;
         this.delegate = delegate;
+        this.declaredMethods = getAllMethods(superclass);
     }
 
+    /**
+     * Initializes a new {@link Delegator}.
+     *
+     * @param source The source instance that wants to delegate
+     * @param superclass The type to which shall be delegated
+     * @param delegateClassName The name of the class to which shall be delegated
+     */
     public Delegator(Object source, Class<C> superclass, String delegateClassName) {
         try {
             this.source = source;
@@ -102,6 +158,7 @@ public class Delegator<C> {
             Constructor<?> delegateConstructor = implCl.getDeclaredConstructor();
             delegateConstructor.setAccessible(true);
             this.delegate = delegateConstructor.newInstance();
+            this.declaredMethods = getAllMethods(superclass);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -109,34 +166,51 @@ public class Delegator<C> {
         }
     }
 
-    public final <T> T invoke(Object... args) {
-        try {
-            String methodName = extractMethodName();
-            Method method = findMethod(methodName, args);
-            @SuppressWarnings("unchecked") T t = (T) invoke0(method, args);
-            return t;
-        } catch (NoSuchMethodException e) {
-            throw new DelegationException(e);
-        }
+    /**
+     * Gets the delegate
+     *
+     * @return The delegate
+     */
+    public Object getDelegate() {
+        return delegate;
     }
 
-    private Object invoke0(Method method, Object[] args) {
+    /**
+     * Delegates to the method invocation of the associated instance.
+     *
+     * @param args The method arguments to pass
+     * @return The invocation result
+     * @throws DelegationException If delegation generally fails
+     * @throws DelegationExecutionException If execution itself fails; providing the causing exception
+     */
+    public final <T> T invoke(Object... args) {
+        String methodName = extractMethodName();
+        Method method = findMethod(methodName, args);
+        @SuppressWarnings("unchecked") T t = (T) invoke0(method, args);
+        return t;
+    }
+
+    Object invoke0(Method method, Object[] args) {
         try {
             writeFields(superclass, source, delegate);
             method.setAccessible(true);
+
             Object result = method.invoke(delegate, args);
+
             writeFields(superclass, delegate, source);
             return result;
-        } catch (RuntimeException e) {
+        } catch (DelegationException e) {
             throw e;
+        } catch (RuntimeException e) {
+            throw new DelegationException(e);
         } catch (InvocationTargetException e) {
-            throw new DelegationException(e.getCause());
+            throw new DelegationExecutionException(e.getCause());
         } catch (Exception e) {
             throw new DelegationException(e);
         }
     }
 
-    private void writeFields(Class clazz, Object from, Object to) throws Exception {
+    private void writeFields(Class<?> clazz, Object from, Object to) throws Exception {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             field.set(to, field.get(from));
@@ -149,15 +223,23 @@ public class Delegator<C> {
         return methodName;
     }
 
-    private Method findMethod(String methodName, Object[] args) throws NoSuchMethodException {
-        Class<?> clazz = superclass;
-        if (args.length == 0) {
-            return clazz.getDeclaredMethod(methodName);
+    private Method findMethod(String methodName, Object[] args) {
+        List<Method> methodsByName = declaredMethods.get(methodName);
+        if (null == methodsByName) {
+            throw new DelegationException("Could not find method " + methodName + " in class " + superclass.getName());
         }
-        Method match = null;
-        next: for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals(methodName)) {
+
+        if (args.length == 0) {
+            for (Method method : methodsByName) {
                 Class<?>[] classes = method.getParameterTypes();
+                if (classes.length == 0) {
+                    return method;
+                }
+            }
+        } else {
+            Method match = null;
+            next: for (Method candidate : methodsByName) {
+                Class<?>[] classes = candidate.getParameterTypes();
                 if (classes.length == args.length) {
                     for (int i = 0; i < classes.length; i++) {
                         Class<?> argType = classes[i];
@@ -166,18 +248,18 @@ public class Delegator<C> {
                             continue next;
                         }
                     }
-                    if (match == null) {
-                        match = method;
-                    } else {
-                        throw new DelegationException("Duplicate matches");
+                    if (match != null) {
+                        throw new DelegationException("Duplicate matches for " + methodName + " in class " + superclass.getName());
                     }
+                    match = candidate;
                 }
             }
+            if (match != null) {
+                return match;
+            }
         }
-        if (match != null) {
-            return match;
-        }
-        throw new DelegationException("Could not find method: " + methodName);
+
+        throw new DelegationException("Could not find method " + methodName + " in class " + superclass.getName());
     }
 
     private Class<?> convertPrimitiveClass(Class<?> primitive) {
@@ -219,17 +301,42 @@ public class Delegator<C> {
      */
     public static class DelegatorMethodFinder<C> {
 
+        private static Method optMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+            try {
+                return clazz.getMethod(methodName, parameterTypes);
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        }
+
+        private static Method optDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+            try {
+                return clazz.getDeclaredMethod(methodName, parameterTypes);
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        }
+
         private final Method method;
         private final Delegator<C> delegator;
 
         DelegatorMethodFinder(Delegator<C> delegator, String methodName, Class<?>... parameterTypes) {
             try {
-                method = delegator.superclass.getDeclaredMethod(methodName, parameterTypes);
+                Class<C> clazz = delegator.superclass;
+                Method m = null;
+                for (Class<?> current = clazz; null == m && null != current; current = current.getSuperclass()) {
+                    m = optMethod(current, methodName, parameterTypes);
+                    if (null == m) {
+                        m = optDeclaredMethod(current, methodName, parameterTypes);
+                    }
+                }
+                if (null == m) {
+                    throw new DelegationException("Could not find method " + methodName + " in class " + clazz.getName());
+                }
+                method = m;
                 this.delegator = delegator;
             } catch (RuntimeException e) {
                 throw e;
-            } catch (Exception e) {
-                throw new DelegationException(e);
             }
         }
 

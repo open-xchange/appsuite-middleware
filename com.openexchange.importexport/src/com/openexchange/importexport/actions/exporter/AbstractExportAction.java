@@ -83,13 +83,20 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
         final List<Integer> cols = req.getColumns();
-        final SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        final SizedInputStream sis;
+        if(null == req.getBatchIds() || req.getBatchIds().isEmpty()){
+            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        }
+        else{
+            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), 0, cols != null ? I2i(cols) : null, getOptionalParams(req), req.getBatchIds());
+        }
+                
         if (null == sis) {
             // Streamed
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
-
-        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension());
+        
+        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), getExportFileName(req) + sis.getFormat().getExtension());
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
@@ -113,5 +120,13 @@ public abstract class AbstractExportAction implements AJAXActionService {
         }
 
         return optionalParams;
+    }
+    
+    private String getExportFileName(ExportRequest req) throws OXException{
+        if (null == req.getBatchIds() || req.getBatchIds().isEmpty()) {
+            return getExporter().getExportFileName(req.getSession(), req.getFolder(), null);
+        } else {
+            return getExporter().getExportFileName(req.getSession(), null, req.getBatchIds());
+        }
     }
 }

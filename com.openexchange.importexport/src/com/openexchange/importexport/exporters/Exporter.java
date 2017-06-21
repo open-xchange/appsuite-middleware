@@ -50,6 +50,7 @@
 package com.openexchange.importexport.exporters;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
@@ -60,6 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  * Defines a class able to export a certain type of OX folder as a certain format
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - exportFileName
  * @see com.openexchange.groupware.Types
  */
 public interface Exporter {
@@ -99,9 +101,21 @@ public interface Exporter {
 	 * @param objectId: Id of an entry in that folder that is to be exported.
 	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+	 * @param batchIds: Ids of multiple entries in different folders
 	 * @return InputStream in requested format.
 	 * @throws OXException
 	 */
-	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
+	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException;
+	
+	/**
+	 * Creates a proper export file name based on the folder or the object to export
+	 * 
+	 * @param session: The session object to be able to check permissions. 
+	 * @param folder: The folder to name the export file after
+	 * @param batchIds: The ids which determine the export file name
+	 * @return String the name of the export file
+	 * @throws OXException
+	 */
+	String getExportFileName(ServerSession sessionObj, String folder, Map<String, List<String>> batchIds) throws OXException;
+	
 }

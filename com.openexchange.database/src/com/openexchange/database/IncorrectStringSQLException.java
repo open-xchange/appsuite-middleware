@@ -70,6 +70,8 @@ public class IncorrectStringSQLException extends SQLException {
     /** The (vendor) error code <code>1366</code> that signals an attempt to pass an incorrect string to database */
     public static final int ERROR_CODE = 1366;
 
+    public static final char UNKNOWN = '\ufffd';
+
     /**
      * Attempts to yield an appropriate {@code UnsupportedCharacterSQLException} instance for specified SQL exception.
      *
@@ -95,12 +97,18 @@ public class IncorrectStringSQLException extends SQLException {
         {
             ByteArrayOutputStream buf = Streams.newByteArrayOutputStream(4);
             String ic = m.group(1);
-            for (int st = 0; ic.indexOf("\\x", st) >= 0;) {
-                int end = st + 4;
+            int end = 0;
+            for (int st = 0; ic.indexOf("\\x", st) == end;) {
+                end = st + 4;
                 buf.write(Integer.parseInt(ic.substring(st + 2, end), 16));
                 st = end;
+                
             }
             incorrect = new String(buf.toByteArray(), Charsets.UTF_8);
+            int posUnknown = incorrect.indexOf(UNKNOWN);
+            if (posUnknown > 0) {
+                incorrect = incorrect.substring(0, posUnknown);
+            }
         }
 
         return new IncorrectStringSQLException(incorrect, m.group(2), Integer.parseInt(m.group(3)), e);
