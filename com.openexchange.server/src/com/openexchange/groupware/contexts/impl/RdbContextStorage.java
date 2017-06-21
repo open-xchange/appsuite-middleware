@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
+import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -79,7 +80,7 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * SQL select statement for loading a context.
      */
-    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=? AND context_server2db_pool.server_id=?";
 
     /**
      * SQL select statement for resolving the login info to the context
@@ -243,8 +244,10 @@ public class RdbContextStorage extends ContextStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            DatabaseService databseService = ServerServiceRegistry.getServize(DatabaseService.class);
             stmt = con.prepareStatement(SELECT_CONTEXT);
             stmt.setInt(1, contextId);
+            stmt.setInt(2, databseService.getServerId());
             result = stmt.executeQuery();
             if (result.next()) {
                 context = new ContextImpl(contextId);
