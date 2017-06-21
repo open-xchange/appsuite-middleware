@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
-import com.openexchange.passwordchange.history.tracker.RuntimeTracker;
 
 /**
  * {@link RuntimeTracker} - Does not save anything to a DB. DummyTracker for testing

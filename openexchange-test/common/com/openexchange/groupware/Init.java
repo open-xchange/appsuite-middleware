@@ -171,6 +171,9 @@ import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
+import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
@@ -516,7 +519,7 @@ public final class Init {
 
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
-        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");        
     }
 
     /**
@@ -1001,6 +1004,14 @@ public final class Init {
             });
             TestServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
             PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
+        }
+    }    
+
+    public static void startAndInjectPasswordChangeHistoryService() {
+        if (null == TestServiceRegistry.getInstance().getService(PasswordChangeTrackerRegistry.class)) {
+            PasswordChangeTrackerRegistry registry = new PasswordChangeTrackerRegistryImpl();
+            services.put(PasswordChangeTrackerRegistry.class, registry);
+            TestServiceRegistry.getInstance().addService(PasswordChangeTrackerRegistry.class, registry);
         }
     }
 
