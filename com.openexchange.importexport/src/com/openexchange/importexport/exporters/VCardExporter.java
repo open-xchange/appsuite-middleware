@@ -58,7 +58,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -308,28 +307,22 @@ public class VCardExporter implements Exporter {
         if (objectId != null) {
             Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
             exportContact(session, contactObj, null, null, writer);
-            try {
-                writer.flush();
-            } catch (IOException e) {
-                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-            }
+            doFlush(writer);
             return;
         }
 
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         VCardService vCardService = ImportExportServices.getVCardService();
 
-        //or export a batch of contacts...
-        if(batchIds != null){
-            try {
-                Iterator<String> folderIterator = batchIds.keySet().iterator();
-                while(folderIterator.hasNext()){
-                    String folder = folderIterator.next();
-                    List<String> contacts = batchIds.get(folder);
-                    String[] contactsId = new String[contacts.size()];
-                    contactsId = contacts.toArray(contactsId);
-                    SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
-                    while(contactBatchIterator.hasNext()){
+        // ... or export a batch of contacts...
+        if (batchIds != null){
+            for (String folder : batchIds.keySet()) {
+                List<String> contacts = batchIds.get(folder);
+                String[] contactsId = new String[contacts.size()];
+                contactsId = contacts.toArray(contactsId);
+                SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
+                try {
+                    while (contactBatchIterator.hasNext()) {
                         Contact contact = contactBatchIterator.next();
                         try {
                             Contact fullContact = contactService.getContact(session, folder, Integer.toString(contact.getObjectID()), fields);
@@ -343,20 +336,16 @@ public class VCardExporter implements Exporter {
                             }
                         }
                     }
+                } finally {
                     SearchIterators.close(contactBatchIterator);
                 }
-            } finally {
-                try {
-                    writer.flush();
-                } catch (IOException e) {
-                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-                }
             }
+            doFlush(writer);
             return;
         }
+
         // ... or export a collection of contacts
         SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
-
         try {
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
@@ -372,13 +361,19 @@ public class VCardExporter implements Exporter {
                     }
                 }
             }
+            doFlush(writer);
         } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    private void doFlush(Writer writer) throws OXException {
+        if (null != writer) {
             try {
                 writer.flush();
             } catch (IOException e) {
                 throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
             }
-            SearchIterators.close(searchIterator);
         }
     }
 
