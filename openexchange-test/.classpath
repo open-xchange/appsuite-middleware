@@ -179,5 +179,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jersey-entity-filtering-2.17.jar" sourcepath="/com.openexchange.bundles/source/jersey-entity-filtering-2.17-sources.jar"/>
 	<classpathentry kind="lib" path="lib/mimepull-1.6.jar" sourcepath="lib/source/mimepull-1.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/migbase64-2.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.passwordchange.history"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

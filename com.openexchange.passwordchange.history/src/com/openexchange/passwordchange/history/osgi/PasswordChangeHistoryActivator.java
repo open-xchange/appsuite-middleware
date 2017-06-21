@@ -101,7 +101,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         properties.put(EventConstants.EVENT_TOPIC, handler.getTopic());
         registerService(EventHandler.class, handler, properties);
 
-        // get serServiceInterceptor.class and register interceptor
+        // Register interceptor
         registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor());
 
         LOG.info("Finished starting PasswordChangeHistory bundle");
