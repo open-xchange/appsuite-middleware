@@ -230,6 +230,24 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public void insertEvents(List<Event> events) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Event event : events) {
+                updated += insertEvent(connection, context.getContextId(), event);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e, EventMapper.getInstance(), null, connection, "prg_dates");
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
     public void updateEvent(Event event) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -256,6 +274,27 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e, EventMapper.getInstance(), event, connection, "del_dates");
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertTombstoneEvents(List<Event> events) throws OXException {
+        if (null == events || 0 == events.size()) {
+            return;
+        }
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Event event : events) {
+                updated += insertTombstoneEvent(connection, context.getContextId(), event);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e, EventMapper.getInstance(), null, connection, "del_dates");
         } finally {
             release(connection, updated);
         }

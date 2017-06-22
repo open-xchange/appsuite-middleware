@@ -74,13 +74,29 @@ public interface AlarmStorage {
      */
     int nextId() throws OXException;
 
+    /**
+     * Inserts alarms for a specific user of an event.
+     *
+     * @param event The event the alarms are associated with
+     * @param userID The identifier of the user the alarms should be inserted for
+     * @param alarms The alarms to insert
+     */
     void insertAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
+
+    /**
+     * Inserts alarms for multiple users of multiple events.
+     *
+     * @param alarmsByUserByEventId The alarms to insert by user, mapped to the corresponding event identifier
+     */
+    void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException;
 
     Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException;
 
     List<Alarm> loadAlarms(Event event, int userID) throws OXException;
 
     Map<String, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException;
+
+    Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException;
 
     void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
 

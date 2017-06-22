@@ -67,6 +67,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -115,6 +116,24 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), asInt(objectID), attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                updated += insertOrReplaceAttendees(connection, false, false, context.getContextId(), asInt(entry.getKey()), entry.getValue());
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);

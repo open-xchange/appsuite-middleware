@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
+    private static final int INSERT_CHUNK_SIZE = 200;
     private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
 
     private final int accountId;
@@ -147,6 +149,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAlarms(connection, context.getContextId(), accountId, CalendarUtils.getObjectIDs(events), AlarmField.values());
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void insertAlarms(Event event, int userId, List<Alarm> alarms) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -155,6 +170,46 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             txPolicy.setAutoCommit(connection, false);
             for (Alarm alarm : alarms) {
                 updated += insertAlarm(connection, context.getContextId(), accountId, event.getId(), userId, alarm);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            Map<String, Map<Integer, List<Alarm>>> chunk = new HashMap<String, Map<Integer, List<Alarm>>>();
+            int chunkSize = 0;
+            for (Entry<String, Map<Integer, List<Alarm>>> entry : alarmsByUserByEventId.entrySet()) {
+                /*
+                 * add to current chunk
+                 */
+                chunk.put(entry.getKey(), entry.getValue());
+                for (List<Alarm> alarms : entry.getValue().values()) {
+                    chunkSize += alarms.size();
+                }
+                if (chunkSize >= INSERT_CHUNK_SIZE) {
+                    /*
+                     * insert & reset current chunk
+                     */
+                    updated += insertAlarms(connection, context.getContextId(), accountId, chunk);
+                    chunk.clear();
+                    chunkSize = 0;
+                }
+            }
+            /*
+             * finally insert remaining chunk
+             */
+            if (0 < chunkSize) {
+                updated += insertAlarms(connection, context.getContextId(), accountId, chunk);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -245,7 +300,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields();
         String sql = new StringBuilder()
             .append("INSERT INTO calendar_alarm (cid,account,event,user,")
-            .append(AlarmMapper.getInstance().getColumns(mappedFields)).append(") ")
+            .append(MAPPER.getColumns(mappedFields)).append(") ")
             .append("VALUES (?,?,?,?,").append(AlarmMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -255,6 +310,42 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, asInt(eventId));
             stmt.setInt(parameterIndex++, userId);
             parameterIndex = AlarmMapper.getInstance().setParameters(stmt, parameterIndex, alarm, mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int insertAlarms(Connection connection, int cid, int account, Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws SQLException, OXException {
+        if (null == alarmsByUserByEventId || 0 == alarmsByUserByEventId.size()) {
+            return 0;
+        }
+        AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields();
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("INSERT INTO calendar_alarm (cid,account,event,user,")
+            .append(MAPPER.getColumns(mappedFields)).append(") VALUES ");
+        for (Map<Integer, List<Alarm>> alarmsByUser : alarmsByUserByEventId.values()) {
+            for (List<Alarm> alarms : alarmsByUser.values()) {
+                for (int i = 0; i < alarms.size(); i++) {
+                    stringBuilder.append("(?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append("),");
+                }
+            }
+        }
+        stringBuilder.setLength(stringBuilder.length() - 1);
+        stringBuilder.append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            for (Entry<String, Map<Integer, List<Alarm>>> entry : alarmsByUserByEventId.entrySet()) {
+                int eventId = asInt(entry.getKey());
+                for (Entry<Integer, List<Alarm>> alarmsByUser : entry.getValue().entrySet()) {
+                    int userId = i(alarmsByUser.getKey());
+                    for (Alarm alarm : alarmsByUser.getValue()) {
+                        stmt.setInt(parameterIndex++, cid);
+                        stmt.setInt(parameterIndex++, account);
+                        stmt.setInt(parameterIndex++, eventId);
+                        stmt.setInt(parameterIndex++, userId);
+                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, alarm, mappedFields);
+                    }
+                }
+            }
             return logExecuteUpdate(stmt);
         }
     }
@@ -276,7 +367,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int cid, int account, String eventId, AlarmField[] fields) throws SQLException, OXException {
-        AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields(fields);
+        AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT user,").append(AlarmMapper.getInstance().getColumns(mappedFields))
             .append(" FROM calendar_alarm WHERE cid=? AND account=? AND event=?;")
@@ -297,7 +388,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private static Map<String, List<Alarm>> selectAlarms(Connection connection, int cid, int account, int user, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
-        AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields(fields);
+        AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(AlarmMapper.getInstance().getColumns(mappedFields))
             .append(" FROM calendar_alarm WHERE cid=? AND account=? AND user=?")
@@ -323,6 +414,38 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
         }
         return alarmsByEventId;
+    }
+
+    private static Map<String, Map<Integer, List<Alarm>>> selectAlarms(Connection connection, int cid, int account, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
+        AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT event,user,").append(AlarmMapper.getInstance().getColumns(mappedFields)).append(" FROM calendar_alarm WHERE cid=? AND account=?");
+        if (1 == eventIds.length) {
+            stringBuilder.append(" AND event=?");
+        } else {
+            stringBuilder.append(" AND event IN (").append(getParameters(eventIds.length)).append(')');
+        }
+        stringBuilder.append(';');
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserById = new HashMap<String, Map<Integer, List<Alarm>>>(eventIds.length);
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, account);
+            for (String eventId : eventIds) {
+                stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
+            }
+            ResultSet resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                String eventID = resultSet.getString(1);
+                Map<Integer, List<Alarm>> alarmsByUser = alarmsByUserById.get(eventID);
+                if (null == alarmsByUser) {
+                    alarmsByUser = new HashMap<Integer, List<Alarm>>();
+                    alarmsByUserById.put(eventID, alarmsByUser);
+                }
+                int userId = I(resultSet.getInt(2));
+                com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(resultSet, mappedFields));
+            }
+        }
+        return alarmsByUserById;
     }
 
     private static int deleteAlarms(Connection connection, int cid, int account, String eventId) throws SQLException {

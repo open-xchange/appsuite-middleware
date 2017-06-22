@@ -112,6 +112,13 @@ public interface AttendeeStorage {
     void insertAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
     /**
+     * Inserts attendees for a multiple events.
+     *
+     * @param attendeesByEventId The attendees to insert, mapped to the corresponding event identifier
+     */
+    void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException;
+
+    /**
      * Updates attendees for a specific event.
      *
      * @param eventId The identifier of the event to update the attendees for
