@@ -53,6 +53,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -88,7 +90,7 @@ public class ExportRequest {
             batchIds = new HashMap<String, List<String>>();
             try{
                 batchIds = extractBatchArrayFromRequest(ids);
-            } catch (IndexOutOfBoundsException e) {
+            } catch (JSONException e) {
                 throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
             }
         } else {
@@ -113,30 +115,28 @@ public class ExportRequest {
         this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
     }
     
-    private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) {
-        String firstExtract = batchArray.substring(1, batchArray.length()-1);
-        String secondExtract = firstExtract.replaceAll("\\[", "");
-        String thirdExtract = secondExtract.replaceAll("\\]", "");
-        String[] lastExtract = thirdExtract.split(",");
-        return parseBatchIds(lastExtract);
-    }
-    
-    private Map<String, List<String>> parseBatchIds(String[] string) {
+    private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) throws JSONException {
+        JSONArray jsonArray = new JSONArray(batchArray);
         Map<String, List<String>> batchIds = new HashMap<String, List<String>>();
-        for (int i = 0; i < string.length; i++) {
-            if (i%2 == 0) {
-                if (!batchIds.containsKey(string[i])) {
-                    List<String> valueList = new LinkedList<String>();
-                    batchIds.put(string[i], valueList);
+        if (jsonArray != null && jsonArray.length() > 0) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONArray array = jsonArray.getJSONArray(i);
+                if (array != null && array.length() > 0) {
+                    if (!batchIds.containsKey(array.getString(0))) {
+                        List<String> valueList = new LinkedList<String>();
+                        valueList.add(array.getString(1));
+                        batchIds.put(array.getString(0), valueList);
+                    } else {
+                        List<String> valueList = batchIds.get(array.getString(0));
+                        valueList.add(array.getString(1));
+                        batchIds.put(array.getString(0), valueList);
+                    }
                 }
-            } else {                      
-                List<String> list = batchIds.get(string[i-1]);
-                list.add(string[i]);
-                batchIds.put(string[i-1], list);
             }
         }
+        
         return batchIds;
-    } 
+    }
 
     public Map<String, List<String>> getBatchIds() {
         return batchIds;
