@@ -88,8 +88,8 @@ public class Alarm {
      */
     public Alarm(Trigger trigger, AlarmAction action) {
         this();
-        this.trigger = trigger;
-        this.action = action;
+        setTrigger(trigger);
+        setAction(action);
     }
 
     /**

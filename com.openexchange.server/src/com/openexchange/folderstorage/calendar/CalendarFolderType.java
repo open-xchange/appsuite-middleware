@@ -75,7 +75,7 @@ public class CalendarFolderType implements FolderType {
 
     @Override
     public boolean servesParentId(String folderId) {
-        return FolderStorage.PRIVATE_ID.equals(folderId) || servesFolderId(folderId);
+        return FolderStorage.PRIVATE_ID.equals(folderId) || FolderStorage.SHARED_ID.equals(folderId) || FolderStorage.PUBLIC_ID.equals(folderId) || servesFolderId(folderId);
     }
 
     @Override

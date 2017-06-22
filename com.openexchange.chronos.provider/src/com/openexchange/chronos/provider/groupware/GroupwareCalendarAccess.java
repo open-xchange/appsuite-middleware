@@ -104,11 +104,19 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      */
     void deleteFolder(String folderId) throws OXException;
 
+    /**
+     * Gets a list of all visible calendar folders.
+     *
+     * @param type The type to get the visible folders for
+     * @return A list of all visible calendar folders of the type
+     */
+    List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
 
-    List<GroupwareCalendarFolder> getSubfolders(String parentId) throws OXException;
-
-    List<GroupwareCalendarFolder> getRootFolders(GroupwareFolderType type) throws OXException;
-
+    /**
+     * Gets the default calendar folder.
+     *
+     * @return The default folder
+     */
     GroupwareCalendarFolder getDefaultFolder() throws OXException;
 
     /**

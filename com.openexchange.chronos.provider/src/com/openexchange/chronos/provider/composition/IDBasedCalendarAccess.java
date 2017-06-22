@@ -85,12 +85,12 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     CalendarFolder getDefaultFolder() throws OXException;
 
     /**
-     * Gets the root calendar folders of a specific folder type.
+     * Gets a list of all visible calendar folders.
      *
-     * @param type The type to get the root folders for
-     * @return The root folder, or an empty list if there are none
+     * @param type The type to get the visible folders for
+     * @return A list of all visible calendar folders of the type
      */
-    List<CalendarFolder> getRootFolders(GroupwareFolderType type) throws OXException;
+    List<CalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
 
     /**
      * Gets a specific calendar folder.
@@ -99,14 +99,6 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The calendar folder
      */
     CalendarFolder getFolder(CompositeFolderID folderID) throws OXException;
-
-    /**
-     * Gets all subfolders of a specific calendar folder.
-     *
-     * @param parentFolderID The composite identifier of the parent folder to get the subfolders from
-     * @return The subfolders
-     */
-    List<CalendarFolder> getSubfolders(CompositeFolderID parentFolderID) throws OXException;
 
     /**
      * Create a new calendar folder.
