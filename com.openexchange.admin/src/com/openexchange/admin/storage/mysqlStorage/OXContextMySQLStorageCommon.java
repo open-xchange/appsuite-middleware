@@ -95,7 +95,6 @@ public class OXContextMySQLStorageCommon {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
-    private final OXUtilMySQLStorageCommon oxutilcommon;
     private final Map<String, StartNumberProvider> startValues;
     private final AdminCache cache;
     private final PropertyHandler prop;
@@ -109,7 +108,6 @@ public class OXContextMySQLStorageCommon {
         super();
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
-        oxutilcommon = new OXUtilMySQLStorageCommon();
 
         Map<String, StartNumberProvider> startValues = new HashMap<String, StartNumberProvider>(4);
         startValues.put("sequence_folder", new StartNumberProvider() {
