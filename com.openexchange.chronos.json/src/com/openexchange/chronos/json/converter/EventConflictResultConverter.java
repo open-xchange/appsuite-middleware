@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -99,14 +100,14 @@ public class EventConflictResultConverter implements ResultConverter {
          */
         Object resultObject = result.getResultObject();
         if (resultObject instanceof ProblematicAttribute[]) {
-            resultObject = convertProblematics((ProblematicAttribute[]) resultObject, timeZoneID);
+            resultObject = convertProblematics((ProblematicAttribute[]) resultObject, timeZoneID, session);
         } else {
             throw new UnsupportedOperationException();
         }
         result.setResultObject(resultObject, "json");
     }
 
-    private JSONObject convertProblematics(ProblematicAttribute[] problematics, String timeZoneID) throws OXException {
+    private JSONObject convertProblematics(ProblematicAttribute[] problematics, String timeZoneID, Session session) throws OXException {
         JSONObject result = new JSONObject(1);
         JSONArray conflicts = new JSONArray(problematics.length);
         try {
@@ -116,7 +117,7 @@ public class EventConflictResultConverter implements ResultConverter {
                     JSONObject jsonConflict = new JSONObject(2);
                     jsonConflict.put("hard_conflict", conflict.isHardConflict());
                     jsonConflict.put("conflicting_attendees", conflict.getConflictingAttendees());
-                    jsonConflict.put("event", EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID));
+                    jsonConflict.put("event", EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID, session));
                     conflicts.put(jsonConflict);
                 }
             }

@@ -85,6 +85,7 @@ public class EventResultConverter implements ResultConverter {
         return Quality.GOOD;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
@@ -114,9 +115,10 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, "json");
     }
 
+    @SuppressWarnings("unused")
     private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
         try {
-            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID);
+            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

@@ -86,6 +86,8 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
@@ -317,6 +319,26 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeCreatedBy();
+            }
+
+            @Override
+            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException, OXException {
+
+                CalendarUser user = new CalendarUser();
+                Integer id = get(from);
+                CalendarUtilities service = ChronosJsonActivator.getServiceLookup().getService(CalendarUtilities.class);
+                service.getEntityResolver(session.getContextId()).applyEntityData(user, id);
+                return serializeCalendarUser(user);
+            }
+
+            @Override
+            public void deserialize(JSONObject from, Event to, TimeZone timeZone) throws JSONException, OXException {
+                JSONObject organizer = (JSONObject) from.get("createdBy");
+                Organizer deserializeCalendarUser = deserializeCalendarUser(organizer, Organizer.class);
+                if(deserializeCalendarUser.getUri()==null && from.has(getAjaxName())){
+                    super.deserialize(from, to);
+                }
+                set(to, deserializeCalendarUser.getEntity());
             }
         });
         mappings.put(EventField.LAST_MODIFIED, new TimeMapping<Event>("lastModified", ColumnIDs.LAST_MODIFIED) {

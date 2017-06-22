@@ -130,7 +130,7 @@ public class DeleteAction extends ChronosAction {
             }
         }
 
-        if (!errors.isEmpty()) {
+        if (errors!=null && !errors.isEmpty()) {
             if (errors.size() == 1) {
                 CompositeEventID errorId = errors.keySet().iterator().next();
                 throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));

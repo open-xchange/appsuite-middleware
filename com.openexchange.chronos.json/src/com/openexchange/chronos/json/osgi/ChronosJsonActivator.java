@@ -60,6 +60,8 @@ import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ChronosJsonActivator}
@@ -69,9 +71,11 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactor
  */
 public class ChronosJsonActivator extends AJAXModuleActivator {
 
+    private static ServiceLookup services = null;
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedCalendarAccessFactory.class };
+        return new Class<?>[] { IDBasedCalendarAccessFactory.class, CalendarUtilities.class };
     }
 
     @Override
@@ -90,6 +94,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new CalendarResultConverter());
             registerService(ResultConverter.class, new CalendarFolderResultConverter());
             registerService(DetailParser.class, new CalendarExceptionDetailParser());
+            services=this;
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
@@ -99,6 +104,11 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         getLogger(ChronosJsonActivator.class).info("stopping bundle {}", context.getBundle());
+        services=null;
         super.stopBundle();
+    }
+
+    public static ServiceLookup getServiceLookup(){
+        return services;
     }
 }

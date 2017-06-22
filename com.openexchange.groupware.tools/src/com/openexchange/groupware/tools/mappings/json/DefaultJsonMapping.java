@@ -89,25 +89,26 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
     }
 
 	@Override
-	public void serialize(O from, JSONObject to) throws JSONException {
+	public void serialize(O from, JSONObject to) throws JSONException, OXException {
 		this.serialize(from, to, null);
 	}
 
 	@Override
-	public void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException {
+	public void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException, OXException {
 		this.serialize(from, to, timeZone, null);
 	}
 
 	@Override
-	public void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+	public void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException, OXException {
 		to.put(getAjaxName(), serialize(from, timeZone, session));
 	}
 
 	/**
 	 * Override this <code>serialize</code>-method if needed.
+	 * @throws OXException
 	 */
 	@Override
-	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException, OXException {
 		final T value = this.get(from);
 		return null != value ? value : JSONObject.NULL;
 	}
