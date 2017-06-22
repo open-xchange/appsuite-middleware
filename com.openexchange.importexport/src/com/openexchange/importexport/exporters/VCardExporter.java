@@ -58,6 +58,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -93,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  */
-public class VCardExporter implements VCardExporterExtended {
+public class VCardExporter implements BatchCapableExporter {
 
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
@@ -243,10 +244,16 @@ public class VCardExporter implements VCardExporterExtended {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportBatchData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
     }
-    
+
+    @Override
+    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        Map<String, List<String>> batchIds = Collections.singletonMap(folderID, Collections.singletonList(objectID));
+        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
+    }
+
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
 //      String oId = null;
 //      try {
@@ -436,7 +443,7 @@ public class VCardExporter implements VCardExporterExtended {
         retval[fields.length] = fieldToAdd;
         return retval;
     }
-    
+
     @Override
     public String getExportFileName(ServerSession sessionObj, String folder) throws OXException {
         //case export complete folder, file name equals folder name
@@ -455,7 +462,7 @@ public class VCardExporter implements VCardExporterExtended {
         //batch of contact ids, file name is set to a default
         return "Batch Contacts";
     }
-    
+
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
         StringBuilder sb = new StringBuilder();
 

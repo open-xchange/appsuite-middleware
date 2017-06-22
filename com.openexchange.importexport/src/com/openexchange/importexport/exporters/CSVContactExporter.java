@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CSVContactExporter implements ExporterExtended {
+public class CSVContactExporter implements Exporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
 
@@ -284,7 +284,7 @@ public class CSVContactExporter implements ExporterExtended {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportSingleData(final ServerSession sessObj, final Format format, final String folder, final String objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
@@ -298,7 +298,7 @@ public class CSVContactExporter implements ExporterExtended {
         }
         final Contact conObj;
         try {
-            conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), Integer.toString(objectId), fields);
+            conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), objectId, fields);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
@@ -361,12 +361,12 @@ public class CSVContactExporter implements ExporterExtended {
     public String getExportFileName(ServerSession session, String folder) throws OXException {
         return createExportFileName(session, folder);
     }
-    
+
     private String createExportFileName(ServerSession session, String folder) throws OXException {
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
         try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());    
+            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
             sb.append(folderObj.getFolderName());
         } catch (OXException e) {
             throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);

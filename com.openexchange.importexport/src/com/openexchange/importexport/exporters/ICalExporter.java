@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  */
-public class ICalExporter implements ExporterExtended {
+public class ICalExporter implements Exporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
 
@@ -202,12 +202,24 @@ public class ICalExporter implements ExporterExtended {
 
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams);
+        return doExportData(session, format, folderID, null, fieldsToBeExported, optionalParams);
     }
 
     @Override
-    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportData(session, format, folderID, objectID, fieldsToBeExported, optionalParams);
+    }
+
+    private SizedInputStream doExportData(ServerSession session, Format format, String folderID, String optObjectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         FolderObject folder = getFolder(session, folderID);
+        int objId = 0;
+        if (null != optObjectID) {
+            try {
+                objId = Integer.parseInt(optObjectID);
+            } catch (NumberFormatException e) {
+                throw OXException.general("Invalid object identifier: " + optObjectID, e);
+            }
+        }
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
@@ -220,9 +232,9 @@ public class ICalExporter implements ExporterExtended {
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
-                        exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                        exportAppointments(session, folder.getObjectID(), objId, fieldsToBeExported, out);
                     } else if (FolderObject.TASK == folder.getModule()) {
-                        exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                        exportTasks(session, folder.getObjectID(), objId, fieldsToBeExported, out);
                     } else {
                         throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
                     }
@@ -235,9 +247,9 @@ public class ICalExporter implements ExporterExtended {
 
         ThresholdFileHolder sink;
         if (FolderObject.CALENDAR == folder.getModule()) {
-            sink = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+            sink = exportAppointments(session, folder.getObjectID(), objId, fieldsToBeExported, null);
         } else if (FolderObject.TASK == folder.getModule()) {
-            sink = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+            sink = exportTasks(session, folder.getObjectID(), objId, fieldsToBeExported, null);
         } else {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
         }
@@ -413,12 +425,12 @@ public class ICalExporter implements ExporterExtended {
     public String getExportFileName(ServerSession session, String folder) throws OXException {
         return createExportFileName(session, folder);
     }
-    
+
     private String createExportFileName(ServerSession session, String folder) throws OXException {
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
         try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());    
+            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
             sb.append(folderObj.getFolderName());
         } catch (OXException e) {
             throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
