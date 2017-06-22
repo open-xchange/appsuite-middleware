@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  */
-public class VCardExporter implements Exporter {
+public class VCardExporter implements VCardExporterExtended {
 
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
@@ -239,54 +239,64 @@ public class VCardExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        return exportData(session, format, folder, 0, fieldsToBeExported, optionalParams, null);
+        return export(session, format, folder, fieldsToBeExported, optionalParams, null);
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
-        String oId = null;
-        try {
-            oId = objectId > 0 ? Integer.toString(objectId) : null;
-        } catch (NumberFormatException e) {
-            throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-        }
+    public SizedInputStream exportData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
+    }
+    
+    private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
+//      String oId = null;
+//      try {
+//          oId = objectId > 0 ? Integer.toString(objectId) : null;
+//      } catch (NumberFormatException e) {
+//          throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
+//      }
 
-        boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
-        try {
-            AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-            if (null != requestData) {
-                // Try to stream
-                final OutputStream out = requestData.optOutputStream();
-                if (null != out) {
-                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, folder, batchIds) + Format.VCARD.getExtension());
-                    requestData.removeCachingHeader();
-                    export(session, folder, oId, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
-                    return null;
-                }
-            }
+      boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
+      try {
+          AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+          if (null != requestData) {
+              // Try to stream
+              final OutputStream out = requestData.optOutputStream();
+              if (null != out) {
+                  requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
+                  if (null != folder) {
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, folder) + Format.VCARD.getExtension());
+                  } else if (null != batchIds) {
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, batchIds) + Format.VCARD.getExtension());
+                  } else {
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=export."+ Format.VCARD.getExtension());
+                  }
+                  requestData.removeCachingHeader();
+                  export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
+                  return null;
+              }
+          }
 
-            // No streaming support possible
-            ThresholdFileHolder sink = new ThresholdFileHolder();
-            boolean error = true;
-            try {
-                export(session, folder, oId, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
-                SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
-                error = false;
-                return sizedIn;
-            } finally {
-                if (error) {
-                    Streams.close(sink);
-                }
-            }
-        } catch (final IOException e) {
-            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-        }
+          // No streaming support possible
+          ThresholdFileHolder sink = new ThresholdFileHolder();
+          boolean error = true;
+          try {
+              export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
+              SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
+              error = false;
+              return sizedIn;
+          } finally {
+              if (error) {
+                  Streams.close(sink);
+              }
+          }
+      } catch (final IOException e) {
+          throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+      }
     }
 
     private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
 
-    private void export(final ServerSession session, final String folderId, final String objectId, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer, Map<String, List<String>> batchIds) throws OXException {
+    private void export(final ServerSession session, final String folderId, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer, Map<String, List<String>> batchIds) throws OXException {
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = ContactMapper.getInstance().getFields(_contactFields);
@@ -304,12 +314,12 @@ public class VCardExporter implements Exporter {
         ContactService contactService = ImportExportServices.getContactService();
 
         // Either export a single contact...
-        if (objectId != null) {
-            Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
-            exportContact(session, contactObj, null, null, writer);
-            doFlush(writer);
-            return;
-        }
+//        if (objectId != null) {
+//            Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
+//            exportContact(session, contactObj, null, null, writer);
+//            doFlush(writer);
+//            return;
+//        }
 
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         VCardService vCardService = ImportExportServices.getVCardService();
@@ -426,25 +436,26 @@ public class VCardExporter implements Exporter {
         retval[fields.length] = fieldToAdd;
         return retval;
     }
+    
+    @Override
+    public String getExportFileName(ServerSession sessionObj, String folder) throws OXException {
+        //case export complete folder, file name equals folder name
+        return createVcardName(sessionObj, folder, null);
+    }
 
     @Override
-    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
-        if (null != folder) {
-            //case export complete folder, file name equals folder name
-            return createVcardName(session, folder, null);
-        }
-
+    public String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
         if (batchIds.size() == 1) {
             //exactly one contact to export, file name equals contact name
             String folderId = batchIds.keySet().iterator().next();
             String batchId = batchIds.get(folderId).get(0);
-            return createVcardName(session, folderId, batchId);
+            return createVcardName(sessionObj, folderId, batchId);
         }
 
         //batch of contact ids, file name is set to a default
         return "Batch Contacts";
     }
-
+    
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
         StringBuilder sb = new StringBuilder();
 
@@ -453,7 +464,6 @@ public class VCardExporter implements Exporter {
                 FolderService folderService = ImportExportServices.getFolderService();
                 FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
                 sb.append(folderObj.getFolderName());
-                sb.append("export");
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
@@ -462,12 +472,10 @@ public class VCardExporter implements Exporter {
                 ContactService contactService = ImportExportServices.getContactService();
                 Contact contactObj = contactService.getContact(session, folder, batchId, null);
                 sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
-                sb.append("export");
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
         }
-
         sb.append('.');
         return sb.toString();
     }

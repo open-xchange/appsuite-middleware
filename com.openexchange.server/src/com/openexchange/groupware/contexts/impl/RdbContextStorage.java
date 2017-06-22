@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +71,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -85,21 +86,18 @@ public class RdbContextStorage extends ContextStorage {
      * SQL select statement for resolving the login info to the context
      * identifier.
      */
-    private static final String RESOLVE_CONTEXT =
-        "SELECT cid FROM login2context WHERE login_info=?";
+    private static final String RESOLVE_CONTEXT = "SELECT cid FROM login2context WHERE login_info=?";
 
     /**
      * SQL select statement for resolving the identifier of the contexts
      * mailadmin.
      */
-    private static final String GET_MAILADMIN =
-        "SELECT user FROM user_setting_admin WHERE cid=?";
+    private static final String GET_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid=?";
 
     /**
      * SQL select statement for reading the login information of a context.
      */
-    private static final String GET_LOGININFOS =
-        "SELECT login_info FROM login2context WHERE cid=?";
+    private static final String GET_LOGININFOS = "SELECT login_info FROM login2context WHERE cid=?";
 
     /**
      * Default constructor.
@@ -205,14 +203,14 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            while(result.next()) {
+            while (result.next()) {
                 final String name = result.getString(1);
                 final String value = result.getString(2);
                 ctx.addAttribute(name, value);
             }
         } catch (final SQLException e) {
             try {
-                if(!Tools.tableExists(con, "contextAttribute")) {
+                if (!Tools.tableExists(con, "contextAttribute")) {
                     // This would be an explanation for the exception. Will
                     // happen once for every schema.
                     return;

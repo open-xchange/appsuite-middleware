@@ -47,67 +47,32 @@
  *
  */
 
-package com.openexchange.database.provider;
+package com.openexchange.importexport.exporters;
 
-import static com.openexchange.database.Databases.autocommit;
-import java.sql.Connection;
-import com.openexchange.database.DatabaseService;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DatabaseServiceDBProvider} - The {@link DBProvider} backed by specified {@link DatabaseService} instance.
+ * {@link ExporterExtended}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
  */
-public class DatabaseServiceDBProvider implements DBProvider {
-
-    private final DatabaseService databaseService;
-
+public interface ExporterExtended extends Exporter {
+    
     /**
-     * Initializes a new {@link DatabaseServiceDBProvider}.
-     *
-     * @param databaseService The backing {@link DatabaseService} instance
+     * @param session: The session object to be able to check permissions.
+     * @param format: Format the returned InputStream should be in.
+     * @param folderID: Folder that should be exported. Note: A folder can only contain data of one type.
+     * @param objectID: Id of an entry in that folder that is to be exported.
+     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+     * @param optionalParams Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+     * @return InputStream in requested format.
+     * @throws OXException
      */
-    public DatabaseServiceDBProvider(final DatabaseService databaseService) {
-        super();
-        this.databaseService = databaseService;
-    }
-
-    @Override
-    public Connection getReadConnection(final Context ctx) throws OXException {
-        return databaseService.getReadOnly(ctx);
-    }
-
-    @Override
-    public void releaseReadConnection(final Context ctx, final Connection con) {
-        if (con != null) {
-            databaseService.backReadOnly(ctx, con);
-        }
-    }
-
-    @Override
-    public Connection getWriteConnection(final Context ctx) throws OXException {
-        return databaseService.getWritable(ctx);
-    }
-
-    @Override
-    public void releaseWriteConnection(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritable(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritableAfterReading(ctx, con);
-
-    }
-
+    SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+    
 }

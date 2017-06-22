@@ -47,67 +47,42 @@
  *
  */
 
-package com.openexchange.database.provider;
+package com.openexchange.importexport.exporters;
 
-import static com.openexchange.database.Databases.autocommit;
-import java.sql.Connection;
-import com.openexchange.database.DatabaseService;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DatabaseServiceDBProvider} - The {@link DBProvider} backed by specified {@link DatabaseService} instance.
+ * {@link VCardExporterExtended}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
  */
-public class DatabaseServiceDBProvider implements DBProvider {
-
-    private final DatabaseService databaseService;
+public interface VCardExporterExtended extends Exporter {
+    
+    /**
+    *
+    * @param sessObj: The session object to be able to check permissions.
+    * @param format: Format the returned InputStream should be in.
+    * @param batchIds: Ids of multiple entries in different folders
+    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+    * @return InputStream in requested format.
+    * @throws OXException
+    */
+   SizedInputStream exportData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
 
     /**
-     * Initializes a new {@link DatabaseServiceDBProvider}.
-     *
-     * @param databaseService The backing {@link DatabaseService} instance
+     * Creates a proper export file name based on the batch of ids to export
+     * 
+     * @param session: The session object to be able to check permissions.
+     * @param batchIds: The ids which determine the export file name.
+     * @return String the name of the export file.
+     * @throws OXException
      */
-    public DatabaseServiceDBProvider(final DatabaseService databaseService) {
-        super();
-        this.databaseService = databaseService;
-    }
-
-    @Override
-    public Connection getReadConnection(final Context ctx) throws OXException {
-        return databaseService.getReadOnly(ctx);
-    }
-
-    @Override
-    public void releaseReadConnection(final Context ctx, final Connection con) {
-        if (con != null) {
-            databaseService.backReadOnly(ctx, con);
-        }
-    }
-
-    @Override
-    public Connection getWriteConnection(final Context ctx) throws OXException {
-        return databaseService.getWritable(ctx);
-    }
-
-    @Override
-    public void releaseWriteConnection(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritable(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritableAfterReading(ctx, con);
-
-    }
-
+    String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException;
 }

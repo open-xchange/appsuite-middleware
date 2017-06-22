@@ -92,30 +92,14 @@ public interface Exporter {
 	 * @throws OXException
 	 */
 	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
+		
 	/**
-	 *
-	 * @param sessObj: The session object to be able to check permissions.
-	 * @param format: Format the returned InputStream should be in.
-	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
-	 * @param objectId: Id of an entry in that folder that is to be exported.
-	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @param batchIds: Ids of multiple entries in different folders
-	 * @return InputStream in requested format.
-	 * @throws OXException
-	 */
-	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException;
-	
-	/**
-	 * Creates a proper export file name based on the folder or the object to export
+	 * Creates a proper export file name based on the folder to export
 	 * 
 	 * @param session: The session object to be able to check permissions. 
-	 * @param folder: The folder to name the export file after
-	 * @param batchIds: The ids which determine the export file name
-	 * @return String the name of the export file
+	 * @param folder: The folder to name the export file after.
+	 * @return String the name of the export file.
 	 * @throws OXException
 	 */
-	String getExportFileName(ServerSession sessionObj, String folder, Map<String, List<String>> batchIds) throws OXException;
-	
+	String getExportFileName(ServerSession sessionObj, String folder) throws OXException;	
 }
