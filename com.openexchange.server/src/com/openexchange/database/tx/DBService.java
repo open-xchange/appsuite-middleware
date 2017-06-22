@@ -60,13 +60,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.LoggingDBProvider;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.ConnectionHolder;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionExceptionCodes;
@@ -82,6 +82,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     private final ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
 
     private static final class ThreadState {
+
         protected final List<Undoable> undoables = new ArrayList<Undoable>();
         protected boolean preferWriteCon;
         private boolean foreignTransaction;
@@ -123,7 +124,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         final ThreadState threadState = txState.get();
-        if(threadState != null) {
+        if (threadState != null) {
             if (threadState.foreignTransaction) {
                 return threadState.foreignConnection;
             } else if (threadState.preferWriteCon) {
@@ -136,7 +137,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         final ThreadState threadState = txState.get();
-        if(threadState != null) {
+        if (threadState != null) {
             if (threadState.foreignTransaction) {
                 return threadState.foreignConnection;
             } else if (threadState.preferWriteCon) {
@@ -154,11 +155,11 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null) {
+        if (threadState != null) {
             if (threadState.foreignTransaction) {
                 return;
-            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
-                releaseWriteConnectionAfterReading(ctx,con);
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)) {
+                releaseWriteConnectionAfterReading(ctx, con);
                 return;
             }
         }
@@ -168,10 +169,10 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null) {
+        if (threadState != null) {
             if (threadState.foreignTransaction) {
                 return;
-            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)) {
                 threadState.writeCons.remove(con);
             }
         }
@@ -181,10 +182,10 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null) {
+        if (threadState != null) {
             if (threadState.foreignTransaction) {
                 return;
-            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)) {
                 threadState.writeCons.remove(con);
             }
         }
@@ -278,7 +279,6 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.setRequestTransactional(transactional);
     }
 
-
     @Override
     public void setCommitsTransaction(final boolean mustCommit) {
         provider.setCommitsTransaction(false);
@@ -291,12 +291,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
      * @param rs The optional result set to close
      */
     public void close(PreparedStatement stmt, ResultSet rs) {
-        DBUtils.closeSQLStuff(rs, stmt);
+        Databases.closeSQLStuff(rs, stmt);
     }
 
     protected void addUndoable(final Undoable undo) {
         final ThreadState threadState = txState.get();
-        if(null == threadState || null == threadState.undoables) {
+        if (null == threadState || null == threadState.undoables) {
             return;
         }
         threadState.undoables.add(undo);
@@ -304,17 +304,17 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     protected void perform(final UndoableAction action, final boolean dbTransaction) throws OXException {
         try {
-            if(dbTransaction) {
+            if (dbTransaction) {
                 startDBTransaction();
             }
             action.perform();
-            if(dbTransaction) {
+            if (dbTransaction) {
                 commitDBTransaction(action);
             } else {
                 addUndoable(action);
             }
         } catch (final OXException e) {
-            if(dbTransaction) {
+            if (dbTransaction) {
                 try {
                     rollbackDBTransaction();
                 } catch (OXException x) {
@@ -323,7 +323,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             }
             throw e;
         } finally {
-            if(dbTransaction) {
+            if (dbTransaction) {
                 try {
                     finishDBTransaction();
                 } catch (final OXException e) {
@@ -339,7 +339,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         // Nothing to do.
     }
 
-    public boolean inTransaction(){
+    public boolean inTransaction() {
         return txState.get() != null;
     }
 
