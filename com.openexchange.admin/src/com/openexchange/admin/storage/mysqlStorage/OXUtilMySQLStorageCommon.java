@@ -120,7 +120,7 @@ public class OXUtilMySQLStorageCommon {
         }
         return isWhitespace;
     }
-    
+
     private static Connection getSimpleSQLConnectionWithoutTimeout(Database db) throws StorageException {
         String passwd = "";
         if (db.getPassword() != null) {
@@ -261,19 +261,6 @@ public class OXUtilMySQLStorageCommon {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(result, stmt);
-        }
-    }
-
-    private void createDatabase(final Connection con, final String name) throws StorageException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 
