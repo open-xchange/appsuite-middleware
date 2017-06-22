@@ -1304,7 +1304,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Cannot occur
-        return null;
+        return ctx;
     }
 
     private boolean retry(DBUtils.TransactionRollbackCondition condition) throws SQLException {
