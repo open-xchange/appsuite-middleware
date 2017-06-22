@@ -72,16 +72,16 @@ import com.openexchange.server.impl.DBPool;
  */
 public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
 
-    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_change WHERE cid=? AND uid=?;";
-    private static final String GET_HISTORY_ID = "SELECT id FROM user_password_change WHERE cid=? AND uid=?;";
+    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=?;";
+    private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?;";
     private static final String GET_SEQUENCE_ID = "SELECT id FROM sequence_password_history WHERE cid=?;";
 
     private static final String UPDATE_SEQUENCE_ID = "UPDATE sequence_password_history SET id=? WHERE cid=?;";
 
-    private static final String CLEAR_FOR_ID = "DELETE FROM user_password_change WHERE cid=? AND id=?;";
-    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_change WHERE cid=? AND uid=?;";
+    private static final String CLEAR_FOR_ID = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
+    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
 
-    private static final String INSERT_DATA = "INSERT INTO user_password_change (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
+    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
     private static final String CREATE_SEQUENCE = "INSERT INTO sequence_password_history (cid, id) VALUES (?,?);";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabasePasswordChangeTracker.class);
