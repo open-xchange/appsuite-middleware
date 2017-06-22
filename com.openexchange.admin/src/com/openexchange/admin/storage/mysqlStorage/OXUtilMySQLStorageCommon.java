@@ -120,20 +120,15 @@ public class OXUtilMySQLStorageCommon {
         }
         return isWhitespace;
     }
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
-
-    private static final AdminCache cache = ClientAdminThread.cache;
-
-    public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
-        String sql_pass = "";
+    
+    private static Connection getSimpleSQLConnectionWithoutTimeout(Database db) throws StorageException {
+        String passwd = "";
         if (db.getPassword() != null) {
-            sql_pass = db.getPassword();
+            passwd = db.getPassword();
         }
 
-        Connection con;
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
+            return cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), passwd, db.getDriver());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
@@ -141,6 +136,14 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
+    }
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
+
+    private static final AdminCache cache = ClientAdminThread.cache;
+
+    public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
+        Connection con = getSimpleSQLConnectionWithoutTimeout(db);
         boolean error = true;
         boolean created = false;
         boolean rollback = false;
@@ -150,7 +153,7 @@ public class OXUtilMySQLStorageCommon {
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
-            createDatabase(con, db.getScheme());
+            createDatabaseSchema(con, db.getScheme());
             // Only delete the schema if it has been created successfully. Otherwise it may happen that we delete a longly existing schema.
             // See bug 18788.
             created = true;
@@ -175,6 +178,19 @@ public class OXUtilMySQLStorageCommon {
                 deleteDatabaseSchema(con, db);
             }
             cache.closeSimpleConnection(con);
+        }
+    }
+
+    private void createDatabaseSchema(final Connection con, final String name) throws StorageException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.executeUpdate("CREATE DATABASE `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci");
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
