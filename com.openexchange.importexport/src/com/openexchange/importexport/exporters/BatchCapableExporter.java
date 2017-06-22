@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
@@ -56,23 +57,32 @@ import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExporterExtended}
+ * {@link BatchCapableExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10
  */
-public interface ExporterExtended extends Exporter {
+public interface BatchCapableExporter extends Exporter {
     
     /**
+    *
+    * @param sessObj: The session object to be able to check permissions.
+    * @param format: Format the returned InputStream should be in.
+    * @param batchIds: Ids of multiple entries in different folders
+    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+    * @return InputStream in requested format.
+    * @throws OXException
+    */
+   SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+
+    /**
+     * Creates a proper export file name based on the batch of ids to export
+     * 
      * @param session: The session object to be able to check permissions.
-     * @param format: Format the returned InputStream should be in.
-     * @param folderID: Folder that should be exported. Note: A folder can only contain data of one type.
-     * @param objectID: Id of an entry in that folder that is to be exported.
-     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-     * @param optionalParams Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return InputStream in requested format.
+     * @param batchIds: The ids which determine the export file name.
+     * @return String the name of the export file.
      * @throws OXException
      */
-    SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
+    String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException;
 }
