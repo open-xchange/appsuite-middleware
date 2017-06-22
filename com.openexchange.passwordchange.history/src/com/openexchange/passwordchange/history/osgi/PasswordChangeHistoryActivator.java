@@ -49,15 +49,22 @@
 
 package com.openexchange.passwordchange.history.osgi;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.history.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
+import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
 import com.openexchange.passwordchange.history.tracker.DatabasePasswordChangeTracker;
@@ -106,6 +113,18 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
         // Register interceptor
         registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor());
+
+        // Register UpdateTask
+        registerService(CreateTableService.class, new PasswordChangeHistoryCreateTableTask());
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                final List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(1);
+                tasks.add(new PasswordChangeHistoryCreateTableTask());
+                return tasks;
+            }
+        });
 
         LOG.info("Finished starting PasswordChangeHistory bundle");
     }
