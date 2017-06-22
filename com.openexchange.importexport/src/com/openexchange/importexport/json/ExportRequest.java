@@ -49,7 +49,9 @@
 
 package com.openexchange.importexport.json;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,6 @@ public class ExportRequest {
 
         String ids = request.getParameter(AJAXServlet.PARAMETER_IDS);
         if (Strings.isNotEmpty(ids)) {
-            batchIds = new HashMap<String, List<String>>();
             try{
                 batchIds = extractBatchArrayFromRequest(ids);
             } catch (JSONException e) {
@@ -114,27 +115,28 @@ public class ExportRequest {
         }
         this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
     }
-    
+
     private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) throws JSONException {
-        JSONArray jsonArray = new JSONArray(batchArray);
-        Map<String, List<String>> batchIds = new HashMap<String, List<String>>();
-        if (jsonArray != null && jsonArray.length() > 0) {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONArray array = jsonArray.getJSONArray(i);
-                if (array != null && array.length() > 0) {
-                    if (!batchIds.containsKey(array.getString(0))) {
-                        List<String> valueList = new LinkedList<String>();
-                        valueList.add(array.getString(1));
-                        batchIds.put(array.getString(0), valueList);
-                    } else {
-                        List<String> valueList = batchIds.get(array.getString(0));
-                        valueList.add(array.getString(1));
-                        batchIds.put(array.getString(0), valueList);
-                    }
+        JSONArray jPairs = new JSONArray(batchArray);
+        int length = jPairs.length();
+        if (length <= 0) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, List<String>> batchIds = new LinkedHashMap<String, List<String>>(length);
+        for (int i = 0; i < length; i++) {
+            JSONArray jPair = jPairs.getJSONArray(i);
+            int innerLength = jPair.length();
+            if (innerLength > 0) {
+                String folderId = jPair.getString(0);
+                List<String> valueList = batchIds.get(folderId);
+                if (null == valueList) {
+                    valueList = new ArrayList<String>(innerLength);
+                    batchIds.put(folderId, valueList);
                 }
+                valueList.add(jPair.getString(1));
             }
         }
-        
         return batchIds;
     }
 
