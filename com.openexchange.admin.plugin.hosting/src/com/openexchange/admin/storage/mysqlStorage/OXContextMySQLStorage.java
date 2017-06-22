@@ -1446,16 +1446,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             return;
         }
 
-        PreparedStatement stmtupdateattribute = null;
         PreparedStatement stmtinsertattribute = null;
         PreparedStatement stmtdelattribute = null;
         try {
             int contextId = ctx.getId().intValue();
 
-            stmtupdateattribute = oxCon.prepareStatement("UPDATE contextAttribute SET value = ? WHERE cid=? AND name=?");
-            stmtupdateattribute.setInt(2, contextId);
-
-            stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?)");
+            stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
             stmtinsertattribute.setInt(2, contextId);
 
             stmtdelattribute = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
@@ -1467,15 +1463,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     String name = namespace + "/" + pair.getKey();
                     String value = pair.getValue();
                     if (value != null) {
-                        stmtupdateattribute.setString(1, value);
-                        stmtupdateattribute.setString(3, name);
-
-                        int changedRows = stmtupdateattribute.executeUpdate();
-                        if (changedRows == 0) {
-                            stmtinsertattribute.setString(1, value);
-                            stmtinsertattribute.setString(3, name);
-                            stmtinsertattribute.executeUpdate();
-                        }
+                        stmtinsertattribute.setString(1, value);
+                        stmtinsertattribute.setString(3, name);
+                        stmtinsertattribute.setString(4, value);
+                        stmtinsertattribute.executeUpdate();
                     } else {
                         stmtdelattribute.setString(2, name);
                         stmtdelattribute.executeUpdate();
@@ -1500,7 +1491,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
         } finally {
-            Databases.closeSQLStuff(stmtupdateattribute, stmtinsertattribute, stmtdelattribute);
+            Databases.closeSQLStuff(stmtinsertattribute, stmtdelattribute);
         }
     }
 
@@ -1519,31 +1510,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * ============================================================================ Private part
      * ============================================================================
      */
-    private Database getDatabaseHandleById(final Database database_id, final Connection configdb_write) throws SQLException {
-        final Database retval = new Database();
-        retval.setId(database_id.getId());
+    private Database getDatabaseHandleById(final Database database_id, final Connection configdb_write) throws SQLException, StorageException {
+        ResultSet rs = null;
         PreparedStatement pstm = null;
         try {
             pstm = configdb_write.prepareStatement("SELECT url,driver,login,password,name FROM db_pool WHERE db_pool_id = ?");
             pstm.setInt(1, database_id.getId().intValue());
-            final ResultSet rs = pstm.executeQuery();
-            rs.next();
+            rs = pstm.executeQuery();
+
+            if (false == rs.next()) {
+                throw new StorageException("No such database with identifier " + database_id.getId());
+            }
+
+            final Database retval = new Database();
+            retval.setId(database_id.getId());
             retval.setLogin(rs.getString("login"));
             retval.setPassword(rs.getString("password"));
             retval.setDriver(rs.getString("driver"));
             retval.setUrl(rs.getString("url"));
             retval.setName(rs.getString("name"));
-            rs.close();
+            return retval;
         } finally {
-            try {
-                if (pstm != null) {
-                    pstm.close();
-                }
-            } catch (final Exception e) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            Databases.closeSQLStuff(rs, pstm);
         }
-        return retval;
     }
 
     /**
@@ -2848,6 +2837,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         Database database = null;
+        boolean error = true;
+        boolean created = false;
         boolean rollback = false;
         try {
             // Get database handle
@@ -2871,13 +2862,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String schemaName = database.getName() + '_' + schemaUnique;
             database.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(database, configCon);
+            created = true;
             configCon.commit();
             rollback = false;
+            error = false;
             return database.getScheme();
         } catch (SQLException e) {
-            if (database != null) {
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(database.getId()), database.getScheme());
-            }
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -2886,6 +2876,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             autocommit(configCon);
+            if (error && created) {
+                if (database != null) {
+                    OXContextMySQLStorageCommon.deleteEmptySchema(i(database.getId()), database.getScheme());
+                }
+            }
             try {
                 cache.pushWriteConnectionForConfigDB(configCon);
             } catch (PoolException e) {
@@ -3099,6 +3094,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs = stmt.executeQuery();
             if (rs.next()) {
                 class DbAndSchema {
+
                     final int dbId;
                     final String schema;
 
