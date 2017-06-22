@@ -1169,7 +1169,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (StorageException e) {
                 LOG.error(e.getMessage(), e);
                 throw new StorageException("Unable to create context: " + e.getMessage());
-                //                throw new StorageException(e.getMessage());
             }
 
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
@@ -1236,7 +1235,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     try {
                         cacheFinalize.finalize(contextCreated);
                     } catch (Exception x) {
-                        // Ignore
+                        LOG.debug("An error occurred while performing a finalisation on context '{}': {}", contextId, x.getMessage(), x);
                     }
                 }
 
