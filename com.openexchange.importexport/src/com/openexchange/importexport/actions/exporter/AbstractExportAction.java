@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.exporters.VCardExporterExtended;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.json.ExportRequest;
@@ -84,12 +85,12 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
         final List<Integer> cols = req.getColumns();
         final SizedInputStream sis;
-        if(null == req.getBatchIds() || req.getBatchIds().isEmpty()){
+          
+        if (getExporter() instanceof VCardExporterExtended) {
+            sis = ((VCardExporterExtended) getExporter()).exportData(req.getSession(), getFormat(), req.getBatchIds(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        } else {
             sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
-        }
-        else{
-            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), 0, cols != null ? I2i(cols) : null, getOptionalParams(req), req.getBatchIds());
-        }
+        }   
                 
         if (null == sis) {
             // Streamed
@@ -124,9 +125,9 @@ public abstract class AbstractExportAction implements AJAXActionService {
     
     private String getExportFileName(ExportRequest req) throws OXException{
         if (null == req.getBatchIds() || req.getBatchIds().isEmpty()) {
-            return getExporter().getExportFileName(req.getSession(), req.getFolder(), null);
+            return getExporter().getExportFileName(req.getSession(), req.getFolder());
         } else {
-            return getExporter().getExportFileName(req.getSession(), null, req.getBatchIds());
+            return ((VCardExporterExtended) getExporter()).getExportFileName(req.getSession(), req.getBatchIds());
         }
     }
 }
