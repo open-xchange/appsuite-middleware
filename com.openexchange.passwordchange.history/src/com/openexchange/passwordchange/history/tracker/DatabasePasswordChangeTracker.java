@@ -72,13 +72,17 @@ import com.openexchange.server.impl.DBPool;
  */
 public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
 
-    private static final String GET = "SELECT created, source, ip FROM user_password_change WHERE cid=? AND uid=?;";
+    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_change WHERE cid=? AND uid=?;";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_change WHERE cid=? AND uid=?;";
     private static final String GET_SEQUENCE_ID = "SELECT id FROM sequence_password_history WHERE cid=?;";
+
     private static final String UPDATE_SEQUENCE_ID = "UPDATE sequence_password_history SET id=? WHERE cid=?;";
-    private static final String INSERT = "INSERT INTO user_password_change (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
-    private static final String CLEAR = "DELETE FROM user_password_change WHERE cid=? AND id=?;";
-    private static final String CLEAR_ALL = "DELETE FROM user_password_change WHERE cid=?;";
+
+    private static final String CLEAR_FOR_ID = "DELETE FROM user_password_change WHERE cid=? AND id=?;";
+    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_change WHERE cid=? AND uid=?;";
+
+    private static final String INSERT_DATA = "INSERT INTO user_password_change (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
+    private static final String CREATE_SEQUENCE = "INSERT INTO sequence_password_history (cid, id) VALUES (?,?);";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabasePasswordChangeTracker.class);
 
@@ -94,9 +98,9 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
         PreparedStatement stmt = null;
         try {
             // Get data
-            context = Services.getService(ContextService.class).getContext(contextID);
+            context = Services.getService(ContextService.class, true).getContext(contextID);
             con = DBPool.pickupWriteable(context);
-            stmt = con.prepareStatement(GET);
+            stmt = con.prepareStatement(GET_DATA);
             stmt.setInt(1, contextID);
             stmt.setInt(2, userID);
             stmt.execute();
@@ -148,27 +152,42 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
         Context context = null;
         PreparedStatement stmt = null;
         try {
-            context = Services.getService(ContextService.class).getContext(contextID);
+            context = Services.getService(ContextService.class, true).getContext(contextID);
             con = DBPool.pickupWriteable(context);
             // First get current sequence number
             stmt = con.prepareStatement(GET_SEQUENCE_ID);
             stmt.setInt(1, contextID);
             stmt.execute();
             ResultSet set = stmt.getResultSet();
-            set.next();
-            int sequence = set.getInt(1);
-            Databases.closeSQLStuff(stmt);
+            int sequence;
+            if (set.next()) {
+                // Entry exist
+                sequence = set.getInt(1);
+                Databases.closeSQLStuff(stmt);
 
-            // Increment and update
-            sequence++;
-            stmt = con.prepareStatement(UPDATE_SEQUENCE_ID);
-            stmt.setInt(1, sequence);
-            stmt.setInt(2, contextID);
-            stmt.execute();
-            Databases.closeSQLStuff(stmt);
+                // Increment and update
+                sequence++;
+                stmt = con.prepareStatement(UPDATE_SEQUENCE_ID);
+                stmt.setInt(1, sequence);
+                stmt.setInt(2, contextID);
+                stmt.execute();
+                Databases.closeSQLStuff(stmt);
+
+            } else {
+                // Create entry for this context
+                Databases.closeSQLStuff(stmt);
+                sequence = 1;
+
+                stmt = con.prepareStatement(CREATE_SEQUENCE);
+                stmt.setInt(1, contextID);
+                stmt.setInt(2, sequence);
+                stmt.execute();
+
+                Databases.closeSQLStuff(stmt);
+            }
 
             // Write info
-            stmt = con.prepareStatement(INSERT);
+            stmt = con.prepareStatement(INSERT_DATA);
             stmt.setInt(1, contextID);
             stmt.setInt(2, sequence);
             stmt.setInt(3, userID);
@@ -193,14 +212,15 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
         Context context = null;
         PreparedStatement stmt = null;
         try {
-            context = Services.getService(ContextService.class).getContext(contextID);
+            context = Services.getService(ContextService.class, true).getContext(contextID);
             con = DBPool.pickupWriteable(context);
             if (limit <= 0) {
-                stmt = con.prepareStatement(CLEAR_ALL);
+                stmt = con.prepareStatement(CLEAR_FOR_USER);
                 stmt.setInt(1, contextID);
+                stmt.setInt(2, userID);
                 stmt.execute();
             } else {
-                // Get entries, sort after IDs and delete oldest
+                // Get entries
                 stmt = con.prepareStatement(GET_HISTORY_ID);
                 stmt.setInt(1, contextID);
                 stmt.setInt(2, userID);
@@ -215,16 +235,22 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
                 if (data.size() > limit) {
                     // Sort & delete the first until limit triggers
                     Collections.sort(data);
-                    stmt = con.prepareStatement(CLEAR);
+
+                    final int batchSize = 100;
+                    int count = 0;
+
+                    stmt = con.prepareStatement(CLEAR_FOR_ID);
                     for (int i = 0; i < data.size() - limit; i++) {
                         stmt.setInt(1, contextID);
                         stmt.setInt(2, data.get(i));
                         stmt.addBatch();
+
+                        // Just in case we have many entries to delete
+                        if (++count % batchSize == 0) {
+                            stmt.executeBatch();
+                        }
                     }
-                    
                     stmt.executeBatch();
-                    stmt.execute();
-                    Databases.closeSQLStuff(stmt);
                 }
             }
         } catch (Exception e) {
