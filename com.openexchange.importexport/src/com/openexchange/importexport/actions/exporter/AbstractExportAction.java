@@ -83,19 +83,24 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private static final String DOWNLOAD = "download";
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
-        List<Integer> cols = req.getColumns();
+        int[] fieldsToBeExported = req.getColumns() != null ? I2i(req.getColumns()) : null;
         Map<String, List<String>> batchIds = req.getBatchIds();
         Exporter exporter = getExporter();
 
         SizedInputStream sis;
         if (doBatchExport(batchIds, exporter)) {
-            sis = ((BatchCapableExporter) exporter).exportBatchData(req.getSession(), getFormat(), batchIds, cols != null ? I2i(cols) : null, getOptionalParams(req));
+            sis = ((BatchCapableExporter) exporter).exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
-            String objectId = req.getObjectId();
-            if (null == objectId) {
-                sis = exporter.exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+            FolderAndId singleId = optSingleId(batchIds);
+            if (null == singleId) {
+                String objectId = req.getObjectId();
+                if (null == objectId) {
+                    sis = exporter.exportData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
+                } else {
+                    sis = exporter.exportSingleData(req.getSession(), getFormat(), req.getFolder(), objectId, fieldsToBeExported, getOptionalParams(req));
+                }
             } else {
-                sis = exporter.exportSingleData(req.getSession(), getFormat(), req.getFolder(), objectId, cols != null ? I2i(cols) : null, getOptionalParams(req));
+                sis = exporter.exportSingleData(req.getSession(), getFormat(), singleId.folder, singleId.objectId, fieldsToBeExported, getOptionalParams(req));
             }
         }
 
@@ -112,6 +117,18 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
     private boolean doBatchExport(Map<String, List<String>> batchIds, Exporter exporter) {
         return (exporter instanceof BatchCapableExporter) && (null != batchIds && false == batchIds.isEmpty());
+    }
+
+    private FolderAndId optSingleId(Map<String, List<String>> batchIds) {
+        if (null != batchIds && 1 == batchIds.size()) {
+            Map.Entry<String, List<String>> singleEntry = batchIds.entrySet().iterator().next();
+            List<String> ids = singleEntry.getValue();
+            if (1 == ids.size()) {
+                return new FolderAndId(singleEntry.getKey(), ids.get(0));
+            }
+        }
+
+        return null;
     }
 
     protected Map<String, Object> getOptionalParams(ExportRequest req) {
@@ -139,4 +156,18 @@ public abstract class AbstractExportAction implements AJAXActionService {
             return ((BatchCapableExporter) getExporter()).getExportFileName(req.getSession(), req.getBatchIds());
         }
     }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private static final class FolderAndId {
+        final String folder;
+        final String objectId;
+
+        FolderAndId(String folder, String objectId) {
+            super();
+            this.folder = folder;
+            this.objectId = objectId;
+        }
+    }
+
 }
