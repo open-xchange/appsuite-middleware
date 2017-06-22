@@ -82,6 +82,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -408,7 +409,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 case AJAXServlet.PARAMETER_SORT:
                     return new AbstractMap.SimpleEntry<String, EventField>(CalendarParameters.PARAMETER_ORDER_BY, EventConverter.getField(Integer.parseInt(value)));
                 case AJAXServlet.PARAMETER_ORDER:
-                    return new AbstractMap.SimpleEntry<String, String>(CalendarParameters.PARAMETER_ORDER, "desc".equalsIgnoreCase(value) ? "DESC" : "ASC");
+                    return new AbstractMap.SimpleEntry<String, SortOrder.Order>(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
                 case AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS:
                     return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
                 case AJAXServlet.PARAMETER_RECURRENCE_MASTER:

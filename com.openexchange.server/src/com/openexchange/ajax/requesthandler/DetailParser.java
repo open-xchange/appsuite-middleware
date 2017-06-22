@@ -47,47 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.ajax.requesthandler;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import java.util.Locale;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.Detail;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link DetailParser} parses a {@link Detail} implementation to json.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public interface DetailParser {
 
-    private final Map<String, AJAXActionService> actions;
+    /**
+     * Parses a {@link Detail} object into a {@link JSONObject}
+     * @param detail The detail
+     * @param locale The locale
+     * @return the {@link JSONObject}
+     * @throws JSONException
+     */
+    public JSONObject toJSON(Detail detail, Locale locale) throws JSONException;
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    /**
+     * Checks whether this parser can parse the given {@link Detail}.
+     * @param detail
+     * @return
+     */
+    public boolean isApplicable(Detail detail);
 
 }

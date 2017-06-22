@@ -86,11 +86,7 @@ public class SearchOptions {
         this();
         EventField by = parameters.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
         if (null != by) {
-            if ("desc".equalsIgnoreCase(parameters.get(CalendarParameters.PARAMETER_ORDER, String.class, "ASC"))) {
-                addOrder(SortOrder.DESC(by));
-            } else {
-                addOrder(SortOrder.ASC(by));
-            }
+            addOrder(SortOrder.getSortOrder(by, parameters.get(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.class, SortOrder.Order.ASC)));
         }
         Integer leftHandLimit = parameters.get(CalendarParameters.PARAMETER_LEFT_HAND_LIMIT, Integer.class);
         Integer rightHandLimit = parameters.get(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, Integer.class);
@@ -203,29 +199,39 @@ public class SearchOptions {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SearchOptions other = (SearchOptions) obj;
         if (from == null) {
-            if (other.from != null)
+            if (other.from != null) {
                 return false;
-        } else if (!from.equals(other.from))
+            }
+        } else if (!from.equals(other.from)) {
             return false;
-        if (limit != other.limit)
+        }
+        if (limit != other.limit) {
             return false;
-        if (offset != other.offset)
+        }
+        if (offset != other.offset) {
             return false;
-        if (!Arrays.equals(sortOrders, other.sortOrders))
+        }
+        if (!Arrays.equals(sortOrders, other.sortOrders)) {
             return false;
+        }
         if (until == null) {
-            if (other.until != null)
+            if (other.until != null) {
                 return false;
-        } else if (!until.equals(other.until))
+            }
+        } else if (!until.equals(other.until)) {
             return false;
+        }
         return true;
     }
 

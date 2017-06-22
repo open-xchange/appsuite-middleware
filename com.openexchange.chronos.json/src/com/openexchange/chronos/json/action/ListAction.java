@@ -49,20 +49,17 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.json.exception.CalendarExceptionDetail;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
@@ -71,23 +68,23 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link DeleteAction}
+ * {@link ListAction}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteAction extends ChronosAction {
+public class ListAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", "timezone", PARAMETER_FIELDS);
 
     private static final String IDS_FIELD = "ids";
 
     /**
-     * Initializes a new {@link DeleteAction}.
+     * Initializes a new {@link ListAction}.
      *
      * @param services A service lookup reference
      */
-    protected DeleteAction(ServiceLookup services) {
+    protected ListAction(ServiceLookup services) {
         super(services);
     }
 
@@ -98,7 +95,6 @@ public class DeleteAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
         Object data = requestData.getData();
         if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
@@ -118,31 +114,9 @@ public class DeleteAction extends ChronosAction {
         for (Object id : ids) {
             compositeEventIDs.add(CompositeEventID.parse(id.toString()));
         }
-        Map<CompositeEventID, OXException> errors = null;
-        for (CompositeEventID id : compositeEventIDs) {
-            try {
-                calendarAccess.deleteEvent(id);
-            } catch (OXException e) {
-                if (errors == null) {
-                    errors = new HashMap<>();
-                }
-                errors.put(id, e);
-            }
-        }
+        List<Event> events = calendarAccess.getEvents(compositeEventIDs);
 
-        if (!errors.isEmpty()) {
-            if (errors.size() == 1) {
-                CompositeEventID errorId = errors.keySet().iterator().next();
-                throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));
-            } else {
-                OXException ex = CalendarExceptionCodes.ERROR_DELETING_EVENTS.create();
-                for(CompositeEventID id : errors.keySet()){
-                    ex.addDetail(new CalendarExceptionDetail(errors.get(id), id));
-                }
-                throw ex;
-            }
-        }
-        return new AJAXRequestResult();
+        return new AJAXRequestResult(events, "event");
     }
 
 }

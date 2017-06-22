@@ -50,6 +50,11 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -69,7 +74,7 @@ public class AllAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeStart", "rangeEnd");
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", "timezone");
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", "timezone", PARAMETER_TIMESTAMP, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE);
 
     /**
      * Initializes a new {@link AllAction}.

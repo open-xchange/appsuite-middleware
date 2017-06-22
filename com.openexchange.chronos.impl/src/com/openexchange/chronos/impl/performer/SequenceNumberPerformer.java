@@ -93,7 +93,7 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         Date lastModified = folder.getLastModifiedUTC();
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
-        SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.DESC(EventField.LAST_MODIFIED)).setLimits(0, 1);
+        SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.LAST_MODIFIED, SortOrder.Order.DESC)).setLimits(0, 1);
         EventField[] fields = { EventField.LAST_MODIFIED };
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
         if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {

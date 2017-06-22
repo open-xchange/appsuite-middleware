@@ -69,6 +69,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -273,7 +274,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         CalendarSession calendarSession = calendarService.init(share.getSession());
         calendarSession
             .set(CalendarParameters.PARAMETER_ORDER_BY, EventField.START_DATE)
-            .set(CalendarParameters.PARAMETER_ORDER, "ASC")
+            .set(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.ASC)
             .set(CalendarParameters.PARAMETER_FIELDS, EVENT_FIELDS)
             .set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE)
             .set(CalendarParameters.PARAMETER_RANGE_START, getIntervalStart())

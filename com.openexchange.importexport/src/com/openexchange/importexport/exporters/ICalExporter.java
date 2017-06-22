@@ -72,6 +72,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -365,7 +366,7 @@ public class ICalExporter implements Exporter {
         CalendarSession calendarSession = calendarService.init(session);
         calendarSession
             .set(CalendarParameters.PARAMETER_ORDER_BY, EventField.START_DATE)
-            .set(CalendarParameters.PARAMETER_ORDER, "ASC")
+            .set(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.ASC)
             .set(CalendarParameters.PARAMETER_FIELDS, EVENT_FIELDS)
             .set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE)
         ;
@@ -505,12 +506,12 @@ public class ICalExporter implements Exporter {
     public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
         return createExportFileName(session, folder, null);
     }
-    
+
     private String createExportFileName(ServerSession session, String folder, String batchId) throws OXException {
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
         try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());    
+            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
             sb.append(folderObj.getFolderName());
         } catch (OXException e) {
             throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);

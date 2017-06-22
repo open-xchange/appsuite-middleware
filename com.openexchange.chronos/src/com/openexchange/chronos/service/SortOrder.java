@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import com.openexchange.chronos.EventField;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SortOrder}
@@ -60,23 +61,43 @@ import com.openexchange.chronos.EventField;
 public class SortOrder {
 
     /**
-     * Initializes a new ascending {@link SortOrder} for a specific event field.
+     * {@link Order} describes the order of a sort operation
      *
-     * @param by The event field to use for ordering
-     * @return The sort order
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.0
      */
-    public static SortOrder ASC(EventField by) {
-        return new SortOrder(by, false);
+    public static enum Order {
+        ASC,
+        DESC;
+
+        /**
+         * Parses a string to a {@link Order}
+         *
+         * @param str The string to parse
+         * @param defaultOrder The fallback {@link Order}
+         * @return the parsed {@link Order} or the defaultOrder
+         */
+        public static Order parse(String str, Order defaultOrder) {
+            if (Strings.isEmpty(str)) {
+                return defaultOrder;
+            }
+            try {
+                return Order.valueOf(str.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return defaultOrder;
+            }
+        }
     }
 
     /**
-     * Initializes a new descending {@link SortOrder} for a specific event field.
+     * Initializes a new {@link SortOrder} for a specific event field with the given order.
      *
      * @param by The event field to use for ordering
+     * @param order The order to use for ordering
      * @return The sort order
      */
-    public static SortOrder DESC(EventField by) {
-        return new SortOrder(by, true);
+    public static SortOrder getSortOrder(EventField by, Order order) {
+        return new SortOrder(by, order);
     }
 
     private final EventField by;
@@ -88,10 +109,10 @@ public class SortOrder {
      * @param by The event field to use for ordering
      * @param descending <code>true</code> if descending, <code>false</code>, otherwise
      */
-    private SortOrder(EventField by, boolean descending) {
+    private SortOrder(EventField by, Order order) {
         super();
         this.by = by;
-        this.descending = descending;
+        this.descending = Order.DESC.equals(order);
     }
 
     /**
@@ -123,17 +144,22 @@ public class SortOrder {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         SortOrder other = (SortOrder) obj;
-        if (by != other.by)
+        if (by != other.by) {
             return false;
-        if (descending != other.descending)
+        }
+        if (descending != other.descending) {
             return false;
+        }
         return true;
     }
 

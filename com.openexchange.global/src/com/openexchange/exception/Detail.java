@@ -47,47 +47,23 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
-
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.exception;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link Detail} describes a detail of a {@link OXException}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * E.g. in case multiple errors occur the {@link Detail} could contain one of those errors.
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public interface Detail {
 
-    private final Map<String, AJAXActionService> actions;
-
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    /**
+     * returns the details type which is unique for this {@link Detail} implementation.
+     *
+     * @return the details type
+     */
+    public String getType();
 
 }

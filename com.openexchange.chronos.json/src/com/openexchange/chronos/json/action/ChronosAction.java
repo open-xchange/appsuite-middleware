@@ -55,6 +55,10 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECU
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMEZONE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -66,10 +70,12 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -209,9 +215,31 @@ public abstract class ChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
             case PARAMETER_TIMESTAMP:
                 return new AbstractMap.SimpleEntry<String, Long>(PARAMETER_TIMESTAMP, Long.parseLong(value));
+            case PARAMETER_ORDER_BY:
+                return new AbstractMap.SimpleEntry<String, EventField>(PARAMETER_ORDER_BY, EventField.valueOf(value.toUpperCase()));
+            case PARAMETER_ORDER:
+                return new AbstractMap.SimpleEntry<String, SortOrder.Order>(PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
+            case PARAMETER_FIELDS:
+                return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
+            case PARAMETER_INCLUDE_PRIVATE:
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.parseBoolean(value));
             default:
                 throw new IllegalArgumentException("unknown paramter: " + parameter);
         }
+    }
+
+    private static EventField[] parseFields(String value){
+        if(Strings.isEmpty(value)){
+            return new EventField[0];
+        }
+
+        String[] splitByColon = Strings.splitByComma(value);
+        EventField[] fields = new EventField[splitByColon.length];
+        int x=0;
+        for(String str: splitByColon){
+            fields[x++] = EventField.valueOf(str.toUpperCase());
+        }
+        return fields;
     }
 
 }

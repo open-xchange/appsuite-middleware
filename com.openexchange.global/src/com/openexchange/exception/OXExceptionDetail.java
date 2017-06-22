@@ -47,47 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.exception;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link OXExceptionDetail} is a simple {@link Detail} implementation wrapping another exception.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class OXExceptionDetail implements Detail{
 
-    private final Map<String, AJAXActionService> actions;
+    private final OXException exception;
 
-    public ChronosActionFactory(ServiceLookup services) {
+    /**
+     * Initializes a new {@link OXExceptionDetail}.
+     * @param exception
+     */
+    public OXExceptionDetail(OXException exception) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
+        this.exception = exception;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public String getType() {
+        return this.getClass().getName();
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    /**
+     * Gets the exception
+     *
+     * @return The exception
+     */
+    public OXException getException() {
+        return exception;
     }
+
+
+
+
+
+
 
 }

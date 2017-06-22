@@ -47,47 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.chronos.json.exception;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXExceptionDetail;
+
 
 /**
- * {@link ChronosActionFactory}
+ * {@link CalendarExceptionDetail}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class CalendarExceptionDetail extends OXExceptionDetail {
 
-    private final Map<String, AJAXActionService> actions;
+    private final CompositeEventID eventId;
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link CalendarExceptionDetail}.
+     * @param exception
+     */
+    private CalendarExceptionDetail(OXException exception) {
+        super(exception);
+        eventId=null;
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionDetail}.
+     * @param exception
+     * @param eventId
+     */
+    public CalendarExceptionDetail(OXException exception, CompositeEventID eventId) {
+        super(exception);
+        this.eventId = eventId;
+    }
+
+    /**
+     * Gets the eventId
+     *
+     * @return The eventId
+     */
+    public CompositeEventID getEventId() {
+        return eventId;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public String getType(){
+        return this.getClass().getName();
     }
 
 }

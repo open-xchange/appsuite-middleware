@@ -47,47 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.ajax.requesthandler;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import java.util.List;
+import com.openexchange.java.ConcurrentLinkedList;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link DetailParserService}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public final class DetailParserService {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final DetailParserService INSTANCE = new DetailParserService();
+    private ConcurrentLinkedList<DetailParser> parsers;
 
-    public ChronosActionFactory(ServiceLookup services) {
+
+
+    /**
+     * Initializes a new {@link DetailParserService}.
+     */
+    private DetailParserService() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public static DetailParserService getInstance(){
+        return INSTANCE;
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    /**
+     * Retrieves the list of parsers or null in case it is not properly initialized.
+     * @return a list of {@link DetailParser}
+     */
+    public List<DetailParser> getParser(){
+        return parsers;
+    }
+
+    public void init(ConcurrentLinkedList<DetailParser> parsers){
+        this.parsers = parsers;
     }
 
 }
