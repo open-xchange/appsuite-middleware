@@ -140,6 +140,13 @@ public interface EventStorage {
     void insertEvent(Event event) throws OXException;
 
     /**
+     * Inserts multiple new events into the database.
+     *
+     * @param events The events to insert
+     */
+    void insertEvents(List<Event> events) throws OXException;
+
+    /**
      * Updates an existing event.
      *
      * @param event The event to update
@@ -153,6 +160,18 @@ public interface EventStorage {
      */
     void deleteEvent(String eventId) throws OXException;
 
+    /**
+     * Inserts a new (or overwrites a previously existing) <i>tombstone</i> record for a specific event into the database.
+     *
+     * @param event The event to insert the tombstone for
+     */
     void insertTombstoneEvent(Event event) throws OXException;
+
+    /**
+     * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple events into the database.
+     *
+     * @param events The events to insert the tombstones for
+     */
+    void insertTombstoneEvents(List<Event> events) throws OXException;
 
 }

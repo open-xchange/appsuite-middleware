@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.service.EntityResolver;
@@ -75,6 +76,7 @@ import com.openexchange.tools.arrays.Collections;
  */
 public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
+    private static final int INSERT_CHUNK_SIZE = 200;
     private static final AttendeeMapper MAPPER = AttendeeMapper.getInstance();
 
     private final int accountId;
@@ -128,8 +130,44 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            for (Attendee attendee : attendees) {
-                updated += insertAttendee(connection, eventId, attendee);
+            updated = insertAttendees(connection, eventId, attendees);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            Map<String, List<Attendee>> chunk = new HashMap<String, List<Attendee>>();
+            int chunkSize = 0;
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                /*
+                 * add to current chunk
+                 */
+                chunk.put(entry.getKey(), entry.getValue());
+                chunkSize += entry.getValue().size();
+                if (chunkSize >= INSERT_CHUNK_SIZE) {
+                    /*
+                     * insert & reset current chunk
+                     */
+                    updated += insertAttendees(connection, chunk);
+                    chunk.clear();
+                    chunkSize = 0;
+                }
+            }
+            /*
+             * finally insert remaining chunk
+             */
+            if (0 < chunkSize) {
+                updated += insertAttendees(connection, chunk);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -269,19 +307,37 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private int insertAttendee(Connection connection, String eventId, Attendee attendee) throws SQLException, OXException {
-        attendee = entityProcessor.adjustPriorSave(attendee);
+    private int insertAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
+        return insertAttendees(connection, java.util.Collections.singletonMap(eventId, attendees));
+    }
+
+    private int insertAttendees(Connection connection, Map<String, List<Attendee>> attendeesByEventId) throws SQLException, OXException {
+        if (null == attendeesByEventId || 0 == attendeesByEventId.size()) {
+            return 0;
+        }
         AttendeeField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder()
-            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") VALUES ")
+        ;
+        for (List<Attendee> attendees : attendeesByEventId.values()) {
+            for (int i = 0; i < attendees.size(); i++) {
+                stringBuilder.append("(?,?,?,").append(MAPPER.getParameters(mappedFields)).append("),");
+            }
+        }
+        stringBuilder.setLength(stringBuilder.length() - 1);
+        stringBuilder.append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
-            stmt.setInt(parameterIndex++, asInt(eventId));
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                int eventId = asInt(entry.getKey());
+                for (Attendee attendee : entry.getValue()) {
+                    attendee = entityProcessor.adjustPriorSave(attendee);
+                    stmt.setInt(parameterIndex++, context.getContextId());
+                    stmt.setInt(parameterIndex++, accountId);
+                    stmt.setInt(parameterIndex++, eventId);
+                    parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
+                }
+            }
             return logExecuteUpdate(stmt);
         }
     }
