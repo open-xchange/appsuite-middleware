@@ -103,7 +103,7 @@ public final class PasswordChangeUtility {
                 }
 
             };
-            tracker.trackPasswordChange(contextID, userID, info);
+            tracker.trackPasswordChange(userID, contextID, info);
         } catch (Exception e) {
             // IF this happens some property won't be there ..
             LOG.debug("Error while tracking password change for user {} in context {}", userID, contextID);
