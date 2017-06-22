@@ -1087,7 +1087,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e.getMessage(), e);
             } catch (OXContextException e) {
                 LOG.error(e.getMessage(), e);
-                throw new StorageException(e.getMessage());
+                throw new StorageException("Unable to create context: " + e.getMessage());
             }
 
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
@@ -1097,7 +1097,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             boolean rollback = false;
             boolean configConCommitted = false;
             boolean automaticStrategyUsed = true;
-            PreparedStatement stmt = null;
             try {
                 // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
@@ -1143,7 +1142,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Apparently, no error occurred
                 contextCreated = true;
 
-                LOG.info("Context {} created!", retval.getId());
+                LOG.info("Context {} created with strategy {}!", retval.getId(), schemaResult.getStrategy().toString());
                 return retval;
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
@@ -1153,17 +1152,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw e;
             } finally {
                 if (null != cacheFinalize) {
-                    try { cacheFinalize.finalize(contextCreated); } catch (Exception x) { /*Ignore*/ }
+                    try {
+                        cacheFinalize.finalize(contextCreated);
+                    } catch (Exception x) {
+                        LOG.debug("An error occurred while performing a finalisation on context '{}': {}", contextId, x.getMessage(), x);
+                    }
                 }
 
-                if (automaticStrategyUsed) {
-                    if (rollback) {
+                if (rollback) {
+                    if (automaticStrategyUsed) {
                         // A commit on configDb connection is guaranteed that is has not been performed
                         rollback(configCon);
                         OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
-                    }
-                } else {
-                    if (rollback) {
+                    } else {
                         // Either commit on configDb connection or writeContext() invocation failed
                         // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
                         rollback(configCon);
@@ -1176,7 +1177,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 autocommit(configCon);
-                closeSQLStuff(stmt);
             }
         } finally {
             pushConnectionToPoolConfigDB(configCon);
