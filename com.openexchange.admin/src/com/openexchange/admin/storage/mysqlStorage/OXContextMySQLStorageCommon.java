@@ -61,7 +61,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -94,14 +96,57 @@ public class OXContextMySQLStorageCommon {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
     private final OXUtilMySQLStorageCommon oxutilcommon;
+    private final Map<String, StartNumberProvider> startValues;
     private final AdminCache cache;
     private final PropertyHandler prop;
+
+    private static interface StartNumberProvider {
+
+        int getStartValue();
+    }
 
     public OXContextMySQLStorageCommon() {
         super();
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         oxutilcommon = new OXUtilMySQLStorageCommon();
+
+        Map<String, StartNumberProvider> startValues = new HashMap<String, StartNumberProvider>(4);
+        startValues.put("sequence_folder", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                // below id 20 is reserved
+                return 20;
+            }
+        });
+        startValues.put("sequence_uid_number", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
+                if (startnum > 0) {
+                    // we use the uid number feature
+                    // set the start number in the sequence for uid_numbers
+                    return startnum;
+                }
+                return 0;
+            }
+        });
+        startValues.put("sequence_gid_number", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
+                if (startnum > 0) {
+                    // we use the gid number feature
+                    // set the start number in the sequence for gid_numbers
+                    return startnum;
+                }
+                return 0;
+            }
+        });
+        this.startValues = startValues;
     }
 
     // TODO: The average size parameter can be removed if we have an new property handler which can
@@ -375,7 +420,7 @@ public class OXContextMySQLStorageCommon {
             int filestoreId = getFilestoreIdFor(con, contextId);
 
             pool.lock(con, poolId, dbSchema);
-            
+
             if (0 != filestoreId) {
                 stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
@@ -575,30 +620,8 @@ public class OXContextMySQLStorageCommon {
     }
 
     private int modifyStartValue(final String tableName) {
-        int retval = 0;
-        if ("sequence_folder".equals(tableName)) {
-            // below id 20 is reserved
-            retval = 20;
-        }
-        // check for the uid number feature
-        if ("sequence_uid_number".equals(tableName)) {
-            final int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
-            if (startnum > 0) {
-                // we use the uid number feature
-                // set the start number in the sequence for uid_numbers
-                retval = startnum;
-            }
-        }
-        // check for the gid number feature
-        if ("sequence_gid_number".equals(tableName)) {
-            final int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
-            if (startnum > 0) {
-                // we use the gid number feature
-                // set the start number in the sequence for gid_numbers
-                retval = startnum;
-            }
-        }
-        return retval;
+        StartNumberProvider startNumberProvider = startValues.get(tableName);
+        return null == startNumberProvider ? 0 : startNumberProvider.getStartValue();
     }
 
     /**
