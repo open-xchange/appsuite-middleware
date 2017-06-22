@@ -273,8 +273,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return listMaintenanceReason("*", auth);
     }
 
-    public void createDatabase(final Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public void createDatabase(final Database db, Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = creds == null ? new Credentials("","") : creds;
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {

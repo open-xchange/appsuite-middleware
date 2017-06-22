@@ -1780,7 +1780,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
             log.error("OX Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
@@ -3068,11 +3068,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 UserConfigurationStorage.getInstance().invalidateCache(user.getUserId(), gwCtx);
             }
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.getMessage(), e);
         } catch (final OXException e) {
-            log.error("UserConfiguration Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.getMessage(), e);
         }
     }
 

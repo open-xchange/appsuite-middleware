@@ -1318,18 +1318,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
-        PreparedStatement stmtupdateattribute = null;
+        int contextId = ctx.getId().intValue();
         PreparedStatement stmtinsertattribute = null;
         PreparedStatement stmtdelattribute = null;
-        final int contextId = ctx.getId().intValue();
         try {
 
             if (ctx.isUserAttributesset()) {
-
-                stmtupdateattribute = oxCon.prepareStatement("UPDATE contextAttribute SET value = ? WHERE cid=? AND name=?");
-                stmtupdateattribute.setInt(2, contextId);
-
-                stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?)");
+                stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
                 stmtinsertattribute.setInt(2, contextId);
 
                 stmtdelattribute = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
@@ -1341,15 +1336,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         final String name = namespace + "/" + pair.getKey();
                         final String value = pair.getValue();
                         if (value != null) {
-                            stmtupdateattribute.setString(1, value);
-                            stmtupdateattribute.setString(3, name);
-
-                            final int changedRows = stmtupdateattribute.executeUpdate();
-                            if (changedRows == 0) {
-                                stmtinsertattribute.setString(1, value);
-                                stmtinsertattribute.setString(3, name);
-                                stmtinsertattribute.executeUpdate();
-                            }
+                            stmtinsertattribute.setString(1, value);
+                            stmtinsertattribute.setString(3, name);
+                            stmtinsertattribute.setString(4, value);
+                            stmtinsertattribute.executeUpdate();
                         } else {
                             stmtdelattribute.setString(2, name);
                             stmtdelattribute.executeUpdate();
@@ -1359,17 +1349,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             }
         } finally {
-            if (stmtupdateattribute != null) {
-                stmtupdateattribute.close();
-            }
-            if (stmtinsertattribute != null) {
-                stmtinsertattribute.close();
-            }
-            if (stmtdelattribute != null) {
-                stmtdelattribute.close();
-            }
+            Databases.closeSQLStuff(stmtinsertattribute);
+            Databases.closeSQLStuff(stmtdelattribute);
         }
-
     }
 
     /**
@@ -1387,31 +1369,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * ============================================================================ Private part
      * ============================================================================
      */
-    private Database getDatabaseHandleById(final Database database_id, final Connection configdb_write) throws SQLException {
-        final Database retval = new Database();
-        retval.setId(database_id.getId());
+    private Database getDatabaseHandleById(final Database database_id, final Connection configdb_write) throws SQLException, StorageException {
         PreparedStatement pstm = null;
+        ResultSet rs = null;
         try {
             pstm = configdb_write.prepareStatement("SELECT url,driver,login,password,name FROM db_pool WHERE db_pool_id = ?");
             pstm.setInt(1, database_id.getId().intValue());
-            final ResultSet rs = pstm.executeQuery();
-            rs.next();
+            rs = pstm.executeQuery();
+            if (false == rs.next()) {
+                throw new StorageException("No such database with identifier " + database_id.getId());
+            }
+
+            Database retval = new Database();
+            retval.setId(database_id.getId());
             retval.setLogin(rs.getString("login"));
             retval.setPassword(rs.getString("password"));
             retval.setDriver(rs.getString("driver"));
             retval.setUrl(rs.getString("url"));
             retval.setName(rs.getString("name"));
-            rs.close();
+            return retval;
         } finally {
-            try {
-                if (pstm != null) {
-                    pstm.close();
-                }
-            } catch (final Exception e) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            Databases.closeSQLStuff(rs, pstm);
         }
-        return retval;
     }
 
     /**
@@ -2833,6 +2812,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // Get connection to 'configdb'
         Connection configCon = getConnectionForConfigDb();
         Database database = null;
+        boolean error = true;
+        boolean created = false;
         boolean rollback = false;
         try {
             // Get database handle
@@ -2857,13 +2838,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String schemaName = database.getName() + '_' + schemaUnique;
             database.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(database,configCon);
+            created = true;
             configCon.commit();
             rollback = false;
+            error = false;
             return database.getScheme();
         } catch (SQLException e) {
-            if (database != null) {
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(database.getId()), database.getScheme());
-            }
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -2871,6 +2851,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 rollback(configCon);
             }
             autocommit(configCon);
+            if (error && created) {
+                if (database != null) {
+                    OXContextMySQLStorageCommon.deleteEmptySchema(i(database.getId()), database.getScheme());
+                }
+            }
             try {
                 cache.pushConnectionForConfigDB(configCon);
             } catch (PoolException e) {

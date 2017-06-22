@@ -50,10 +50,9 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.database.CreateTableService;
 
 
@@ -61,6 +60,7 @@ import com.openexchange.database.CreateTableService;
  * {@link CreateTableRegistry}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CreateTableRegistry {
 
@@ -68,34 +68,35 @@ public class CreateTableRegistry {
 
     private static final CreateTableRegistry SINGLETON = new CreateTableRegistry();
 
-    private final Set<CreateTableService> createTables = new HashSet<CreateTableService>();
+    public static CreateTableRegistry getInstance() {
+        return SINGLETON;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<CreateTableService, Object> createTables;
 
     /**
      * Prevent instantiation.
      */
     private CreateTableRegistry() {
         super();
-    }
-
-    public static CreateTableRegistry getInstance() {
-        return SINGLETON;
+        createTables = new ConcurrentHashMap<CreateTableService, Object>(128, 0.9F, 1);
     }
 
     public void addCreateTable(CreateTableService service) {
-        if (!createTables.add(service)) {
+        if (null != createTables.putIfAbsent(service, service)) {
             LOG.warn("CreateTableService {} found twice.", service.getClass().getName());
         }
     }
 
     public void removeCreateTable(CreateTableService service) {
-        if (!createTables.remove(service)) {
+        if (null == createTables.remove(service)) {
             LOG.warn("Unkown CreateTableService {} removed.", service.getClass().getName());
         }
     }
 
     public List<CreateTableService> getList() {
-        List<CreateTableService> tmp = new ArrayList<CreateTableService>(createTables.size());
-        tmp.addAll(createTables);
-        return Collections.unmodifiableList(tmp);
+        return new ArrayList<CreateTableService>(createTables.keySet());
     }
 }
