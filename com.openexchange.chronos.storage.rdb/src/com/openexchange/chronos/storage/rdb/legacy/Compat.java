@@ -174,6 +174,22 @@ public class Compat {
         if (event.containsOrganizer() && null != event.getOrganizer() && null != entityResolver) {
             event.setOrganizer(entityResolver.applyEntityData(event.getOrganizer(), CalendarUserType.INDIVIDUAL));
         }
+        /*
+         * derive calendar user based on present public folder and created by info
+         */
+        if (event.containsFolderId()) {
+            if (null == event.getFolderId() || "0".equals(event.getFolderId())) {
+                /*
+                 * event from personal calendar, take over calendar user from created by
+                 */
+                event.setCalendarUser(event.getCreatedBy());
+            } else {
+                /*
+                 * event in public folder, assume no specific calendar user
+                 */
+                event.setCalendarUser(0);
+            }
+        }
         return event;
     }
 
