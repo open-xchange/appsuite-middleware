@@ -93,7 +93,7 @@ public abstract class ChronosAction implements AJAXActionService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
-    private final ServiceLookup services;
+    final ServiceLookup services;
 
     /**
      * Initializes a new {@link AbstractDriveShareAction}.

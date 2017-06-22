@@ -115,7 +115,6 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, "json");
     }
 
-    @SuppressWarnings("unused")
     private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
         try {
             return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session);
