@@ -85,25 +85,11 @@ public class ExportRequest {
 
         String ids = request.getParameter(AJAXServlet.PARAMETER_IDS);
         if (Strings.isNotEmpty(ids)) {
-            String[] split = Strings.splitByComma(ids);
             batchIds = new HashMap<String, List<String>>();
-            for (String s : split) {
-                try {
-                    String[] nextSplit = s.split("\\.");
-                    String key = nextSplit[0];
-                    String valueEntry = nextSplit[1];
-                    if (!batchIds.containsKey(nextSplit[0])) {
-                        List<String> valueList = new LinkedList<String>();
-                        valueList.add(valueEntry);
-                        batchIds.put(key, valueList);
-                    } else {
-                        List<String> list = batchIds.get(key);
-                        list.add(valueEntry);
-                        batchIds.put(key, list);
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
-                }
+            try{
+                batchIds = extractBatchArrayFromRequest(ids);
+            } catch (IndexOutOfBoundsException e) {
+                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
             }
         } else {
             batchIds = null;
@@ -126,6 +112,31 @@ public class ExportRequest {
         }
         this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
     }
+    
+    private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) {
+        String firstExtract = batchArray.substring(1, batchArray.length()-1);
+        String secondExtract = firstExtract.replaceAll("\\[", "");
+        String thirdExtract = secondExtract.replaceAll("\\]", "");
+        String[] lastExtract = thirdExtract.split(",");
+        return parseBatchIds(lastExtract);
+    }
+    
+    private Map<String, List<String>> parseBatchIds(String[] string) {
+        Map<String, List<String>> batchIds = new HashMap<String, List<String>>();
+        for (int i = 0; i < string.length; i++) {
+            if (i%2 == 0) {
+                if (!batchIds.containsKey(string[i])) {
+                    List<String> valueList = new LinkedList<String>();
+                    batchIds.put(string[i], valueList);
+                }
+            } else {                      
+                List<String> list = batchIds.get(string[i-1]);
+                list.add(string[i]);
+                batchIds.put(string[i-1], list);
+            }
+        }
+        return batchIds;
+    } 
 
     public Map<String, List<String>> getBatchIds() {
         return batchIds;
