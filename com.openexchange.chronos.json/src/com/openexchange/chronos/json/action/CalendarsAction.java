@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.exception.OXException;
@@ -79,35 +78,11 @@ public class CalendarsAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        //TODO: "flat" list of calendars directly from service?
         List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
-        for (GroupwareFolderType type : new GroupwareFolderType[] { GroupwareFolderType.PRIVATE, GroupwareFolderType.SHARED, GroupwareFolderType.PUBLIC }) {
-            List<CalendarFolder> rootFolders = calendarAccess.getRootFolders(type);
-            if (null != rootFolders && 0 < rootFolders.size()) {
-                folders.addAll(rootFolders);
-                for (CalendarFolder rootFolder : rootFolders) {
-                    List<CalendarFolder> subfolders = collectFolders(calendarAccess, CompositeFolderID.parse(rootFolder.getId()), true);
-                    if (null != subfolders) {
-                        folders.addAll(subfolders);
-                    }
-                }
-            }
+        for (GroupwareFolderType type : GroupwareFolderType.values()) {
+            folders.addAll(calendarAccess.getVisibleFolders(type));
         }
         return new AJAXRequestResult(folders, "calendarFolder");
-    }
-
-    private static List<CalendarFolder> collectFolders(IDBasedCalendarAccess calendarAccess, CompositeFolderID parentFolderId, boolean recursive) throws OXException {
-        List<CalendarFolder> folders = calendarAccess.getSubfolders(parentFolderId);
-        if (recursive && null != folders && 0 < folders.size()) {
-            for (CalendarFolder folder : folders) {
-                folders = new ArrayList<CalendarFolder>(folders);
-                List<CalendarFolder> subfolders = collectFolders(calendarAccess, CompositeFolderID.parse(folder.getId()), recursive);
-                if (null != subfolders) {
-                    folders.addAll(subfolders);
-                }
-            }
-        }
-        return folders;
     }
 
 }

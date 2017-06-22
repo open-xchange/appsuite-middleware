@@ -84,7 +84,7 @@ public interface CalendarAccess {
      *
      * @return A list of all visible calendar folders.
      */
-    List<? extends CalendarFolder> getVisibleFolders() throws OXException;
+    List<CalendarFolder> getVisibleFolders() throws OXException;
 
     /**
      * Gets a specific event.

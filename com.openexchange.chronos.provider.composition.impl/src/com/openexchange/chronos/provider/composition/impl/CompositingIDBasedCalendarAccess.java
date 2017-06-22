@@ -239,34 +239,24 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
     }
 
     @Override
-    public List<CalendarFolder> getRootFolders(GroupwareFolderType type) throws OXException {
-        List<CalendarFolder> rootFolders = new ArrayList<CalendarFolder>();
+    public List<CalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
         for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
             if (GroupwareCalendarAccess.class.isInstance(access)) {
-                List<GroupwareCalendarFolder> groupwareRootFolders = ((GroupwareCalendarAccess) access).getRootFolders(type);
-                rootFolders.addAll(withUniqueID(groupwareRootFolders, account.getAccountId()));
+                List<GroupwareCalendarFolder> groupwareFolders = ((GroupwareCalendarAccess) access).getVisibleFolders(type);
+                folders.addAll(withUniqueID(groupwareFolders, account.getAccountId()));
             } else if (GroupwareFolderType.PRIVATE.equals(type)) {
-                rootFolders.addAll(withUniqueID(access.getVisibleFolders(), account.getAccountId()));
+                folders.addAll(withUniqueID(access.getVisibleFolders(), account.getAccountId()));
             }
         }
-        return rootFolders;
+        return folders;
     }
 
     @Override
     public CalendarFolder getFolder(CompositeFolderID folderID) throws OXException {
         CalendarFolder calendarFolder = getAccess(folderID).getFolder(folderID.getFolderId());
         return withUniqueID(calendarFolder, folderID);
-    }
-
-    @Override
-    public List<CalendarFolder> getSubfolders(CompositeFolderID parentFolderID) throws OXException {
-        CalendarAccess calendarAccess = getAccess(parentFolderID);
-        if (GroupwareCalendarAccess.class.isInstance(calendarAccess)) {
-            List<GroupwareCalendarFolder> groupwareFolders = ((GroupwareCalendarAccess) calendarAccess).getSubfolders(parentFolderID.getFolderId());
-            return withUniqueID(groupwareFolders, parentFolderID);
-        }
-        return null;
     }
 
     @Override

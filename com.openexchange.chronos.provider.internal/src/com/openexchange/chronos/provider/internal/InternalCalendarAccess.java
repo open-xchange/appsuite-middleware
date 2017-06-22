@@ -50,12 +50,11 @@
 package com.openexchange.chronos.provider.internal;
 
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
-import static com.openexchange.chronos.provider.internal.Constants.PUBLIC_FOLDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
-import static com.openexchange.chronos.provider.internal.Constants.SHARED_FOLDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageType;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,28 +117,18 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
     }
 
     @Override
-    public List<GroupwareCalendarFolder> getRootFolders(GroupwareFolderType type) throws OXException {
-        switch (type) {
-            case PUBLIC:
-                return getCalendarFolders(getFolderService().getSubfolders(TREE_ID, PUBLIC_FOLDER_ID, true, session.getSession(), initDecorator()));
-            case SHARED:
-                return getCalendarFolders(getFolderService().getSubfolders(TREE_ID, SHARED_FOLDER_ID, true, session.getSession(), initDecorator()));
-            case PRIVATE:
-                return Collections.singletonList(getDefaultFolder());
-            default:
-                throw new IllegalArgumentException();
+    public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
+        return getCalendarFolders(getFolderService().getVisibleFolders(
+            TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
+    }
+
+    @Override
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        for (GroupwareFolderType type : GroupwareFolderType.values()) {
+            folders.addAll(getVisibleFolders(type));
         }
-    }
-
-    @Override
-    public List<? extends CalendarFolder> getVisibleFolders() throws OXException {
-        //TODO
-        return getCalendarFolders(getFolderService().getAllVisibleFolders(TREE_ID, null, session.getSession(), initDecorator()));
-    }
-
-    @Override
-    public List<GroupwareCalendarFolder> getSubfolders(String parentId) throws OXException {
-        return getCalendarFolders(getFolderService().getSubfolders(TREE_ID, parentId, true, session.getSession(), initDecorator()));
+        return folders;
     }
 
     @Override

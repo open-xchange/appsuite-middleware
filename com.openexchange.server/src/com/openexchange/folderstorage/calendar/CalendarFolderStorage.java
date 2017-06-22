@@ -50,14 +50,12 @@
 package com.openexchange.folderstorage.calendar;
 
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
+import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.CompositeID;
@@ -79,9 +77,6 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.CalendarType;
-import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.id.IDMangler;
 
@@ -210,32 +205,21 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(String rootFolderId, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
-        if (false == CalendarContentType.class.isInstance(contentType)) {
-            return new SortableId[0];
-        }
-        List<CalendarFolder> visibleFolders;
-        if (null != rootFolderId) {
-            visibleFolders = getSubfolders(rootFolderId, storageParameters, true);
-        } else if (PrivateType.getInstance().equals(type)) {
-            visibleFolders = getSubfolders(PRIVATE_ID, storageParameters, true);
-        } else if (SharedType.getInstance().equals(type)) {
-            visibleFolders = getSubfolders(SHARED_ID, storageParameters, true);
-        } else if (PublicType.getInstance().equals(type)) {
-            visibleFolders = getSubfolders(PUBLIC_ID, storageParameters, true);
-        } else {
-            visibleFolders = null;
-        }
-        return getSortableIDs(visibleFolders);
+        return getVisibleFolders(treeId, contentType, type, storageParameters);
     }
 
     @Override
     public SortableId[] getVisibleFolders(String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
-        return getVisibleFolders(null, treeId, contentType, type, storageParameters);
+        if (false == CalendarContentType.class.isInstance(contentType)) {
+            return new SortableId[0];
+        }
+        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
+        return getSortableIDs(calendarAccess.getVisibleFolders(getCalendarType(type)));
     }
 
     @Override
     public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
-        return new SortableId[0];
+        throw new UnsupportedOperationException("CalendarFolderStorage.getUserSharedFolders()");
     }
 
     @Override
@@ -259,8 +243,7 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public void clearFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
-        // not supported
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("CalendarFolderStorage.clearFolder()");
     }
 
     @Override
@@ -278,6 +261,9 @@ public class CalendarFolderStorage implements FolderStorage {
     public String getDefaultFolderID(User user, String treeId, ContentType contentType, Type type, StorageParameters storageParameters) throws OXException {
         if (false == CalendarContentType.class.isInstance(contentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
+        }
+        if (false == GroupwareFolderType.PRIVATE.equals(getCalendarType(type))) {
+            throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(contentType, treeId);
         }
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         CalendarFolder folder = calendarAccess.getDefaultFolder();
@@ -306,7 +292,7 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public void updateLastModified(long lastModified, String treeId, String folderId, StorageParameters storageParameters) throws OXException {
-        // Nothing to do
+        //
     }
 
     @Override
@@ -341,31 +327,7 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
-        return getSortableIDs(getSubfolders(parentId, storageParameters, false));
-    }
-
-    private List<CalendarFolder> getSubfolders(String parentId, StorageParameters storageParameters, boolean recursive) throws OXException {
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        List<CalendarFolder> subfolders;
-        if (PRIVATE_ID.equals(parentId)) {
-            subfolders = calendarAccess.getRootFolders(GroupwareFolderType.PRIVATE);
-        } else if (SHARED_ID.equals(parentId)) {
-            subfolders = calendarAccess.getRootFolders(GroupwareFolderType.SHARED);
-        } else if (PUBLIC_ID.equals(parentId)) {
-            subfolders = calendarAccess.getRootFolders(GroupwareFolderType.PUBLIC);
-        } else {
-            subfolders = calendarAccess.getSubfolders(CompositeFolderID.parse(parentId));
-        }
-        List<CalendarFolder> collectedFolders = new ArrayList<CalendarFolder>();
-        if (null != subfolders) {
-            collectedFolders.addAll(subfolders);
-            if (recursive && 0 < subfolders.size()) {
-                for (CalendarFolder subfolder : subfolders) {
-                    collectedFolders.addAll(getSubfolders(subfolder.getId(), storageParameters, recursive));
-                }
-            }
-        }
-        return collectedFolders;
+        throw new UnsupportedOperationException("CalendarFolderStorage.getSubfolders()");
     }
 
     @Override
@@ -383,25 +345,12 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public String[] getDeletedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws OXException {
-        return new String[0];
+        throw new UnsupportedOperationException("CalendarFolderStorage.getDeletedFolderIDs()");
     }
 
     @Override
     public String[] getModifiedFolderIDs(String treeId, Date timeStamp, ContentType[] includeContentTypes, StorageParameters storageParameters) throws OXException {
-        if (null == includeContentTypes || includeContentTypes.length == 0) {
-            return new String[0];
-        }
-        List<String> ret = new ArrayList<String>();
-        Set<ContentType> supported = new HashSet<ContentType>(Arrays.asList(getSupportedContentTypes()));
-        for (ContentType includeContentType : includeContentTypes) {
-            if (supported.contains(includeContentType)) {
-                SortableId[] subfolders = getSubfolders(FolderStorage.REAL_TREE_ID, PRIVATE_ID, storageParameters);
-                for (SortableId sortableId : subfolders) {
-                    ret.add(sortableId.getId());
-                }
-            }
-        }
-        return ret.toArray(new String[ret.size()]);
+        throw new UnsupportedOperationException("CalendarFolderStorage.getModifiedFolderIDs()");
     }
 
     @Override

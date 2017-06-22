@@ -98,7 +98,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     }
 
     @Override
-    public List<? extends CalendarFolder> getVisibleFolders() throws OXException {
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
         return Collections.singletonList(folder);
     }
 
