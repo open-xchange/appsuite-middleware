@@ -555,8 +555,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
         if (0 < attendeesToDelete.size()) {
             requireWritePermissions(originalEvent, attendeesToDelete);
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
-            storage.getAttendeeStorage().insertTombstoneAttendees(originalEvent.getId(), AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
+            storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getAttendeeStorage().insertAttendeeTombstones(originalEvent.getId(), AttendeeMapper.getInstance().getTombstones(attendeesToDelete));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), attendeesToDelete);
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), getUserIDs(attendeesToDelete));
         }

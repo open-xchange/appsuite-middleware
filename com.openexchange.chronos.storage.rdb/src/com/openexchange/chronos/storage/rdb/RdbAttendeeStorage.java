@@ -200,17 +200,17 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertTombstoneAttendee(String eventId, Attendee attendee) throws OXException {
-        insertTombstoneAttendees(eventId, java.util.Collections.singletonList(attendee));
+    public void insertAttendeeTombstone(String eventId, Attendee attendee) throws OXException {
+        insertAttendeeTombstones(eventId, java.util.Collections.singletonList(attendee));
     }
 
     @Override
-    public void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException {
+    public void insertAttendeeTombstones(String eventId, List<Attendee> attendees) throws OXException {
         insertAttendees(java.util.Collections.singletonMap(eventId, attendees), true);
     }
 
     @Override
-    public void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+    public void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
         insertAttendees(attendeesByEventId, true);
     }
 

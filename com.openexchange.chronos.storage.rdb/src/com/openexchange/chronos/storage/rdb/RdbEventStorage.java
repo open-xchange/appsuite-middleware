@@ -294,7 +294,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void insertTombstoneEvent(Event event) throws OXException {
+    public void insertEventTombstone(Event event) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -310,7 +310,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void insertTombstoneEvents(List<Event> events) throws OXException {
+    public void insertEventTombstones(List<Event> events) throws OXException {
         if (null == events || 0 == events.size()) {
             return;
         }

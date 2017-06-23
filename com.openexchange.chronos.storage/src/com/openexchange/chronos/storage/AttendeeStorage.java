@@ -140,7 +140,7 @@ public interface AttendeeStorage {
      * @param eventId The identifier of the event to insert the tombstone for
      * @param attendee The attendee to insert the tombstone for
      */
-    void insertTombstoneAttendee(String eventId, Attendee attendee) throws OXException;
+    void insertAttendeeTombstone(String eventId, Attendee attendee) throws OXException;
 
     /**
      * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple attendees into the database.
@@ -148,14 +148,14 @@ public interface AttendeeStorage {
      * @param eventId The identifier of the event to insert the tombstones for
      * @param attendees The attendees to insert the tombstones for
      */
-    void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException;
+    void insertAttendeeTombstones(String eventId, List<Attendee> attendees) throws OXException;
 
     /**
      * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple attendees into the database.
      *
      * @param attendeesByEventId The attendees to insert, mapped to the corresponding event identifier
      */
-    void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException;
+    void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException;
 
     /**
      * Loads attendees for specific events in the stored <i>tombstone</i> records.
