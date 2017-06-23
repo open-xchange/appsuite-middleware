@@ -74,9 +74,6 @@ import com.openexchange.folderstorage.type.SharedType;
  */
 public class CalendarFolderConverter {
 
-    //    private static final ContentType STORAGE_CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
-    //    // private static final ContentType CALENDAR_CONTENT_TYPE = com.openexchange.folderstorage.calendar.CalendarContentType.getInstance();
-    //
     /**
      * Converts a calendar folder into a folder-storage compatible folder.
      *
@@ -90,7 +87,7 @@ public class CalendarFolderConverter {
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             return getStorageFolder(treeId, accountId, contentType, (GroupwareCalendarFolder) calendarFolder);
         }
-        Folder folder = newStorageFolder(treeId, accountId, contentType);
+        Folder folder = newStorageFolder(treeId, accountId, contentType, false);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setParentID(CalendarFolderStorage.PRIVATE_ID);
@@ -117,7 +114,7 @@ public class CalendarFolderConverter {
      * @return The folder-storage compatible folder
      */
     public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, GroupwareCalendarFolder calendarFolder) {
-        Folder folder = newStorageFolder(treeId, accountId, contentType);
+        Folder folder = newStorageFolder(treeId, accountId, contentType, true);
         folder.setAccountID(accountId);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
@@ -129,6 +126,7 @@ public class CalendarFolderConverter {
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
+        //        folder.setSupportedCapabilities(capabilities);
         Map<String, Object> meta = new HashMap<String, Object>();
         String color = calendarFolder.getColor();
         if (null != color) {
@@ -290,16 +288,17 @@ public class CalendarFolderConverter {
      * @param treeId The identifier of the folder tree to take over
      * @param accountId The fully-qualified account identifier to take over
      * @param contentType The context type to take over
+     * @param global <code>true</code> if the folder is globally unique, <code>false</code> if it is bound to a certain user only
      * @return A new folder instance
      */
-    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType) {
+    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType, final boolean global) {
         Folder folder = new AbstractFolder() {
 
             private static final long serialVersionUID = 4412370864216762652L;
 
             @Override
             public boolean isGlobalID() {
-                return false;
+                return global;
             }
         };
         folder.setTreeID(treeId);
