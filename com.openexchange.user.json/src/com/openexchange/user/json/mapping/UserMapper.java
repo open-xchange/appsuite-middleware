@@ -65,6 +65,7 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -453,8 +454,16 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
                 // No slash character present
                 return addr.toUnicodeString();
             }
-            final StringBuilder sb = new StringBuilder(32);
-            final String personal = addr.getPersonal();
+
+            String suffix = sAddress.substring(pos);
+            if (!"/TYPE=PLMN".equals(Strings.toUpperCase(suffix))) {
+                // Not an MSISDN address
+                return addr.toUnicodeString();
+            }
+
+            // A MSISDN address; e.g. "+491234567890/TYPE=PLMN"
+            StringBuilder sb = new StringBuilder(32);
+            String personal = addr.getPersonal();
             if (null == personal) {
                 sb.append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos)));
             } else {
