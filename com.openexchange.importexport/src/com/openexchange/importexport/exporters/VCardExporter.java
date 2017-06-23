@@ -318,8 +318,9 @@ public class VCardExporter implements BatchCapableExporter {
 
         // export a single contact or a batch of contacts...
         if (batchIds != null){
-            for (String folder : batchIds.keySet()) {
-                List<String> contacts = batchIds.get(folder);
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                String folder = batchEntry.getKey();
+                List<String> contacts = batchEntry.getValue();
                 String[] contactsId = new String[contacts.size()];
                 contactsId = contacts.toArray(contactsId);
                 SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
