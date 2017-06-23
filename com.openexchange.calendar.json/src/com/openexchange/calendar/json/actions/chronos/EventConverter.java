@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.asString;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -122,7 +123,6 @@ public abstract class EventConverter {
             return e;
         }
         Object firstArg = null != e.getLogArgs() && 0 < e.getLogArgs().length ? e.getLogArgs()[0] : null;
-        Object secondArg = null != e.getLogArgs() && 1 < e.getLogArgs().length ? e.getLogArgs()[1] : null;
         switch (e.getCode()) {
             case 4224: // com.openexchange.chronos.exception.CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED
                 return OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create(e);
@@ -131,9 +131,9 @@ public abstract class EventConverter {
             case 4221: // com.openexchange.chronos.exception.CalendarExceptionCodes.END_BEFORE_START
                 return OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create(e);
             case 4041: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER
-                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, secondArg);
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e);
             case 4030: // com.openexchange.chronos.exception.CalendarExceptionCodes.NO_READ_PERMISSION
-                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, firstArg);
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, getNumericLogArgument(firstArg));
             case 4040: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND
                 return OXException.notFound("Object " + firstArg + " in context");
             case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
@@ -1029,6 +1029,20 @@ public abstract class EventConverter {
             to.setUri(from.getUri());
         }
         return to;
+    }
+
+    private static Number getNumericLogArgument(Object arg) {
+        if (null != arg) {
+            if (Number.class.isInstance(arg)) {
+                return (Number) arg;
+            }
+            try {
+                return Long.valueOf(String.valueOf(arg));
+            } catch (NumberFormatException e) {
+                getLogger(EventConverter.class).warn("Error parsing numeric log argument {}.", arg, e);
+            }
+        }
+        return null;
     }
 
 }
