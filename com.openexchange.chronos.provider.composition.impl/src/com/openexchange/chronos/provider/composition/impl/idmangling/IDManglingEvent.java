@@ -62,9 +62,9 @@ import com.openexchange.chronos.provider.composition.CompositeFolderID;
  */
 public class IDManglingEvent extends DelegatingEvent {
 
-    private final String id;
-    private final String folderId;
-    private final String seriesId;
+    private final String newId;
+    private final String newFolderId;
+    private final String newSeriesId;
 
     /**
      * Initializes a new {@link IDManglingEvent}.
@@ -73,10 +73,26 @@ public class IDManglingEvent extends DelegatingEvent {
      * @param accountId The identifier of the calendar account the event originates in
      */
     public IDManglingEvent(Event delegate, int accountId) {
+        this(delegate,
+            null != delegate.getId() ? new CompositeEventID(accountId, delegate.getFolderId(), delegate.getId()).toUniqueID() : null,
+            null != delegate.getFolderId() ? new CompositeFolderID(accountId, delegate.getFolderId()).toUniqueID() : null,
+            null != delegate.getSeriesId() ? new CompositeEventID(accountId, delegate.getFolderId(), delegate.getSeriesId()).toUniqueID() : null
+        );
+    }
+
+    /**
+     * Initializes a new {@link IDManglingEvent}.
+     *
+     * @param delegate The event delegate
+     * @param newId The new identifier to take over
+     * @param newFolderId The folder new identifier to take over
+     * @param newSeriesId The new series identifier to take over
+     */
+    public IDManglingEvent(Event delegate, String newId, String newFolderId, String newSeriesId) {
         super(delegate);
-        id = new CompositeEventID(accountId, delegate.getFolderId(), delegate.getId()).toUniqueID();
-        folderId = new CompositeFolderID(accountId, delegate.getFolderId()).toUniqueID();
-        seriesId = null != delegate.getSeriesId() ? new CompositeEventID(accountId, delegate.getFolderId(), delegate.getSeriesId()).toUniqueID() : null;
+        this.newId = newId;
+        this.newFolderId = newFolderId;
+        this.newSeriesId = newSeriesId;
     }
 
     @Override
@@ -96,17 +112,17 @@ public class IDManglingEvent extends DelegatingEvent {
 
     @Override
     public String getId() {
-        return id;
+        return newId;
     }
 
     @Override
     public String getFolderId() {
-        return folderId;
+        return newFolderId;
     }
 
     @Override
     public String getSeriesId() {
-        return seriesId;
+        return newSeriesId;
     }
 
 }
