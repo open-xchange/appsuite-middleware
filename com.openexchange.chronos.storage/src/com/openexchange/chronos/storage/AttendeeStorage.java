@@ -134,8 +134,35 @@ public interface AttendeeStorage {
      */
     void updateAttendee(String eventId, Attendee attendee) throws OXException;
 
+    /**
+     * Inserts a new (or overwrites previously existing) <i>tombstone</i> record for a specific attendee into the database.
+     *
+     * @param eventId The identifier of the event to insert the tombstone for
+     * @param attendee The attendee to insert the tombstone for
+     */
+    void insertTombstoneAttendee(String eventId, Attendee attendee) throws OXException;
+
+    /**
+     * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple attendees into the database.
+     *
+     * @param eventId The identifier of the event to insert the tombstones for
+     * @param attendees The attendees to insert the tombstones for
+     */
     void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
-    void insertTombstoneAttendee(String eventId, Attendee attendee) throws OXException;
+    /**
+     * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple attendees into the database.
+     *
+     * @param attendeesByEventId The attendees to insert, mapped to the corresponding event identifier
+     */
+    void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException;
+
+    /**
+     * Loads attendees for specific events in the stored <i>tombstone</i> records.
+     *
+     * @param eventIds The identifiers of the events to load the attendees for
+     * @return The attendees, mapped to the identifiers of the corresponding events
+     */
+    Map<String, List<Attendee>> loadAttendeeTombstones(String[] eventIds) throws OXException;
 
 }

@@ -185,57 +185,41 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public List<Attendee> loadAttendees(String objectID) throws OXException {
-        return loadAttendees(new String[] { objectID }).get(objectID);
-    }
-
-    @Override
-    public Map<String, List<Attendee>> loadAttendees(String[] objectIDs) throws OXException {
-        return loadAttendees(objectIDs, null);
-    }
-
-    @Override
-    public Map<String, List<Attendee>> loadAttendees(String[] objectIDs, Boolean internal) throws OXException {
-        Map<String, List<Attendee>> attendeesById = new HashMap<String, List<Attendee>>(objectIDs.length);
+    public void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+        int updated = 0;
         Connection connection = null;
         try {
-            connection = dbProvider.getReadConnection(context);
-            /*
-             * select raw attendee data & pre-fetch referenced internal entities
-             */
-            Map<String, List<Attendee>> userAttendeeData;
-            Map<String, List<Attendee>> internalAttendeeData;
-            Map<String, List<Attendee>> externalAttendeeData;
-            if (false == Boolean.FALSE.equals(internal)) {
-                userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), objectIDs);
-                internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), objectIDs);
-                prefetchEntities(internalAttendeeData.values(), userAttendeeData.values());
-            } else {
-                userAttendeeData = null;
-                internalAttendeeData = null;
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                updated += insertTombstoneAttendees(connection, context.getContextId(), asInt(entry.getKey()), entry.getValue());
             }
-            if (false == Boolean.TRUE.equals(internal)) {
-                externalAttendeeData = selectExternalAttendeeData(connection, context.getContextId(), objectIDs);
-            } else {
-                externalAttendeeData = null;
-            }
-            /*
-             * generate resulting attendee lists per object ID
-             */
-            for (String objectID : objectIDs) {
-                String key = objectID;
-                attendeesById.put(key, getAttendees(
-                    null != internalAttendeeData ? internalAttendeeData.get(key) : null,
-                    null != userAttendeeData ? userAttendeeData.get(key) : null,
-                    null != externalAttendeeData ? externalAttendeeData.get(key) : null))
-                ;
-            }
-            return attendeesById;
+            txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
-            dbProvider.releaseReadConnection(context, connection);
+            release(connection, updated);
         }
+    }
+
+    @Override
+    public List<Attendee> loadAttendees(String eventId) throws OXException {
+        return loadAttendees(new String[] { eventId }).get(eventId);
+    }
+
+    @Override
+    public Map<String, List<Attendee>> loadAttendees(String[] eventIds) throws OXException {
+        return loadAttendees(eventIds, null);
+    }
+
+    @Override
+    public Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException {
+        return loadAttendees(eventIds, internal, false);
+    }
+
+    @Override
+    public Map<String, List<Attendee>> loadAttendeeTombstones(String[] eventIds) throws OXException {
+        return loadAttendees(eventIds, null, true);
     }
 
     @Override
@@ -267,6 +251,48 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             throw asOXException(e);
         } finally {
             release(connection, updated);
+        }
+    }
+
+    private Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal, boolean tombstones) throws OXException {
+        Map<String, List<Attendee>> attendeesById = new HashMap<String, List<Attendee>>(eventIds.length);
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            /*
+             * select raw attendee data & pre-fetch referenced internal entities
+             */
+            Map<String, List<Attendee>> userAttendeeData;
+            Map<String, List<Attendee>> internalAttendeeData;
+            Map<String, List<Attendee>> externalAttendeeData;
+            if (false == Boolean.FALSE.equals(internal)) {
+                userAttendeeData = selectUserAttendeeData(connection, context.getContextId(), eventIds, tombstones);
+                internalAttendeeData = selectInternalAttendeeData(connection, context.getContextId(), eventIds, tombstones);
+                prefetchEntities(internalAttendeeData.values(), userAttendeeData.values());
+            } else {
+                userAttendeeData = null;
+                internalAttendeeData = null;
+            }
+            if (false == tombstones || false == Boolean.TRUE.equals(internal)) {
+                externalAttendeeData = selectExternalAttendeeData(connection, context.getContextId(), eventIds);
+            } else {
+                externalAttendeeData = null;
+            }
+            /*
+             * generate resulting attendee lists per event identifier
+             */
+            for (String eventId : eventIds) {
+                attendeesById.put(eventId, getAttendees(
+                    null != internalAttendeeData ? internalAttendeeData.get(eventId) : null,
+                    null != userAttendeeData ? userAttendeeData.get(eventId) : null,
+                    null != externalAttendeeData ? externalAttendeeData.get(eventId) : null))
+                ;
+            }
+            return attendeesById;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -552,18 +578,20 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+    private static Map<String, List<Attendee>> selectInternalAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException, OXException {
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
-        String sql;
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT object_id,id,type,ma,dn FROM ")
+            .append(tombstones ? "del_date_rights" : "prg_date_rights")
+            .append(" WHERE cid=? AND object_id")
+        ;
         if (1 == objectIDs.length) {
-            sql = "SELECT object_id,id,type,ma,dn FROM prg_date_rights WHERE cid=? AND object_id=? AND type IN (1,2,3);";
+            stringBuilder.append("=?");
         } else {
-            sql = new StringBuilder()
-                .append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
-                .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
-            .toString();
+            stringBuilder.append(" IN (").append(getParameters(objectIDs.length)).append(')');
         }
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stringBuilder.append(" AND type IN (1,2,3);");
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
             for (String objectID : objectIDs) {
@@ -583,18 +611,19 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return attendeesByObjectId;
     }
 
-    private static Map<String, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, String objectIDs[]) throws SQLException, OXException {
+    private static Map<String, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException, OXException {
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
-        String sql;
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT object_id,member_uid,confirm,reason,pfid FROM ")
+            .append(tombstones ? "del_dates_members" : "prg_dates_members")
+            .append(" WHERE cid=? AND object_id")
+        ;
         if (1 == objectIDs.length) {
-            sql = "SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members WHERE cid=? AND object_id=?;";
+            stringBuilder.append("=?;");
         } else {
-            sql = new StringBuilder()
-                .append("SELECT object_id,member_uid,confirm,reason,pfid FROM prg_dates_members ")
-                .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(");")
-            .toString();
+            stringBuilder.append(" IN (").append(getParameters(objectIDs.length)).append(");");
         }
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
             for (String objectID : objectIDs) {

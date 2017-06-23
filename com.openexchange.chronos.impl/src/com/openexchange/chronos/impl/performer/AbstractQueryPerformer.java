@@ -133,7 +133,7 @@ public abstract class AbstractQueryPerformer {
          */
         List<Event> events;
         if (deleted) {
-            events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), getFields(session));
+            events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), getFields(session));
         } else {
             events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
         }

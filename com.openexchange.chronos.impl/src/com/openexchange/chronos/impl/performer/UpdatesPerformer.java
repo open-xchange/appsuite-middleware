@@ -133,7 +133,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, session.getUserId(), fields);
             deletedEvents = postProcess(events, session.getUserId(), true);
         }
@@ -169,7 +169,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-            List<Event> events = storage.getEventStorage().searchDeletedEvents(searchTerm, new SearchOptions(session), fields);
+            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             readAdditionalEventData(events, getCalendarUserId(folder), fields);
             Boolean oldRecurrenceMaserParameter = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
             try {

@@ -99,7 +99,7 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
         if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
             lastModified = events.get(0).getLastModified();
         }
-        List<Event> deletedEvents = storage.getEventStorage().searchDeletedEvents(searchTerm, sortOptions, fields);
+        List<Event> deletedEvents = storage.getEventStorage().searchEventTombstones(searchTerm, sortOptions, fields);
         if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
             lastModified = deletedEvents.get(0).getLastModified();
         }

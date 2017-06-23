@@ -112,7 +112,20 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAttendees(connection, eventIds, internal, null);
+            return selectAttendees(connection, eventIds, internal, false, null);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public Map<String, List<Attendee>> loadAttendeeTombstones(String[] eventIds) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAttendees(connection, eventIds, null, false, null);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -122,59 +135,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        if (null == attendees || 0 == attendees.size()) {
-            return;
-        }
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            updated = insertAttendees(connection, eventId, attendees);
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(connection, updated);
-        }
+        insertAttendees(java.util.Collections.singletonMap(eventId, attendees), false);
     }
 
     @Override
     public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            Map<String, List<Attendee>> chunk = new HashMap<String, List<Attendee>>();
-            int chunkSize = 0;
-            for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
-                /*
-                 * add to current chunk
-                 */
-                chunk.put(entry.getKey(), entry.getValue());
-                chunkSize += entry.getValue().size();
-                if (chunkSize >= INSERT_CHUNK_SIZE) {
-                    /*
-                     * insert & reset current chunk
-                     */
-                    updated += insertAttendees(connection, chunk);
-                    chunk.clear();
-                    chunkSize = 0;
-                }
-            }
-            /*
-             * finally insert remaining chunk
-             */
-            if (0 < chunkSize) {
-                updated += insertAttendees(connection, chunk);
-            }
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(connection, updated);
-        }
+        insertAttendees(attendeesByEventId, false);
     }
 
     @Override
@@ -240,7 +206,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void insertTombstoneAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        if (null == attendees || 0 == attendees.size()) {
+        insertAttendees(java.util.Collections.singletonMap(eventId, attendees), true);
+    }
+
+    @Override
+    public void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+        insertAttendees(attendeesByEventId, true);
+    }
+
+    private void insertAttendees(Map<String, List<Attendee>> attendeesByEventId, boolean tombstones) throws OXException {
+        if (null == attendeesByEventId || 0 == attendeesByEventId.size()) {
             return;
         }
         int updated = 0;
@@ -248,8 +223,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            for (Attendee attendee : attendees) {
-                updated += replaceTombstoneAttendee(connection, eventId, attendee);
+            if (1 == attendeesByEventId.size()) {
+                updated = insertAttendees(connection, attendeesByEventId, tombstones);
+            } else {
+                updated = insertAttendees(connection, attendeesByEventId, tombstones, INSERT_CHUNK_SIZE);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -307,17 +284,42 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private int insertAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
-        return insertAttendees(connection, java.util.Collections.singletonMap(eventId, attendees));
+    private int insertAttendees(Connection connection, Map<String, List<Attendee>> attendeesByEventId, boolean tombstones, int chunkSize) throws SQLException, OXException {
+        int updated = 0;
+        Map<String, List<Attendee>> currentChunk = new HashMap<String, List<Attendee>>();
+        int currentSize = 0;
+        for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+            /*
+             * add to current chunk
+             */
+            currentChunk.put(entry.getKey(), entry.getValue());
+            currentSize += entry.getValue().size();
+            if (currentSize >= chunkSize) {
+                /*
+                 * insert & reset current chunk
+                 */
+                updated += insertAttendees(connection, currentChunk, tombstones);
+                currentChunk.clear();
+                currentSize = 0;
+            }
+        }
+        /*
+         * finally insert remaining chunk
+         */
+        if (0 < currentSize) {
+            updated += insertAttendees(connection, currentChunk, tombstones);
+        }
+        return updated;
     }
 
-    private int insertAttendees(Connection connection, Map<String, List<Attendee>> attendeesByEventId) throws SQLException, OXException {
+    private int insertAttendees(Connection connection, Map<String, List<Attendee>> attendeesByEventId, boolean tombstones) throws SQLException, OXException {
         if (null == attendeesByEventId || 0 == attendeesByEventId.size()) {
             return 0;
         }
         AttendeeField[] mappedFields = MAPPER.getMappedFields();
         StringBuilder stringBuilder = new StringBuilder()
-            .append("INSERT INTO calendar_attendee (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") VALUES ")
+            .append(tombstones ? "REPLACE INTO calendar_attendee_tombstone " : "INSERT INTO calendar_attendee ")
+            .append("(cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") VALUES ")
         ;
         for (List<Attendee> attendees : attendeesByEventId.values()) {
             for (int i = 0; i < attendees.size(); i++) {
@@ -342,28 +344,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private int replaceTombstoneAttendee(Connection connection, String eventId, Attendee attendee) throws SQLException, OXException {
-        attendee = entityProcessor.adjustPriorSave(attendee);
-        AttendeeField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder()
-            .append("REPLACE INTO calendar_attendee_tombstone (cid,account,event,").append(MAPPER.getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
-            stmt.setInt(parameterIndex++, asInt(eventId));
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, attendee, mappedFields);
-            return logExecuteUpdate(stmt);
-        }
-    }
-
-    private Map<String, List<Attendee>> selectAttendees(Connection connection, String[] eventIds, Boolean internal, AttendeeField[] fields) throws SQLException, OXException {
+    private Map<String, List<Attendee>> selectAttendees(Connection connection, String[] eventIds, Boolean internal, boolean tombstones, AttendeeField[] fields) throws SQLException, OXException {
         AttendeeField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
-            .append(" FROM calendar_attendee WHERE cid=? AND account=?")
+            .append(" FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
+            .append(" WHERE cid=? AND account=?")
         ;
         if (1 == eventIds.length) {
             stringBuilder.append(" AND event=?");
