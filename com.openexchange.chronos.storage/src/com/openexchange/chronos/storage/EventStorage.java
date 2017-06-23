@@ -119,14 +119,14 @@ public interface EventStorage {
     List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     /**
-     * Searches for previously deleted events.
+     * Searches for previously deleted events in the stored <i>tombstone</i> records.
      *
      * @param searchTerm The search term to use
      * @param searchOptions The search options to apply, or <code>null</code> if not specified
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The found events
      */
-    List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException;
+    List<Event> searchEventTombstones(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     List<Event> searchOverlappingEvents(List<Attendee> attendees, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws OXException;
 

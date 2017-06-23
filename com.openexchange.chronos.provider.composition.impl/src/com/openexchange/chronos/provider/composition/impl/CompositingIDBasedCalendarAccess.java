@@ -262,14 +262,14 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
     @Override
     public CalendarResult createEvent(CompositeFolderID folderID, Event event) throws OXException {
         GroupwareCalendarAccess calendarAccess = getGroupwareAccess(folderID);
-        CalendarResult result = calendarAccess.createEvent(folderID.getFolderId(), event);
+        CalendarResult result = calendarAccess.createEvent(folderID.getFolderId(), withRelativeID(event));
         return new IDManglingCalendarResult(result, folderID);
     }
 
     @Override
     public CalendarResult updateEvent(CompositeEventID eventID, Event event) throws OXException {
         GroupwareCalendarAccess calendarAccess = getGroupwareAccess(eventID);
-        CalendarResult result = calendarAccess.updateEvent(getRelativeID(eventID), event);
+        CalendarResult result = calendarAccess.updateEvent(getRelativeID(eventID), withRelativeID(event));
         return new IDManglingCalendarResult(result, eventID);
     }
 

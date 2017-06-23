@@ -116,6 +116,13 @@ public class IDMangling {
         return new IDManglingFolder(folder, newId);
     }
 
+    public static Event withRelativeID(Event event) {
+        String newId = null == event.getId() ? null : CompositeEventID.parse(event.getId()).getEventId();
+        String newFolderId = null == event.getFolderId() ? null : CompositeFolderID.parse(event.getFolderId()).getFolderId();
+        String newSeriesId = null == event.getSeriesId() ? null : CompositeEventID.parse(event.getSeriesId()).getEventId();
+        return new IDManglingEvent(event, newId, newFolderId, newSeriesId);
+    }
+
     public static Event withUniqueID(Event event, int accountId) {
         return new IDManglingEvent(event, accountId);
     }
