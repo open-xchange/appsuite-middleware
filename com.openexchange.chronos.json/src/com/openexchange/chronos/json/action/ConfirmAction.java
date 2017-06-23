@@ -51,16 +51,23 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.json.converter.EventMapper;
+import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -80,17 +87,19 @@ public class ConfirmAction extends ChronosAction {
 
     /**
      * Initializes a new {@link ConfirmAction}.
+     *
      * @param services
      */
     protected ConfirmAction(ServiceLookup services) {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone",CalendarParameters.PARAMETER_TIMESTAMP );
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_TIMESTAMP);
 
-    private static final String CONFIRMATION_FIELD="confirmation";
-    private static final String CONFIRM_MESSAGE_FIELD="confirmmessage";
-    private static final String URI_FIELD="uri";
+    private static final String CONFIRMATION_FIELD = "confirmation";
+    private static final String CONFIRM_MESSAGE_FIELD = "confirmmessage";
+    private static final String URI_FIELD = "uri";
+    private static final String ALARMS_FIELD = "alarms";
 
     @Override
     protected Set<String> getOptionalParameters() {
@@ -102,7 +111,7 @@ public class ConfirmAction extends ChronosAction {
 
         Object data = requestData.getData();
         Attendee attendee = new Attendee();
-        if(data instanceof JSONObject){
+        if (data instanceof JSONObject) {
             try {
                 String confirmation = ((JSONObject) data).getString(CONFIRMATION_FIELD);
                 attendee.setPartStat(new ParticipationStatus(confirmation));
@@ -110,34 +119,59 @@ public class ConfirmAction extends ChronosAction {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
             }
             String confirmMSG = ((JSONObject) data).optString(CONFIRM_MESSAGE_FIELD);
-            if(Strings.isNotEmpty(confirmMSG)){
+            if (Strings.isNotEmpty(confirmMSG)) {
                 attendee.setComment(confirmMSG);
             }
             String uri = ((JSONObject) data).optString(URI_FIELD);
 
-            if(Strings.isNotEmpty(uri)){
+            if (Strings.isNotEmpty(uri)) {
                 attendee.setUri(uri);
             } else {
                 attendee.setUri(CalendarUtils.getURI(requestData.getSession().getUser().getMail()));
             }
+
+            CompositeEventID compositeEventID = parseIdParameter(requestData);
+            CalendarResult calResult = calendarAccess.updateAttendee(compositeEventID, attendee);
+            List<UpdateResult> updates = calResult.getUpdates();
+            List<OXException> warnings = null;
+            if (updates.size() == 1) {
+                Event update = updates.get(0).getUpdate();
+
+                if (((JSONObject) data).has(ALARMS_FIELD)) {
+                    Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
+                    try {
+                        if (parseParameter == null) {
+                            EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, update);
+                        } else {
+                            TimeZone zone = (TimeZone) parseParameter.getValue();
+                            EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, update, zone);
+                        }
+                        try {
+                            CalendarResult calendarResult = calendarAccess.updateEvent(compositeEventID, update);
+                            update = calendarResult.getUpdates().get(0).getUpdate();
+                        } catch (OXException e) {
+                            warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
+                        }
+                    } catch (JSONException e) {
+                        warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
+                    }
+
+                }
+                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(update, update.getLastModified(), "event");
+                if (warnings != null) {
+                    ajaxRequestResult.addWarnings(warnings);
+                }
+                return ajaxRequestResult;
+            } else {
+                List<Event> events = new ArrayList<>(updates.size());
+                for (UpdateResult result : updates) {
+                    events.add(result.getUpdate());
+                }
+                return new AJAXRequestResult(events, "event");
+            }
         } else {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-
-
-        CalendarResult calResult = calendarAccess.updateAttendee(parseIdParameter(requestData), attendee);
-        List<UpdateResult> updates = calResult.getUpdates();
-        if(updates.size()==1){
-            Event update = updates.get(0).getUpdate();
-            return new AJAXRequestResult(update, update.getLastModified(), "event");
-        } else {
-            List<Event> events = new ArrayList<>(updates.size());
-            for(UpdateResult result: updates){
-                events.add(result.getUpdate());
-            }
-            return new AJAXRequestResult(events, "event");
-        }
-
     }
 
 }

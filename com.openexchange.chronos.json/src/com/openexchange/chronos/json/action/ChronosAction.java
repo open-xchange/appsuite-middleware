@@ -186,6 +186,15 @@ public abstract class ChronosAction implements AJAXActionService {
         return calendarAccess;
     }
 
+    /**
+     * Retrieves the given parameter as an Entry object
+     * 
+     * @param request The request
+     * @param parameter The parameter name
+     * @param required Defines if the parameter is required
+     * @return The parameter or null if it isn't required
+     * @throws OXException if the parameter is required and can't be found or if the parameter can't be parsed
+     */
     protected static Entry<String, ?> parseParameter(AJAXRequestData request, String parameter, boolean required) throws OXException {
         String value = request.getParameter(parameter);
         if (Strings.isEmpty(value)) {

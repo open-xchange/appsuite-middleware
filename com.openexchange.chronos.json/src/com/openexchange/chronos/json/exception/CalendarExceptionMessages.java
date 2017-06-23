@@ -63,4 +63,6 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ERROR_DELETING_EVENTS_MSG = "Multiple events couldn't be deleted.";
 
+    public static final String UNABLE_TO_ADD_ALARMS_MSG = "Unable to add alarms: %s";
+
 }

@@ -70,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -85,6 +86,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
+import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -1015,7 +1017,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return jsonArray;
             }
         });
-        mappings.put(EventField.ALARMS, new ListMapping<Alarm, Event>("alarms", ColumnIDs.ALARMS) {
+        mappings.put(EventField.ALARMS, new DefaultJsonMapping<List<Alarm>, Event>("alarms", ColumnIDs.ALARMS) {
 
             @Override
             public boolean isSet(Event object) {
@@ -1038,11 +1040,42 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Alarm deserialize(JSONArray array, int index) throws JSONException, OXException {
-                JSONObject jsonObject = array.getJSONObject(index);
-                Alarm alarm = new Alarm();
-                //TODO
-                return alarm;
+            public void deserialize(JSONObject from, Event to, TimeZone timezone) throws JSONException, OXException {
+
+                JSONArray arrayOfAlarms = from.getJSONArray(getAjaxName());
+                List<Alarm> alarms = new ArrayList<>(arrayOfAlarms.length());
+                for (int index = 0; index < arrayOfAlarms.length(); index++) {
+
+                    JSONObject jsonObject = arrayOfAlarms.getJSONObject(index);
+                    Alarm alarm = new Alarm();
+                    if (jsonObject.has("action")) {
+                        String action = jsonObject.getString("action");
+                        alarm.setAction(new AlarmAction(action));
+                    }
+
+                    if (jsonObject.has("trigger")) {
+                        JSONObject triggerJSON = jsonObject.getJSONObject("trigger");
+                        Trigger trigger = new Trigger();
+                        if (triggerJSON.has("related")) {
+                            String related = triggerJSON.getString("related");
+                            trigger.setRelated(Related.valueOf(related.toUpperCase()));
+                        }
+                        if (triggerJSON.has("duration")) {
+                            String duration = triggerJSON.getString("duration");
+                            trigger.setDuration(duration);
+                        }
+                        if (triggerJSON.has("dateTime")) {
+                            long date = triggerJSON.getLong("dateTime");
+                            date -= timezone.getOffset(date);
+                            trigger.setDateTime(new Date(date));
+                        }
+                        alarm.setTrigger(trigger);
+                    }
+
+                    alarms.add(alarm);
+                }
+
+                to.setAlarms(alarms);
             }
 
             @Override
@@ -1088,6 +1121,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                     jsonArray.put(jsonObject);
                 }
                 return jsonArray;
+            }
+
+            @Override
+            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
+                this.deserialize(from, to, TimeZone.getTimeZone("UTC"));
+
             }
         });
         mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultJsonMapping<ExtendedProperties, Event>("extendedProperties", ColumnIDs.EXTENDED_PROPERTIES) {

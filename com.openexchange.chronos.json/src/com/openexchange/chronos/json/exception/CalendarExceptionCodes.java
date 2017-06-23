@@ -71,7 +71,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Multiple event couldn't be deleted.
      */
-    ERROR_DELETING_EVENTS("Multiple events couldn't be deleted.", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 2)
+    ERROR_DELETING_EVENTS("Multiple events couldn't be deleted.", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 2),
+
+    /**
+     * Unable to add alarms: %s
+     */
+    UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 3),
 
     ;
 
