@@ -99,7 +99,7 @@ public class UpdateAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
 
         Object data = requestData.getData();
-        if(data==null || !(data instanceof JSONObject)){
+        if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
         JSONObject jsonEvent = (JSONObject) data;
@@ -113,7 +113,6 @@ public class UpdateAction extends ChronosAction {
         }
         try {
             CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event);
-
             return new AJAXRequestResult(calendarResult, calendarResult.getTimestamp(), "calendarResult");
         } catch (OXException e) {
             if (Category.CATEGORY_CONFLICT.equals(e.getCategory()) && (CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.EVENT_CONFLICTS.equals(e))) {

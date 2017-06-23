@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.exception.CalendarExceptionDetail;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
@@ -68,7 +69,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link DeleteAction}
@@ -81,6 +81,8 @@ public class DeleteAction extends ChronosAction {
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
     private static final String IDS_FIELD = "ids";
+    private static final String ID_FIELD = "id";
+    private static final String RECURENCE_ID_FIELD = "recurrenceId";
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -104,45 +106,54 @@ public class DeleteAction extends ChronosAction {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
         JSONObject jsonEvent = (JSONObject) data;
-        List<Object> ids;
+        JSONArray ids;
         try {
             if (jsonEvent.get(IDS_FIELD) instanceof JSONArray) {
-                ids = ((JSONArray) jsonEvent.get(IDS_FIELD)).asList();
+                ids = ((JSONArray) jsonEvent.get(IDS_FIELD));
             } else {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
             }
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }
-        List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.size());
-        for (Object id : ids) {
-            compositeEventIDs.add(CompositeEventID.parse(id.toString()));
-        }
-        Map<CompositeEventID, OXException> errors = null;
-        for (CompositeEventID id : compositeEventIDs) {
-            try {
-                calendarAccess.deleteEvent(id);
-            } catch (OXException e) {
-                if (errors == null) {
-                    errors = new HashMap<>();
-                }
-                errors.put(id, e);
-            }
-        }
 
-        if (errors!=null && !errors.isEmpty()) {
-            if (errors.size() == 1) {
-                CompositeEventID errorId = errors.keySet().iterator().next();
-                throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));
-            } else {
-                OXException ex = CalendarExceptionCodes.ERROR_DELETING_EVENTS.create();
-                for(CompositeEventID id : errors.keySet()){
-                    ex.addDetail(new CalendarExceptionDetail(errors.get(id), id));
+            List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.length());
+            for (int x = 0; x < ids.length(); x++) {
+                JSONObject jsonObject = ids.getJSONObject(x);
+                String id = jsonObject.getString(ID_FIELD);
+                if (jsonObject.has(RECURENCE_ID_FIELD)) {
+                    long recurrenceId = jsonObject.getLong(RECURENCE_ID_FIELD);
+                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(recurrenceId)));
+                } else {
+                    compositeEventIDs.add(CompositeEventID.parse(id));
                 }
-                throw ex;
             }
+
+            Map<CompositeEventID, OXException> errors = null;
+            for (CompositeEventID id : compositeEventIDs) {
+                try {
+                    calendarAccess.deleteEvent(id);
+                } catch (OXException e) {
+                    if (errors == null) {
+                        errors = new HashMap<>();
+                    }
+                    errors.put(id, e);
+                }
+            }
+
+            if (errors != null && !errors.isEmpty()) {
+                if (errors.size() == 1) {
+                    CompositeEventID errorId = errors.keySet().iterator().next();
+                    throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));
+                } else {
+                    OXException ex = CalendarExceptionCodes.ERROR_DELETING_EVENTS.create();
+                    for (CompositeEventID id : errors.keySet()) {
+                        ex.addDetail(new CalendarExceptionDetail(errors.get(id), id));
+                    }
+                    throw ex;
+                }
+            }
+            return new AJAXRequestResult();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
-        return new AJAXRequestResult();
     }
 
 }

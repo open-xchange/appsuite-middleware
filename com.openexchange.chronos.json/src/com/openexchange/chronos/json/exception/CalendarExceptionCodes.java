@@ -76,7 +76,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unable to add alarms: %s
      */
-    UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 3),
+    UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.UNABLE_TO_ADD_ALARMS_MSG, Category.CATEGORY_ERROR, 3),
 
     ;
 

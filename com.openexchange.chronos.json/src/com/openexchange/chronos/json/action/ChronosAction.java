@@ -71,10 +71,12 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -156,10 +158,24 @@ public abstract class ChronosAction implements AJAXActionService {
 
     protected CompositeEventID parseIdParameter(AJAXRequestData requestData) throws OXException {
         String value = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
+        Long recurrenceId = parseRecurrenceIdParameter(requestData);
         try {
-            return CompositeEventID.parse(value);
+            if (recurrenceId != null) {
+                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(recurrenceId));
+            } else {
+                return CompositeEventID.parse(value);
+            }
         } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_ID, value);
+        }
+    }
+
+    private Long parseRecurrenceIdParameter(AJAXRequestData requestData) throws OXException {
+        String value = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
+        try {
+            return value != null ? Long.valueOf(value) : null;
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, CalendarParameters.PARAMETER_RECURRENCE_ID, value);
         }
     }
 
@@ -188,7 +204,7 @@ public abstract class ChronosAction implements AJAXActionService {
 
     /**
      * Retrieves the given parameter as an Entry object
-     * 
+     *
      * @param request The request
      * @param parameter The parameter name
      * @param required Defines if the parameter is required

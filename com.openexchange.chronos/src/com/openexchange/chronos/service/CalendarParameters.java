@@ -178,6 +178,15 @@ public interface CalendarParameters {
     static final String PARAMETER_DEFAULT_ATTENDEE = "default_attendee";
 
     /**
+     * {@link Long}
+     * <p/>
+     * The recurrence id of a series event
+     * <p/>
+     * If set the operation only applies to this recurrence and not to the master.
+     */
+    static final String PARAMETER_RECURRENCE_ID = "recurrenceId";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set

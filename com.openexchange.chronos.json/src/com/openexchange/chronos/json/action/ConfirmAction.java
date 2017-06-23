@@ -71,6 +71,7 @@ import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -131,44 +132,50 @@ public class ConfirmAction extends ChronosAction {
             }
 
             CompositeEventID compositeEventID = parseIdParameter(requestData);
-            CalendarResult calResult = calendarAccess.updateAttendee(compositeEventID, attendee);
-            List<UpdateResult> updates = calResult.getUpdates();
+            CalendarResult updateAttendeeResult = calendarAccess.updateAttendee(compositeEventID, attendee);
+            List<CreateResult> creations = updateAttendeeResult.getCreations();
+            List<UpdateResult> updates = updateAttendeeResult.getUpdates();
             List<OXException> warnings = null;
-            if (updates.size() == 1) {
-                Event update = updates.get(0).getUpdate();
+            Event toUpdate = null;
+            if (creations.size() == 1) {
+                toUpdate = creations.get(0).getCreatedEvent();
+            } else {
+                toUpdate = updates.get(0).getUpdate();
+            }
 
-                if (((JSONObject) data).has(ALARMS_FIELD)) {
-                    Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
+            List<CalendarResult> results = null;
+            if (((JSONObject) data).has(ALARMS_FIELD)) {
+                Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
+                try {
+                    if (parseParameter == null) {
+                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate);
+                    } else {
+                        TimeZone zone = (TimeZone) parseParameter.getValue();
+                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
+                    }
                     try {
-                        if (parseParameter == null) {
-                            EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, update);
-                        } else {
-                            TimeZone zone = (TimeZone) parseParameter.getValue();
-                            EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, update, zone);
-                        }
-                        try {
-                            CalendarResult calendarResult = calendarAccess.updateEvent(compositeEventID, update);
-                            update = calendarResult.getUpdates().get(0).getUpdate();
-                        } catch (OXException e) {
-                            warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
-                        }
-                    } catch (JSONException e) {
+                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(compositeEventID, toUpdate);
+                        results = new ArrayList<>(2);
+                        results.add(updateAttendeeResult);
+                        results.add(updateAlarmResult);
+                    } catch (OXException e) {
                         warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
                     }
-
+                } catch (JSONException e) {
+                    warnings = Collections.singletonList(CalendarExceptionCodes.UNABLE_TO_ADD_ALARMS.create(e, e.getMessage()));
                 }
-                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(update, update.getLastModified(), "event");
+
+            }
+            if (results != null) {
+                return new AJAXRequestResult(results, results.get(results.size() - 1).getTimestamp(), "calendarResults");
+            } else {
+                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, updateAttendeeResult.getTimestamp(), "calendarResult");
                 if (warnings != null) {
                     ajaxRequestResult.addWarnings(warnings);
                 }
                 return ajaxRequestResult;
-            } else {
-                List<Event> events = new ArrayList<>(updates.size());
-                for (UpdateResult result : updates) {
-                    events.add(result.getUpdate());
-                }
-                return new AJAXRequestResult(events, "event");
             }
+
         } else {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
