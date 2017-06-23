@@ -513,6 +513,9 @@ final class ListLsubCollection implements Serializable {
             checkConsistency(imapStore);
         }
 
+        // Drop leftover single namespace folders
+        dropSingleNamespaceFolders();
+
         if (debug) {
             long dur = System.currentTimeMillis() - st;
             LOG.debug("LIST/LSUB cache built in {}msec", dur);
@@ -524,15 +527,32 @@ final class ListLsubCollection implements Serializable {
         deprecated.set(State.INITIALIZED);
     }
 
+    private void dropSingleNamespaceFolders() {
+        for (String sharedNamespace : shared) {
+            ListLsubEntryImpl lsubEntry = lsubMap.get(sharedNamespace);
+            if (null != lsubEntry && false == lsubEntry.hasChildren()) {
+                lsubMap.remove(sharedNamespace);
+            }
+        }
+        for (String userNamespace : user) {
+            ListLsubEntryImpl lsubEntry = lsubMap.get(userNamespace);
+            if (null != lsubEntry && false == lsubEntry.hasChildren()) {
+                lsubMap.remove(userNamespace);
+            }
+        }
+    }
+
     private void checkConsistency(final IMAPStore imapStore) {
         final ListLsubEntryImpl rootEntry = listMap.get(ROOT_FULL_NAME);
         /*
          * Ensure every LSUB'ed entry occurs in LIST'ed entries
          */
-        for (final Entry<String, ListLsubEntryImpl> entry : new TreeMap<String, ListLsubEntryImpl>(lsubMap).entrySet()) {
-            final String fullName = entry.getKey();
+        for (Map.Entry<String, ListLsubEntryImpl> entry : new TreeMap<String, ListLsubEntryImpl>(lsubMap).entrySet()) {
+            String fullName = entry.getKey();
             if (!listMap.containsKey(fullName)) {
-                /*
+                /*-
+                 * An LSUB entry is not contained in LISTed ones...
+                 *
                  * Distinguish between personal and other namespace
                  */
                 if (isNamespace(fullName)) {
@@ -544,14 +564,14 @@ final class ListLsubCollection implements Serializable {
                     } else {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                         final ListLsubEntryImpl lle = entry.getValue();
-                        dropEntryFrom(lle, listMap);
+                        dropEntryFrom(lle, lsubMap);
                     }
                 } else {
                     /*
                      * A personal full name: Drop LSUB'ed entries which do not occur in LIST'ed entries.
                      */
                     final ListLsubEntryImpl lle = entry.getValue();
-                    dropEntryFrom(lle, listMap);
+                    dropEntryFrom(lle, lsubMap);
                 }
             }
         }
