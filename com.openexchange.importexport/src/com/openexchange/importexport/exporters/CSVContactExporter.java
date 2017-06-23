@@ -307,9 +307,7 @@ public class CSVContactExporter implements Exporter {
         if (inMemory) {
             StringBuilder ret = new StringBuilder(1024);
             ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            if (conObj.containsDistributionLists()) {
-                ret.append(convertToLine(convertToList(conObj, fields)));
-            }
+            ret.append(convertToLine(convertToList(conObj, fields)));
 
             byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
             return new SizedInputStream(Streams.newByteArrayInputStream(bytes), bytes.length, Format.CSV);
@@ -319,9 +317,7 @@ public class CSVContactExporter implements Exporter {
             ThresholdFileHolder sink = new ThresholdFileHolder();
             OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
             writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            if (conObj.containsDistributionLists()) {
-                writer.write(convertToLine(convertToList(conObj, fields)));
-            }
+            writer.write(convertToLine(convertToList(conObj, fields)));
             writer.flush();
             return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
         } catch (IOException e) {

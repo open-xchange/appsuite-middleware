@@ -47,49 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.importexport;
 
-import java.util.Date;
-import org.junit.Before;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.List;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 
-public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-    protected int folderID;
-    protected int secondFolderID;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        UserValues values = getClient().getValues();
-        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
-        folder = ftm.insertFolderOnServer(folder);
-        folderID = folder.getObjectID();
-        
-        folder = ftm.generatePublicFolder("ManagedContactTest2_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
-        folder = ftm.insertFolderOnServer(folder);
-        secondFolderID = folder.getObjectID();
-    }
-
-    protected Contact generateContact(String lastname) {
-        return this.generateContact(lastname, folderID);
-    }
+/**
+ * {@link CSVSingleExportTest}
+ *
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
+ */
+public class CSVSingleExportTest extends AbstractManagedContactTest {
     
-    protected Contact generateContact(String lastname, int folderId) {
-        Contact contact = new Contact();
-        contact.setSurName(lastname);
-        contact.setGivenName("Given name");
-        contact.setDisplayName(contact.getSurName() + ", " + contact.getGivenName());
-        contact.setParentFolderID(folderId);
-        return contact;
-    }
-
-    protected Contact generateContact() {
-        return generateContact("Surname");
+    @Test
+    public void testSingleCSVExport() throws OXException, IOException, JSONException {
+        generateContact("First Contact");        
+        Contact secondContact = generateContact("Second Contact");
+        int secondId = cotm.newAction(secondContact).getObjectID();
+        
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID,String.valueOf(secondId)));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        assertEquals("There should only be one exported Contact", 2, actual.size());
     }
 }
