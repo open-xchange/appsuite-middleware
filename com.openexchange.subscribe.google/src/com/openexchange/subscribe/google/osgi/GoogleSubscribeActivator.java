@@ -57,6 +57,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
@@ -79,6 +80,7 @@ public class GoogleSubscribeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServices(this);
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
+        trackService(ThreadControlService.class);
         openTrackers();
     }
 
