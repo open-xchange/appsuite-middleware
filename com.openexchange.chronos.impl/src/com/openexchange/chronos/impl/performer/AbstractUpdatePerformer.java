@@ -206,8 +206,8 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertTombstoneAttendees(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
+        storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getAttendeeStorage().insertAttendeeTombstones(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
@@ -244,8 +244,8 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage for this attendee
          */
         String objectID = originalEvent.getId();
-        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
+        storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getAttendeeStorage().insertAttendeeTombstone(objectID, originalAttendee);
         storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(objectID, userID);
         /*

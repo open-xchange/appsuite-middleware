@@ -164,12 +164,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertTombstoneAttendee(String objectID, Attendee attendee) throws OXException {
-        insertTombstoneAttendees(objectID, Collections.singletonList(attendee));
+    public void insertAttendeeTombstone(String objectID, Attendee attendee) throws OXException {
+        insertAttendeeTombstones(objectID, Collections.singletonList(attendee));
     }
 
     @Override
-    public void insertTombstoneAttendees(String objectID, List<Attendee> attendees) throws OXException {
+    public void insertAttendeeTombstones(String objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -185,7 +185,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     @Override
-    public void insertTombstoneAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
+    public void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {

@@ -130,8 +130,6 @@ public interface EventStorage {
 
     List<Event> searchOverlappingEvents(List<Attendee> attendees, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
-    //    List<Event> searchOverlappingEvents(Date from, Date until, Attendee attendee, boolean includeTransparent, boolean includeDeclined, SearchOptions searchOptions, EventField[] fields) throws OXException;
-
     /**
      * Inserts a new event into the database.
      *
@@ -165,13 +163,13 @@ public interface EventStorage {
      *
      * @param event The event to insert the tombstone for
      */
-    void insertTombstoneEvent(Event event) throws OXException;
+    void insertEventTombstone(Event event) throws OXException;
 
     /**
      * Inserts new (or overwrites previously existing) <i>tombstone</i> records for multiple events into the database.
      *
      * @param events The events to insert the tombstones for
      */
-    void insertTombstoneEvents(List<Event> events) throws OXException;
+    void insertEventTombstones(List<Event> events) throws OXException;
 
 }
