@@ -149,10 +149,7 @@ public final class MailFolderUtility {
         try {
             accountId = (index == LEN ? MailAccount.DEFAULT_ID : Integer.parseInt(fullnameArgument.substring(LEN, index)));
         } catch (final NumberFormatException e) {
-            final IllegalArgumentException err = new IllegalArgumentException(
-                "Mail account identifier is not a number: " + fullnameArgument);
-            err.initCause(e);
-            throw err;
+            throw new IllegalArgumentException("Mail account identifier is not a number: " + fullnameArgument, e);
         }
         if (index >= len) {
             return new FullnameArgument(accountId, DEFAULT_FOLDER_ID);
@@ -194,23 +191,37 @@ public final class MailFolderUtility {
         if (fullname == null) {
             return null;
         }
-        final int length = fullname.length();
+        int length = fullname.length();
         if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
             return new StringBuilder(length + 4).append(fullname).append(accountId).toString();
         }
-        if (fullname.startsWith(DEFAULT_FOLDER_ID)) {
-            /*
-             * Ensure given account ID is contained
-             */
-            final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
-            if (DEFAULT_FOLDER_ID.equals(tmpFullname)) {
-                return new StringBuilder(length + 4).append(fullname).append(tmpFullname).toString();
-            }
-            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
-                MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
+        char separator = MailProperties.getInstance().getDefaultSeparator();
+        if (false == fullname.startsWith(DEFAULT_FOLDER_ID)) {
+            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
         }
-        return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
-            MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
+        /*
+         * Tricky case...
+         */
+        int sepPos = fullname.indexOf(separator);
+        if (sepPos >= DEFAULT_FOLDER_ID.length()) {
+            int accId = optNumFor(fullname.substring(DEFAULT_FOLDER_ID.length(), sepPos));
+            if (accId >= 0) {
+                FullnameArgument fa = prepareMailFolderParam(fullname);
+                if (fa.getAccountId() == accountId) {
+                    return fullname;
+                }
+            }
+            return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
+        }
+        return new StringBuilder(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(separator).append(fullname).toString();
+    }
+
+    private static int optNumFor(String possibleNumber) {
+        try {
+            return Strings.parseInt(possibleNumber);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private static final Pattern P_FOLDER;
