@@ -76,7 +76,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -301,16 +300,6 @@ public class CSVContactExporter implements Exporter {
             conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), objectId, fields);
         } catch (final OXException e) {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
-        }
-
-        boolean inMemory = false;
-        if (inMemory) {
-            StringBuilder ret = new StringBuilder(1024);
-            ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            ret.append(convertToLine(convertToList(conObj, fields)));
-
-            byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
-            return new SizedInputStream(Streams.newByteArrayInputStream(bytes), bytes.length, Format.CSV);
         }
 
         try {
