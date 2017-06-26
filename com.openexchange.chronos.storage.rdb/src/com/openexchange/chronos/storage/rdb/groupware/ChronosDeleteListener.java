@@ -106,6 +106,11 @@ public final class ChronosDeleteListener implements DeleteListener {
              * delete all calendar accounts in context
              */
             deleteAccounts(writeCon, cid);
+            /*
+             * delete any 'tombstone' records
+             */
+            //...
+
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }

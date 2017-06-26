@@ -70,14 +70,6 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
      */
     static Map<String, String> getTablesByName() {
         Map<String, String> tablesByName = new HashMap<String, String>(); //@formatter:off
-        tablesByName.put("calendar_sequence",
-            "CREATE TABLE calendar_sequence (" +
-                "cid INT4 UNSIGNED NOT NULL," +
-                "account INT4 UNSIGNED NOT NULL," +
-                "id INT4 UNSIGNED NOT NULL," +
-                "PRIMARY KEY (cid,account)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
-        );
         tablesByName.put("calendar_account",
             "CREATE TABLE calendar_account (" +
                 "cid INT4 UNSIGNED NOT NULL," +
@@ -88,6 +80,170 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "data BLOB," +
                 "PRIMARY KEY (cid,id)," +
                 "KEY `user` (cid,user)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_sequence",
+            "CREATE TABLE calendar_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_alarm_sequence",
+            "CREATE TABLE calendar_alarm_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_event",
+            "CREATE TABLE calendar_event (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED NOT NULL," +
+                "folder VARCHAR(255) DEFAULT NULL," +
+                "series INT4 UNSIGNED DEFAULT NULL," +
+                "uid VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "recurrence BIGINT(20) DEFAULT NULL," +
+                "deleteExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "changeExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "created BIGINT(20) NOT NULL," +
+                "createdBy INT4 UNSIGNED NOT NULL," +
+                "modified BIGINT(20) NOT NULL," +
+                "modifiedBy INT4 UNSIGNED NOT NULL," +
+                "sequence INT4 UNSIGNED DEFAULT NULL," +
+                "start datetime NOT NULL," +
+                "end datetime DEFAULT NULL," +
+                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "allDay INT4 UNSIGNED DEFAULT NULL," +
+                "rangeFrom BIGINT(20) NOT NULL," +
+                "rangeUntil BIGINT(20) NOT NULL," +
+                "transp INT4 UNSIGNED DEFAULT NULL," +
+                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "status VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "summary VARCHAR(255) DEFAULT NULL," +
+                "location VARCHAR(255) DEFAULT NULL," +
+                "description TEXT DEFAULT NULL," +
+                "categories VARCHAR(1024) DEFAULT NULL," +
+                "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY rangeFrom (cid,account,rangeFrom)," +
+                "KEY rangeUntil (cid,account,rangeUntil)," +
+                "KEY modified (cid,account,modified)," +
+                "KEY user (cid,account,user)," +
+                "KEY uid (cid,account,uid(767))," +
+                "KEY filename (cid,account,filename(767))" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_event_tombstone",
+            "CREATE TABLE calendar_event_tombstone (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED NOT NULL," +
+                "folder VARCHAR(255) DEFAULT NULL," +
+                "series INT4 UNSIGNED DEFAULT NULL," +
+                "uid VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "recurrence BIGINT(20) DEFAULT NULL," +
+                "deleteExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "changeExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "created BIGINT(20) NOT NULL," +
+                "createdBy INT4 UNSIGNED NOT NULL," +
+                "modified BIGINT(20) NOT NULL," +
+                "modifiedBy INT4 UNSIGNED NOT NULL," +
+                "sequence INT4 UNSIGNED DEFAULT NULL," +
+                "start datetime NOT NULL," +
+                "end datetime DEFAULT NULL," +
+                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "allDay INT4 UNSIGNED DEFAULT NULL," +
+                "rangeFrom BIGINT(20) NOT NULL," +
+                "rangeUntil BIGINT(20) NOT NULL," +
+                "transp INT4 UNSIGNED DEFAULT NULL," +
+                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "status VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "summary VARCHAR(255) DEFAULT NULL," +
+                "location VARCHAR(255) DEFAULT NULL," +
+                "description TEXT DEFAULT NULL," +
+                "categories VARCHAR(1024) DEFAULT NULL," +
+                "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY rangeFrom (cid,account,rangeFrom)," +
+                "KEY rangeUntil (cid,account,rangeUntil)," +
+                "KEY modified (cid,account,modified)," +
+                "KEY user (cid,account,user)," +
+                "KEY uid (cid,account,uid(767))," +
+                "KEY filename (cid,account,filename(767))" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_attendee",
+            "CREATE TABLE calendar_attendee (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "event INT4 UNSIGNED NOT NULL," +
+                "uri VARCHAR(512) CHARACTER SET latin1 NOT NULL," +
+                "cn VARCHAR(512) DEFAULT NULL," +
+                "entity INT4 UNSIGNED DEFAULT NULL," +
+                "folder VARCHAR(255) DEFAULT NULL," +
+                "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "comment VARCHAR(512) DEFAULT NULL," +
+                "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,event,uri)," +
+                "KEY entity (cid,account,event,entity)," +
+                "KEY folder (cid,account,event,folder(190))" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_attendee_tombstone",
+            "CREATE TABLE calendar_attendee_tombstone (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "event INT4 UNSIGNED NOT NULL," +
+                "uri VARCHAR(512) CHARACTER SET latin1 NOT NULL," +
+                "cn VARCHAR(512) DEFAULT NULL," +
+                "entity INT4 UNSIGNED DEFAULT NULL," +
+                "folder VARCHAR(255) DEFAULT NULL," +
+                "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "comment VARCHAR(512) DEFAULT NULL," +
+                "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,event,uri)," +
+                "KEY entity (cid,account,event,entity)," +
+                "KEY folder (cid,account,event,folder(190))" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_alarm",
+            "CREATE TABLE calendar_alarm (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "event INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED NOT NULL," +
+                "uid VARCHAR(767) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) DEFAULT NULL," +
+                "acknowledged BIGINT(20) DEFAULT NULL," +
+                "action VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+                "repetition VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "triggerRelated VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "triggerDuration VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "triggerDate BIGINT(20) DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY event_user (cid,account,event,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         return tablesByName; //@formatter:on

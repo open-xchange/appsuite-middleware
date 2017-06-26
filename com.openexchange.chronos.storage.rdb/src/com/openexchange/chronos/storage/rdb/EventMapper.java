@@ -433,7 +433,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeModifiedBy();
             }
         });
-        mappings.put(EventField.CALENDAR_USER, new IntegerMapping<Event>("calendarUser", "Calendar User") {
+        mappings.put(EventField.CALENDAR_USER, new IntegerMapping<Event>("user", "Calendar User") {
 
             @Override
             public void set(Event event, Integer value) {
