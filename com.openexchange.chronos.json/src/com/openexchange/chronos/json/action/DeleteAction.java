@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class DeleteAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
     private static final String IDS_FIELD = "ids";
     private static final String ID_FIELD = "id";
@@ -94,8 +94,8 @@ public class DeleteAction extends ChronosAction {
     }
 
     @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 
     @Override
