@@ -61,11 +61,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
-import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -86,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class ConfirmAction extends IDBasedCalendarAction {
+public final class ConfirmAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);
     /**
@@ -175,27 +173,6 @@ public final class ConfirmAction extends IDBasedCalendarAction {
             attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUserId());
         }
         CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee);
-        return new AJAXRequestResult(new JSONObject(0), result.getTimestamp(), "json");
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
-        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
-        int recurrencePosition = request.optInt("recurrence_position");
-        CompositeEventID eventID;
-        if (AppointmentAJAXRequest.NOT_FOUND == recurrencePosition) {
-            eventID = CompositeEventID.parse(objectId);
-        } else {
-            eventID = getEventConverter(access).getEventID(objectId, recurrencePosition);
-        }
-        JSONObject jsonObject = request.getData();
-        ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
-        Attendee attendee = EventConverter.getAttendee(participant);
-        if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
-            attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : access.getSession().getUserId());
-        }
-        CalendarResult result = access.updateAttendee(eventID, attendee);
         return new AJAXRequestResult(new JSONObject(0), result.getTimestamp(), "json");
     }
 
