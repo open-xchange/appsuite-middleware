@@ -47,36 +47,58 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.impl;
+package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.websockets.SendControl;
 
 
 /**
- * {@link SendControlImpl}
+ * {@link CompletedSendControl} - The send-control which already completed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public class SendControlImpl<V> implements SendControl {
+public class CompletedSendControl implements SendControl {
 
-    private final Future<V> future;
+    private static final CompletedSendControl INSTANCE = new CompletedSendControl();
 
     /**
-     * Initializes a new {@link SendControlImpl}.
+     * Gets the instance
      *
-     * @param future The backing {@link Future} instance
+     * @return The instance
      */
-    public SendControlImpl(Future<V> future) {
-        super();
-        this.future = future;
+    public static CompletedSendControl getInstance() {
+        return INSTANCE;
+    }
 
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CompletedSendControl}.
+     */
+    private CompletedSendControl() {
+        super();
+    }
+
+    @Override
+    public void awaitDone() throws InterruptedException {
+        // Nothing
+    }
+
+    @Override
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        // Nothing
     }
 
     @Override
     public boolean isDone() {
-        return future.isDone();
+        return true;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
     }
 
 }

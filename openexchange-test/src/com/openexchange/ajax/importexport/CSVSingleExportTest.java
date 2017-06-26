@@ -47,67 +47,42 @@
  *
  */
 
-package com.openexchange.database.provider;
+package com.openexchange.ajax.importexport;
 
-import static com.openexchange.database.Databases.autocommit;
-import java.sql.Connection;
-import com.openexchange.database.DatabaseService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.List;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.importexport.csv.CSVParser;
+
 
 /**
- * {@link DatabaseServiceDBProvider} - The {@link DBProvider} backed by specified {@link DatabaseService} instance.
+ * {@link CSVSingleExportTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
  */
-public class DatabaseServiceDBProvider implements DBProvider {
-
-    private final DatabaseService databaseService;
-
-    /**
-     * Initializes a new {@link DatabaseServiceDBProvider}.
-     *
-     * @param databaseService The backing {@link DatabaseService} instance
-     */
-    public DatabaseServiceDBProvider(final DatabaseService databaseService) {
-        super();
-        this.databaseService = databaseService;
+public class CSVSingleExportTest extends AbstractManagedContactTest {
+    
+    @Test
+    public void testSingleCSVExport() throws OXException, IOException, JSONException {
+        generateContact("First Contact");        
+        Contact secondContact = generateContact("Second Contact");
+        int secondId = cotm.newAction(secondContact).getObjectID();
+        
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID,String.valueOf(secondId)));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        assertEquals("There should only be one exported Contact", 2, actual.size());
     }
-
-    @Override
-    public Connection getReadConnection(final Context ctx) throws OXException {
-        return databaseService.getReadOnly(ctx);
-    }
-
-    @Override
-    public void releaseReadConnection(final Context ctx, final Connection con) {
-        if (con != null) {
-            databaseService.backReadOnly(ctx, con);
-        }
-    }
-
-    @Override
-    public Connection getWriteConnection(final Context ctx) throws OXException {
-        return databaseService.getWritable(ctx);
-    }
-
-    @Override
-    public void releaseWriteConnection(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritable(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritableAfterReading(ctx, con);
-
-    }
-
 }

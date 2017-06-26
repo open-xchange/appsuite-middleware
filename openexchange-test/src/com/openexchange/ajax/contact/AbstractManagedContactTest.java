@@ -80,7 +80,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
         return this.generateContact(lastname, folderID);
     }
     
-    protected Contact generateContact(String lastname, int folderId){
+    protected Contact generateContact(String lastname, int folderId) {
         Contact contact = new Contact();
         contact.setSurName(lastname);
         contact.setGivenName("Given name");

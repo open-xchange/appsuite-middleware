@@ -75,6 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -120,19 +121,27 @@ public final class Tools {
     }
 
     public static Context getContext(final Session so) throws OXException {
-        return ContextStorage.getInstance().getContext(so.getContextId());
+        ContextStorage contextStorage = ContextStorage.getInstance();
+        ShutDownRuntimeException.throwShutDownRuntimeExceptionIfNull(contextStorage);
+        return contextStorage.getContext(so.getContextId());
     }
 
     public static User getUser(final Session so, final Context ctx) throws OXException {
-        return UserStorage.getInstance().getUser(so.getUserId(), ctx);
+        UserStorage userStorage = UserStorage.getInstance();
+        ShutDownRuntimeException.throwShutDownRuntimeExceptionIfNull(userStorage);
+        return userStorage.getUser(so.getUserId(), ctx);
     }
 
     public static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        ShutDownRuntimeException.throwShutDownRuntimeExceptionIfNull(userConfigStorage);
+        return userConfigStorage.getUserConfiguration(userId, ctx);
     }
 
     public static UserPermissionBits getUserPermissionBits(final Context ctx, final int userId) throws OXException {
-        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
+        UserPermissionBitsStorage permissionBitsStorage = UserPermissionBitsStorage.getInstance();
+        ShutDownRuntimeException.throwShutDownRuntimeExceptionIfNull(permissionBitsStorage);
+        return permissionBitsStorage.getUserPermissionBits(userId, ctx);
     }
 
     /**

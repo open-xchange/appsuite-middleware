@@ -57,12 +57,12 @@ import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link VCardExporterExtended}
+ * {@link BatchCapableExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10
  */
-public interface VCardExporterExtended extends Exporter {
+public interface BatchCapableExporter extends Exporter {
     
     /**
     *
@@ -74,7 +74,7 @@ public interface VCardExporterExtended extends Exporter {
     * @return InputStream in requested format.
     * @throws OXException
     */
-   SizedInputStream exportData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+   SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
 
     /**
      * Creates a proper export file name based on the batch of ids to export

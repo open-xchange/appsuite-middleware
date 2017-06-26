@@ -21,6 +21,11 @@
         type: string
         description: 'Toggles whether distribution lists shall be exported too (default is `false`).'
         required: false
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the single object whose content shall be exported. This must be an object in a calendar folder.
+        required: false
     responses:
       200:
         description: 'An input stream containing the content of the CSV file with the MIME type `text/csv`.'

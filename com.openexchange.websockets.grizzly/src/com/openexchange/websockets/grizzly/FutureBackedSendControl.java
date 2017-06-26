@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,66 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.websockets.grizzly;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.glassfish.grizzly.websockets.DataFrame;
+import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link ExporterExtended}
+ * {@link FutureBackedSendControl} - The send-control backed by a {@link Future} instance.
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ExporterExtended extends Exporter {
-    
+public class FutureBackedSendControl implements SendControl {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FutureBackedSendControl.class);
+
+    private final Future<DataFrame> future;
+
     /**
-     * @param session: The session object to be able to check permissions.
-     * @param format: Format the returned InputStream should be in.
-     * @param folderID: Folder that should be exported. Note: A folder can only contain data of one type.
-     * @param objectID: Id of an entry in that folder that is to be exported.
-     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-     * @param optionalParams Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return InputStream in requested format.
-     * @throws OXException
+     * Initializes a new {@link FutureBackedSendControl}.
      */
-    SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
+    public FutureBackedSendControl(Future<DataFrame> future) {
+        super();
+        this.future = future;
+    }
+
+    @Override
+    public void awaitDone() throws InterruptedException {
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
+    }
+
+    @Override
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        try {
+            future.get(timeout, unit);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
+    }
+
+    @Override
+    public boolean isDone() {
+        return future.isDone();
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return future.cancel(mayInterruptIfRunning);
+    }
+
 }

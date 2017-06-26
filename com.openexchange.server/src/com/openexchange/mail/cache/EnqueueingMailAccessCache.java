@@ -319,7 +319,11 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * Disposes this cache.
      */
     protected void dispose() {
-        timerTask.cancel(false);
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel(false);
+        }
         for (final Key key : new HashSet<Key>(map.keySet())) {
             orderlyClearQueue(key);
         }
