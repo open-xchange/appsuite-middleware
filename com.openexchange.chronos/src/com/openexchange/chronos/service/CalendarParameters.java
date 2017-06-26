@@ -133,7 +133,7 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Specifies that attendees should be notified about the changes when savong a meeting or not.
+     * Specifies that attendees should be notified about the changes when saving a meeting or not.
      */
     static final String PARAMETER_NOTIFICATION = "notification";
 

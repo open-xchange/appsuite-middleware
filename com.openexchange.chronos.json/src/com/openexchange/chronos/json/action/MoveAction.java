@@ -49,48 +49,64 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.composition.CompositeFolderID;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link MoveAction}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class MoveAction extends ChronosAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("calendars", new CalendarsAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        this.actions = actions.build();
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_NOTIFICATION, CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    /**
+     * Initializes a new {@link MoveAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected MoveAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        CompositeFolderID folderID = parseFolderParameter(requestData);
+        try{
+        CalendarResult moveResult = calendarAccess.moveEvent(parseIdParameter(requestData), folderID);
+        return new AJAXRequestResult(moveResult, moveResult.getTimestamp(), "calendarResult");
+        }catch(OXException e){
+            if (Category.CATEGORY_CONFLICT.equals(e.getCategory()) && (CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.EVENT_CONFLICTS.equals(e))) {
+                return new AJAXRequestResult(e.getProblematics(), "eventConflict");
+            }
+            throw e;
+        }
     }
 
 }
