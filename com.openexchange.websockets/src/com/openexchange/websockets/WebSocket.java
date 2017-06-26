@@ -139,30 +139,19 @@ public interface WebSocket {
      * A previously set {@link MessageTranscoder transcoder} kicks-in.
      *
      * @param message The message to be sent
+     * @return The handler which will be notified of progress
      * @throws OXException If there is a problem delivering the message.
      */
-    void sendMessage(String message) throws OXException;
+    SendControl sendMessage(String message) throws OXException;
 
     /**
      * Sends a message to the remote end-point, blocking until all of the message has been transmitted.
      *
      * @param message The message to be sent
+     * @return The handler which will be notified of progress
      * @throws OXException If there is a problem delivering the message.
      */
-    void sendMessageRaw(String message) throws OXException;
-
-    /**
-     * Initiates the asynchronous transmission of a text message. This method returns before the message
-     * is transmitted. Developers provide a callback to be notified when the message has been
-     * transmitted. Errors in transmission are given to the developer in the SendResult object.
-     * <p>
-     * A previously set {@link MessageTranscoder transcoder} kicks-in.
-     *
-     * @param text The text being sent.
-     * @param handler The handler which will be notified of progress.
-     * @throws IllegalArgumentException if the text or the handler is {@code null}.
-     */
-    SendControl sendMessageAsync(String message) throws OXException;
+    SendControl sendMessageRaw(String message) throws OXException;
 
     /**
      * Closes this {@link WebSocket}.

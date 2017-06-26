@@ -47,36 +47,66 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.impl;
+package com.openexchange.websockets.grizzly;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.glassfish.grizzly.websockets.DataFrame;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.websockets.SendControl;
 
 
 /**
- * {@link SendControlImpl}
+ * {@link FutureBackedSendControl} - The send-control backed by a {@link Future} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public class SendControlImpl<V> implements SendControl {
+public class FutureBackedSendControl implements SendControl {
 
-    private final Future<V> future;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FutureBackedSendControl.class);
+
+    private final Future<DataFrame> future;
 
     /**
-     * Initializes a new {@link SendControlImpl}.
-     *
-     * @param future The backing {@link Future} instance
+     * Initializes a new {@link FutureBackedSendControl}.
      */
-    public SendControlImpl(Future<V> future) {
+    public FutureBackedSendControl(Future<DataFrame> future) {
         super();
         this.future = future;
+    }
 
+    @Override
+    public void awaitDone() throws InterruptedException {
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
+    }
+
+    @Override
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        try {
+            future.get(timeout, unit);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
     }
 
     @Override
     public boolean isDone() {
         return future.isDone();
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return future.cancel(mayInterruptIfRunning);
     }
 
 }
