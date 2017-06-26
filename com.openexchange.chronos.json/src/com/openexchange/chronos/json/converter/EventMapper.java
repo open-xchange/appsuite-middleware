@@ -83,6 +83,8 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipantRole;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
@@ -888,7 +890,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return serializeCalendarUser(from.getOrganizer());
             }
         });
-        mappings.put(EventField.ATTENDEES, new ListMapping<Attendee, Event>("attendees", ColumnIDs.ATTENDEES) {
+        mappings.put(EventField.ATTENDEES, new ListItemMapping<Attendee, Event, JSONObject>("attendees", ColumnIDs.ATTENDEES) {
 
             @Override
             public boolean isSet(Event object) {
@@ -913,12 +915,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             protected Attendee deserialize(JSONArray array, int index) throws JSONException, OXException {
                 JSONObject jsonObject = array.getJSONObject(index);
-                Attendee attendee = deserializeCalendarUser(jsonObject, Attendee.class);
-                if (jsonObject.has("cuType")) {
-                    attendee.setCuType(new CalendarUserType(jsonObject.getString("cuType")));
-                }
-
-                return attendee;
+                return deserialize(jsonObject);
             }
 
             @Override
@@ -929,31 +926,70 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 }
                 JSONArray jsonArray = new JSONArray(value.size());
                 for (Attendee attendee : value) {
-                    JSONObject jsonObject = serializeCalendarUser(attendee);
-                    if (null != attendee.getCuType()) {
-                        jsonObject.put("cuType", attendee.getCuType().getValue());
-                    }
-                    if (null != attendee.getRole()) {
-                        jsonObject.put("role", attendee.getRole().getValue());
-                    }
-                    if (null != attendee.getPartStat()) {
-                        jsonObject.put("partStat", attendee.getPartStat().getValue());
-                    }
-                    if (null != attendee.getComment()) {
-                        jsonObject.put("comment", attendee.getComment());
-                    }
-                    if (null != attendee.getRsvp()) {
-                        jsonObject.put("rsvp", attendee.getRsvp());
-                    }
-                    if (null != attendee.getFolderID()) {
-                        jsonObject.put("folder", attendee.getFolderID());
-                    }
-                    if (null != attendee.getMember()) {
-                        jsonObject.put("member", attendee.getMember());
-                    }
-                    jsonArray.put(jsonObject);
+
+                    jsonArray.put(serialize(attendee));
                 }
                 return jsonArray;
+            }
+
+            @Override
+            public Attendee deserialize(JSONObject from) throws JSONException {
+                Attendee attendee = deserializeCalendarUser(from, Attendee.class);
+                if (from.has("cuType")) {
+                    attendee.setCuType(new CalendarUserType(from.getString("cuType")));
+                }
+                if (from.has("role")) {
+                    attendee.setRole(new ParticipantRole(from.getString("role")));
+                }
+                if (from.has("partStat")) {
+                    attendee.setPartStat(new ParticipationStatus(from.getString("partStat")));
+                }
+                if (from.has("comment")) {
+                    attendee.setComment(from.getString("comment"));
+                }
+                if (from.has("rsvp")) {
+                    attendee.setRsvp(from.getBoolean("rsvp"));
+                }
+                if (from.has("folder")) {
+                    attendee.setFolderID(from.getString("folder"));
+                }
+                if (from.has("member")) {
+                    JSONArray array = from.getJSONArray("member");
+                    List<String> list = new ArrayList<>(array.length());
+                    for(Object o: array.asList()){
+                        list.add(o.toString());
+                    }
+                    attendee.setMember(list);
+                }
+
+                return attendee;
+            }
+
+            @Override
+            public JSONObject serialize(Attendee from) throws JSONException {
+                JSONObject jsonObject = serializeCalendarUser(from);
+                if (null != from.getCuType()) {
+                    jsonObject.put("cuType", from.getCuType().getValue());
+                }
+                if (null != from.getRole()) {
+                    jsonObject.put("role", from.getRole().getValue());
+                }
+                if (null != from.getPartStat()) {
+                    jsonObject.put("partStat", from.getPartStat().getValue());
+                }
+                if (null != from.getComment()) {
+                    jsonObject.put("comment", from.getComment());
+                }
+                if (null != from.getRsvp()) {
+                    jsonObject.put("rsvp", from.getRsvp());
+                }
+                if (null != from.getFolderID()) {
+                    jsonObject.put("folder", from.getFolderID());
+                }
+                if (null != from.getMember()) {
+                    jsonObject.put("member", from.getMember());
+                }
+                return jsonObject;
             }
         });
         mappings.put(EventField.ATTACHMENTS, new ListMapping<Attachment, Event>("attachments", ColumnIDs.ATTACHMENTS) {
@@ -1177,10 +1213,18 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JSONException(e);
         }
-        calendarUser.setUri(jsonObject.optString("uri", null));
-        calendarUser.setCn(jsonObject.optString("cn", null));
-        calendarUser.setEMail(jsonObject.optString("email", null));
-        calendarUser.setSentBy(deserializeCalendarUser(jsonObject.optJSONObject("sentBy"), CalendarUser.class));
+        if(jsonObject.has("uri")){
+            calendarUser.setUri(jsonObject.optString("uri", null));
+        }
+        if(jsonObject.has("cn")){
+            calendarUser.setCn(jsonObject.optString("cn", null));
+        }
+        if(jsonObject.has("email")){
+            calendarUser.setEMail(jsonObject.optString("email", null));
+        }
+        if(jsonObject.has("sentBy")){
+            calendarUser.setSentBy(deserializeCalendarUser(jsonObject.optJSONObject("sentBy"), CalendarUser.class));
+        }
         if (jsonObject.has("entity")) {
             calendarUser.setEntity(jsonObject.getInt("entity"));
         }

@@ -63,9 +63,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.json.converter.EventMapper;
+import com.openexchange.chronos.json.converter.ListItemMapping;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -75,7 +74,7 @@ import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -99,9 +98,7 @@ public class UpdateAttendeeAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_TIMESTAMP, CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
 
-    private static final String CONFIRMATION_FIELD = "confirmation";
-    private static final String CONFIRM_MESSAGE_FIELD = "confirmmessage";
-    private static final String URI_FIELD = "uri";
+    private static final String ATTENDEE = "attendee";
     private static final String ALARMS_FIELD = "alarms";
 
     @Override
@@ -109,28 +106,22 @@ public class UpdateAttendeeAction extends ChronosAction {
         return OPTIONAL_PARAMETERS;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
 
         Object data = requestData.getData();
-        Attendee attendee = new Attendee();
         if (data instanceof JSONObject) {
+            Attendee attendee = null;
             try {
-                String confirmation = ((JSONObject) data).getString(CONFIRMATION_FIELD);
-                attendee.setPartStat(new ParticipationStatus(confirmation));
+                JSONObject attendeeJSON = ((JSONObject) data).getJSONObject(ATTENDEE);
+                ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
+                attendee = mapping.deserialize(attendeeJSON);
+                if(!attendee.containsUri() && !attendee.containsEntity()){
+                    attendee.setEntity(requestData.getSession().getUserId());
+                }
             } catch (JSONException e) {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-            }
-            String confirmMSG = ((JSONObject) data).optString(CONFIRM_MESSAGE_FIELD);
-            if (Strings.isNotEmpty(confirmMSG)) {
-                attendee.setComment(confirmMSG);
-            }
-            String uri = ((JSONObject) data).optString(URI_FIELD);
-
-            if (Strings.isNotEmpty(uri)) {
-                attendee.setUri(uri);
-            } else {
-                attendee.setUri(CalendarUtils.getURI(requestData.getSession().getUser().getMail()));
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }
 
             CompositeEventID compositeEventID = parseIdParameter(requestData);
@@ -164,6 +155,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                         EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
                     }
                     try {
+
                         CalendarResult updateAlarmResult = calendarAccess.updateEvent(compositeEventID, toUpdate);
                         results = new ArrayList<>(2);
                         results.add(updateAttendeeResult);
