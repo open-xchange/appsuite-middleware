@@ -228,7 +228,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         writer.writeInt(FIELD_USER_ID, userId);
         writer.writeUTF(FIELD_MESSAGE, message);
         writer.writeUTF(FIELD_FILTER, filter);
-        writer.writeBoolean(FIELD_ASYNC, false);
+        writer.writeBoolean(FIELD_ASYNC, true);
     }
 
     @Override
