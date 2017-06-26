@@ -809,11 +809,17 @@ final class ListLsubCollection implements Serializable {
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecualUse) throws ProtocolException {
+    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecialUse) throws ProtocolException {
         String command = "LIST";
-        String sCmd = new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
+        String sCmd = new StringBuilder(command).append(usingSpecialUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
         Response[] r = performCommand(protocol, sCmd);
         Response response = r[r.length - 1];
+        if (usingSpecialUse && response.isBAD()) {
+            // Retry w/o SPECIAL-USE
+            sCmd = "LIST \"\" \"*\"";
+            r = performCommand(protocol, sCmd);
+            response = r[r.length - 1];
+        }
         if (response.isOK()) {
             for (int i = 0, len = r.length - 1; i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
