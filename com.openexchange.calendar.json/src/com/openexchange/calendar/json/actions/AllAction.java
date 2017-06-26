@@ -65,10 +65,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -97,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class AllAction extends IDBasedCalendarAction {
+public final class AllAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
@@ -368,21 +366,6 @@ public final class AllAction extends IDBasedCalendarAction {
             events = session.getCalendarService().getEventsInFolder(session, folderId);
         }
         return getAppointmentResultWithTimestamp(getEventConverter(session), events);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
-        if (false == access.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
-            access.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
-        }
-        List<Event> events;
-        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        if (null == folderId || "0".equals(folderId)) {
-            events = access.getEventsOfUser();
-        } else {
-            events = access.getEventsInFolder(CompositeFolderID.parse(folderId));
-        }
-        return getAppointmentResultWithTimestamp(getEventConverter(access), events);
     }
 
 }

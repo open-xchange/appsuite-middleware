@@ -64,9 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -89,7 +88,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class NewAppointmentsSearchAction extends IDBasedCalendarAction {
+public final class NewAppointmentsSearchAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(NewAppointmentsSearchAction.class);
@@ -233,12 +232,6 @@ public final class NewAppointmentsSearchAction extends IDBasedCalendarAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<Event> events = session.getCalendarService().getEventsOfUser(session);
         return getAppointmentResultWithTimestamp(getEventConverter(session), events);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
-        List<Event> events = access.getEventsOfUser();
-        return getAppointmentResultWithTimestamp(getEventConverter(access), events);
     }
 
 }

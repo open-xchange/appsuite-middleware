@@ -59,9 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.IDBasedCalendarAction;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -90,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class UpdatesAction extends IDBasedCalendarAction {
+public final class UpdatesAction extends ChronosAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
@@ -309,32 +307,6 @@ public final class UpdatesAction extends IDBasedCalendarAction {
             result = session.getCalendarService().getUpdatedEventsOfUser(session, since);
         }
         AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(getEventConverter(session), result.getNewAndModifiedEvents(), result.getDeletedEvents());
-        if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {
-            deltaResult.setTimestamp(since);
-        }
-        return deltaResult;
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess access, AppointmentAJAXRequest request) throws OXException, JSONException {
-        if (false == access.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
-            access.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
-        }
-        Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        UpdatesResult result;
-        if (null != folderId) {
-            result = access.getUpdatedEventsInFolder(CompositeFolderID.parse(folderId), since);
-        } else {
-            if (false == access.contains(CalendarParameters.PARAMETER_RANGE_START)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);
-            }
-            if (false == access.contains(CalendarParameters.PARAMETER_RANGE_END)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_END);
-            }
-            result = access.getUpdatedEventsOfUser(since);
-        }
-        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(getEventConverter(access), result.getNewAndModifiedEvents(), result.getDeletedEvents());
         if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {
             deltaResult.setTimestamp(since);
         }
