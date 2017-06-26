@@ -57,10 +57,11 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link XingOAuthServiceMetaData}
@@ -99,7 +100,7 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
     }
 
     @Override
-    public String processAuthorizationURL(final String authUrl) {
+    public String processAuthorizationURL(final String authUrl, Session session) {
         return authUrl;
     }
 

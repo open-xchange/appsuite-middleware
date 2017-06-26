@@ -60,9 +60,9 @@ import java.util.Set;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultOAuthAccount;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -71,6 +71,7 @@ import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.impl.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.session.Session;
 import com.openexchange.tools.sql.SQLTestCase;
 
 /**
@@ -107,7 +108,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
-            public String processAuthorizationURL(final String authUrl) {
+            public String processAuthorizationURL(final String authUrl, Session session) {
                 return authUrl;
             }
 

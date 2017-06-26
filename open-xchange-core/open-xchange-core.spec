@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1437,6 +1437,13 @@ if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
     ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
 fi
 
+# SoftwareChange_Request-4204
+pfile=/opt/open-xchange/etc/whitelist.properties
+for property in html.style.page-break-{after,before,inside}
+do
+  ox_remove_property ${property} ${pfile}
+done
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1478,6 +1485,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Mon Jun 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-06-26 (4223)
 * Tue Jun 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-06-12 (4186)
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

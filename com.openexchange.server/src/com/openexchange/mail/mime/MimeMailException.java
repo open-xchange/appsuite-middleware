@@ -75,6 +75,7 @@ import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -244,6 +245,11 @@ public class MimeMailException extends OXException {
                 if (isTimeoutException(e)) {
                     // javax.mail.FolderClosedException through a read timeout
                     return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                }
+
+                Exception nextException = e.getNextException();
+                if (nextException instanceof com.sun.mail.iap.ConnectionException) {
+                    return handleConnectionException((com.sun.mail.iap.ConnectionException) nextException, mailConfig, e);
                 }
 
                 final Folder f = ((javax.mail.FolderClosedException) e).getFolder();
@@ -425,21 +431,7 @@ public class MimeMailException extends OXException {
             if (nextException instanceof java.net.BindException) {
                 return MimeMailExceptionCode.BIND_ERROR.create(e, mailConfig == null ? STR_EMPTY : Integer.valueOf(mailConfig.getPort()));
             } else if (nextException instanceof com.sun.mail.iap.ConnectionException) {
-                mailInterfaceMonitor.changeNumBrokenConnections(true);
-                com.sun.mail.iap.ConnectionException connectionException = (com.sun.mail.iap.ConnectionException) nextException;
-                if (isTimeoutException(connectionException)) {
-                    // A read timeout
-                    return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                }
-                if (isByeException(connectionException)) {
-                    // Unexpected connection close
-                    return MimeMailExceptionCode.CONNECTION_CLOSED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                }
-
-                return MimeMailExceptionCode.CONNECT_ERROR.create(
-                    e,
-                    mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                        mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                return handleConnectionException((com.sun.mail.iap.ConnectionException) nextException, mailConfig, e);
             } else if (nextException instanceof java.net.ConnectException) {
                 /*
                  * Most modern IP stack implementations sense connection idleness, and abort the connection attempt, resulting in a
@@ -671,6 +663,20 @@ public class MimeMailException extends OXException {
         }
 
         return null;
+    }
+
+    private static OXException handleConnectionException(com.sun.mail.iap.ConnectionException connectionException, MailConfig mailConfig, MessagingException e) {
+        mailInterfaceMonitor.changeNumBrokenConnections(true);
+        if (isTimeoutException(connectionException)) {
+            // A read timeout
+            return MimeMailExceptionCode.READ_TIMEOUT.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        }
+        if (isByeException(connectionException)) {
+            // Unexpected connection close
+            return MimeMailExceptionCode.CONNECTION_CLOSED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        }
+
+        return MimeMailExceptionCode.CONNECT_ERROR.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
     }
 
     private static OXException handleAuthenticationFailedException(Exception authenticationFailedException, MailConfig mailConfig, Session session) {

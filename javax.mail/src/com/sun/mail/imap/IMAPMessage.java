@@ -163,11 +163,12 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      */
     protected IMAPProtocol getProtocol()
 			    throws ProtocolException, FolderClosedException {
-	((IMAPFolder)folder).waitIfIdle();
-	IMAPProtocol p = ((IMAPFolder)folder).protocol;
-	if (p == null)
-	    throw new FolderClosedException(folder);
-	else
+	IMAPFolder imapFolder = (IMAPFolder)folder;
+    imapFolder.waitIfIdle();
+	IMAPProtocol p = imapFolder.protocol;
+	if (p == null) {
+	    throw new FolderClosedException(folder, null, imapFolder.byeConnectionException);
+	} else
 	    return p;
     }
 
@@ -177,10 +178,11 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     protected boolean isREV1() throws FolderClosedException {
 	// access the folder's protocol object without waiting
 	// for IDLE to complete
-	IMAPProtocol p = ((IMAPFolder)folder).protocol;
-	if (p == null)
-	    throw new FolderClosedException(folder);
-	else
+    IMAPFolder imapFolder = (IMAPFolder)folder;
+	IMAPProtocol p = imapFolder.protocol;
+	if (p == null) {
+        throw new FolderClosedException(folder, null, imapFolder.byeConnectionException);
+	} else
 	    return p.isREV1();
     }
 
