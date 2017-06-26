@@ -76,7 +76,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -303,25 +302,11 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
 
-        boolean inMemory = false;
-        if (inMemory) {
-            StringBuilder ret = new StringBuilder(1024);
-            ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            if (conObj.containsDistributionLists()) {
-                ret.append(convertToLine(convertToList(conObj, fields)));
-            }
-
-            byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
-            return new SizedInputStream(Streams.newByteArrayInputStream(bytes), bytes.length, Format.CSV);
-        }
-
         try {
             ThresholdFileHolder sink = new ThresholdFileHolder();
             OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
             writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            if (conObj.containsDistributionLists()) {
-                writer.write(convertToLine(convertToList(conObj, fields)));
-            }
+            writer.write(convertToLine(convertToList(conObj, fields)));
             writer.flush();
             return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
         } catch (IOException e) {

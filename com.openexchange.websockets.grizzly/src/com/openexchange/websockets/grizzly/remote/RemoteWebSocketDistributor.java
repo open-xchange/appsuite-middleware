@@ -86,9 +86,8 @@ public interface RemoteWebSocketDistributor  {
      * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param async Whether to send asynchronously or with blocking behavior
      */
-    void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async);
+    void sendRemote(String message, String pathFilter, int userId, int contextId);
 
     /**
      * Checks if there is any filter-satisfying Web Socket connection associated with specified user on a remote cluster member.

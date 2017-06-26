@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,58 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.websockets.grizzly;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link SendControl} - Receives call-backs for message transmission results.
+ * {@link CompletedSendControl} - The send-control which already completed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public interface SendControl {
+public class CompletedSendControl implements SendControl {
+
+    private static final CompletedSendControl INSTANCE = new CompletedSendControl();
 
     /**
-     * Awaits until message transmission has been completed; either successfully or not.
+     * Gets the instance
      *
-     * @throws InterruptedException If the current thread was interrupted while waiting
+     * @return The instance
      */
-    void awaitDone() throws InterruptedException;
+    public static CompletedSendControl getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------
 
     /**
-     * Awaits for at most the given time until message transmission has been completed; either successfully or not.
-     *
-     * @param timeout The maximum time to wait
-     * @param unit The time unit of the timeout argument
-     * @throws InterruptedException If the current thread was interrupted while waiting
-     * @throws TimeoutException If the wait timed out
+     * Initializes a new {@link CompletedSendControl}.
      */
-    void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;
+    private CompletedSendControl() {
+        super();
+    }
 
-    /**
-     * Checks if message transmission completed; either successfully or due to a failure.
-     *
-     * @return {@code true} if this message transmission completed; otherwise <code>false</code>
-     */
-    boolean isDone();
+    @Override
+    public void awaitDone() throws InterruptedException {
+        // Nothing
+    }
 
-    /**
-     * Attempts to cancel message transmission.
-     * <p>
-     * After this method returns, subsequent calls to {@link #isDone} will always return <tt>true</tt>.
-     *
-     * @param mayInterruptIfRunning Whether the transferring thread should be interrupted
-     * @return <tt>false</tt> if the message transfer could not be cancelled, <tt>true</tt> otherwise
-     */
-    boolean cancel(boolean mayInterruptIfRunning);
+    @Override
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        // Nothing
+    }
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
 
 }

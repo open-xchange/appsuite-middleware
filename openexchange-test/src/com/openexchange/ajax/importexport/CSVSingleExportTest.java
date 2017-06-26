@@ -47,51 +47,42 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.ajax.importexport;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.List;
+import org.json.JSONException;
+import org.junit.Test;
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.importexport.csv.CSVParser;
+
 
 /**
- * {@link SendControl} - Receives call-backs for message transmission results.
+ * {@link CSVSingleExportTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
  */
-public interface SendControl {
-
-    /**
-     * Awaits until message transmission has been completed; either successfully or not.
-     *
-     * @throws InterruptedException If the current thread was interrupted while waiting
-     */
-    void awaitDone() throws InterruptedException;
-
-    /**
-     * Awaits for at most the given time until message transmission has been completed; either successfully or not.
-     *
-     * @param timeout The maximum time to wait
-     * @param unit The time unit of the timeout argument
-     * @throws InterruptedException If the current thread was interrupted while waiting
-     * @throws TimeoutException If the wait timed out
-     */
-    void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;
-
-    /**
-     * Checks if message transmission completed; either successfully or due to a failure.
-     *
-     * @return {@code true} if this message transmission completed; otherwise <code>false</code>
-     */
-    boolean isDone();
-
-    /**
-     * Attempts to cancel message transmission.
-     * <p>
-     * After this method returns, subsequent calls to {@link #isDone} will always return <tt>true</tt>.
-     *
-     * @param mayInterruptIfRunning Whether the transferring thread should be interrupted
-     * @return <tt>false</tt> if the message transfer could not be cancelled, <tt>true</tt> otherwise
-     */
-    boolean cancel(boolean mayInterruptIfRunning);
-
+public class CSVSingleExportTest extends AbstractManagedContactTest {
+    
+    @Test
+    public void testSingleCSVExport() throws OXException, IOException, JSONException {
+        generateContact("First Contact");        
+        Contact secondContact = generateContact("Second Contact");
+        int secondId = cotm.newAction(secondContact).getObjectID();
+        
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID,String.valueOf(secondId)));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        assertEquals("There should only be one exported Contact", 2, actual.size());
+    }
 }

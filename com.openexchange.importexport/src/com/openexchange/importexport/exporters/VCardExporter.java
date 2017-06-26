@@ -255,13 +255,6 @@ public class VCardExporter implements BatchCapableExporter {
     }
 
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
-//      String oId = null;
-//      try {
-//          oId = objectId > 0 ? Integer.toString(objectId) : null;
-//      } catch (NumberFormatException e) {
-//          throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
-//      }
-
       boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -320,21 +313,14 @@ public class VCardExporter implements BatchCapableExporter {
         // Get required contact service
         ContactService contactService = ImportExportServices.getContactService();
 
-        // Either export a single contact...
-//        if (objectId != null) {
-//            Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
-//            exportContact(session, contactObj, null, null, writer);
-//            doFlush(writer);
-//            return;
-//        }
-
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         VCardService vCardService = ImportExportServices.getVCardService();
 
-        // ... or export a batch of contacts...
+        // export a single contact or a batch of contacts...
         if (batchIds != null){
-            for (String folder : batchIds.keySet()) {
-                List<String> contacts = batchIds.get(folder);
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                String folder = batchEntry.getKey();
+                List<String> contacts = batchEntry.getValue();
                 String[] contactsId = new String[contacts.size()];
                 contactsId = contacts.toArray(contactsId);
                 SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
@@ -361,7 +347,7 @@ public class VCardExporter implements BatchCapableExporter {
             return;
         }
 
-        // ... or export a collection of contacts
+        // ... or export a folder of contacts
         SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
         try {
             while (searchIterator.hasNext()) {

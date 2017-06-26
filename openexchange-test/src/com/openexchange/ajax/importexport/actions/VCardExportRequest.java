@@ -60,7 +60,6 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
 
     private final boolean failOnError;
     private final Boolean exportDlists;
-    private final int contactId;
     private final String batchContactIds;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
@@ -71,15 +70,13 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
-        this.contactId = -1;
         batchContactIds = null;
     }
 
-    public VCardExportRequest(int folderId, Boolean exportDlists, int contactId, String batchIds, boolean failOnError) {
+    public VCardExportRequest(int folderId, Boolean exportDlists, String batchIds, boolean failOnError) {
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
-        this.contactId = contactId;
         this.batchContactIds = batchIds;
     }
 

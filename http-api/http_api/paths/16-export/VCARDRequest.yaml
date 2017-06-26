@@ -14,7 +14,7 @@
       - in: query
         name: ids
         type: string
-        description: 'A comma-separated list of contacts to export, seperated into [folder_id].[contact_id],[folder_id].[contact_id],... '
+        description: 'A comma-separated list of contacts to export, seperated into [[folder_id],[contact_id],[folder_id].,[contact_id],...] '
         required: false
     responses:
       200:

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 
@@ -61,6 +59,7 @@ import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 public final class ICalExportRequest extends AbstractExportRequest<ICalExportResponse> {
 
     private final int type;
+    private String objectId = "";
 
     public ICalExportRequest(final int folderId) {
         this(folderId, -1);
@@ -70,17 +69,22 @@ public final class ICalExportRequest extends AbstractExportRequest<ICalExportRes
         super(Action.ICal, folderId);
         this.type = type;
         
+    }    
+    
+    public ICalExportRequest(final int folderId, final String objectId) {
+        this(folderId, -1);
+        this.objectId = objectId;
+
     }
     
     @Override
     public Parameter[] getParameters() {
         com.openexchange.ajax.framework.AJAXRequest.Parameter[] parameters = super.getParameters();
         if (type != -1) {
-            List<com.openexchange.ajax.framework.AJAXRequest.Parameter> arrayList = new ArrayList<Parameter>(parameters.length);
-            for (Parameter param : parameters) {
-                arrayList.add(param);
-            }
-            arrayList.add(new Parameter(AJAXServlet.PARAMETER_TYPE, this.type));
+            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_TYPE, this.type), parameters);
+        }
+        if (null != objectId || !objectId.equals("")) {
+            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_ID, this.objectId), parameters);
         }
         return parameters;
     }
@@ -88,5 +92,12 @@ public final class ICalExportRequest extends AbstractExportRequest<ICalExportRes
     @Override
     public ICalExportParser getParser() {
         return new ICalExportParser(true);
+    }
+    
+    private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToAdd(Parameter parameter, Parameter[] parameters) {
+        Parameter[] newParameters = new Parameter[parameters.length + 1];
+        System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
+        newParameters[newParameters.length - 1] = parameter;
+        return newParameters;
     }
 }
