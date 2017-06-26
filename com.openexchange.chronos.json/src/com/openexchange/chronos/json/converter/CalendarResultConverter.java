@@ -62,6 +62,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -105,6 +106,8 @@ public class CalendarResultConverter implements ResultConverter {
         Object resultObject = result.getResultObject();
         if (resultObject instanceof CalendarResult) {
             resultObject = convertCalendarResult((CalendarResult) resultObject, timeZoneID, session);
+        } else if (resultObject instanceof UpdatesResult) {
+            resultObject = convertCalendarResult((UpdatesResult) resultObject, timeZoneID, session);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -121,6 +124,25 @@ public class CalendarResultConverter implements ResultConverter {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
         return result;
+    }
+
+    private JSONObject convertCalendarResult(UpdatesResult calendarResult, String timeZoneID, Session session) throws OXException {
+        JSONObject result = new JSONObject(1);
+        try {
+            result.put("newAndModified", convertEvents(calendarResult.getNewAndModifiedEvents(), timeZoneID, session));
+            result.put("deleted", convertEvents(calendarResult.getDeletedEvents(), timeZoneID, session));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+        return result;
+    }
+
+    private JSONArray convertEvents(List<Event> events, String timeZoneID, Session session) throws OXException{
+        JSONArray jsonArray = new JSONArray(events.size());
+        for(Event event : events){
+            jsonArray.put(convertEvent(event, timeZoneID, session));
+        }
+        return jsonArray;
     }
 
     private JSONArray convertCreateEvents(List<CreateResult> results, String timeZoneID, Session session) throws OXException {
