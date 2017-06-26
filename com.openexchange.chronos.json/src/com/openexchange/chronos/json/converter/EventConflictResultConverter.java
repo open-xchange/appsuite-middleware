@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -116,7 +118,7 @@ public class EventConflictResultConverter implements ResultConverter {
                     EventConflict conflict = (EventConflict) problematic;
                     JSONObject jsonConflict = new JSONObject(2);
                     jsonConflict.put("hard_conflict", conflict.isHardConflict());
-                    jsonConflict.put("conflicting_attendees", conflict.getConflictingAttendees());
+                    jsonConflict.put("conflicting_attendees", parseAttendees(conflict.getConflictingAttendees()));
                     jsonConflict.put("event", EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID, session));
                     conflicts.put(jsonConflict);
                 }
@@ -124,6 +126,15 @@ public class EventConflictResultConverter implements ResultConverter {
             result.put("conflicts", conflicts);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+        return result;
+    }
+
+    private JSONArray parseAttendees(List<Attendee> attendees) throws JSONException{
+        JSONArray result = new JSONArray(attendees.size());
+        for(Attendee attendee: attendees){
+            EventMapper.getInstance();
+            result.put(EventMapper.serializeCalendarUser(attendee));
         }
         return result;
     }

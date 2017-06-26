@@ -73,29 +73,31 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ConfirmAction}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link UpdateAttendeeAction}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ConfirmAction extends ChronosAction {
+public class UpdateAttendeeAction extends ChronosAction {
 
     /**
-     * Initializes a new {@link ConfirmAction}.
+     * Initializes a new {@link UpdateAttendeeAction}.
      *
      * @param services
      */
-    protected ConfirmAction(ServiceLookup services) {
+    protected UpdateAttendeeAction(ServiceLookup services) {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_TIMESTAMP);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_TIMESTAMP, CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
 
     private static final String CONFIRMATION_FIELD = "confirmation";
     private static final String CONFIRM_MESSAGE_FIELD = "confirmmessage";
@@ -132,7 +134,15 @@ public class ConfirmAction extends ChronosAction {
             }
 
             CompositeEventID compositeEventID = parseIdParameter(requestData);
-            CalendarResult updateAttendeeResult = calendarAccess.updateAttendee(compositeEventID, attendee);
+            CalendarResult updateAttendeeResult;
+            try {
+                updateAttendeeResult = calendarAccess.updateAttendee(compositeEventID, attendee);
+            } catch (OXException e) {
+                if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+                    return new AJAXRequestResult(e.getProblematics(), "eventConflict");
+                }
+                throw e;
+            }
             List<CreateResult> creations = updateAttendeeResult.getCreations();
             List<UpdateResult> updates = updateAttendeeResult.getUpdates();
             List<OXException> warnings = null;

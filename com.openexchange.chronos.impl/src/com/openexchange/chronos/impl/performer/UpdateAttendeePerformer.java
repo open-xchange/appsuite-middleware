@@ -63,6 +63,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
@@ -118,6 +120,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * load original event data & attendee
          */
         Event originalEvent = loadEventData(objectID);
+        attendee = session.getEntityResolver().prepare(attendee);
         Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
         /*
          * check current session user's permissions
@@ -135,12 +138,45 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
+
+        if(needsConflictCheck(originalEvent, originalAttendee, attendee)){
+            Check.noConflicts(storage, session, originalEvent, Collections.singletonList(attendee));
+        }
+
         if (null == recurrenceID) {
             updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
             updateAttendee(originalEvent, originalAttendee, attendee, recurrenceID);
         }
         return result;
+    }
+
+    /**
+     * Gets a value indicating whether conflict checks should take place along with the update or not.
+     *
+     * @param originalEvent The original event
+     * @param originalAttendee The original {@link Attendee}
+     * @param updatedAttendee The updated {@link Attendee}
+     * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
+     */
+    private boolean needsConflictCheck(Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) {
+
+        if(originalAttendee.getPartStat().equals(ParticipationStatus.ACCEPTED)){
+            return false;
+        }
+
+        if(updatedAttendee.getPartStat().equals(ParticipationStatus.ACCEPTED)){
+            if(originalAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE)){
+                return false;
+            }
+            return true;
+        }
+
+        if(updatedAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE) && (!originalAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE))){
+            return true;
+        }
+
+        return false;
     }
 
     /**
