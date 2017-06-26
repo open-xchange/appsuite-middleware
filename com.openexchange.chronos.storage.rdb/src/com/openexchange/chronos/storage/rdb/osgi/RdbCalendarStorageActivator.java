@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.storage.rdb.osgi;
 
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -58,12 +60,14 @@ import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosDeleteListener;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -86,13 +90,20 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, RecurrenceService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { CalendarUtilities.class };
     }
 
     @Override
     protected boolean stopOnServiceUnavailability() {
         return true;
     }
+
+    private volatile ServiceTracker<ManagementService, ManagementService> mgmtTracker;
 
     @Override
     protected void startBundle() throws Exception {
@@ -112,6 +123,12 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));
+            /*
+             * track management service to register mbean on demand
+             */
+            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
+            this.mgmtTracker = mgmtTracker;
+            mgmtTracker.open();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -121,6 +138,11 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
+        if (null != mgmtTracker) {
+            mgmtTracker.close();
+            this.mgmtTracker = null;
+        }
         Services.set(null);
         super.stopBundle();
     }
