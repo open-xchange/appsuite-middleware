@@ -54,12 +54,10 @@ import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -98,11 +96,11 @@ public class MoveAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         CompositeFolderID folderID = parseFolderParameter(requestData);
-        try{
-        CalendarResult moveResult = calendarAccess.moveEvent(parseIdParameter(requestData), folderID);
-        return new AJAXRequestResult(moveResult, moveResult.getTimestamp(), "calendarResult");
-        }catch(OXException e){
-            if (Category.CATEGORY_CONFLICT.equals(e.getCategory()) && (CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.EVENT_CONFLICTS.equals(e))) {
+        try {
+            CalendarResult moveResult = calendarAccess.moveEvent(parseIdParameter(requestData), folderID);
+            return new AJAXRequestResult(moveResult, moveResult.getTimestamp(), "calendarResult");
+        } catch (OXException e) {
+            if (isConflict(e)) {
                 return new AJAXRequestResult(e.getProblematics(), "eventConflict");
             }
             throw e;

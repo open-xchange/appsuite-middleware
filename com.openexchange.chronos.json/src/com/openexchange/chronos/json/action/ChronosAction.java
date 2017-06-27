@@ -72,12 +72,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -265,6 +267,10 @@ public abstract class ChronosAction implements AJAXActionService {
             fields[x++] = EventField.valueOf(str.toUpperCase());
         }
         return fields;
+    }
+
+    protected boolean isConflict(OXException e){
+        return Category.CATEGORY_CONFLICT.equals(e.getCategory()) && (CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.EVENT_CONFLICTS.equals(e));
     }
 
 }

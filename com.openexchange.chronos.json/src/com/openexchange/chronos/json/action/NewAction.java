@@ -62,7 +62,6 @@ import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -118,7 +117,7 @@ public class NewAction extends ChronosAction {
 
             return new AJAXRequestResult(createdEvent, createdEvent.getLastModified(), "event");
         } catch (OXException e) {
-            if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            if (isConflict(e)) {
                 return new AJAXRequestResult(e.getProblematics(), "eventConflict");
             }
             throw e;
