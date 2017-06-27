@@ -68,7 +68,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -140,7 +139,7 @@ public class FileMD5SumHelper {
         Collection<Integer> databaseIds;
         Connection connection = dbSerivce.getReadOnly();
         try {
-            databaseIds = dbSerivce.getAllSchemata(connection).values();
+            databaseIds = getDatabaseIds(connection);
         } finally {
             dbSerivce.backReadOnly(connection);
         }
@@ -233,7 +232,7 @@ public class FileMD5SumHelper {
         Collection<Integer> databaseIds;
         Connection connection = dbSerivce.getReadOnly();
         try {
-            databaseIds = dbSerivce.getAllSchemata(connection).values();
+            databaseIds = getDatabaseIds(connection);
         } finally {
             dbSerivce.backReadOnly(connection);
         }
@@ -297,7 +296,7 @@ public class FileMD5SumHelper {
     }
 
     private FileStorage getFileStorage(int contextId, int userId) throws OXException {
-        return fsService.getQuotaFileStorage(userId, contextId, Info.drive());
+        return fsService.getQuotaFileStorage(userId, contextId);
     }
 
     private static Map<Integer, List<DocumentMetadata>> getDocumentsPerOwner(Connection connection, int contextId, List<DocumentMetadata> documents) throws SQLException {
@@ -306,7 +305,7 @@ public class FileMD5SumHelper {
         Map<Integer, Integer> ownerPerFolder = getOwnerPerFolder(connection, contextId, documentsPerFolder.keySet());
         for (Entry<Integer, List<DocumentMetadata>> entry : documentsPerFolder.entrySet()) {
             Integer owner = ownerPerFolder.get(entry.getKey());
-            com.openexchange.tools.arrays.Collections.put(documentsPerOwner, owner, entry.getValue());
+            put(documentsPerOwner, owner, entry.getValue());
         }
         LOG.debug("Evaluated {} different folder owners for {} documents in context {}", I(documentsPerOwner.size()), I(documents.size()), I(contextId));
         return documentsPerOwner;
@@ -370,7 +369,7 @@ public class FileMD5SumHelper {
     private static Map<Integer, List<DocumentMetadata>> getDocumentsPerFolder(List<DocumentMetadata> documents) {
         Map<Integer, List<DocumentMetadata>> documentsPerFolder = new HashMap<Integer, List<DocumentMetadata>>();
         for (DocumentMetadata document : documents) {
-            com.openexchange.tools.arrays.Collections.put(documentsPerFolder, I((int) document.getFolderId()), document);
+            put(documentsPerFolder, I((int) document.getFolderId()), document);
         }
         return documentsPerFolder;
     }
@@ -390,6 +389,37 @@ public class FileMD5SumHelper {
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         }
+    }
+
+    private static Collection<Integer> getDatabaseIds(Connection connection) throws OXException {
+        List<Integer> databaseIds = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT DISTINCT read_db_pool_id FROM context_server2db_pool GROUP BY db_schema;");
+            ResultSet result = stmt.executeQuery()) {
+            while (result.next()) {
+                databaseIds.add(Integer.valueOf(result.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw new OXException(e);
+        }
+        return databaseIds;
+    }
+
+    private static <K, V> boolean put(Map<K, List<V>> multiMap, K key, V value) {
+        List<V> values = multiMap.get(key);
+        if (null == values) {
+            values = new ArrayList<>();
+            multiMap.put(key, values);
+        }
+        return values.add(value);
+    }
+
+    private static <K, V> boolean put(Map<K, List<V>> multiMap, K key, Collection<? extends V> values) {
+        List<V> list = multiMap.get(key);
+        if (null == list) {
+            list = new ArrayList<>();
+            multiMap.put(key, list);
+        }
+        return list.addAll(values);
     }
 
     private static String toString(int contextId, DocumentMetadata document) {
