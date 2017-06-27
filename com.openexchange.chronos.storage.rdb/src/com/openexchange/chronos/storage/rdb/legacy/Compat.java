@@ -56,12 +56,12 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
-import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceIDs;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +75,7 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
@@ -139,10 +140,10 @@ public class Compat {
                      * transform legacy "recurrence date positions" for exceptions to recurrence ids
                      */
                     if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                        event.setDeleteExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getDeleteExceptionDates())));
+                        event.setDeleteExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getDeleteExceptionDates())));
                     }
                     if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
+                        event.setChangeExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
                     }
                 } else if (isSeriesException(event)) {
                     /*
@@ -157,7 +158,7 @@ public class Compat {
                         event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
                     }
                     if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(Services.getService(RecurrenceService.class), recurrenceData, getDates(event.getChangeExceptionDates())));
+                        event.setChangeExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
                     }
                 }
             }
@@ -390,6 +391,41 @@ public class Compat {
             endDate.setTime(endDate.getTime() + endOffset - startOffset);
         }
         return new Period(startDate, endDate, seriesMaster.isAllDay());
+    }
+
+    /**
+     * Calculates the recurrence identifiers, i.e. the start times of the specific occurrences of a recurring event, for a list of legacy
+     * recurrence date position. Invalid recurrence date positions are skipped silently.
+     *
+     * @param recurrenceData The corresponding recurrence data
+     * @param recurrenceDatePositions The legacy recurrence date positions, i.e. the dates where the original occurrences would have been,
+     *            as UTC date with truncated time fraction
+     * @return The recurrence identifiers
+     */
+    private static SortedSet<RecurrenceId> getRecurrenceIDs(RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions) throws OXException {
+        SortedSet<RecurrenceId> recurrenceIDs;
+        RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        try {
+            recurrenceIDs = Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
+        } catch (OXException e) {
+            if (false == "CAL-4061".equals(e.getErrorCode())) {
+                throw e;
+            }
+            /*
+             * invalid recurrence id, fallback & convert as much as possible
+             */
+            recurrenceIDs = new TreeSet<RecurrenceId>();
+            for (Date date : recurrenceDatePositions) {
+                try {
+                    recurrenceIDs.add(getRecurrenceID(recurrenceService, recurrenceData, date));
+                } catch (OXException e2) {
+                    if (false == "CAL-4061".equals(e2.getErrorCode())) {
+                        throw e2;
+                    }
+                }
+            }
+        }
+        return recurrenceIDs;
     }
 
 }
