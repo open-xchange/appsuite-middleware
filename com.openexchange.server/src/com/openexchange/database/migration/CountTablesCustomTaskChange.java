@@ -163,7 +163,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             return;
         }
 
-        String createStmt = "CREATE TABLE contexts_per_filestore (" + "filestore_id INT4 UNSIGNED NOT NULL, " + "count INT4 UNSIGNED NOT NULL, " + "PRIMARY KEY (filestore_id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        String createStmt = "CREATE TABLE contexts_per_filestore (filestore_id INT4 UNSIGNED NOT NULL, count INT4 UNSIGNED NOT NULL, PRIMARY KEY (filestore_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
         PreparedStatement stmt = null;
         try {
@@ -176,7 +176,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
     private void createDBPoolCountTable(Connection configDbCon) throws SQLException {
         if (false == tableExists(configDbCon, "contexts_per_dbpool")) {
-            String createStmt = "CREATE TABLE contexts_per_dbpool (" + "db_pool_id INT4 UNSIGNED NOT NULL, " + "count INT4 UNSIGNED NOT NULL, " + "PRIMARY KEY (db_pool_id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            String createStmt = "CREATE TABLE contexts_per_dbpool (db_pool_id INT4 UNSIGNED NOT NULL, count INT4 UNSIGNED NOT NULL, PRIMARY KEY (db_pool_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
             PreparedStatement stmt = null;
             try {
@@ -188,7 +188,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
 
         if (false == tableExists(configDbCon, "dbpool_lock")) {
-            String createStmt = "CREATE TABLE dbpool_lock (" + "db_pool_id INT4 UNSIGNED NOT NULL, " + "PRIMARY KEY (db_pool_id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            String createStmt = "CREATE TABLE dbpool_lock (db_pool_id INT4 UNSIGNED NOT NULL, PRIMARY KEY (db_pool_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
             PreparedStatement stmt = null;
             try {
@@ -202,7 +202,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
     private void createDBPoolSchemaCountTable(Connection configDbCon) throws SQLException {
         if (false == tableExists(configDbCon, "contexts_per_dbschema")) {
-            String createStmt = "CREATE TABLE contexts_per_dbschema (" + "db_pool_id INT4 UNSIGNED NOT NULL, " + "schemaname VARCHAR(32) NOT NULL, " + "count INT4 UNSIGNED NOT NULL, " + "PRIMARY KEY (db_pool_id, schemaname)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            String createStmt = "CREATE TABLE contexts_per_dbschema (db_pool_id INT4 UNSIGNED NOT NULL, schemaname VARCHAR(32) NOT NULL, count INT4 UNSIGNED NOT NULL, PRIMARY KEY (db_pool_id, schemaname)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
             PreparedStatement stmt = null;
             try {
@@ -214,7 +214,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
 
         if (false == tableExists(configDbCon, "dbschema_lock")) {
-            String createStmt = "CREATE TABLE dbschema_lock (" + "db_pool_id INT4 UNSIGNED NOT NULL, " + "schemaname VARCHAR(32) NOT NULL, " + "PRIMARY KEY (db_pool_id, schemaname)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            String createStmt = "CREATE TABLE dbschema_lock (db_pool_id INT4 UNSIGNED NOT NULL, schemaname VARCHAR(32) NOT NULL, PRIMARY KEY (db_pool_id, schemaname)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
             PreparedStatement stmt = null;
             try {
@@ -231,7 +231,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             return;
         }
 
-        String createStmt = "CREATE TABLE `ctx_per_schema_sem` (" + "id BIGINT UNSIGNED NOT NULL, " + "PRIMARY KEY (id)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        String createStmt = "CREATE TABLE `ctx_per_schema_sem` (id BIGINT UNSIGNED NOT NULL, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
         PreparedStatement stmt = null;
         try {
