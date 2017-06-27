@@ -72,7 +72,7 @@ public class NewAction extends AbstractAccountAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         JSONObject data = requestData.getData(JSONObject.class);
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (null == providerId || Strings.isEmpty(providerId)) {
+        if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         CalendarAccountStorageFactory factory = Services.getService(CalendarAccountStorageFactory.class);

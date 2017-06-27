@@ -61,7 +61,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link GetAction}
  *
@@ -73,11 +72,11 @@ public class GetAction extends AbstractAccountAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (null == providerId || Strings.isEmpty(providerId)) {
+        if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         String accountId = requestData.getParameter(PARAMETER_ACCOUNT_ID);
-        if (null == accountId || Strings.isEmpty(accountId)) {
+        if (Strings.isEmpty(accountId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
         CalendarAccountStorageFactory factory = Services.getService(CalendarAccountStorageFactory.class);

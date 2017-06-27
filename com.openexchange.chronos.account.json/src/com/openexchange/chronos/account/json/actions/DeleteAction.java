@@ -61,7 +61,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DeleteAction}
  *
@@ -73,7 +72,7 @@ public class DeleteAction extends AbstractAccountAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (null == providerId || Strings.isEmpty(providerId)) {
+        if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         JSONArray data = requestData.getData(JSONArray.class);
