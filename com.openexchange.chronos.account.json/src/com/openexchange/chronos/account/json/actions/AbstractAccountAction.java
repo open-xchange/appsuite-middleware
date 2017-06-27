@@ -50,23 +50,42 @@
 package com.openexchange.chronos.account.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractAccountAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class AbstractAccountAction implements AJAXActionService {
+abstract class AbstractAccountAction implements AJAXActionService {
 
     protected final String PARAMETER_PROVIDER_ID = "providerId";
     protected final String PARAMETER_ACCOUNT_ID = "accountId";
+    private ServiceLookup services;
 
-    @Override
-    public abstract AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException;
+    /**
+     * Initialises a new {@link AbstractAccountAction}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     */
+    public AbstractAccountAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    <S extends Object> S getService(final Class<? extends S> clazz) {
+        if (null == services) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.account.json\" not started?");
+        }
+        return services.getService(clazz);
+    }
 }

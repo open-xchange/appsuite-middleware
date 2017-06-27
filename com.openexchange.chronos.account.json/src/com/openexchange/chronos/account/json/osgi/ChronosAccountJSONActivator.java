@@ -68,8 +68,6 @@ public class ChronosAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerModule(new ChronosAccountActionFactory(), "chronos/accounts");
+        registerModule(new ChronosAccountActionFactory(this), "chronos/accounts");
     }
-
 }

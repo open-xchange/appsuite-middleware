@@ -60,6 +60,7 @@ import com.openexchange.chronos.account.json.actions.GetAction;
 import com.openexchange.chronos.account.json.actions.NewAction;
 import com.openexchange.chronos.account.json.actions.UpdateAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ChronosAccountActionFactory}
@@ -71,14 +72,19 @@ public class ChronosAccountActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
-    public ChronosAccountActionFactory() {
+    /**
+     * Initialises a new {@link ChronosAccountActionFactory}.
+     * 
+     * @param services
+     */
+    public ChronosAccountActionFactory(ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("new", new NewAction());
-        actions.put("all", new AllAction());
-        actions.put("get", new GetAction());
-        actions.put("update", new UpdateAction());
-        actions.put("delete", new DeleteAction());
+        actions.put("new", new NewAction(services));
+        actions.put("all", new AllAction(services));
+        actions.put("get", new GetAction(services));
+        actions.put("update", new UpdateAction(services));
+        actions.put("delete", new DeleteAction(services));
         this.actions = actions.build();
     }
 

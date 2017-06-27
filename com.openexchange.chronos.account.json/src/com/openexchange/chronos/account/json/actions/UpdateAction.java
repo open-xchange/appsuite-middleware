@@ -51,12 +51,12 @@ package com.openexchange.chronos.account.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.account.json.osgi.Services;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,6 +68,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UpdateAction extends AbstractAccountAction {
 
+    /**
+     * Initialises a new {@link UpdateAction}.
+     * 
+     * @param services
+     */
+    public UpdateAction(ServiceLookup services) {
+        super(services);
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
@@ -78,12 +87,11 @@ public class UpdateAction extends AbstractAccountAction {
         if (Strings.isEmpty(accountId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
-        CalendarAccountStorageFactory factory = Services.getService(CalendarAccountStorageFactory.class);
+        CalendarAccountStorageFactory factory = getService(CalendarAccountStorageFactory.class);
         CalendarAccountStorage storage = factory.create(session.getContext());
         CalendarAccount account = storage.loadAccount(Integer.parseInt(accountId));
         // Updates
         storage.updateAccount(Integer.parseInt(accountId), account.getConfiguration());
         return new AJAXRequestResult();
     }
-
 }
