@@ -161,6 +161,11 @@ public class Compat {
                     }
                 }
             }
+        } else if (isSeriesMaster(event)) {
+            /*
+             * ensure to remove a series for events that used to be a series, but are no longer
+             */
+            event.removeSeriesId();
         }
         /*
          * take over timezone
