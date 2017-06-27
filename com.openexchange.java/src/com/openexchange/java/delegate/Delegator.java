@@ -175,6 +175,14 @@ public class Delegator<C> {
         return delegate;
     }
 
+    /**
+     * Delegates to the method invocation of the associated instance.
+     *
+     * @param args The method arguments to pass
+     * @return The invocation result
+     * @throws DelegationException If delegation generally fails
+     * @throws DelegationExecutionException If execution itself fails; providing the causing exception
+     */
     public final <T> T invoke(Object... args) {
         String methodName = extractMethodName();
         Method method = findMethod(methodName, args);
@@ -186,13 +194,17 @@ public class Delegator<C> {
         try {
             writeFields(superclass, source, delegate);
             method.setAccessible(true);
+
             Object result = method.invoke(delegate, args);
+
             writeFields(superclass, delegate, source);
             return result;
-        } catch (RuntimeException e) {
+        } catch (DelegationException e) {
             throw e;
+        } catch (RuntimeException e) {
+            throw new DelegationException(e);
         } catch (InvocationTargetException e) {
-            throw new DelegationException(e.getCause());
+            throw new DelegationExecutionException(e.getCause());
         } catch (Exception e) {
             throw new DelegationException(e);
         }

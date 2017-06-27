@@ -153,7 +153,6 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
     private int contextId;
     private String message;
     private String filter;
-    private boolean async;
 
     /**
      * Initializes a new {@link PortableMessageDistributor}.
@@ -169,10 +168,9 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
      * @param filter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param async Whether to send asynchronously or blocking
      */
-    public PortableMessageDistributor(Collection<String> messages, String filter, int userId, int contextId, boolean async) {
-        this(joinMessages(messages), filter, userId, contextId, async);
+    public PortableMessageDistributor(Collection<String> messages, String filter, int userId, int contextId) {
+        this(joinMessages(messages), filter, userId, contextId);
     }
 
     /**
@@ -182,15 +180,13 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
      * @param filter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param async Whether to send asynchronously or blocking
      */
-    public PortableMessageDistributor(String message, String filter, int userId, int contextId, boolean async) {
+    public PortableMessageDistributor(String message, String filter, int userId, int contextId) {
         super();
         this.userId = userId;
         this.contextId = contextId;
         this.message = message;
         this.filter = filter;
-        this.async = async;
     }
 
     @Override
@@ -211,11 +207,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
         try {
             for (String msg : messages) {
-                if (async) {
-                    application.sendToUserAsync(msg, filter, true, userId, contextId);
-                } else {
-                    application.sendToUser(msg, filter, true, userId, contextId);
-                }
+                application.sendToUserAsync(msg, filter, true, userId, contextId);
                 WS_LOGGER.debug("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", GrizzlyWebSocketUtils.abbreviateMessageArg(msg), filter, I(userId), I(contextId));
             }
             return null;
@@ -236,7 +228,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         writer.writeInt(FIELD_USER_ID, userId);
         writer.writeUTF(FIELD_MESSAGE, message);
         writer.writeUTF(FIELD_FILTER, filter);
-        writer.writeBoolean(FIELD_ASYNC, async);
+        writer.writeBoolean(FIELD_ASYNC, true);
     }
 
     @Override
@@ -245,7 +237,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         this.userId = reader.readInt(FIELD_USER_ID);
         this.message = reader.readUTF(FIELD_MESSAGE);
         this.filter = reader.readUTF(FIELD_FILTER);
-        this.async = reader.readBoolean(FIELD_ASYNC);
+        boolean async = reader.readBoolean(FIELD_ASYNC);
     }
 
 }

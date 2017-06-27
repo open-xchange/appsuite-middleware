@@ -386,7 +386,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     if (null == decorator) {
                         for (int j = 0; j < size; j++) {
                             final MailFolderInfo mfi = folderInfos.get(j);
-                            list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mfi.getFullname()), j).setName(translate ? mfi.getDisplayName() : mfi.getName()));
+                            list.add(new MailId(prepareFullname(accountId, mfi.getFullname()), j).setName(translate ? mfi.getDisplayName() : mfi.getName()));
                         }
                     } else {
                         final List<MailAccount> accountList;
@@ -422,7 +422,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         int start = list.size();
                         for (int j = 0; j < size; j++) {
                             final MailFolderInfo mfi = folderInfos.get(j);
-                            list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mfi.getFullname()), start++).setName(translate ? mfi.getDisplayName() : mfi.getName()));
+                            list.add(new MailId(prepareFullname(accountId, mfi.getFullname()), start++).setName(translate ? mfi.getDisplayName() : mfi.getName()));
                         }
                         // Add root folders for external accounts
                         final int sz = accountList.size();
@@ -460,7 +460,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == decorator) {
                 for (int j = 0; j < size; j++) {
                     final MailFolder mf = folders.get(j);
-                    list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), j).setName(mf.getName()));
+                    list.add(new MailId(prepareFullname(accountId, mf.getFullname()), j).setName(mf.getName()));
                 }
             } else {
                 final List<MailAccount> accountList;
@@ -496,7 +496,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 int start = list.size();
                 for (int j = 0; j < size; j++) {
                     final MailFolder mf = folders.get(j);
-                    list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), start++).setName(mf.getName()));
+                    list.add(new MailId(prepareFullname(accountId, mf.getFullname()), start++).setName(mf.getName()));
                 }
                 // Add root folders for external accounts
                 final int sz = accountList.size();

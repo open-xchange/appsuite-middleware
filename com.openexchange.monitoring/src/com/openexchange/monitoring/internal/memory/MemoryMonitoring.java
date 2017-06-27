@@ -143,13 +143,24 @@ public class MemoryMonitoring implements Runnable {
                  *
                  */
                 StringBuilder msg = new StringBuilder(256);
-                msg.append(Strings.getLineSeparator()).append("\tHigh GC activity detected!!!");
-                msg.append(Strings.getLineSeparator()).append("\tGarbage collection consumed ").append(decimalFormatPercent.format(gcTimePercentSum)).append("% of uptime within ").append(getTimeInfo()).append(". Thereof:");
+                List<Object> args = new ArrayList<>(8);
+
+
+                msg.append("{}\tHigh GC activity detected!!!");
+                args.add(Strings.getLineSeparator());
+
+                msg.append("{}\tGarbage collection consumed ").append(decimalFormatPercent.format(gcTimePercentSum)).append("% of uptime within ").append(getTimeInfo()).append(". Thereof:");
+                args.add(Strings.getLineSeparator());
+
                 for (GarbageCollectionInfo gcInfo : infos.gcSingles) {
-                    msg.append(Strings.getLineSeparator()).append("\t\t").append(gcInfo.gcName).append(" consumed ").append(decimalFormatPercent.format(gcInfo.gcTimePercent)).append(" (").append(decimalFormatCount.format(gcInfo.gcCountPerPeriod)).append(" collections)");
+                    msg.append("{}\t\t").append(gcInfo.gcName).append(" consumed ").append(decimalFormatPercent.format(gcInfo.gcTimePercent)).append(" (").append(decimalFormatCount.format(gcInfo.gcCountPerPeriod)).append(" collections)");
+                    args.add(Strings.getLineSeparator());
                 }
-                msg.append(Strings.getLineSeparator());
-                LOG.warn(msg.toString());
+
+                msg.append("{}");
+                args.add(Strings.getLineSeparator());
+
+                LOG.warn(msg.toString(), args.toArray(new Object[args.size()]));
             } else {
                 LOG.info("{}\tGarbage collection consumed {}% of uptime within {}. All fine.{}", Strings.getLineSeparator(), decimalFormatPercent.format(gcTimePercentSum), getTimeInfo(), Strings.getLineSeparator());
             }

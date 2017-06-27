@@ -58,6 +58,7 @@ import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -105,5 +106,9 @@ public class ImportExportServices {
             return vCardStorageFactory.getVCardStorageService(LOOKUP.get().getService(ConfigViewFactory.class), contextId);
         }
         return null;
+    }
+    
+    public static FolderService getFolderService() {
+        return LOOKUP.get().getService(FolderService.class);
     }
 }

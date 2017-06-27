@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,14 +81,17 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.policy.retry.RetryPolicy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.google.internal.CalendarEventParser;
+import com.openexchange.subscribe.google.osgi.Services;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
@@ -109,7 +113,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Initialises a new {@link GoogleCalendarSubscribeService}.
-     * 
+     *
      * @param googleMetaData The {@link OAuthServiceMetaData} for the Google subscribe service
      * @param services The {@link ServiceLookup} instance
      */
@@ -122,7 +126,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
      */
     @Override
@@ -132,7 +136,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.SubscribeService#handles(int)
      */
     @Override
@@ -142,7 +146,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
     @Override
@@ -204,57 +208,69 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
             @Override
             public Void call() throws Exception {
-                final CalendarEventParser parser = new CalendarEventParser(session);
+                Thread currentThread = Thread.currentThread();
+                ThreadControlService threadControl = Services.getOptionalService(ThreadControlService.class);
 
-                // Initialise lists
-                final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
-                final List<CalendarDataObject> deleteExceptions = new LinkedList<CalendarDataObject>();
-                final List<CalendarDataObject> series = new LinkedList<CalendarDataObject>();
+                boolean added = null == threadControl ? false : threadControl.addThread(currentThread);
+                try {
+                    final CalendarEventParser parser = new CalendarEventParser(session);
 
-                final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
-                if (null == factoryService) {
-                    throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-                }
-                final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
+                    // Initialise lists
+                    final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
+                    final List<CalendarDataObject> deleteExceptions = new LinkedList<CalendarDataObject>();
+                    final List<CalendarDataObject> series = new LinkedList<CalendarDataObject>();
 
-                // Workaround for Bug 53927. Wait until the folder was emptied
-                int objectsInFolder = -1;
-                RetryPolicy retryPolicy = new ExponentialBackOffRetryPolicy();
-                while (retryPolicy.isRetryAllowed() && objectsInFolder != 0) {
-                    LOGGER.debug("Folder was not emptied yet. Retrying");
-                    objectsInFolder = appointmentsql.countObjectsInFolder(subscription.getFolderIdAsInt());
-                }
-                if (objectsInFolder != 0) {
-                    LOGGER.warn("The Google calendar subscription folder '{}' for subscription '{}' in context '{}' was not emptied. The subscription might result in inconcistencies", subscription.getFolderIdAsInt(), subscription.getId(), subscription.getContext().getContextId());
-                }
-
-                // Generate list request...
-                Calendar.Events.List list = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(pageSize);
-
-                // ... and do the pagination
-                String nextPageToken = null;
-                Events events;
-                do {
-                    List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
-                    if (null != nextPageToken) {
-                        list.setPageToken(nextPageToken);
+                    final AppointmentSqlFactoryService factoryService = services.getOptionalService(AppointmentSqlFactoryService.class);
+                    if (null == factoryService) {
+                        throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
                     }
-                    try {
-                        events = list.execute();
-                        LOG.debug("Fetched {} events for user {} in context {}", events.size(), subscription.getSession().getUserId(), subscription.getSession().getContextId());
-                    } catch (IOException e) {
-                        LOG.error(e.getMessage(), e);
-                        throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                    final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
+
+                    // Workaround for Bug 53927. Wait until the folder was emptied
+                    int objectsInFolder = -1;
+                    RetryPolicy retryPolicy = new ExponentialBackOffRetryPolicy();
+                    while (retryPolicy.isRetryAllowed() && objectsInFolder != 0) {
+                        LOGGER.debug("Folder was not emptied yet. Retrying");
+                        objectsInFolder = appointmentsql.countObjectsInFolder(subscription.getFolderIdAsInt());
+                    }
+                    if (objectsInFolder != 0) {
+                        LOGGER.warn("The Google calendar subscription folder '{}' for subscription '{}' in context '{}' was not emptied. The subscription might result in inconcistencies", subscription.getFolderIdAsInt(), subscription.getId(), subscription.getContext().getContextId());
                     }
 
-                    // Parse the events and fill the series, change exceptions and delete exceptions lists
-                    parseAndAdd(events, parser, single, series, changeExceptions, deleteExceptions);
-                    // Handle the single appointments first
-                    handleSingleAppointments(subscription, appointmentsql, single);
-                } while ((nextPageToken = events.getNextPageToken()) != null);
+                    // Generate list request...
+                    Calendar.Events.List list = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(pageSize);
 
-                // Now handle the series, change exceptions and deletion exceptions
-                handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql);
+                    // ... and do the pagination
+                    String nextPageToken = null;
+                    Events events;
+                    do {
+                        List<CalendarDataObject> single = new LinkedList<CalendarDataObject>();
+                        if (null != nextPageToken) {
+                            list.setPageToken(nextPageToken);
+                        }
+                        try {
+                            events = list.execute();
+                            LOG.debug("Fetched {} events for user {} in context {}", events.size(), subscription.getSession().getUserId(), subscription.getSession().getContextId());
+                        } catch (IOException e) {
+                            LOG.error(e.getMessage(), e);
+                            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                        }
+
+                        // Parse the events and fill the series, change exceptions and delete exceptions lists
+                        parseAndAdd(events, parser, single, series, changeExceptions, deleteExceptions);
+                        // Handle the single appointments first
+                        handleSingleAppointments(subscription, appointmentsql, single, currentThread);
+                    } while (false == currentThread.isInterrupted() && (nextPageToken = events.getNextPageToken()) != null);
+
+                    // Now handle the series, change exceptions and deletion exceptions
+                    handleSeriesAndSeriesExceptions(subscription, changeExceptions, deleteExceptions, series, appointmentsql, currentThread);
+                } catch (ShutDownRuntimeException e) {
+                    LOG.warn("Aborted Google Calendar subscription due to server shut-down");
+                } finally {
+                    if (added && null != threadControl) {
+                        threadControl.removeThread(currentThread);
+                    }
+                }
 
                 return null;
             }
@@ -265,7 +281,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Parses the {@link Event}s into {@link CalendarDataObject}s
-     * 
+     *
      * @param events The Google {@link Event}s
      * @param parser The {@link CalendarEventParser}
      * @param singleAppointments A list with single appointments
@@ -298,14 +314,15 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Handle single appointments
-     * 
+     *
      * @param subscription The {@link Subscription}
      * @param appointmentsql The {@link AppointmentSQLInterface}
      * @param single A list with single appointments
      * @throws OXException if the appointments cannot be inserted or updated
      */
-    private void handleSingleAppointments(final Subscription subscription, final AppointmentSQLInterface appointmentsql, List<CalendarDataObject> single) throws OXException {
-        for (CalendarDataObject cdo : single) {
+    private void handleSingleAppointments(final Subscription subscription, final AppointmentSQLInterface appointmentsql, List<CalendarDataObject> single, Thread currentThread) throws OXException {
+        for (Iterator<CalendarDataObject> iter = single.iterator(); false == currentThread.isInterrupted() && iter.hasNext();) {
+            CalendarDataObject cdo = iter.next();
             cdo.setParentFolderID(subscription.getFolderIdAsInt());
             try {
                 appointmentsql.insertAppointmentObject(cdo);
@@ -317,6 +334,9 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     // Just log the exception
                     LOG.error("Couldn't import appointment {}.", cdo, e);
                 }
+            } catch (ShutDownRuntimeException e) {
+                // Re-throw...
+                throw e;
             } catch (RuntimeException e) {
                 LOG.error("Unexpected exception while importing appointment {}.", cdo, e);
             }
@@ -325,35 +345,37 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Handles the appointment series and appointment series exceptions
-     * 
+     *
      * @param subscription The {@link Subscription}
      * @param changeExceptions A list with change exceptions
      * @param deleteExceptions A list with delete exceptions
      * @param series A list with appointment series
      * @param appointmentsql The {@link AppointmentSQLInterface}
+     * @param currentThread The current thread
      * @throws OXException if the operation fails
      */
-    void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql) throws OXException {
+    void handleSeriesAndSeriesExceptions(final Subscription subscription, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql, Thread currentThread) throws OXException {
         final Map<String, CalendarDataObject> masterMap = new HashMap<String, CalendarDataObject>(series.size());
 
-        handleSeries(subscription, series, appointmentsql, masterMap);
-        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false);
-        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true);
+        handleSeries(subscription, series, appointmentsql, masterMap, currentThread);
+        handleExceptions(subscription, changeExceptions, appointmentsql, masterMap, false, currentThread);
+        handleExceptions(subscription, deleteExceptions, appointmentsql, masterMap, true, currentThread);
     }
 
     /**
      * Handles the appointment series
-     * 
+     *
      * @param subscription The {@link Subscription}
      * @param series A list with series {@link CalendarDataObject}
      * @param appointmentsql The {@link AppointmentSQLInterface}
      * @param masterMap The map with all the appointments in the {@link Subscription}
+     * @param currentThread The current thread
      * @return The map with all the appointments in the {@link Subscription}
      * @throws OXException if the operation fails
      */
-    private Map<String, CalendarDataObject> handleSeries(final Subscription subscription, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap) throws OXException {
-        // Handle series
-        for (CalendarDataObject cdo : series) {
+    private Map<String, CalendarDataObject> handleSeries(final Subscription subscription, final List<CalendarDataObject> series, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, Thread currentThread) throws OXException {
+        for (Iterator<CalendarDataObject> iter = series.iterator(); false == currentThread.isInterrupted() && iter.hasNext();) {
+            CalendarDataObject cdo = iter.next();
             try {
                 cdo.setParentFolderID(subscription.getFolderIdAsInt());
                 appointmentsql.insertAppointmentObject(cdo);
@@ -366,6 +388,9 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     // Just log the exception
                     LOG.error("Couldn't import series appointment {}.", cdo, e);
                 }
+            } catch (ShutDownRuntimeException e) {
+                // Re-throw...
+                throw e;
             } catch (RuntimeException e) {
                 LOG.error("Unexpected exception while importing series appointment {}.", cdo, e);
             }
@@ -375,40 +400,47 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Handles the appointment exceptions
-     * 
+     *
      * @param subscription The {@link Subscription}
      * @param exceptions A list with {@link CalendarDataObject} exceptions
      * @param appointmentsql The {@link AppointmentSQLInterface}
      * @param masterMap A map with all the appointments in the {@link Subscription}
      * @param delete flag indicating a delete exception when true and a change exception when false
+     * @param currentThread The current thread
      * @throws OXException if the operation fails
      */
-    private void handleExceptions(final Subscription subscription, final List<CalendarDataObject> exceptions, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, final boolean delete) throws OXException {
+    private void handleExceptions(final Subscription subscription, final List<CalendarDataObject> exceptions, final AppointmentSQLInterface appointmentsql, final Map<String, CalendarDataObject> masterMap, final boolean delete, Thread currentThread) throws OXException {
         // Handle exceptions
         final java.util.Calendar utcCalendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        for (CalendarDataObject cdo : exceptions) {
+        for (Iterator<CalendarDataObject> iter = exceptions.iterator(); false == currentThread.isInterrupted() && iter.hasNext();) {
+            CalendarDataObject cdo = iter.next();
             String uid = cdo.getUid();
             final CalendarDataObject masterObj = masterMap.get(uid);
             if (masterObj != null) {
                 cdo.setObjectID(masterObj.getObjectID());
                 setBeginOfTheDay(cdo.getStartDate(), utcCalendar);
                 cdo.setRecurrenceDatePosition(utcCalendar.getTime());
-                boolean error = false;
+                boolean error = true;
                 if (delete) {
                     try {
                         appointmentsql.deleteAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                        error = false;
                     } catch (SQLException e) {
-                        error = true;
                         throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    } catch (ShutDownRuntimeException e) {
+                        // Re-throw...
+                        throw e;
                     } catch (Exception e) {
-                        error = true;
                         LOG.error("Couldn't create delete exception {} to series appointment {}.", cdo, masterObj, e);
                     }
                 } else {
                     try {
                         appointmentsql.updateAppointmentObject(cdo, subscription.getFolderIdAsInt(), masterObj.getLastModified());
+                        error = false;
+                    } catch (ShutDownRuntimeException e) {
+                        // Re-throw...
+                        throw e;
                     } catch (Exception e) {
-                        error = true;
                         LOG.error("Couldn't create change exception {} to series appointment {}.", cdo, masterObj, e);
                     }
                 }
@@ -421,7 +453,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
     /**
      * Sets the begin of the day to the specified {@link java.util.Calendar}
-     * 
+     *
      * @param startDate The start date
      * @param calendar The {@link java.util.Calendar}
      */
