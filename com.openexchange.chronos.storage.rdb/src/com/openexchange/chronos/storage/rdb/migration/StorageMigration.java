@@ -103,8 +103,10 @@ public class StorageMigration {
             CalendarStorage sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             CalendarStorage destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             MigrationResult result = run(sourceStorage, destinationStorage, batchSize);
-            writeConnection.commit();
-            committed = true;
+            if (null == result.getErrors() || result.getErrors().isEmpty()) {
+                writeConnection.commit();
+                committed = true;
+            }
             return result;
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
