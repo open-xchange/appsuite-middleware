@@ -60,8 +60,7 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
 
     private final boolean failOnError;
     private final Boolean exportDlists;
-    private int contactId;
-    private String batchContactIds;
+    private final String batchContactIds;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
         this(folderId, null, failOnError);
@@ -71,14 +70,13 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
-        this.contactId = -1;
+        batchContactIds = null;
     }
-    
-    public VCardExportRequest(int folderId, Boolean exportDlists, int contactId, String batchIds, boolean failOnError) {
+
+    public VCardExportRequest(int folderId, Boolean exportDlists, String batchIds, boolean failOnError) {
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
-        this.contactId = contactId;
         this.batchContactIds = batchIds;
     }
 
@@ -86,11 +84,11 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         Parameter[] parameters = super.getParameters();
         if (null != exportDlists) {
-            parameters = parametersToAdd(new Parameter("export_dlists", exportDlists.booleanValue()), parameters);            
-        }   
+            parameters = parametersToAdd(new Parameter("export_dlists", exportDlists.booleanValue()), parameters);
+        }
         if (null != batchContactIds) {
-            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_VCARD_EXPORT, batchContactIds), parameters);
-        } 
+            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_IDS, batchContactIds), parameters);
+        }
         if (this.getFolderId() < 0) {
             parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);
         }
@@ -101,14 +99,14 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
     public AbstractAJAXParser<VCardExportResponse> getParser() {
         return new VCardExportParser(failOnError);
     }
-    
+
     private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToAdd(Parameter parameter, Parameter[] parameters) {
         Parameter[] newParameters = new Parameter[parameters.length + 1];
         System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
         newParameters[newParameters.length - 1] = parameter;
         return newParameters;
     }
-    
+
     private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToRemove(String parameter, Parameter[] parameters) {
         List<Parameter> list = Arrays.asList(parameters);
         List<Parameter> newList = new ArrayList<Parameter>();

@@ -54,8 +54,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
-import com.openexchange.ajax.importexport.actions.CSVExportRequest;
-import com.openexchange.ajax.importexport.actions.CSVExportResponse;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.ajax.importexport.actions.VCardExportResponse;
 import com.openexchange.exception.OXException;
@@ -73,53 +71,57 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         super();
     }
     
-    private final String DOT_DELIMITER = ".";
+    private final String BRACKET_DELIMITER = "[";
+    private final String CLOSE_BRACKET_DELIMITER = "]";
     private final String COMMA_DELIMITER = ",";
     
-//    @Test
-//    public void testVCardSingleExport() throws OXException, IOException, JSONException{
-//        Contact contact = generateContact("Singlecontact");
-//        int contactId = cotm.newAction(contact).getObjectID();
-//        
-//        String singleId = folderID+DOT_DELIMITER+contactId;
-//        
-//        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false, 0, singleId, false));
-//        String vcard = (String) vcardExportResponse.getData(); 
-//        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-//        assertEquals("One vCard expected!", 1, result.length);
-//    }
-//    
-//    @Test
-//    public void testVCardMultipleExport() throws OXException, IOException, JSONException{
-//        Contact firstContact = generateContact("First Contact");
-//        int firstId = cotm.newAction(firstContact).getObjectID();
-//        
-//        Contact secondContact = generateContact("Second Contact");
-//        int secondId = cotm.newAction(secondContact).getObjectID();
-//        
-//        Contact thirdContact = generateContact("Third Contact");
-//        int thirdId = cotm.newAction(thirdContact).getObjectID();
-//        
-//        String batchIds = folderID+DOT_DELIMITER+firstId+COMMA_DELIMITER+folderID+DOT_DELIMITER+secondId+COMMA_DELIMITER+folderID+DOT_DELIMITER+thirdId;
-//        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false, 0, batchIds, false));
-//        String vcard = (String) vcardExportResponse.getData(); 
-//        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-//        assertEquals("Three vCards expected!", 3, result.length);
-//    }
-//    
-//    @Test
-//    public void testVCardOldFolderExport() throws OXException, IOException, JSONException{
-//        Contact firstContact = generateContact("First Contact");
-//        cotm.newAction(firstContact).getObjectID();
-//        
-//        Contact secondContact = generateContact("Second Contact");
-//        cotm.newAction(secondContact).getObjectID();
-//        
-//        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false));
-//        String vcard = (String) vcardExportResponse.getData();        
-//        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-//        assertEquals("Two vCards expected!", 2, result.length);
-//    }    
+    @Test
+    public void testVCardSingleExport() throws OXException, IOException, JSONException{
+        Contact contact = generateContact("Singlecontact");
+        int contactId = cotm.newAction(contact).getObjectID();
+        
+        String singleId = BRACKET_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+contactId+CLOSE_BRACKET_DELIMITER+CLOSE_BRACKET_DELIMITER;
+        
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false, singleId, false));
+        String vcard = (String) vcardExportResponse.getData(); 
+        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
+        assertEquals("One vCard expected!", 1, result.length);
+    }
+    
+    @Test
+    public void testVCardMultipleExport() throws OXException, IOException, JSONException{
+        Contact firstContact = generateContact("First Contact");
+        int firstId = cotm.newAction(firstContact).getObjectID();
+        
+        Contact secondContact = generateContact("Second Contact");
+        int secondId = cotm.newAction(secondContact).getObjectID();
+        
+        Contact thirdContact = generateContact("Third Contact");
+        int thirdId = cotm.newAction(thirdContact).getObjectID();
+        
+        String batchIds = BRACKET_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+firstId+CLOSE_BRACKET_DELIMITER
+            +COMMA_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+secondId+CLOSE_BRACKET_DELIMITER
+            +COMMA_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+thirdId+CLOSE_BRACKET_DELIMITER+CLOSE_BRACKET_DELIMITER;
+        
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false, batchIds, false));
+        String vcard = (String) vcardExportResponse.getData(); 
+        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
+        assertEquals("Three vCards expected!", 3, result.length);
+    }
+    
+    @Test
+    public void testVCardOldFolderExport() throws OXException, IOException, JSONException{
+        Contact firstContact = generateContact("First Contact");
+        cotm.newAction(firstContact).getObjectID();
+        
+        Contact secondContact = generateContact("Second Contact");
+        cotm.newAction(secondContact).getObjectID();
+        
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false));
+        String vcard = (String) vcardExportResponse.getData();        
+        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
+        assertEquals("Two vCards expected!", 2, result.length);
+    }    
     
     @Test
     public void testCrossFolderBatchExportTest() throws OXException, IOException, JSONException{
@@ -132,8 +134,10 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         Contact thirdContact = generateContact("Third Contact", secondFolderID);
         int thirdId = cotm.newAction(thirdContact).getObjectID();
         
-        String batchIds = folderID+DOT_DELIMITER+firstId+COMMA_DELIMITER+folderID+DOT_DELIMITER+secondId+COMMA_DELIMITER+secondFolderID+DOT_DELIMITER+thirdId;
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, false, 0, batchIds, false));
+        String batchIds = BRACKET_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+firstId+CLOSE_BRACKET_DELIMITER
+            +COMMA_DELIMITER+BRACKET_DELIMITER+folderID+COMMA_DELIMITER+secondId+CLOSE_BRACKET_DELIMITER
+            +COMMA_DELIMITER+BRACKET_DELIMITER+secondFolderID+COMMA_DELIMITER+thirdId+CLOSE_BRACKET_DELIMITER+CLOSE_BRACKET_DELIMITER;
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, false, batchIds, false));
         String vcard = (String) vcardExportResponse.getData(); 
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Three vCards expected!", 3, result.length);        

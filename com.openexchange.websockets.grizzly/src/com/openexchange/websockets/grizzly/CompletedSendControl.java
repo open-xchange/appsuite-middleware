@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,67 +47,58 @@
  *
  */
 
-package com.openexchange.database.provider;
+package com.openexchange.websockets.grizzly;
 
-import static com.openexchange.database.Databases.autocommit;
-import java.sql.Connection;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link DatabaseServiceDBProvider} - The {@link DBProvider} backed by specified {@link DatabaseService} instance.
+ * {@link CompletedSendControl} - The send-control which already completed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DatabaseServiceDBProvider implements DBProvider {
+public class CompletedSendControl implements SendControl {
 
-    private final DatabaseService databaseService;
+    private static final CompletedSendControl INSTANCE = new CompletedSendControl();
 
     /**
-     * Initializes a new {@link DatabaseServiceDBProvider}.
+     * Gets the instance
      *
-     * @param databaseService The backing {@link DatabaseService} instance
+     * @return The instance
      */
-    public DatabaseServiceDBProvider(final DatabaseService databaseService) {
+    public static CompletedSendControl getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link CompletedSendControl}.
+     */
+    private CompletedSendControl() {
         super();
-        this.databaseService = databaseService;
     }
 
     @Override
-    public Connection getReadConnection(final Context ctx) throws OXException {
-        return databaseService.getReadOnly(ctx);
+    public void awaitDone() throws InterruptedException {
+        // Nothing
     }
 
     @Override
-    public void releaseReadConnection(final Context ctx, final Connection con) {
-        if (con != null) {
-            databaseService.backReadOnly(ctx, con);
-        }
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        // Nothing
     }
 
     @Override
-    public Connection getWriteConnection(final Context ctx) throws OXException {
-        return databaseService.getWritable(ctx);
+    public boolean isDone() {
+        return true;
     }
 
     @Override
-    public void releaseWriteConnection(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritable(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
-        if (con == null) {
-            return;
-        }
-        autocommit(con);
-        databaseService.backWritableAfterReading(ctx, con);
-
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
     }
 
 }

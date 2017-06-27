@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.activation.FileTypeMap;
@@ -86,11 +87,14 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.google.internal.ContactEntryParser;
+import com.openexchange.subscribe.google.osgi.Services;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -302,11 +306,12 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             int page = 1;
             adjustQuery(contactQuery, page, pageSize);
 
+            Thread currentThread = Thread.currentThread();
             List<Contact> contacts;
             int resultsFound;
             {
                 contacts = new LinkedList<Contact>();
-                resultsFound = fetchResults(contactsService, contactQuery, contacts);
+                resultsFound = fetchResults(contactsService, contactQuery, contacts, currentThread);
             }
 
             if (resultsFound != pageSize) {
@@ -325,9 +330,9 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                 // All with this thread
                 do {
                     adjustQuery(contactQuery, page, pageSize);
-                    resultsFound = fetchResults(contactsService, contactQuery, contacts);
+                    resultsFound = fetchResults(contactsService, contactQuery, contacts, currentThread);
                     page++;
-                } while (resultsFound == pageSize);
+                } while (false == currentThread.isInterrupted() && resultsFound == pageSize);
                 return contacts;
             }
 
@@ -338,16 +343,28 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
 
                     @Override
                     public Void call() throws Exception {
-                        int page = pageOffset;
-                        int resultsFound = pageSize;
-                        while (resultsFound == pageSize) {
-                            List<Contact> contacts = new ArrayList<Contact>();
-                            adjustQuery(contactQuery, page, pageSize);
-                            resultsFound = fetchResults(contactsService, contactQuery, contacts);
-                            folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+                        Thread currentThread = Thread.currentThread();
+                        ThreadControlService threadControl = Services.getOptionalService(ThreadControlService.class);
 
-                            // Next page...
-                            page++;
+                        boolean added = null == threadControl ? false : threadControl.addThread(currentThread);
+                        try {
+                            int page = pageOffset;
+                            int resultsFound = pageSize;
+                            while (false == currentThread.isInterrupted() && resultsFound == pageSize) {
+                                List<Contact> contacts = new ArrayList<Contact>();
+                                adjustQuery(contactQuery, page, pageSize);
+                                resultsFound = fetchResults(contactsService, contactQuery, contacts, currentThread);
+                                folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+
+                                // Next page...
+                                page++;
+                            }
+                        } catch (ShutDownRuntimeException e) {
+                            LOG.warn("Aborted Google Contact subscription due to server shut-down");
+                        } finally {
+                            if (added && null != threadControl) {
+                                threadControl.removeThread(currentThread);
+                            }
                         }
                         return null;
                     }
@@ -370,7 +387,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         query.setMaxResults(pageSize);
     }
 
-    private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
+    private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts, final Thread currentThread) throws OXException, IOException, ServiceException {
         ContactFeed contactFeed;
         try {
             contactFeed = contactsService.getFeed(query, ContactFeed.class);
@@ -384,7 +401,8 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             throw e;
         }
 
-        for (ContactEntry entry : contactFeed.getEntries()) {
+        for (Iterator<ContactEntry> iter = contactFeed.getEntries().iterator(); false == currentThread.isInterrupted() && iter.hasNext();) {
+            ContactEntry entry = iter.next();
             Contact contact = new Contact();
             parser.parseContact(entry, contact);
             loadingPhotoHandler.handlePhoto(contactsService, entry, contact);

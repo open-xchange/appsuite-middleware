@@ -225,12 +225,24 @@ public class ICalExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return exportData(session, format, folderID, 0, fieldsToBeExported, optionalParams, null);
+        return doExportData(session, format, folderID, null, fieldsToBeExported, optionalParams);
     }
 
     @Override
-    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams, Map<String, List<String>> batchIds) throws OXException {
+    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportData(session, format, folderID, objectID, fieldsToBeExported, optionalParams);
+    }
+
+    private SizedInputStream doExportData(ServerSession session, Format format, String folderID, String optObjectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         FolderObject folder = getFolder(session, folderID);
+        int objId = 0;
+        if (null != optObjectID) {
+            try {
+                objId = Integer.parseInt(optObjectID);
+            } catch (NumberFormatException e) {
+                throw OXException.general("Invalid object identifier: " + optObjectID, e);
+            }
+        }
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
@@ -239,17 +251,17 @@ public class ICalExporter implements Exporter {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+createExportFileName(session, folderID, null) + Format.ICAL.getExtension());
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+getExportFileName(session, folderID) + Format.ICAL.getExtension());
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
                         if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
-                            exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                            exportAppointments(session, folder.getObjectID(), objId, fieldsToBeExported, out);
                         } else {
-                            exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objectID), fieldsToBeExported, out);
+                            exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objId), fieldsToBeExported, out);
                         }
                     } else if (FolderObject.TASK == folder.getModule()) {
-                        exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                        exportTasks(session, folder.getObjectID(), objId, fieldsToBeExported, out);
                     } else {
                         throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
                     }
@@ -263,12 +275,12 @@ public class ICalExporter implements Exporter {
         ThresholdFileHolder sink;
         if (FolderObject.CALENDAR == folder.getModule()) {
             if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
-                sink = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+                sink = exportAppointments(session, folder.getObjectID(), objId, fieldsToBeExported, null);
             } else {
-                sink = exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objectID), fieldsToBeExported, null);
+                sink = exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objId), fieldsToBeExported, null);
             }
         } else if (FolderObject.TASK == folder.getModule()) {
-            sink = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+            sink = exportTasks(session, folder.getObjectID(), objId, fieldsToBeExported, null);
         } else {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
         }
@@ -503,11 +515,11 @@ public class ICalExporter implements Exporter {
     }
 
     @Override
-    public String getExportFileName(ServerSession session, String folder, final Map<String, List<String>> batchIds) throws OXException {
-        return createExportFileName(session, folder, null);
+    public String getExportFileName(ServerSession session, String folder) throws OXException {
+        return createExportFileName(session, folder);
     }
 
-    private String createExportFileName(ServerSession session, String folder, String batchId) throws OXException {
+    private String createExportFileName(ServerSession session, String folder) throws OXException {
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
         try {
@@ -515,8 +527,6 @@ public class ICalExporter implements Exporter {
             sb.append(folderObj.getFolderName());
         } catch (OXException e) {
             throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-        } finally {
-            sb.append("export");
         }
         sb.append(".");
         return sb.toString();
