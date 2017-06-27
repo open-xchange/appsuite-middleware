@@ -8990,6 +8990,16 @@ msgstr ""
 msgid "Authentication failed for user name: %1$s"
 msgstr ""
 
+#. unknown location
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:64
+msgid "unknown location"
+msgstr ""
+
+#. Session not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/exception/SessionManagementExceptionMessages.java:64
+msgid "Session not found."
+msgstr ""
+
 #. No session found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 msgid "No session found for identifier: %1$s"
