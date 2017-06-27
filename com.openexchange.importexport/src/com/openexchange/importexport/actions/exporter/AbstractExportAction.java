@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.exporters.BatchCapableExporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.json.ExportRequest;
@@ -82,43 +83,91 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private static final String DOWNLOAD = "download";
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
-        final List<Integer> cols = req.getColumns();
-        final SizedInputStream sis;
-        if(null == req.getBatchIds() || req.getBatchIds().isEmpty()){
-            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
-        }
-        else{
-            sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), 0, cols != null ? I2i(cols) : null, getOptionalParams(req), req.getBatchIds());
+        int[] fieldsToBeExported = req.getColumns() != null ? I2i(req.getColumns()) : null;
+        Map<String, List<String>> batchIds = req.getBatchIds();
+        Exporter exporter = getExporter();
+
+        SizedInputStream sis;
+        if (doBatchExport(batchIds, exporter)) {
+            sis = ((BatchCapableExporter) exporter).exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
+        } else {
+            FolderAndId singleId = optSingleId(batchIds);
+            if (null == singleId) {
+                String objectId = req.getObjectId();
+                if (null == objectId) {
+                    sis = exporter.exportData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
+                } else {
+                    sis = exporter.exportSingleData(req.getSession(), getFormat(), req.getFolder(), objectId, fieldsToBeExported, getOptionalParams(req));
+                }
+            } else {
+                sis = exporter.exportSingleData(req.getSession(), getFormat(), singleId.folder, singleId.objectId, fieldsToBeExported, getOptionalParams(req));
+            }
         }
 
         if (null == sis) {
             // Streamed
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
-        
-        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension());
+
+        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), getExportFileName(req) + sis.getFormat().getExtension());
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
     }
 
-    protected Map<String, Object> getOptionalParams(ExportRequest req) {
-        final Map<String, Object> optionalParams;
-        final AJAXRequestData request = req.getRequest();
+    private boolean doBatchExport(Map<String, List<String>> batchIds, Exporter exporter) {
+        return (exporter instanceof BatchCapableExporter) && (null != batchIds && false == batchIds.isEmpty());
+    }
 
-        final boolean responseAccess = request.isHttpServletResponseAvailable();
-        if (responseAccess) {
-            optionalParams = new HashMap<String, Object>(4);
-            optionalParams.put("__requestData", request);
-            String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
-            String delivery = request.getParameter(DELIVERY);
-            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                optionalParams.put("__saveToDisk", Boolean.TRUE);
+    private FolderAndId optSingleId(Map<String, List<String>> batchIds) {
+        if (null != batchIds && 1 == batchIds.size()) {
+            Map.Entry<String, List<String>> singleEntry = batchIds.entrySet().iterator().next();
+            List<String> ids = singleEntry.getValue();
+            if (1 == ids.size()) {
+                return new FolderAndId(singleEntry.getKey(), ids.get(0));
             }
-        } else {
-            optionalParams = null;
+        }
+
+        return null;
+    }
+
+    protected Map<String, Object> getOptionalParams(ExportRequest req) {
+        AJAXRequestData request = req.getRequest();
+        boolean responseAccess = request.isHttpServletResponseAvailable();
+        if (!responseAccess) {
+            return null;
+        }
+
+        Map<String, Object> optionalParams = new HashMap<String, Object>(4);
+        optionalParams.put("__requestData", request);
+        String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
+        String delivery = request.getParameter(DELIVERY);
+        if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+            optionalParams.put("__saveToDisk", Boolean.TRUE);
         }
 
         return optionalParams;
     }
+
+    private String getExportFileName(ExportRequest req) throws OXException{
+        if (null == req.getBatchIds() || req.getBatchIds().isEmpty()) {
+            return getExporter().getExportFileName(req.getSession(), req.getFolder());
+        } else {
+            return ((BatchCapableExporter) getExporter()).getExportFileName(req.getSession(), req.getBatchIds());
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    private static final class FolderAndId {
+        final String folder;
+        final String objectId;
+
+        FolderAndId(String folder, String objectId) {
+            super();
+            this.folder = folder;
+            this.objectId = objectId;
+        }
+    }
+
 }

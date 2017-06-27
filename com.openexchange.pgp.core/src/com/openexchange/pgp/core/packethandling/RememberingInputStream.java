@@ -51,7 +51,9 @@ package com.openexchange.pgp.core.packethandling;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * {@link RememberingInputStream} represents an InputStream which remembers the data which has been read
@@ -62,7 +64,8 @@ import java.util.Arrays;
 class RememberingInputStream extends InputStream {
 
     private final InputStream in;
-    private byte[] buffer = null;
+    private ArrayList<Byte> buffer = null;
+    private boolean remember;
 
     /**
      * Initializes a new {@link RememberingInputStream}.
@@ -71,6 +74,7 @@ class RememberingInputStream extends InputStream {
      */
     public RememberingInputStream(InputStream inputStream) {
         this.in = inputStream;
+        this.remember = false;
     }
 
     /**
@@ -79,15 +83,11 @@ class RememberingInputStream extends InputStream {
      * @param b The bytes to remember
      */
     private void addToBuffer(byte... b) {
-        if (buffer == null) {
-            buffer = new byte[b.length];
-            System.arraycopy(b, 0, buffer, 0, b.length);
-        }
-        else {
-            byte[] newBuffer = new byte[buffer.length + b.length];
-            System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
-            System.arraycopy(b, 0, newBuffer, buffer.length, b.length);
-            buffer = newBuffer;
+        if(remember) {
+            if (buffer == null) {
+                buffer = new ArrayList<Byte>(b.length);
+            }
+            buffer.addAll(Arrays.asList(ArrayUtils.toObject(b)));
         }
     }
 
@@ -97,14 +97,34 @@ class RememberingInputStream extends InputStream {
      * @return
      */
     public byte[] getBuffer() {
-        return buffer;
+        if(buffer == null) {
+            return new byte[] {};
+        }
+        return ArrayUtils.toPrimitive(this.buffer.toArray(new Byte[buffer.size()]));
     }
 
     /**
      * Resets the internal "remember" buffer
      */
     public void resetBuffer() {
-        buffer = null;
+        if(buffer != null) {
+            buffer.clear();
+            buffer = null;
+        }
+    }
+
+    /**
+     * Starts remembering all bytes read from the InputStream
+     */
+    public void startRemembering() {
+        this.remember = true;
+    }
+
+    /**
+     * Stops remembering
+     */
+    public void stopRemembering() {
+        this.remember = false;
     }
 
     /**
@@ -112,7 +132,7 @@ class RememberingInputStream extends InputStream {
      *
      * @return The underlying InputStream
      */
-    public InputStream getRememberingStream() {
+    public InputStream getRememberedStream() {
         return this.in;
     }
 

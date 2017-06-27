@@ -223,10 +223,10 @@ public class JSONStringEncoderReader extends Reader {
 
         @Override
         public int next() {
+            int ch = this.ch;
             if (ch < 0) {
                 return -1;
             }
-            int ch = this.ch;
             this.ch = -1;
             return ch;
         }

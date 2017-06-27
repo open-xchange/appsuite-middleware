@@ -47,36 +47,34 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.impl;
-
-import java.util.concurrent.Future;
-import com.openexchange.websockets.SendControl;
-
+package com.openexchange.monitoring.sockets;
 
 /**
- * {@link SendControlImpl}
+ * {@link SocketFailure} - A socket failure; connect error, timeout, whatever...
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-public class SendControlImpl<V> implements SendControl {
-
-    private final Future<V> future;
+public interface SocketFailure<E extends Exception> {
 
     /**
-     * Initializes a new {@link SendControlImpl}.
+     * Gets the exception
      *
-     * @param future The backing {@link Future} instance
+     * @return The exception
      */
-    public SendControlImpl(Future<V> future) {
-        super();
-        this.future = future;
+    E getE();
 
-    }
+    /**
+     * Gets the tracked milliseconds
+     *
+     * @return The tracked milliseconds until exception occurred or <code>-1</code>
+     */
+    long getMillis();
 
-    @Override
-    public boolean isDone() {
-        return future.isDone();
-    }
-
+    /**
+     * Gets the status assoaciated with this failure
+     *
+     * @return The status
+     */
+    SocketStatus getStatus();
 }

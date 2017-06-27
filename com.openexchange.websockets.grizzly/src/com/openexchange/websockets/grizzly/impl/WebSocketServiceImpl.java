@@ -50,9 +50,7 @@
 package com.openexchange.websockets.grizzly.impl;
 
 import java.util.List;
-import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
-import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketInfo;
@@ -70,7 +68,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private final DefaultGrizzlyWebSocketApplication localApp;
     private final RemoteWebSocketDistributor remoteDistributor;
-    private final boolean asyncRemoteDistribution;
 
     /**
      * Initializes a new {@link WebSocketServiceImpl}.
@@ -79,7 +76,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         super();
         this.localApp = app;
         this.remoteDistributor = remoteDistributor;
-        asyncRemoteDistribution = true;
     }
 
     @Override
@@ -105,11 +101,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         sendMessage(message, null, userId, contextId);
     }
 
-    @Override
-    public SendControl sendMessageAsync(String message, int userId, int contextId) throws OXException {
-        return sendMessageAsync(message, null, userId, contextId);
-    }
-
     // -------------------------------------------------------------------------------------------------------------
 
     @Override
@@ -119,18 +110,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         localApp.sendToUser(message, pathFilter, false, userId, contextId);
-        remoteDistributor.sendRemote(message, pathFilter, userId, contextId, asyncRemoteDistribution);
-    }
-
-    @Override
-    public SendControl sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException {
-        if (false == WebSockets.validatePath(pathFilter)) {
-            throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
-        }
-
-        Future<Void> f = localApp.sendToUserAsync(message, pathFilter, false, userId, contextId);
-        remoteDistributor.sendRemote(message, pathFilter, userId, contextId, true);
-        return new SendControlImpl<Void>(f);
+        remoteDistributor.sendRemote(message, pathFilter, userId, contextId);
     }
 
     // -------------------------------------------------------------------------------------------------------------

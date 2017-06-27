@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,31 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.monitoring.sockets;
 
-import static org.junit.Assert.*;
 import java.io.IOException;
-import org.json.JSONException;
-import org.junit.Test;
-import com.openexchange.ajax.contact.AbstractManagedContactTest;
-import com.openexchange.ajax.importexport.actions.VCardExportRequest;
-import com.openexchange.ajax.importexport.actions.VCardExportResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link SingleVCardExportTest}
+ * {@link IOFailure} - The generic I/O failure.
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class SingleVCardExportTest extends AbstractManagedContactTest {
+public class IOFailure extends AbstractSocketFailure<IOException> {
 
-    public SingleVCardExportTest() {
-        super();
+    /**
+     * Initializes a new {@link IOFailure}.
+     *
+     * @param e The I/O exception that occurred
+     * @param millis The tracked milliseconds until I/O error occurred
+     */
+    public IOFailure(IOException e, long millis) {
+        super(e, millis);
     }
-    
-    @Test
-    public void testVCardSingleExport() throws OXException, IOException, JSONException{
-        Contact contact = generateContact("Singlecontact");
-        int contactId = cotm.newAction(contact).getObjectID();
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, contactId, false));
-        String vcard = (String) vcardExportResponse.getData();
-        
-        assertNotNull(vcard);        
+
+    @Override
+    public SocketStatus getStatus() {
+        return SocketStatus.READ_ERROR;
     }
-    
-    @Test
-    public void testVCardSingleExportDistList() {
-        //add a case with distributionlist
-    }
-    
+
 }

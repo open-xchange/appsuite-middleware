@@ -1572,6 +1572,13 @@ EOF
   fi
 fi
 
+# SoftwareChange_Request-4204
+pfile=/opt/open-xchange/etc/whitelist.properties
+for property in html.style.page-break-{after,before,inside}
+do
+  ox_remove_property ${property} ${pfile}
+done
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
