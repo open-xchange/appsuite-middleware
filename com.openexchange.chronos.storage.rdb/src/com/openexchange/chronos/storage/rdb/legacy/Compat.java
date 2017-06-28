@@ -117,24 +117,27 @@ public class Compat {
     public static Event adjustAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             /*
-             * extract series pattern and "absolute duration" / "recurrence calculator" field
+             * convert legacy series pattern into proper recurrence rule after extracting
+             * series pattern and "absolute duration" / "recurrence calculator" field
              */
-            String value = event.getRecurrenceRule();
-            int idx = value.indexOf('~');
-            int absoluteDuration = Integer.parseInt(value.substring(0, idx));
-            String databasePattern = value.substring(idx + 1);
             TimeZone timeZone = optTimeZone(event.getStartTimeZone(), TimeZones.UTC);
-            /*
-             * convert legacy series pattern into proper recurrence rule
-             */
-            SeriesPattern seriesPattern = new SeriesPattern(databasePattern);
-            RecurrenceData recurrenceData = getRecurrenceData(seriesPattern, timeZone, event.isAllDay());
+            int absoluteDuration = 0;
+            RecurrenceData recurrenceData = null;
+            try {
+                int idx = event.getRecurrenceRule().indexOf('~');
+                absoluteDuration = Integer.parseInt(event.getRecurrenceRule().substring(0, idx));
+                String databasePattern = event.getRecurrenceRule().substring(idx + 1);
+                recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.isAllDay());
+            } catch (IllegalArgumentException | OXException e) {
+                LOG.info("Ignoring invalid legacy series pattern {} in event {}", event.getRecurrenceRule(), event.getId(), e);
+                eventStorage.addWarning(event.getId(), CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, event.getId(), EventField.RECURRENCE_RULE));
+            }
+            event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             if (null != recurrenceData) {
                 if (isSeriesMaster(event)) {
                     /*
                      * apply recurrence rule & adjust the recurrence master's actual start- and enddate
                      */
-                    event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
                     Period seriesPeriod = new Period(event);
                     Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
                     event.setStartDate(masterPeriod.getStartDate());

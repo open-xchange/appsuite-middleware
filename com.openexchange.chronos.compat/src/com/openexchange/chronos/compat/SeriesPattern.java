@@ -117,8 +117,9 @@ public class SeriesPattern {
      * Initializes a new {@link SeriesPattern}.
      *
      * @param databasePattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
+     * @throws IllegalArgumentException If input not parseable
      */
-    public SeriesPattern(String databasePattern) {
+    public SeriesPattern(String databasePattern) throws IllegalArgumentException {
         super();
         deserialize(databasePattern);
     }
@@ -133,6 +134,12 @@ public class SeriesPattern {
         this.type = I(type);
     }
 
+    /**
+     * Deserializes the supplied legacy series pattern.
+     *
+     * @param databasePattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>
+     * @throws IllegalArgumentException If input not parseable
+     */
     private void deserialize(String pattern) throws IllegalArgumentException {
         String[] splitted = pattern.split("\\|");
         for (int i = 1; i < splitted.length; i += 2) {
