@@ -93,7 +93,7 @@ import com.openexchange.tools.arrays.Arrays;
 @RunWith(Parameterized.class)
 public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
-    private String taxonomyTypes = "groupware_premium";
+    private final String taxonomyTypes = "groupware_premium";
     private Context old;
     private static final String reloadables = "AdvertisementPackageServiceImpl";
     private static final String DEFAULT = "default";
@@ -194,7 +194,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
         JSONValue adConfig = generateAdConfig();
         try {
-            advertisementApi.put_2(contextId, userId, adConfig.toString());
+            advertisementApi.putAdvertisementByUserId(contextId, userId, adConfig.toString());
             assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
@@ -208,7 +208,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         } catch (Exception e) {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
-            advertisementApi.delete_1(contextId, userId);
+            advertisementApi.deleteAdvertisementByUserId(contextId, userId);
             assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         }
     }
@@ -228,7 +228,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
         JSONValue adConfig = generateAdConfig();
         try {
-            advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
+            advertisementApi.putAdvertisementByResellerAndPackage(DEFAULT, pack, adConfig.toString());
             assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
 
             GetConfigRequest req = new GetConfigRequest();
@@ -238,7 +238,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         } catch (Exception e) {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
         } finally {
-            advertisementApi.delete_0(DEFAULT, pack);
+            advertisementApi.deleteAdvertisementByResellerAndPackage(DEFAULT, pack);
             assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         }
     }
@@ -259,7 +259,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         JSONValue adConfig = generateAdConfig();
 
         // create configuration
-        advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
+        advertisementApi.putAdvertisementByResellerAndPackage(DEFAULT, pack, adConfig.toString());
         assertTrue("Unexpected status: " + getRestClient().getStatusCode(), Arrays.contains(new int[] { 200, 201 }, getRestClient().getStatusCode()));
         // Check if configuration is available
         GetConfigRequest req = new GetConfigRequest();
@@ -267,7 +267,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         assertTrue("Response has errors: " + response.getErrorMessage(), !response.hasError());
         assertEquals("The server returned the wrong configuration.", adConfig, response.getData());
         // Remove configuration again
-        advertisementApi.delete_0(DEFAULT, pack);
+        advertisementApi.deleteAdvertisementByResellerAndPackage(DEFAULT, pack);
 
         assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
         // Check if configuration is gone
@@ -292,7 +292,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         Long userId = new Long(getAjaxClient().getValues().getUserId());
         JSONValue adConfig = generateAdConfig();
         try {
-            advertisementApi.put_0(DEFAULT, pack, adConfig.toString());
+            advertisementApi.putAdvertisementByResellerAndPackage(DEFAULT, pack, adConfig.toString());
             int statusLine = getRestClient().getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
             GetConfigRequest req = new GetConfigRequest();
@@ -302,7 +302,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
 
             // Create Preview
             JSONValue previewConfig = generateAdConfig();
-            advertisementApi.put_2(ctxId, userId, previewConfig.toString());
+            advertisementApi.putAdvertisementByUserId(ctxId, userId, previewConfig.toString());
             statusLine = getRestClient().getStatusCode();
             assertTrue("Unexpected status: " + statusLine, Arrays.contains(new int[] { 200, 201 }, statusLine));
 
@@ -313,7 +313,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             assertEquals("The server returned the wrong configuration.", previewConfig, response.getData());
 
             // Remove preview configuration
-            advertisementApi.delete_1(ctxId, userId);
+            advertisementApi.deleteAdvertisementByUserId(ctxId, userId);
             assertEquals("Deletion of ad config failed: " + getRestClient().getStatusCode(), 204, getRestClient().getStatusCode());
 
             // Check if configuration is back to the old one again
@@ -324,8 +324,8 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
             LoggerFactory.getLogger(AdvertisementTest.class).error("Test failed with error: {}", e.getMessage(), e);
             fail(e.getMessage());
         } finally {
-            advertisementApi.delete_0(DEFAULT, pack);
-            advertisementApi.delete_1(ctxId, userId);
+            advertisementApi.deleteAdvertisementByResellerAndPackage(DEFAULT, pack);
+            advertisementApi.deleteAdvertisementByUserId(ctxId, userId);
         }
     }
 
