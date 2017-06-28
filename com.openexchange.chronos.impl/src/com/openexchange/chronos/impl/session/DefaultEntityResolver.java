@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -321,7 +322,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     @Override
-    public void prefetch(List<Attendee> attendees) throws OXException {
+    public void prefetch(List<Attendee> attendees) {
         Set<Integer> usersToLoad = new HashSet<Integer>();
         Set<Integer> groupsToLoad = new HashSet<Integer>();
         Set<Integer> resourcesToLoad = new HashSet<Integer>();
@@ -345,20 +346,32 @@ public class DefaultEntityResolver implements EntityResolver {
         }
         if (0 < resourcesToLoad.size()) {
             for (Integer resourceID : resourcesToLoad) {
-                knownResources.put(resourceID, loadResource(resourceID.intValue()));
+                try {
+                    knownResources.put(resourceID, loadResource(i(resourceID)));
+                } catch (OXException e) {
+                    LOG.debug("Error loading resource with id {}, skipping during pre-fetch.", resourceID, e);
+                }
             }
         }
         if (0 < groupsToLoad.size()) {
             for (Integer groupID : groupsToLoad) {
-                Group group = loadGroup(groupID.intValue());
-                knownGroups.put(groupID, group);
-                usersToLoad.addAll(java.util.Arrays.asList(i2I(group.getMember())));
+                try {
+                    Group group = loadGroup(i(groupID));
+                    knownGroups.put(groupID, group);
+                    usersToLoad.addAll(java.util.Arrays.asList(i2I(group.getMember())));
+                } catch (OXException e) {
+                    LOG.debug("Error loading resource with id {}, skipping during pre-fetch.", groupID, e);
+                }
             }
         }
         if (0 < usersToLoad.size()) {
-            User[] users = loadUsers(I2i(usersToLoad));
-            for (User user : users) {
-                knownUsers.put(I(user.getId()), user);
+            try {
+                User[] users = loadUsers(I2i(usersToLoad));
+                for (User user : users) {
+                    knownUsers.put(I(user.getId()), user);
+                }
+            } catch (OXException e) {
+                LOG.debug("Error loading users with ids {}, skipping during pre-fetch.", usersToLoad, e);
             }
         }
     }

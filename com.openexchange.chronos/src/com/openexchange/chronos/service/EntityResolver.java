@@ -210,7 +210,7 @@ public interface EntityResolver {
      *
      * @param attendees The attendees to prefetch information for
      */
-    void prefetch(List<Attendee> attendees) throws OXException;
+    void prefetch(List<Attendee> attendees);
 
     /**
      * Gets the identifier of the context this entity resolver operates on.
