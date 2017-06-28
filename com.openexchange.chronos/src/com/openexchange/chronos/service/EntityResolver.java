@@ -169,6 +169,15 @@ public interface EntityResolver {
     Attendee prepareResourceAttendee(int resourceID) throws OXException;
 
     /**
+     * Probes the actual calendar user type for a specific internal entity identifier based on the existence of a corresponding user,
+     * group or resource.
+     *
+     * @param entity The entity identifier to probe the calendar user type for
+     * @return The calendar user type, or <code>null</code> if no matching entity exixts
+     */
+    CalendarUserType probeCUType(int entity) throws OXException;
+
+    /**
      * Applies the default set of static properties for the supplied internal calendar user based on the underlying groupware object.
      * This typically includes the calendar user's common name and calendar user address for the supplied internal entity.
      *

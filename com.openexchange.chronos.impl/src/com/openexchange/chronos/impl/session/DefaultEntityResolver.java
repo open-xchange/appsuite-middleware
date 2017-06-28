@@ -233,6 +233,20 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     @Override
+    public CalendarUserType probeCUType(int entity) throws OXException {
+        if (null != optUser(entity)) {
+            return CalendarUserType.INDIVIDUAL;
+        }
+        if (null != optGroup(entity)) {
+            return CalendarUserType.GROUP;
+        }
+        if (null != optResource(entity)) {
+            return CalendarUserType.RESOURCE;
+        }
+        return null;
+    }
+
+    @Override
     public <T extends CalendarUser> T applyEntityData(T calendarUser, int userID) throws OXException {
         User user = getUser(userID);
         calendarUser.setEntity(user.getId());
