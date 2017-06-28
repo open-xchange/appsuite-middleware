@@ -79,10 +79,12 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -92,6 +94,8 @@ import com.openexchange.java.util.TimeZones;
  * @since v7.10.0
  */
 public class Compat {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Compat.class);
 
     /**
      * Initializes a new {@link Compat}.
@@ -139,10 +143,10 @@ public class Compat {
                      * transform legacy "recurrence date positions" for exceptions to recurrence ids
                      */
                     if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                        event.setDeleteExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getDeleteExceptionDates())));
+                        event.setDeleteExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getDeleteExceptionDates()), EventField.DELETE_EXCEPTION_DATES));
                     }
                     if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
+                        event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
                     }
                 } else if (isSeriesException(event)) {
                     /*
@@ -157,7 +161,7 @@ public class Compat {
                         event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
                     }
                     if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(recurrenceData, getDates(event.getChangeExceptionDates())));
+                        event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
                     }
                 }
             }
@@ -395,32 +399,36 @@ public class Compat {
      * Calculates the recurrence identifiers, i.e. the start times of the specific occurrences of a recurring event, for a list of legacy
      * recurrence date position. Invalid recurrence date positions are skipped silently.
      *
+     * @param eventStorage The associated event storage
+     * @param event The event being adjusted
      * @param recurrenceData The corresponding recurrence data
      * @param recurrenceDatePositions The legacy recurrence date positions, i.e. the dates where the original occurrences would have been,
      *            as UTC date with truncated time fraction
+     * @param field The event field being processed
      * @return The recurrence identifiers
      */
-    private static SortedSet<RecurrenceId> getRecurrenceIDs(RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions) throws OXException {
-        SortedSet<RecurrenceId> recurrenceIDs;
+    private static SortedSet<RecurrenceId> getRecurrenceIDs(RdbEventStorage eventStorage, String eventId, RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions, EventField field) throws OXException {
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
         try {
-            recurrenceIDs = Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
+            return Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
         } catch (OXException e) {
             if (false == "CAL-4061".equals(e.getErrorCode())) {
                 throw e;
             }
-            /*
-             * invalid recurrence id, fallback & convert as much as possible
-             */
-            recurrenceIDs = new TreeSet<RecurrenceId>();
-            for (Date date : recurrenceDatePositions) {
-                try {
-                    recurrenceIDs.add(getRecurrenceID(recurrenceService, recurrenceData, date));
-                } catch (OXException e2) {
-                    if (false == "CAL-4061".equals(e2.getErrorCode())) {
-                        throw e2;
-                    }
+        }
+        /*
+         * invalid recurrence id, fallback & convert as much as possible, one after another
+         */
+        SortedSet<RecurrenceId> recurrenceIDs = new TreeSet<RecurrenceId>();
+        for (Date date : recurrenceDatePositions) {
+            try {
+                recurrenceIDs.add(getRecurrenceID(recurrenceService, recurrenceData, date));
+            } catch (OXException e) {
+                if (false == "CAL-4061".equals(e.getErrorCode())) {
+                    throw e;
                 }
+                LOG.info("Skipping invalid recurrence date position {} in event {}", Autoboxing.L(date.getTime()), eventId, e);
+                eventStorage.addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, field));
             }
         }
         return recurrenceIDs;

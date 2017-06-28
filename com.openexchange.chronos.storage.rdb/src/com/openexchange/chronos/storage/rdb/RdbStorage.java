@@ -57,7 +57,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.database.IncorrectStringSQLException;
@@ -86,6 +89,8 @@ public abstract class RdbStorage {
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;
 
+    private Map<String, List<OXException>> warnings;
+
     /**
      * Initializes a new {@link RdbStorage}.
      *
@@ -98,6 +103,28 @@ public abstract class RdbStorage {
         this.context = context;
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
+    }
+
+    /**
+     * Keeps track of a warning that occurred when processing the data of a specific event.
+     *
+     * @param eventId The identifier of the event the warning is associated with
+     * @param warning The warning
+     */
+    public void addWarning(String eventId, OXException warning) {
+        if (null == warnings) {
+            warnings = new HashMap<String, List<OXException>>();
+        }
+        com.openexchange.tools.arrays.Collections.put(warnings, eventId, warning);
+    }
+
+    /**
+     * Gets any tracked warnings that occurred when processing the stored data.
+     *
+     * @return The warnings, or an empty map if there are none
+     */
+    public Map<String, List<OXException>> getWarnings() {
+        return null == warnings ? Collections.<String, List<OXException>> emptyMap() : warnings;
     }
 
     /**
@@ -205,7 +232,7 @@ public abstract class RdbStorage {
      * @param e The SQL exception to get the OX exception for
      * @return The OX exception
      */
-    protected OXException asOXException(SQLException e) {
+    protected static OXException asOXException(SQLException e) {
         return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
     }
 

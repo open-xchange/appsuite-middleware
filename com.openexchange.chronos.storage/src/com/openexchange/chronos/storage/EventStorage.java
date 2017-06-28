@@ -54,6 +54,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -128,6 +129,15 @@ public interface EventStorage {
      */
     List<Event> searchEventTombstones(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
+    /**
+     * Searches for events of one or more attendees that overlap a specific timerange.
+     *
+     * @param attendees The attendees to restrict the results to
+     * @param includeTransparent <code>true</code> to also include events marks as {@link Transp#TRANSPARENT}, <code>false</code>, otherwise
+     * @param searchOptions The search options to apply (containing the start- and end of the queried range)
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events
+     */
     List<Event> searchOverlappingEvents(List<Attendee> attendees, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws OXException;
 
     /**

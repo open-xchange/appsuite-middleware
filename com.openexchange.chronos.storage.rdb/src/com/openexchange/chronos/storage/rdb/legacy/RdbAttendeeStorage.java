@@ -72,10 +72,12 @@ import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -282,7 +284,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
              * generate resulting attendee lists per event identifier
              */
             for (String eventId : eventIds) {
-                attendeesById.put(eventId, getAttendees(
+                attendeesById.put(eventId, getAttendees(eventId,
                     null != internalAttendeeData ? internalAttendeeData.get(eventId) : null,
                     null != userAttendeeData ? userAttendeeData.get(eventId) : null,
                     null != externalAttendeeData ? externalAttendeeData.get(eventId) : null))
@@ -299,20 +301,22 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     /**
      * Constructs the final attendee list for an event by pre-processing and merging the supplied lists of loaded attendees.
      *
+     * @param eventId The identifier of the corresponding event
      * @param internalAttendees The internal attendees as loaded from the storage
      * @param userAttendees The user attendees as loaded from the storage
      * @param externalAttendees The external attendees as loaded from the storage
      * @return The merged list of attendees
      */
-    private List<Attendee> getAttendees(List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
+    private List<Attendee> getAttendees(String eventId, List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
         List<Attendee> attendees = new ArrayList<Attendee>();
         /*
          * add user attendees individually if listed in internal attendees, or as member of a group if not
          */
         if (null != userAttendees) {
             for (Attendee userAttendee : userAttendees) {
+                userAttendee = entityResolver.applyEntityData(sanitizeCUType(eventId, userAttendee));
                 if (null != find(internalAttendees, userAttendee.getEntity())) {
-                    attendees.add(entityResolver.applyEntityData(userAttendee));
+                    attendees.add(userAttendee);
                 } else {
                     int[] groupIDs = findGroupIDs(internalAttendees, userAttendee.getEntity());
                     if (null != groupIDs && 0 < groupIDs.length) {
@@ -321,7 +325,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                             groupMemberships.add(ResourceId.forGroup(context.getContextId(), groupID));
                         }
                         userAttendee.setMember(groupMemberships);
-                        attendees.add(entityResolver.applyEntityData(userAttendee));
+                        attendees.add(userAttendee);
                     }
                 }
             }
@@ -332,7 +336,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         if (null != internalAttendees) {
             for (Attendee internalAttendee : internalAttendees) {
                 if (false == CalendarUserType.INDIVIDUAL.equals(internalAttendee.getCuType())) {
-                    attendees.add(entityResolver.applyEntityData(internalAttendee));
+                    attendees.add(entityResolver.applyEntityData(sanitizeCUType(eventId, internalAttendee)));
                 }
             }
         }
@@ -342,6 +346,38 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
         }
         return attendees;
+    }
+
+    private Attendee sanitizeCUType(String eventId, Attendee internalAttendee) throws OXException {
+        int entity = internalAttendee.getEntity();
+        CalendarUserType cuType = internalAttendee.getCuType();
+        try {
+            /*
+             * check entity existence by preparing a corresponding internal attendee
+             */
+            if (CalendarUserType.GROUP.equals(cuType)) {
+                entityResolver.prepareGroupAttendee(entity);
+            } else if (CalendarUserType.RESOURCE.equals(cuType) || CalendarUserType.ROOM.equals(cuType)) {
+                entityResolver.prepareResourceAttendee(entity);
+            } else {
+                entityResolver.prepareUserAttendee(entity);
+            }
+            return internalAttendee;
+        } catch (OXException e) {
+            if ("CAL-4034".equals(e.getErrorCode())) {
+                /*
+                 * Invalid calendar user; possibly a "user" attendee added as resource recover if possible
+                 */
+                CalendarUserType probedCUType = entityResolver.probeCUType(entity);
+                if (null != probedCUType && false == probedCUType.equals(cuType)) {
+                    LOG.info("Auto-correcting stored calendar user type for {} to {} in event {}.", String.valueOf(internalAttendee), probedCUType, eventId, e);
+                    addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, EventField.ATTENDEES));
+                    internalAttendee.setCuType(probedCUType);
+                    return internalAttendee;
+                }
+            }
+            throw e;
+        }
     }
 
     private int[] findGroupIDs(List<Attendee> internalAttendees, int member) throws OXException {
