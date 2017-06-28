@@ -111,6 +111,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String DATA_TRUNCATION_MSG = "Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.";
 
+    public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

@@ -56,6 +56,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
@@ -269,6 +270,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Incorrect string [string %1$s, field %2$s, column %3$s]</li>
      */
     INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 5071),
+    /**
+     * <li>The value for \"%2$s\" is invalid and wasn't be applied.</li>
+     * <li>Ignored invalid data [id %1$s, field %2$s]</li>
+     */
+    IGNORED_INVALID_DATA("Ignored invalid data [id %1$s, field %2$s]", IGNORED_INVALID_DATA_MSG, Category.CATEGORY_WARNING, 1990),
 
     ;
 
