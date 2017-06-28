@@ -339,7 +339,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ")
             .append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
-        Event eventData = Compat.adjustPriorSave(entityResolver, connection, contextID, event);
+        Event eventData = Compat.adjustPriorSave(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -354,7 +354,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("UPDATE prg_dates SET ").append(EventMapper.getInstance().getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
-        Event eventData = Compat.adjustPriorSave(entityResolver, connection, contextID, event);
+        Event eventData = Compat.adjustPriorSave(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, assignedfields);
@@ -375,7 +375,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(2, objectID);
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                return readEvent(entityResolver, resultSet, mappedFields, null);
+                return readEvent(resultSet, mappedFields, null);
             }
         }
         return null;
@@ -393,14 +393,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setString(3, String.valueOf(recurrenceDatePosition));
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                return readEvent(entityResolver, resultSet, mappedFields, null);
+                return readEvent(resultSet, mappedFields, null);
             }
         }
         return null;
     }
 
-    private static Event readEvent(EntityResolver entityResolver, ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
-        return Compat.adjustAfterLoad(entityResolver, EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
+    private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
+        return Compat.adjustAfterLoad(this, EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
     private List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
@@ -441,7 +441,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             adapter.setParameters(stmt, parameterIndex);
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                events.add(readEvent(entityResolver, resultSet, mappedFields, "d."));
+                events.add(readEvent(resultSet, mappedFields, "d."));
             }
         }
         return events;
@@ -511,13 +511,21 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                events.add(readEvent(entityResolver, resultSet, mappedFields, "d."));
+                events.add(readEvent(resultSet, mappedFields, "d."));
             }
         }
         return events;
     }
 
-    static RecurrenceData selectRecurrenceData(EntityResolver entityResolver, Connection connection, int contextID, int seriesID, boolean deleted) throws SQLException, OXException {
+    /**
+     * Selects recurrence data for a specific series.
+     *
+     * @param connection The database connection to use
+     * @param seriesID The series identifier to load the recurrence data for
+     * @param deleted <code>true</code> to read from the <i>tombstone</i> tables, <code>false</code>, otherwise
+     * @return The recurrence data, or <code>null</code> if not found
+     */
+    RecurrenceData selectRecurrenceData(Connection connection, int seriesID, boolean deleted) throws SQLException, OXException {
         EventField[] fields = EventMapper.getInstance().getMappedFields(new EventField[] {
             EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE,
             EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
@@ -528,16 +536,24 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append(" WHERE cid=? AND intfield01=? AND intfield02=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, contextID);
+            stmt.setInt(1, context.getContextId());
             stmt.setInt(2, seriesID);
             stmt.setInt(3, seriesID);
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
-                Event event = readEvent(entityResolver, resultSet, fields, null);
-                return new DefaultRecurrenceData(event);
+                return new DefaultRecurrenceData(readEvent(resultSet, fields, null));
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the used entity resolver.
+     *
+     * @return The entity resolver, or <code>null</code> if not set
+     */
+    EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
     /**
