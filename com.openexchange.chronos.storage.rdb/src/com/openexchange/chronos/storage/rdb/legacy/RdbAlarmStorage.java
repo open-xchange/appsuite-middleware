@@ -75,10 +75,12 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
@@ -137,7 +139,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             connection = dbProvider.getReadConnection(context);
             Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), asInt(event.getId()));
             for (Map.Entry<Integer, ReminderData> entry : remindersByUserID.entrySet()) {
-                List<Alarm> alarms = getAlarms(event, i(entry.getKey()), entry.getValue());
+                List<Alarm> alarms = optAlarms(event, i(entry.getKey()), entry.getValue());
                 if (null != alarms) {
                     alarmsByUserID.put(entry.getKey(), alarms);
                 }
@@ -159,7 +161,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             connection = dbProvider.getReadConnection(context);
             Map<String, ReminderData> remindersByID = selectReminders(connection, context.getContextId(), eventsByID.keySet(), userID);
             for (Map.Entry<String, ReminderData> entry : remindersByID.entrySet()) {
-                List<Alarm> alarms = getAlarms(eventsByID.get(entry.getKey()), userID, entry.getValue());
+                List<Alarm> alarms = optAlarms(eventsByID.get(entry.getKey()), userID, entry.getValue());
                 if (null != alarms) {
                     alarmsByEventID.put(entry.getKey(), alarms);
                 }
@@ -182,10 +184,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             Map<String, Map<Integer, ReminderData>> remindersByUserByID = selectReminders(connection, context.getContextId(), eventsByID.keySet());
             for (Entry<String, Map<Integer, ReminderData>> entry : remindersByUserByID.entrySet()) {
                 String eventID = entry.getKey();
-
                 for (Entry<Integer, ReminderData> reminderEntry : entry.getValue().entrySet()) {
                     Integer userID = reminderEntry.getKey();
-                    List<Alarm> alarms = getAlarms(eventsByID.get(eventID), i(userID), reminderEntry.getValue());
+                    List<Alarm> alarms = optAlarms(eventsByID.get(eventID), i(userID), reminderEntry.getValue());
                     if (null != alarms) {
                         Map<Integer, List<Alarm>> alarmsByUser = alarmsByUserByEventID.get(eventID);
                         if (null == alarmsByUser) {
@@ -301,7 +302,25 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     /**
-     * Gets the alarms representing the stored reminder data.
+     * Optionally gets the alarms representing the stored reminder data. Invalid / malformed alarm data is ignored implicitly.
+     *
+     * @param event The event the alarms are associated with
+     * @param userID The identifier of the user
+     * @param reminderData The stored reminder data
+     * @return The alarms, or <code>null</code> if there are none or if no alarms couldn't be derived
+     */
+    private List<Alarm> optAlarms(Event event, int userID, ReminderData reminderData) {
+        try {
+            return getAlarms(event, userID, reminderData);
+        } catch (OXException e) {
+            LOG.info("Ignoring invalid legacy {} for user {} in event {}", reminderData, I(userID), event.getId(), e);
+            addWarning(event.getId(), CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, event.getId(), EventField.ALARMS));
+            return null;
+        }
+    }
+
+    /**
+     * Gets the alarms representing the stored reminder data. Invalid / malformed alarm data is ignored implicitly.
      *
      * @param event The event the alarms are associated with
      * @param userID The identifier of the user
