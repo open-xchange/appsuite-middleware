@@ -100,15 +100,6 @@ public interface CalendarConfig {
     boolean isUseLegacyStack();
 
     /**
-     * Gets a value indicating whether the <i>ID-based</i> calendar access services should be used or not.
-     * <p/>
-     * This implicitly depends on {@link #isUseLegacyStack()}.
-     *
-     * @return <code>true</code> if the ID-based access should be used, <code>false</code>, otherwise
-     */
-    boolean isUseIDBasedAccess();
-
-    /**
      * Gets a value indicating whether the storage should use the <i>legacy</i> database tables or not.
      * <p/>
      * This implicitly depends on {@link #isUseLegacyStack()}.

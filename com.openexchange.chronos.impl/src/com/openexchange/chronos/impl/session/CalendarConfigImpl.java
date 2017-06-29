@@ -127,11 +127,6 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public boolean isUseIDBasedAccess() {
-        return false == isUseLegacyStack() && getConfigValue("com.openexchange.chronos.useIDBasedAccess", Boolean.class, Boolean.FALSE).booleanValue();
-    }
-
-    @Override
     public boolean isUseLegacyStorage() {
         return isUseLegacyStack() || getConfigValue("com.openexchange.chronos.useLegacyStorage", Boolean.class, Boolean.TRUE).booleanValue();
     }

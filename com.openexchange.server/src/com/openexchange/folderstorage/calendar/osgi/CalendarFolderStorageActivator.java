@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
@@ -75,7 +74,7 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return EMPTY_CLASSES;
     }
 
     @Override
@@ -85,7 +84,7 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
             /*
              * initialize folder storage
              */
-            reinit(getService(ConfigurationService.class));
+            reinit();
             openTrackers();
         } catch (Exception e) {
             getLogger(CalendarFolderStorageActivator.class).error("error starting {}", context.getBundle(), e);
@@ -93,7 +92,7 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
         }
     }
 
-    private synchronized void reinit(ConfigurationService configService) throws OXException {
+    private synchronized void reinit() throws OXException {
         ServiceTracker<?, ?> tracker = this.dependentTracker;
         if (null != tracker) {
             this.dependentTracker = null;
@@ -101,21 +100,19 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
             tracker = null;
         }
         /*
-         * register calendar folder storage if enabled & IDBasedCalendarAccessFactory service is available
+         * register calendar folder storage once IDBasedCalendarAccessFactory service becomes available
          */
-        if (configService.getBoolProperty("com.openexchange.chronos.useIDBasedAccess", false)) {
-            Dictionary<String, String> serviceProperties = new Hashtable<String, String>(1);
-            serviceProperties.put("tree", FolderStorage.REAL_TREE_ID);
-            DependentServiceRegisterer<FolderStorage> registerer = new DependentServiceRegisterer<FolderStorage>(
-                context, FolderStorage.class, CalendarFolderStorage.class, serviceProperties, IDBasedCalendarAccessFactory.class);
-            try {
-                tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
-            } catch (InvalidSyntaxException e) {
-                throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create(e);
-            }
-            this.dependentTracker = tracker;
-            tracker.open();
+        Dictionary<String, String> serviceProperties = new Hashtable<String, String>(1);
+        serviceProperties.put("tree", FolderStorage.REAL_TREE_ID);
+        DependentServiceRegisterer<FolderStorage> registerer = new DependentServiceRegisterer<FolderStorage>(
+            context, FolderStorage.class, CalendarFolderStorage.class, serviceProperties, IDBasedCalendarAccessFactory.class);
+        try {
+            tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
+        } catch (InvalidSyntaxException e) {
+            throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create(e);
         }
+        this.dependentTracker = tracker;
+        tracker.open();
     }
 
     @Override
