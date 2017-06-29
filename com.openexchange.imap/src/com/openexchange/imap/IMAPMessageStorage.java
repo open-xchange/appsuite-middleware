@@ -1743,15 +1743,25 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                         sortedSeqNums = new int[numToCopy];
                         if (OrderDirection.ASC.equals(order)) {
-                            int length = Math.min(unseenSeqNums.length, numToCopy);
-                            System.arraycopy(unseenSeqNums, 0, sortedSeqNums, 0, length);
+                            int length = Math.min(unseenSeqNums.length - fromIndex, numToCopy);
+                            if (length < 0) {
+                                length = 0;
+                            }
+                            if (length > 0) {
+                                System.arraycopy(unseenSeqNums, 0, sortedSeqNums, 0, length);
+                            }
                             numToCopy -= length;
                             if (numToCopy > 0) {
                                 System.arraycopy(seenSeqNums, 0, sortedSeqNums, length, numToCopy);
                             }
                         } else {
-                            int length = Math.min(seenSeqNums.length, numToCopy);
-                            System.arraycopy(seenSeqNums, 0, sortedSeqNums, 0, length);
+                            int length = Math.min(seenSeqNums.length - fromIndex, numToCopy);
+                            if (length < 0) {
+                                length = 0;
+                            }
+                            if (length > 0) {
+                                System.arraycopy(seenSeqNums, 0, sortedSeqNums, 0, length);
+                            }
                             numToCopy -= length;
                             if (numToCopy > 0) {
                                 System.arraycopy(unseenSeqNums, 0, sortedSeqNums, length, numToCopy);
