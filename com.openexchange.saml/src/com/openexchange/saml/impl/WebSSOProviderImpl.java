@@ -119,6 +119,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
@@ -855,7 +856,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     private static String deflateAndEncode(String xml) throws OXException {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream bytesOut = Streams.newByteArrayOutputStream();
         Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
         try {

@@ -87,6 +87,10 @@ public class Interest {
             return null;
         }
 
+        if (0 == topics.length) {
+            return Collections.emptyList();
+        }
+
         return interestsFor(Arrays.asList(topics));
     }
 

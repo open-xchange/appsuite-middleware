@@ -49,9 +49,11 @@
 
 package com.openexchange.pns.impl;
 
+import java.util.Iterator;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.pns.Interest;
 import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionListener;
@@ -89,7 +91,15 @@ public class ListenerStartingSubscriptionListener implements PushSubscriptionLis
 
     @Override
     public void addedSubscription(PushSubscription subscription) throws OXException {
-        if (subscription.getTopics().contains(KnownTopic.MAIL_NEW.getName())) {
+        boolean interestedInNewMail = false;
+        for (Iterator<Interest> interests = Interest.interestsFor(subscription.getTopics()).iterator(); !interestedInNewMail && interests.hasNext();) {
+            if (interests.next().isInterestedIn(KnownTopic.MAIL_NEW.getName())) {
+                // Found interest for "ox:mail:new"
+                interestedInNewMail = true;
+            }
+        }
+
+        if (interestedInNewMail) {
             // Added a new subscription interested in "ox:mail:new"
             String sessionId = LogProperties.get(LogProperties.Name.SESSION_SESSION_ID);
             if (Strings.isEmpty(sessionId)) {
