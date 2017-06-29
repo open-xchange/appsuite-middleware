@@ -74,6 +74,8 @@ import com.openexchange.threadpool.AbstractTask;
  */
 public class StorageCopyTask extends AbstractTask<Void> {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageCopyTask.class);
+
     private final CalendarStorage sourceStorage;
     private final CalendarStorage destinationStorage;
     private final int batchSize;
@@ -146,6 +148,7 @@ public class StorageCopyTask extends AbstractTask<Void> {
     }
 
     private boolean copyCalendarData(int offset, int length) throws OXException {
+        LOG.info("copyCalendarData@" + offset);
         /*
          * read from source storage: events, corresponding attendees, corresponding alarms
          */
@@ -172,6 +175,7 @@ public class StorageCopyTask extends AbstractTask<Void> {
     }
 
     private boolean copyTombstoneData(int offset, int length) throws OXException {
+        LOG.info("copyTombstoneData@" + offset);
         /*
          * read from source storage: event tombstones, corresponding attendees
          */
