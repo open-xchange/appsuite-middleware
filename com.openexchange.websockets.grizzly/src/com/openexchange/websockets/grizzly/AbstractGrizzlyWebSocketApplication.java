@@ -60,10 +60,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -184,6 +188,20 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         defaultAuthenticator = new DefaultGrizzlyWebSocketAuthenticator(hashSource, services, LOGGER);
     }
 
+    private <V> void awaitFutureCompletion(Future<V> future, long timeout, TimeUnit unit) {
+        try {
+            future.get(timeout, unit);
+        } catch (InterruptedException e) {
+            // Interrupted
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // Expected. Ignore.
+        } catch (ExecutionException e) {
+            // Something went wrong during message delivery.
+            LOGGER.warn("Failed to deliver message via Web Socket", e.getCause());
+        }
+    }
+
     /**
      * Shuts-down this application.
      */
@@ -191,7 +209,14 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<ConcurrentMap<ConnectionId, S>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<S> iter = i.next().values().iterator(); iter.hasNext();) {
                 S sessionBoundSocket = iter.next();
-                sessionBoundSocket.send("session:invalid");
+
+                ProtocolHandler protocolHandler = sessionBoundSocket.getProtocolHandler();
+                DataFrame frameToSend = protocolHandler.toDataFrame("session:invalid");
+                frameToSend.getBytes();
+
+                GrizzlyFuture<DataFrame> sendFuture = protocolHandler.send(frameToSend);
+                awaitFutureCompletion(sendFuture, 100, TimeUnit.MILLISECONDS);
+
                 closeSocketSafe(sessionBoundSocket);
                 iter.remove();
             }
@@ -252,7 +277,13 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
             return false;
         }
 
-        sessionBoundSocket.send("session:invalid");
+        ProtocolHandler protocolHandler = sessionBoundSocket.getProtocolHandler();
+        DataFrame frameToSend = protocolHandler.toDataFrame("session:invalid");
+        frameToSend.getBytes();
+
+        GrizzlyFuture<DataFrame> sendFuture = protocolHandler.send(frameToSend);
+        awaitFutureCompletion(sendFuture, 100, TimeUnit.MILLISECONDS);
+
         closeSocketSafe(sessionBoundSocket);
         LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
         return true;
@@ -276,7 +307,13 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                sessionBoundSocket.send("session:invalid");
+                ProtocolHandler protocolHandler = sessionBoundSocket.getProtocolHandler();
+                DataFrame frameToSend = protocolHandler.toDataFrame("session:invalid");
+                frameToSend.getBytes();
+
+                GrizzlyFuture<DataFrame> sendFuture = protocolHandler.send(frameToSend);
+                awaitFutureCompletion(sendFuture, 100, TimeUnit.MILLISECONDS);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
@@ -304,7 +341,13 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (sessionId.equals(sessionBoundSocket.getSessionId())) {
-                sessionBoundSocket.send("session:invalid");
+                ProtocolHandler protocolHandler = sessionBoundSocket.getProtocolHandler();
+                DataFrame frameToSend = protocolHandler.toDataFrame("session:invalid");
+                frameToSend.getBytes();
+
+                GrizzlyFuture<DataFrame> sendFuture = protocolHandler.send(frameToSend);
+                awaitFutureCompletion(sendFuture, 100, TimeUnit.MILLISECONDS);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" bound to dropped/removed session {} for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), sessionId, I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
