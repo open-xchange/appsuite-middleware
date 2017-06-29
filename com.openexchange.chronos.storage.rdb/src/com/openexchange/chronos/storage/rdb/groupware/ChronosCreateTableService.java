@@ -82,8 +82,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY `user` (cid,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_sequence",
-            "CREATE TABLE calendar_sequence (" +
+        tablesByName.put("calendar_event_sequence",
+            "CREATE TABLE calendar_event_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
