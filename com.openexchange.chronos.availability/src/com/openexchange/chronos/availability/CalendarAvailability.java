@@ -50,11 +50,13 @@
 package com.openexchange.chronos.availability;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.availability.fields.AvailabilityField;
 
 /**
  * {@link CalendarAvailability} - Defines periods of availability for a calendar user.
@@ -96,6 +98,8 @@ public class CalendarAvailability {
 
     private List<CalendarFreeSlot> calendarFreeSlots;
 
+    private EnumSet<AvailabilityField> fields;
+
     // TODO: map iana-properties?
 
     /**
@@ -103,6 +107,7 @@ public class CalendarAvailability {
      */
     public CalendarAvailability() {
         super();
+        fields = EnumSet.noneOf(AvailabilityField.class);
     }
 
     /**
@@ -112,6 +117,7 @@ public class CalendarAvailability {
      */
     public void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+        fields.add(AvailabilityField.dtstamp);
     }
 
     /**
@@ -121,6 +127,7 @@ public class CalendarAvailability {
      */
     public void setUid(String uid) {
         this.uid = uid;
+        fields.add(AvailabilityField.uid);
     }
 
     /**
@@ -157,6 +164,7 @@ public class CalendarAvailability {
      */
     public void setBusyType(FbType busyType) {
         this.busyType = busyType;
+        fields.add(AvailabilityField.busytype);
     }
 
     /**
@@ -175,6 +183,7 @@ public class CalendarAvailability {
      */
     public void setClassification(Classification classification) {
         this.classification = classification;
+        fields.add(AvailabilityField.classification);
     }
 
     /**
@@ -193,6 +202,7 @@ public class CalendarAvailability {
      */
     public void setPriority(int priority) {
         this.priority = priority;
+        fields.add(AvailabilityField.priority);
     }
 
     /**
@@ -211,6 +221,7 @@ public class CalendarAvailability {
      */
     public void setSequence(int sequence) {
         this.sequence = sequence;
+        fields.add(AvailabilityField.seq);
     }
 
     /**
@@ -229,6 +240,7 @@ public class CalendarAvailability {
      */
     public void setCreated(Date created) {
         this.created = created;
+        fields.add(AvailabilityField.created);
     }
 
     /**
@@ -265,6 +277,7 @@ public class CalendarAvailability {
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
+        fields.add(AvailabilityField.lastModified);
     }
 
     /**
@@ -283,6 +296,7 @@ public class CalendarAvailability {
      */
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
+        fields.add(AvailabilityField.dtstart);
     }
 
     /**
@@ -319,6 +333,7 @@ public class CalendarAvailability {
      */
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+        fields.add(AvailabilityField.dtend);
     }
 
     /**
@@ -355,6 +370,7 @@ public class CalendarAvailability {
      */
     public void setDescription(String description) {
         this.description = description;
+        fields.add(AvailabilityField.description);
     }
 
     /**
@@ -373,6 +389,7 @@ public class CalendarAvailability {
      */
     public void setLocation(String location) {
         this.location = location;
+        fields.add(AvailabilityField.location);
     }
 
     /**
@@ -391,6 +408,7 @@ public class CalendarAvailability {
      */
     public void setOrganizer(Organizer organizer) {
         this.organizer = organizer;
+        fields.add(AvailabilityField.organizer);
     }
 
     /**
@@ -409,6 +427,7 @@ public class CalendarAvailability {
      */
     public void setUrl(String url) {
         this.url = url;
+        fields.add(AvailabilityField.url);
     }
 
     /**
@@ -427,6 +446,7 @@ public class CalendarAvailability {
      */
     public void setDuration(long duration) {
         this.duration = duration;
+        fields.add(AvailabilityField.duration);
     }
 
     /**
@@ -445,6 +465,7 @@ public class CalendarAvailability {
      */
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
+        fields.add(AvailabilityField.extendedProperties);
     }
 
     /**
@@ -463,6 +484,7 @@ public class CalendarAvailability {
      */
     public void setCategories(List<String> categories) {
         this.categories = categories;
+        fields.add(AvailabilityField.categories);
     }
 
     /**
@@ -483,6 +505,16 @@ public class CalendarAvailability {
         this.calendarFreeSlots = calendarFreeSlots;
     }
 
+    /**
+     * Determines whether this object contains the specified field
+     * 
+     * @param field The field
+     * @return <code>true</code> if the field is contained and set; <code>false</code> otherwise
+     */
+    public boolean contains(AvailabilityField field) {
+        return fields.contains(field);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -494,4 +526,5 @@ public class CalendarAvailability {
         builder.append("CalendarAvailability [uid=").append(getUid()).append(", busyType=").append(busyType).append(", startTime=").append(startTime).append(", endTime=").append(endTime).append(", description=").append(description).append("]");
         return builder.toString();
     }
+
 }

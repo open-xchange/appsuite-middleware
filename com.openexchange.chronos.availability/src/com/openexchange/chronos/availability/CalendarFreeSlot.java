@@ -50,9 +50,11 @@
 package com.openexchange.chronos.availability;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.availability.fields.FreeSlotField;
 
 /**
  * {@link CalendarFreeSlot} - Defines an available time range within a {@link CalendarAvailability} component
@@ -83,11 +85,14 @@ public class CalendarFreeSlot {
 
     //TODO: iana-props, exdate, rdate, contact
 
+    private final EnumSet<FreeSlotField> fields;
+
     /**
      * Initialises a new {@link CalendarFreeSlot}.
      */
     public CalendarFreeSlot() {
         super();
+        fields = EnumSet.noneOf(FreeSlotField.class);
     }
 
     /**
@@ -97,6 +102,7 @@ public class CalendarFreeSlot {
      */
     public void setUid(String uid) {
         this.uid = uid;
+        fields.add(FreeSlotField.uid);
     }
 
     /**
@@ -106,6 +112,7 @@ public class CalendarFreeSlot {
      */
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+        fields.add(FreeSlotField.dtstamp);
     }
 
     /**
@@ -115,6 +122,7 @@ public class CalendarFreeSlot {
      */
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
+        fields.add(FreeSlotField.dtstart);
     }
 
     /**
@@ -133,6 +141,7 @@ public class CalendarFreeSlot {
      */
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+        fields.add(FreeSlotField.dtend);
     }
 
     /**
@@ -151,6 +160,7 @@ public class CalendarFreeSlot {
      */
     public void setDuration(long duration) {
         this.duration = duration;
+        fields.add(FreeSlotField.duration);
     }
 
     /**
@@ -169,6 +179,7 @@ public class CalendarFreeSlot {
      */
     public void setCreated(Date created) {
         this.created = created;
+        fields.add(FreeSlotField.created);
     }
 
     /**
@@ -187,6 +198,7 @@ public class CalendarFreeSlot {
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
+        fields.add(FreeSlotField.lastModified);
     }
 
     /**
@@ -205,6 +217,7 @@ public class CalendarFreeSlot {
      */
     public void setDescription(String description) {
         this.description = description;
+        fields.add(FreeSlotField.description);
     }
 
     /**
@@ -223,6 +236,7 @@ public class CalendarFreeSlot {
      */
     public void setSummary(String summary) {
         this.summary = summary;
+        fields.add(FreeSlotField.summary);
     }
 
     /**
@@ -241,6 +255,7 @@ public class CalendarFreeSlot {
      */
     public void setRecurrenceId(RecurrenceId recurrenceId) {
         this.recurrenceId = recurrenceId;
+        fields.add(FreeSlotField.recurid);
     }
 
     /**
@@ -259,6 +274,7 @@ public class CalendarFreeSlot {
      */
     public void setCategories(List<String> categories) {
         this.categories = categories;
+        fields.add(FreeSlotField.categories);
     }
 
     /**
@@ -277,6 +293,7 @@ public class CalendarFreeSlot {
      */
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
+        fields.add(FreeSlotField.extendedProperties);
     }
 
     /**
@@ -295,6 +312,7 @@ public class CalendarFreeSlot {
      */
     public void setComments(List<String> comments) {
         this.comments = comments;
+        fields.add(FreeSlotField.comment);
     }
 
     /**
@@ -322,5 +340,9 @@ public class CalendarFreeSlot {
      */
     public Date getStartTime() {
         return startTime;
+    }
+
+    public boolean contains(FreeSlotField field) {
+        return fields.contains(field);
     }
 }
