@@ -156,7 +156,9 @@ public class PGPDecrypter {
         Iterator<PGPPublicKeyEncryptedData> encryptedDataListIterator = encryptedDataList.getEncryptedDataObjects();
         while (encryptedDataListIterator.hasNext()) {
             encryptedData = encryptedDataListIterator.next();
-            privateKey = getPrivateKey(encryptedData, userID, password);
+            if (password != null) {
+                privateKey = getPrivateKey(encryptedData, userID, password);
+            }
             if (privateKey != null) {
                 break;
             }
