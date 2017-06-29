@@ -50,7 +50,6 @@
 package com.openexchange.chronos.storage.rdb.migration;
 
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,12 +72,25 @@ import com.openexchange.threadpool.AbstractTask;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class StorageCopyTask extends AbstractTask<MigrationResult> {
+public class StorageCopyTask extends AbstractTask<Void> {
 
     private final CalendarStorage sourceStorage;
     private final CalendarStorage destinationStorage;
     private final int batchSize;
 
+    private int copiedEventTombstones;
+    private int copiedEvents;
+    private int copiedAttendees;
+    private int copiedAttendeeTombstones;
+    private int copiedAlarms;
+
+    /**
+     * Initializes a new {@link StorageCopyTask}.
+     *
+     * @param sourceStorage The source calendar storage
+     * @param destinationStorage The destination calendar storage
+     * @param batchSize The batch size to use
+     */
     public StorageCopyTask(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize) {
         super();
         this.sourceStorage = sourceStorage;
@@ -87,45 +99,57 @@ public class StorageCopyTask extends AbstractTask<MigrationResult> {
     }
 
     @Override
-    public MigrationResult call() throws Exception {
-        MigrationResult result = new MigrationResult();
-        result.setStart(new Date());
-        try {
-            /*
-             * copy calendar data
-             */
-            copyCalendarData(result, batchSize);
-            /*
-             * copy tombstone data
-             */
-            copyTombstoneData(result, batchSize);
-        } catch (OXException e) {
-            result.addError(e);
-        }
-        result.setEnd(new Date());
-        return result;
+    public Void call() throws Exception {
+        /*
+         * copy calendar data
+         */
+        copyCalendarData(batchSize);
+        /*
+         * copy tombstone data
+         */
+        copyTombstoneData(batchSize);
+        return null;
     }
 
-    private void copyTombstoneData(MigrationResult result, int batchSize) throws OXException {
+    public int getCopiedEventTombstones() {
+        return copiedEventTombstones;
+    }
+
+    public int getCopiedEvents() {
+        return copiedEvents;
+    }
+
+    public int getCopiedAttendees() {
+        return copiedAttendees;
+    }
+
+    public int getCopiedAttendeeTombstones() {
+        return copiedAttendeeTombstones;
+    }
+
+    public int getCopiedAlarms() {
+        return copiedAlarms;
+    }
+
+    private void copyTombstoneData(int batchSize) throws OXException {
         int offset = 0;
-        while (copyTombstoneData(result, offset, batchSize)) {
+        while (copyTombstoneData(offset, batchSize)) {
             offset += batchSize;
         }
     }
 
-    public void copyCalendarData(MigrationResult result, int batchSize) throws OXException {
+    private void copyCalendarData(int batchSize) throws OXException {
         int offset = 0;
-        while (copyCalendarData(result, offset, batchSize)) {
+        while (copyCalendarData(offset, batchSize)) {
             offset += batchSize;
         }
     }
 
-    private boolean copyCalendarData(MigrationResult result, int offset, int length) throws OXException {
+    private boolean copyCalendarData(int offset, int length) throws OXException {
         /*
          * read from source storage: events, corresponding attendees, corresponding alarms
          */
-        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC)).setLimits(offset, offset + length);
-        List<Event> events = sourceStorage.getEventStorage().searchEvents(null, searchOptions, EventField.values());
+        List<Event> events = sourceStorage.getEventStorage().searchEvents(null, getSearchOptions(offset, length), EventField.values());
         if (null == events || 0 == events.size()) {
             return false;
         }
@@ -139,20 +163,19 @@ public class StorageCopyTask extends AbstractTask<MigrationResult> {
          * write to destination storage & track result
          */
         destinationStorage.getEventStorage().insertEvents(events);
-        result.setMigratedEvents(result.getMigratedEvents() + events.size());
+        copiedEvents += events.size();
         destinationStorage.getAttendeeStorage().insertAttendees(attendees);
-        result.setMigratedAttendees(result.getMigratedAttendees() + countMultiMap(attendees));
+        copiedAttendees += countMultiMap(attendees);
         destinationStorage.getAlarmStorage().insertAlarms(alarms);
-        result.setMigratedAlarms(result.getMigratedAlarms() + countMultiMultiMap(alarms));
+        copiedAlarms += countMultiMultiMap(alarms);
         return true;
     }
 
-    private boolean copyTombstoneData(MigrationResult result, int offset, int length) throws OXException {
+    private boolean copyTombstoneData(int offset, int length) throws OXException {
         /*
          * read from source storage: event tombstones, corresponding attendees
          */
-        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC)).setLimits(offset, offset + length);
-        List<Event> events = sourceStorage.getEventStorage().searchEventTombstones(null, searchOptions, EventField.values());
+        List<Event> events = sourceStorage.getEventStorage().searchEventTombstones(null, getSearchOptions(offset, length), EventField.values());
         if (null == events || 0 == events.size()) {
             return false;
         }
@@ -161,10 +184,14 @@ public class StorageCopyTask extends AbstractTask<MigrationResult> {
          * write to destination storage & track result
          */
         destinationStorage.getEventStorage().insertEventTombstones(events);
-        result.setMigratedEventTombstones(result.getMigratedEventTombstones() + events.size());
+        copiedEventTombstones += events.size();
         destinationStorage.getAttendeeStorage().insertAttendeeTombstones(attendees);
-        result.setMigratedAttendeeTombstones(result.getMigratedAttendeeTombstones() + countMultiMap(attendees));
+        copiedAttendeeTombstones += countMultiMap(attendees);
         return true;
+    }
+
+    private static SearchOptions getSearchOptions(int offset, int length) {
+        return new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC)).setLimits(offset, offset + length);
     }
 
     private static Map<String, Map<Integer, List<Alarm>>> prepareAlarms(AlarmStorage destinationStorage, Map<String, Map<Integer, List<Alarm>>> alarms) throws OXException {

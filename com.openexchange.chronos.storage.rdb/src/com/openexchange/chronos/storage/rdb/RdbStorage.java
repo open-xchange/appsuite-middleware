@@ -121,10 +121,25 @@ public abstract class RdbStorage {
     /**
      * Gets any tracked warnings that occurred when processing the stored data.
      *
-     * @return The warnings, or an empty map if there are none
+     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
      */
     public Map<String, List<OXException>> getWarnings() {
         return null == warnings ? Collections.<String, List<OXException>> emptyMap() : warnings;
+    }
+
+    /**
+     * Gets any tracked warnings that occurred when processing the stored data and flushes them, so that subsequent invocations would
+     * return an empty map.
+     *
+     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
+     */
+    public Map<String, List<OXException>> getAndFlushWarnings() {
+        if (null == warnings) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<OXException>> result = new HashMap<String, List<OXException>>(warnings);
+        warnings = null;
+        return result;
     }
 
     /**

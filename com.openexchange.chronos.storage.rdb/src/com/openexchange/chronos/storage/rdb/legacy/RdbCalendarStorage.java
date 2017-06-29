@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
@@ -57,6 +60,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -107,6 +111,30 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return attendeeStorage;
+    }
+
+    @Override
+    public Map<String, List<OXException>> getWarnings() {
+        Map<String, List<OXException>> warnings = new HashMap<String, List<OXException>>();
+        warnings.putAll(eventStorage.getWarnings());
+        warnings.putAll(attendeeStorage.getWarnings());
+        warnings.putAll(alarmStorage.getWarnings());
+        if (null != attachmentStorage) {
+            warnings.putAll(attachmentStorage.getWarnings());
+        }
+        return warnings;
+    }
+
+    @Override
+    public Map<String, List<OXException>> getAndFlushWarnings() {
+        Map<String, List<OXException>> warnings = new HashMap<String, List<OXException>>();
+        warnings.putAll(eventStorage.getAndFlushWarnings());
+        warnings.putAll(attendeeStorage.getAndFlushWarnings());
+        warnings.putAll(alarmStorage.getAndFlushWarnings());
+        if (null != attachmentStorage) {
+            warnings.putAll(attachmentStorage.getAndFlushWarnings());
+        }
+        return warnings;
     }
 
 }

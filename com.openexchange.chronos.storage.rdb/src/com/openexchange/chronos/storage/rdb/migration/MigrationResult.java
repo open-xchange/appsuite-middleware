@@ -49,9 +49,10 @@
 
 package com.openexchange.chronos.storage.rdb.migration;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,31 +63,26 @@ import com.openexchange.exception.OXException;
  */
 public class MigrationResult {
 
+    private final int contextId;
+
     private int migratedEventTombstones;
     private int migratedEvents;
     private int migratedAttendees;
     private int migratedAttendeeTombstones;
     private int migratedAlarms;
-    private int contextId;
     private Date start;
     private Date end;
-    private List<OXException> errors;
+    private Map<String, List<OXException>> errors;
 
     /**
      * Initializes a new {@link MigrationResult}.
+     *
+     * @param contextId The context identifier
      */
-    public MigrationResult() {
+    public MigrationResult(int contextId) {
         super();
-        this.errors = new ArrayList<OXException>();
-    }
-
-    public void add(MigrationResult other) {
-        migratedAlarms += other.migratedAlarms;
-        migratedEvents += other.migratedEvents;
-        migratedEventTombstones += other.migratedEventTombstones;
-        migratedAttendees += other.migratedAttendees;
-        migratedAttendeeTombstones += other.migratedAttendeeTombstones;
-        errors.addAll(other.errors);
+        this.contextId = contextId;
+        this.errors = new HashMap<String, List<OXException>>();
     }
 
     public int getMigratedEventTombstones() {
@@ -133,10 +129,6 @@ public class MigrationResult {
         return contextId;
     }
 
-    public void setContextId(int contextId) {
-        this.contextId = contextId;
-    }
-
     public Date getStart() {
         return start;
     }
@@ -153,12 +145,12 @@ public class MigrationResult {
         this.end = end;
     }
 
-    public List<OXException> getErrors() {
+    public Map<String, List<OXException>> getErrors() {
         return errors;
     }
 
-    public void addError(OXException error) {
-        this.errors.add(error);
+    public void addErrors(Map<String, List<OXException>> errors) {
+        this.errors.putAll(errors);
     }
 
     @Override

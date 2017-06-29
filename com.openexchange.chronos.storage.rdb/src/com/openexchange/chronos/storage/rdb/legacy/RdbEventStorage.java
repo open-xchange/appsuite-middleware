@@ -215,6 +215,15 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public void insertEvent(Event event) throws OXException {
+
+        {
+            //            StorageMigration storageMigration = new StorageMigration(Services.get(), context.getContextId());
+            //            MigrationResult result = storageMigration.run();
+            //
+            //            System.out.println(result);
+
+        }
+
         int updated = 0;
         Connection connection = null;
         try {

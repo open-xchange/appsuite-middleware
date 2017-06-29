@@ -54,6 +54,7 @@ import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -125,8 +126,13 @@ public class StorageMigration {
     }
 
     private MigrationResult run(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize) {
-        MigrationResult result = new StorageCopyTask(sourceStorage, destinationStorage, batchSize).execute();
-        result.setContextId(context.getContextId());
+        MigrationResult result = new MigrationResult(context.getContextId());
+        result.setStart(new Date());
+        StorageCopyTask copyTask = new StorageCopyTask(sourceStorage, destinationStorage, batchSize);
+        copyTask.execute();
+        result.addErrors(sourceStorage.getAndFlushWarnings());
+        result.addErrors(destinationStorage.getAndFlushWarnings());
+        result.setEnd(new Date());
         return result;
     }
 

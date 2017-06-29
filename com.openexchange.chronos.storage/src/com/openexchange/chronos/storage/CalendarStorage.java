@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.storage;
 
+import java.util.List;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+
 /**
  * {@link CalendarStorage}
  *
@@ -84,5 +88,20 @@ public interface CalendarStorage {
      * @return The attendee storage
      */
     AttendeeStorage getAttendeeStorage();
+
+    /**
+     * Gets any tracked warnings that occurred when processing the stored data.
+     *
+     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
+     */
+    Map<String, List<OXException>> getWarnings();
+
+    /**
+     * Gets any tracked warnings that occurred when processing the stored data and flushes them, so that subsequent invocations would
+     * return an empty map.
+     *
+     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
+     */
+    Map<String, List<OXException>> getAndFlushWarnings();
 
 }
