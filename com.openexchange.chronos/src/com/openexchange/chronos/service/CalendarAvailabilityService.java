@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.chronos.availability;
+package com.openexchange.chronos.service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.exception.OXException;
 
 /**

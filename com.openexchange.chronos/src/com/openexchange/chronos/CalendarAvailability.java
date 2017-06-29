@@ -47,16 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.availability;
+package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.FbType;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.availability.fields.AvailabilityField;
+import com.openexchange.chronos.service.AvailabilityField;
 
 /**
  * {@link CalendarAvailability} - Defines periods of availability for a calendar user.

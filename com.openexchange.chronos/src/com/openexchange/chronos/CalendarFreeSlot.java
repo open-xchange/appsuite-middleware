@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.availability;
+package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.availability.fields.FreeSlotField;
+import com.openexchange.chronos.service.FreeSlotField;
 
 /**
  * {@link CalendarFreeSlot} - Defines an available time range within a {@link CalendarAvailability} component

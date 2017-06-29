@@ -47,30 +47,34 @@
  *
  */
 
-package com.openexchange.chronos.availability.fields;
+package com.openexchange.chronos.service;
 
 import java.util.EnumSet;
 
 /**
- * {@link FreeSlotField}
+ * {@link AvailabilityField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum FreeSlotField {
+public enum AvailabilityField {
 
     // the following are REQUIRED but MUST NOT occur more than once
     dtstamp(true, false),
-    dtstart(true, false),
     uid(true, false),
 
     // the following are OPTIONAL but MUST NOT occur more than once
+    busytype(false, false),
+    classification(false, false),
     created(false, false),
     description(false, false),
+    dtstart(false, false),
     lastModified(false, false),
     location(false, false),
-    recurid(false, false),
-    rrule(false, false),
+    organizer(false, false),
+    priority(false, false),
+    seq(false, false),
     summary(false, false),
+    url(false, false),
     dtend(false, false),
     duration(false, false),
 
@@ -78,8 +82,6 @@ public enum FreeSlotField {
     categories(false, true),
     comment(false, true),
     contact(false, true),
-    exdate(false, true),
-    rdate(false, true),
     extendedProperties(false, true),
     ianaProperties(false, true),
     ;
@@ -88,12 +90,12 @@ public enum FreeSlotField {
     private final boolean multiple;
 
     /**
-     * Initialises a new {@link FreeSlotField}.
+     * Initialises a new {@link AvailabilityField}.
      * 
      * @param required whether the field is mandatory
      * @param multiple whether the field can appear more than once
      */
-    private FreeSlotField(boolean required, boolean multiple) {
+    private AvailabilityField(boolean required, boolean multiple) {
         this.required = required;
         this.multiple = multiple;
     }
@@ -121,7 +123,7 @@ public enum FreeSlotField {
      * 
      * @return The mandatory fields
      */
-    public static EnumSet<FreeSlotField> getMandatoryFields() {
-        return EnumSet.of(dtstart, dtstamp, uid);
+    public static EnumSet<AvailabilityField> getMandatoryFields() {
+        return EnumSet.of(dtstart, uid);
     }
 }

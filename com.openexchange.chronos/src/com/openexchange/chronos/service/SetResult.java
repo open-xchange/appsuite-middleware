@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.availability;
+package com.openexchange.chronos.service;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
