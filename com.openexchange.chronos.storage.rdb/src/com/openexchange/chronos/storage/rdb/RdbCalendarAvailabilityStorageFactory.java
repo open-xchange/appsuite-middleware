@@ -63,16 +63,11 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbCalendarAvailabilityStorageFactory implements CalendarAvailabilityStorageFactory {
 
-    private final DBProvider defaultDbProvider;
-
     /**
      * Initialises a new {@link RdbCalendarAvailabilityStorageFactory}.
-     * 
-     * @param defaultDbProvider The default database provider to use
      */
-    public RdbCalendarAvailabilityStorageFactory(DBProvider defaultDbProvider) {
+    public RdbCalendarAvailabilityStorageFactory() {
         super();
-        this.defaultDbProvider = defaultDbProvider;
     }
 
     /*
