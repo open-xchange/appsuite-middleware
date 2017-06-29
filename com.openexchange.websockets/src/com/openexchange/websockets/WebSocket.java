@@ -129,7 +129,7 @@ public interface WebSocket {
     /**
      * Gets the scheme identifier for the currently active message transcoder.
      *
-     * @return The scheme identifier or <code>null</code> if no trancoder is in place
+     * @return The scheme identifier or <code>null</code> if no transcoder is in place
      */
     String getMessageTranscoderScheme();
 
