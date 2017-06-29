@@ -81,6 +81,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.rdb.AttendeeMapper;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -314,11 +315,24 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
          */
         if (null != userAttendees) {
             for (Attendee userAttendee : userAttendees) {
-                userAttendee = entityResolver.applyEntityData(sanitizeCUType(eventId, userAttendee));
+                try {
+                    userAttendee = entityResolver.applyEntityData(sanitizeCUType(eventId, userAttendee));
+                } catch (OXException e) {
+                    if ("CAL-4034".equals(e.getErrorCode())) {
+                        /*
+                         * invalid calendar user; possibly a no longer existing user - add as external attendee as fallback
+                         */
+                        attendees.add(entityResolver.applyEntityData(asExternal(userAttendee)));
+                        LOG.info("Unable to resolve internal {} in event {}, falling back to an external attendee representation.", String.valueOf(userAttendee), eventId, e);
+                        addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, EventField.ATTENDEES));
+                        continue;
+                    }
+                    throw e;
+                }
                 if (null != find(internalAttendees, userAttendee.getEntity())) {
                     attendees.add(userAttendee);
                 } else {
-                    int[] groupIDs = findGroupIDs(internalAttendees, userAttendee.getEntity());
+                    int[] groupIDs = findGroupIDs(eventId, internalAttendees, userAttendee.getEntity());
                     if (null != groupIDs && 0 < groupIDs.length) {
                         List<String> groupMemberships = new ArrayList<String>(groupIDs.length);
                         for (int groupID : groupIDs) {
@@ -326,6 +340,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         }
                         userAttendee.setMember(groupMemberships);
                         attendees.add(userAttendee);
+                    } else {
+                        LOG.info("No matching group memberships found for {} in event {}, skipping.", String.valueOf(userAttendee), eventId);
+                        addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(new Exception("No matching group memberships found for attendee " + userAttendee), eventId, EventField.ATTENDEES));
                     }
                 }
             }
@@ -336,7 +353,27 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         if (null != internalAttendees) {
             for (Attendee internalAttendee : internalAttendees) {
                 if (false == CalendarUserType.INDIVIDUAL.equals(internalAttendee.getCuType())) {
-                    attendees.add(entityResolver.applyEntityData(sanitizeCUType(eventId, internalAttendee)));
+                    try {
+                        attendees.add(entityResolver.applyEntityData(sanitizeCUType(eventId, internalAttendee)));
+                    } catch (OXException e) {
+                        if ("CAL-4034".equals(e.getErrorCode())) {
+                            if (CalendarUserType.GROUP.equals(internalAttendee.getCuType())) {
+                                /*
+                                 * invalid calendar user; possibly a no longer group - skip
+                                 */
+                                LOG.info("Unable to resolve internal {} in event {}, skipping.", String.valueOf(internalAttendee), eventId, e);
+                            } else {
+                                /*
+                                 * invalid calendar user; possibly a no longer resource - add as external attendee as fallback
+                                 */
+                                LOG.info("Unable to resolve internal {} in event {}, falling back to an external attendee representation.", String.valueOf(internalAttendee), eventId, e);
+                                attendees.add(entityResolver.applyEntityData(asExternal(internalAttendee)));
+                            }
+                            addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, EventField.ATTENDEES));
+                            continue;
+                        }
+                        throw e;
+                    }
                 }
             }
         }
@@ -380,12 +417,24 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private int[] findGroupIDs(List<Attendee> internalAttendees, int member) throws OXException {
+    private int[] findGroupIDs(String eventId, List<Attendee> internalAttendees, int member) throws OXException {
         Set<Integer> groupIDs = new HashSet<Integer>();
         for (Attendee groupAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
-            int[] members = entityResolver.getGroupMembers(groupAttendee.getEntity());
-            if (com.openexchange.tools.arrays.Arrays.contains(members, member)) {
-                groupIDs.add(I(groupAttendee.getEntity()));
+            try {
+                int[] members = entityResolver.getGroupMembers(groupAttendee.getEntity());
+                if (com.openexchange.tools.arrays.Arrays.contains(members, member)) {
+                    groupIDs.add(I(groupAttendee.getEntity()));
+                }
+            } catch (OXException e) {
+                if ("CAL-4034".equals(e.getErrorCode())) {
+                    /*
+                     * Invalid calendar user; possibly a no longer existing group
+                     */
+                    LOG.info("Ignoring not existing {} when resolving group memberships for user {} in event {}.", String.valueOf(groupAttendee), I(member), eventId, e);
+                    addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, EventField.ATTENDEES));
+                    continue;
+                }
+                throw e;
             }
         }
         return I2i(groupIDs);
@@ -733,6 +782,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             return entity;
         }
+    }
+
+    /**
+     * Initializes a new attendee based on the supplied internal attendee and copies over all properties, excluding the internal entity identifier field.
+     *
+     * @param internalAttendee The internal attendee to get an external representation for
+     * @return The external attendee
+     */
+    private static Attendee asExternal(Attendee internalAttendee) throws OXException {
+        Attendee attendee = AttendeeMapper.getInstance().copy(internalAttendee, new Attendee(), AttendeeMapper.getInstance().getMappedFields());
+        attendee.removeEntity();
+        return attendee;
     }
 
 }
