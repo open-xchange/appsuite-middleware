@@ -134,7 +134,7 @@ public interface WebSocket {
     String getMessageTranscoderScheme();
 
     /**
-     * Sends a message to the remote end-point, blocking until all of the message has been transmitted.
+     * Sends a message to the remote end-point.
      * <p>
      * A previously set {@link MessageTranscoder transcoder} kicks-in.
      *
@@ -145,7 +145,9 @@ public interface WebSocket {
     SendControl sendMessage(String message) throws OXException;
 
     /**
-     * Sends a message to the remote end-point, blocking until all of the message has been transmitted.
+     * Sends a message to the remote end-point.
+     * <p>
+     * No {@link MessageTranscoder transcoder} kicks-in.
      *
      * @param message The message to be sent
      * @return The handler which will be notified of progress
