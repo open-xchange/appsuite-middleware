@@ -49,6 +49,8 @@
 
 package com.openexchange.imap;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -113,8 +115,68 @@ public enum IMAPClientParameters {
         buf.append(session.getSessionID());
         buf.append('-').append(session.getUserId());
         buf.append('-').append(session.getContextId());
-        buf.append('-').append(imapStore.hashCode());
+        buf.append('-').append(getHashFor(session));
         return buf.toString();
+    }
+
+    private static final java.util.concurrent.atomic.AtomicLong NEXT = new java.util.concurrent.atomic.AtomicLong(0);
+    private static final byte[] SERVER_ID = intToBytes(com.openexchange.exception.OXException.getServerId());
+
+    private static String getHashFor(Session session) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            long current;
+            long next;
+            do {
+                current = NEXT.get();
+                next = current + 1;
+                if (next < 0) {
+                    next = 0;
+                }
+            } while (false == NEXT.compareAndSet(current, next));
+            md.update(longToBytes(current));
+            md.update(SERVER_ID); // Node-unique salt
+
+            return asHex(md.digest(), 8);
+        } catch (NoSuchAlgorithmException e) {
+            // Ignore
+        }
+
+        return new StringBuilder(16).append(session.hashCode()).append(session.getUserId()).append(session.getContextId()).append(System.nanoTime()).toString();
+    }
+
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    private static String asHex(byte[] hash, int len) {
+        int length = len <= 0 || len > hash.length ?  hash.length : len;
+
+        char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        return new String(buf);
+    }
+
+    private static byte[] longToBytes(long value) {
+        byte[] result = new byte[8];
+        long l = value;
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte) (l & 0xFF);
+            l >>= 8;
+        }
+        return result;
+    }
+
+    private static byte[] intToBytes(int value) {
+        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
     }
 
 }
