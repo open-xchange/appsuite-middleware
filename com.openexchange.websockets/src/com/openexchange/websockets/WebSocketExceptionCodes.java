@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
  *
  *    OPEN-XCHANGE legal information
