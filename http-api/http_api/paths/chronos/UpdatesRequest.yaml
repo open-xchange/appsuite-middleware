@@ -1,0 +1,40 @@
+/chronos?action=updates:
+  get:
+    operationId: getUpdates
+    tags:
+      - Chronos
+    summary: Gets all changed events since the given timestamp.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the requested events.
+        required: true
+      - in: query
+        name: rangeStart
+        type: integer
+        format: int64
+        description: Lower inclusive limit of the queried range as a Date. Only events which start on or after this date are returned.
+        required: false
+      - in: query
+        name: rangeEnd
+        type: integer
+        format: int64
+        description: Upper exclusive limit of the queried range as a Date. Only events which end before this date are returned.
+        required: false
+      - $ref: "#/parameters/QueryParamChronosTimezone"
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosOrder"
+      - $ref: "#/parameters/QueryParamChronosSort"
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - $ref: "#/parameters/QueryParamChronosIncludePrivate"
+    responses:
+      200:
+        description: |
+          A JSON object containing two arrays. One with new and updated events and another one with deleted events. The events are
+          sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosUpdatesResponse"

@@ -95,7 +95,8 @@ public class UpdateAttendeeAction extends ChronosAction {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_TIMESTAMP, CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_TIMESTAMP);
 
     private static final String ATTENDEE = "attendee";
     private static final String ALARMS_FIELD = "alarms";
@@ -103,6 +104,11 @@ public class UpdateAttendeeAction extends ChronosAction {
     @Override
     protected Set<String> getOptionalParameters() {
         return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 
     @SuppressWarnings("unchecked")

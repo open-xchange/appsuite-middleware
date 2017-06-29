@@ -306,3 +306,68 @@ glbQueryParamsCryptoAuth:
   description: Authentication token used for Guard in order to decrypt or sign items.  Required if the token is not attached to the session and the decrypt flag was sent.
   required: false
 
+# Chronos parameters
+QueryParamChronosFolder:
+  name: folder
+  in: query
+  type: string
+  description: ID of the folder who contains the events.
+  required: true
+QueryParamChronosID:
+  name: id
+  in: query
+  type: string
+  description: ID of the event.
+  required: true
+QueryParamChronosRecurrenceID:
+  name: recurrenceId
+  in: query
+  type: integer
+  format: int64
+  description: The recurrence identifier.
+  required: false
+QueryParamChronosTimezone:
+  name: timezone
+  in: query
+  type: string
+  description: The timezone to use.
+  required: false
+QueryParamChronosFields:
+  name: fields
+  in: query
+  type: string
+  description: A comma-separated list of field identifiers.
+  required: false
+QueryParamChronosOrder:
+  name: order
+  in: query
+  type: string
+  description: The sort order to apply, either <code>ASC</code> for ascending, or <code>DESC</code> for descending.
+  required: false
+QueryParamChronosSort:
+  name: sort
+  in: query
+  type: string
+  description: Specifies the field for sorting the results.
+  required: false
+QueryParamChronosIgnoreConflicts:
+  name: ignore_conflicts
+  in: query
+  type: boolean
+  default: false
+  description: Whether to ignore conflicts or not.
+  required: false
+QueryParamChronosExpand:
+  name: expand
+  in: query
+  type: boolean
+  default: false
+  description: Defines if event series should be extended or not.
+  required: false
+QueryParamChronosIncludePrivate:
+  name: showPrivate
+  in: query
+  type: boolean
+  default: false
+  description: Defines whether "private" events of the calendar owner, i.e. events whose classification is PRIVATE or CONFIDENTIAL should be included when fetching events from a shared folder or not.
+  required: false

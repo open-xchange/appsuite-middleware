@@ -1,0 +1,29 @@
+type: object
+properties:
+  uid: 
+    type: string
+    description: The uid of the alarm.
+  action:
+    type: string
+    description: The action of the alarm.
+  acknowledged:
+    type: long
+    description: The time of the acknowledgement.
+  trigger:
+    type: object
+    title: Trigger
+    description: The trigger of the alarm.
+    properties:
+        duration:
+            type: string
+            description: The duration of the trigger relative to the related field.
+        related:
+            type: string
+            description: Defines whether the trigger is related to the startDate or the endDate.
+            default: START
+            enum: 
+             - START
+             - END
+        dateTime:
+            type: long
+            description: Defines an absolute date for the alarm.

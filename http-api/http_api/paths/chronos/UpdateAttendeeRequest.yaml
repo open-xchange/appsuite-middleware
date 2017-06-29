@@ -1,0 +1,42 @@
+/chronos?action=updateAttendee:
+  put:
+    operationId: updateAttendee
+    tags:
+      - Chronos
+    summary: Updates the attendee status of an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosTimezone"
+      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - in: body
+        name: body
+        description: A JSON object with the field `attendee` and `alarms`.
+        required: true
+        schema:
+          type: object
+          title: AttendeeAndAlarm
+          properties:
+            attendee:
+              $ref: "#/definitions/Attendee"
+            alarms:
+              type: array
+              description: A list of alarms for this event.
+              items:
+                $ref: "#/definitions/Alarm"
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosUpdateResponse"

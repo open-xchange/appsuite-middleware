@@ -1,0 +1,17 @@
+/chronos?action=list:
+  get:
+    operationId: getEventList
+    tags:
+      - Chronos
+    summary: Gets a list of events.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosTimezone"
+      - $ref: "#/parameters/QueryParamChronosFields"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with events. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"

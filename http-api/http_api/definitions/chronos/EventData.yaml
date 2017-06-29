@@ -1,0 +1,72 @@
+type: object
+properties:
+  startDate:
+    type: long
+    description: The starting date of the event.
+  startTimezone:
+    type: string
+    description: The timezone of the startDate field.
+  endDate:
+    type: long
+    description: The ending date of the event.
+  endTimezone:
+    type: string
+    description: The timezone of the endDate field.
+  created:
+    type: long
+    description: The creation time.
+  uid:
+    type: string
+    description: the universal identifier.
+  attendees:
+    type: array
+    description: The attendees of the event.
+    items:
+        $ref: "#/definitions/Attendee"
+  alarms:
+    type: array
+    description: The alarms of the event for the current user.
+    items: 
+      $ref: "#/definitions/Alarm"
+  lastModified:
+    type: long
+    description: The last modification time.
+  modifiedBy:
+    type: integer
+    description: The id of the user who lastly modified the event.
+  summary:
+    type: string
+    description: The summary of the event.
+  sequence:
+    type: integer
+    description: The sequence number of the event.
+  id:
+    type: string
+    description: The identifier of the event.
+  class:
+    type: string
+    description: The class of the event.
+  organizer:
+      $ref: "#/definitions/CalendarUser"
+      description: The organizer of the event.
+  transp:
+    type: string
+    description: Defines whether the event is shown in the free-busy view.
+    enum: 
+      - OPAQUE
+      - TRANSPARENT
+  allDay:
+    type: boolean
+    description: A flag indicating an all day event.
+  color: 
+    type: string
+    description: The color of the even as a css3 color definition.
+  folder:
+    type: string
+    description: The folder identifier.
+  createdBy: 
+    $ref: "#/definitions/CalendarUser"
+    description: The creator of the event.
+  recurrenceId:
+    type: long
+    description: The recurrence id of this recurrence.

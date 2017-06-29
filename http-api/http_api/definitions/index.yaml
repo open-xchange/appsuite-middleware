@@ -139,6 +139,27 @@ AppointmentFreeBusyResponse:
   $ref: ./calendar/AppointmentFreeBusyResponse.yaml
 AppointmentSearchBody:
   $ref: ./calendar/AppointmentSearchBody.yaml
+# Module: chronos
+EventResponse:
+  $ref: ./chronos/EventResponse.yaml
+EventsResponse:
+  $ref: ./chronos/EventsResponse.yaml
+EventConflictResponse:
+  $ref: ./chronos/EventConflictResponse.yaml
+EventData:
+  $ref: ./chronos/EventData.yaml
+EventId:
+  $ref: ./chronos/EventId.yaml
+CalendarUser:
+  $ref: ./chronos/CalendarUser.yaml
+Attendee:
+  $ref: ./chronos/Attendee.yaml
+Alarm:
+  $ref: ./chronos/Alarm.yaml
+ChronosUpdateResponse:
+  $ref: ./chronos/UpdateResponse.yaml
+ChronosUpdatesResponse:
+  $ref: ./chronos/UpdatesResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

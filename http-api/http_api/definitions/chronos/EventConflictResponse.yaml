@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ../chronos/ConflictData.yaml
+  data:
+    $ref: "#/definitions/EventData"

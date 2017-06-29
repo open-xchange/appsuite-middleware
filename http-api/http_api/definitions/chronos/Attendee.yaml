@@ -1,0 +1,18 @@
+type: object
+properties:
+  $ref: CalendarUserRaw.yaml
+  cuType:
+    type: string
+    description: The attendee user type.
+    enum:
+      - INDIVIDUAL
+      - GROUP
+      - RESOURCE
+      - ROOM
+      - UNKNOWN
+  folder: 
+    type: string
+    description: The folder of the attendee.
+  partStat:
+    type: string
+    description: The participation status.

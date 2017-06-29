@@ -80,7 +80,6 @@ public class DeleteAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
-    private static final String IDS_FIELD = "ids";
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";
 
@@ -102,18 +101,11 @@ public class DeleteAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
 
         Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONObject)) {
+        if (data == null || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-        JSONObject jsonEvent = (JSONObject) data;
-        JSONArray ids;
+        JSONArray ids = (JSONArray) data;
         try {
-            if (jsonEvent.get(IDS_FIELD) instanceof JSONArray) {
-                ids = ((JSONArray) jsonEvent.get(IDS_FIELD));
-            } else {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-            }
-
             List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.length());
             for (int x = 0; x < ids.length(); x++) {
                 JSONObject jsonObject = ids.getJSONObject(x);

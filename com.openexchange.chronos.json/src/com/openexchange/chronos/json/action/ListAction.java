@@ -76,7 +76,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class ListAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", "timezone", PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", PARAMETER_FIELDS);
 
     private static final String IDS_FIELD = "ids";
 

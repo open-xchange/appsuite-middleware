@@ -1,0 +1,33 @@
+/chronos?action=update:
+  put:
+    operationId: updateEvent
+    tags:
+      - Chronos
+    summary: Updates an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - in: body
+        name: body
+        description: A JSON object containing the event's data.
+        required: true
+        schema:
+          $ref: "#/definitions/EventData"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosUpdateResponse"
