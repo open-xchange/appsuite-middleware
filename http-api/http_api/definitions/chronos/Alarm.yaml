@@ -7,7 +7,8 @@ properties:
     type: string
     description: The action of the alarm.
   acknowledged:
-    type: long
+    type: integer
+    format: int64
     description: The time of the acknowledgement.
   trigger:
     type: object

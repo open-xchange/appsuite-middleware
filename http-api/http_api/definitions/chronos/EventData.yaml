@@ -1,19 +1,22 @@
 type: object
 properties:
   startDate:
-    type: long
+    type: integer
+    format: int64
     description: The starting date of the event.
   startTimezone:
     type: string
     description: The timezone of the startDate field.
   endDate:
-    type: long
+    type: integer
+    format: int64
     description: The ending date of the event.
   endTimezone:
     type: string
     description: The timezone of the endDate field.
   created:
-    type: long
+    type: integer
+    format: int64
     description: The creation time.
   uid:
     type: string
@@ -29,7 +32,8 @@ properties:
     items: 
       $ref: "#/definitions/Alarm"
   lastModified:
-    type: long
+    type: integer
+    format: int64
     description: The last modification time.
   modifiedBy:
     type: integer
@@ -68,5 +72,6 @@ properties:
     $ref: "#/definitions/CalendarUser"
     description: The creator of the event.
   recurrenceId:
-    type: long
+    type: integer
+    format: int64
     description: The recurrence id of this recurrence.
