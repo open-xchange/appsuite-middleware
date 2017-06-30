@@ -191,8 +191,7 @@ public class HostList {
             }
         }
 
-        String address = hostAddress.getHostAddress();
-        return contains(null == address ? hostAddress.getHostName() : address);
+        return contains(hostAddress.getHostName());
     }
 
     /**

@@ -306,14 +306,14 @@ public final class OXFolderUtility {
         set.add(permissions[0].getEntity());
         for (int i = 1; i < permissions.length; i++) {
             final OCLPermission permission = permissions[i];
-            final int key = permission.getEntity();
-            if (set.contains(key)) {
+            final int entityId = permission.getEntity();
+            if (false == set.add(entityId)) {
+                // TIntSet instance did not change through add
                 if (permission.isGroupPermission()) {
-                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(Integer.valueOf(permission.getEntity()));
+                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(Integer.valueOf(entityId));
                 }
-                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(Integer.valueOf(permission.getEntity()));
+                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(Integer.valueOf(entityId));
             }
-            set.add(key);
         }
     }
 
