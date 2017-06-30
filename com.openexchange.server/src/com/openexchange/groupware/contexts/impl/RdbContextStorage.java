@@ -71,7 +71,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -80,8 +80,8 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * SQL select statement for loading a context.
      */
-    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=? AND context_server2db_pool.server_id=?";
-    
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max,server_id FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=?";
+
     /**
      * SQL select statement for retrieving the server identifier for the specified context
      */
@@ -242,30 +242,25 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     public ContextImpl loadContextData(final Connection con, final int contextId) throws OXException {
-        ContextImpl context = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            DatabaseService databseService = ServerServiceRegistry.getServize(DatabaseService.class);
             stmt = con.prepareStatement(SELECT_CONTEXT);
             stmt.setInt(1, contextId);
-            stmt.setInt(2, databseService.getServerId());
             result = stmt.executeQuery();
-            if (!result.next()) {
-                // Collect more information on which server the context is located, if existing at all
-                closeSQLStuff(result, stmt);
 
-                stmt = con.prepareCall(FIND_SERVER_OF_CONTEXT);
-                stmt.setInt(1, contextId);
-                result = stmt.executeQuery();
-                if (!result.next()) {
-                    throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
-                }
-                int serverId = result.getInt(1);
+            // Check if such a context exists
+            if (false == result.next()) {
+                throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
+            }
+
+            // Check if context-associated server matches this node's one
+            int serverId = result.getInt(8);
+            if (serverId != DBPool.getServerId()) {
                 throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
             }
 
-            context = new ContextImpl(contextId);
+            ContextImpl context = new ContextImpl(contextId);
             int pos = 1;
             context.setName(result.getString(pos++));
             context.setEnabled(result.getBoolean(pos++));
@@ -276,12 +271,12 @@ public class RdbContextStorage extends ContextStorage {
             auth[1] = result.getString(pos++);
             context.setFilestoreAuth(auth);
             context.setFileStorageQuota(result.getLong(pos++));
+            return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return context;
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.database.internal;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,26 +85,28 @@ public final class Server {
     static void setConfigDatabaseService(final ConfigDatabaseService configDatabaseService) {
         Server.configDatabaseService = configDatabaseService;
     }
-
     private static volatile Integer serverId;
 
     public static int getServerId() throws OXException {
+        // Load if not yet done
         Integer tmp = serverId;
         if (null == tmp) {
             synchronized (Server.class) {
                 tmp = serverId;
                 if (null == tmp) {
-                    int iServerId = Server.loadServerId(getServerName());
-                    if (-1 == iServerId) {
-                        throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
-                    }
-                    tmp = I(iServerId);
-                    serverId = tmp;
+                    tmp = Integer.valueOf(Server.loadServerId(getServerName()));
                     LOG.trace("Got server id: {}", tmp);
+                    serverId = tmp;
                 }
             }
         }
-        return tmp.intValue();
+
+        // Check & return
+        int iServerId = tmp.intValue();
+        if (iServerId < 0) {
+            throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+        }
+        return iServerId;
     }
 
     public static final void start(final ConfigurationService service) throws OXException {
