@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -131,6 +132,18 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             release(connection, updated);
         }
         return value;
+    }
+
+    public long countEvents() throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return countEvents(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
     }
 
     @Override
@@ -341,6 +354,16 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
+    private long countEvents(Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT COUNT(*) FROM calendar_event WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? l(resultSet.getLong(1)) : 0L;
+            }
+        }
+    }
+
     private int deleteEvent(Connection connection, String id) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_event WHERE cid=? AND account=? AND id=?;")) {
             stmt.setInt(1, context.getContextId());
@@ -480,12 +503,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, accountId);
             stmt.setInt(3, asInt(id));
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                return readEvent(resultSet, mappedFields, null);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
             }
         }
-        return null;
     }
 
     private Event selectException(Connection connection, String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws SQLException, OXException {
@@ -499,12 +520,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(2, accountId);
             stmt.setInt(3, asInt(seriesId));
             stmt.setLong(4, recurrenceId.getValue());
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                return readEvent(resultSet, mappedFields, null);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
             }
         }
-        return null;
     }
 
     private List<Event> selectEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
@@ -538,9 +557,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 stmt.setLong(parameterIndex++, searchOptions.getUntil().getTime());
             }
             adapter.setParameters(stmt, parameterIndex++);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(resultSet, mappedFields, "e."));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, "e."));
+                }
             }
         }
         return events;
@@ -593,9 +613,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     stmt.setInt(parameterIndex++, entity);
                 }
             }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(resultSet, mappedFields, "e."));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, "e."));
+                }
             }
         }
         return events;
