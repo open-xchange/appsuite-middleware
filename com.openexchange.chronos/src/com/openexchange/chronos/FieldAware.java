@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,84 +47,24 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos;
 
-import java.util.EnumSet;
+import com.openexchange.chronos.service.CalendarAvailabilityField;
+
+;
 
 /**
- * {@link FreeSlotField}
+ * {@link FieldAware}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum FreeSlotField implements CalendarAvailabilityField {
-
-    // the following are REQUIRED but MUST NOT occur more than once
-    dtstamp(true, false),
-    dtstart(true, false),
-    uid(true, false),
-
-    // the following are OPTIONAL but MUST NOT occur more than once
-    created(false, false),
-    description(false, false),
-    lastModified(false, false),
-    location(false, false),
-    recurid(false, false),
-    rrule(false, false),
-    summary(false, false),
-    dtend(false, false),
-    duration(false, false),
-
-    // the following are OPTIONAL and MAY occur more than once
-    categories(false, true),
-    comment(false, true),
-    contact(false, true),
-    exdate(false, true),
-    rdate(false, true),
-    extendedProperties(false, true),
-    ianaProperties(false, true),
-    ;
-
-    private final boolean mandatory;
-    private final boolean multiOccurrent;
+public interface FieldAware {
 
     /**
-     * Initialises a new {@link FreeSlotField}.
+     * Determines whether this object contains the specified field
      * 
-     * @param mandatory whether the field is mandatory
-     * @param multiOccurrent whether the field can appear more than once
+     * @param field The field
+     * @return <code>true</code> if the field is contained and set; <code>false</code> otherwise
      */
-    private FreeSlotField(boolean mandatory, boolean multiOccurrent) {
-        this.mandatory = mandatory;
-        this.multiOccurrent = multiOccurrent;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMandatory()
-     */
-    @Override
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMultiOccurrent()
-     */
-    @Override
-    public boolean isMultiOccurrent() {
-        return multiOccurrent;
-    }
-
-    /**
-     * Returns the mandatory fields
-     * 
-     * @return The mandatory fields
-     */
-    public static EnumSet<FreeSlotField> getMandatoryFields() {
-        return EnumSet.of(dtstart, dtstamp, uid);
-    }
-
+    boolean contains(CalendarAvailabilityField field);
 }
