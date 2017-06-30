@@ -66,6 +66,7 @@ public enum AvailabilityField implements CalendarAvailabilityField {
     busytype(false, false),
     classification(false, false),
     created(false, false),
+    createdBy(false, false),
     description(false, false),
     dtstart(false, false),
     lastModified(false, false),
