@@ -321,11 +321,12 @@ public final class LoginPerformer {
                 ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
                 if (!Strings.isEmpty(migrationRedirectURL)) {
-                    retval.setRedirect(migrationRedirectURL);
-                    //retval.setHeaders(headers);
-                    retval.setCookies(cookies);
-                    retval.setCode(ResultCode.REDIRECT);
-                    return retval;
+                    OXException redirectExc = LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
+                    // Call onRedirectedAuthentication
+                    for (LoginListener listener : listeners) {
+                        listener.onRedirectedAuthentication(request, properties, redirectExc);
+                    }
+                    throw redirectExc;
                 }
             }
             if (LoginExceptionCodes.REDIRECT.equals(e)) {
