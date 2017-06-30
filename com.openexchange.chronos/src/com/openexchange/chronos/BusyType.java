@@ -79,4 +79,21 @@ public enum BusyType {
     public String getValue() {
         return value;
     }
+
+    /**
+     * Parses the specified value to a {@link BusyType} enum item
+     * 
+     * @param value The value to parse
+     * @return The {@link BusyType} that corresponds to that value
+     * @throws IllegalArgumentException if the specified value does not map to any known
+     *             {@link BusyType} enum item
+     */
+    public static BusyType parseFromString(String value) {
+        for (BusyType bt : values()) {
+            if (bt.getValue().equals(value)) {
+                return bt;
+            }
+        }
+        throw new IllegalArgumentException("Unknown BusyType for value '" + value + "'");
+    }
 }
