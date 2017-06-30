@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.database.IncorrectStringSQLException;
@@ -116,6 +117,21 @@ public abstract class RdbStorage {
             warnings = new HashMap<String, List<OXException>>();
         }
         com.openexchange.tools.arrays.Collections.put(warnings, eventId, warning);
+    }
+
+    /**
+     * Initializes and keeps track of a {@link CalendarExceptionCodes#IGNORED_INVALID_DATA} warning that occurred when processing the data
+     * of a specific event.
+     *
+     * @param eventId The identifier of the event the warning is associated with
+     * @param field The corresponding event field of the invalid data
+     * @param message The message providing details of the warning
+     * @param cause The optional initial cause
+     */
+    public void addInvalidDataWaring(String eventId, EventField field, String message, Throwable cause) {
+        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, message);
+        LOG.info(warning.getLogMessage());
+        addWarning(eventId, warning);
     }
 
     /**

@@ -68,10 +68,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -279,34 +276,30 @@ public class Check {
          * check further properties based on alarm type
          */
         if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
-            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+            if (!alarm.containsDescription()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
             return alarm;
         } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "DESCRIPTION"))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create("DESCRIPTION");
+            if ((!alarm.containsDescription()) || alarm.getDescription().isEmpty()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
-            if (Strings.isEmpty(AlarmUtils.optExtendedPropertyValue(alarm, "SUMMARY"))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create("SUMMARY");
+            if ((!alarm.containsSummary()) || alarm.getSummary().isEmpty()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
             }
-            ExtendedProperties extendedProperties = alarm.getExtendedProperties();
-            if (null == extendedProperties) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+
+            if ((!alarm.containsAttendees()) || alarm.getAttendees().isEmpty()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
             }
-            List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
-            if (attendeeProperties.isEmpty()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
-            }
-            for (ExtendedProperty attendeeProperty : attendeeProperties) {
-                String address = attendeeProperty.getValue();
-                if (null == address) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create("ATTENDEE");
+
+            for (Attendee attendee : alarm.getAttendees()) {
+                if (attendee.getEMail() == null || attendee.getEMail().isEmpty()) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
                 }
                 try {
-                    new QuotedInternetAddress(address);
+                    new QuotedInternetAddress(attendee.getEMail());
                 } catch (AddressException e) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(e, "ATTENDEE");
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
                 }
             }
         }
