@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
 
@@ -77,18 +78,20 @@ public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
      * Deserializes a list item from a json list element.
      *
      * @param from The source
-     * @return
+     * @param timeZone The {@link TimeZone} to use
+     * @return The deserialized object
      * @throws JSONException
      */
-    public abstract T deserialize(I from) throws JSONException;
+    public abstract T deserialize(I from, TimeZone timeZone) throws JSONException;
 
     /**
      * Serializes a list item to a json list element.
      *
-     * @param from
-     * @return
+     * @param from The source
+     * @param timeZone The {@link TimeZone} to use
+     * @return The serialized object
      * @throws JSONException
      */
-    public abstract I serialize(T from) throws JSONException;
+    public abstract I serialize(T from, TimeZone timeZone) throws JSONException;
 
 }

@@ -121,7 +121,12 @@ public class UpdateAttendeeAction extends ChronosAction {
             try {
                 JSONObject attendeeJSON = ((JSONObject) data).getJSONObject(ATTENDEE);
                 ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
-                attendee = mapping.deserialize(attendeeJSON);
+                Entry<String, ?> timezone = parseParameter(requestData, "timezone", false);
+                if (timezone != null && timezone.getValue() != null) {
+                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone((String) timezone.getValue()));
+                } else {
+                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone("UTC"));
+                }
                 if(!attendee.containsUri() && !attendee.containsEntity()){
                     attendee.setEntity(requestData.getSession().getUserId());
                 }

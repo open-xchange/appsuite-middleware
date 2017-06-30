@@ -73,10 +73,10 @@ public abstract class ListMapping<T, O> extends DefaultJsonMapping<List<T>, O> {
 		super(ajaxName, columnID);
 	}
 
-    protected abstract T deserialize(JSONArray array, int index) throws JSONException, OXException;
+    protected abstract T deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException;
 
 	@Override
-	public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
 		if (from.isNull(getAjaxName())) {
             set(to, null);
 		} else {
@@ -84,11 +84,16 @@ public abstract class ListMapping<T, O> extends DefaultJsonMapping<List<T>, O> {
 			int size = jsonArray.length();
             List<T> array = new ArrayList<>(size);
 			for (int i = 0; i < size; i++) {
-                array.add(deserialize(jsonArray, i));
+                array.add(deserialize(jsonArray, i, timeZone));
 			}
 			this.set(to, array);
 		}
 	}
+
+    @Override
+    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+        deserialize(from, to, TimeZone.getTimeZone("UTC"));
+    }
 
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {

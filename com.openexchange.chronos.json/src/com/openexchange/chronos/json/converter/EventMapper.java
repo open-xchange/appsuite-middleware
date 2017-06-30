@@ -500,7 +500,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected String deserialize(JSONArray array, int index) throws JSONException, OXException {
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
                 return array.getString(index);
             }
         });
@@ -787,7 +787,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Long deserialize(JSONArray array, int index) throws JSONException, OXException {
+            protected Long deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
                 return L(array.getLong(index));
             }
         });
@@ -830,7 +830,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Long deserialize(JSONArray array, int index) throws JSONException, OXException {
+            protected Long deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
                 return L(array.getLong(index));
             }
         });
@@ -913,9 +913,9 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Attendee deserialize(JSONArray array, int index) throws JSONException, OXException {
+            protected Attendee deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
                 JSONObject jsonObject = array.getJSONObject(index);
-                return deserialize(jsonObject);
+                return deserialize(jsonObject, timeZone);
             }
 
             @Override
@@ -927,13 +927,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 JSONArray jsonArray = new JSONArray(value.size());
                 for (Attendee attendee : value) {
 
-                    jsonArray.put(serialize(attendee));
+                    jsonArray.put(serialize(attendee, timeZone));
                 }
                 return jsonArray;
             }
 
             @Override
-            public Attendee deserialize(JSONObject from) throws JSONException {
+            public Attendee deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
                 Attendee attendee = deserializeCalendarUser(from, Attendee.class);
                 if (from.has("cuType")) {
                     attendee.setCuType(new CalendarUserType(from.getString("cuType")));
@@ -966,7 +966,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public JSONObject serialize(Attendee from) throws JSONException {
+            public JSONObject serialize(Attendee from, TimeZone timeZone) throws JSONException {
                 JSONObject jsonObject = serializeCalendarUser(from);
                 if (null != from.getCuType()) {
                     jsonObject.put("cuType", from.getCuType().getValue());
@@ -992,7 +992,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return jsonObject;
             }
         });
-        mappings.put(EventField.ATTACHMENTS, new ListMapping<Attachment, Event>("attachments", ColumnIDs.ATTACHMENTS) {
+        mappings.put(EventField.ATTACHMENTS, new ListItemMapping<Attachment, Event, JSONObject>("attachments", ColumnIDs.ATTACHMENTS) {
 
             @Override
             public boolean isSet(Event object) {
@@ -1015,11 +1015,10 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Attachment deserialize(JSONArray array, int index) throws JSONException, OXException {
+            protected Attachment deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
                 JSONObject jsonObject = array.getJSONObject(index);
-                Attachment attachment = new Attachment();
-                //TODO
-                return attachment;
+                return deserialize(jsonObject, timeZone);
+
             }
 
             @Override
@@ -1030,27 +1029,57 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 }
                 JSONArray jsonArray = new JSONArray(value.size());
                 for (Attachment attachment : value) {
-                    JSONObject jsonObject = new JSONObject();
-                    if (null != attachment.getFilename()) {
-                        jsonObject.put("filename", attachment.getFilename());
-                    }
-                    if (null != attachment.getFormatType()) {
-                        jsonObject.put("fmtType", attachment.getFormatType());
-                    }
-                    if (0 < attachment.getSize()) {
-                        jsonObject.put("size", attachment.getSize());
-                    }
-                    if (null != attachment.getCreated()) {
-                        long date = attachment.getCreated().getTime();
-                        date += timeZone.getOffset(date);
-                        jsonObject.put("created", date);
-                    }
-                    if (0 < attachment.getManagedId()) {
-                        jsonObject.put("managedId", attachment.getManagedId());
-                    }
-                    jsonArray.put(jsonObject);
+
+                    jsonArray.put(serialize(attachment, timeZone));
                 }
                 return jsonArray;
+            }
+
+            @Override
+            public Attachment deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
+                Attachment attachment = new Attachment();
+
+                if (from.has("filename")) {
+                    attachment.setFilename(from.getString("filename"));
+                }
+                if (from.has("fmtType")) {
+                    attachment.setFormatType(from.getString("fmtType"));
+                }
+                if (from.has("size")) {
+                    attachment.setSize(from.getLong("size"));
+                }
+                if (from.has("created")) {
+                    long date = from.getLong("created");
+                    date -= timeZone.getOffset(date);
+                    attachment.setCreated(new Date(date));
+                }
+                if (from.has("managedId")) {
+                    attachment.setManagedId(from.getInt("managedId"));
+                }
+                return attachment;
+            }
+
+            @Override
+            public JSONObject serialize(Attachment attachment, TimeZone timeZone) throws JSONException {
+                JSONObject jsonObject = new JSONObject();
+                if (null != attachment.getFilename()) {
+                    jsonObject.put("filename", attachment.getFilename());
+                }
+                if (null != attachment.getFormatType()) {
+                    jsonObject.put("fmtType", attachment.getFormatType());
+                }
+                if (0 < attachment.getSize()) {
+                    jsonObject.put("size", attachment.getSize());
+                }
+                if (null != attachment.getCreated()) {
+                    long date = attachment.getCreated().getTime();
+                    date += timeZone.getOffset(date);
+                    jsonObject.put("created", date);
+                }
+                if (0 < attachment.getManagedId()) {
+                    jsonObject.put("managedId", attachment.getManagedId());
+                }
+                return jsonObject;
             }
         });
         mappings.put(EventField.ALARMS, new DefaultJsonMapping<List<Alarm>, Event>("alarms", ColumnIDs.ALARMS) {
@@ -1075,6 +1104,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeAlarms();
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public void deserialize(JSONObject from, Event to, TimeZone timezone) throws JSONException, OXException {
 
@@ -1106,6 +1136,49 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                             trigger.setDateTime(new Date(date));
                         }
                         alarm.setTrigger(trigger);
+                    }
+
+                    if (jsonObject.has("attachments")) {
+                        JSONArray arrayOfAttachments = jsonObject.getJSONArray("attachments");
+                        List<Attachment> attachments = new ArrayList<>(arrayOfAttachments.length());
+                        for (int x = 0; x < arrayOfAttachments.length(); x++) {
+                            JSONObject attachmentJSON = arrayOfAttachments.getJSONObject(x);
+                            Attachment attach = ((ListItemMapping<Attachment, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTACHMENTS)).deserialize(attachmentJSON, timezone);
+                            attachments.add(attach);
+                        }
+                        if (!attachments.isEmpty()) {
+                            alarm.setAttachments(attachments);
+                        }
+                    }
+
+                    if (jsonObject.has("attendees")) {
+                        JSONArray arrayOfAttendees = jsonObject.getJSONArray("attendees");
+                        List<Attendee> attendees = new ArrayList<>(arrayOfAttendees.length());
+                        for (int x = 0; x < arrayOfAttendees.length(); x++) {
+                            JSONObject attendeeJSON = arrayOfAttendees.getJSONObject(x);
+                            Attendee attendee = ((ListItemMapping<Attendee, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTENDEES)).deserialize(attendeeJSON, timezone);
+                            attendees.add(attendee);
+                        }
+                        if (!attendees.isEmpty()) {
+                            alarm.setAttendees(attendees);
+                        }
+                    }
+
+                    if (jsonObject.has("summary")) {
+                        String summary = jsonObject.getString("summary");
+                        alarm.setSummary(summary);
+                    }
+
+                    if (jsonObject.has("description")) {
+                        String description = jsonObject.getString("description");
+                        alarm.setDescription(description);
+                    }
+
+                    if (jsonObject.has("extendedProperties")) {
+                        ExtendedProperties deserializeExtendedProperties = deserializeExtendedProperties(jsonObject.getJSONArray("extendedProperties"));
+                        if (deserializeExtendedProperties != null) {
+                            alarm.setExtendedProperties(deserializeExtendedProperties);
+                        }
                     }
 
                     alarms.add(alarm);
@@ -1252,7 +1325,9 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             return null;
         }
         ExtendedProperties extendedProperties = new ExtendedProperties();
-        //TODO
+        for (int x = 0; x < jsonArray.length(); x++) {
+            extendedProperties.add(deserializeExtendedProperty(jsonArray.getJSONObject(x)));
+        }
         return extendedProperties;
     }
 
@@ -1285,6 +1360,33 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         }
         jsonObject.put("parameters", jsonParameters);
         return jsonObject;
+    }
+
+    private static ExtendedProperty deserializeExtendedProperty(JSONObject extendedProperty) throws JSONException {
+        if (null == extendedProperty) {
+            return null;
+        }
+
+        String name = extendedProperty.getString("name");
+        String value = extendedProperty.getString("value");
+        List<ExtendedPropertyParameter> parameters = null;
+        if (extendedProperty.has("parameters")) {
+            JSONArray array = extendedProperty.getJSONArray("parameters");
+            parameters = new ArrayList<>(array.length());
+            for (int x = 0; x < extendedProperty.length(); x++) {
+                JSONObject param = array.getJSONObject(x);
+                String paraName = param.getString("name");
+                String paraValue = param.getString("value");
+                if (paraName != null && !paraName.isEmpty() && paraValue != null && !paraValue.isEmpty()) {
+                    parameters.add(new ExtendedPropertyParameter(name, value));
+                }
+            }
+        }
+        if (parameters != null && !parameters.isEmpty()) {
+            return new ExtendedProperty(name, value, parameters);
+        } else {
+            return new ExtendedProperty(name, value);
+        }
     }
 
 }
