@@ -84,9 +84,11 @@ public class CalendarAvailability implements FieldAware {
     private String endTimeZone;
 
     private String description;
+    private String summary;
     private String location;
     private Organizer organizer;
     private String url;
+    private String comment;
 
     private long duration; //FIXME: as integer or another type?
 
@@ -638,7 +640,8 @@ public class CalendarAvailability implements FieldAware {
 
     /**
      * Gets the calendarFreeSlots
-     *
+     * s
+     * 
      * @return The calendarFreeSlots
      */
     public List<CalendarFreeSlot> getCalendarFreeSlots() {
@@ -652,6 +655,60 @@ public class CalendarAvailability implements FieldAware {
      */
     public void setCalendarFreeSlots(List<CalendarFreeSlot> calendarFreeSlots) {
         this.calendarFreeSlots = calendarFreeSlots;
+    }
+
+    /**
+     * Gets the summary
+     *
+     * @return The summary
+     */
+    public String getSummary() {
+        return summary;
+    }
+
+    /**
+     * Sets the summary
+     *
+     * @param summary The summary to set
+     */
+    public void setSummary(String summary) {
+        this.summary = summary;
+        fields.add(AvailabilityField.summary);
+    }
+
+    /**
+     * Removes the summary
+     */
+    public void removeSummary() {
+        summary = null;
+        fields.remove(AvailabilityField.summary);
+    }
+
+    /**
+     * Gets the comment
+     *
+     * @return The comment
+     */
+    public String getComment() {
+        return comment;
+    }
+
+    /**
+     * Sets the comment
+     *
+     * @param comment The comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+        fields.add(AvailabilityField.comment);
+    }
+
+    /**
+     * Removes the comment
+     */
+    public void removeComment() {
+        comment = null;
+        fields.remove(AvailabilityField.comment);
     }
 
     /*
