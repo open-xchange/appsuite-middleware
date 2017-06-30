@@ -66,8 +66,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -232,7 +230,7 @@ public class Appointment2Event {
      */
     public static Alarm getAlarm(int reminder) {
         Alarm alarm = new Alarm(new Trigger(AlarmUtils.getDuration(true, 0, 0, 0, reminder, 0)), AlarmAction.DISPLAY);
-        alarm.setExtendedProperties(new ExtendedProperties(Collections.singletonList(new ExtendedProperty("DESCRIPTION", "Reminder"))));
+        alarm.setDescription("Reminder");
         return alarm;
     }
 
