@@ -79,12 +79,10 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -129,8 +127,8 @@ public class Compat {
                 String databasePattern = event.getRecurrenceRule().substring(idx + 1);
                 recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.isAllDay());
             } catch (IllegalArgumentException | OXException e) {
-                LOG.info("Ignoring invalid legacy series pattern {} in event {}", event.getRecurrenceRule(), event.getId(), e);
-                eventStorage.addWarning(event.getId(), CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, event.getId(), EventField.RECURRENCE_RULE));
+                String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
+                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, message, e);
             }
             event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             if (null != recurrenceData) {
@@ -430,8 +428,7 @@ public class Compat {
                 if (false == "CAL-4061".equals(e.getErrorCode())) {
                     throw e;
                 }
-                LOG.info("Skipping invalid recurrence date position {} in event {}", Autoboxing.L(date.getTime()), eventId, e);
-                eventStorage.addWarning(eventId, CalendarExceptionCodes.IGNORED_INVALID_DATA.create(e, eventId, field));
+                eventStorage.addInvalidDataWaring(eventId, field, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
             }
         }
         return recurrenceIDs;

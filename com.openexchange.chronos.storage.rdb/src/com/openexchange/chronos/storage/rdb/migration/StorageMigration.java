@@ -88,11 +88,15 @@ public class StorageMigration {
     }
 
     public MigrationResult run() throws OXException {
-        return run(DEFAULT_BATCH_SIZE);
+        try {
+            return run(DEFAULT_BATCH_SIZE);
+        } catch (Exception e) {
+            throw new OXException(e);
+        }
 
     }
 
-    public MigrationResult run(int batchSize) throws OXException {
+    public MigrationResult run(int batchSize) throws Exception {
         EntityResolver entityResolver = optEntityResolver(services, context.getContextId());
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection writeConnection = null;
@@ -125,11 +129,11 @@ public class StorageMigration {
         }
     }
 
-    private MigrationResult run(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize) {
+    private MigrationResult run(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize) throws Exception {
         MigrationResult result = new MigrationResult(context.getContextId());
         result.setStart(new Date());
         StorageCopyTask copyTask = new StorageCopyTask(sourceStorage, destinationStorage, batchSize);
-        copyTask.execute();
+        copyTask.call();
         result.addErrors(sourceStorage.getAndFlushWarnings());
         result.addErrors(destinationStorage.getAndFlushWarnings());
         result.setEnd(new Date());
