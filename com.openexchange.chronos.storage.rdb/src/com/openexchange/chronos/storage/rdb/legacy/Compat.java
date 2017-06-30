@@ -166,11 +166,14 @@ public class Compat {
                     }
                 }
             }
-        } else if (isSeriesMaster(event)) {
+        } else if (null != event.getId() && event.getId().equals(event.getSeriesId())) {
             /*
-             * ensure to remove a series for events that used to be a series, but are no longer
+             * ensure to remove recurrence remnants for events that used to be a series, but are no longer
              */
             event.removeSeriesId();
+            event.removeRecurrenceId();
+            event.removeChangeExceptionDates();
+            event.removeDeleteExceptionDates();
         }
         /*
          * take over timezone
