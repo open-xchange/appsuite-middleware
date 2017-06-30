@@ -51,6 +51,7 @@ package com.openexchange.chronos.availability.impl;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FbType;
@@ -155,7 +156,7 @@ public class CheckUtil {
         // used on a "FREEBUSY" property, with the exception that the "FREE" value is not used in this property.
         // FIXME: Should we throw an exception instead?
         if (!availability.contains(AvailabilityField.busytype) || availability.getBusyType().equals(FbType.FREE)) {
-            availability.setBusyType(FbType.BUSY_UNAVAILABLE);
+            availability.setBusyType(BusyType.BUSY_UNAVAILABLE);
         }
 
         // Valid 'PRIORITY' values are 0, 9, 8, 7, 6, 5, 4, 3, 2, 1

@@ -68,7 +68,7 @@ public class CalendarAvailability implements FieldAware {
     private long creationTimestamp;
     private String uid;
 
-    private FbType busyType = FbType.BUSY_UNAVAILABLE;
+    private BusyType busyType = BusyType.BUSY_UNAVAILABLE;
     private Classification classification;
 
     private int priority;
@@ -108,16 +108,6 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
-     * Sets the creationTimestamp
-     *
-     * @param creationTimestamp The creationTimestamp to set
-     */
-    public void setCreationTimestamp(long creationTimestamp) {
-        this.creationTimestamp = creationTimestamp;
-        fields.add(AvailabilityField.dtstamp);
-    }
-
-    /**
      * Sets the uid
      *
      * @param uid The uid to set
@@ -125,15 +115,6 @@ public class CalendarAvailability implements FieldAware {
     public void setUid(String uid) {
         this.uid = uid;
         fields.add(AvailabilityField.uid);
-    }
-
-    /**
-     * Gets the creationTimestamp
-     *
-     * @return The creationTimestamp
-     */
-    public long getCreationTimestamp() {
-        return creationTimestamp;
     }
 
     /**
@@ -146,11 +127,46 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the identifier
+     */
+    public void removeUid() {
+        uid = null;
+        fields.remove(AvailabilityField.uid);
+    }
+
+    /**
+     * Sets the creationTimestamp
+     *
+     * @param creationTimestamp The creationTimestamp to set
+     */
+    public void setCreationTimestamp(long creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
+        fields.add(AvailabilityField.dtstamp);
+    }
+
+    /**
+     * Gets the creationTimestamp
+     *
+     * @return The creationTimestamp
+     */
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
+    /**
+     * Removes the creation timestamp
+     */
+    public void removeCreationTimestamp() {
+        creationTimestamp = 0;
+        fields.remove(AvailabilityField.created);
+    }
+
+    /**
      * Gets the busyType
      *
      * @return The busyType
      */
-    public FbType getBusyType() {
+    public BusyType getBusyType() {
         return busyType;
     }
 
@@ -159,9 +175,17 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param busyType The busyType to set
      */
-    public void setBusyType(FbType busyType) {
+    public void setBusyType(BusyType busyType) {
         this.busyType = busyType;
         fields.add(AvailabilityField.busytype);
+    }
+
+    /**
+     * Removes the busy type
+     */
+    public void removeBusyType() {
+        busyType = null;
+        fields.remove(AvailabilityField.busytype);
     }
 
     /**
@@ -184,6 +208,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the classification
+     */
+    public void removeClassification() {
+        classification = null;
+        fields.remove(AvailabilityField.classification);
+    }
+
+    /**
      * Gets the priority
      *
      * @return The priority
@@ -200,6 +232,14 @@ public class CalendarAvailability implements FieldAware {
     public void setPriority(int priority) {
         this.priority = priority;
         fields.add(AvailabilityField.priority);
+    }
+
+    /**
+     * Removes the prioriry
+     */
+    public void removePriority() {
+        priority = -1;
+        fields.remove(AvailabilityField.priority);
     }
 
     /**
@@ -222,6 +262,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the sequence
+     */
+    public void removeSequence() {
+        sequence = -1;
+        fields.remove(AvailabilityField.seq);
+    }
+
+    /**
      * Gets the created
      *
      * @return The created
@@ -241,6 +289,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the created timestamp
+     */
+    public void removeCreated() {
+        created = null;
+        fields.remove(AvailabilityField.created);
+    }
+
+    /**
      * Gets the createdBy
      *
      * @return The createdBy
@@ -256,6 +312,14 @@ public class CalendarAvailability implements FieldAware {
      */
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
+    }
+
+    /**
+     * Removes the identifier of the user who has created the availability block.
+     */
+    public void removeCreatedBy() {
+        createdBy = 0;
+        fields.remove(AvailabilityField.createdBy);
     }
 
     /**
@@ -278,6 +342,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the last modification date.
+     */
+    public void removeLastModified() {
+        lastModified = null;
+        fields.remove(AvailabilityField.lastModified);
+    }
+
+    /**
      * Gets the startTime
      *
      * @return The startTime
@@ -294,6 +366,14 @@ public class CalendarAvailability implements FieldAware {
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
         fields.add(AvailabilityField.dtstart);
+    }
+
+    /**
+     * Removes the start date
+     */
+    public void removeStartTime() {
+        startTime = null;
+        fields.remove(AvailabilityField.dtstart);
     }
 
     /**
@@ -315,6 +395,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the start timezone
+     */
+    public void removeStartTimeZone() {
+        startTimeZone = null;
+        //fields.remove(AvailabilityField.);
+    }
+
+    /**
      * Gets the endTime
      *
      * @return The endTime
@@ -331,6 +419,14 @@ public class CalendarAvailability implements FieldAware {
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
         fields.add(AvailabilityField.dtend);
+    }
+
+    /**
+     * Removes the end date
+     */
+    public void removeEndTime() {
+        endTime = null;
+        fields.remove(AvailabilityField.dtend);
     }
 
     /**
@@ -371,6 +467,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the description
+     */
+    public void removeDescription() {
+        description = null;
+        fields.remove(AvailabilityField.description);
+    }
+
+    /**
      * Gets the location
      *
      * @return The location
@@ -387,6 +491,14 @@ public class CalendarAvailability implements FieldAware {
     public void setLocation(String location) {
         this.location = location;
         fields.add(AvailabilityField.location);
+    }
+
+    /**
+     * Removes the location
+     */
+    public void removeLocation() {
+        location = null;
+        fields.remove(AvailabilityField.location);
     }
 
     /**
@@ -409,6 +521,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the organizer
+     */
+    public void removeOrganizer() {
+        organizer = null;
+        fields.remove(AvailabilityField.organizer);
+    }
+
+    /**
      * Gets the url
      *
      * @return The url
@@ -425,6 +545,14 @@ public class CalendarAvailability implements FieldAware {
     public void setUrl(String url) {
         this.url = url;
         fields.add(AvailabilityField.url);
+    }
+
+    /**
+     * Removes the url
+     */
+    public void removeUrl() {
+        url = null;
+        fields.remove(AvailabilityField.url);
     }
 
     /**
@@ -447,6 +575,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the duration
+     */
+    public void removeDuration() {
+        duration = -1;
+        fields.remove(AvailabilityField.duration);
+    }
+
+    /**
      * Gets the extendedProperties
      *
      * @return The extendedProperties
@@ -466,6 +602,14 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
+     * Removes the extended properties
+     */
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        fields.remove(AvailabilityField.extendedProperties);
+    }
+
+    /**
      * Gets the categories
      *
      * @return The categories
@@ -482,6 +626,14 @@ public class CalendarAvailability implements FieldAware {
     public void setCategories(List<String> categories) {
         this.categories = categories;
         fields.add(AvailabilityField.categories);
+    }
+
+    /**
+     * Removes the categories
+     */
+    public void removeCategories() {
+        categories = null;
+        fields.remove(AvailabilityField.categories);
     }
 
     /**
