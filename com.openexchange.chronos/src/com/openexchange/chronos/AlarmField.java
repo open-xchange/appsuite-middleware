@@ -89,6 +89,23 @@ public enum AlarmField {
      * Extended properties of the alarm.
      */
     EXTENDED_PROPERTIES,
+    /**
+     * A list of attachments. Can be used as the sound source for the audio action or as attachments for the mail action.
+     */
+    ATTACHMENTS,
+    /**
+     * A summary which can be used as the mail subject for the mail action.
+     */
+    SUMMARY,
+    /**
+     * A description which can either be used to be display for the display action or used as a text for the mail action.
+     */
+    DESCRIPTION,
+
+    /**
+     * A list of mail addresses for the mail action.
+     */
+    ATTENDEES
 
     ;
 }

@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * {@link Alarm}
@@ -69,6 +70,10 @@ public class Alarm {
     private AlarmAction action;
     private Repeat repeat;
     private ExtendedProperties extendedProperties;
+    private List<Attachment> attachments;
+    private String description;
+    private String summary;
+    private List<Attendee> attendees;
 
     private final EnumSet<AlarmField> setFields;
 
@@ -388,6 +393,150 @@ public class Alarm {
      */
     public boolean containsExtendedProperties() {
         return setFields.contains(AlarmField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Gets the attachments of the alarm.
+     *
+     * @return The attachments
+     */
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    /**
+     * Sets the attachments of the alarm.
+     *
+     * @param attachments The attachments to set
+     */
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+        setFields.add(AlarmField.ATTACHMENTS);
+    }
+
+    /**
+     * Removes the attachments of the alarm.
+     */
+    public void removeattachments() {
+        this.attachments = null;
+        setFields.remove(AlarmField.ATTACHMENTS);
+    }
+
+    /**
+     * Gets a value indicating whether attachments of the alarm have been set or not.
+     *
+     * @return <code>true</code> if attachments are set, <code>false</code>, otherwise
+     */
+    public boolean containsAttachments() {
+        return setFields.contains(AlarmField.ATTACHMENTS);
+    }
+
+    /**
+     * Gets the description of the alarm.
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Sets the description of the alarm.
+     *
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+        setFields.add(AlarmField.DESCRIPTION);
+    }
+
+    /**
+     * Removes the description of the alarm.
+     */
+    public void removeDescription() {
+        this.description = null;
+        setFields.remove(AlarmField.DESCRIPTION);
+    }
+
+    /**
+     * Gets a value indicating whether the description of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the description is set, <code>false</code>, otherwise
+     */
+    public boolean containsDescription() {
+        return setFields.contains(AlarmField.DESCRIPTION);
+    }
+
+    /**
+     * Gets the summary of the alarm.
+     *
+     * @return The summary
+     */
+    public String getSummary() {
+        return summary;
+    }
+
+    /**
+     * Sets the summary of the alarm.
+     *
+     * @param summary The summary to set
+     */
+    public void setSummary(String summary) {
+        this.summary = summary;
+        setFields.add(AlarmField.SUMMARY);
+    }
+
+    /**
+     * Removes the summary of the alarm.
+     */
+    public void removeSummary() {
+        this.summary = null;
+        setFields.remove(AlarmField.SUMMARY);
+    }
+
+    /**
+     * Gets a value indicating whether the summary of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the summary is set, <code>false</code>, otherwise
+     */
+    public boolean containsSummary() {
+        return setFields.contains(AlarmField.SUMMARY);
+    }
+
+    /**
+     * Gets the attendees of the alarm.
+     *
+     * @return The attendees
+     */
+    public List<Attendee> getAttendees() {
+        return attendees;
+    }
+
+    /**
+     * Sets the attendees of the alarm.
+     *
+     * @param mailAddresses The mailAddresses to set
+     */
+    public void setAttendees(List<Attendee> attendees) {
+        this.attendees = attendees;
+        setFields.add(AlarmField.ATTENDEES);
+    }
+
+    /**
+     * Removes attendees of the alarm.
+     */
+    public void removeAttendees() {
+        this.attendees = null;
+        setFields.remove(AlarmField.ATTENDEES);
+    }
+
+    /**
+     * Gets a value indicating whether attendees of the alarm have been set or not.
+     *
+     * @return <code>true</code> if attendees are set, <code>false</code>, otherwise
+     */
+    public boolean containsAttendees() {
+        return setFields.contains(AlarmField.ATTENDEES);
     }
 
     @Override
