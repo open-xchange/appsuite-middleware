@@ -65,6 +65,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -381,7 +382,9 @@ public final class UploadUtility {
                     String name = item.getName();
                     if (!isEmpty(name)) {
                         try {
-                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize, uuid, session, listeners);
+                            FileItemHeaders headers = item.getHeaders();
+                            String contentId = headers.getHeader("Content-Id");
+                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, contentId, current, maxFileSize, maxOverallSize, uuid, session, listeners);
                             current += uf.getSize();
                             uploadEvent.addUploadFile(uf);
                         } catch (OXException e) {
@@ -464,10 +467,11 @@ public final class UploadUtility {
 
     private static final String PREFIX = "openexchange-upload-" + com.openexchange.exception.OXException.getServerId() + "-";
 
-    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, String contentId, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
+        retval.setContentId(contentId);
 
         // Deduce MIME type from passed file name
         String mimeType = MimeType2ExtMap.getContentType(fileName, null);
