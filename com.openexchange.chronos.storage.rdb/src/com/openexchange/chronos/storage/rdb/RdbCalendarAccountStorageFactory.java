@@ -84,7 +84,7 @@ public class RdbCalendarAccountStorageFactory implements CalendarAccountStorageF
 
     @Override
     public CalendarAccountStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarAccountStorage(context, dbProvider, txPolicy);
+        return new CachingCalendarAccountStorage(new RdbCalendarAccountStorage(context, dbProvider, txPolicy));
     }
 
 }

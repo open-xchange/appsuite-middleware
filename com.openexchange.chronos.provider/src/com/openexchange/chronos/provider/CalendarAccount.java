@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -57,7 +58,7 @@ import java.util.Map;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarAccount {
+public interface CalendarAccount extends Serializable{
 
     /**
      * Gets the account's identifier.
