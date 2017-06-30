@@ -71,6 +71,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -2121,11 +2122,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
-            log.error("OX Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
@@ -2281,9 +2280,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
+            lockTable("updateTask", con);
         } catch (final OXException e) {
-            log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException("Problem storing the primary mail account.", e);
+        } catch (SQLException e) {
+            throw new StorageException("Problem storing the primary mail account.", e);
+        }
+    }
+
+    private void lockTable(String table, Connection con) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute("SELECT 1 FROM " + table + " FOR UPDATE");
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 

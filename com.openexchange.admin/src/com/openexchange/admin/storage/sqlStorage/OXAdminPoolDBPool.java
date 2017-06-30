@@ -146,119 +146,127 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(con);
+        if (null == con) {
+            return false;
+        }
+
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritable(con);
         }
         return true;
     }
 
     @Override
     public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb read connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backReadOnly(con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb read connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backReadOnly(con);
         }
         return true;
     }
 
     @Override
     public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritable(con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritable(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritableAfterReading(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritableAfterReading(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backForUpdateTask(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backForUpdateTask(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnection(int poolId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().back(poolId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().back(poolId, con);
         }
         return true;
     }
@@ -366,11 +374,15 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public void lock(Connection con, int writePoolId) throws PoolException {
+    public void lock(Connection con, int writePoolId, String schemaName) throws PoolException {
         try {
-            getService().lock(con, writePoolId);
+            getService().lock(con, writePoolId, schemaName);
         } catch (OXException e) {
-            log.error("Error locking context_server2db_pool table", e);
+            if (null == schemaName) {
+                log.error("Error locking database pool {}", writePoolId, e);
+            } else {
+                log.error("Error locking schema {} in database pool {}", schemaName, writePoolId, e);
+            }
             throw new PoolException(e.getMessage());
         }
     }

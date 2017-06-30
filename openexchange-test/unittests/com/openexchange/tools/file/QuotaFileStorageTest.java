@@ -256,7 +256,7 @@ public class QuotaFileStorageTest {
         }
 
         @Override
-        public void lock(Connection con, int poolId) {
+        public void lock(Connection con, int poolId, String schemaName) {
             // Nothing to do
         }
 

@@ -380,11 +380,11 @@ public abstract class OXUtilStorageInterface {
      * Creates a new database from scratch on the given database host. Is used
      * ONLY internally at the moment.
      *
-     * @param db
-     *            a database object to create
+     * @param db a database object to create
+     * @param con A writable {@link Connection} to the configdb
      * @throws StorageException
      */
-    public abstract void createDatabase(final Database db) throws StorageException;
+    public abstract void createDatabase(final Database db, Connection con) throws StorageException;
 
     /**
      * Delete a complete database(scheme) from the given database host. Is used

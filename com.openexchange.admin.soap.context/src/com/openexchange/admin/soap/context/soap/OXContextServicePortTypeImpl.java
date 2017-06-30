@@ -621,6 +621,28 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         }
     }
+    
+    @Override
+    public void checkCountsConsistency(CheckCountsConsistency parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
+        final OXContextInterface contextInterface = getContextInterface();
+        try {
+            contextInterface.checkCountsConsistency(parameters.isCheckDatabaseCounts(), parameters.isCheckFilestoreCounts(), soap2Credentials(parameters.auth));
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
+            com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
+            faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        }
+    }
 
     @Override
     public java.util.List<Context> listByFilestore(final Filestore fs, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception {

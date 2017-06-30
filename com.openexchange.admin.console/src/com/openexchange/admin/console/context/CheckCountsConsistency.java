@@ -47,24 +47,64 @@
  *
  */
 
-package com.openexchange.admin.storage.sqlStorage;
+package com.openexchange.admin.console.context;
 
-import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import java.rmi.Naming;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 /**
- * This class implements the global storage interface and creates a layer between the abstract
- * storage definition and a storage in a SQL accessible database
+ * {@link CheckCountsConsistency}
  *
- * @author d7
- * @author cutmasta
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class OXUtilSQLStorage extends OXUtilStorageInterface {
+public class CheckCountsConsistency extends ContextAbstraction {
 
     /**
-     * Initialises a new {@link OXUtilSQLStorage}.
+     * Entry point
+     * 
+     * @param args The command line arguments
      */
-    protected OXUtilSQLStorage() {
-        super();
+    public static void main(final String args[]) {
+        new CheckCountsConsistency(args);
+    }
+
+    /**
+     * Initialises a new {@link CheckCountsConsistency}.
+     * 
+     * @param args The command line arguments
+     */
+    public CheckCountsConsistency(final String[] args) {
+
+        final AdminParser parser = new AdminParser("checkcountsconsistency");
+
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        try {
+            parser.ownparse(args);
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
+            // get rmi ref
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+
+            oxres.checkCountsConsistency(true, true, auth);
+
+            System.out.println("Counts successfully checked");
+            sysexit(0);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.console.context.ContextAbstraction#getObjectName()
+     */
+    @Override
+    protected String getObjectName() {
+        return "counts consistency";
     }
 }

@@ -210,5 +210,4 @@
             <dropTable tableName="advertisement_mapping" />
         </rollback>
     </changeSet>
-
 </databaseChangeLog>

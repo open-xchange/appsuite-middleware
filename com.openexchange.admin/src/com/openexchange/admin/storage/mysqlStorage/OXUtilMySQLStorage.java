@@ -739,10 +739,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection configdb_write_con = null;
         PreparedStatement prep = null;
-
+        boolean rollback = false;
         try {
             configdb_write_con = cache.getWriteConnectionForConfigDB();
             configdb_write_con.setAutoCommit(false);
+            rollback = true;
 
             final Integer id = fstore.getId();
             final String url = fstore.getUrl();
@@ -779,6 +780,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             configdb_write_con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             try {
@@ -794,79 +796,96 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(pe);
         } catch (final SQLException exp) {
             LOG.error("SQL Error", exp);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of configdb connection!", expd);
-            }
             throw new StorageException(exp);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                rollback(configdb_write_con);
             }
-            try {
-                if (configdb_write_con != null) {
+
+            closeSQLStuff(prep);
+            autocommit(configdb_write_con);
+            if (configdb_write_con != null) {
+                try {
                     cache.pushWriteConnectionForConfigDB(configdb_write_con);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing configdb connection to pool!", ecp);
                 }
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing configdb connection to pool!", ecp);
             }
         }
     }
 
     @Override
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(final Database db, Connection con) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.createDatabase(db);
+        oxutilcommon.createDatabase(db, con);
     }
 
     @Override
     public void deleteDatabase(final Database db) throws StorageException {
-        OXUtilMySQLStorageCommon.deleteDatabase(db);
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getWriteConnectionForConfigDB();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+
+            autocommit(con);
+            if (con != null) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
     }
 
     @Override
     public void deleteMaintenanceReason(final int[] reason_ids) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
             con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
-            for (final int element : reason_ids) {
+            rollback = true;
+
+            for (int element : reason_ids) {
                 stmt = con.prepareStatement("DELETE FROM reason_text WHERE id = ?");
                 stmt.setInt(1, element);
                 stmt.executeUpdate();
                 stmt.close();
             }
             con.commit();
+            rollback = false;
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Erroe closing statement", e);
+            if (rollback) {
+                rollback(con);
             }
+
+            closeSQLStuff(stmt);
+            autocommit(con);
             try {
                 if (con != null) {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -1140,6 +1159,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.executeUpdate();
                 prep.close();
 
+                // update counter table
+                prep = con.prepareStatement("INSERT INTO contexts_per_dbpool (db_pool_id,count) VALUES(?,0);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
+
+                // update lock table
+                prep = con.prepareStatement("INSERT INTO dbpool_lock (db_pool_id) VALUES(?);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
             } else {
                 prep = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE db_pool_id = ?");
                 prep.setInt(1, db.getMasterId());
@@ -1219,6 +1249,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setLong(3, store_size);
             stmt.setInt(4, fstore.getMaxContexts());
             stmt.executeUpdate();
+            stmt.close();
+
+            // update counter table
+            stmt = con.prepareStatement("INSERT INTO contexts_per_filestore (filestore_id,count) VALUES (?,0)");
+            stmt.setInt(1, fstore_id);
+            stmt.executeUpdate();
+
             con.commit();
             rollback = false;
 
@@ -1324,7 +1361,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Load potential candidates
             List<Candidate> candidates = new LinkedList<>();
             {
-                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
                 rs = stmt.executeQuery();
 
                 if (!rs.next()) {
@@ -1664,6 +1701,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } finally {
                     closeSQLStuff(stmt);
                 }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             } else {
                 try {
                     stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
@@ -1721,6 +1772,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
+            stmt.setInt(1, store_id);
+            stmt.executeUpdate();
+            stmt.close();
+
+            stmt = con.prepareStatement("DELETE FROM contexts_per_filestore WHERE filestore_id = ?");
             stmt.setInt(1, store_id);
             stmt.executeUpdate();
 
@@ -2480,7 +2536,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = readConfigdbCon.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
+                stmt = readConfigdbCon.prepareStatement("SELECT count FROM contexts_per_filestore WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
@@ -2840,17 +2896,18 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final int pool_id = db.getId().intValue();
 
             if (this.USE_UNIT == UNIT_CONTEXT) {
-                ps = configdb_con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
+                ps = configdb_con.prepareStatement("SELECT count FROM contexts_per_dbpool WHERE db_pool_id=?");
                 ps.setInt(1, pool_id);
                 final ResultSet rsi = ps.executeQuery();
 
                 if (!rsi.next()) {
                     throw new StorageException("Unable to count contexts of db_pool_id=" + pool_id);
                 }
-                count = rsi.getInt("COUNT(server_id)");
+                count = rsi.getInt("count");
                 rsi.close();
                 ps.close();
             } else if (this.USE_UNIT == UNIT_USER) {
+                // TODO: Do we need to consider the performance of a user count in a schema when creating a context?
                 ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();
@@ -2944,7 +3001,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         String schemaName = db.getName() + '_' + schemaUnique;
         db.setScheme(schemaName);
-        OXUtilStorageInterface.getInstance().createDatabase(db);
+        OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
     }
-
 }

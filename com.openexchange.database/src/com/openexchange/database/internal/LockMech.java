@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,54 @@
  *
  */
 
-package com.openexchange.admin.storage.sqlStorage;
-
-import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+package com.openexchange.database.internal;
 
 /**
- * This class implements the global storage interface and creates a layer between the abstract
- * storage definition and a storage in a SQL accessible database
+ * {@link LockMech} - Specifies how a locking for a certain database pool (and possibly a given schema) is supposed to be performed.
  *
- * @author d7
- * @author cutmasta
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class OXUtilSQLStorage extends OXUtilStorageInterface {
+public enum LockMech {
 
     /**
-     * Initialises a new {@link OXUtilSQLStorage}.
+     * Performs row locking through a <code>"SELECT ... FOR UPDATE"</code> statement using pool identifier (and possibly schema name) for fine-grained lock scope.
      */
-    protected OXUtilSQLStorage() {
-        super();
+    ROW_LOCK("row"),
+    /**
+     * Performs global locking through attempting to increment a counter in a "semaphore" table:<br><code>"UPDATE ctx_per_schema_sem SET id=id+1"</code>
+     */
+    GLOBAL_LOCK("global");
+
+    private final String id;
+
+    private LockMech(String id) {
+        this.id = id;
     }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the lock mechanism for specified identifier
+     *
+     * @param id The identifier
+     * @return The looked-up lock mechanism or {@link #ROW_LOCK} as fall-back
+     */
+    public static LockMech lockMechFor(String id) {
+        if (null != id) {
+            for (LockMech lm : values()) {
+                if (lm.id.equals(id)) {
+                    return lm;
+                }
+            }
+        }
+        return LockMech.ROW_LOCK;
+    }
+
 }
