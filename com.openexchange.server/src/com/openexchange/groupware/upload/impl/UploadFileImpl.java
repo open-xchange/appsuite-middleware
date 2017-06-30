@@ -63,15 +63,11 @@ import com.openexchange.groupware.upload.UploadFile;
 public class UploadFileImpl implements UploadFile {
 
     private String fieldName;
-
     private String fileName;
-
     private String preparedFileName;
-
     private File tmpFile;
-
     private String contentType;
-
+    private String contentId;
     private long size;
 
     /**
@@ -89,67 +85,41 @@ public class UploadFileImpl implements UploadFile {
         return new FileInputStream(tmpFile);
     }
 
-    /**
-     * Gets the file's field name in multipart upload.
-     *
-     * @return The file's field name in multipart upload.
-     */
     @Override
     public String getFieldName() {
         return fieldName;
     }
 
-    /**
-     * Sets the file's field name in multipart upload.
-     *
-     * @param fieldName The file's field name in multipart upload.
-     */
     @Override
     public void setFieldName(final String fieldName) {
         this.fieldName = fieldName;
     }
 
-    /**
-     * Gets the file's content type.
-     *
-     * @return The file's content type.
-     */
+    @Override
+    public String getContentId() {
+        return contentId;
+    }
+
+    @Override
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
+
     @Override
     public String getContentType() {
         return contentType;
     }
 
-    /**
-     * Sets the file's content type.
-     *
-     * @param contentType The file's content type.
-     */
     @Override
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
-    /**
-     * Gets the file name as given through upload form.
-     * <p>
-     * The file name possible contains the full path on sender's file system and may be encoded as well; e.g.<br>
-     * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
-     * <p>
-     * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
-     *
-     * @see #getPreparedFileName()
-     * @return The file name.
-     */
     @Override
     public String getFileName() {
         return fileName;
     }
 
-    /**
-     * Gets the prepared file name; meaning prepending path and encoding information omitted.
-     *
-     * @return The prepared file name
-     */
     @Override
     public String getPreparedFileName() {
         if (null == preparedFileName) {
@@ -174,51 +144,26 @@ public class UploadFileImpl implements UploadFile {
         return preparedFileName;
     }
 
-    /**
-     * Sets the file name as provided through upload form.
-     *
-     * @param fileName The file name
-     */
     @Override
     public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
-    /**
-     * Gets the file size in bytes.
-     *
-     * @return The file size in bytes.
-     */
     @Override
     public long getSize() {
         return size;
     }
 
-    /**
-     * Sets the file size in bytes.
-     *
-     * @param size The file size in bytes.
-     */
     @Override
     public void setSize(final long size) {
         this.size = size;
     }
 
-    /**
-     * Gets the associated unique temporary file on disk.
-     *
-     * @return The associated unique temporary file on disk.
-     */
     @Override
     public File getTmpFile() {
         return tmpFile;
     }
 
-    /**
-     * Sets the associated unique temporary file on disk.
-     *
-     * @param tmpFile The associated unique temporary file on disk.
-     */
     @Override
     public void setTmpFile(final File tmpFile) {
         this.tmpFile = tmpFile;

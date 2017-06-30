@@ -89,6 +89,20 @@ public interface UploadFile {
     void setContentType(final String contentType);
 
     /**
+     * Gets the value of the optional <code>"Content-Id"</code> header.
+     *
+     * @return The value of the <code>"Content-Id"</code> header or <code>null</code>
+     */
+    String getContentId();
+
+    /**
+     * Sets the value of the <code>"Content-Id"</code> header.
+     *
+     * @param contentId The value of the <code>"Content-Id"</code> header or <code>null</code>
+     */
+    void setContentId(final String contentId);
+
+    /**
      * Gets the file name as given through upload form.
      * <p>
      * The file name possible contains the full path on sender's file system and may be encoded as well; e.g.<br>
