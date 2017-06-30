@@ -90,7 +90,7 @@ public class StorageMigrationMBeanImpl extends StandardMBean implements StorageM
     @Override
     public String migrate(int contextId, int batchSize) throws MBeanException {
         try {
-            MigrationResult result = new StorageMigration(services, contextId).run(batchSize);
+            MigrationResult result = new StorageMigration(services, contextId).run();
             return String.valueOf(result);
         } catch (Exception e) {
             throw new MBeanException(e, e.getMessage());

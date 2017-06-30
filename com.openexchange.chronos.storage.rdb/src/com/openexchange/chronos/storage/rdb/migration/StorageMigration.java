@@ -54,7 +54,9 @@ import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -66,6 +68,7 @@ import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -77,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
 public class StorageMigration {
 
     private static final int DEFAULT_BATCH_SIZE = 500;
+    private static final int DEFAULT_MAX_TOMBSTONE_AGE_IN_MONTHS = 12;
 
     private final Context context;
     private final ServiceLookup services;
@@ -89,14 +93,22 @@ public class StorageMigration {
 
     public MigrationResult run() throws OXException {
         try {
-            return run(DEFAULT_BATCH_SIZE);
+            return run(DEFAULT_BATCH_SIZE, getDefaultMinTombstoneLastModified());
         } catch (Exception e) {
             throw new OXException(e);
         }
-
     }
 
-    public MigrationResult run(int batchSize) throws Exception {
+    public boolean checkRead() throws OXException {
+
+        try {
+            return checkRead(DEFAULT_BATCH_SIZE, getDefaultMinTombstoneLastModified());
+        } catch (Exception e) {
+            throw new OXException(e);
+        }
+    }
+
+    public MigrationResult run(int batchSize, Date minTombstoneLastModified) throws Exception {
         EntityResolver entityResolver = optEntityResolver(services, context.getContextId());
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection writeConnection = null;
@@ -107,7 +119,7 @@ public class StorageMigration {
             SimpleDBProvider dbProvider = new SimpleDBProvider(writeConnection, writeConnection);
             CalendarStorage sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             CalendarStorage destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            MigrationResult result = run(sourceStorage, destinationStorage, batchSize);
+            MigrationResult result = run(sourceStorage, destinationStorage, batchSize, minTombstoneLastModified);
             if (null == result.getErrors() || result.getErrors().isEmpty()) {
                 writeConnection.commit();
                 committed = true;
@@ -129,15 +141,43 @@ public class StorageMigration {
         }
     }
 
-    private MigrationResult run(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize) throws Exception {
+    public boolean checkRead(int batchSize, Date minTombstoneLastModified) throws Exception {
+        EntityResolver entityResolver = optEntityResolver(services, context.getContextId());
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        Connection readConnection = null;
+        try {
+            readConnection = dbService.getReadOnly(context);
+            SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
+            CalendarStorage sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            return runCheckRead(sourceStorage, batchSize, minTombstoneLastModified);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != readConnection) {
+                dbService.backReadOnly(context, readConnection);
+            }
+        }
+    }
+
+    private MigrationResult run(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize, Date minTombstoneLastModified) throws Exception {
         MigrationResult result = new MigrationResult(context.getContextId());
         result.setStart(new Date());
-        StorageCopyTask copyTask = new StorageCopyTask(sourceStorage, destinationStorage, batchSize);
+        StorageCopyTask copyTask = new StorageCopyTask(sourceStorage, destinationStorage, batchSize, minTombstoneLastModified);
         copyTask.call();
         result.addErrors(sourceStorage.getAndFlushWarnings());
         result.addErrors(destinationStorage.getAndFlushWarnings());
         result.setEnd(new Date());
         return result;
+    }
+
+    private boolean runCheckRead(CalendarStorage sourceStorage, int batchSize, Date minTombstoneLastModified) throws Exception {
+        MigrationResult result = new MigrationResult(context.getContextId());
+        result.setStart(new Date());
+        StorageReadTask copyTask = new StorageReadTask(sourceStorage, batchSize, minTombstoneLastModified);
+        copyTask.call();
+        result.addErrors(sourceStorage.getAndFlushWarnings());
+        result.setEnd(new Date());
+        return true;
     }
 
     private static EntityResolver optEntityResolver(ServiceLookup services, int contextId) {
@@ -150,6 +190,12 @@ public class StorageMigration {
             }
         }
         return null;
+    }
+
+    private static final Date getDefaultMinTombstoneLastModified() {
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+        calendar.add(Calendar.MONTH, -1 * DEFAULT_MAX_TOMBSTONE_AGE_IN_MONTHS);
+        return calendar.getTime();
     }
 
 }

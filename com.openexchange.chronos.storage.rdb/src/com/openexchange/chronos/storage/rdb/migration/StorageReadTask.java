@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -64,7 +63,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.SortOrder.Order;
-import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SingleSearchTerm;
@@ -72,38 +70,35 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link StorageCopyTask}
+ * {@link StorageReadTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class StorageCopyTask extends AbstractTask<Void> {
+public class StorageReadTask extends AbstractTask<Void> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageCopyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StorageReadTask.class);
 
     private final CalendarStorage sourceStorage;
-    private final CalendarStorage destinationStorage;
     private final int batchSize;
     private final Date minTombstoneLastModified;
 
-    private int copiedEventTombstones;
-    private int copiedEvents;
-    private int copiedAttendees;
-    private int copiedAttendeeTombstones;
-    private int copiedAlarms;
+    private int readEventTombstones;
+    private int readEvents;
+    private int readAttendees;
+    private int readAttendeeTombstones;
+    private int readAlarms;
 
     /**
-     * Initializes a new {@link StorageCopyTask}.
+     * Initializes a new {@link StorageReadTask}.
      *
      * @param sourceStorage The source calendar storage
-     * @param destinationStorage The destination calendar storage
      * @param batchSize The batch size to use
      * @param minTombstoneLastModified
      */
-    public StorageCopyTask(CalendarStorage sourceStorage, CalendarStorage destinationStorage, int batchSize, Date minTombstoneLastModified) {
+    public StorageReadTask(CalendarStorage sourceStorage, int batchSize, Date minTombstoneLastModified) {
         super();
         this.sourceStorage = sourceStorage;
-        this.destinationStorage = destinationStorage;
         this.batchSize = batchSize;
         this.minTombstoneLastModified = minTombstoneLastModified;
     }
@@ -113,50 +108,50 @@ public class StorageCopyTask extends AbstractTask<Void> {
         /*
          * copy calendar data
          */
-        copyCalendarData(batchSize);
+        readCalendarData(batchSize);
         /*
-         * copy tombstone data
+         * read tombstone data
          */
         copyTombstoneData(batchSize, minTombstoneLastModified);
         return null;
     }
 
-    public int getCopiedEventTombstones() {
-        return copiedEventTombstones;
+    public int getReadEventTombstones() {
+        return readEventTombstones;
     }
 
-    public int getCopiedEvents() {
-        return copiedEvents;
+    public int getReadEvents() {
+        return readEvents;
     }
 
-    public int getCopiedAttendees() {
-        return copiedAttendees;
+    public int getReadAttendees() {
+        return readAttendees;
     }
 
-    public int getCopiedAttendeeTombstones() {
-        return copiedAttendeeTombstones;
+    public int getReadAttendeeTombstones() {
+        return readAttendeeTombstones;
     }
 
-    public int getCopiedAlarms() {
-        return copiedAlarms;
+    public int getReadAlarms() {
+        return readAlarms;
     }
 
     private void copyTombstoneData(int batchSize, Date minLastModified) throws OXException {
         Date lastLastModified = minLastModified;
         do {
-            lastLastModified = copyTombstoneData(lastLastModified, batchSize);
+            lastLastModified = readTombstoneData(lastLastModified, batchSize);
         } while (null != lastLastModified);
     }
 
-    private void copyCalendarData(int batchSize) throws OXException {
+    private void readCalendarData(int batchSize) throws OXException {
         int lastObjectId = 0;
         do {
-            lastObjectId = copyCalendarData(lastObjectId, batchSize);
+            lastObjectId = readCalendarData(lastObjectId, batchSize);
         } while (0 < lastObjectId);
     }
 
-    private int copyCalendarData(int lastObjectId, int length) throws OXException {
-        LOG.info("copyCalendarData@" + lastObjectId);
+    private int readCalendarData(int lastObjectId, int length) throws OXException {
+        LOG.info("readCalendarData@" + lastObjectId);
         /*
          * read from source storage: events, corresponding attendees, corresponding alarms
          */
@@ -168,50 +163,16 @@ public class StorageCopyTask extends AbstractTask<Void> {
         Map<String, List<Attendee>> attendees = sourceStorage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
         Map<String, Map<Integer, List<Alarm>>> alarms = sourceStorage.getAlarmStorage().loadAlarms(events);
         /*
-         * prepare data for destination storage
+         * track result
          */
-        alarms = prepareAlarms(destinationStorage.getAlarmStorage(), alarms);
-        /*
-         * write to destination storage & track result
-         */
-        destinationStorage.getEventStorage().insertEvents(events);
-        copiedEvents += events.size();
-        destinationStorage.getAttendeeStorage().insertAttendees(attendees);
-        copiedAttendees += countMultiMap(attendees);
-        destinationStorage.getAlarmStorage().insertAlarms(alarms);
-        copiedAlarms += countMultiMultiMap(alarms);
+        readEvents += events.size();
+        readAttendees += countMultiMap(attendees);
+        readAlarms += countMultiMultiMap(alarms);
         return Integer.parseInt(events.get(events.size() - 1).getId());
     }
 
-    private boolean copyCalendarData1(int offset, int length) throws OXException {
-        LOG.info("copyCalendarData@" + offset);
-        /*
-         * read from source storage: events, corresponding attendees, corresponding alarms
-         */
-        List<Event> events = sourceStorage.getEventStorage().searchEvents(null, getSearchOptions(offset, length), EventField.values());
-        if (null == events || 0 == events.size()) {
-            return false;
-        }
-        Map<String, List<Attendee>> attendees = sourceStorage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
-        Map<String, Map<Integer, List<Alarm>>> alarms = sourceStorage.getAlarmStorage().loadAlarms(events);
-        /*
-         * prepare data for destination storage
-         */
-        alarms = prepareAlarms(destinationStorage.getAlarmStorage(), alarms);
-        /*
-         * write to destination storage & track result
-         */
-        destinationStorage.getEventStorage().insertEvents(events);
-        copiedEvents += events.size();
-        destinationStorage.getAttendeeStorage().insertAttendees(attendees);
-        copiedAttendees += countMultiMap(attendees);
-        destinationStorage.getAlarmStorage().insertAlarms(alarms);
-        copiedAlarms += countMultiMultiMap(alarms);
-        return true;
-    }
-
-    private Date copyTombstoneData(Date lastLastModified, int length) throws OXException {
-        LOG.info("copyTombstoneData@" + lastLastModified.getTime());
+    private Date readTombstoneData(Date lastLastModified, int length) throws OXException {
+        LOG.info("readTombstoneData@" + lastLastModified.getTime());
         /*
          * read from source storage: event tombstones, corresponding attendees
          */
@@ -223,53 +184,15 @@ public class StorageCopyTask extends AbstractTask<Void> {
         }
         Map<String, List<Attendee>> attendees = sourceStorage.getAttendeeStorage().loadAttendeeTombstones(getObjectIDs(events));
         /*
-         * write to destination storage & track result
+         * track result
          */
-        destinationStorage.getEventStorage().insertEventTombstones(events);
-        copiedEventTombstones += events.size();
-        destinationStorage.getAttendeeStorage().insertAttendeeTombstones(attendees);
-        copiedAttendeeTombstones += countMultiMap(attendees);
+        readEventTombstones += events.size();
+        readAttendeeTombstones += countMultiMap(attendees);
         return events.get(events.size() - 1).getLastModified();
-    }
-
-    private boolean copyTombstoneData1(int offset, int length) throws OXException {
-        LOG.info("copyTombstoneData@" + offset);
-        /*
-         * read from source storage: event tombstones, corresponding attendees
-         */
-        List<Event> events = sourceStorage.getEventStorage().searchEventTombstones(null, getSearchOptions(offset, length), EventField.values());
-        if (null == events || 0 == events.size()) {
-            return false;
-        }
-        Map<String, List<Attendee>> attendees = sourceStorage.getAttendeeStorage().loadAttendeeTombstones(getObjectIDs(events));
-        /*
-         * write to destination storage & track result
-         */
-        destinationStorage.getEventStorage().insertEventTombstones(events);
-        copiedEventTombstones += events.size();
-        destinationStorage.getAttendeeStorage().insertAttendeeTombstones(attendees);
-        copiedAttendeeTombstones += countMultiMap(attendees);
-        return true;
     }
 
     private static SearchOptions getSearchOptions(int offset, int length) {
         return new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC)).setLimits(offset, offset + length);
-    }
-
-    private static Map<String, Map<Integer, List<Alarm>>> prepareAlarms(AlarmStorage destinationStorage, Map<String, Map<Integer, List<Alarm>>> alarms) throws OXException {
-        for (Entry<String, Map<Integer, List<Alarm>>> entry : alarms.entrySet()) {
-            for (Entry<Integer, List<Alarm>> alarmsPerUser : entry.getValue().entrySet()) {
-                for (Alarm alarm : alarmsPerUser.getValue()) {
-                    if (false == alarm.containsId() || 0 == alarm.getId()) {
-                        alarm.setId(destinationStorage.nextId());
-                    }
-                    if (false == alarm.containsUid() || null == alarm.getUid()) {
-                        alarm.setUid(UUID.randomUUID().toString());
-                    }
-                }
-            }
-        }
-        return alarms;
     }
 
     private static <K, V> int countMultiMap(Map<K, List<V>> multiMap) {
