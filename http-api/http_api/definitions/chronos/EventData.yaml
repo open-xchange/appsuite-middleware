@@ -75,3 +75,6 @@ properties:
     type: integer
     format: int64
     description: The recurrence id of this recurrence.
+  calendarUser:
+    type: integer
+    description: The user of this calendar.
