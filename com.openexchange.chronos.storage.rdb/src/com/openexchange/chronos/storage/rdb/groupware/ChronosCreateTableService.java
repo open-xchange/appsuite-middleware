@@ -246,6 +246,60 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY event_user (cid,account,event,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
+        
+        /* Calendar Availability Tables
+        tablesByName.put("calendar_availability",
+            "CREATE TABLE calendar_alarm (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED NOT NULL," +
+                "uid VARCHAR(767) DEFAULT NULL," +
+                "busyType VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," + 
+                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "created BIGINT(20) NOT NULL," +
+                "description TEXT DEFAULT NULL," +
+                "start datetime NOT NULL," +
+                "end datetime DEFAULT NULL," +
+                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "modified BIGINT(20) NOT NULL," +
+                "location VARCHAR(255) DEFAULT NULL," +
+                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "priority INT4 UNSIGNED DEFAULT NULL," +
+                "sequence INT4 UNSIGNED DEFAULT NULL," +
+                "summary VARCHAR(255) DEFAULT NULL," +
+                "url VARCHAR(255) DEFAULT NULL," +
+                "categories VARCHAR(1024) DEFAULT, " +
+                "comment VARCHAR(512) DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_free_slot",
+            "CREATE TABLE calendar_alarm (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED NOT NULL," +
+                "uid VARCHAR(767) DEFAULT NULL," +
+                "start datetime NOT NULL," +
+                "end datetime DEFAULT NULL," +
+                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "created BIGINT(20) NOT NULL," +
+                "description TEXT DEFAULT NULL," + 
+                "modified BIGINT(20) NOT NULL," +
+                "location VARCHAR(255) DEFAULT NULL," +
+                "recurrence BIGINT(20) DEFAULT NULL," +
+                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "summary VARCHAR(255) DEFAULT NULL," +
+                "categories VARCHAR(1024) DEFAULT, " +
+                "comment VARCHAR(512) DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );*/
         return tablesByName; //@formatter:on
     }
 

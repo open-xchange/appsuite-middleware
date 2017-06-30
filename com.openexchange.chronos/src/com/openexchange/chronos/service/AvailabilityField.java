@@ -56,7 +56,7 @@ import java.util.EnumSet;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum AvailabilityField {
+public enum AvailabilityField implements CalendarAvailabilityField {
 
     // the following are REQUIRED but MUST NOT occur more than once
     dtstamp(true, false),
@@ -83,39 +83,40 @@ public enum AvailabilityField {
     comment(false, true),
     contact(false, true),
     extendedProperties(false, true),
-    ianaProperties(false, true),
-    ;
+    ianaProperties(false, true),;
 
-    private final boolean required;
-    private final boolean multiple;
+    private final boolean mandatory;
+
+    private final boolean multiOccurrent;
 
     /**
      * Initialises a new {@link AvailabilityField}.
      * 
-     * @param required whether the field is mandatory
-     * @param multiple whether the field can appear more than once
+     * @param mandatory whether the field is mandatory
      */
-    private AvailabilityField(boolean required, boolean multiple) {
-        this.required = required;
-        this.multiple = multiple;
+    private AvailabilityField(boolean mandatory, boolean multiOccurrent) {
+        this.mandatory = mandatory;
+        this.multiOccurrent = multiOccurrent;
     }
 
-    /**
-     * Gets the required
-     *
-     * @return The required
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMandatory()
      */
-    public boolean isRequired() {
-        return required;
+    @Override
+    public boolean isMandatory() {
+        return mandatory;
     }
 
-    /**
-     * Gets the multiple
-     *
-     * @return The multiple
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.CalendarAvailabilityField#isMultiOccurrent()
      */
-    public boolean isMultiple() {
-        return multiple;
+    @Override
+    public boolean isMultiOccurrent() {
+        return multiOccurrent;
     }
 
     /**
@@ -126,4 +127,5 @@ public enum AvailabilityField {
     public static EnumSet<AvailabilityField> getMandatoryFields() {
         return EnumSet.of(dtstart, uid);
     }
+
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.chronos.service.FreeSlotField;
 
 /**
@@ -60,7 +61,7 @@ import com.openexchange.chronos.service.FreeSlotField;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarFreeSlot {
+public class CalendarFreeSlot implements FieldAware {
 
     private String uid;
     private Date creationTimestamp;
@@ -340,7 +341,13 @@ public class CalendarFreeSlot {
         return startTime;
     }
 
-    public boolean contains(FreeSlotField field) {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.FieldAware#contains(com.openexchange.chronos.service.CalendarAvailabilityField)
+     */
+    @Override
+    public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
 }

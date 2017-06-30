@@ -56,12 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
-import com.openexchange.chronos.FbType;
-import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.service.SetResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -95,7 +91,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     @Override
     public SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availabilities) throws OXException {
         // Pre-condition checks
-        check(availabilities);
+        CheckUtil.check(availabilities);
 
         return null;
     }
@@ -108,7 +104,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     @Override
     public SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availabilities, boolean merge) throws OXException {
         // Pre-condition checks
-        check(availabilities);
+        CheckUtil.check(availabilities);
 
         return null;
     }
@@ -190,109 +186,4 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
 
     }
 
-    /**
-     * Check the validity of the values of the specified {@link List} with {@link CalendarAvailability} blocks
-     * according to the <a href="https://tools.ietf.org/html/rfc7953">RFC-7953</a>
-     * 
-     * @param availabilities The {@link List} of {@link CalendarAvailability} blocks to check
-     * @throws OXException if any of the fields in any of the {@link CalendarAvailability} does not meed
-     *             the regulations of the RFC
-     */
-    private void check(List<CalendarAvailability> availabilities) throws OXException {
-        for (CalendarAvailability availability : availabilities) {
-            checkMandatory(availability);
-            checkConstrains(availability);
-            checkRanges(availability);
-        }
-    }
-
-    /**
-     * 
-     * @param availability
-     * @throws OXException
-     */
-    private void checkMandatory(CalendarAvailability availability) throws OXException {
-        if (availability.contains(AvailabilityField.dtstamp) && availability.contains(AvailabilityField.uid)) {
-            return;
-        }
-
-        throw new OXException(31145, "Mandatory fields are not set");
-    }
-
-    /**
-     * 
-     * @param availability
-     * @throws OXException
-     */
-    private void checkConstrains(CalendarAvailability availability) throws OXException {
-        if (!availability.contains(AvailabilityField.dtstart) && availability.contains(AvailabilityField.duration)) {
-            throw new OXException(31145, "The 'duration' field is set, but the 'start' field is not");
-        }
-
-        if (availability.contains(AvailabilityField.dtend) && availability.contains(AvailabilityField.duration)) {
-            throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
-        }
-
-        for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
-            checkMandatory(freeSlot);
-            checkConstrains(freeSlot);
-        }
-    }
-
-    /**
-     * 
-     * @param availability
-     * @throws OXException
-     */
-    private void checkMandatory(CalendarFreeSlot freeSlot) throws OXException {
-        if (freeSlot.contains(FreeSlotField.dtstamp) && freeSlot.contains(FreeSlotField.uid) && freeSlot.contains(FreeSlotField.dtstart)) {
-            return;
-        }
-
-        throw new OXException(31145, "Mandatory fields are not set");
-    }
-
-    /**
-     * 
-     * @param freeSlot
-     * @throws OXException
-     */
-    private void checkConstrains(CalendarFreeSlot freeSlot) throws OXException {
-        if (freeSlot.contains(FreeSlotField.dtend) && freeSlot.contains(FreeSlotField.duration)) {
-            throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
-        }
-    }
-
-    /**
-     * Check ranges
-     * 
-     * @param availability
-     * @throws OXException
-     */
-    private void checkRanges(CalendarAvailability availability) throws OXException {
-        // If "DTSTART" is not present, then the start time is unbounded.
-        if (!availability.contains(AvailabilityField.dtstart)) {
-            availability.setStartTime(new Date(Long.MAX_VALUE));
-            //availability.setStartTimeZone(startTimeZone); //FIXME: set user's timezone?
-        }
-
-        // If "DTEND" or "DURATION" are not present, then the end time is unbounded. 
-        if (!availability.contains(AvailabilityField.dtend) && !availability.contains(AvailabilityField.duration)) {
-            availability.setEndTime(new Date(Long.MAX_VALUE));
-            //availability.setEndTimezone(endTimeZone); //FIXME: set user's timezone?
-        }
-
-        // Within the specified time period, availability defaults to a free-busy type of "BUSY-UNAVAILABLE" 
-        // Furthermore, the values of the 'BUSYTYPE' property correspond to those used by the "FBTYPE" parameter 
-        // used on a "FREEBUSY" property, with the exception that the "FREE" value is not used in this property.
-        // FIXME: Should we throw an exception instead?
-        if (!availability.contains(AvailabilityField.busytype) || availability.getBusyType().equals(FbType.FREE)) {
-            availability.setBusyType(FbType.BUSY_UNAVAILABLE);
-        }
-
-        // Valid 'PRIORITY' values are 0, 9, 8, 7, 6, 5, 4, 3, 2, 1
-        if (availability.contains(AvailabilityField.priority) && (availability.getPriority() < 0 || availability.getPriority() > 9)) {
-            throw new OXException(31145, "The 'priority' range is out of bounds.");
-        }
-    }
 }
