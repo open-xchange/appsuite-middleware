@@ -139,7 +139,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the auto login for the specified login request and with the specified properties
-     * 
+     *
      * @param request The login request
      * @param properties The properties
      * @return The login providing login information
@@ -247,11 +247,7 @@ public final class LoginPerformer {
                 ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
                 if (!Strings.isEmpty(migrationRedirectURL)) {
-                    retval.setRedirect(migrationRedirectURL);
-                    //retval.setHeaders(headers);
-                    retval.setCookies(cookies);
-                    retval.setCode(ResultCode.REDIRECT);
-                    return retval;
+                    throw LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
                 }
             }
             throw e;
