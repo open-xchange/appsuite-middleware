@@ -285,7 +285,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
              * generate resulting attendee lists per event identifier
              */
             for (String eventId : eventIds) {
-                attendeesById.put(eventId, getAttendees(eventId,
+                attendeesById.put(eventId, getAttendees(eventId, tombstones,
                     null != internalAttendeeData ? internalAttendeeData.get(eventId) : null,
                     null != userAttendeeData ? userAttendeeData.get(eventId) : null,
                     null != externalAttendeeData ? externalAttendeeData.get(eventId) : null))
@@ -303,15 +303,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
      * Constructs the final attendee list for an event by pre-processing and merging the supplied lists of loaded attendees.
      *
      * @param eventId The identifier of the corresponding event
+     * @param tombstones <code>true</code> if attendee tombstones are read, <code>false</code>, otherwise
      * @param internalAttendees The internal attendees as loaded from the storage
      * @param userAttendees The user attendees as loaded from the storage
      * @param externalAttendees The external attendees as loaded from the storage
      * @return The merged list of attendees
      */
-    private List<Attendee> getAttendees(String eventId, List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
+    private List<Attendee> getAttendees(String eventId, boolean tombstones, List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
         List<Attendee> attendees = new ArrayList<Attendee>();
         /*
-         * add user attendees individually if listed in internal attendees, or as member of a group if not
+         * add user attendees individually if listed in internal attendees or when reading tombstone data, or as member of a group if not
          */
         if (null != userAttendees) {
             for (Attendee userAttendee : userAttendees) {
@@ -337,7 +338,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     }
                     throw e;
                 }
-                if (null != find(internalAttendees, userAttendee.getEntity())) {
+                if (tombstones || null != find(internalAttendees, userAttendee.getEntity())) {
                     attendees.add(userAttendee);
                 } else {
                     int[] groupIDs = findGroupIDs(eventId, internalAttendees, userAttendee.getEntity());
