@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
+import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -115,7 +116,7 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public Map<String, List<OXException>> getWarnings() {
-        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>();
+        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getWarnings());
         warnings.putAll(attendeeStorage.getWarnings());
         warnings.putAll(alarmStorage.getWarnings());
@@ -127,7 +128,7 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public Map<String, List<OXException>> getAndFlushWarnings() {
-        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>();
+        Map<String, List<OXException>> warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
         warnings.putAll(eventStorage.getAndFlushWarnings());
         warnings.putAll(attendeeStorage.getAndFlushWarnings());
         warnings.putAll(alarmStorage.getAndFlushWarnings());

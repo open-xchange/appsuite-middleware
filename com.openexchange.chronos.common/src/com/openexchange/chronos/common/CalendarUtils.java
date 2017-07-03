@@ -104,6 +104,26 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  */
 public class CalendarUtils {
 
+    /** A comparator for (usually numerical) string identifiers */
+    public static final Comparator<String> ID_COMPARATOR = new Comparator<String>() {
+
+        @Override
+        public int compare(String id1, String id2) {
+            if (null == id1) {
+                return null == id2 ? 0 : 1;
+            }
+            if (null == id2) {
+                return -1;
+            }
+            try {
+                return Integer.compare(Integer.parseInt(id1), Integer.parseInt(id2));
+            } catch (NumberFormatException e) {
+                // fall back to common string comparator
+                return id1.compareTo(id2);
+            }
+        }
+    };
+
     private static final ConcurrentMap<String, TimeZone> KNOWN_TIMEZONES = new ConcurrentHashMap<String, TimeZone>();
 
     /**
