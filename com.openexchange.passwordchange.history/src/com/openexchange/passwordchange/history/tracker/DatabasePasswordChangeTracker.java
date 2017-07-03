@@ -62,7 +62,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.server.impl.DBPool;
 
