@@ -105,7 +105,7 @@ public class UpdateAction extends ChronosAction {
         Event event;
         try {
             TimeZone tz = calendarAccess.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : null);
+            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : requestData.getSession().getUser().getTimeZone());
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

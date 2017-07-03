@@ -125,7 +125,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 if (timezone != null && timezone.getValue() != null) {
                     attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone((String) timezone.getValue()));
                 } else {
-                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone("UTC"));
+                    attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
                 }
                 if(!attendee.containsUri() && !attendee.containsEntity()){
                     attendee.setEntity(requestData.getSession().getUserId());
@@ -159,7 +159,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
                 try {
                     if (parseParameter == null) {
-                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate);
+                        EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
                     } else {
                         TimeZone zone = (TimeZone) parseParameter.getValue();
                         EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
