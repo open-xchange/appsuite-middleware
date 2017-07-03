@@ -50,6 +50,8 @@
 package com.openexchange.chronos.account.json.actions;
 
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -71,7 +73,7 @@ public class GetAction extends AbstractAccountAction {
 
     /**
      * Initialises a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(ServiceLookup services) {
@@ -92,7 +94,15 @@ public class GetAction extends AbstractAccountAction {
         CalendarAccountStorage storage = factory.create(session.getContext());
         CalendarAccount account = storage.loadAccount(Integer.parseInt(accountId));
         Map<String, Object> configuration = account.getConfiguration();
-        return new AJAXRequestResult(configuration);
+        JSONObject resp = new JSONObject(configuration.size());
+        try {
+            for (String key : configuration.keySet()) {
+                resp.put(key, configuration.get(key));
+            }
+        } catch (JSONException e) {
+            // should not happen
+        }
+        return new AJAXRequestResult(resp);
     }
 
 }
