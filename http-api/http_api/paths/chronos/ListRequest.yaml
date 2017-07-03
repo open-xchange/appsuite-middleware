@@ -8,6 +8,14 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosTimezone"
       - $ref: "#/parameters/QueryParamChronosFields"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.
+        required: true
+        schema:
+          type: array
+          items: 
+            $ref: "#/definitions/EventId"
     responses:
       200:
         description: |

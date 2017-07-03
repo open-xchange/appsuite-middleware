@@ -60,12 +60,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  *
@@ -78,7 +78,8 @@ public class ListAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", PARAMETER_FIELDS);
 
-    private static final String IDS_FIELD = "ids";
+    private static final String ID_FIELD = "id";
+    private static final String RECURENCE_ID_FIELD = "recurrenceId";
 
     /**
      * Initializes a new {@link ListAction}.
@@ -100,24 +101,25 @@ public class ListAction extends ChronosAction {
         if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-        JSONObject jsonEvent = (JSONObject) data;
-        List<Object> ids;
+        JSONArray ids = (JSONArray) data;
         try {
-            if (jsonEvent.get(IDS_FIELD) instanceof JSONArray) {
-                ids = ((JSONArray) jsonEvent.get(IDS_FIELD)).asList();
-            } else {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.length());
+            for (int x = 0; x < ids.length(); x++) {
+                JSONObject jsonObject = ids.getJSONObject(x);
+                String id = jsonObject.getString(ID_FIELD);
+                if (jsonObject.has(RECURENCE_ID_FIELD)) {
+                    long recurrenceId = jsonObject.getLong(RECURENCE_ID_FIELD);
+                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(recurrenceId)));
+                } else {
+                    compositeEventIDs.add(CompositeEventID.parse(id));
+                }
             }
+            List<Event> events = calendarAccess.getEvents(compositeEventIDs);
+            return new AJAXRequestResult(events, "event");
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
-        List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.size());
-        for (Object id : ids) {
-            compositeEventIDs.add(CompositeEventID.parse(id.toString()));
-        }
-        List<Event> events = calendarAccess.getEvents(compositeEventIDs);
 
-        return new AJAXRequestResult(events, "event");
     }
 
 }
