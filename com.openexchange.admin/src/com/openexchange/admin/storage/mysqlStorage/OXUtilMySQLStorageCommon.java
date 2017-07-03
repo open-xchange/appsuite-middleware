@@ -244,9 +244,10 @@ public class OXUtilMySQLStorageCommon {
 
         PreparedStatement stmt = null;
         try {
-            stmt = configdbCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count) VALUES (?, ?, 0)");
+            stmt = configdbCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, 0, ?)");
             stmt.setInt(1, db.getId());
             stmt.setString(2, db.getScheme());
+            stmt.setLong(3, System.currentTimeMillis());
             stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;

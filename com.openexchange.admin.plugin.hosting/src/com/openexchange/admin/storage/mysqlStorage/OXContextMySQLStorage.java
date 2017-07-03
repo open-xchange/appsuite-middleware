@@ -3195,7 +3195,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
             }
 
-            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+            long now = System.currentTimeMillis();
             for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
                 int poolId = entry.getKey().intValue();
                 List<SchemaCount> schemaCounts = entry.getValue();
@@ -3203,7 +3204,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     stmt.setInt(1, poolId);
                     stmt.setString(2, schemaCount.schemaName);
                     stmt.setInt(3, schemaCount.count);
-                    stmt.setInt(4, schemaCount.count);
+                    stmt.setLong(4, now);
+                    stmt.setInt(5, schemaCount.count);
                     stmt.addBatch();
                 }
             }
