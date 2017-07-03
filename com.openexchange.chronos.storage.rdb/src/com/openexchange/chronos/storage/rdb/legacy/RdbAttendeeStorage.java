@@ -339,10 +339,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     throw e;
                 }
                 if (tombstones || null != find(internalAttendees, userAttendee.getEntity())) {
+                    /*
+                     * attendee tombstone or individual user attendee
+                     */
                     attendees.add(userAttendee);
                 } else {
                     int[] groupIDs = findGroupIDs(eventId, internalAttendees, userAttendee.getEntity());
                     if (null != groupIDs && 0 < groupIDs.length) {
+                        /*
+                         * suitable entry group membership(s) found
+                         */
                         List<String> groupMemberships = new ArrayList<String>(groupIDs.length);
                         for (int groupID : groupIDs) {
                             groupMemberships.add(ResourceId.forGroup(context.getContextId(), groupID));
@@ -350,7 +356,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         userAttendee.setMember(groupMemberships);
                         attendees.add(userAttendee);
                     } else {
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping " + userAttendee + " due to missing group membership", null);
+                        /*
+                         * no suitable entry in prg_date_rights (anymore), skip attendee
+                         */
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping " + userAttendee + " due to missing access rights", null);
                     }
                 }
             }
