@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.storage;
 
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -68,14 +66,4 @@ public interface CalendarAccountStorageFactory {
      * @param context The context
      */
     CalendarAccountStorage create(Context context) throws OXException;
-
-    /**
-     * Initializes a new {@link CalendarAccountStorage}.
-     *
-     * @param context The context
-     * @param dbProvider The database provider to use
-     * @param The transaction policy
-     */
-    CalendarAccountStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
-
 }

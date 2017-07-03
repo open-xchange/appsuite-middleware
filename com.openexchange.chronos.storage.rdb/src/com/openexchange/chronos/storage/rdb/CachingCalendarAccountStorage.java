@@ -54,11 +54,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -69,17 +70,16 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     
-    private static final String REGION_NAME = "Contact Account";
+    private static final String REGION_NAME = "CalendarAccount";
         
-    private RdbCalendarAccountStorage delegate;
+    private final RdbCalendarAccountStorage delegate;
     
-    public static String getRegionName() {
-        return REGION_NAME;         
-    }
+    private final int contextId;
     
-    public CachingCalendarAccountStorage(RdbCalendarAccountStorage delegate) {
+    public CachingCalendarAccountStorage(RdbCalendarAccountStorage delegate, int contextId) {
         super();
         this.delegate = delegate;
+        this.contextId = contextId;
     }
     
     @Override
@@ -101,19 +101,19 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     
     @Override
     public CalendarAccount loadAccount(int id) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        final CacheService cacheService = getCacheService();
         if (null == cacheService) {
             return delegate.loadAccount(id);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object obj = cache.get(id);
+        final Object obj = cache.get(newCacheKey(cacheService, id));
         if (obj instanceof CalendarAccount) {
             return (CalendarAccount) obj;            
         }
         
         final CalendarAccount calendarAccount = delegate.loadAccount(id);
         if (null != calendarAccount) {
-            cache.put(id, calendarAccount, false);     
+            cache.put(newCacheKey(cacheService, id), calendarAccount, false);
         }                
         
         return calendarAccount;
@@ -121,26 +121,26 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     
     @Override
     public List<CalendarAccount> loadAccounts(int userId) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        final CacheService cacheService = getCacheService();
         if (null == cacheService) {
             return delegate.loadAccounts(userId);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
         List<CalendarAccount> calendarAccountList = delegate.loadAccounts(userId);
         for (CalendarAccount calendarAccount : calendarAccountList) {
-            if (!(cache.get(calendarAccount.getAccountId()) instanceof CalendarAccount)) {
-                cache.put(calendarAccount.getAccountId(), calendarAccount, false);
+            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId()))) {
+                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId()), calendarAccount, false);               
             }
         }
         return calendarAccountList;
     }    
     
     private void invalidateCalendarAccounts(int[] accIds) throws OXException {
-        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = getCacheService();
         if (null == cacheService) {
             // Cache not initialized.
             return;
-        }
+        }        
         /*
          * gather cache keys to invalidate
          */
@@ -148,9 +148,19 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         List<Serializable> keys = new LinkedList<Serializable>();
         for (int accId : accIds) {
             Integer key = accId;
-            keys.add(key);        
+            keys.add(newCacheKey(cacheService, key));        
         }
         
         cache.remove(keys);
     }
+    
+    private CacheKey newCacheKey(final CacheService cacheService, int accId) {
+        return cacheService.newCacheKey(contextId, accId);
+
+    }
+    
+    private CacheService getCacheService() {
+        return Services.getOptionalService(CacheService.class);
+    }
+    
 }
