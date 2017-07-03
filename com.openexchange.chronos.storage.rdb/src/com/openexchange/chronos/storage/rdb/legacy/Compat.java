@@ -159,7 +159,18 @@ public class Compat {
                      */
                     if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                         int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
-                        event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
+                        try {
+                            event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
+                        } catch (OXException e) {
+                            if (false == "CAL-4061".equals(e.getErrorCode())) {
+                                throw e;
+                            }
+                            event.removeSeriesId();
+                            event.removeRecurrenceId();
+                            event.removeChangeExceptionDates();
+                            event.removeDeleteExceptionDates();
+                            eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
+                        }
                     }
                     if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
                         event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
