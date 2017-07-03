@@ -1,0 +1,26 @@
+/chronos/accounts?action=get:
+  get:
+    operationId: getAccount
+    tags:
+      - Chronos
+    summary: Gets a calendar account for a calendar provider.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: providerId
+        type: string
+        description: Calendar provider identifier
+        required: true
+      - in: query
+        name: accountId
+        type: integer
+        format: int64
+        description: Calendar account identifier
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing the configuration of requested calendar account. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"

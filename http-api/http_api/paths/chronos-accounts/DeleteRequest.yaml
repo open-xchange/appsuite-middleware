@@ -1,0 +1,28 @@
+/chronos/accounts?action=delete:
+  put:
+    operationId: deleteAccount
+    tags:
+      - Chronos
+    summary: Deletes calendar account.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: providerId
+        type: string
+        description: Calendar provider identifier
+        required: true
+      - in: body
+        name: body
+        description: A JSON array of ids from the calendar accounts to delete.
+        required: true
+        schema:
+          type: array
+    responses:
+      200:
+        description: |
+          An empty json object if the deletion was successfull. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

@@ -1,0 +1,32 @@
+/chronos/accounts?action=update:
+  get:
+    operationId: updateAccount
+    tags:
+      - Chronos
+    summary: Updates a calendar account for a calendar provider.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: providerId
+        type: string
+        description: Calendar provider identifier
+        required: true
+      - in: query
+        name: accountId
+        type: integer
+        format: int64
+        description: Calendar account identifier
+        required: true
+      - in: body
+        name: body
+        description: A JSON object describing the calendar account to update.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing the configuration of updated calendar account. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"
