@@ -213,6 +213,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                 "db_pool_id INT4 UNSIGNED NOT NULL, " +
                 "schemaname VARCHAR(32) NOT NULL, " +
                 "count INT4 UNSIGNED NOT NULL, " +
+                "creating_date BIGINT(64) NOT NULL," +
                 "PRIMARY KEY (db_pool_id, schemaname)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
@@ -496,7 +497,8 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                 stmt = null;
             }
 
-            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+            long now = System.currentTimeMillis();
             for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
                 int poolId = entry.getKey().intValue();
                 List<SchemaCount> schemaCounts = entry.getValue();
@@ -504,7 +506,8 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                     stmt.setInt(1, poolId);
                     stmt.setString(2, schemaCount.schemaName);
                     stmt.setInt(3, schemaCount.count);
-                    stmt.setInt(4, schemaCount.count);
+                    stmt.setLong(4, now);
+                    stmt.setInt(5, schemaCount.count);
                     stmt.addBatch();
                 }
             }

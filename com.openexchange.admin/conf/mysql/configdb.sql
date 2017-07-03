@@ -111,7 +111,7 @@ CREATE TABLE contexts_per_dbpool (
     count INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (db_pool_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-     
+
 CREATE TABLE contexts_per_filestore (
     filestore_id INT4 UNSIGNED NOT NULL,
     count INT4 UNSIGNED NOT NULL,
@@ -122,6 +122,7 @@ CREATE TABLE contexts_per_dbschema (
     db_pool_id INT4 UNSIGNED NOT NULL,
     schemaname VARCHAR(32) NOT NULL,
     count INT4 UNSIGNED NOT NULL,
+    creating_date BIGINT(64) NOT NULL,
     PRIMARY KEY (db_pool_id, schemaname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
