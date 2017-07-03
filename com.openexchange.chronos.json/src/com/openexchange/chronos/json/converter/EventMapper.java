@@ -1320,7 +1320,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return jsonObject;
     }
 
-    private static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
+    static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
         if (null == jsonArray) {
             return null;
         }
@@ -1331,7 +1331,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return extendedProperties;
     }
 
-    private static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
+    static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
         if (null == extendedProperties) {
             return null;
         }
