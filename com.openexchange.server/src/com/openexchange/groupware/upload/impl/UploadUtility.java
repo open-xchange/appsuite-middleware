@@ -86,6 +86,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadFileListener;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -373,9 +374,7 @@ public final class UploadUtility {
                     String name = item.getName();
                     if (!isEmpty(name)) {
                         try {
-                            FileItemHeaders headers = item.getHeaders();
-                            String contentId = headers.getHeader("Content-Id");
-                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, contentId, current, maxFileSize, maxOverallSize, uuid, session, listeners);
+                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize, uuid, session, listeners);
                             current += uf.getSize();
                             uploadEvent.addUploadFile(uf);
                         } catch (OXException e) {
@@ -458,10 +457,13 @@ public final class UploadUtility {
 
     private static final String PREFIX = "openexchange-upload-" + com.openexchange.exception.OXException.getServerId() + "-";
 
-    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, String contentId, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
+
+        FileItemHeaders headers = item.getHeaders();
+        String contentId = headers.getHeader("Content-Id");
         retval.setContentId(contentId);
 
         // Deduce MIME type from passed file name
@@ -470,9 +472,20 @@ public final class UploadUtility {
         // Set associated MIME type
         {
             // Check if we are forced to select the MIME type as signaled by file item
-            String forcedMimeType = item.getHeaders().getHeader("X-Forced-MIME-Type");
+            String forcedMimeType = headers.getHeader("X-Forced-MIME-Type");
             if (null == forcedMimeType) {
-                retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
+                String itemContentType = item.getContentType();
+                ContentType contentType = getContentTypeSafe(itemContentType);
+                if (null == contentId) {
+                    contentId = contentType.getParameter("cid");
+                    retval.setContentId(contentId);
+                }
+
+                if (null == contentType) {
+                    retval.setContentType(null == mimeType ? itemContentType : mimeType);
+                } else {
+                    retval.setContentType(contentType.getBaseType());
+                }
             } else if (AJAXRequestDataTools.parseBoolParameter(forcedMimeType)) {
                 retval.setContentType(item.getContentType());
             } else {
@@ -569,6 +582,19 @@ public final class UploadUtility {
         retval.setSize(size);
         retval.setTmpFile(tmpFile);
         return retval;
+    }
+
+    private static ContentType getContentTypeSafe(String contentType) {
+        if (null == contentType) {
+            return null;
+        }
+
+        try {
+            return new ContentType(contentType);
+        } catch (Exception e) {
+            LOG.debug("MIME type could not be parsed", e);
+            return null;
+        }
     }
 
     private static void startUploadEvicterIfNotYetDone() {
