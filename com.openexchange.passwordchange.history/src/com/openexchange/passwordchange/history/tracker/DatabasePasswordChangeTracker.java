@@ -58,9 +58,11 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.server.impl.DBPool;
 
@@ -83,6 +85,8 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
     private static final String CREATE_SEQUENCE = "INSERT INTO sequence_password_history (cid, id) VALUES (?,?);";
+
+    private static final String LIMIT = "com.openexchange.passwordchange.limit";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabasePasswordChangeTracker.class);
 
@@ -203,6 +207,18 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
         } finally {
             Databases.closeSQLStuff(stmt);
             DBPool.closeWriterSilent(context, con);
+        }
+
+        // Clean up data too
+        try {
+            final ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
+            if (null == casscade) {
+                LOG.warn("Could not get config to delete password history.");
+            } else {
+                clear(userID, contextID, casscade.getView(contextID, userID).get(LIMIT, Integer.class));
+            }
+        } catch (Exception e) {
+            LOG.warn("Could not clear password change history for ." + userID + " in context " + contextID);
         }
     }
 
