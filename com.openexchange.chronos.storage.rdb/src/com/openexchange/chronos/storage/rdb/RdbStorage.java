@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -153,7 +154,7 @@ public abstract class RdbStorage {
         if (null == warnings) {
             return Collections.emptyMap();
         }
-        Map<String, List<OXException>> result = new HashMap<String, List<OXException>>(warnings);
+        Map<String, List<OXException>> result = new TreeMap<String, List<OXException>>(warnings);
         warnings = null;
         return result;
     }

@@ -52,10 +52,16 @@ package com.openexchange.chronos.storage.rdb.migration;
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -175,9 +181,34 @@ public class StorageMigration {
         result.setStart(new Date());
         StorageReadTask copyTask = new StorageReadTask(sourceStorage, batchSize, minTombstoneLastModified);
         copyTask.call();
+
+        System.out.println(toString(sourceStorage.getWarnings(), false));
+
         result.addErrors(sourceStorage.getAndFlushWarnings());
         result.setEnd(new Date());
         return true;
+    }
+
+    private static String toString(Map<String, List<OXException>> warnings, boolean includeStackTrace) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (null != warnings && 0 < warnings.size()) {
+            for (Entry<String, List<OXException>> entry : warnings.entrySet()) {
+                for (OXException e : entry.getValue()) {
+                    if (includeStackTrace) {
+                        try (StringWriter stringWriter = new StringWriter()) {
+                            e.printStackTrace(new PrintWriter(stringWriter));
+                            stringBuilder.append(stringWriter.toString());
+                        } catch (IOException e1) {
+                            // ignore
+                        }
+                        stringBuilder.append(System.lineSeparator());
+                    } else {
+                        stringBuilder.append(e.getLogMessage()).append(System.lineSeparator());
+                    }
+                }
+            }
+        }
+        return stringBuilder.toString();
     }
 
     private static EntityResolver optEntityResolver(ServiceLookup services, int contextId) {
