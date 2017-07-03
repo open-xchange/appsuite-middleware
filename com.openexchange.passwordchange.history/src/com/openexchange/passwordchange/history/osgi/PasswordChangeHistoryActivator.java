@@ -103,7 +103,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         // Register a password change registry  
         PasswordChangeTrackerRegistry registry = new PasswordChangeTrackerRegistryImpl();
         registry.register("DB", new DatabasePasswordChangeTracker());
-        addService(PasswordChangeTrackerRegistry.class, registry);
+        registerService(PasswordChangeTrackerRegistry.class, registry);
 
         // Register event for password change
         PasswordChangeEventListener handler = new PasswordChangeEventListener();

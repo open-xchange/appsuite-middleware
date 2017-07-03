@@ -50,7 +50,6 @@
 package com.openexchange.passwordchange.history.events;
 
 import java.sql.Timestamp;
-import java.util.List;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -146,7 +145,7 @@ public final class PasswordChangeUtility {
             throw PasswordChangeHistoryException.MISSING_CONFIGURATION.create(userID, contextID);
         }
         // Load registry to get the fitting tracker
-        PasswordChangeTrackerRegistry trackerRegistry = Services.getService(PasswordChangeTrackerRegistry.class);
+        PasswordChangeTrackerRegistry trackerRegistry = Services.getOptionalService(PasswordChangeTrackerRegistry.class);
         if (null == trackerRegistry) {
             LOG.debug("Could not get PasswordChangeTrackerRegistry");
             throw PasswordChangeHistoryException.MISSING_SERVICE.create("PasswordChangeTrackerRegistry");
