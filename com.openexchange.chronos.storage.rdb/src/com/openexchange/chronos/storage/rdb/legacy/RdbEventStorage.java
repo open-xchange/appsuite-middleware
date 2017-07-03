@@ -218,10 +218,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
         {
             //            StorageMigration storageMigration = new StorageMigration(Services.get(), context.getContextId());
+            //            storageMigration.checkRead();
             //            MigrationResult result = storageMigration.run();
             //
             //            System.out.println(result);
-
         }
 
         int updated = 0;
@@ -429,10 +429,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         stringBuilder.append("WHERE d.cid=? ");
         if (null != searchOptions) {
-            if (null != searchOptions.getFrom()) {
+            if (false == deleted && null != searchOptions.getFrom()) {
                 stringBuilder.append("AND d.timestampfield02>? ");
             }
-            if (null != searchOptions.getUntil()) {
+            if (false == deleted && null != searchOptions.getUntil()) {
                 stringBuilder.append("AND d.timestampfield01<? ");
             }
         }
@@ -441,10 +441,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            if (null != searchOptions && null != searchOptions.getFrom()) {
+            if (false == deleted && null != searchOptions && null != searchOptions.getFrom()) {
                 stmt.setTimestamp(parameterIndex++, new Timestamp(searchOptions.getFrom().getTime()));
             }
-            if (null != searchOptions && null != searchOptions.getUntil()) {
+            if (false == deleted && null != searchOptions && null != searchOptions.getUntil()) {
                 stmt.setTimestamp(parameterIndex++, new Timestamp(searchOptions.getUntil().getTime()));
             }
             adapter.setParameters(stmt, parameterIndex);
