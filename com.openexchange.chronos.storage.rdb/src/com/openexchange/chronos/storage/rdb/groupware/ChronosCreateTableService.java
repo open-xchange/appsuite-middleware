@@ -79,7 +79,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "modified BIGINT(20) NOT NULL," +
                 "data BLOB," +
                 "PRIMARY KEY (cid,id)," +
-                "KEY `user` (cid,user)" +
+                "KEY user (cid,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_event_sequence",
@@ -200,7 +200,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "comment VARCHAR(512) DEFAULT NULL," +
+                "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,uri)," +
                 "KEY entity (cid,account,event,entity)," +
@@ -219,7 +219,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "comment VARCHAR(512) DEFAULT NULL," +
+                "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,uri)," +
                 "KEY entity (cid,account,event,entity)," +
@@ -246,7 +246,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY event_user (cid,account,event,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        
+
         /* Calendar Availability Tables
         tablesByName.put("calendar_availability",
             "CREATE TABLE calendar_alarm (" +
@@ -255,7 +255,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) DEFAULT NULL," +
-                "busyType VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," + 
+                "busyType VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
                 "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "description TEXT DEFAULT NULL," +
@@ -288,7 +288,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
-                "description TEXT DEFAULT NULL," + 
+                "description TEXT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "recurrence BIGINT(20) DEFAULT NULL," +
