@@ -579,7 +579,7 @@ public abstract class EventConverter {
             }
         }
         if (event.containsSeriesId()) {
-            appointment.setRecurrenceID(asInt(event.getSeriesId()));
+            appointment.setRecurrenceID(asInt(event.getSeriesId(), true));
         }
         if (event.containsRecurrenceId()) {
             if (null == event.getRecurrenceId()) {

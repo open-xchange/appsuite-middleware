@@ -64,6 +64,7 @@ import java.util.List;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -115,7 +116,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-        readAdditionalEventData(events, session.getUserId(), fields);
+        Utils.loadAdditionalEventData(storage, false, session.getUserId(), events, fields);
         return postProcess(events, session.getUserId(), true);
     }
 
@@ -131,8 +132,9 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
-        readAdditionalEventData(events, getCalendarUserId(folder), getFields(session));
+        EventField[] fields = getFields(session);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+        Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), events, fields);
         return postProcess(events, folder, isIncludeClassifiedEvents(session));
     }
 

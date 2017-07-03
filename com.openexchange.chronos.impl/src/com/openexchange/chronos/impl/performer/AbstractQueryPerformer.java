@@ -106,7 +106,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean deleted, Date updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Date updatedSince) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -131,17 +131,14 @@ public abstract class AbstractQueryPerformer {
         /*
          * perform search & userize the results
          */
-        List<Event> events;
-        if (deleted) {
-            events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), getFields(session));
+        EventField[] fields = getFields(session);
+        if (tombstones) {
+            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
+            return Utils.loadAdditionalEventData(storage, true, getCalendarUserId(folder), events, fields);
         } else {
-            events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), getFields(session));
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+            return Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), events, fields);
         }
-        return readAdditionalEventData(events, getCalendarUserId(folder), getFields(session));
-    }
-
-    protected List<Event> readAdditionalEventData(List<Event> events, int userID, EventField[] fields) throws OXException {
-        return Utils.loadAdditionalEventData(storage, userID, events, fields);
     }
 
     protected Iterator<Event> resolveOccurrences(Event masterEvent, Date from, Date until) throws OXException {

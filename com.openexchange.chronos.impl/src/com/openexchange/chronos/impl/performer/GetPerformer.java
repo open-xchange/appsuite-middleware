@@ -64,6 +64,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -105,7 +106,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
-        readAdditionalEventData(Collections.singletonList(event), getCalendarUserId(folder), fields);
+        Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), Collections.singletonList(event), fields);
         Check.eventIsInFolder(event, folder);
         event.setFolderId(folder.getID());
         if (isSeriesMaster(event)) {

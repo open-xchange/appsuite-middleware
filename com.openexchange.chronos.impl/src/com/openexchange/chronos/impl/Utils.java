@@ -408,7 +408,7 @@ public class Utils {
         }
         Date from = getFrom(session);
         Date until = getUntil(session);
-        if (null != from || null != until) {
+        if ((null != from || null != until) && null != event.getStartDate()) {
             if (isSeriesMaster(event)) {
                 /*
                  * excluded if there are no actual occurrences in range
@@ -611,35 +611,54 @@ public class Utils {
      * Loads additional event data from the storage, based on the requested fields. This currently includes
      * <ul>
      * <li>{@link EventField#ATTENDEES}</li>
-     * <li>{@link EventField#ATTACHMENTS}</li>
-     * <li>{@link EventField#ALARMS}</li> (of the calendar user)
+     * <li>{@link EventField#ATTACHMENTS}</li> (not for <i>tombstones</i>)
+     * <li>{@link EventField#ALARMS}</li> (of the calendar user; not for <i>tombstones</i>)
      * </ul>
      *
      * @param storage A reference to the calendar storage to use
+     * @param tombstones <code>true</code> if tombstone data is being read, <code>false</code>, otherwise
      * @param events The events to load additional data for
      * @param userID The identifier of the calendar user to load additional data for, or <code>-1</code> to not load user-sensitive data
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The events, enriched by the additionally loaded data
      */
-    public static List<Event> loadAdditionalEventData(CalendarStorage storage, int userID, List<Event> events, EventField[] fields) throws OXException {
-        if (null != events && 0 < events.size() && (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS))) {
-            String[] objectIDs = getObjectIDs(events);
+    public static List<Event> loadAdditionalEventData(CalendarStorage storage, boolean tombstones, int userID, List<Event> events, EventField[] fields) throws OXException {
+        if (null == events || 0 == events.size()) {
+            return events;
+        }
+        if (tombstones) {
+            /*
+             * only attendee data available for tombstone events
+             */
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
-                Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
+                Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events));
                 for (Event event : events) {
                     event.setAttendees(attendeesById.get(event.getId()));
                 }
             }
-            if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
-                Map<String, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
-                for (Event event : events) {
-                    event.setAttachments(attachmentsById.get(event.getId()));
+        } else {
+            /*
+             * read attendees, attachments & alarms for non-tombstone events
+             */
+            if (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ATTACHMENTS) || contains(fields, EventField.ALARMS)) {
+                String[] objectIDs = getObjectIDs(events);
+                if (null == fields || contains(fields, EventField.ATTENDEES)) {
+                    Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs);
+                    for (Event event : events) {
+                        event.setAttendees(attendeesById.get(event.getId()));
+                    }
                 }
-            }
-            if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
-                Map<String, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
-                for (Event event : events) {
-                    event.setAlarms(alarmsById.get(event.getId()));
+                if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
+                    Map<String, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
+                    for (Event event : events) {
+                        event.setAttachments(attachmentsById.get(event.getId()));
+                    }
+                }
+                if (0 < userID && (null == fields || contains(fields, EventField.ALARMS))) {
+                    Map<String, List<Alarm>> alarmsById = storage.getAlarmStorage().loadAlarms(events, userID);
+                    for (Event event : events) {
+                        event.setAlarms(alarmsById.get(event.getId()));
+                    }
                 }
             }
         }
@@ -699,7 +718,7 @@ public class Utils {
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
         List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields((EventField[]) null));
-        changeExceptions = loadAdditionalEventData(storage, forUser, changeExceptions, new EventField[] { EventField.ATTENDEES });
+        changeExceptions = loadAdditionalEventData(storage, false, forUser, changeExceptions, new EventField[] { EventField.ATTENDEES });
         /*
          * check which change exception the user attends
          */

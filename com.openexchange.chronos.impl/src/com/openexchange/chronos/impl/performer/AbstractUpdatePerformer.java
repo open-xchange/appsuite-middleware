@@ -385,7 +385,7 @@ public abstract class AbstractUpdatePerformer {
                 exceptions.add(exception);
             }
         }
-        return Utils.loadAdditionalEventData(storage, calendarUserId, exceptions, EventField.values());
+        return Utils.loadAdditionalEventData(storage, false, calendarUserId, exceptions, EventField.values());
     }
 
     protected Event loadExceptionData(String seriesID, RecurrenceId recurrenceID) throws OXException {

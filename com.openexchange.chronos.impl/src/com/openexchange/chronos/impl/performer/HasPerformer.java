@@ -117,7 +117,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
         EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ORGANIZER, EventField.ATTENDEES);
         List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
         List<Event> events = storage.getEventStorage().searchOverlappingEvents(attendees, true, new SearchOptions().setRange(rangeStart, rangeEnd), fields);
-        readAdditionalEventData(events, -1, fields);
+        Utils.loadAdditionalEventData(storage, false, -1, events, fields);
         /*
          * step through events day-wise & check for present events
          */
