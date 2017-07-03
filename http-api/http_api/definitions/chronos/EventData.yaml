@@ -78,3 +78,6 @@ properties:
   calendarUser:
     type: integer
     description: The user of this calendar.
+  rrule:
+    type: string
+    description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
