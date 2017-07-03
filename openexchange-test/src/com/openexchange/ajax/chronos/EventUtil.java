@@ -60,11 +60,12 @@ import com.openexchange.testing.httpclient.models.EventData;
  */
 public class EventUtil {
 
-    public static void compare(EventData e1, EventData e2) {
-
-        assertTrue(e1.getId().equals(e2.getId()));
-        //TODO extend compare
-
+    public static void compare(EventData e1, EventData e2, boolean assertTrue) {
+        if(assertTrue){
+            assertTrue("The events aren't equal!", e1.equals(e2));
+        } else {
+            assertTrue("The events are equal, but they shouldn't!", !e1.equals(e2));
+        }
     }
 
 }

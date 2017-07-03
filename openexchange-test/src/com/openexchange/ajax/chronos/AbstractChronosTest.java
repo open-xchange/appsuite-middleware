@@ -52,8 +52,12 @@ package com.openexchange.ajax.chronos;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
+import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
 
 /**
  * {@link AbstractChronosTest}
@@ -64,14 +68,19 @@ import com.openexchange.testing.httpclient.modules.ChronosApi;
 public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected ChronosApi api;
+    private FoldersApi foldersApi;
     protected String session;
     List<EventId> eventIds;
+    protected int calUser;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         api = new ChronosApi(getClient());
-        session = login(this.testUser);
+        foldersApi = new FoldersApi(getClient());
+        LoginResponse login = login(this.testUser);
+        calUser = login.getUserId();
+        session = login.getSession();
     }
 
     protected void rememberEventId(EventId eventId) {
@@ -87,6 +96,31 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         if (eventIds != null) {
             api.deleteEvent(session, System.currentTimeMillis(), eventIds);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected String getDefaultFolder() throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "event", "1,308", "0");
+        if (visibleFolders.getError() != null) {
+            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
+        }
+
+        Object privateFolders = visibleFolders.getData().getPrivate();
+        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        if (privateList.size() == 1) {
+            return (String) privateList.get(0).get(0);
+        } else {
+            for (ArrayList<?> folder : privateList) {
+                if ((boolean) folder.get(1)) {
+                    return (String) folder.get(0);
+                }
+            }
+        }
+        throw new Exception("Unable to find default calendar folder!");
+    }
+
+    protected long getCurrentTime(){
+        return System.currentTimeMillis()%1000*1000;
     }
 
 }

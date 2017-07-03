@@ -49,40 +49,48 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.net.URI;
-import java.net.URISyntaxException;
+import static org.junit.Assert.assertTrue;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.ChronosUpdateResponse;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.EventConflictResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import edu.emory.mathcs.backport.java.util.Collections;
-import net.fortuna.ical4j.model.property.Attendee;
 
 /**
  *
- * {@link BasicCRUDTest}
+ * {@link BasicSingelEventTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class BasicCRUDTest extends AbstractChronosTest {
+public class BasicSingelEventTest extends AbstractChronosTest {
+
+    private String folderId;
 
     @SuppressWarnings("unchecked")
-    private EventData createSingleEvent() throws URISyntaxException {
+    private EventData createSingleEvent() {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.setCalAddress(new URI("mailto:" + this.testUser.getLogin()));
+        attendee.entity(calUser);
+        attendee.cuType(CuTypeEnum.INDIVIDUAL);
+        attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(System.currentTimeMillis());
-        singleEvent.setEndDate(System.currentTimeMillis() + 5000);
+        singleEvent.setStartDate(getCurrentTime());
+        singleEvent.setEndDate(getCurrentTime() + 5000);
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
         return singleEvent;
@@ -91,20 +99,65 @@ public class BasicCRUDTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
+        folderId = getDefaultFolder();
     }
 
     @Test
-    public void testCreateSingle() throws ApiException, URISyntaxException {
-        EventConflictResponse createEvent = api.createEvent(session, "cal://0/54", createSingleEvent(), false);
+    public void testCreateSingle() throws Exception {
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent(), false);
         assertNull(createEvent.getError(), createEvent.getError());
-        assertNull(createEvent.getData());
+        assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
         eventId.setId(createEvent.getData().getId());
         rememberEventId(eventId);
         EventResponse eventResponse = api.getEvent(session, createEvent.getData().getId(), null, null, null);
+        assertNull(eventResponse.getError(), createEvent.getError());
+        assertNotNull(eventResponse.getData());
+        EventUtil.compare(createEvent.getData(), eventResponse.getData(), true);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testDeleteSingle() throws Exception {
+
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent(), false);
         assertNull(createEvent.getError(), createEvent.getError());
-        assertNull(createEvent.getData());
-        EventUtil.compare(createEvent.getData(), eventResponse.getData());
+        assertNotNull(createEvent.getData());
+        EventId eventId = new EventId();
+        eventId.setId(createEvent.getData().getId());
+
+        CommonResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
+        assertNull(deleteResponse.getError());
+
+        EventResponse eventResponse = api.getEvent(session, createEvent.getData().getId(), null, null, null);
+        assertNotNull(eventResponse.getError());
+        assertEquals("CAL-4040", eventResponse.getCode());
+
+    }
+
+    @Test
+    public void testUpdateSingle() throws Exception {
+        EventData initialEvent = createSingleEvent();
+        EventConflictResponse createEvent = api.createEvent(session, folderId, initialEvent, false);
+        assertNull(createEvent.getError(), createEvent.getError());
+        assertNotNull(createEvent.getData());
+        EventId eventId = new EventId();
+        eventId.setId(createEvent.getData().getId());
+        rememberEventId(eventId);
+
+        EventData updatedData = createEvent.getData();
+        updatedData.setEndDate(updatedData.getEndDate()+5000);
+
+        ChronosUpdateResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), updatedData, System.currentTimeMillis(), true, null);
+        assertNull(updateResponse.getError());
+        assertNotNull(updateResponse.getData());
+
+        List<EventData> updates = updateResponse.getData().getUpdated();
+        assertTrue(updates.size()==1);
+        EventUtil.compare(initialEvent, updates.get(0), false);
+        updatedData.setLastModified(updates.get(0).getLastModified());
+        updatedData.setSequence(updates.get(0).getSequence());
+        EventUtil.compare(updatedData, updates.get(0), true);
+
     }
 }

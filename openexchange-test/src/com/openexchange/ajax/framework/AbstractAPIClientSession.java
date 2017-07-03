@@ -93,10 +93,10 @@ public abstract class AbstractAPIClientSession {
         super();
     }
 
-    protected String login(TestUser user) throws Exception {
+    protected LoginResponse login(TestUser user) throws Exception {
         LoginResponse doLogin = loginApi.doLogin(user.getLogin(), user.getPassword(), null, null, null, null, null);
         if (doLogin.getError() == null) {
-            return doLogin.getSession();
+            return doLogin;
         }
         throw new Exception("Error during login: " + doLogin.getError());
     }
