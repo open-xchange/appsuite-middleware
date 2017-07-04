@@ -74,7 +74,7 @@ import com.openexchange.rest.services.annotation.RoleAllowed;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@Path("password/history/v1")
+@Path("passwordchange/history/v1")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class PasswordChangeHistoryREST {
 
@@ -118,19 +118,14 @@ public class PasswordChangeHistoryREST {
             return new JSONObject("{No history available.}");
         }
 
-        // Limit if necessary 
-        if (limit > 0 && size > limit) { // Limit zero or less --> return everything
-            for (int i = limit; i < size; i++) {
-                // Remove all that exceeds the limit
-                history.remove(i);
-            }
-        }
-
         // Build response
         JSONObject json = new JSONObject();
         JSONArray entries = new JSONArray();
         int i = 0;
         for (PasswordChangeInfo info : history) {
+            if (limit > 0 && i >= limit) {
+                break;
+            }
             JSONObject data = new JSONObject();
             data.append("lastModified", info.lastModified().toString());
             data.append("modifiedBy", info.modifiedBy());
