@@ -972,6 +972,14 @@ public final class CSSMatcher {
         cssBuilder.append(repl);
     }
 
+    private static final MatcherReplacer.Condition NO_EVENT_HANDLER_CONDITION = new MatcherReplacer.Condition() {
+
+        @Override
+        public CharSequence acceptTail(CharSequence tail) {
+            return HtmlServices.containsEventHandler(tail.toString()) ? null : tail;
+        }
+    };
+
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map<br>
      * <br>
@@ -1027,19 +1035,27 @@ public final class CSSMatcher {
                         /*
                          * Direct match
                          */
-                        elemBuilder.append(elementValues);
-                        hasValues = true;
+                        if (HtmlServices.containsEventHandler(elementValues)) {
+                            modified = true;
+                        } else {
+                            elemBuilder.append(elementValues);
+                            hasValues = true;
+                        }
                     } else {
                         boolean first = true;
                         for (String token : splitToTokens(elementValues)) {
                             if (matches(token, allowedValuesSet)) {
-                                if (first) {
-                                    first = false;
+                                if (HtmlServices.containsEventHandler(token)) {
+                                    modified = true;
                                 } else {
-                                    elemBuilder.append(' ');
+                                    if (first) {
+                                        first = false;
+                                    } else {
+                                        elemBuilder.append(' ');
+                                    }
+                                    elemBuilder.append(token);
+                                    hasValues = true;
                                 }
-                                elemBuilder.append(token);
-                                hasValues = true;
                             } else {
                                 modified = true;
                             }
@@ -1065,7 +1081,7 @@ public final class CSSMatcher {
                 }
             }
         } while (!thread.isInterrupted() && m.find());
-        mr.appendTail(cssBuilder);
+        mr.appendTail(cssBuilder, NO_EVENT_HANDLER_CONDITION);
         return modified;
     }
 

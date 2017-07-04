@@ -336,6 +336,16 @@ public class CSSMatcherTest {
         Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
     }
 
+    @Test
+    public void testDoCheckCss_bug54592() {
+        FilterMaps.loadWhitelist();
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("\\'font-size:12px;/onerror=\"this.src=alert(document.cookie)\""));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        String content = "\\'font-size: 12px;";
+        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+    }
+
      @Test
      public void testCheckCss_threadpoolAvailableAndNotInternallyInvoked_createAdditionalThread() throws InterruptedException, ExecutionException, TimeoutException {
         PowerMockito.mockStatic(ThreadPools.class);
