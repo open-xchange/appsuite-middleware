@@ -7,19 +7,19 @@
     produces:
       - application/json
     parameters:
-      - in: querry
+      - in: query
         name: contextID
         description: The context the user is in
         required: true
         type: integer
         format: int64
-      - in: querry
+      - in: query
         name: userID
         description: The ID representing the user
         required: true
         type: integer
         format: int64
-      - in: querry
+      - in: query
         name: limit
         description: Limit the output to a specific length of entries. Entries are sorted from oldest first to newest last. So limitation will cut off newest changes.
         required: false
