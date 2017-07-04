@@ -1,5 +1,5 @@
 /passwordchange/history/v1/:
-  list:
+  get:
     operationId: list
     tags:
       - Passwordchangehistory
