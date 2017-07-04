@@ -6,6 +6,7 @@
     summary: Gets all changed events since the given timestamp.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
       - in: query
         name: timestamp
         type: integer
