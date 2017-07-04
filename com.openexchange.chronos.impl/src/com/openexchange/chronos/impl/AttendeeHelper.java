@@ -450,7 +450,7 @@ public class AttendeeHelper {
          */
         int calendarUserId = getCalendarUserId(folder);
         List<Attendee> attendees = previewChanges();
-        if (false == enforceDefaultAttendee && 1 == attendees.size() && isLastUserAttendee(attendees, calendarUserId)) {
+        if (false == enforceDefaultAttendee && (attendees.isEmpty() || isLastUserAttendee(attendees, calendarUserId))) {
             /*
              * event is not (or no longer) a group-scheduled one, remove default attendee
              */
