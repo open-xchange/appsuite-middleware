@@ -272,7 +272,7 @@ public class CSSMatcherTest {
         CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
-        String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active { color: #a9a9a9; }";
+        String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active { color: #a9a9a9;}";
 
         Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
     }
