@@ -160,7 +160,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
 
     @Override
     public Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        return getCalendarService().getEvent(session, folderId, eventId);
+        return getCalendarService().getEvent(session, folderId, new EventID(folderId, eventId, recurrenceId));
     }
 
     @Override

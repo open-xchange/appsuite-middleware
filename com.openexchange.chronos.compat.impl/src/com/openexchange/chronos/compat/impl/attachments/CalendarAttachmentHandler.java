@@ -136,7 +136,8 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
          * get event & check read access implicitly
          */
         CalendarSession calendarSession = requireService(CalendarService.class).init(serverSession);
-        Event event = calendarSession.getCalendarService().getEvent(calendarSession, String.valueOf(folderId), String.valueOf(objectId));
+        EventID eventId = new EventID(String.valueOf(folderId), String.valueOf(objectId));
+        Event event = calendarSession.getCalendarService().getEvent(calendarSession, eventId.getFolderID(), eventId);
         if (CalendarUtils.isClassifiedFor(event, serverSession.getUserId())) {
             throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(String.valueOf(folderId), event.getId(), String.valueOf(event.getClassification()));
         }

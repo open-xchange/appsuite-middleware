@@ -117,7 +117,7 @@ public class DefaultEventConverter extends EventConverter {
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
             session.set(CalendarParameters.PARAMETER_RANGE_START, null);
             session.set(CalendarParameters.PARAMETER_RANGE_END, null);
-            return session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
+            return session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID);
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
             session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaster);

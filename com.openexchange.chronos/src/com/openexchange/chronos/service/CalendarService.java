@@ -186,10 +186,10 @@ public interface CalendarService {
      *
      * @param session The calendar session
      * @param folderID The identifier of the folder representing the current user's calendar view
-     * @param objectID The identifier of the event to get
+     * @param eventId The identifier of the event to get
      * @return The event
      */
-    Event getEvent(CalendarSession session, String folderID, String objectID) throws OXException;
+    Event getEvent(CalendarSession session, String folderID, EventID eventId) throws OXException;
 
     /**
      * Gets a list of events.

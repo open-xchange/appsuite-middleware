@@ -71,6 +71,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -162,7 +163,7 @@ public final class CopyAction extends ChronosAction {
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         JSONObject jsonObject = request.getData();
         String targetFolderID = DataParser.checkString(jsonObject, FolderChildFields.FOLDER_ID);
-        Event event = session.getCalendarService().getEvent(session, folderId, objectId);
+        Event event = session.getCalendarService().getEvent(session, folderId, new EventID(folderId, objectId));
         event.removeId();
         event.removeUid();
         event.removeFolderId();

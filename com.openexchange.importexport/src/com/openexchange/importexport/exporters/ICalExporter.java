@@ -72,6 +72,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -391,7 +392,7 @@ public class ICalExporter implements Exporter {
          * perform export
          */
         if (null != objectID) {
-            Event event = calendarService.getEvent(calendarSession, folderID, objectID);
+            Event event = calendarService.getEvent(calendarSession, folderID, new EventID(folderID, objectID));
             calendarExport.add(event);
             if (CalendarUtils.isSeriesMaster(event) && null != event.getChangeExceptionDates() && 0 < event.getChangeExceptionDates().size()) {
                 for (Event changeException : calendarService.getChangeExceptions(calendarSession, folderID, objectID)) {

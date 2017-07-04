@@ -50,7 +50,6 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
-import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -86,6 +85,7 @@ import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
@@ -293,7 +293,8 @@ public class EventPatches {
                     RecurrenceId recurrenceId = newChangeException.getRecurrenceId();
                     CalendarSession calendarSession = resource.getCalendarSession();
                     calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
-                    Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, resource.getEvent().getFolderId(), resource.getEvent().getId());
+                    EventID eventId = new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), resource.getEvent().getRecurrenceId());
+                    Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, eventId.getFolderID(), eventId);
                     Event originalOccurrence = null;
                     Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue()), null);
                     if (iterator.hasNext()) {

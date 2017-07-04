@@ -60,12 +60,14 @@ import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.Collections;
+import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -92,27 +94,37 @@ public class GetPerformer extends AbstractQueryPerformer {
      * Performs the operation.
      *
      * @param folder The parent folder to get read the event in
-     * @param objectID The identifier if the event to get
+     * @param eventId The identifier of the event to get
      * @return The loaded event
+     * @throws OXException if the event couldn't be loaded.
      */
-    public Event perform(UserizedFolder folder, String objectID) throws OXException {
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        Event event = storage.getEventStorage().loadEvent(objectID, fields);
-        if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(objectID);
-        }
-        if (session.getUserId() != event.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+    public Event perform(UserizedFolder folder, EventID eventId) throws OXException {
+        if (eventId.getRecurrenceID() == null) {
+            EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+            Event event = storage.getEventStorage().loadEvent(eventId.getObjectID(), fields);
+            if (null == event) {
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+            }
+            if (session.getUserId() != event.getCreatedBy()) {
+                requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+            } else {
+                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+            }
+            Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), Collections.singletonList(event), fields);
+            Check.eventIsInFolder(event, folder);
+            event.setFolderId(folder.getID());
+            if (isSeriesMaster(event)) {
+                event = applyExceptionDates(storage, event, getCalendarUserId(folder));
+            }
+            return anonymizeIfNeeded(session, event);
         } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+            List<Event> results = new ListPerformer(session, storage).perform(Collections.singletonList(eventId));
+            if(results.size()==1){
+                return results.get(0);
+            } else {
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+            }
         }
-        Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), Collections.singletonList(event), fields);
-        Check.eventIsInFolder(event, folder);
-        event.setFolderId(folder.getID());
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
-        }
-        return anonymizeIfNeeded(session, event);
     }
 
 }

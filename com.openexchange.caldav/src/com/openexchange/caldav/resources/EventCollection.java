@@ -84,6 +84,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.CalendarColor;
@@ -123,8 +124,8 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     protected final String folderID;
 
     private CalendarSession calendarSession;
-    private MinDateTime minDateTime;
-    private MaxDateTime maxDateTime;
+    private final MinDateTime minDateTime;
+    private final MaxDateTime maxDateTime;
     private Date lastModified;
 
     /**
@@ -306,7 +307,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         }
         if (null != objectID) {
             try {
-                return calendarSession.getCalendarService().getEvent(calendarSession, folderID, objectID);
+                return calendarSession.getCalendarService().getEvent(calendarSession, folderID, new EventID(folderID, objectID));
             } catch (OXException e) {
                 if ("CAL-4041".equals(e.getErrorCode())) {
                     /*

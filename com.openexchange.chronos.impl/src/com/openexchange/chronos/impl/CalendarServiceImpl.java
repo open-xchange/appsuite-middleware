@@ -188,12 +188,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Event getEvent(CalendarSession session, final String folderID, final String objectID) throws OXException {
+    public Event getEvent(CalendarSession session, final String folderID, final EventID eventId) throws OXException {
         return new StorageOperation<Event>(session) {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetPerformer(session, storage).perform(getFolder(session, folderID), objectID);
+                return new GetPerformer(session, storage).perform(getFolder(session, folderID), eventId);
             }
         }.executeQuery();
     }

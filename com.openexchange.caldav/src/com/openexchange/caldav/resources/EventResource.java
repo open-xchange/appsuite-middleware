@@ -225,7 +225,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 /*
                  * load all event data & add (master) event to export
                  */
-                Event event = calendarSession.getCalendarService().getEvent(calendarSession, object.getFolderId(), object.getId());
+                Event event = calendarSession.getCalendarService().getEvent(calendarSession, object.getFolderId(), new EventID(object.getFolderId(), object.getId(), object.getRecurrenceId()));
                 event = EventPatches.Outgoing.applyAll(this, event);
                 calendarExport.add(event);
                 if (CalendarUtils.isSeriesMaster(object) && null != object.getChangeExceptionDates()) {

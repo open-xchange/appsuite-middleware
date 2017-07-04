@@ -61,6 +61,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -126,7 +127,7 @@ public final class GetAction extends ChronosAction {
         String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
-        Event event = session.getCalendarService().getEvent(session, folderId, objectId);
+        Event event = session.getCalendarService().getEvent(session, folderId, new EventID(folderId, objectId));
         Appointment appointment = getEventConverter(session).getAppointment(event);
         return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
     }
