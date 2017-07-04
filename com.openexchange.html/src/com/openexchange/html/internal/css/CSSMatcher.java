@@ -1081,7 +1081,9 @@ public final class CSSMatcher {
                 }
             }
         } while (!thread.isInterrupted() && m.find());
-        mr.appendTail(cssBuilder, NO_EVENT_HANDLER_CONDITION);
+        // In case there is a tail, it was apparently not covered by PATTERN_STYLE_LINE pattern
+        // Presumably no CSS content...
+        // mr.appendTail(cssBuilder, NO_EVENT_HANDLER_CONDITION);
         return modified;
     }
 
