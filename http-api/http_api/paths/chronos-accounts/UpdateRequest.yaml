@@ -23,6 +23,8 @@
         name: body
         description: A JSON object describing the calendar account to update.
         required: true
+        schema:
+          type: string
     responses:
       200:
         description: |
