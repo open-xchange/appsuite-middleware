@@ -3,7 +3,7 @@
     operationId: list
     tags:
       - Passwordchangehistory
-    summary: List the history of password changes from a specific user
+    summary: List the history of password changes for a specific user
     produces:
       - application/json
     parameters:
