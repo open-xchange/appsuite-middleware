@@ -54,6 +54,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -97,7 +98,13 @@ public class AllAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         List<Event> events = calendarAccess.getEventsInFolder(parseFolderParameter(requestData));
-        return new AJAXRequestResult(events, "event");
+        long timeStamp=0;
+        for(Event event: events){
+            if(event.getLastModified().getTime()>timeStamp){
+                timeStamp = event.getLastModified().getTime();
+            }
+        }
+        return new AJAXRequestResult(events, new Date(timeStamp), "event");
     }
 
 }
