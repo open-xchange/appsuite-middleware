@@ -1,4 +1,4 @@
-/passwordchange/history/v1/:
+/passwordchange/history/v1/list:
   get:
     operationId: list
     tags:
