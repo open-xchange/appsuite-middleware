@@ -212,6 +212,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException {
+        return export(ctxGroup, filter, Collections.<String, String> emptyMap());
+    }
+
+    @Override
+    public ExportResultConverter export(String ctxGroup, FeedbackFilter filter, Map<String, String> configuration) throws OXException {
         ParameterValidator.checkString(ctxGroup);
         ParameterValidator.checkObject(filter);
 
@@ -239,7 +244,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 }
             }
 
-            return feedBackType.getFeedbacks(filteredFeedback, readCon);
+            return feedBackType.getFeedbacks(filteredFeedback, readCon, configuration);
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         } finally {
