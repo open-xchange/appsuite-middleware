@@ -1,0 +1,50 @@
+/passwordchange/history/v1/:
+  list:
+    operationId: list
+    tags:
+      - Passwordchangehistory
+    summary: List the history of password changes from a specific user
+    produces:
+      - application/json
+    parameters:
+      - in: querry
+        name: contextID
+        description: The context the user is in
+        required: true
+        type: integer
+        format: int64
+      - in: querry
+        name: userID
+        description: The ID representing the user
+        required: true
+        type: integer
+        format: int64
+      - in: querry
+        name: limit
+        description: Limit the output to a specific length of entries. Entries are sorted from oldest first to newest last. So limitation will cut off newest changes.
+        required: false
+        type: integer
+        format: int64
+    responses:
+      200:
+        description: An JSONObject containing an array with the entries
+        schema:
+          type: string
+      400:
+        description: Bad request, response contains error message.
+        schema:
+          type: string
+      401:
+        description: Not authorized  
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
+    x-ox-examples:
+      Example:
+        description: List the first two recorded password changes for user 5 in context 10 
+        example: LIST http://localhost:8009/password/history/v1/list?limit=2&contextID=10&userID=5
