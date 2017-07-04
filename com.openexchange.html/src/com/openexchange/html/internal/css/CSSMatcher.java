@@ -1007,13 +1007,7 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        Matcher m;
-        MatcherReplacer mr;
-        {
-            String str = cssBuilder.toString();
-            m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(str));
-            mr = new MatcherReplacer(m, str);
-        }
+        Matcher m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
         cssBuilder.setLength(0);
 
         if (false == m.find()) {
@@ -1063,13 +1057,15 @@ public final class CSSMatcher {
                     }
                     if (hasValues) {
                         elemBuilder.append(';');
-                        mr.appendLiteralReplacement(cssBuilder, elemBuilder.toString());
+                        if (cssBuilder.length() > 0) {
+                            cssBuilder.append(' ');
+                        }
+                        cssBuilder.append(elemBuilder.toString());
                     } else {
                         /*
                          * Remove element since none of its values is allowed
                          */
                         modified = true;
-                        mr.appendReplacement(cssBuilder, "");
                     }
                     elemBuilder.setLength(0);
                 } else if (removeIfAbsent) {
@@ -1077,7 +1073,11 @@ public final class CSSMatcher {
                      * Remove forbidden element
                      */
                     modified = true;
-                    mr.appendReplacement(cssBuilder, "");
+                } else {
+                    if (cssBuilder.length() > 0) {
+                        cssBuilder.append(' ');
+                    }
+                    cssBuilder.append(m.group());
                 }
             }
         } while (!thread.isInterrupted() && m.find());
