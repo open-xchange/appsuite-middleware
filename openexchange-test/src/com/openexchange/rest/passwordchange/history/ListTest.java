@@ -49,61 +49,76 @@
 
 package com.openexchange.rest.passwordchange.history;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import java.sql.Timestamp;
+import static org.junit.Assert.assertEquals;
+import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.impl.PasswordChangeInfoImpl;
-import com.openexchange.rest.AbstractRestTest;
-import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
+import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 
 /**
- * {@link AbstractPasswordchangehistoryTest}
+ * {@link ListTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
+public class ListTest extends AbstractPasswordchangehistoryTest {
 
-    protected static final String ARRAY_NAME = "PasswordChangeHistroy";
+    private static final String ARRAY_NAME = "PasswordChangeHistroy";
 
-    protected PasswordchangehistoryApi pwdhapi;
-    protected Long contextID;
-    protected Long userID;
-    protected Long limit = new Long(1);
-    protected Timestamp send;
-    protected PasswordchangehistoryApi pwdhapi;
+    private Long contextID;
+    private Long userID;
+    private Long limit = new Long(1);
+    private Long send;
+
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(PasswordChangeHistoryREST.class);
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        // API to operate on
-        pwdhapi = new PasswordchangehistoryApi(getRestClient());
-
         // Do a password change
+        send = System.currentTimeMillis();
         PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
-        send = new Timestamp(System.currentTimeMillis());
-        PasswordChangeUpdateResponse response = getAjaxClient().execute(request);
-        assertFalse("Errors in response!", response.hasError());
-        assertFalse("Warnings in response!", response.hasWarnings());
+        getAjaxClient().execute(request);
 
         // Get context and user ID
         contextID = Integer.toUnsignedLong(getAjaxClient().getValues().getContextId());
         userID = Integer.toUnsignedLong(getAjaxClient().getValues().getUserId());
     }
 
-    protected PasswordChangeInfo parse(JSONObject data) throws Exception {
-        final String ip = filter(data, "ip");
-        final String client = filter(data, "client");
-        final Timestamp created = Timestamp.valueOf(filter(data, "created"));
+    @Test
+    public void testLimit() throws Exception {
 
-        return new PasswordChangeInfoImpl(created, client, ip);
+        String retval = pwdhapi.list(contextID, userID, limit);
+        JSONObject json = new JSONObject(retval);
+        JSONArray array = json.getJSONArray(ARRAY_NAME);
+        assertEquals("More than one element! Limitation did not work..", 1, array.asList().size());
     }
 
-    private String filter(JSONObject data, String name) throws Exception {
-        return data.getString(name).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", "");
+    @Test
+    public void testTime() throws Exception {
+
+        String retval = pwdhapi.list(contextID, userID, 0l);
+        JSONObject json = new JSONObject(retval);
+        JSONArray array = json.getJSONArray(ARRAY_NAME);
+
+        for (int i = 0; i < array.length(); i++) {
+            JSONArray info = array.getJSONArray(i);            
+            Long lastModified = Long.parseLong(info.getString(0));
+
+            if ((lastModified - send) > 10) {
+                return;
+            }
+        }
+        fail("Did not find any timestamp near the transmitting timestamp");
     }
+
 }
