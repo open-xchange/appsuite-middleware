@@ -86,7 +86,7 @@ Import-Package: com.fasterxml.jackson.core;version="2.6.2",
  org.slf4j
 Bundle-Activator: com.openexchange.oauth.dropbox.osgi.DropboxOAuthActivator
 Bundle-ClassPath: .,
- lib/dropbox-java-sdk-2.1.1.jar
+ lib/dropbox-core-sdk-3.0.3.jar
 Export-Package: com.dropbox.core,
  com.dropbox.core.v2,
  com.dropbox.core.v2.auth,
