@@ -151,11 +151,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Performs the update operation.
      *
      * @param objectID The identifier of the event to update
+     * @param recurrenceId The optional id of the recurrence.
      * @param updatedEvent The updated event data
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The update result
      */
-    public CalendarResultImpl perform(String objectID, Event updatedEvent, long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceId, Event updatedEvent, long clientTimestamp) throws OXException {
         /*
          * load original event data
          */
@@ -163,8 +164,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * update event or event occurrence
          */
-        if (isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()) {
-            updateEvent(originalEvent, updatedEvent, updatedEvent.getRecurrenceId());
+        if (isSeriesMaster(originalEvent) && (recurrenceId != null || (updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()))) {
+            updateEvent(originalEvent, updatedEvent, recurrenceId != null ? recurrenceId : updatedEvent.getRecurrenceId());
         } else {
             if(updateEvent(originalEvent, updatedEvent)){
                 result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));

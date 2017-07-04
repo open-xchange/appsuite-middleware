@@ -279,7 +279,7 @@ public class CalendarServiceImpl implements CalendarService {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), event, clientTimestamp);
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), event, clientTimestamp);
             }
 
         }.executeUpdate());
