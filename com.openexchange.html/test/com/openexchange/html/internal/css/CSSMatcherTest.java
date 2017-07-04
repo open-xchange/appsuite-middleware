@@ -272,7 +272,7 @@ public class CSSMatcherTest {
         CSSMatcher.doCheckCss(cssBld, FilterMaps.getStaticStyleMap(), "123456", true);
         String convertedCss = cssBld.toString().replaceAll("\\s+", " ");
 
-        String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active { color: #a9a9a9;}";
+        String content = "#123456 .123456-top , #123456 .123456-footer a:link , #123456 .123456-footer a:visited , #123456 .123456-footer a:active {color: #a9a9a9;}";
 
         Assert.assertTrue("Processed CSS does not contain desired content " + content, convertedCss.contains(content));
     }
@@ -318,7 +318,8 @@ public class CSSMatcherTest {
         checkCSS(cssBld, FilterMaps.getImageStyleMap(), true, false);
 
         String content = "border-collapse: collapse; table-layout: auto;";
-        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
 
      @Test
@@ -342,8 +343,37 @@ public class CSSMatcherTest {
 
         Stringer cssBld = new StringBufferStringer(new StringBuffer("\\'font-size:12px;/onerror=\"this.src=alert(document.cookie)\""));
         CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
-        String content = "\\'font-size: 12px;";
-        Assert.assertEquals("Processed CSS does not match.", content, cssBld.toString().trim());
+        String content = "font-size: 12px;";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+    }
+
+    @Test
+    public void testDoCheckCss_bug54579() {
+        FilterMaps.loadWhitelist();
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("\\'font-size:12px;/href=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        String content = "font-size: 12px;";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+
+        cssBld = new StringBufferStringer(new StringBuffer("\\'font-size:12px;/href=\"data&colon;text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=="));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        content = "font-size: 12px;";
+        convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
+    }
+
+    @Test
+    public void testDoCheckCss_bug54578() {
+        FilterMaps.loadWhitelist();
+
+        Stringer cssBld = new StringBufferStringer(new StringBuffer("\\'font-size:12px;/src=\"//heiland.io/\""));
+        CSSMatcher.checkCSSElements(cssBld, FilterMaps.getStaticStyleMap(), true);
+        String content = "font-size: 12px;";
+        String convertedCss = cssBld.toString().trim();
+        Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
 
      @Test
