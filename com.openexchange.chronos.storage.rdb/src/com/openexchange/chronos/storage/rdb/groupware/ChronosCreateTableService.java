@@ -161,7 +161,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "modified BIGINT(20) NOT NULL," +
                 "modifiedBy INT4 UNSIGNED NOT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
-                "start datetime NOT NULL," +
+                "start datetime DEFAULT NULL," +
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
