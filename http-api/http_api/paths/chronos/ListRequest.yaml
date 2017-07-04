@@ -1,9 +1,11 @@
 /chronos?action=list:
-  get:
+  put:
     operationId: getEventList
     tags:
       - Chronos
     summary: Gets a list of events.
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosTimezone"

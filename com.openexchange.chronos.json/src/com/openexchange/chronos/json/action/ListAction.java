@@ -98,7 +98,7 @@ public class ListAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONObject)) {
+        if (data == null || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
         JSONArray ids = (JSONArray) data;
