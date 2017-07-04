@@ -63,6 +63,7 @@ import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
@@ -122,17 +123,41 @@ public final class QuotedInternetAddress extends InternetAddress {
         return tmp.booleanValue();
     }
 
+    private static volatile Boolean keepQuotesInEncodedPersonal;
+    private static boolean keepQuotesInEncodedPersonal() {
+        Boolean tmp = keepQuotesInEncodedPersonal;
+        if (null == tmp) {
+            synchronized (QuotedInternetAddress.class) {
+                tmp = keepQuotesInEncodedPersonal;
+                if (null == tmp) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    // Therefore assuming 'false' as default here
+                    boolean defaultValue = false;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.keepQuotesInEncodedPersonal", defaultValue));
+                    keepQuotesInEncodedPersonal = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     static {
         MailReloadable.getInstance().addReloadable(new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 preferSimpleAddressParsing = null;
+                keepQuotesInEncodedPersonal = null;
             }
 
             @Override
             public Interests getInterests() {
-                return null;
+                return Reloadables.interestsForProperties("com.openexchange.mail.preferSimpleAddressParsing", "com.openexchange.mail.keepQuotesInEncodedPersonal");
             }
         });
     }
@@ -1177,19 +1202,23 @@ public final class QuotedInternetAddress extends InternetAddress {
                     }
                 }
 
-                if (needQuoting(personal, true)) {
-                    try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                    } catch (final UnsupportedEncodingException e) {
-                        LOG.error("", e);
-                    }
-                } else if (!isAscii(personal)) {
-                    try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                    } catch (final UnsupportedEncodingException e) {
-                        LOG.error("", e);
+                if (keepQuotesInEncodedPersonal()) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    if (needQuoting(personal, true)) {
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
+                    } else if (!isAscii(personal)) {
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
                     }
                 }
+
                 return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
             } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
                 return new StringBuilder().append('<').append(address).append('>').toString();
