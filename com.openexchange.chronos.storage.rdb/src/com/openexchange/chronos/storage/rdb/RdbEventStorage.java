@@ -441,7 +441,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             return 0;
         }
         EventField[] mappedFields = MAPPER.getMappedFields();
-        StringBuilder stringBuilder = new StringBuilder().append("REPLACE INTO calendar_event_tombstone ").append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ").append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)");
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("REPLACE INTO calendar_event_tombstone ")
+            .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
+            .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)")
+        ;
         for (int i = 1; i < events.length; i++) {
             stringBuilder.append(",(?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)");
         }
@@ -649,7 +653,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (0 < searchOptions.getLimit()) {
             stringBuilder.append(" LIMIT ");
             if (0 < searchOptions.getOffset()) {
-                stringBuilder.append(searchOptions.getOffset()).append(", ");
+                stringBuilder.append(searchOptions.getOffset()).append(',');
             }
             stringBuilder.append(searchOptions.getLimit());
         }
@@ -678,12 +682,20 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * the maximum, timezone-independent range for any possible occurrence of the event, i.e. the range for <i>floating</i> events is
      * expanded with the minimum/maximum timezone offsets, and the period for recurring event series will span from the first until the
      * last possible occurrence (or {@link Long#MAX_VALUE} for never ending series).
+     * <p/>
+     * If no start- and end-date are set in the event, the "from" value for the maximum range {@link Long#MIN_VALUE} is returned.
      *
      * @param event The event to get the range for
      * @return The start time of the effective range of an event
      */
     private static long getRangeFrom(Event event) {
         Date rangeFrom = event.getStartDate();
+        if (null == rangeFrom) {
+            /*
+             * (legacy) tombstone event without persisted start-/end-date
+             */
+            return Long.MIN_VALUE;
+        }
         if (isFloating(event)) {
             /*
              * add easternmost offset (GMT +14:00)
@@ -698,12 +710,20 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * the maximum, timezone-independent range for any possible occurrence of the event, i.e. the range for <i>floating</i> events is
      * expanded with the minimum/maximum timezone offsets, and the period for recurring event series will span from the first until the
      * last possible occurrence (or {@link Long#MAX_VALUE} for never ending series).
+     * <p/>
+     * If no start- and end-date are set in the event, the "until" valud for the maximum range {@link Long#MAX_VALUE} is returned.
      *
      * @param event The event to get the range for
      * @return The start time of the effective range of an event
      */
     private static long getRangeUntil(Event event) throws OXException {
         Date rangeUntil = null != event.getEndDate() ? event.getEndDate() : event.getStartDate();
+        if (null == rangeUntil) {
+            /*
+             * (legacy) tombstone event without persisted start-/end-date
+             */
+            return Long.MAX_VALUE;
+        }
         if (isSeriesMaster(event)) {
             /*
              * take over end-date of last occurrence
