@@ -50,9 +50,14 @@
 package com.openexchange.ajax.chronos;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.LoginResponse;
@@ -119,8 +124,14 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
-    protected long getCurrentTime(){
-        return System.currentTimeMillis()%1000*1000;
+    protected Date getAPIDate(TimeZone localtimeZone, Date localDate, int datesToAdd) {
+        Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
+        localCalendar.setTime(localDate);
+        localCalendar.add(Calendar.DAY_OF_YEAR, datesToAdd);
+        Calendar utcCalendar = GregorianCalendar.getInstance(TimeZones.UTC);
+        utcCalendar.set(localCalendar.get(Calendar.YEAR), localCalendar.get(Calendar.MONTH), localCalendar.get(Calendar.DATE), 0, 0, 0);
+        utcCalendar.set(Calendar.MILLISECOND, 0);
+        return utcCalendar.getTime();
     }
 
 }
