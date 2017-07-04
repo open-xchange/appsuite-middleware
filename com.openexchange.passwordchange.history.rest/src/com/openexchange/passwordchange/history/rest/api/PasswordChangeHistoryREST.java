@@ -111,8 +111,15 @@ public class PasswordChangeHistoryREST {
             return new JSONObject("{No tracker for the requested user found.}");
         }
         List<PasswordChangeInfo> history = pwdtracker.listPasswordChanges(userID, contextID);
+
+        // Check data
         int size = history.size();
-        if (size > limit) {
+        if (size == 0) {
+            return new JSONObject("{No history available.}");
+        }
+
+        // Limit if necessary 
+        if (limit > 0 && size > limit) { // Limit zero or less --> return everything
             for (int i = limit; i < size; i++) {
                 // Remove all that exceeds the limit
                 history.remove(i);
