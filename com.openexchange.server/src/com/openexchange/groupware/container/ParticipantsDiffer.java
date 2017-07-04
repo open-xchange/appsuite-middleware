@@ -124,19 +124,6 @@ public class ParticipantsDiffer extends Differ<CalendarObject> {
         return isDifferent ? difference : null;
     }
 
-    private Change getChange(UserParticipant original, UserParticipant update) {
-        boolean changed = false;
-
-        ConfirmationChange change = getConfirmChange(original, update);
-
-        if (original.getConfirmMessage() != update.getConfirmMessage() && (original.getConfirmMessage() == null && update.getConfirmMessage() != null || !original.getConfirmMessage().equals(update.getConfirmMessage()))) {
-            changed = true;
-            change.setMessage(original.getConfirmMessage(), update.getConfirmMessage());
-        }
-
-        return changed ? change : null;
-    }
-
     public ConfirmationChange getConfirmChange(UserParticipant original, UserParticipant update) {
         boolean changed = false;
 
