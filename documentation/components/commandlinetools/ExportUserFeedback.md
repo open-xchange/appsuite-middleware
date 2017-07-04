@@ -24,6 +24,8 @@ Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after t
 The feedback type to delete. Default: 'star-rating-v1'.
 - ``-U,--api-user <arg>``        
 Username and password to use for API authentication (user:password).
+- ``--delimiter <arg>``      
+CSV export only: The column delimiter used. Default: ';'.
 
 ### Examples
 

@@ -52,6 +52,7 @@ package com.openexchange.userfeedback.starrating.v1;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,13 +74,19 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StarRatingV1ExportResultConverter.class);
 
-    private static final char CELL_DELIMITER = ',';
-    private static final char ROW_DELIMITER = '\n';
+    private static final char TEXT_QUALIFIER = '"';
+    private static final char CELL_DELIMITER = ';';
+    private static final char CARRIAGE_RETURN = '\r';
 
     private final Collection<Feedback> feedbacks;
 
-    public StarRatingV1ExportResultConverter(Collection<Feedback> feedbacks) {
+    private final char delimiter;
+
+    public StarRatingV1ExportResultConverter(Collection<Feedback> feedbacks, Map<String, String> configuration) {
         this.feedbacks = feedbacks;
+
+        String lDelimiter = configuration.get("delimiter");
+        this.delimiter = lDelimiter != null ? lDelimiter.charAt(0) : CELL_DELIMITER;
     }
 
     @Override
@@ -113,6 +120,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
             final StarRatingV1Fields[] jsonFields = StarRatingV1Fields.values();
             StringBuilder bob = new StringBuilder(1024);
 
+            writer.write('\ufeff'); // BOM for UTF-*
             // Writer header line
             writer.write(convertToLine(jsonFields, null, bob));
 
@@ -145,21 +153,22 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         if (null == object) {
             // Header line
             for (StarRatingV1Fields token : jsonFields) {
-                bob.append('"');
+                bob.append(TEXT_QUALIFIER);
                 bob.append(sanitize(token.getDisplayName()));
-                bob.append('"');
-                bob.append(CELL_DELIMITER);
+                bob.append(TEXT_QUALIFIER);
+                bob.append(this.delimiter);
             }
         } else {
             for (StarRatingV1Fields token : jsonFields) {
-                bob.append('"');
-                String sanitizedValue = sanitize(object.getString(token.name()));
+                bob.append(TEXT_QUALIFIER);
+                String content = object.getString(token.name());
+                String sanitizedValue = sanitize(content.replace("\n", "\r\n"));
                 bob.append(sanitizedValue);
-                bob.append('"');
-                bob.append(CELL_DELIMITER);
+                bob.append(TEXT_QUALIFIER);
+                bob.append(this.delimiter);
             }
         }
-        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
+        bob.setCharAt(bob.length() - 1, CARRIAGE_RETURN);
         return bob.toString();
     }
 
