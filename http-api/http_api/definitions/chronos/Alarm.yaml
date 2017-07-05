@@ -29,3 +29,24 @@ properties:
             type: integer
             format: int64
             description: Defines an absolute date for the alarm.
+    attachments:
+      type: array
+      description: An array of attachments.
+      items:
+        $ref: "#/definitions/ChronosAttachment"
+    attendees:
+      type: array
+      description: An array of attendees.
+      items: 
+        $ref: "#/definitions/Attendee"
+    summary:
+      type: string
+      description: The summary of this alarm.
+    description: 
+      type: string
+      description: The description of this alarm.
+    extendedProperties:
+      type: array
+      description: An array of extended properties of this alarm.
+      items: 
+        $ref: "#/definitions/ChronosExtendedProperty"

@@ -81,3 +81,13 @@ properties:
   rrule:
     type: string
     description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
+  attachments:
+    type: array
+    description: An array of attachments.
+    items:
+      $ref: "#/definitions/ChronosAttachment"
+  extendedProperties:
+    type: array
+    description: An array of extended properties of this event.
+    items:
+      $ref: "#/definitions/ChronosExtendedProperty"

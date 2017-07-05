@@ -160,6 +160,10 @@ ChronosUpdateResponse:
   $ref: ./chronos/UpdateResponse.yaml
 ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
+ChronosAttachment:
+  $ref: ./chronos/Attachment.yaml
+ChronosExtendedProperty:
+  $ref: ./chronos/ExtendedProperty.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
