@@ -1187,6 +1187,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 to.setAlarms(alarms);
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
                 List<Alarm> value = get(from);
@@ -1224,6 +1225,35 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                         }
                         jsonObject.put("trigger", triggerJsonObject);
                     }
+
+                    if (null != alarm.getAttachments()) {
+
+                        List<Attachment> attachments = alarm.getAttachments();
+                        JSONArray attachmentArray = new JSONArray(attachments.size());
+                        for(Attachment attachment: attachments){
+                            attachmentArray.put(((ListItemMapping<Attachment, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTACHMENTS)).serialize(attachment, timeZone));
+                        }
+                        jsonObject.put("attachments", attachmentArray);
+                    }
+
+                    if (null != alarm.getAttendees()) {
+
+                        List<Attendee> attendees = alarm.getAttendees();
+                        JSONArray attendessArray = new JSONArray(attendees.size());
+                        for(Attendee attendee: attendees){
+                            attendessArray.put(((ListItemMapping<Attendee, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTENDEES)).serialize(attendee, timeZone));
+                        }
+                        jsonObject.put("attendees", attendessArray);
+                    }
+
+                    if (null != alarm.getSummary()) {
+                        jsonObject.put("summary", alarm.getSummary());
+                    }
+
+                    if (null != alarm.getDescription()) {
+                        jsonObject.put("description", alarm.getDescription());
+                    }
+
                     if (null != alarm.getExtendedProperties()) {
                         jsonObject.put("extendedProperties", serializeExtendedProperties(alarm.getExtendedProperties()));
                     }
