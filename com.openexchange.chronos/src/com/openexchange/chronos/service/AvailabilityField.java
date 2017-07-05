@@ -61,6 +61,7 @@ public enum AvailabilityField implements CalendarAvailabilityField {
     // the following are REQUIRED but MUST NOT occur more than once
     dtstamp(true, false),
     uid(true, false),
+    user(true, false),
 
     // the following are OPTIONAL but MUST NOT occur more than once
     busytype(false, false),

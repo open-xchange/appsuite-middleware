@@ -67,6 +67,7 @@ public class CalendarAvailability implements FieldAware {
     /** The 'dtstamp' */
     private long creationTimestamp;
     private String uid;
+    private int calendarUser;
 
     private BusyType busyType = BusyType.BUSY_UNAVAILABLE;
     private Classification classification;
@@ -711,6 +712,26 @@ public class CalendarAvailability implements FieldAware {
         fields.remove(AvailabilityField.comment);
     }
 
+    /**
+     * @return the calendarUser
+     */
+    public int getCalendarUser() {
+        return calendarUser;
+    }
+
+    /**
+     * @param calendarUser the calendarUser to set
+     */
+    public void setCalendarUser(int calendarUser) {
+        this.calendarUser = calendarUser;
+        fields.add(AvailabilityField.user);
+    }
+
+    public void removeCalendarUser() {
+        calendarUser = 0;
+        fields.remove(AvailabilityField.user);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -732,5 +753,4 @@ public class CalendarAvailability implements FieldAware {
         builder.append("CalendarAvailability [uid=").append(getUid()).append(", busyType=").append(busyType).append(", startTime=").append(startTime).append(", endTime=").append(endTime).append(", description=").append(description).append("]");
         return builder.toString();
     }
-
 }
