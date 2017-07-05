@@ -1000,6 +1000,9 @@ public final class CSSMatcher {
          * Feed matcher with buffer's content and reset
          */
         Matcher m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
+
+        String before = cssBuilder.toString();
+
         cssBuilder.setLength(0);
 
         if (false == m.find()) {
@@ -1076,6 +1079,12 @@ public final class CSSMatcher {
         // In case there is a tail, it was apparently not covered by PATTERN_STYLE_LINE pattern
         // Presumably no CSS content...
         // mr.appendTail(cssBuilder, NO_EVENT_HANDLER_CONDITION);
+
+        String after = cssBuilder.toString();
+        System.err.println(" --------------------- ");
+        System.err.println(before);
+        System.err.println(after);
+
         return modified;
     }
 
