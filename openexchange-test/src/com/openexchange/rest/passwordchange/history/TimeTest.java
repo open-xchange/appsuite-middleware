@@ -49,75 +49,49 @@
 
 package com.openexchange.rest.passwordchange.history;
 
-import static org.junit.Assert.assertFalse;
-import java.sql.Timestamp;
+import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
+import org.junit.Test;
+import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.rest.AbstractRestTest;
-import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
 
 /**
- * {@link AbstractPasswordchangehistoryTest}
+ * {@link TimeTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
-    
-    protected static final String ARRAY_NAME = "PasswordChangeHistroy";
-
-    protected PasswordchangehistoryApi pwdhapi;
-    protected Long contextID;
-    protected Long userID;
-    protected Long limit = new Long(1);
-    protected Timestamp send;
+public class TimeTest extends AbstractPasswordchangehistoryTest {
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // API to operate on
-        pwdhapi = new PasswordchangehistoryApi(getRestClient());
-
-        // Do a password change
-        PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
-        send = new Timestamp(System.currentTimeMillis());
-        PasswordChangeUpdateResponse response = getAjaxClient().execute(request);
-        assertFalse("Errors in response!", response.hasError());
-        assertFalse("Warnings in response!", response.hasWarnings());
-
-        // Get context and user ID
-        contextID = Integer.toUnsignedLong(getAjaxClient().getValues().getContextId());
-        userID = Integer.toUnsignedLong(getAjaxClient().getValues().getUserId());
+    protected Application configure() {
+        return new ResourceConfig(PasswordChangeHistoryREST.class);
     }
 
-    protected PasswordChangeInfo parse(JSONObject data) throws Exception {
-        final String modifyOrigin = filter(data, "modifyOrigin");
-        final String modifiedBy = filter(data, "modifiedBy");
-        final Timestamp lastModified = Timestamp.valueOf(filter(data, "lastModified"));
+    @Test
+    public void testTime() throws Exception {
 
-        return new PasswordChangeInfo() {
+        String retval = pwdhapi.list(contextID, userID, 0l);
+        JSONObject json = new JSONObject(retval);
+        JSONArray array = json.getJSONArray(ARRAY_NAME).getJSONArray(0);
 
-            @Override
-            public String modifyOrigin() {
-                return modifyOrigin;
+        for (int i = 0; i < array.length(); i++) {
+            PasswordChangeInfo info = parse(array.getJSONObject(i));
+            System.out.println(i);
+            System.out.println(info.lastModified());
+            System.out.println(send);
+            System.out.println(send.getTime() - info.lastModified().getTime());
+            if ((send.getTime() - info.lastModified().getTime()) < 1000) {
+                // Check other criteria. This may fail if a password change made by another test was within the last second
+                assertEquals("Was not changed by this test!", "App Suite UI", info.modifiedBy());
+                assertEquals("Was not changed by this test!", "127.0.0.1", info.modifyOrigin());
+                return;
             }
-
-            @Override
-            public String modifiedBy() {
-                return modifiedBy;
-            }
-
-            @Override
-            public Timestamp lastModified() {
-                return lastModified;
-            }
-        };
-    }
-
-    private String filter(JSONObject data, String name) throws Exception {
-        return data.getString(name).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", "");
+        }
+        fail("Did not find any timestamp near the transmitting timestamp");
     }
 }

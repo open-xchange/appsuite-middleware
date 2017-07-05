@@ -49,76 +49,34 @@
 
 package com.openexchange.rest.passwordchange.history;
 
-import static org.junit.Assert.fail;
-import java.sql.Timestamp;
 import static org.junit.Assert.assertEquals;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 
 /**
- * {@link ListTest}
+ * {@link LimitTest}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ListTest extends AbstractPasswordchangehistoryTest {
+public class LimitTest extends AbstractPasswordchangehistoryTest {
 
-    private static final String ARRAY_NAME = "PasswordChangeHistroy";
-
-    private Long contextID;
-    private Long userID;
-    private Long limit = new Long(1);
-    private Long send;
+    
 
     @Override
     protected Application configure() {
         return new ResourceConfig(PasswordChangeHistoryREST.class);
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // Do a password change
-        send = System.currentTimeMillis();
-        PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
-        getAjaxClient().execute(request);
-
-        // Get context and user ID
-        contextID = Integer.toUnsignedLong(getAjaxClient().getValues().getContextId());
-        userID = Integer.toUnsignedLong(getAjaxClient().getValues().getUserId());
-    }
-
     @Test
     public void testLimit() throws Exception {
-
         String retval = pwdhapi.list(contextID, userID, limit);
         JSONObject json = new JSONObject(retval);
         JSONArray array = json.getJSONArray(ARRAY_NAME);
         assertEquals("More than one element! Limitation did not work..", 1, array.asList().size());
     }
-
-    @Test
-    public void testTime() throws Exception {
-
-        String retval = pwdhapi.list(contextID, userID, 0l);
-        JSONObject json = new JSONObject(retval);
-        JSONArray array = json.getJSONArray(ARRAY_NAME);
-
-        for (int i = 0; i < array.length(); i++) {
-            JSONArray info = array.getJSONArray(i);            
-            Long lastModified = Long.parseLong(info.getString(0));
-
-            if ((lastModified - send) > 10) {
-                return;
-            }
-        }
-        fail("Did not find any timestamp near the transmitting timestamp");
-    }
-
 }
