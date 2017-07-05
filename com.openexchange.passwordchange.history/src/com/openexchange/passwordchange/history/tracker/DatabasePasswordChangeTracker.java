@@ -82,7 +82,7 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
     private static final String CLEAR_FOR_ID = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
     private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
 
-    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, id, uid, source, ip) VALUES (?,?,?,?,?);";
+    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, id, uid, source, ip, created) VALUES (?,?,?,?,?,?);";
     private static final String CREATE_SEQUENCE = "INSERT INTO sequence_password_history (cid, id) VALUES (?,?);";
 
     private static final String LIMIT = "com.openexchange.passwordchange.limit";
@@ -200,6 +200,7 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             } else {
                 stmt.setString(5, info.modifyOrigin());
             }
+            stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             stmt.execute();
         } catch (Exception e) {
             LOG.warn("Could not save password history.");
@@ -214,10 +215,10 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             if (null == casscade) {
                 LOG.warn("Could not get config to delete password history.");
             } else {
-                clear(userID, contextID, casscade.getView(contextID, userID).get(LIMIT, Integer.class));
+                clear(userID, contextID, casscade.getView(userID, contextID).get(LIMIT, Integer.class));
             }
         } catch (Exception e) {
-            LOG.warn("Could not clear password change history for ." + userID + " in context " + contextID);
+            LOG.warn("Could not clear password change history for " + userID + " in context " + contextID);
         }
     }
 
