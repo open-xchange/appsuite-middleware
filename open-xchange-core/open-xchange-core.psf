@@ -139,7 +139,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oxscripts.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.history"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.history.servlet"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.history.rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.keys"/>
