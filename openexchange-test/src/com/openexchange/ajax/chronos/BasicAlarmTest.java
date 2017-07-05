@@ -269,6 +269,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());
             assertEquals(1, eventResponse2.getData().getAlarms().size());
+            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            alarm.setUid(changedAlarm.getUid());
+            assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
             timestamp = updateEvent.getTimestamp();
         }
 
@@ -285,7 +288,8 @@ public class BasicAlarmTest extends AbstractChronosTest {
             alarm.setSummary("This is the mail subject");
             List<Attendee> attendees = new ArrayList<>(1);
             Attendee attendee = new Attendee();
-            attendee.setUri("mailto:emailuser1@192.168.33.60");
+            attendee.setUri("mailto:test@domain.wrong");
+            attendee.setEmail("test@domain.wrong");
             attendees.add(attendee);
             alarm.setAttendees(attendees);
             updateData.setAlarms(Collections.singletonList(alarm));
@@ -300,7 +304,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());
             assertEquals(1, eventResponse2.getData().getAlarms().size());
-            assertEquals("mail", eventResponse2.getData().getAlarms().get(0).getAction());
+            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            alarm.setUid(changedAlarm.getUid());
+            assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
             timestamp = updateEvent.getTimestamp();
         }
 
@@ -331,7 +337,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());
             assertEquals(1, eventResponse2.getData().getAlarms().size());
-            assertEquals("audio", eventResponse2.getData().getAlarms().get(0).getAction());
+            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            alarm.setUid(changedAlarm.getUid());
+            assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
             timestamp = updateEvent.getTimestamp();
         }
     }
