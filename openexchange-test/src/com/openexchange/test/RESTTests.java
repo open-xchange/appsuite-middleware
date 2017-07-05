@@ -62,6 +62,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     com.openexchange.rest.userfeedback.UserFeedbackSuite.class,
     com.openexchange.rest.advertisement.AdvertisementTestSuite.class,
+    com.openexchange.rest.passwordchange.history.PasswordchangehistorySuite.class
 })
 public final class RESTTests {
 
