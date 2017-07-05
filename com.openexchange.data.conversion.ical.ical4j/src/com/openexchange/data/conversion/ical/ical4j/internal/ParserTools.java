@@ -55,9 +55,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.TreeBidiMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Parameter;
@@ -263,6 +265,30 @@ public final class ParserTools {
     	}
     	return candidate;
 	}
+
+    /**
+     * Replaces unknown time zones with appropriate java timezones.
+     *
+     * @param tzid
+     * @return
+     */
+    public static TimeZone findTimeZoneReplacement(String tzid) {
+        return MICROSOFT_TO_JAVA_TIMEZONES.get(tzid);
+    }
+
+    private static final Map<String, TimeZone> MICROSOFT_TO_JAVA_TIMEZONES;
+
+    /**
+     * See https://msdn.microsoft.com/en-us/library/ms912391(v=winembedded.11).aspx
+     */
+    static {
+        ImmutableMap.Builder<String, TimeZone> b = ImmutableMap.builder();
+        b.put("Romance Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("Central Europe Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("Central European Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("W. Europe Standard Time", TimeZone.getTimeZone("CET"));
+        MICROSOFT_TO_JAVA_TIMEZONES = b.build();
+    }
 
     /**
      * Gets a value indicating whether the supplied {@link DateProperty} holds a value that appears to be a date or it's time part refers

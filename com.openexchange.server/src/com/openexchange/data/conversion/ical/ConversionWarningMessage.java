@@ -96,7 +96,13 @@ public class ConversionWarningMessage implements LocalizableStrings {
     public final static String EMPTY_CLASS_MSG = "Empty \"CLASS\" element.";
 
     public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
-    
+
     public final static String INVALID_MAIL_ADDRESS_MSG = "Invalid mail address for external participant: %1$s";
+
+    public final static String NO_FOLDER_FOR_APPOINTMENTS = "The conversion yields some objects which could not be stored due to missing folder for appointments.";
+
+    public final static String NO_FOLDER_FOR_TASKS = "The conversion yields some objects which could not be stored due to missing folder for tasks.";
+
+    public static final String TRUNCATED_ITEMS = "Not all of the objects could be stored due to a configured limitation";
 
 }

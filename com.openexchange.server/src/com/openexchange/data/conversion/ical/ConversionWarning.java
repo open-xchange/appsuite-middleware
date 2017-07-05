@@ -66,6 +66,18 @@ public class ConversionWarning extends OXException {
      */
     private static final long serialVersionUID = -7593693106963732974L;
 
+    /**
+     * Creates a conversion warning in case number of elements has been truncated
+     *
+     * @param limit The configured limit
+     * @return The conversion warning
+     */
+    public static ConversionWarning truncatedConversionWarningFor(int limit) {
+        return new ConversionWarning(0, Code.TRUNCATED_ITEMS, Integer.valueOf(limit));
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
     private final int index;
 
     /**
@@ -212,6 +224,18 @@ public class ConversionWarning extends OXException {
          * Invalid mail address for external participant: %1$s
          */
         INVALID_MAIL_ADDRESS("Invalid mail address for external participant: %1$s", CATEGORY_USER_INPUT, 22, ConversionWarningMessage.INVALID_MAIL_ADDRESS_MSG),
+        /**
+         * The conversion yields some objects which could not be stored due to missing folder for %1$s
+         */
+        NO_FOLDER_FOR_APPOINTMENTS("The conversion yields some objects which could not be stored due to missing folder for appointments.", CATEGORY_WARNING, 23, ConversionWarningMessage.NO_FOLDER_FOR_APPOINTMENTS),
+        /**
+         * The conversion yields some objects which could not be stored due to missing folder for %1$s
+         */
+        NO_FOLDER_FOR_TASKS("The conversion yields some objects which could not be stored due to missing folder for tasks.", CATEGORY_WARNING, 23, ConversionWarningMessage.NO_FOLDER_FOR_TASKS),
+        /**
+         * Not all of the objects could be stored due to a configured limit of %1$s
+         */
+        TRUNCATED_ITEMS("Not all of the objects could be stored due to a configured limit of %1$s", CATEGORY_WARNING, 24, ConversionWarningMessage.TRUNCATED_ITEMS)
 
         ;
 
