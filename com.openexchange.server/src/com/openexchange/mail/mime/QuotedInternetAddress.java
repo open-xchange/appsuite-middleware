@@ -1218,15 +1218,17 @@ public final class QuotedInternetAddress extends InternetAddress {
                             LOG.error("", e);
                         }
                     }
-                } else if (!isAscii(personal)) {
+                    return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                }
+
+                if (!isAscii(personal)) {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
                         LOG.error("", e);
                     }
                 }
-
-                return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                return new StringBuilder(32).append(quotePhrase(encodedPersonal, false)).append(" <").append(address).append('>').toString();
             } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
                 return new StringBuilder().append('<').append(address).append('>').toString();
             } else if (isGroup() || isSimple()) {
@@ -1458,7 +1460,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
             final char c = str.charAt(i);
-            ret = (c > 32 && c <= 127);
+            ret = (c >= 32 && c <= 127);
         }
         return ret;
     }
