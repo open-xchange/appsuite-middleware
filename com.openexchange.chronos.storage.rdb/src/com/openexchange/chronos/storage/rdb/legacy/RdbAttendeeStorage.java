@@ -347,7 +347,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                     int[] groupIDs = findGroupIDs(eventId, internalAttendees, userAttendee.getEntity());
                     if (null != groupIDs && 0 < groupIDs.length) {
                         /*
-                         * suitable entry group membership(s) found
+                         * suitable group membership(s) found, apply in "member" property
                          */
                         List<String> groupMemberships = new ArrayList<String>(groupIDs.length);
                         for (int groupID : groupIDs) {
@@ -355,11 +355,17 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         }
                         userAttendee.setMember(groupMemberships);
                         attendees.add(userAttendee);
-                    } else {
+                    } else if (isIgnoreOrphanedUserAttendees()) {
                         /*
                          * no suitable entry in prg_date_rights (anymore), skip attendee
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping " + userAttendee + " due to missing access rights", null);
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping orphaned user attendee " + userAttendee, null);
+                    } else {
+                        /*
+                         * no suitable entry in prg_date_rights (anymore), take over as individual user attendee
+                         */
+                        attendees.add(userAttendee);
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Preserving orphaned user attendee " + userAttendee, null);
                     }
                 }
             }
@@ -808,6 +814,21 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         attendee.removeEntity();
         attendee.setUri(CalendarUtils.getURI(email));
         return attendee;
+    }
+
+    /**
+     * Gets a value indicating whether <i>orphaned</i> individual user attendees that do have a record in the
+     * <code>prg_dates_members</code> table, but there's no matching entry in the <code>prg_date_rights</code> table should be skipped
+     * during read operations or not.
+     * <p/>
+     * This systematically happens for user attendees that originally were added as member of a group, and afterwards this group was
+     * deleted or these users were removed from the group.
+     *
+     * @return <code>true</code> if the such orphaned attendees should be ignored and skipped, <code>false</code>, if they should be
+     *         preserved as individual attendees
+     */
+    private static boolean isIgnoreOrphanedUserAttendees() {
+        return false;
     }
 
 }
