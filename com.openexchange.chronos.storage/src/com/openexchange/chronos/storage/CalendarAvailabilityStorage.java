@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage;
 
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarAvailabilityStorage}
@@ -63,5 +64,5 @@ public interface CalendarAvailabilityStorage {
      * 
      * @param calendarAvailability The {@link CalendarAvailability} to insert
      */
-    void insertCalendarAvailability(CalendarAvailability calendarAvailability);
+    void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException;
 }

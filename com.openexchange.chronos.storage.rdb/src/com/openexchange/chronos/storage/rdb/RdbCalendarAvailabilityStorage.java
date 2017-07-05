@@ -49,11 +49,18 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
 /**
  * {@link RdbCalendarAvailabilityStorage}
@@ -62,6 +69,12 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbCalendarAvailabilityStorage extends RdbStorage implements CalendarAvailabilityStorage {
 
+    private static final CalendarAvailabilityMapper calendarAvailabilityMapper = CalendarAvailabilityMapper.getInstance();
+    private static final FreeSlotMapper freeSlotMapper = FreeSlotMapper.getInstance();
+    private int accountId;
+    private static final String CA_TABLE_NAME = "calendar_availability";
+    private static final String CA_FREE_SLOT_NAME = "calendar_free_slot";
+
     /**
      * Initialises a new {@link RdbCalendarAvailabilityStorage}.
      * 
@@ -69,8 +82,9 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbCalendarAvailabilityStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbCalendarAvailabilityStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
+        this.accountId = accountId;
 
     }
 
@@ -80,9 +94,48 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailability(com.openexchange.chronos.CalendarAvailability)
      */
     @Override
-    public void insertCalendarAvailability(CalendarAvailability calendarAvailability) {
-        // TODO Auto-generated method stub
-
+    public void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            int caAmount = insertCalendarAvailabilityItem(calendarAvailability, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
+            int freeSlotsCount = 0;
+            for (CalendarFreeSlot calendarFreeSlot : calendarAvailability.getCalendarFreeSlots()) {
+                freeSlotsCount += insertCalendarAvailabilityItem(calendarFreeSlot, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
+            }
+            txPolicy.commit(connection);
+            LOG.debug("Inserted {} availability block(s and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Inserts the specified calendar availability item to the storage
+     * 
+     * @param item The item to insert
+     * @param tableName The table name
+     * @param mapper The mapper to use
+     * @param connection The writeable connection
+     * @return The amount of affected rows
+     * @throws OXException
+     * @throws SQLException
+     */
+    private <O> int insertCalendarAvailabilityItem(O item, String tableName, DefaultDbMapper<O, AvailabilityField> mapper, Connection connection) throws OXException, SQLException {
+        AvailabilityField[] mappedFields = mapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(tableName);
+        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(");");
+        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(");");
+        String sql = sb.toString();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
 }
