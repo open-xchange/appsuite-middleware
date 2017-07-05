@@ -51,9 +51,12 @@ package com.openexchange.chronos.impl;
 
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Repeat;
@@ -102,6 +105,72 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
     @Override
     protected EnumMap<AlarmField, ? extends Mapping<? extends Object, Alarm>> getMappings() {
         EnumMap<AlarmField, Mapping<? extends Object, Alarm>> mappings = new EnumMap<AlarmField, Mapping<? extends Object, Alarm>>(AlarmField.class);
+        mappings.put(AlarmField.SUMMARY, new DefaultMapping<String, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsSummary();
+            }
+
+            @Override
+            public void set(Alarm object, String value) throws OXException {
+                object.setSummary(value);
+            }
+
+            @Override
+            public String get(Alarm object) {
+                return object.getSummary();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeSummary();
+            }
+        });
+        mappings.put(AlarmField.DESCRIPTION, new DefaultMapping<String, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsDescription();
+            }
+
+            @Override
+            public void set(Alarm object, String value) throws OXException {
+                object.setDescription(value);
+            }
+
+            @Override
+            public String get(Alarm object) {
+                return object.getDescription();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeDescription();
+            }
+        });
+        mappings.put(AlarmField.UID, new DefaultMapping<String, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsUid();
+            }
+
+            @Override
+            public void set(Alarm object, String value) throws OXException {
+                object.setUid(value);
+            }
+
+            @Override
+            public String get(Alarm object) {
+                return object.getUid();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeUid();
+            }
+        });
         mappings.put(AlarmField.UID, new DefaultMapping<String, Alarm>() {
 
             @Override
@@ -250,6 +319,50 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm object) {
                 object.setAcknowledged(null);
+            }
+        });
+        mappings.put(AlarmField.ATTACHMENTS, new DefaultMapping<List<Attachment>, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsAttachments();
+            }
+
+            @Override
+            public void set(Alarm object, List<Attachment> value) throws OXException {
+                object.setAttachments(value);
+            }
+
+            @Override
+            public List<Attachment> get(Alarm object) {
+                return object.getAttachments();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeAttachments();
+            }
+        });
+        mappings.put(AlarmField.ATTENDEES, new DefaultMapping<List<Attendee>, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsAttendees();
+            }
+
+            @Override
+            public void set(Alarm object, List<Attendee> value) throws OXException {
+                object.setAttendees(value);
+            }
+
+            @Override
+            public List<Attendee> get(Alarm object) {
+                return object.getAttendees();
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeAttendees();
             }
         });
         mappings.put(AlarmField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Alarm>() {

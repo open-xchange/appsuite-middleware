@@ -417,7 +417,7 @@ public class Alarm {
     /**
      * Removes the attachments of the alarm.
      */
-    public void removeattachments() {
+    public void removeAttachments() {
         this.attachments = null;
         setFields.remove(AlarmField.ATTACHMENTS);
     }
