@@ -336,18 +336,17 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
 
             @Override
             public int set(PreparedStatement statement, int parameterIndex, Alarm object) throws SQLException {
-                ExtendedProperties value = get(object);
-                if (null == value) {
-                    statement.setNull(parameterIndex, getSqlType());
-                } else {
-                    try {
-                        byte[] data = ExtendedPropertiesCodec.encode(value);
+                try {
+                    byte[] data = ExtendedPropertiesCodec.encode(get(object));
+                    if (null == data) {
+                        statement.setNull(parameterIndex, getSqlType());
+                    } else {
                         statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
-                    } catch (IOException e) {
-                        throw new SQLException(e);
                     }
+                    return 1;
+                } catch (IOException e) {
+                    throw new SQLException(e);
                 }
-                return 1;
             }
 
             @Override
