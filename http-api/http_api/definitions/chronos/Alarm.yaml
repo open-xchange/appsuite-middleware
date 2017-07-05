@@ -17,7 +17,7 @@ properties:
     properties:
         duration:
             type: string
-            description: The duration of the trigger relative to the related field.
+            description: The duration of the trigger relative to the related field. See rfc 5545 chapter 3.3.6. for more informations about durations.
         related:
             type: string
             description: Defines whether the trigger is related to the startDate or the endDate.
@@ -26,5 +26,6 @@ properties:
              - START
              - END
         dateTime:
-            type: long
+            type: integer
+            format: int64
             description: Defines an absolute date for the alarm.
