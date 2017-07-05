@@ -972,6 +972,14 @@ public final class CSSMatcher {
         cssBuilder.append(repl);
     }
 
+    private static final MatcherReplacer.Condition NO_EVENT_HANDLER_CONDITION = new MatcherReplacer.Condition() {
+
+        @Override
+        public CharSequence acceptTail(CharSequence tail) {
+            return HtmlServices.containsEventHandler(tail.toString()) ? null : tail;
+        }
+    };
+
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map<br>
      * <br>
@@ -999,13 +1007,7 @@ public final class CSSMatcher {
         /*
          * Feed matcher with buffer's content and reset
          */
-        Matcher m;
-        MatcherReplacer mr;
-        {
-            String str = cssBuilder.toString();
-            m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(str));
-            mr = new MatcherReplacer(m, str);
-        }
+        Matcher m = PATTERN_STYLE_LINE.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
         cssBuilder.setLength(0);
 
         if (false == m.find()) {
@@ -1027,19 +1029,27 @@ public final class CSSMatcher {
                         /*
                          * Direct match
                          */
-                        elemBuilder.append(elementValues);
-                        hasValues = true;
+                        if (HtmlServices.containsEventHandler(elementValues)) {
+                            modified = true;
+                        } else {
+                            elemBuilder.append(elementValues);
+                            hasValues = true;
+                        }
                     } else {
                         boolean first = true;
                         for (String token : splitToTokens(elementValues)) {
                             if (matches(token, allowedValuesSet)) {
-                                if (first) {
-                                    first = false;
+                                if (HtmlServices.containsEventHandler(token)) {
+                                    modified = true;
                                 } else {
-                                    elemBuilder.append(' ');
+                                    if (first) {
+                                        first = false;
+                                    } else {
+                                        elemBuilder.append(' ');
+                                    }
+                                    elemBuilder.append(token);
+                                    hasValues = true;
                                 }
-                                elemBuilder.append(token);
-                                hasValues = true;
                             } else {
                                 modified = true;
                             }
@@ -1047,13 +1057,15 @@ public final class CSSMatcher {
                     }
                     if (hasValues) {
                         elemBuilder.append(';');
-                        mr.appendLiteralReplacement(cssBuilder, elemBuilder.toString());
+                        if (cssBuilder.length() > 0) {
+                            cssBuilder.append(' ');
+                        }
+                        cssBuilder.append(elemBuilder.toString());
                     } else {
                         /*
                          * Remove element since none of its values is allowed
                          */
                         modified = true;
-                        mr.appendReplacement(cssBuilder, "");
                     }
                     elemBuilder.setLength(0);
                 } else if (removeIfAbsent) {
@@ -1061,11 +1073,17 @@ public final class CSSMatcher {
                      * Remove forbidden element
                      */
                     modified = true;
-                    mr.appendReplacement(cssBuilder, "");
+                } else {
+                    if (cssBuilder.length() > 0) {
+                        cssBuilder.append(' ');
+                    }
+                    cssBuilder.append(m.group());
                 }
             }
         } while (!thread.isInterrupted() && m.find());
-        mr.appendTail(cssBuilder);
+        // In case there is a tail, it was apparently not covered by PATTERN_STYLE_LINE pattern
+        // Presumably no CSS content...
+        // mr.appendTail(cssBuilder, NO_EVENT_HANDLER_CONDITION);
         return modified;
     }
 

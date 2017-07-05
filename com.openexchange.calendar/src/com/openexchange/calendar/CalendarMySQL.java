@@ -84,6 +84,7 @@ import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -975,9 +976,17 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(forSQLCommand(orderDir));
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        pst.setTimestamp(1, new Timestamp(d2.getTime()));
-        pst.setTimestamp(2, new Timestamp(d1.getTime()));
-        return pst;
+        boolean error = true;
+        try {
+            pst.setTimestamp(1, new Timestamp(d2.getTime()));
+            pst.setTimestamp(2, new Timestamp(d1.getTime()));
+            error = false;
+            return pst;
+        } finally {
+            if (error) {
+                Databases.closeSQLStuff(pst);
+            }
+        }
     }
 
     @Override

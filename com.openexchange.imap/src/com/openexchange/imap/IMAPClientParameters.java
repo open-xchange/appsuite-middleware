@@ -125,11 +125,24 @@ public enum IMAPClientParameters {
         return buf.toString();
     }
 
+    private static final java.util.concurrent.atomic.AtomicLong NEXT = new java.util.concurrent.atomic.AtomicLong(0);
+    private static final byte[] SERVER_ID = intToBytes(com.openexchange.exception.OXException.getServerId());
+
     private static String getHashFor(Session session) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
 
-            md.update((byte) System.nanoTime());
+            long current;
+            long next;
+            do {
+                current = NEXT.get();
+                next = current + 1;
+                if (next < 0) {
+                    next = 0;
+                }
+            } while (false == NEXT.compareAndSet(current, next));
+            md.update(longToBytes(current));
+            md.update(SERVER_ID); // Node-unique salt
 
             return asHex(md.digest(), 8);
         } catch (NoSuchAlgorithmException e) {
@@ -156,6 +169,20 @@ public enum IMAPClientParameters {
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
         }
         return new String(buf);
+    }
+
+    private static byte[] longToBytes(long value) {
+        byte[] result = new byte[8];
+        long l = value;
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte) (l & 0xFF);
+            l >>= 8;
+        }
+        return result;
+    }
+
+    private static byte[] intToBytes(int value) {
+        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
     }
 
     /**

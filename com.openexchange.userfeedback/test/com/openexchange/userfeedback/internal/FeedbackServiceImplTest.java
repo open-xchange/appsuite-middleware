@@ -164,6 +164,7 @@ public class FeedbackServiceImplTest {
         PowerMockito.when(feedbackType.getType()).thenReturn("star-rating-v1");
         PowerMockito.when(feedbackType.storeFeedback(Matchers.any(), (Connection)Matchers.any())).thenReturn(1L);
         PowerMockito.when(feedbackType.getFeedbacks(Matchers.anyList(), (Connection)Matchers.any())).thenReturn(resultConverter);
+        PowerMockito.when(feedbackType.getFeedbacks(Matchers.anyList(), (Connection)Matchers.any(), Matchers.anyMap())).thenReturn(resultConverter);
 
         feedback = new JSONObject(validFeedbackStr);
 
@@ -301,7 +302,7 @@ public class FeedbackServiceImplTest {
         feedbackService = Mockito.spy(new FeedbackServiceImpl());
         Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection)Matchers.any(), (FeedbackFilter)Matchers.any(), Matchers.anyString());
         
-        ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
+        ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER,  Collections.<String, String> emptyMap());
         
         assertEquals(resultConverter, export);
     }

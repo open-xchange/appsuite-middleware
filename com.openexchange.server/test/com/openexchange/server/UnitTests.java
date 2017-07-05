@@ -88,6 +88,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.mail.mime.utils.MimeMessageUtilityTest.class,
     com.openexchange.mail.parser.handlers.JsonMessageHandlerTest.class,
     com.openexchange.groupware.notify.ParticipantNotifyTest.class,
+    com.openexchange.groupware.tasks.mapping.ParticipantsTest.class,
     com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
     com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
     com.openexchange.server.services.SharedInfostoreJSlobTest.class,

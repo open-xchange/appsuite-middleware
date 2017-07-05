@@ -456,7 +456,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return;
         }
 
-        if (onlyIrrelevantFieldsChanged(session, oldObj, newObj, state)) {
+        boolean onlyIrrelevantFieldsChanged = onlyIrrelevantFieldsChanged(session, oldObj, newObj, state);
+        if (onlyIrrelevantFieldsChanged) {
             return;
         }
 

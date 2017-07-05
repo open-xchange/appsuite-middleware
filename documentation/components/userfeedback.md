@@ -37,7 +37,7 @@ To review the collected feedback, a service provider can trigger the export of t
 
 ## star-rating-v1 export
 
-For feedback type <code>star-rating-v1</code> the export as comma separated values in a file and raw type as JSON is provided. This can be done by using the provided REST API or a CLT (CSV only), [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/ExportUserFeedback.html). 
+For feedback type <code>star-rating-v1</code> the export as comma separated values in a file is provided. This can be done by using the provided REST API or a CLT (CSV only), [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/ExportUserFeedback.html). 
 
 To ensure privacy the user and context id are delivered in a hashed form. This way multiple entries can be matched to one user without revealing their identity. Generally the following parameters are supported to filter the stored data:
 
@@ -45,9 +45,13 @@ To ensure privacy the user and context id are delivered in a hashed form. This w
 * type of feedback to export (optional, default: 'star-rating-v1')
 * time range to export feedback for (optional, default: export all feedback); use separate parameters for start and end time to support "since X" and "up to X" use cases
 
+The handling of export data (and the date contained within the export) is in Coordinated Universal Time (UTC). 
+
 ### CSV 
 
-The export as file will be stored on client side and contain all the desired data available. If no data is available, an empty CSV-file will be provided, containing only the headers.
+The export as file will be stored on client side and contain all the desired data available (based on start/end date filter). If no data is available, an empty CSV-file will be provided, containing only the headers. 
+
+By using the provided command line tool 'exportuserfeedback' located in /opt/open-xchange/sbin you can define above mentioned filter and additionally the column delimiter used within the export file. After the file has been created try to open the file by double clicking it. Sometimes importing it won't work (because of different processing of the calc application). 
 
 ### RAW 
 
