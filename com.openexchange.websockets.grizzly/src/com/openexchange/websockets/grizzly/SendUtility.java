@@ -51,6 +51,7 @@ package com.openexchange.websockets.grizzly;
 
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
+import org.glassfish.grizzly.websockets.frametypes.TextFrameType;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocketExceptionCodes;
@@ -92,7 +93,7 @@ public class SendUtility {
 
         // Yield data-frame for given text message
         ProtocolHandler protocolHandler = webSocket.getProtocolHandler();
-        DataFrame frameToSend = protocolHandler.toDataFrame(message);
+        DataFrame frameToSend = new DataFrame(new TextFrameType(), message);
         frameToSend.getBytes(); // Pre-generate bytes to prevent possible NPE in DataFrame.toString()
 
         // Perform the send
