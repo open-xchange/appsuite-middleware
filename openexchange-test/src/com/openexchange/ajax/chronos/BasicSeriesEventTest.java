@@ -87,7 +87,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     private String folderId;
 
     @SuppressWarnings("unchecked")
-    private EventData createSeriesEvent() {
+    private EventData createSeriesEvent(String summary) {
         EventData seriesEvent = new EventData();
         seriesEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
@@ -100,6 +100,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         seriesEvent.setTransp(TranspEnum.OPAQUE);
         seriesEvent.setAllDay(false);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=3");
+        seriesEvent.setSummary(summary);
         return seriesEvent;
     }
 
@@ -111,7 +112,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
     @Test
     public void testCreateSeries() throws Exception {
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testCreateSeries"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
@@ -127,7 +128,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testDeleteCompleteSeries() throws Exception {
 
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testDeleteCompleteSeries"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
@@ -150,7 +151,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date today = getAPIDate(TimeZone.getDefault(), date, 0);
         Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
 
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testDeleteSeriesOccurence"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
@@ -189,7 +190,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
     @Test
     public void testUpdateSeriesMaster() throws Exception {
-        EventData initialEvent = createSeriesEvent();
+        EventData initialEvent = createSeriesEvent("testUpdateSeriesMaster");
         EventConflictResponse createEvent = api.createEvent(session, folderId, initialEvent, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
@@ -219,7 +220,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date today = getAPIDate(TimeZone.getDefault(), date, 0);
         Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
 
-        EventData initialEvent = createSeriesEvent();
+        EventData initialEvent = createSeriesEvent("testUpdateSeriesOccurence");
         EventConflictResponse createEvent = api.createEvent(session, folderId, initialEvent, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
@@ -274,7 +275,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
 
         // Create a series event
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testGetSeries"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
