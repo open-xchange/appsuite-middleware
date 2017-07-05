@@ -542,24 +542,24 @@ public class CalendarUtils {
      * <pre>
      * +---------------------------------------------------------------+
      * | VEVENT has the DTEND property?                                |
-     * | +-------------------------------------------------------------+
-     * | | VEVENT has the DURATION property?                           |
-     * | | +-----------------------------------------------------------+
-     * | | | DURATION property value is greater than 0 seconds?        |
-     * | | | +---------------------------------------------------------+
-     * | | | | DTSTART property is a DATE-TIME value?                  |
-     * | | | | +-------------------------------------------------------+
-     * | | | | | Condition to evaluate                                 |
+     * |   +-----------------------------------------------------------+
+     * |   |   VEVENT has the DURATION property?                       |
+     * |   |   +-------------------------------------------------------+
+     * |   |   |   DURATION property value is greater than 0 seconds?  |
+     * |   |   |   +---------------------------------------------------+
+     * |   |   |   |   DTSTART property is a DATE-TIME value?          |
+     * |   |   |   |   +-----------------------------------------------+
+     * |   |   |   |   | Condition to evaluate                         |
      * +---+---+---+---+-----------------------------------------------+
-     * | Y | N | N | * | (start < DTEND AND end > DTSTART)             |
+     * | Y | N | N | * | (start <  DTEND AND end > DTSTART)            |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART)  |
-     * | | +---+---+---------------------------------------------------+
-     * | | | N | * | (start <= DTSTART AND end > DTSTART)              |
+     * | N | Y | Y | * | (start <  DTSTART+DURATION AND end > DTSTART) |
+     * |   |   +---+---+-----------------------------------------------+
+     * |   |   | N | * | (start <= DTSTART AND end > DTSTART)          |
      * +---+---+---+---+-----------------------------------------------+
      * | N | N | N | Y | (start <= DTSTART AND end > DTSTART)          |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART)       |
+     * | N | N | N | N | (start <  DTSTART+P1D AND end > DTSTART)      |
      * +---+---+---+---+-----------------------------------------------+
      * </pre>
      *
@@ -577,28 +577,36 @@ public class CalendarUtils {
         long start = null == from ? Long.MIN_VALUE : from.getTime();
         long end = null == until ? Long.MAX_VALUE : until.getTime();
         long dtStart = event.getStartDate().getTime();
-        long dtEnd = event.getEndDate().getTime();
         if (isFloating(event)) {
             dtStart -= timeZone.getOffset(dtStart);
-            dtEnd -= timeZone.getOffset(dtEnd);
         }
         /*
          * check if a 'real' end date is set in event
          */
         boolean hasDtEnd;
-        if (event.isAllDay()) {
-            Calendar calendar = initCalendar(timeZone, dtStart);
-            calendar.add(Calendar.DATE, 1);
-            hasDtEnd = calendar.getTimeInMillis() != dtEnd;
+        long dtEnd;
+        if (null == event.getEndDate()) {
+            dtEnd = 0;
+            hasDtEnd = false;
         } else {
-            hasDtEnd = dtStart != dtEnd;
+            dtEnd = event.getEndDate().getTime();
+            if (isFloating(event)) {
+                dtEnd -= timeZone.getOffset(dtEnd);
+            }
+            if (event.isAllDay()) {
+                Calendar calendar = initCalendar(timeZone, dtStart);
+                calendar.add(Calendar.DATE, 1);
+                hasDtEnd = calendar.getTimeInMillis() != dtEnd;
+            } else {
+                hasDtEnd = dtStart != dtEnd;
+            }
         }
         /*
          * perform checks
          */
         if (hasDtEnd) {
             // VEVENT has the DTEND property? Y
-            // (start <  DTEND AND end > DTSTART)
+            // (start < DTEND AND end > DTSTART)
             return start < dtEnd && end > dtStart;
         } else {
             // VEVENT has the DTEND property? N
@@ -608,9 +616,14 @@ public class CalendarUtils {
                 return start <= dtStart && end > dtStart;
             } else {
                 // DTSTART property is a DATE-TIME value? N
-                // (start <  DTSTART+P1D AND end > DTSTART)
-                // DTSTART+P1D == dtEnd
-                return start < dtEnd && end > dtStart;
+                // (start < DTSTART+P1D AND end > DTSTART)
+                if (end > dtStart) {
+                    Calendar calendar = initCalendar(timeZone, dtStart);
+                    calendar.add(Calendar.DATE, 1);
+                    return start < calendar.getTimeInMillis();
+                } else {
+                    return false;
+                }
             }
         }
     }
