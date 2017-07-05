@@ -96,13 +96,13 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
         if (appointments == null) {
             return null;
         }
-        
+
         if (appointments.size() == 0) {
             return appointments;
         }
         final CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
         int index = 0;
-        final LinkedList<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
+        final List<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
         for (final CalendarDataObject appointment : appointments) {
             try {
                 if(appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
