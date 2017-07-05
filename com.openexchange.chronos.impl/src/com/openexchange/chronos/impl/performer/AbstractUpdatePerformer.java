@@ -364,12 +364,28 @@ public abstract class AbstractUpdatePerformer {
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
      */
     protected Event loadEventData(String id) throws OXException {
+        return loadEventData(id, true);
+    }
+
+    /**
+     * Loads all data for a specific event, including attendees, attachments and alarms.
+     * <p/>
+     * The parent folder identifier is optionally set based on {@link AbstractUpdatePerformer#folder}
+     *
+     * @param id The identifier of the event to load
+     * @param applyFolderId <code>true</code> to take over the parent folder identifier representing the view on the event, <code>false</code>, otherwise
+     * @return The event data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
+     */
+    protected Event loadEventData(String id, boolean applyFolderId) throws OXException {
         Event event = storage.getEventStorage().loadEvent(id, null);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
         event = Utils.loadAdditionalEventData(storage, calendarUserId, event, EventField.values());
-        event.setFolderId(folder.getID());
+        if (applyFolderId) {
+            event.setFolderId(folder.getID());
+        }
         return event;
     }
 

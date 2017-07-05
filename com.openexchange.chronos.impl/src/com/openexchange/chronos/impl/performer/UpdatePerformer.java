@@ -160,7 +160,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * load original event data
          */
-        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectID), clientTimestamp);
+        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectID, false), clientTimestamp);
         /*
          * update event or event occurrence
          */
@@ -304,9 +304,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * process any alarm updates for the calendar user
          */
         if (updatedEvent.containsAlarms()) {
-            //TODO: update alarms for session user or calendar user?
-            //            alarmUpdate = updateAlarms(originalEvent, session.getUser(), updatedEvent.getAlarms());
-            wasUpdated |= updateAlarms(originalEvent, calendarUserId, updatedEvent.getAlarms());
+            Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
+            if (null != eventUpdate) {
+                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
+            }
+            changedEvent.setFolderId(folder.getID());
+            wasUpdated |= updateAlarms(changedEvent, calendarUserId, updatedEvent.getAlarms());
         }
         /*
          * update any stored alarm triggers of all users if required
@@ -434,7 +437,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>, <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
     public boolean needsExistenceCheckInTargetFolder(Event originalEvent, Event updatedEvent) {
-        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && 
+            originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return false;
         }
         return true;
