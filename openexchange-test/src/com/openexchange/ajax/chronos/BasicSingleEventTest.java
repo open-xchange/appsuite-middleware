@@ -75,18 +75,18 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
- * {@link BasicSingelEventTest}
+ * {@link BasicSingleEventTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class BasicSingelEventTest extends AbstractChronosTest {
+public class BasicSingleEventTest extends AbstractChronosTest {
 
     private String folderId;
 
     @SuppressWarnings("unchecked")
-    private EventData createSingleEvent() {
+    private EventData createSingleEvent(String summary) {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
@@ -98,6 +98,7 @@ public class BasicSingelEventTest extends AbstractChronosTest {
         singleEvent.setEndDate(System.currentTimeMillis() + 5000);
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
+        singleEvent.setSummary(summary);
         return singleEvent;
     }
 
@@ -109,7 +110,7 @@ public class BasicSingelEventTest extends AbstractChronosTest {
 
     @Test
     public void testCreateSingle() throws Exception {
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testCreateSingle"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
@@ -125,7 +126,7 @@ public class BasicSingelEventTest extends AbstractChronosTest {
     @Test
     public void testDeleteSingle() throws Exception {
 
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testDeleteSingle"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
@@ -142,7 +143,7 @@ public class BasicSingelEventTest extends AbstractChronosTest {
 
     @Test
     public void testUpdateSingle() throws Exception {
-        EventData initialEvent = createSingleEvent();
+        EventData initialEvent = createSingleEvent("testUpdateSingle");
         EventConflictResponse createEvent = api.createEvent(session, folderId, initialEvent, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
@@ -174,7 +175,7 @@ public class BasicSingelEventTest extends AbstractChronosTest {
         Date tomorrow = getAPIDate(TimeZone.getDefault(), date, 1);
 
         // Create a single event
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent(), false);
+        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testGetEvent"), false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventId eventId = new EventId();
