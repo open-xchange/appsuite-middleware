@@ -92,7 +92,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         this.accountId = accountId;
         eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, accountId, dbProvider, txPolicy);
+        alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
     }
 

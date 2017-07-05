@@ -49,28 +49,43 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarStorage}
@@ -84,18 +99,21 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
 
     private final int accountId;
+    private final EntityProcessor entityProcessor;
 
     /**
      * Initializes a new {@link RdbAlarmStorage}.
      *
      * @param context The context
      * @param accountId The account identifier
+     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbAlarmStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbAlarmStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
         this.accountId = accountId;
+        this.entityProcessor = new EntityProcessor(entityResolver);
     }
 
     @Override
@@ -140,7 +158,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAlarms(connection, context.getContextId(), accountId, userId, CalendarUtils.getObjectIDs(events), AlarmField.values());
+            return selectAlarms(connection, context.getContextId(), accountId, userId, getObjectIDs(events), AlarmField.values());
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -153,7 +171,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAlarms(connection, context.getContextId(), accountId, CalendarUtils.getObjectIDs(events), AlarmField.values());
+            return selectAlarms(connection, context.getContextId(), accountId, getObjectIDs(events), AlarmField.values());
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -296,12 +314,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
-        AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields();
+    private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
+        AlarmField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
             .append("INSERT INTO calendar_alarm (cid,account,event,user,")
             .append(MAPPER.getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,?,?,?,").append(AlarmMapper.getInstance().getParameters(mappedFields)).append(");")
+            .append("VALUES (?,?,?,?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -309,8 +327,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, account);
             stmt.setInt(parameterIndex++, asInt(eventId));
             stmt.setInt(parameterIndex++, userId);
-            parameterIndex = AlarmMapper.getInstance().setParameters(stmt, parameterIndex, alarm, mappedFields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(eventId, alarm), mappedFields);
             return logExecuteUpdate(stmt);
+        } catch (SQLException e) {
+            throw asOXException(e, MAPPER, alarm, connection, "calendar_alarm");
         }
     }
 
@@ -318,7 +338,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         if (null == alarmsByUserByEventId || 0 == alarmsByUserByEventId.size()) {
             return 0;
         }
-        AlarmField[] mappedFields = AlarmMapper.getInstance().getMappedFields();
+        AlarmField[] mappedFields = MAPPER.getMappedFields();
         StringBuilder stringBuilder = new StringBuilder()
             .append("INSERT INTO calendar_alarm (cid,account,event,user,")
             .append(MAPPER.getColumns(mappedFields)).append(") VALUES ");
@@ -342,7 +362,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                         stmt.setInt(parameterIndex++, account);
                         stmt.setInt(parameterIndex++, eventId);
                         stmt.setInt(parameterIndex++, userId);
-                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, alarm, mappedFields);
+                        parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(entry.getKey(), alarm), mappedFields);
                     }
                 }
             }
@@ -350,7 +370,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int updateAlarm(Connection connection, int cid, int account, int id, Alarm alarm) throws SQLException, OXException {
+    private int updateAlarm(Connection connection, int cid, int account, int id, Alarm alarm) throws SQLException, OXException {
         AlarmField[] assignedfields = MAPPER.getAssignedFields(alarm);
         String sql = new StringBuilder()
             .append("UPDATE calendar_alarm SET ").append(MAPPER.getAssignments(assignedfields))
@@ -358,7 +378,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, alarm, assignedfields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(asString(id), alarm), assignedfields);
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             stmt.setInt(parameterIndex++, id);
@@ -366,10 +386,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int cid, int account, String eventId, AlarmField[] fields) throws SQLException, OXException {
+    private Map<Integer, List<Alarm>> selectAlarms(Connection connection, int cid, int account, String eventId, AlarmField[] fields) throws SQLException, OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT user,").append(AlarmMapper.getInstance().getColumns(mappedFields))
+            .append("SELECT user,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_alarm WHERE cid=? AND account=? AND event=?;")
         ;
         Map<Integer, List<Alarm>> alarmsByUserId = new HashMap<Integer, List<Alarm>>();
@@ -381,16 +401,16 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 int userId = resultSet.getInt("user");
-                com.openexchange.tools.arrays.Collections.put(alarmsByUserId, I(userId), readAlarm(resultSet, mappedFields));
+                com.openexchange.tools.arrays.Collections.put(alarmsByUserId, I(userId), readAlarm(eventId, resultSet, mappedFields));
             }
         }
         return alarmsByUserId;
     }
 
-    private static Map<String, List<Alarm>> selectAlarms(Connection connection, int cid, int account, int user, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
+    private Map<String, List<Alarm>> selectAlarms(Connection connection, int cid, int account, int user, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT event,").append(AlarmMapper.getInstance().getColumns(mappedFields))
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_alarm WHERE cid=? AND account=? AND user=?")
         ;
         if (1 == eventIds.length) {
@@ -410,15 +430,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                com.openexchange.tools.arrays.Collections.put(alarmsByEventId, resultSet.getString(1), readAlarm(resultSet, mappedFields));
+                String eventId = resultSet.getString(1);
+                com.openexchange.tools.arrays.Collections.put(alarmsByEventId, eventId, readAlarm(eventId, resultSet, mappedFields));
             }
         }
         return alarmsByEventId;
     }
 
-    private static Map<String, Map<Integer, List<Alarm>>> selectAlarms(Connection connection, int cid, int account, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
+    private Map<String, Map<Integer, List<Alarm>>> selectAlarms(Connection connection, int cid, int account, String[] eventIds, AlarmField[] fields) throws SQLException, OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
-        StringBuilder stringBuilder = new StringBuilder().append("SELECT event,user,").append(AlarmMapper.getInstance().getColumns(mappedFields)).append(" FROM calendar_alarm WHERE cid=? AND account=?");
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT event,user,").append(MAPPER.getColumns(mappedFields))
+            .append(" FROM calendar_alarm WHERE cid=? AND account=?")
+        ;
         if (1 == eventIds.length) {
             stringBuilder.append(" AND event=?");
         } else {
@@ -442,7 +466,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     alarmsByUserById.put(eventID, alarmsByUser);
                 }
                 int userId = I(resultSet.getInt(2));
-                com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(resultSet, mappedFields));
+                com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(eventID, resultSet, mappedFields));
             }
         }
         return alarmsByUserById;
@@ -493,9 +517,225 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static Alarm readAlarm(ResultSet resultSet, AlarmField[] fields) throws SQLException, OXException {
-        return AlarmMapper.getInstance().fromResultSet(resultSet, fields);
+    private Alarm readAlarm(String eventId, ResultSet resultSet, AlarmField[] fields) throws SQLException, OXException {
+        return adjustAfterLoad(eventId, MAPPER.fromResultSet(resultSet, fields));
     }
 
+    /**
+     * Adjusts certain properties of an alarm after loading it from the database.
+     *
+     * @param The identifier of the associated event
+     * @param alarm The alarm to adjust
+     * @return The (possibly adjusted) alarm reference
+     */
+    private Alarm adjustAfterLoad(String eventId, Alarm alarm) throws OXException {
+        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+        if (null == extendedProperties) {
+            return alarm;
+        }
+        /*
+         * move specific properties from container into alarm object
+         */
+        ExtendedProperty summaryProperty = extendedProperties.get("SUMMARY");
+        if (null != summaryProperty) {
+            alarm.setSummary(summaryProperty.getValue());
+            extendedProperties.remove(summaryProperty);
+        }
+        ExtendedProperty descriptionProperty = extendedProperties.get("DESCRIPTION");
+        if (null != descriptionProperty) {
+            alarm.setDescription(descriptionProperty.getValue());
+            extendedProperties.remove(descriptionProperty);
+        }
+        List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
+        if (null != attendeeProperties && 0 < attendeeProperties.size()) {
+            alarm.setAttendees(decodeAttendees(eventId, attendeeProperties));
+            extendedProperties.removeAll(attendeeProperties);
+        }
+        List<ExtendedProperty> attachmentProperties = extendedProperties.getAll("ATTACHMENT");
+        if (null != attachmentProperties && 0 < attachmentProperties.size()) {
+            alarm.setAttachments(decodeAttachments(eventId, attachmentProperties));
+            extendedProperties.removeAll(attachmentProperties);
+        }
+        return alarm;
+    }
+
+    /**
+     * Adjusts certain properties of an alarm prior inserting it into the database.
+     *
+     * @param The identifier of the associated event
+     * @param alarm The alarm to adjust
+     * @return The (possibly adjusted) alarm reference
+     */
+    private Alarm adjustPriorSave(String eventId, Alarm alarm) throws OXException {
+        /*
+         * get or initialize new extended properties container
+         */
+        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+        }
+        alarm.setExtendedProperties(extendedProperties);
+        /*
+         * move specific alarm properties into container
+         */
+        if (alarm.containsSummary()) {
+            encdodeProperty(extendedProperties, "SUMMARY", alarm.getSummary());
+        }
+        if (alarm.containsDescription()) {
+            encdodeProperty(extendedProperties, "DESCRIPTION", alarm.getDescription());
+        }
+        if (alarm.containsAttachments()) {
+            encdodeAttachments(eventId, extendedProperties, alarm.getAttachments());
+        }
+        if (alarm.containsAttendees()) {
+            encdodeAttendees(eventId, extendedProperties, alarm.getAttendees());
+        }
+        return alarm;
+    }
+
+    /**
+     * Decodes a list of extended properties into a valid list of attendees.
+     *
+     * @param The identifier of the associated event
+     * @param attendeeProperties The extended attendee properties to decode
+     * @return The decoded attendees, or an empty list if there are none
+     */
+    private List<Attendee> decodeAttendees(String eventId, List<ExtendedProperty> attendeeProperties) {
+        List<Attendee> attendees = new ArrayList<Attendee>(attendeeProperties.size());
+        for (ExtendedProperty attendeeProperty : attendeeProperties) {
+            Attendee attendee = new Attendee();
+            attendee.setUri(attendeeProperty.getValue());
+            ExtendedPropertyParameter cnParameter = attendeeProperty.getParameter("CN");
+            if (null != cnParameter) {
+                attendee.setCn(cnParameter.getValue());
+            }
+            try {
+                attendee = entityProcessor.adjustAfterLoad(attendee);
+            } catch (OXException e) {
+                addInvalidDataWaring(eventId, EventField.ATTENDEES, "Error processing " + attendee, e);
+            }
+            attendees.add(attendee);
+        }
+        return attendees;
+    }
+
+    /**
+     * Decodes a list of extended properties into a valid list of attachments.
+     *
+     * @param The identifier of the associated event
+     * @param attachmentProperties The extended attachment properties to decode
+     * @return The decoded attendees, or an empty list if there are none
+     */
+    private List<Attachment> decodeAttachments(String eventId, List<ExtendedProperty> attachmentProperties) {
+        List<Attachment> attachments = new ArrayList<Attachment>(attachmentProperties.size());
+        for (ExtendedProperty attachmentProperty : attachmentProperties) {
+            Attachment attachment = new Attachment();
+            ExtendedPropertyParameter fmtTypeParameter = attachmentProperty.getParameter("FMTTYPE");
+            if (null != fmtTypeParameter) {
+                attachment.setFormatType(fmtTypeParameter.getValue());
+            }
+            ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
+            if (null != valueParameter && "BINARY".equals(valueParameter.getValue())) {
+                try {
+                    ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                    fileHolder.write(BaseEncoding.base64().decode(attachmentProperty.getValue()));
+                    attachment.setData(fileHolder);
+                } catch (IllegalArgumentException | OXException e) {
+                    addInvalidDataWaring(eventId, EventField.ATTENDEES, "Error processing binary alarm data", e);
+                }
+            } else {
+                attachment.setUri(attachmentProperty.getValue());
+            }
+            attachments.add(attachment);
+        }
+        return attachments;
+    }
+
+    /**
+     * Encodes a list of attachments into the supplied extended properties container. Any previously stored <code>ATTACHMENT</code>
+     * property is overwritten implicitly.
+     *
+     * @param The identifier of the associated event
+     * @param extendedProperties The extended properties to use
+     * @param attachments The attachments to encode, or <code>null</code> to just remove any possibly existing properties
+     * @return <code>true</code> if the extended properties container was modified, <code>false</code>, otherwise
+     */
+    private boolean encdodeAttachments(String eventId, ExtendedProperties extendedProperties, List<Attachment> attachments) {
+        boolean modified = extendedProperties.removeAll("ATTACH");
+        if (null != attachments) {
+            for (Attachment attachment : attachments) {
+                List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
+                String value;
+                if (Strings.isNotEmpty(attachment.getUri())) {
+                    value = attachment.getUri();
+                } else if (null != attachment.getData()) {
+                    IFileHolder data = attachment.getData();
+                    try (InputStream inputStream = data.getStream()) {
+                        value = BaseEncoding.base64().encode(Streams.stream2bytes(inputStream));
+                        parameters.add(new ExtendedPropertyParameter("ENCODING", "BASE64"));
+                        parameters.add(new ExtendedPropertyParameter("VALUE", "BINARY"));
+                    } catch (IOException | OXException e) {
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Error processing binary alarm data", e);
+                        value = null;
+                    }
+                } else {
+                    value = null;
+                }
+                if (null != attachment.getFormatType()) {
+                    parameters.add(new ExtendedPropertyParameter("FMTTYPE", attachment.getFormatType()));
+                }
+                modified |= extendedProperties.add(new ExtendedProperty("ATTACH", value, parameters));
+            }
+        }
+        return modified;
+    }
+
+    /**
+     * Encodes a list of attendees into the supplied extended properties container. Any previously stored <code>ATTENDEE</code>
+     * property is overwritten implicitly.
+     *
+     * @param The identifier of the associated event
+     * @param extendedProperties The extended properties to use
+     * @param attendees The attendees to encode, or <code>null</code> to just remove any possibly existing properties
+     * @return <code>true</code> if the extended properties container was modified, <code>false</code>, otherwise
+     */
+    private boolean encdodeAttendees(String eventId, ExtendedProperties extendedProperties, List<Attendee> attendees) {
+        boolean modified = extendedProperties.removeAll("ATTENDEE");
+        if (null != attendees) {
+            for (Attendee attendee : attendees) {
+                if (null != entityProcessor) {
+                    try {
+                        attendee = entityProcessor.adjustPriorSave(attendee);
+                    } catch (OXException e) {
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Error processing " + attendee, e);
+                    }
+                }
+                if (attendee.containsCn() && null != attendee.getCn()) {
+                    List<ExtendedPropertyParameter> parameters = Collections.singletonList(new ExtendedPropertyParameter("CN", attendee.getCn()));
+                    modified |= extendedProperties.add(new ExtendedProperty("ATTENDEE", attendee.getUri(), parameters));
+                } else {
+                    modified |= extendedProperties.add(new ExtendedProperty("ATTENDEE", attendee.getUri()));
+                }
+            }
+        }
+        return modified;
+    }
+
+    /**
+     * Encodes a single property of an alarm into the supplied extended properties container. Any previously stored property with the
+     * same name is overwritten implicitly.
+     *
+     * @param extendedProperties The extended properties to use
+     * @param name The name of the property to encode
+     * @param value The value of the property to encode, or <code>null</code> to just remove any possibly existing properties
+     * @return <code>true</code> if the extended properties container was modified, <code>false</code>, otherwise
+     */
+    private static boolean encdodeProperty(ExtendedProperties extendedProperties, String name, String value) {
+        boolean modified = extendedProperties.removeAll(name);
+        if (null != value) {
+            modified |= extendedProperties.add(new ExtendedProperty(name, value));
+        }
+        return modified;
+    }
 
 }
