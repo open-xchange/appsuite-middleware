@@ -551,7 +551,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             alarm.setAttendees(decodeAttendees(eventId, attendeeProperties));
             extendedProperties.removeAll(attendeeProperties);
         }
-        List<ExtendedProperty> attachmentProperties = extendedProperties.getAll("ATTACHMENT");
+        List<ExtendedProperty> attachmentProperties = extendedProperties.getAll("ATTACH");
         if (null != attachmentProperties && 0 < attachmentProperties.size()) {
             alarm.setAttachments(decodeAttachments(eventId, attachmentProperties));
             extendedProperties.removeAll(attachmentProperties);
