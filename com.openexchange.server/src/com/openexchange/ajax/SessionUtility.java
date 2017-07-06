@@ -380,14 +380,13 @@ public final class SessionUtility {
     }
 
     /**
-     * Checks whether passed exception indicates an IP check error.
+     * Checks whether passed exception indicates an expired session.
      *
      * @param e The exception to check
-     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     * @return <code>true</code> if passed exception indicates an expired session; otherwise <code>false</code>
      */
-    public static boolean isIpCheckError(final OXException e) {
-        final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
-        return (code.equals(e)) && code.getCategory().equals(e.getCategory());
+    public static boolean isSessionExpired(final OXException e) {
+        return (e.getPrefix().equals(SessionExceptionCodes.getErrorPrefix()) && SessionExceptionCodes.SESSION_EXPIRED.getCategory().equals(e.getCategory()));
     }
 
     /**
@@ -676,8 +675,8 @@ public final class SessionUtility {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
-            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
-            oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
+            final OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), null == secret ? "null" : secret);
             throw oxe;
         }
     }

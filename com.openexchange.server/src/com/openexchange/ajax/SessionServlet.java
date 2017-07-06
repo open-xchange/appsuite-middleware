@@ -52,6 +52,8 @@ package com.openexchange.ajax;
 import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
@@ -60,6 +62,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.configuration.ServerConfig;
@@ -218,17 +221,16 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The HTTP response
      */
     protected void handleSessiondException(OXException e, HttpServletRequest req, HttpServletResponse resp) {
-        if (SessionUtility.isIpCheckError(e)) {
+        if (SessionUtility.isSessionExpired(e)) {
             try {
                 // Drop Open-Xchange cookies
+                SessionUtility.removeOXCookies(req, resp, Collections.singletonList(HashCalculator.getInstance().getHash(req)));
+                SessionUtility.removeJSESSIONID(req, resp);
                 SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 String sessionId = SessionUtility.getSessionId(req);
-                SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
-                if (null != result.getSession()) {
-                    SessionUtility.removeOXCookies(result.getSession(), req, resp);
+                if (false == sessiondService.removeSession(sessionId)) {
+                    LOG.debug("No session with id {} found. Could not remove anything.", sessionId);
                 }
-                SessionUtility.removeJSESSIONID(req, resp);
-                sessiondService.removeSession(sessionId);
             } catch (Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
@@ -488,6 +490,7 @@ public abstract class SessionServlet extends AJAXServlet {
     // --------------------------------------------------------------------------------------------------------------------- //
 
     private static volatile Integer maxConcurrentRequests;
+
     private static int getMaxConcurrentRequests(final ServerSession session) {
         Integer tmp = maxConcurrentRequests;
         if (null == tmp) {

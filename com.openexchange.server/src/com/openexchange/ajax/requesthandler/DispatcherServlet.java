@@ -318,11 +318,11 @@ public class DispatcherServlet extends SessionServlet {
             try {
                 result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
             } catch (OXException e) {
-                if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                if (!SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
                     throw e;
                 }
                 // Got a wrong or missing secret
-                String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                String wrongSecret = e.getProperty(SessionExceptionCodes.SESSION_EXPIRED.name());
                 if (!"null".equals(wrongSecret)) {
                     // No information available or a differing secret
                     throw e;
@@ -397,6 +397,7 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
             SessionExceptionCodes.WRONG_SESSION_SECRET,
+            SessionExceptionCodes.WRONG_CLIENT_IP,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
             AjaxExceptionCodes.CONNECTION_RESET
