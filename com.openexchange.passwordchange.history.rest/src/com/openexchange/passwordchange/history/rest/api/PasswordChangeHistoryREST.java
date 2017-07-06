@@ -98,24 +98,28 @@ public class PasswordChangeHistoryREST {
         ConfigViewFactory config = Services.getService(ConfigViewFactory.class, true);
         ConfigView view = config.getView(userID, contextID);
 
-        // Check configuration
+        /*
+         * Check configuration
+         * Note: PasswordChangeHistory does not need to be enabled to return the data
+         * So we just check if there is a service configured that can provide the data
+         */
         String symbolicName = view.get("com.openexchange.passwordchange.tracker", String.class);
         if (null == symbolicName || symbolicName.isEmpty()) {
-            return new JSONObject("{No tracker for the requested user configured.}");
+            return new JSONObject().put("Error: ", "No tracker for the requested user configured.");
         }
 
         // Get tracker & data
         Map<String, PasswordChangeTracker> trackers = registry.getTrackers();
         PasswordChangeTracker pwdtracker = trackers.get(symbolicName);
         if (null == pwdtracker) {
-            return new JSONObject("{No tracker for the requested user found.}");
+            return new JSONObject().put("Error:", "{No tracker for the requested user found.}");
         }
         List<PasswordChangeInfo> history = pwdtracker.listPasswordChanges(userID, contextID);
 
         // Check data
         int size = history.size();
         if (size == 0) {
-            return new JSONObject("{No history available.}");
+            return new JSONObject().put("Error", "{No history available.}");
         }
 
         // Build response

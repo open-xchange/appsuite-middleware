@@ -215,7 +215,13 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             if (null == casscade) {
                 LOG.warn("Could not get config to delete password history.");
             } else {
-                clear(userID, contextID, casscade.getView(userID, contextID).get(LIMIT, Integer.class));
+                int limit = 10;
+                try {
+                    limit = casscade.getView(userID, contextID).get(LIMIT, Integer.class);
+                } catch (Exception e) {
+                    // Nothing configured. Go with standard value
+                }
+                clear(userID, contextID, limit);
             }
         } catch (Exception e) {
             LOG.warn("Could not clear password change history for " + userID + " in context " + contextID);
