@@ -77,6 +77,6 @@ public class RdbCalendarAvailabilityStorageFactory implements CalendarAvailabili
      */
     @Override
     public CalendarAvailabilityStorage create(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarAvailabilityStorage(context, dbProvider, txPolicy);
+        return new RdbCalendarAvailabilityStorage(context, accountId, dbProvider, txPolicy);
     }
 }
