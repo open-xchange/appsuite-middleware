@@ -296,7 +296,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAlarms(int[] alarmIds) throws OXException {
+    public void deleteAlarms(String eventId, int userId, int[] alarmIds) throws OXException {
         if (null == alarmIds || 0 == alarmIds.length) {
             return;
         }

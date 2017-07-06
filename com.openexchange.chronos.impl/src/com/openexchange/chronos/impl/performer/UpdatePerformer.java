@@ -437,7 +437,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>, <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
     public boolean needsExistenceCheckInTargetFolder(Event originalEvent, Event updatedEvent) {
-        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) && 
+        if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
             originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return false;
         }
@@ -635,18 +635,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         requireWritePermissions(event);
         /*
-         * pass updated alarms directly if using legacy storage
-         */
-        if (session.getConfig().isUseLegacyStorage()) {
-            storage.getAlarmStorage().updateAlarms(event, calendarUserId, updatedAlarms);
-            return true;
-        }
-        /*
          * delete removed alarms
          */
         List<Alarm> removedItems = alarmUpdates.getRemovedItems();
         if (0 < removedItems.size()) {
-            storage.getAlarmStorage().deleteAlarms(getAlarmIDs(removedItems));
+            storage.getAlarmStorage().deleteAlarms(event.getId(), calendarUserId, getAlarmIDs(removedItems));
         }
         /*
          * save updated alarms
@@ -656,8 +649,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
             for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
                 Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, (AlarmField[]) null);
-                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm,
-                    AlarmField.ACKNOWLEDGED, AlarmField.ACTION, AlarmField.EXTENDED_PROPERTIES, AlarmField.RELATED_TO, AlarmField.REPEAT, AlarmField.TRIGGER);
+                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm));

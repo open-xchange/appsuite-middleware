@@ -296,8 +296,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
-    public void deleteAlarms(int[] alarmIds) throws OXException {
-        throw new UnsupportedOperationException(); // not supported in legacy storage
+    public void deleteAlarms(String eventId, int userId, int[] alarmIds) throws OXException {
+        deleteAlarms(eventId, userId);
     }
 
     /**

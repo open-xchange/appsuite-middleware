@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link AlarmMapper}
@@ -105,6 +106,28 @@ public class AlarmMapper extends DefaultMapper<Alarm, AlarmField> {
     @Override
     protected EnumMap<AlarmField, ? extends Mapping<? extends Object, Alarm>> getMappings() {
         EnumMap<AlarmField, Mapping<? extends Object, Alarm>> mappings = new EnumMap<AlarmField, Mapping<? extends Object, Alarm>>(AlarmField.class);
+        mappings.put(AlarmField.ID, new DefaultMapping<Integer, Alarm>() {
+
+            @Override
+            public boolean isSet(Alarm object) {
+                return object.containsId();
+            }
+
+            @Override
+            public void set(Alarm object, Integer value) throws OXException {
+                object.setId(null != value ? Autoboxing.i(value) : 0);
+            }
+
+            @Override
+            public Integer get(Alarm object) {
+                return Autoboxing.I(object.getId());
+            }
+
+            @Override
+            public void remove(Alarm object) {
+                object.removeId();
+            }
+        });
         mappings.put(AlarmField.SUMMARY, new DefaultMapping<String, Alarm>() {
 
             @Override

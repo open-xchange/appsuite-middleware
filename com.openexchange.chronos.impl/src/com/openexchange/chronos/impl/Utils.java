@@ -815,6 +815,27 @@ public class Utils {
      * @return The collection update
      */
     public static AbstractCollectionUpdate<Alarm, AlarmField> getAlarmUpdates(List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        /*
+         * special handling to detect change of single reminder (as used in legacy storage)
+         */
+        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 1 == updatedAlarms.size()) {
+            Alarm originalAlarm = originalAlarms.get(0);
+            Alarm updatedAlarm = updatedAlarms.get(0);
+            Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
+                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION);
+            if (differentFields.isEmpty()) {
+                return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
+
+                    @Override
+                    protected boolean matches(Alarm alarm1, Alarm alarm2) {
+                        return true;
+                    }
+                };
+            }
+        }
+        /*
+         * default collection update, otherwise
+         */
         return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
 
             @Override
