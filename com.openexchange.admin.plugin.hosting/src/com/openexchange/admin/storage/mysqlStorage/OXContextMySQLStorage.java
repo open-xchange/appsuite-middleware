@@ -1986,7 +1986,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private List<DatabaseHandle> removeFull(final List<DatabaseHandle> list) {
-        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
+        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>(list.size());
         for (final DatabaseHandle db : list) {
             final int maxUnit = i(db.getMaxUnits());
             if (maxUnit == -1 || (maxUnit != 0 && db.getCount() < maxUnit)) {
@@ -1997,13 +1997,52 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private List<DatabaseHandle> loadDatabases(final Connection con) throws SQLException, OXContextException {
-        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            if (this.USE_UNIT == UNIT_CONTEXT) {
+                stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    // No databases at all...
+                    return Collections.emptyList();
+                }
+
+                List<DatabaseHandle> databases = new LinkedList<DatabaseHandle>();
+                do {
+                    final DatabaseHandle db = new DatabaseHandle();
+                    int pos = 1;
+                    db.setId(I(rs.getInt(pos++)));
+                    db.setUrl(rs.getString(pos++));
+                    db.setDriver(rs.getString(pos++));
+                    db.setLogin(rs.getString(pos++));
+                    db.setPassword(rs.getString(pos++));
+                    db.setName(rs.getString(pos++));
+                    final int slaveId = rs.getInt(pos++);
+                    if (slaveId > 0) {
+                        db.setRead_id(I(slaveId));
+                    }
+                    db.setClusterWeight(I(rs.getInt(pos++)));
+                    db.setMaxUnits(I(rs.getInt(pos++)));
+                    db.setCount(rs.getInt(pos++));
+                    if (rs.wasNull()) {
+                        throw new OXContextException("Unable to count contexts of db_pool_id=" + db.getId());
+                    }
+                    databases.add(db);
+                } while (rs.next());
+                return databases;
+            }
+
+            // Load databases and then determine counters
             stmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id");
             rs = stmt.executeQuery();
-            while (rs.next()) {
+            if (false == rs.next()) {
+                // No databases at all...
+                return Collections.emptyList();
+            }
+
+            List<DatabaseHandle> retval = new LinkedList<DatabaseHandle>();
+            do {
                 final DatabaseHandle db = new DatabaseHandle();
                 int pos = 1;
                 db.setId(I(rs.getInt(pos++)));
@@ -2019,15 +2058,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 db.setClusterWeight(I(rs.getInt(pos++)));
                 db.setMaxUnits(I(rs.getInt(pos++)));
                 retval.add(db);
+            } while (rs.next());
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final DatabaseHandle db : retval) {
+                final int db_count = countUnits(db, con);
+                db.setCount(db_count);
             }
+
+            return retval;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        for (final DatabaseHandle db : retval) {
-            final int db_count = countUnits(db, con);
-            db.setCount(db_count);
-        }
-        return retval;
     }
 
     /**
@@ -2053,7 +2097,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final ResultSet rsi = ps.executeQuery();
 
                 if (!rsi.next()) {
-                    throw new OXContextException("Unable to count contextsof db_pool_id=" + pool_id);
+                    throw new OXContextException("Unable to count contexts of db_pool_id=" + pool_id);
                 }
                 count = rsi.getInt("count");
                 rsi.close();
