@@ -52,13 +52,10 @@ package com.openexchange.passwordchange.history.events;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.exeption.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
@@ -71,7 +68,6 @@ import com.openexchange.user.AbstractUserServiceInterceptor;
 public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
-    private static final String LIMIT = "com.openexchange.passwordchange.limit";
 
     ExecutorService executor;
 
@@ -107,11 +103,6 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     @Override
     public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        final ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
-        if (null == casscade) {
-            LOG.warn("Could not get config to delete password history.");
-            throw PasswordChangeHistoryException.MISSING_SERVICE.create("ConfigViewFactory");
-        }
         final int contextID = context.getContextId();
         final int userID = user.getId();
         // Clear DB after deletion of user
@@ -120,10 +111,10 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
             @Override
             public void run() {
                 try {
-                    PasswordChangeUtility.clearFor(contextID, userID, casscade.getView(contextID, userID).get(LIMIT, Integer.class));
-                } catch (OXException e) {
+                    PasswordChangeUtility.clearFor(contextID, userID, 0);
+                } catch (Exception e) {
                     // In case view can not be loaded
-                    LOG.error("Could not delete password chage history for " + String.valueOf(userID) + " in context " + String.valueOf(contextID));
+                    LOG.error("Could not delete password chage history for {} in context {}. Reason: ", String.valueOf(userID), String.valueOf(contextID), e.getMessage());
                 }
             }
         });

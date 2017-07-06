@@ -105,7 +105,7 @@ public final class PasswordChangeUtility {
             tracker.trackPasswordChange(userID, contextID, info);
         } catch (Exception e) {
             // IF this happens some property won't be there ..
-            LOG.debug("Error while tracking password change for user {} in context {}", userID, contextID);
+            LOG.debug("Error while tracking password change for user {} in context {}. Reason: ", userID, contextID, e.getMessage());
         }
     }
 
@@ -121,7 +121,7 @@ public final class PasswordChangeUtility {
             PasswordChangeTracker tracker = loadTracker(contextID, userID);
             tracker.clear(userID, contextID, limit);
         } catch (Exception e) {
-            LOG.warn("Error while deleting password change history for user {} in context {}", userID, contextID);
+            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userID, contextID, e.getMessage());
         }
     }
 
@@ -134,13 +134,27 @@ public final class PasswordChangeUtility {
         }
         ConfigView view;
         view = casscade.getView(userID, contextID);
-        boolean enabled = view.get(ENABLED, Boolean.class);
-        if (false == enabled) {
+        try {
+            boolean enabled = view.get(ENABLED, Boolean.class);
+            if (false == enabled) {
+                throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
+            }
+        } catch (Exception e) {
+            // Could not load, no configuration available
             throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
         }
         // If empty, password change history is not wanted after all 
-        String symbolicTrackerName = view.get(TRACKER, String.class);
+        String symbolicTrackerName = null;
+        boolean shouldThrow = false;
+        try {
+            symbolicTrackerName = view.get(TRACKER, String.class);
+        } catch (Exception e) {
+            shouldThrow = true;
+        }
         if (null == symbolicTrackerName || symbolicTrackerName.isEmpty()) {
+            shouldThrow = true;
+        }
+        if (shouldThrow) {
             LOG.debug("No PasswordChangeTracker found .. No tracking wanted ");
             throw PasswordChangeHistoryException.MISSING_CONFIGURATION.create(userID, contextID);
         }
