@@ -444,7 +444,7 @@ public class VCardExporter implements BatchCapableExporter {
             String folderId = batchIds.keySet().iterator().next();
             List<String> contactIdList = batchIds.get(folderId);
             if (contactIdList.size() > 1) {
-                sb.append("Batch Contacts");
+                sb.append("Batch Contacts.");
             } else {
                 //exactly one contact to export, file name equals contact name
                 String batchId = batchIds.get(folderId).get(0);                
@@ -452,10 +452,8 @@ public class VCardExporter implements BatchCapableExporter {
             }            
         } else {
             //batch of contact ids from different folders, file name is set to a default
-            sb.append("Batch Contacts");
-        }
-        sb.append(".");
-        
+            sb.append("Batch Contacts.");
+        }        
         return sb.toString();
     }
 
@@ -479,7 +477,7 @@ public class VCardExporter implements BatchCapableExporter {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
         }
-        sb.append('.');
+        sb.append(".");
         return sb.toString();
     }
 }
