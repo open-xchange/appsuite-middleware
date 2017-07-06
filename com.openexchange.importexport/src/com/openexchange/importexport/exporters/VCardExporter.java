@@ -438,15 +438,25 @@ public class VCardExporter implements BatchCapableExporter {
 
     @Override
     public String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+        StringBuilder sb = new StringBuilder();
         if (batchIds.size() == 1) {
-            //exactly one contact to export, file name equals contact name
+            //check for two contacts of the same folder
             String folderId = batchIds.keySet().iterator().next();
-            String batchId = batchIds.get(folderId).get(0);
-            return createVcardName(sessionObj, folderId, batchId);
+            List<String> contactIdList = batchIds.get(folderId);
+            if (contactIdList.size() > 1) {
+                sb.append("Batch Contacts");
+            } else {
+                //exactly one contact to export, file name equals contact name
+                String batchId = batchIds.get(folderId).get(0);                
+                sb.append(createVcardName(sessionObj, folderId, batchId));
+            }            
+        } else {
+            //batch of contact ids from different folders, file name is set to a default
+            sb.append("Batch Contacts");
         }
-
-        //batch of contact ids, file name is set to a default
-        return "Batch Contacts";
+        sb.append(".");
+        
+        return sb.toString();
     }
 
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
