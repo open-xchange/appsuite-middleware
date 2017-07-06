@@ -248,7 +248,7 @@ public final class JerichoParser {
      * @throws OXException If specified HTML content cannot be parsed
      */
     public void parse(final String html, final JerichoHandler handler, final boolean checkSize) throws OXException {
-        int timeout = 0; //htmlParseTimeoutSec;
+        int timeout = htmlParseTimeoutSec;
         if (timeout <= 0) {
             doParse(html, handler, checkSize);
             return;
