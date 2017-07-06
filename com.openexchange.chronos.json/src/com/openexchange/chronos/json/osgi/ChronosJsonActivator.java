@@ -53,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.ajax.requesthandler.DetailParser;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chronos.freebusy.json.ChronosFreeBusyActionFactory;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.CalendarExceptionDetailParser;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -86,6 +87,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              * register json module
              */
             registerModule(new ChronosActionFactory(this), "chronos");
+            registerModule(new ChronosFreeBusyActionFactory(this), "chronos/freebusy");
             /*
              * register result converters
              */

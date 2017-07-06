@@ -67,6 +67,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -75,17 +76,22 @@ import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
+import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.CompositeID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
+import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEvent;
+import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
@@ -102,7 +108,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
+public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, IDBasedFreeBusyAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositingIDBasedCalendarAccess.class);
 
@@ -513,6 +519,113 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
             .append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId())
             .append(", connectedAccesses=").append(connectedAccesses.keySet()).append(']')
         .toString();
+    }
+
+    @Override
+    public boolean[] hasEventsBetween(Date from, Date until) throws OXException {
+
+        boolean [] result=null;
+        for(CalendarAccount account: getAccounts()){
+            CalendarAccess access = getAccess(account);
+            if(access instanceof FreeBusyAwareCalendarAccess){
+                boolean[] hasEventsBetween = ((FreeBusyAwareCalendarAccess) access).hasEventsBetween(from, until);
+                if(result==null){
+                    result=hasEventsBetween;
+                } else {
+                    mergeEventsBetween(result, hasEventsBetween);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void mergeEventsBetween(boolean [] result, boolean [] newValues){
+        if(result.length != newValues.length){
+           //TODO throw exception
+        }
+
+        for(int x=0; x<result.length; x++){
+            result[x]|=newValues[x];
+        }
+    }
+
+    @Override
+    public Map<Attendee, List<Event>> getFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, List<Event>> result=null;
+        for(CalendarAccount account: getAccounts()){
+            CalendarAccess access = getAccess(account);
+            if(access instanceof FreeBusyAwareCalendarAccess){
+                Map<Attendee, List<Event>> eventsPerAttendee = ((FreeBusyAwareCalendarAccess) access).getFreeBusy(attendees, from, until);
+                if(result==null){
+                    result=eventsPerAttendee;
+                    for(Attendee att: result.keySet()){
+                        result.put(att, withUniqueIDs(result.get(att), account.getAccountId()));
+                    }
+                } else {
+                    for(Attendee att: eventsPerAttendee.keySet()){
+                        result.get(att).addAll(withUniqueIDs(eventsPerAttendee.get(att), account.getAccountId()));
+                    }
+                }
+            }
+        }
+
+        // Sort results
+
+        for(Attendee att: result.keySet()){
+            List<Event> events = result.get(att);
+            Collections.sort(events, new EventTimezoneComparator<>(null)); //TODO properly sort events or remove sorting?
+        }
+
+        return result;
+    }
+
+    @Override
+    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, List<FreeBusyTime>> result=null;
+        for(CalendarAccount account: getAccounts()){
+            CalendarAccess access = getAccess(account);
+            if(access instanceof FreeBusyAwareCalendarAccess){
+                Map<Attendee, List<FreeBusyTime>> freeBusyTimesPerAttendee = ((FreeBusyAwareCalendarAccess) access).getMergedFreeBusy(attendees, from, until);
+                if(result==null){
+                    result=freeBusyTimesPerAttendee;
+                } else {
+                    for(Attendee att: freeBusyTimesPerAttendee.keySet()){
+                        result.get(att).addAll(freeBusyTimesPerAttendee.get(att));
+                    }
+                }
+            }
+        }
+
+        // Sort results
+
+        for(Attendee att: result.keySet()){
+            List<FreeBusyTime> events = result.get(att);
+            Collections.sort(events, new FreeBusyComparator<>(null)); //TODO properly sort FreeBusyTime's
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
+        List<EventConflict> result=null;
+        for(CalendarAccount account: getAccounts()){
+            CalendarAccess access = getAccess(account);
+            if (access instanceof FreeBusyAwareCalendarAccess) {
+                List<EventConflict> eventConflicts = ((FreeBusyAwareCalendarAccess) access).checkForConflicts(event, attendees);
+                if (result == null) {
+                    result = new ArrayList<>(eventConflicts.size());
+                }
+                for (EventConflict conflict : result) {
+                    result.add(new IDManglingEventConflict(conflict, new IDManglingEvent(conflict.getConflictingEvent(), account.getAccountId())));
+                }
+            }
+        }
+
+        //TODO sort results?
+
+        return result;
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition;
+package com.openexchange.chronos.freebusy.json;
 
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link IDBasedCalendarAccessFactory}
+ * {@link FreeBusyAction}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@SingletonService
-public interface IDBasedCalendarAccessFactory {
+public class FreeBusyAction extends AbstractFreeBusyAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
 
     /**
-     * Initializes a new ID-based calendar access for the supplied session.
-     * <p/>
-     * Supplementary calendar parameters may be configured in the returned reference.
+     * Initializes a new {@link FreeBusyAction}.
      *
-     * @param session The session to create the access for
-     * @return The calendar access
-     * @see CalendarParameters
+     * @param services A service lookup reference
      */
-    IDBasedCalendarAccess createAccess(Session session) throws OXException;
+    protected FreeBusyAction(ServiceLookup services) {
+        super(services);
+    }
 
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
-    /**
-     * Initializes a new ID-based free-busy access for the supplied session.
-     *
-     * @param session The session to create the access for
-     * @return The free-busy access
-     */
-    IDBasedFreeBusyAccess createFreebusyAccess(Session session) throws OXException;
+    @Override
+    protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
+        List<Attendee> attendees = null;
+        Date from = null;
+        Date until = null;
+        Map<Attendee, List<FreeBusyTime>> mergedFreeBusy = freeBusyAccess.getMergedFreeBusy(attendees, from, until);
+        return new AJAXRequestResult(mergedFreeBusy, "freeBusy");
+    }
 
 }

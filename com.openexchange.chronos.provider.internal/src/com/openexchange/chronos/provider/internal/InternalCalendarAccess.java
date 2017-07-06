@@ -60,10 +60,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
@@ -71,7 +74,9 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -91,7 +96,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess {
 
     private final CalendarSession session;
 
@@ -241,6 +246,15 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
     }
 
     /**
+     * Gets the free busy service.
+     *
+     * @return The {@link FreeBusyService}
+     */
+    private FreeBusyService getFreeBusyService() throws OXException {
+        return session.getFreeBusyService();
+    }
+
+    /**
      * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
      *
      * @return A new folder service decorator
@@ -275,6 +289,26 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess {
             calendarFolders.add(getCalendarFolder(userizedFolder));
         }
         return calendarFolders;
+    }
+
+    @Override
+    public boolean[] hasEventsBetween(Date from, Date until) throws OXException {
+        return getFreeBusyService().hasEventsBetween(session, from, until);
+    }
+
+    @Override
+    public Map<Attendee, List<Event>> getFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        return getFreeBusyService().getFreeBusy(session, attendees, from, until);
+    }
+
+    @Override
+    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        return getFreeBusyService().getMergedFreeBusy(session, attendees, from, until);
+    }
+
+    @Override
+    public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
+        return getFreeBusyService().checkForConflicts(session, event, attendees);
     }
 
 }
