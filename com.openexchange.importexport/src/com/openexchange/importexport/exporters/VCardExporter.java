@@ -440,7 +440,7 @@ public class VCardExporter implements BatchCapableExporter {
     public String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
         StringBuilder sb = new StringBuilder();
         if (batchIds.size() == 1) {
-            //check for two contacts of the same folder
+            //check for contacts of the same folder
             String folderId = batchIds.keySet().iterator().next();
             List<String> contactIdList = batchIds.get(folderId);
             if (contactIdList.size() > 1) {
@@ -459,7 +459,6 @@ public class VCardExporter implements BatchCapableExporter {
 
     private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
         StringBuilder sb = new StringBuilder();
-
         if (null == batchId || batchId.equals("")) {
             try {
                 FolderService folderService = ImportExportServices.getFolderService();
@@ -472,7 +471,11 @@ public class VCardExporter implements BatchCapableExporter {
             try {
                 ContactService contactService = ImportExportServices.getContactService();
                 Contact contactObj = contactService.getContact(session, folder, batchId, null);
-                sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
+                if (contactObj.containsMarkAsDistributionlist()) {
+                    sb.append(contactObj.getDisplayName());
+                } else {
+                    sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
+                }
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             }
