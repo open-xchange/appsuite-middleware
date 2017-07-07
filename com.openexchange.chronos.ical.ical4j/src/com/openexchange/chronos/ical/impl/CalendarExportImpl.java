@@ -221,7 +221,7 @@ public class CalendarExportImpl implements CalendarExport {
         VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
         ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         if (false == CalendarUtils.isFloating(event)) {
-            trackTimezones(event.getStartTimeZone(), event.getEndTimeZone());
+            trackTimezones(event.getStartDate(), event.getEndDate());
         }
         /*
          * export alarms as sub-components
@@ -260,6 +260,19 @@ public class CalendarExportImpl implements CalendarExport {
             for (String timeZoneID : timeZoneIDs) {
                 if (null != timeZoneID && false == "UTC".equals(timeZoneID)) {
                     added |= timezoneIDs.add(timeZoneID);
+                }
+            }
+        }
+        return added;
+    }
+
+    private boolean trackTimezones(org.dmfs.rfc5545.DateTime... dateTimes) {
+        boolean added = false;
+        if (null != dateTimes && 0 < dateTimes.length) {
+            for (int i = 0; i < dateTimes.length; i++) {
+                org.dmfs.rfc5545.DateTime dateTime = dateTimes[i];
+                if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone()) {
+                    added |= trackTimezones(dateTime.getTimeZone().getID());
                 }
             }
         }

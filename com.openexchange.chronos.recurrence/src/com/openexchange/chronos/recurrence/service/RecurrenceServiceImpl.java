@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TimeZone;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
@@ -98,7 +97,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (counter++ == position) {
-                Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(master.getStartTimeZone()));
+                Calendar retval = GregorianCalendar.getInstance(master.getStartDate().getTimeZone());
                 retval.setTimeInMillis(nextMillis);
                 return retval;
             }
@@ -112,7 +111,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         if (!master.containsRecurrenceRule()) {
             return 0;
         }
-        if (datePosition.getTimeInMillis() < master.getStartDate().getTime()) {
+        if (datePosition.getTimeInMillis() < master.getStartDate().getTimestamp()) {
             return 0;
         }
         int position = 1;

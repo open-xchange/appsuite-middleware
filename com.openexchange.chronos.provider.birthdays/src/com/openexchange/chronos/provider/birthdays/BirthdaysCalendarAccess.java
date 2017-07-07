@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
@@ -261,7 +262,6 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
         //        event.setCreated(contact.getCreationDate());
         //        event.setModifiedBy(contact.getModifiedBy());
         //        event.setLastModified(contact.getLastModified());
-        event.setAllDay(true);
         event.setRecurrenceRule("FREQ=YEARLY");
         event.setTransp(TimeTransparency.TRANSPARENT);
         event.setUid(contact.getUid());
@@ -277,16 +277,9 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
 
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, contact.getBirthday());
         CalendarUtils.truncateTime(calendar);
-        event.setStartDate(calendar.getTime());
+        event.setStartDate(new DateTime(calendar.getTimeInMillis()).toAllDay());
         calendar.add(Calendar.DATE, 1);
-        event.setEndDate(calendar.getTime());
-        if (0 < contact.getInternalUserId()) {
-            //TODO
-            //            String timeZoneID = session.getEntityResolver().getTimeZone(contact.getInternalUserId()).getID();
-            //            event.setStartTimeZone(timeZoneID);
-            //            event.setEndTimeZone(timeZoneID);
-        }
-
+        event.setEndDate(new DateTime(calendar.getTimeInMillis()).toAllDay());
         return event;
     }
 

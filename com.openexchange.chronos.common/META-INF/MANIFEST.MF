@@ -19,11 +19,11 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.search.internal.operands,
  com.openexchange.tools.arrays,
  javax.mail.internet.idn,
+ org.dmfs.rfc5545,
+ org.dmfs.rfc5545.calendarmetrics,
  org.slf4j
 Export-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,
  com.openexchange.chronos.common,
- org.dmfs.rfc5545,
- org.dmfs.rfc5545.calendarmetrics,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset

@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -673,8 +674,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return <code>true</code> if the range needs to be updated, <code>false</code>, otherwise
      */
     private static boolean needsRangeUpdate(Event event) {
-        return event.containsStartDate() || event.containsStartTimeZone() || event.containsEndDate() || event.containsEndTimeZone() ||
-            event.containsAllDay() || event.containsRecurrenceRule();
+        return event.containsStartDate() || event.containsEndDate() || event.containsRecurrenceRule();
     }
 
     /**
@@ -689,7 +689,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return The start time of the effective range of an event
      */
     private static long getRangeFrom(Event event) {
-        Date rangeFrom = event.getStartDate();
+        DateTime rangeFrom = event.getStartDate();
         if (null == rangeFrom) {
             /*
              * (legacy) tombstone event without persisted start-/end-date
@@ -700,9 +700,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             /*
              * add easternmost offset (GMT +14:00)
              */
-            rangeFrom = add(rangeFrom, Calendar.HOUR_OF_DAY, -14);
+            return add(new Date(rangeFrom.getTimestamp()), Calendar.HOUR_OF_DAY, -14).getTime();
         }
-        return rangeFrom.getTime();
+        return rangeFrom.getTimestamp();
     }
 
     /**
@@ -717,7 +717,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return The start time of the effective range of an event
      */
     private static long getRangeUntil(Event event) throws OXException {
-        Date rangeUntil = null != event.getEndDate() ? event.getEndDate() : event.getStartDate();
+        DateTime rangeUntil = null != event.getEndDate() ? event.getEndDate() : event.getStartDate();
         if (null == rangeUntil) {
             /*
              * (legacy) tombstone event without persisted start-/end-date
@@ -732,16 +732,16 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             if (null == lastRecurrenceId) {
                 return Long.MAX_VALUE; // never ending series
             }
-            long eventDuration = event.getEndDate().getTime() - event.getStartDate().getTime();
-            rangeUntil = new Date(lastRecurrenceId.getValue() + eventDuration);
+            long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
+            rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue() + eventDuration);
         }
         if (isFloating(event)) {
             /*
              * add offset of 'westernmost' timezone offset (GMT-12:00)
              */
-            rangeUntil = add(rangeUntil, Calendar.HOUR_OF_DAY, 12);
+            return add(new Date(rangeUntil.getTimestamp()), Calendar.HOUR_OF_DAY, 12).getTime();
         }
-        return rangeUntil.getTime();
+        return rangeUntil.getTimestamp();
     }
 
 }

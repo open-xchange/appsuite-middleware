@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
@@ -205,7 +206,7 @@ public abstract class EventConverter {
             case Appointment.END_DATE:
                 return EventField.END_DATE;
             case Appointment.FULL_TIME:
-                return EventField.ALL_DAY;
+                return EventField.START_DATE;
             case CalendarObject.RECURRENCE_ID:
                 return EventField.SERIES_ID;
             case CalendarObject.RECURRENCE_TYPE:
@@ -223,7 +224,7 @@ public abstract class EventConverter {
             case CalendarObject.CHANGE_EXCEPTIONS:
                 return EventField.CHANGE_EXCEPTION_DATES;
             case Appointment.TIMEZONE:
-                return EventField.START_TIMEZONE;
+                return EventField.START_DATE;
             case CalendarObject.PARTICIPANTS:
             case CalendarObject.CONFIRMATIONS:
             case CalendarObject.USERS:
@@ -302,7 +303,8 @@ public abstract class EventConverter {
         if (0 >= recurrencePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(eventID), recurrencePosition);
+        RecurrenceData recurrenceData = new OriginalEventHolder(this, eventID).getRecurrenceData();
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, recurrencePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -320,20 +322,73 @@ public abstract class EventConverter {
         if (null == recurrenceDatePosition) {
             return eventID;
         }
-        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), loadRecurrenceData(eventID), recurrenceDatePosition);
+        RecurrenceData recurrenceData = new OriginalEventHolder(this, eventID).getRecurrenceData();
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, recurrenceDatePosition);
         return new EventID(folderID, objectID, recurrenceID);
+    }
+
+    /**
+     * Gets a value indicating whether a specific appointment has the <i>all-day</i>-character or not. If the required information is not
+     * available in the passed object (e.g. during an update operation), the properties of the existing event are checked.
+     *
+     * @param appointment The appointment to check
+     * @param originalEventHolder The original event holder, or <code>null</code> if not available
+     * @return <code>true</code> for an <i>all-day</i> event, <code>false</code>, otherwise
+     */
+    private boolean isAllDay(Appointment appointment, OriginalEventHolder originalEventHolder) throws OXException {
+        if (appointment.containsFullTime()) {
+            return appointment.getFullTime();
+        }
+        if (null != originalEventHolder) {
+            return originalEventHolder.get().getStartDate().isAllDay();
+        }
+        return false;
+    }
+
+    /**
+     * Derives the timezone for a specific appointment. If the required information is not available in the passed object (e.g. during an
+     * update operation), the properties of the existing event are checked.
+     *
+     * @param appointment The appointment to check
+     * @param originalEventHolder The original event holder, or <code>null</code> if not available
+     * @return The timezone, falling back to the request/user timezone, or <code>null</code> for floating events
+     */
+    private TimeZone getTimeZone(Appointment appointment, OriginalEventHolder originalEventHolder) throws OXException {
+        /*
+         * check for floating dates
+         */
+        if (isAllDay(appointment, originalEventHolder)) {
+            return null;
+        }
+        /*
+         * derive timezone
+         */
+        TimeZone defaultTimeZone = getDefaultTimeZone();
+        if (appointment.containsTimezone()) {
+            return optTimeZone(appointment.getTimezone(), defaultTimeZone);
+        }
+        if (null != originalEventHolder) {
+            return originalEventHolder.get().getStartDate().getTimeZone();
+        }
+        return defaultTimeZone;
     }
 
     /**
      * Converts the supplied appointment into a corresponding event.
      *
      * @param appointment The appointment to convert
-     * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknwon
+     * @param originalEventID The identifier of the original event in case of update operations, or <code>null</code> if unknown
      * @return The event
      */
     public Event getEvent(Appointment appointment, EventID originalEventID) throws OXException {
+        /*
+         * prepare conversion
+         */
         Event event = new Event();
-        RecurrenceData recurrenceData = null;
+        OriginalEventHolder originalEventHolder = null != originalEventID ? new OriginalEventHolder(this, originalEventID) : null;
+        /*
+         * convert appointment properties
+         */
         if (appointment.containsObjectID()) {
             event.setId(asString(appointment.getObjectID()));
         }
@@ -366,11 +421,39 @@ public abstract class EventConverter {
         if (appointment.containsTitle()) {
             event.setSummary(appointment.getTitle());
         }
-        if (appointment.containsStartDate()) {
-            event.setStartDate(appointment.getStartDate());
+        if (appointment.containsStartDate() || appointment.containsFullTime() || appointment.containsTimezone()) {
+            if (appointment.containsStartDate() && null == appointment.getStartDate()) {
+                event.setStartDate(null);
+            } else {
+                long timestamp;
+                if (null != appointment.getStartDate()) {
+                    timestamp = appointment.getStartDate().getTime();
+                } else {
+                    timestamp = originalEventHolder.get().getStartDate().getTimestamp();
+                }
+                if (isAllDay(appointment, originalEventHolder)) {
+                    event.setStartDate(new DateTime(timestamp).toAllDay());
+                } else {
+                    event.setStartDate(new DateTime(getTimeZone(appointment, originalEventHolder), timestamp));
+                }
+            }
         }
-        if (appointment.containsEndDate()) {
-            event.setEndDate(appointment.getEndDate());
+        if (appointment.containsEndDate() || appointment.containsFullTime() || appointment.containsTimezone()) {
+            if (appointment.containsEndDate() && null == appointment.getEndDate()) {
+                event.setEndDate(null);
+            } else {
+                long timestamp;
+                if (null != appointment.getEndDate()) {
+                    timestamp = appointment.getEndDate().getTime();
+                } else {
+                    timestamp = originalEventHolder.get().getEndDate().getTimestamp();
+                }
+                if (isAllDay(appointment, originalEventHolder)) {
+                    event.setEndDate(new DateTime(timestamp).toAllDay());
+                } else {
+                    event.setEndDate(new DateTime(getTimeZone(appointment, originalEventHolder), timestamp));
+                }
+            }
         }
         if (appointment.containsNote()) {
             event.setDescription(appointment.getNote());
@@ -382,9 +465,7 @@ public abstract class EventConverter {
             if (null == appointment.getRecurrenceDatePosition()) {
                 event.setRecurrenceId(null);
             } else {
-                if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(originalEventID);
-                }
+                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrenceDatePosition()));
             }
         }
@@ -392,9 +473,7 @@ public abstract class EventConverter {
             if (0 >= appointment.getRecurrencePosition()) {
                 event.setRecurrenceId(null);
             } else {
-                if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(originalEventID);
-                }
+                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrencePosition()));
             }
         }
@@ -402,10 +481,7 @@ public abstract class EventConverter {
             if (0 == appointment.getRecurrenceType()) {
                 event.setRecurrenceRule(null);
             } else {
-                if (null == recurrenceData && null != originalEventID) {
-                    recurrenceData = loadRecurrenceData(originalEventID);
-                }
-                recurrenceData = getRecurrenceData(appointment, recurrenceData);
+                RecurrenceData recurrenceData = getRecurrenceData(appointment, originalEventHolder);
                 event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             }
         }
@@ -413,9 +489,7 @@ public abstract class EventConverter {
             if (null == appointment.getChangeException()) {
                 event.setChangeExceptionDates(null);
             } else {
-                if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(originalEventID);
-                }
+                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
                 event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
             }
         }
@@ -423,9 +497,7 @@ public abstract class EventConverter {
             if (null == appointment.getDeleteException()) {
                 event.setChangeExceptionDates(null);
             } else {
-                if (null == recurrenceData) {
-                    recurrenceData = loadRecurrenceData(originalEventID);
-                }
+                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
                 event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
             }
         }
@@ -447,14 +519,8 @@ public abstract class EventConverter {
         if (appointment.containsLocation()) {
             event.setLocation(appointment.getLocation());
         }
-        if (appointment.containsFullTime()) {
-            event.setAllDay(appointment.getFullTime());
-        }
         if (appointment.containsShownAs()) {
             event.setTransp(Appointment2Event.getTransparency(appointment.getShownAs()));
-        }
-        if (appointment.containsTimezone()) {
-            event.setStartTimeZone(appointment.getTimezone());
         }
         if (appointment.containsAlarm()) {
             if (-1 == appointment.getAlarm()) {
@@ -538,27 +604,36 @@ public abstract class EventConverter {
                     firstRecurrenceId = iterator.next();
                 }
                 if (event.containsStartDate()) {
-                    if (null != firstRecurrenceId) {
-                        appointment.setStartDate(new Date(firstRecurrenceId.getValue()));
-                    } else {
-                        appointment.setStartDate(event.getStartDate());
-                    }
+                    appointment.setFullTime(recurrenceData.isAllDay());
+                    appointment.setTimezone(recurrenceData.getTimeZoneID());
+                    long timestamp = null != firstRecurrenceId ? firstRecurrenceId.getValue() : event.getStartDate().getTimestamp();
+                    appointment.setStartDate(new Date(timestamp));
                 }
                 if (event.containsEndDate()) {
+                    long timestamp;
                     if (null != firstRecurrenceId) {
-                        long duration = event.getEndDate().getTime() - event.getStartDate().getTime();
-                        appointment.setEndDate(new Date(firstRecurrenceId.getValue() + duration));
+                        long duration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
+                        timestamp = firstRecurrenceId.getValue() + duration;
                     } else {
-                        appointment.setEndDate(event.getEndDate());
+                        timestamp = event.getEndDate().getTimestamp();
                     }
+                    appointment.setEndDate(new Date(timestamp));
                 }
             }
         } else {
             if (event.containsStartDate()) {
-                appointment.setStartDate(event.getStartDate());
+                DateTime startDate = event.getStartDate();
+                if (null == startDate) {
+                    appointment.setStartDate(null);
+                } else {
+                    appointment.setFullTime(startDate.isAllDay());
+                    appointment.setTimezone(null == startDate.getTimeZone() ? null : startDate.getTimeZone().getID());
+                    appointment.setStartDate(new Date(startDate.getTimestamp()));
+                }
             }
             if (event.containsEndDate()) {
-                appointment.setEndDate(event.getEndDate());
+                DateTime endDate = event.getEndDate();
+                appointment.setEndDate(null == endDate ? null : new Date(endDate.getTimestamp()));
             }
         }
         if (event.containsDescription()) {
@@ -696,16 +771,8 @@ public abstract class EventConverter {
         if (event.containsLocation()) {
             appointment.setLocation(event.getLocation());
         }
-        if (event.containsAllDay()) {
-            appointment.setFullTime(event.isAllDay());
-        } else {
-            appointment.setFullTime(false);
-        }
         if (event.containsTransp()) {
             appointment.setShownAs(Event2Appointment.getShownAs(event.getTransp()));
-        }
-        if (event.containsStartTimeZone()) {
-            appointment.setTimezone(event.getStartTimeZone());
         }
         return appointment;
     }
@@ -806,15 +873,16 @@ public abstract class EventConverter {
      * update operations.
      *
      * @param appointment The appointment to extract the series pattern from
-     * @param originalPattern The original pattern, or <code>null</code> if not available
+     * @param originalEventHolder The original event holder, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
      */
-    protected RecurrenceData getRecurrenceData(Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
+    protected RecurrenceData getRecurrenceData(Appointment appointment, OriginalEventHolder originalEventHolder) throws OXException {
         /*
          * prepare series pattern & take over original pattern data if available
          */
         boolean fulltime = false;
         TimeZone timeZone = null;
+        RecurrenceData originalRecurrenceData = null != originalEventHolder ? originalEventHolder.getRecurrenceData() : null;
         SeriesPattern pattern = new SeriesPattern();
         if (null != originalRecurrenceData) {
             fulltime = originalRecurrenceData.isAllDay();
@@ -950,16 +1018,16 @@ public abstract class EventConverter {
      * @param eventID The identifier of the event to get the recurrence data for
      * @return The recurrence data, or <code>null</code> if not set
      */
-    protected RecurrenceData loadRecurrenceData(EventID eventID) throws OXException {
+    protected RecurrenceData loadRecurrenceDwata(EventID eventID) throws OXException {
         EventField [] recurrenceFields = {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY,
-            EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
         };
         Event event = getEvent(eventID, recurrenceFields);
         if (false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
-                return new DefaultRecurrenceData(null, event.isAllDay(), event.getStartTimeZone(), event.getStartDate().getTime());
+                DateTime startDate = event.getStartDate();
+                return new DefaultRecurrenceData(null, startDate.isAllDay(), startDate.getTimeZone().getID(), startDate.getTimestamp());
             }
             event = getEvent(new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
         }
@@ -974,13 +1042,13 @@ public abstract class EventConverter {
      */
     protected RecurrenceData loadRecurrenceData(Event event) throws OXException {
         EventField [] recurrenceFields = {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY,
-            EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
         };
         if (false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
-                return new DefaultRecurrenceData(null, event.isAllDay(), event.getStartTimeZone(), event.getStartDate().getTime());
+                DateTime startDate = event.getStartDate();
+                return new DefaultRecurrenceData(null, startDate.isAllDay(), startDate.getTimeZone().getID(), startDate.getTimestamp());
             }
             event = getEvent(new EventID(event.getFolderId(), event.getSeriesId()), recurrenceFields);
         }

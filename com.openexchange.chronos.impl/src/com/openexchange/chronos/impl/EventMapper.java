@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,6 +58,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -91,10 +90,10 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
     /** The event fields that are preserved for reference in "tombstone" events */
     private static final EventField[] TOMBSTONE_FIELDS = {
-        EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
-        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID, EventField.LAST_MODIFIED,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID, EventField.LAST_MODIFIED,
         EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
-        EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.TRANSP, EventField.UID,
+        EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP, EventField.UID,
         EventField.FILENAME, EventField.SEQUENCE
     };
 
@@ -565,7 +564,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeColor();
             }
         });
-        mappings.put(EventField.START_DATE, new DefaultMapping<Date, Event>() {
+        mappings.put(EventField.START_DATE, new DefaultMapping<DateTime, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -573,12 +572,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
+            public void set(Event object, DateTime value) throws OXException {
                 object.setStartDate(value);
             }
 
             @Override
-            public Date get(Event object) {
+            public DateTime get(Event object) {
                 return object.getStartDate();
             }
 
@@ -587,29 +586,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeStartDate();
             }
         });
-        mappings.put(EventField.START_TIMEZONE, new DefaultMapping<String, Event>() {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsStartTimeZone();
-            }
-
-            @Override
-            public void set(Event object, String value) throws OXException {
-                object.setStartTimeZone(value);
-            }
-
-            @Override
-            public String get(Event object) {
-                return object.getStartTimeZone();
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeStartTimeZone();
-            }
-        });
-        mappings.put(EventField.END_DATE, new DefaultMapping<Date, Event>() {
+        mappings.put(EventField.END_DATE, new DefaultMapping<DateTime, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -617,62 +594,18 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
+            public void set(Event object, DateTime value) throws OXException {
                 object.setEndDate(value);
             }
 
             @Override
-            public Date get(Event object) {
+            public DateTime get(Event object) {
                 return object.getEndDate();
             }
 
             @Override
             public void remove(Event object) {
                 object.removeEndDate();
-            }
-        });
-        mappings.put(EventField.END_TIMEZONE, new DefaultMapping<String, Event>() {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsEndTimeZone();
-            }
-
-            @Override
-            public void set(Event object, String value) throws OXException {
-                object.setEndTimeZone(value);
-            }
-
-            @Override
-            public String get(Event object) {
-                return object.getEndTimeZone();
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeEndTimeZone();
-            }
-        });
-        mappings.put(EventField.ALL_DAY, new DefaultMapping<Boolean, Event>() {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsAllDay();
-            }
-
-            @Override
-            public void set(Event object, Boolean value) throws OXException {
-                object.setAllDay(null == value ? false : b(value));
-            }
-
-            @Override
-            public Boolean get(Event object) {
-                return B(object.getAllDay());
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeAllDay();
             }
         });
         mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {

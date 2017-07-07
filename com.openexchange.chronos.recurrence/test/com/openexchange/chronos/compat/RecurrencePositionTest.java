@@ -54,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import org.junit.Test;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -278,10 +279,9 @@ public class RecurrencePositionTest {
     private Event getEventSeries(String rrule, TimeZone timeZone, String start, String end) throws Exception {
         Event event = new Event();
         event.setRecurrenceRule(rrule);
-        event.setStartTimeZone(timeZone.getID());
         event.setSummary("RecurrencePositionTest");
-        event.setStartDate(D(start, timeZone));
-        event.setEndDate(D(end, timeZone));
+        event.setStartDate(new DateTime(timeZone, D(start, timeZone).getTime()));
+        event.setEndDate(new DateTime(timeZone, D(end, timeZone).getTime()));
         return event;
     }
 
@@ -289,9 +289,8 @@ public class RecurrencePositionTest {
         Event event = new Event();
         event.setRecurrenceRule(rrule);
         event.setSummary("RecurrencePositionTest");
-        event.setAllDay(true);
-        event.setStartDate(D(start, TimeZones.UTC));
-        event.setEndDate(D(end, TimeZones.UTC));
+        event.setStartDate(new DateTime(D(start, TimeZones.UTC).getTime()).toAllDay());
+        event.setEndDate(new DateTime(D(end, TimeZones.UTC).getTime()).toAllDay());
         return event;
     }
 

@@ -84,7 +84,7 @@ public class Period {
      * @param event The event to get the period for
      */
     public Period(Event event) {
-        this(event.getStartDate(), event.getEndDate(), event.isAllDay());
+        this(new Date(event.getStartDate().getTimestamp()), new Date(event.getEndDate().getTimestamp()), event.getStartDate().isAllDay());
     }
 
     /**

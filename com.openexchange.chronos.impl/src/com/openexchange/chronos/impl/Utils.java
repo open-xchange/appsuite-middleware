@@ -125,17 +125,17 @@ public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.ALL_DAY,
-        EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.RECURRENCE_RULE,
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
+        EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
     public static final EventField[] NON_CLASSIFIED_FIELDS = {
-        EventField.ALL_DAY, EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
-        EventField.CALENDAR_USER, EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.END_TIMEZONE, EventField.ID,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.CALENDAR_USER, EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID,
         EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
-        EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.START_TIMEZONE, EventField.TRANSP,
+        EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP,
         EventField.UID, EventField.FILENAME
     };
 
@@ -366,6 +366,8 @@ public class Utils {
                 }
                 int comparison = 0;
                 if (null != sortOrders && 0 < sortOrders.length) {
+                    if (1 == 1)
+                        return 0;
                     for (SortOrder sortOrder : sortOrders) {
                         try {
                             comparison = EventMapper.getInstance().get(sortOrder.getBy()).compare(event1, event2);

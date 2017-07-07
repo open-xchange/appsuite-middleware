@@ -369,8 +369,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * reset all delete- and change exceptions if master period changes, or if recurrence is deleted
          */
-        if (eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY }) ||
+        if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE }) ||
             eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE) && null == eventUpdate.getUpdate().getRecurrenceRule()) {
             eventUpdate.getUpdate().setDeleteExceptionDates(null);
             eventUpdate.getUpdate().setChangeExceptionDates(null);
@@ -451,9 +450,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
      */
     private boolean needsParticipationStatusReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
-        return eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        });
+        return eventUpdate.containsAnyChangeOf(new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE });
     }
 
     /**
@@ -464,9 +461,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
     private boolean needsConflictCheck(ItemUpdate<Event, EventField> eventUpdate, AttendeeHelper attendeeHelper) throws OXException {
-        if (eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        })) {
+        if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE })) {
             return true;
         }
         if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && false == CalendarUtils.isOpaqueTransparency(eventUpdate.getOriginal())) {
@@ -486,9 +481,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
      */
     private boolean needsSequenceNumberIncrement(ItemUpdate<Event, EventField> eventUpdate, AttendeeHelper attendeeHelper) throws OXException {
-        if (eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        })) {
+        if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE })) {
             return true;
         }
         if (0 < attendeeHelper.getAttendeesToDelete().size() || 0 < attendeeHelper.getAttendeesToInsert().size() || 0 < attendeeHelper.getAttendeesToUpdate().size()) {
@@ -505,9 +498,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if alarm trigger updates should take place, <code>false</code>, otherwise
      */
     private boolean needsAlarmTriggerUpdate(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
-        return eventUpdate.containsAnyChangeOf(new EventField[] {
-            EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
-        });
+        return eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE });
     }
 
     private boolean updateDeleteExceptions(Event originalEvent, Event updatedEvent) throws OXException {
@@ -735,29 +726,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                             String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
-                case START_TIMEZONE:
-                    /*
-                     * check timezone validity & ensure all necessary recurrence related data is present in passed event update & re-validate start- and end date
-                     */
-                    Check.timeZoneExists(updatedEvent.getStartTimeZone());
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                    Check.startAndEndDate(eventUpdate);
-                    break;
-                case END_TIMEZONE:
-                    /*
-                     * check timezone validity & ensure all necessary recurrence related data is present in passed event update & re-validate start- and end date
-                     */
-                    Check.timeZoneExists(updatedEvent.getEndTimeZone());
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                    Check.startAndEndDate(eventUpdate);
-                    break;
-                case ALL_DAY:
-                    /*
-                     * adjust start- and enddate, too, if required & ensure all necessary recurrence related data is present in passed event update
-                     */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
-                    Consistency.adjustAllDayDates(eventUpdate);
-                    break;
                 case RECURRENCE_RULE:
                     /*
                      * deny update for change exceptions (but ignore if set to 'null')
@@ -775,7 +743,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         /*
                          * series to single event, remove recurrence & ensure all necessary recurrence data is present in passed event update
                          */
-                        EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                        EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
                         eventUpdate.setSeriesId(null);
                         eventUpdate.setChangeExceptionDates(null);
                         eventUpdate.setDeleteExceptionDates(null);
@@ -784,7 +752,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
                     Check.recurrenceRuleIsValid(session.getRecurrenceService(), eventUpdate);
                     /*
                      * single event to series, assign new recurrence id
@@ -796,9 +764,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case START_DATE:
                 case END_DATE:
                     /*
-                     * ensure all necessary recurrence related data is present in passed event update & check rule validity & re-validate start- and end date
+                     * ensure all necessary recurrence related data is present in passed event update, adjust start/end & re-validate start- and end date
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
+                    Consistency.adjustAllDayDates(eventUpdate);
                     Check.startAndEndDate(eventUpdate);
                     break;
                 case RECURRENCE_ID:

@@ -57,6 +57,7 @@ import static com.openexchange.java.Autoboxing.i;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.EnumMap;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -76,6 +78,7 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.storage.rdb.DateTimeMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
@@ -500,10 +503,22 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeColor();
             }
         });
-        mappings.put(EventField.START_DATE, new DateMapping<Event>("timestampfield01", "Start date") {
+        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>("timestampfield01", "timezone", "intfield07", "Start date") {
 
             @Override
-            public void set(Event event, Date value) {
+            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
+                DateTime value = get(event);
+                if (null != value && null == value.getTimeZone()) {
+                    statement.setTimestamp(parameterIndex, new Timestamp(value.getTimestamp()));
+                    statement.setString(parameterIndex + 1, "");
+                    statement.setInt(parameterIndex + 2, value.isAllDay() ? 1 : 0);
+                    return 3;
+                }
+                return super.set(statement, parameterIndex, event);
+            }
+
+            @Override
+            public void set(Event event, DateTime value) {
                 event.setStartDate(value);
             }
 
@@ -513,7 +528,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public Date get(Event event) {
+            public DateTime get(Event event) {
                 return event.getStartDate();
             }
 
@@ -522,34 +537,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeStartDate();
             }
         });
-        mappings.put(EventField.START_TIMEZONE, new VarCharMapping<Event>("timezone", "Start timezone") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setStartTimeZone(value);
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsStartTimeZone();
-            }
-
-            @Override
-            public String get(Event event) {
-                return event.getStartTimeZone();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeStartTimeZone();
-            }
-        });
         mappings.put(EventField.END_DATE, new DateMapping<Event>("timestampfield02", "End date") {
-
-            @Override
-            public void set(Event event, Date value) {
-                event.setEndDate(value);
-            }
 
             @Override
             public boolean isSet(Event event) {
@@ -557,36 +545,19 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public Date get(Event event) {
-                return event.getEndDate();
-            }
-
-            @Override
             public void remove(Event event) {
                 event.removeEndDate();
             }
-        });
-        // EventField.END_TIMEZONE
-        mappings.put(EventField.ALL_DAY, new IntegerMapping<Event>("intfield07", "All day") {
 
             @Override
-            public void set(Event event, Integer value) {
-                event.setAllDay(null != value && 1 == i(value));
+            public void set(Event event, Date value) throws OXException {
+                event.setEndDate(null == value ? null : new DateTime(value.getTime()));
             }
 
             @Override
-            public boolean isSet(Event event) {
-                return event.containsAllDay();
-            }
-
-            @Override
-            public Integer get(Event event) {
-                return I(event.getAllDay() ? 1 : 0);
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeAllDay();
+            public Date get(Event event) {
+                DateTime value = event.getEndDate();
+                return null == value ? null : new Date(value.getTimestamp());
             }
         });
         mappings.put(EventField.TRANSP, new IntegerMapping<Event>("intfield06", "Transparency") {

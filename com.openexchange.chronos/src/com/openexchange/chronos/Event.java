@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.SortedSet;
+import org.dmfs.rfc5545.DateTime;
 
 /**
  * {@link Event}
@@ -82,11 +83,8 @@ public class Event {
     private Classification classification;
     private String color;
 
-    private Date startDate;
-    private String startTimeZone;
-    private Date endDate;
-    private String endTimeZone;
-    private boolean allDay;
+    private DateTime startDate;
+    private DateTime endDate;
     private Transp transp;
 
     private String seriesId;
@@ -705,7 +703,7 @@ public class Event {
      *
      * @return The start date
      */
-    public Date getStartDate() {
+    public DateTime getStartDate() {
         return startDate;
     }
 
@@ -714,7 +712,7 @@ public class Event {
      *
      * @param value The start date to set
      */
-    public void setStartDate(Date value) {
+    public void setStartDate(DateTime value) {
         startDate = value;
         setFields.add(EventField.START_DATE);
     }
@@ -737,47 +735,11 @@ public class Event {
     }
 
     /**
-     * Gets the start timezone of the event.
-     *
-     * @return The start timezone
-     */
-    public String getStartTimeZone() {
-        return startTimeZone;
-    }
-
-    /**
-     * Sets the start timezone of the event.
-     *
-     * @param value The start timezone to set
-     */
-    public void setStartTimeZone(String value) {
-        startTimeZone = value;
-        setFields.add(EventField.START_TIMEZONE);
-    }
-
-    /**
-     * Removes the start timezone of the event.
-     */
-    public void removeStartTimeZone() {
-        startTimeZone = null;
-        setFields.remove(EventField.START_TIMEZONE);
-    }
-
-    /**
-     * Gets a value indicating whether the start timezone of the event has been set or not.
-     *
-     * @return <code>true</code> if the start timezone is set, <code>false</code>, otherwise
-     */
-    public boolean containsStartTimeZone() {
-        return setFields.contains(EventField.START_TIMEZONE);
-    }
-
-    /**
      * Gets the end date of the event.
      *
      * @return The end date
      */
-    public Date getEndDate() {
+    public DateTime getEndDate() {
         return endDate;
     }
 
@@ -786,7 +748,7 @@ public class Event {
      *
      * @param value The end date to set
      */
-    public void setEndDate(Date value) {
+    public void setEndDate(DateTime value) {
         endDate = value;
         setFields.add(EventField.END_DATE);
     }
@@ -806,87 +768,6 @@ public class Event {
      */
     public boolean containsEndDate() {
         return setFields.contains(EventField.END_DATE);
-    }
-
-    /**
-     * Gets the end timezone of the event.
-     *
-     * @return The end timezone
-     */
-    public String getEndTimeZone() {
-        return endTimeZone;
-    }
-
-    /**
-     * Sets the end timezone of the event.
-     *
-     * @param value The end timezone to set
-     */
-    public void setEndTimeZone(String value) {
-        endTimeZone = value;
-        setFields.add(EventField.END_TIMEZONE);
-    }
-
-    /**
-     * Removes the end timezone of the event.
-     */
-    public void removeEndTimeZone() {
-        endTimeZone = null;
-        setFields.remove(EventField.END_TIMEZONE);
-    }
-
-    /**
-     * Gets a value indicating whether the end timezone of the event has been set or not.
-     *
-     * @return <code>true</code> if the end timezone is set, <code>false</code>, otherwise
-     */
-    public boolean containsEndTimeZone() {
-        return setFields.contains(EventField.END_TIMEZONE);
-    }
-
-    /**
-     * Gets the all-day character of the event.
-     *
-     * @return The all-day character
-     */
-    public boolean getAllDay() {
-        return allDay;
-    }
-
-    /**
-     * Gets the all-day character of the event.
-     *
-     * @return The all-day character
-     */
-    public boolean isAllDay() {
-        return allDay;
-    }
-
-    /**
-     * Sets the all-day character of the event.
-     *
-     * @param value The all-day character to set
-     */
-    public void setAllDay(boolean value) {
-        allDay = value;
-        setFields.add(EventField.ALL_DAY);
-    }
-
-    /**
-     * Removes the all-day character of the event.
-     */
-    public void removeAllDay() {
-        allDay = false;
-        setFields.remove(EventField.ALL_DAY);
-    }
-
-    /**
-     * Gets a value indicating whether the all-day character of the event has been set or not.
-     *
-     * @return <code>true</code> if the all-day character is set, <code>false</code>, otherwise
-     */
-    public boolean containsAllDay() {
-        return setFields.contains(EventField.ALL_DAY);
     }
 
     /**

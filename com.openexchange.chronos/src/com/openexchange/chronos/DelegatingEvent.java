@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
+import org.dmfs.rfc5545.DateTime;
 
 /**
  * {@link DelegatingEvent}
@@ -379,12 +380,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public Date getStartDate() {
+    public DateTime getStartDate() {
         return delegate.getStartDate();
     }
 
     @Override
-    public void setStartDate(Date value) {
+    public void setStartDate(DateTime value) {
         delegate.setStartDate(value);
     }
 
@@ -399,32 +400,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public String getStartTimeZone() {
-        return delegate.getStartTimeZone();
-    }
-
-    @Override
-    public void setStartTimeZone(String value) {
-        delegate.setStartTimeZone(value);
-    }
-
-    @Override
-    public void removeStartTimeZone() {
-        delegate.removeStartTimeZone();
-    }
-
-    @Override
-    public boolean containsStartTimeZone() {
-        return delegate.containsStartTimeZone();
-    }
-
-    @Override
-    public Date getEndDate() {
+    public DateTime getEndDate() {
         return delegate.getEndDate();
     }
 
     @Override
-    public void setEndDate(Date value) {
+    public void setEndDate(DateTime value) {
         delegate.setEndDate(value);
     }
 
@@ -436,51 +417,6 @@ public abstract class DelegatingEvent extends Event {
     @Override
     public boolean containsEndDate() {
         return delegate.containsEndDate();
-    }
-
-    @Override
-    public String getEndTimeZone() {
-        return delegate.getEndTimeZone();
-    }
-
-    @Override
-    public void setEndTimeZone(String value) {
-        delegate.setEndTimeZone(value);
-    }
-
-    @Override
-    public void removeEndTimeZone() {
-        delegate.removeEndTimeZone();
-    }
-
-    @Override
-    public boolean containsEndTimeZone() {
-        return delegate.containsEndTimeZone();
-    }
-
-    @Override
-    public boolean getAllDay() {
-        return delegate.getAllDay();
-    }
-
-    @Override
-    public boolean isAllDay() {
-        return delegate.isAllDay();
-    }
-
-    @Override
-    public void setAllDay(boolean value) {
-        delegate.setAllDay(value);
-    }
-
-    @Override
-    public void removeAllDay() {
-        delegate.removeAllDay();
-    }
-
-    @Override
-    public boolean containsAllDay() {
-        return delegate.containsAllDay();
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
+import org.dmfs.rfc5545.DateTime;
 
 /**
  * {@link UnmodifiableEvent}
@@ -221,7 +222,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setStartDate(Date value) {
+    public void setStartDate(DateTime value) {
         throw new UnsupportedOperationException();
     }
 
@@ -231,42 +232,12 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setStartTimeZone(String value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removeStartTimeZone() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEndDate(Date value) {
+    public void setEndDate(DateTime value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void removeEndDate() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEndTimeZone(String value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removeEndTimeZone() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setAllDay(boolean value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removeAllDay() {
         throw new UnsupportedOperationException();
     }
 

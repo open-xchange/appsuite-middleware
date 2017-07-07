@@ -169,10 +169,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * date/time related properties
          */
         Check.startAndEndDate(eventData);
-        EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
-        event.setAllDay(eventData.containsAllDay() ? eventData.getAllDay() : false);
+        EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE);
         Consistency.adjustAllDayDates(event);
-        Consistency.setTimeZone(session, event, calendarUserId);
+        //        Consistency.setTimeZone(session, event, calendarUserId);
         /*
          * classification, status, transparency, color
          */

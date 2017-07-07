@@ -75,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -82,6 +83,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -162,9 +164,9 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * derive checked period (+/- one day to cover floating events in different timezone)
          */
-        TimeZone eventTimeZone = isFloating(event) || null == event.getStartTimeZone() ? getTimeZone(session) : TimeZone.getTimeZone(event.getStartTimeZone());
-        Date from = add(event.getStartDate(), Calendar.DATE, -1, eventTimeZone);
-        Date until = add(event.getEndDate(), Calendar.DATE, 1, eventTimeZone);
+        TimeZone eventTimeZone = isFloating(event) || null == event.getStartDate().getTimeZone() ? getTimeZone(session) : event.getStartDate().getTimeZone();
+        Date from = add(new Date(event.getStartDate().getTimestamp()), Calendar.DATE, -1, eventTimeZone);
+        Date until = add(new Date(event.getEndDate().getTimestamp()), Calendar.DATE, 1, eventTimeZone);
         if (today.after(until)) {
             return Collections.emptyList();
         }
@@ -201,15 +203,18 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 /*
                  * expand & check all occurrences of event series in period
                  */
-                long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
                 Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(eventInPeriod, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
-                    if (event.getStartDate().getTime() < recurrenceId.getValue() + duration && event.getEndDate().getTime() > recurrenceId.getValue()) {
-                        /*
-                         * add conflict for occurrence
-                         */
-                        conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict.getValue()));
+                    DateTime occurrenceEnd = CalendarUtils.calculateEnd(eventInPeriod, recurrenceId);
+                    if (event.getStartDate().before(occurrenceEnd)) {
+                        DateTime occurrenceStart = CalendarUtils.calculateStart(eventInPeriod, recurrenceId);
+                        if (event.getEndDate().after(occurrenceStart)) {
+                            /*
+                             * add conflict for occurrence
+                             */
+                            conflicts.add(getSeriesConflict(eventInPeriod, recurrenceId, conflictingAttendees, hardConflict.getValue()));
+                        }
                     }
                 }
             } else {
@@ -239,7 +244,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
         }
-        long masterEventDuration = masterEvent.getEndDate().getTime() - masterEvent.getStartDate().getTime();
+        long masterEventDuration = masterEvent.getEndDate().getTimestamp() - masterEvent.getStartDate().getTimestamp();
         Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue() + masterEventDuration);
         if (today.after(until)) {
             return Collections.emptyList();
@@ -279,7 +284,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                  * expand & check all occurrences of event series in period
                  */
                 int count = 0;
-                long duration = eventInPeriod.getEndDate().getTime() - eventInPeriod.getStartDate().getTime();
+                long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
                 Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(eventInPeriod, from, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
@@ -300,12 +305,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 }
             } else {
                 for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
-                    if (eventRecurrenceId.getValue() >= eventInPeriod.getEndDate().getTime()) {
+                    if (eventRecurrenceId.getValue() >= eventInPeriod.getEndDate().getTimestamp()) {
                         /*
                          * further occurrences are also "after" the checked event
                          */
                         break;
-                    } else if (eventRecurrenceId.getValue() + masterEventDuration > eventInPeriod.getStartDate().getTime()) {
+                    } else if (eventRecurrenceId.getValue() + masterEventDuration > eventInPeriod.getStartDate().getTimestamp()) {
                         /*
                          * add conflict
                          */
@@ -329,7 +334,6 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         Event eventData = new Event();
         eventData.setStartDate(event.getStartDate());
         eventData.setEndDate(event.getEndDate());
-        eventData.setAllDay(event.isAllDay());
         eventData.setId(event.getId());
         eventData.setRecurrenceId(event.getRecurrenceId());
         eventData.setCreatedBy(event.getCreatedBy());
@@ -353,9 +357,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      */
     private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
         Event eventData = new Event();
-        eventData.setStartDate(new Date(recurrenceId.getValue()));
-        eventData.setEndDate(new Date(recurrenceId.getValue() + (seriesMaster.getEndDate().getTime() - seriesMaster.getStartDate().getTime())));
-        eventData.setAllDay(seriesMaster.isAllDay());
+        eventData.setStartDate(CalendarUtils.calculateStart(seriesMaster, recurrenceId));
+        eventData.setEndDate(CalendarUtils.calculateEnd(seriesMaster, recurrenceId));
         eventData.setId(seriesMaster.getId());
         eventData.setRecurrenceId(recurrenceId);
         eventData.setCreatedBy(seriesMaster.getCreatedBy());
@@ -529,7 +532,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             if (false == conflict1.isHardConflict() && conflict2.isHardConflict()) {
                 return 1;
             }
-            return conflict1.getConflictingEvent().getStartDate().compareTo(conflict2.getConflictingEvent().getStartDate());
+            return Long.compare(conflict1.getConflictingEvent().getStartDate().getTimestamp(), conflict2.getConflictingEvent().getStartDate().getTimestamp());
         }
     };
 

@@ -98,14 +98,14 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /** The event fields returned in free/busy queries by default */
     private static final EventField[] FREEBUSY_FIELDS = {
         EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
-        EventField.ALL_DAY, EventField.SUMMARY, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE,
+        EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE,
         EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
     private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = {
-        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.CLASSIFICATION, EventField.ALL_DAY,
-        EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE,
+        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.CLASSIFICATION,
+        EventField.START_DATE, EventField.END_DATE,
         EventField.TRANSP, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
 
@@ -145,7 +145,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
-        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.START_TIMEZONE, EventField.END_TIMEZONE);
+        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
@@ -224,8 +224,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         resultingOccurrence.removeSeriesId();
         resultingOccurrence.removeClassification();
         resultingOccurrence.setRecurrenceId(recurrenceId);
-        resultingOccurrence.setStartDate(new Date(recurrenceId.getValue()));
-        resultingOccurrence.setEndDate(new Date(recurrenceId.getValue() + (masterEvent.getEndDate().getTime()) - masterEvent.getStartDate().getTime()));
+        resultingOccurrence.setStartDate(CalendarUtils.calculateStart(masterEvent, recurrenceId));
+        resultingOccurrence.setEndDate(CalendarUtils.calculateEnd(masterEvent, recurrenceId));
         return resultingOccurrence;
     }
 
@@ -409,13 +409,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private static List<FreeBusyTime> getFreeBusyTimes(List<Event> events, TimeZone timeZone) {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<FreeBusyTime>(events.size());
         for (Event event : events) {
-            Date start = event.getStartDate();
-            Date end = event.getEndDate();
+            long start = event.getStartDate().getTimestamp();
+            long end = event.getEndDate().getTimestamp();
             if (CalendarUtils.isFloating(event)) {
-                start = CalendarUtils.getDateInTimeZone(start, timeZone);
-                end = CalendarUtils.getDateInTimeZone(end, timeZone);
+                start = CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone);
+                end = CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone);
             }
-            freeBusyTimes.add(new FreeBusyTime(getFbType(event), start, end));
+            freeBusyTimes.add(new FreeBusyTime(getFbType(event), new Date(start), new Date(end)));
         }
         return freeBusyTimes;
     }

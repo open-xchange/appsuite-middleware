@@ -49,10 +49,11 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.Date;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
@@ -64,7 +65,7 @@ import net.fortuna.ical4j.model.property.RecurrenceId;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RecurrenceIdMapping extends ICalDateMapping<VEvent, Event> {
+public class RecurrenceIdMapping extends ICalDateTimeMapping<VEvent, Event> {
 
     /**
      * Initializes a new {@link RecurrenceIdMapping}.
@@ -74,24 +75,17 @@ public class RecurrenceIdMapping extends ICalDateMapping<VEvent, Event> {
 	}
 
 	@Override
-	protected Date getValue(Event object) {
+    protected DateTime getValue(Event object) {
         com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
-        return null != value ? new Date(value.getValue()) : null;
+        if (null == value) {
+            return null;
+        }
+        return CalendarUtils.isAllDay(object) ? new DateTime(value.getValue()).toAllDay() : new DateTime(value.getValue());
 	}
 
 	@Override
-	protected String getTimezone(Event object) {
-		return object.getStartTimeZone();
-	}
-
-	@Override
-	protected boolean hasTime(Event object) {
-		return false == object.isAllDay();
-	}
-
-	@Override
-	protected void setValue(Event object, Date value, String timezone, boolean hasTime) {
-        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
+    protected void setValue(Event object, DateTime value) {
+        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value.getTimestamp()) : null);
 	}
 
 	@Override

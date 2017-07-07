@@ -49,9 +49,8 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
-import java.util.Date;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Parameter;
@@ -70,7 +69,7 @@ import net.fortuna.ical4j.util.Dates;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
+public class DtEndMapping extends ICalDateTimeMapping<VEvent, Event> {
 
     /**
      * Initializes a new {@link DtEndMapping}.
@@ -80,25 +79,13 @@ public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
 	}
 
 	@Override
-	protected Date getValue(Event object) {
+    protected org.dmfs.rfc5545.DateTime getValue(Event object) {
 		return object.getEndDate();
 	}
 
 	@Override
-	protected String getTimezone(Event object) {
-		return object.getEndTimeZone();
-	}
-
-	@Override
-	protected boolean hasTime(Event object) {
-		return false == object.isAllDay();
-	}
-
-	@Override
-	protected void setValue(Event object, Date value, String timezone, boolean hasTime) {
+    protected void setValue(Event object, org.dmfs.rfc5545.DateTime value) {
 		object.setEndDate(value);
-		object.setEndTimeZone(timezone);
-		object.setAllDay(false == hasTime);
 	}
 
 	@Override

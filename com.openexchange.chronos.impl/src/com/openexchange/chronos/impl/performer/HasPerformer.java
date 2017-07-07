@@ -141,11 +141,11 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
                     continue; // skip if user doesn't match event owner
                 }
                 if (isSeriesMaster(event)) {
-                    long duration = event.getEndDate().getTime() - event.getStartDate().getTime();
+                    long duration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(event, minimumEndTime, maximumStartTime);
                     while (iterator.hasNext() && false == hasEvents) {
                         RecurrenceId recurrenceId = iterator.next();
-                        Period occurence = new Period(new Date(recurrenceId.getValue()), new Date(recurrenceId.getValue() + duration), event.isAllDay());
+                        Period occurence = new Period(new Date(recurrenceId.getValue()), new Date(recurrenceId.getValue() + duration), event.getStartDate().isAllDay());
                         hasEvents |= isInRange(occurence, minimumEndTime, maximumStartTime, timeZone);
                     }
                 } else {

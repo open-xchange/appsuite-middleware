@@ -226,7 +226,13 @@ public class Check {
     }
 
     /**
-     * Checks that the start- and enddate properties are set in an event, and ensures that the end date does is not before the start date.
+     * Checks
+     * <ul>
+     * <li>that the start- and enddate properties are set in the event</li>
+     * <li>that the end date does is not before the start date</li>
+     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
+     * <li>that both start and enddate are either both <i>floating</i> or not</li>
+     * </ul>
      *
      * @param event The event to check
      * @see Check#mandatoryFields(Event, EventField...)
@@ -235,7 +241,13 @@ public class Check {
     public static void startAndEndDate(Event event) throws OXException {
         mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
         if (event.getStartDate().after(event.getEndDate())) {
-            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTime()), L(event.getEndDate().getTime()));
+            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTimestamp()), L(event.getEndDate().getTimestamp()));
+        }
+        if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
+            throw new OXException(); //TODO
+        }
+        if (event.getStartDate().isFloating() != event.getEndDate().isFloating()) {
+            throw new OXException(); //TODO
         }
     }
 

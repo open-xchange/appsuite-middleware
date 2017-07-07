@@ -36,6 +36,7 @@ Import-Package: com.openexchange.ajax.container,
  net.fortuna.ical4j.zoneinfo.outlook,
  org.apache.commons.collections,
  org.apache.commons.collections.bidimap,
+ org.dmfs.rfc5545,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

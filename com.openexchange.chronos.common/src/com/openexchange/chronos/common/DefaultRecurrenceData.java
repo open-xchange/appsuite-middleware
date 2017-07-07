@@ -88,7 +88,7 @@ public class DefaultRecurrenceData implements RecurrenceData {
      * @param seriesMaster The series master event
      */
     public DefaultRecurrenceData(Event seriesMaster) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.isAllDay(), isFloating(seriesMaster) ? null : seriesMaster.getStartTimeZone(), seriesMaster.getStartDate().getTime());
+        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate().isAllDay(), isFloating(seriesMaster) ? null : seriesMaster.getStartDate().getTimeZone().getID(), seriesMaster.getStartDate().getTimestamp());
     }
 
     @Override

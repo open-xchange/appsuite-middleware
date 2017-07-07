@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
@@ -313,11 +314,12 @@ public class AlarmUtils extends CalendarUtils {
             return trigger.getDateTime();
         }
         if (null != trigger.getDuration()) {
-            Date relatedDate = getRelatedDate(trigger.getRelated(), event);
+            DateTime relatedDate = getRelatedDate(trigger.getRelated(), event);
             if (isFloating(event)) {
-                relatedDate = getDateInTimeZone(relatedDate, timeZone);
+                long dateInTimeZone = getDateInTimeZone(relatedDate, timeZone);
+                relatedDate = new DateTime(timeZone, dateInTimeZone);
             }
-            Calendar calendar = initCalendar(timeZone, relatedDate);
+            Calendar calendar = initCalendar(timeZone, relatedDate.getTimestamp());
             return applyDuration(trigger.getDuration(), calendar).getTime();
         }
         return null;
@@ -402,8 +404,8 @@ public class AlarmUtils extends CalendarUtils {
             return trigger.getDuration();
         }
         if (null != trigger.getDateTime()) {
-            Date relatedDate = getRelatedDate(trigger.getRelated(), event);
-            long diff = trigger.getDateTime().getTime() - relatedDate.getTime();
+            DateTime relatedDate = getRelatedDate(trigger.getRelated(), event);
+            long diff = trigger.getDateTime().getTime() - relatedDate.getTimestamp();
             return getDuration(diff, TimeUnit.MILLISECONDS);
         }
         return null;
@@ -430,7 +432,7 @@ public class AlarmUtils extends CalendarUtils {
         Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
-            if (occurrence.getStartDate().before(startDate)) {
+            if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {
                 continue;
             }
             Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);
@@ -451,7 +453,7 @@ public class AlarmUtils extends CalendarUtils {
      * @param event The event the trigger is associated with
      * @return The related date
      */
-    public static Date getRelatedDate(Trigger.Related related, Event event) {
+    public static DateTime getRelatedDate(Trigger.Related related, Event event) {
         return Related.END.equals(related) ? event.getEndDate() : event.getStartDate();
     }
 

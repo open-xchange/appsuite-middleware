@@ -25,4 +25,8 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.slf4j
 Export-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
- com.openexchange.chronos.service
+ com.openexchange.chronos.service,
+ org.dmfs.rfc5545,
+ org.dmfs.rfc5545.calendarmetrics
+Bundle-ClassPath: .,
+ lib/rfc5545-datetime-0.2.4.jar

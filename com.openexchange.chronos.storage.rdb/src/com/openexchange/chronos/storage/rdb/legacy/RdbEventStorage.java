@@ -84,6 +84,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DbMultiMapping;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -536,8 +537,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      */
     RecurrenceData selectRecurrenceData(Connection connection, int seriesID, boolean deleted) throws SQLException, OXException {
         EventField[] fields = EventMapper.getInstance().getMappedFields(new EventField[] {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE,
-            EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
         });
         String sql = new StringBuilder()
             .append("SELECT ").append(EventMapper.getInstance().getColumns(fields))
@@ -596,6 +596,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private static String getColumnLabel(EventField field, String prefix) throws OXException {
         DbMapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+        if (DbMultiMapping.class.isInstance(mapping)) {
+            if (null != prefix) {
+                return ((DbMultiMapping<?, Event>) mapping).getColumnLabels(prefix)[0];
+            } else {
+                return ((DbMultiMapping<?, Event>) mapping).getColumnLabels()[0];
+            }
+        }
         return null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
     }
 

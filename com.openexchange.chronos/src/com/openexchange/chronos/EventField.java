@@ -126,21 +126,9 @@ public enum EventField {
      */
     START_DATE,
     /**
-     * The start timezone of the event.
-     */
-    START_TIMEZONE,
-    /**
      * The end date of the event.
      */
     END_DATE,
-    /**
-     * The end timezone of the event.
-     */
-    END_TIMEZONE,
-    /**
-     * The all-day character of the event.
-     */
-    ALL_DAY,
     /**
      * The time transparency of the event.
      */

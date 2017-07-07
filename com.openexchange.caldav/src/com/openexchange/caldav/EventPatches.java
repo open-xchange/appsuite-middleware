@@ -50,6 +50,7 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -65,6 +66,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -707,8 +709,8 @@ public class EventPatches {
                                     Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(
                                         exportedEvent, snoozedAlarm.getAcknowledged(), null);
                                     if (iterator.hasNext()) {
-                                        Date relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
-                                        String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTime()) + "000";
+                                        DateTime relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
+                                        String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTimestamp()) + "000";
                                         addExtendedProperty(exportedEvent, new ExtendedProperty(propertyName, Tools.formatAsUTC(snoozeTime)));
                                     }
                                 } catch (OXException e) {

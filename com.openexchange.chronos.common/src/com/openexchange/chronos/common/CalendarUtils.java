@@ -70,6 +70,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -389,6 +390,20 @@ public class CalendarUtils {
     }
 
     /**
+     * Converts a so-called <i>floating</i> date into a date in a concrete timezone by applying the actual timezone offset on that date.
+     *
+     * @param floatingDate The floating date to convert (usually the raw date in <code>UTC</code>)
+     * @param timeZone The target timezone
+     * @return The date in the target timezone, with the corresponding timezone offset applied
+     */
+    public static long getDateInTimeZone(DateTime floatingDate, TimeZone timeZone) {
+        if (false == floatingDate.isFloating() || null == floatingDate.getTimeZone()) {
+            return floatingDate.getTimestamp();
+        }
+        return floatingDate.getTimestamp() - timeZone.getOffset(floatingDate.getTimestamp());
+    }
+
+    /**
      * Adds or subtracts the specified amount of time of the given calendar field to the supplied date.<p/>
      * The calendar is initialized with <code>UTC</code> timezone implicitly.
      *
@@ -486,6 +501,22 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new calendar in a specific timezone and sets the initial time from the timestamp of the supplie date-time.
+     *
+     * @param timeZone The timezone to use for the calendar
+     * @param time The initial time to set, or <code>null</code> to intialize with the default time
+     * @return A new calendar instance
+     */
+    @Deprecated
+    public static Calendar initCalendar(TimeZone timeZone, DateTime time) {
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        if (null != time) {
+            calendar.setTimeInMillis(time.getTimestamp());
+        }
+        return calendar;
+    }
+
+    /**
      * Initializes a new calendar in a specific timezone and sets the initial time.
      *
      * @param timeZone The timezone to use for the calendar
@@ -576,7 +607,7 @@ public class CalendarUtils {
          */
         long start = null == from ? Long.MIN_VALUE : from.getTime();
         long end = null == until ? Long.MAX_VALUE : until.getTime();
-        long dtStart = event.getStartDate().getTime();
+        long dtStart = event.getStartDate().getTimestamp();
         if (isFloating(event)) {
             dtStart -= timeZone.getOffset(dtStart);
         }
@@ -589,11 +620,11 @@ public class CalendarUtils {
             dtEnd = 0;
             hasDtEnd = false;
         } else {
-            dtEnd = event.getEndDate().getTime();
+            dtEnd = event.getEndDate().getTimestamp();
             if (isFloating(event)) {
                 dtEnd -= timeZone.getOffset(dtEnd);
             }
-            if (event.isAllDay()) {
+            if (event.getStartDate().isAllDay()) {
                 Calendar calendar = initCalendar(timeZone, dtStart);
                 calendar.add(Calendar.DATE, 1);
                 hasDtEnd = calendar.getTimeInMillis() != dtEnd;
@@ -610,7 +641,7 @@ public class CalendarUtils {
             return start < dtEnd && end > dtStart;
         } else {
             // VEVENT has the DTEND property? N
-            if (false == event.isAllDay()) {
+            if (false == event.getStartDate().isAllDay()) {
                 // DTSTART property is a DATE-TIME value? Y
                 // (start <= DTSTART AND end > DTSTART)
                 return start <= dtStart && end > dtStart;
@@ -637,9 +668,9 @@ public class CalendarUtils {
      * @return <code>true</code> if the event falls into the time range of the other, <code>false</code>, otherwise
      */
     public static boolean isInRange(Event event, Event event2, TimeZone timeZone) {
-        Date from = isFloating(event2) ? getDateInTimeZone(event2.getStartDate(), timeZone) : event2.getStartDate();
-        Date until = isFloating(event2) ? getDateInTimeZone(event2.getEndDate(), timeZone) : event2.getEndDate();
-        return isInRange(event, from, until, timeZone);
+        long from = isFloating(event2) ? getDateInTimeZone(event2.getStartDate(), timeZone) : event2.getStartDate().getTimestamp();
+        long until = isFloating(event2) ? getDateInTimeZone(event2.getEndDate(), timeZone) : event2.getEndDate().getTimestamp();
+        return isInRange(event, new Date(from), new Date(until), timeZone);
     }
 
     /**
@@ -667,9 +698,18 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is <i>floating</i>, <code>false</code>, otherwise
      */
     public static boolean isFloating(Event event) {
-        // - floating events that are not "all-day"?
-        // - better rely on null == event.getStartTimeZone()?
-        return event.isAllDay();
+        return event.getStartDate().isFloating();
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event has <i>all-day</i> character or not, i.e. its start- and endtime do not contain
+     * a time of day or not. This implicitly implies that the event is also <i>floating</i>.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event has <i>all-day</i> character, <code>false</code>, otherwise
+     */
+    public static boolean isAllDay(Event event) {
+        return null != event.getStartDate() && event.getStartDate().isAllDay();
     }
 
     /**
@@ -1073,6 +1113,40 @@ public class CalendarUtils {
      */
     public static boolean isOrganizerSchedulingResource(Event event, int calendarUserId) {
         return isGroupScheduled(event) && null != event.getOrganizer() && event.getOrganizer().getEntity() == calendarUserId;
+    }
+
+    /**
+     * Calculates the effective start date of a specific occurrence of an event series.
+     *
+     * @param seriesMaster The series master event
+     * @param recurrenceId The recurrence identifier of the occurrence
+     * @return The start date of the occurrence
+     */
+    public static DateTime calculateStart(Event seriesMaster, RecurrenceId recurrenceId) {
+        //TODO check
+        if (seriesMaster.getStartDate().isAllDay()) {
+            return new DateTime(recurrenceId.getValue()).toAllDay();
+        }
+        return new DateTime(seriesMaster.getStartDate().getTimeZone(), recurrenceId.getValue());
+    }
+
+    /**
+     * Calculates the effective end date of a specific occurrence of an event series.
+     *
+     * @param seriesMaster The series master event
+     * @param recurrenceId The recurrence identifier of the occurrence
+     * @return The end date of the occurrence
+     */
+    public static DateTime calculateEnd(Event seriesMaster, RecurrenceId recurrenceId) {
+        //TODO check
+        long startMillis = seriesMaster.getStartDate().getTimestamp();
+        long endMillis = seriesMaster.getEndDate().getTimestamp();
+        long duration = endMillis - startMillis;
+        long occurrenceEnd = recurrenceId.getValue() + duration;
+        if (seriesMaster.getEndDate().isAllDay()) {
+            return new DateTime(occurrenceEnd).toAllDay();
+        }
+        return new DateTime(seriesMaster.getEndDate().getTimeZone(), occurrenceEnd);
     }
 
     /**

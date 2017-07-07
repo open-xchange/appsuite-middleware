@@ -114,7 +114,7 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
     }
 
     protected boolean hasTime(Event object) {
-        return false == object.isAllDay();
+        return null == object.getStartDate() || false == object.getStartDate().isAllDay();
     }
 
 }

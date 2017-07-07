@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -113,19 +114,29 @@ public class Compat {
      * @return The (possibly adjusted) event reference
      */
     public static Event adjustAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
+        if (event.containsEndDate() && null != event.getEndDate()) {
+            DateTime startDate = event.getStartDate();
+            if (null != startDate) {
+                if (startDate.isAllDay()) {
+                    event.setEndDate(event.getEndDate().toAllDay());
+                } else if (null != startDate.getTimeZone()) {
+                    event.setEndDate(new DateTime(startDate.getTimeZone(), event.getEndDate().getTimestamp()));
+                }
+            }
+        }
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             /*
              * convert legacy series pattern into proper recurrence rule after extracting
              * series pattern and "absolute duration" / "recurrence calculator" field
              */
-            TimeZone timeZone = optTimeZone(event.getStartTimeZone(), TimeZones.UTC);
+            TimeZone timeZone = null != event.getStartDate().getTimeZone() ? event.getStartDate().getTimeZone() : TimeZones.UTC;
             int absoluteDuration = 0;
             RecurrenceData recurrenceData = null;
             try {
                 int idx = event.getRecurrenceRule().indexOf('~');
                 absoluteDuration = Integer.parseInt(event.getRecurrenceRule().substring(0, idx));
                 String databasePattern = event.getRecurrenceRule().substring(idx + 1);
-                recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.isAllDay());
+                recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.getStartDate().isAllDay());
             } catch (IllegalArgumentException | OXException e) {
                 String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
                 eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, message, e);
@@ -138,8 +149,13 @@ public class Compat {
                      */
                     Period seriesPeriod = new Period(event);
                     Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
-                    event.setStartDate(masterPeriod.getStartDate());
-                    event.setEndDate(masterPeriod.getEndDate());
+                    if (masterPeriod.isAllDay()) {
+                        event.setStartDate(new DateTime(masterPeriod.getStartDate().getTime()).toAllDay());
+                        event.setEndDate(new DateTime(masterPeriod.getEndDate().getTime()).toAllDay());
+                    } else {
+                        event.setStartDate(new DateTime(event.getStartDate().getTimeZone(), masterPeriod.getStartDate().getTime()));
+                        event.setEndDate(new DateTime(event.getEndDate().getTimeZone(), masterPeriod.getEndDate().getTime()));
+                    }
                     /*
                      * transform legacy "recurrence date positions" for exceptions to recurrence ids
                      */
@@ -185,12 +201,6 @@ public class Compat {
             event.removeRecurrenceId();
             event.removeChangeExceptionDates();
             event.removeDeleteExceptionDates();
-        }
-        /*
-         * take over timezone
-         */
-        if (event.containsStartTimeZone()) {
-            event.setEndTimeZone(event.getStartTimeZone());
         }
         /*
          * enhance organizer with static properties
@@ -245,9 +255,15 @@ public class Compat {
                 /*
                  * expand recurrence master start- and enddate to cover the whole series period
                  */
+                TimeZone timeZone = optTimeZone(recurrenceData.getTimeZoneID());
                 Period seriesPeriod = getImplicitSeriesPeriod(Services.getService(RecurrenceService.class), event);
-                eventData.setStartDate(seriesPeriod.getStartDate());
-                eventData.setEndDate(seriesPeriod.getEndDate());
+                if (seriesPeriod.isAllDay()) {
+                    eventData.setStartDate(new DateTime(seriesPeriod.getStartDate().getTime()).toAllDay());
+                    eventData.setEndDate(new DateTime(seriesPeriod.getEndDate().getTime()).toAllDay());
+                } else {
+                    eventData.setStartDate(new DateTime(timeZone, seriesPeriod.getStartDate().getTime()));
+                    eventData.setEndDate(new DateTime(timeZone, seriesPeriod.getEndDate().getTime()));
+                }
             }
         }
         if (isSeriesException(eventData)) {
@@ -363,12 +379,12 @@ public class Compat {
         /*
          * remember time fraction of actual start- and end-date
          */
-        TimeZone timeZone = isFloating(seriesMaster) ? TimeZones.UTC : optTimeZone(seriesMaster.getStartTimeZone(), TimeZones.UTC);
+        TimeZone timeZone = isFloating(seriesMaster) ? TimeZones.UTC : optTimeZone(seriesMaster.getStartDate().getTimeZone().getID(), TimeZones.UTC);
         Calendar calendar = initCalendar(timeZone, seriesMaster.getStartDate());
         int startHour = calendar.get(Calendar.HOUR_OF_DAY);
         int startMinute = calendar.get(Calendar.MINUTE);
         int startSecond = calendar.get(Calendar.SECOND);
-        calendar.setTime(seriesMaster.getEndDate());
+        calendar.setTimeInMillis(seriesMaster.getEndDate().getTimestamp());
         int endHour = calendar.get(Calendar.HOUR_OF_DAY);
         int endMinute = calendar.get(Calendar.MINUTE);
         int endSecond = calendar.get(Calendar.SECOND);
@@ -384,12 +400,12 @@ public class Compat {
             calendar.set(Calendar.SECOND, startSecond);
             startDate = calendar.getTime();
         } else {
-            startDate = seriesMaster.getStartDate();
+            startDate = new Date(seriesMaster.getStartDate().getTimestamp());
         }
         /*
          * iterate recurrence and take over end date of "last" occurrence
          */
-        long millis = seriesMaster.getEndDate().getTime();
+        long millis = seriesMaster.getEndDate().getTimestamp();
         for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue(), i++)
             ;
         calendar.setTimeInMillis(millis);
@@ -407,7 +423,7 @@ public class Compat {
         if (startOffset != endOffset) {
             endDate.setTime(endDate.getTime() + endOffset - startOffset);
         }
-        return new Period(startDate, endDate, seriesMaster.isAllDay());
+        return new Period(startDate, endDate, seriesMaster.getStartDate().isAllDay());
     }
 
     /**

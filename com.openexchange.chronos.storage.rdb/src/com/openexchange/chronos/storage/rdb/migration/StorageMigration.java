@@ -224,7 +224,7 @@ public class StorageMigration {
     }
 
     private static final Date getDefaultMinTombstoneLastModified() {
-        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, (Date) null);
         calendar.add(Calendar.MONTH, -1 * DEFAULT_MAX_TOMBSTONE_AGE_IN_MONTHS);
         return calendar.getTime();
     }

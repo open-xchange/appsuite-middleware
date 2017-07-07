@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
+import java.sql.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
@@ -87,7 +89,11 @@ public class DurationMapping extends AbstractICalMapping<VEvent, Event> {
         }
         DtStart dtStart = component.getStartDate();
         if (null != dtStart && null != dtStart.getDate()) {
-            object.setEndDate(duration.getDuration().getTime(dtStart.getDate()));
+            Event event = new Event();
+            new DtStartMapping().importICal(component, event, parameters, warnings);
+            DateTime startDate = event.getStartDate();
+            java.util.Date date = duration.getDuration().getTime(new Date(startDate.getTimestamp()));
+            object.setEndDate(new DateTime(startDate.getTimeZone(), date.getTime()));
         }
     }
 

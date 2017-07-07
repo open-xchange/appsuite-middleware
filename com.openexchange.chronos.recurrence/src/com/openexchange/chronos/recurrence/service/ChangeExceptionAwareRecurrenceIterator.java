@@ -97,7 +97,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
         this.changeExceptions = new TreeMap<Date, Event>();
         if (changeExceptions != null) {
             for (Event e : changeExceptions) {
-                this.changeExceptions.put(e.getStartDate(), e);
+                this.changeExceptions.put(new Date(e.getStartDate().getTimestamp()), e);
             }
         }
 
@@ -107,7 +107,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
         if (start != null) {
             while (changeIterator.hasNext()) {
                 Date tmp = changeIterator.next();
-                if (this.changeExceptions.get(tmp).getEndDate().after(start.getTime())) {
+                if (this.changeExceptions.get(tmp).getEndDate().getTimestamp() > start.getTimeInMillis()) {
                     changeLookahead = tmp;
                     break;
                 }
@@ -167,7 +167,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
         if (regularLookahead == null) {
             // No more regular occurrences, continue with change exceptions
             Event candidate = changeExceptions.get(changeLookahead);
-            if (end != null && !candidate.getStartDate().before(end.getTime())) {
+            if (end != null && candidate.getStartDate().getTimestamp() >= end.getTimeInMillis()) {
                 // Right boundary reached
                 next = null;
                 return;
@@ -180,12 +180,12 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
         }
 
         // Determine correct order. Change exception wins on equal.
-        if (regularLookahead.getStartDate().before(changeLookahead)) {
+        if (regularLookahead.getStartDate().getTimestamp() < changeLookahead.getTime()) {
             next = regularLookahead;
             regularLookahead = null;
         } else {
             Event candidate = changeExceptions.get(changeLookahead);
-            if (end != null && !candidate.getStartDate().before(end.getTime())) {
+            if (end != null && candidate.getStartDate().getTimestamp() >= end.getTimeInMillis()) {
                 next = regularLookahead;
                 regularLookahead = null;
             } else {

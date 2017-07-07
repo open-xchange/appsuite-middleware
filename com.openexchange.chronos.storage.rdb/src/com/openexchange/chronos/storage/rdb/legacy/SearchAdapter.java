@@ -284,7 +284,7 @@ public class SearchAdapter {
     }
 
     private void appendRangeFilter(List<String> queries) throws OXException {
-        Calendar calendar = initCalendar(TimeZones.UTC, null);
+        Calendar calendar = initCalendar(TimeZones.UTC, (Date) null);
         for (String query : queries) {
             switch (query) {
                 case "one_month":

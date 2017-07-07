@@ -49,17 +49,12 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.Calendar;
 import java.util.Date;
+import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link CalendarService}
@@ -75,12 +70,12 @@ public class Consistency {
      * @param event The event to set the timezones in
      * @param user The user to get the fallback timezone from
      */
-    public static void setTimeZone(Event event, User user) throws OXException {
-        String startTimezone = event.getStartTimeZone();
-        event.setStartTimeZone(null == startTimezone ? user.getTimeZone() : Check.timeZoneExists(startTimezone));
-        String endTimezone = event.getEndTimeZone();
-        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
-    }
+    //    public static void setTimeZone(Event event, User user) throws OXException {
+    //        String startTimezone = event.getStartTimeZone();
+    //        event.setStartTimeZone(null == startTimezone ? user.getTimeZone() : Check.timeZoneExists(startTimezone));
+    //        String endTimezone = event.getEndTimeZone();
+    //        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
+    //    }
 
     /**
      * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.
@@ -89,12 +84,12 @@ public class Consistency {
      * @param event The event to set the timezones in
      * @param calendarUserId The identifier of the user to get the fallback timezone from
      */
-    public static void setTimeZone(CalendarSession session, Event event, int calendarUserId) throws OXException {
-        String startTimezone = event.getStartTimeZone();
-        event.setStartTimeZone(null == startTimezone ? session.getEntityResolver().getTimeZone(calendarUserId).getID() : Check.timeZoneExists(startTimezone));
-        String endTimezone = event.getEndTimeZone();
-        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
-    }
+    //    public static void setTimeZone(CalendarSession session, Event event, int calendarUserId) throws OXException {
+    //        String startTimezone = event.getStartTimeZone();
+    //        event.setStartTimeZone(null == startTimezone ? session.getEntityResolver().getTimeZone(calendarUserId).getID() : Check.timeZoneExists(startTimezone));
+    //        String endTimezone = event.getEndTimeZone();
+    //        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
+    //    }
 
     /**
      * Adjusts the start- and end-date of the supplied event in case it is marked as "all-day". This includes the truncation of the
@@ -104,22 +99,10 @@ public class Consistency {
      * @param event The event to adjust
      */
     public static void adjustAllDayDates(Event event) {
-        if (event.isAllDay()) {
-            if (event.containsStartDate() && null != event.getStartDate()) {
-                Date truncatedDate = CalendarUtils.truncateTime(event.getStartDate(), TimeZones.UTC);
-                if (false == truncatedDate.equals(event.getStartDate())) {
-                    event.setStartDate(truncatedDate);
-                }
-            }
+        if (null != event.getStartDate() && event.getStartDate().isAllDay()) {
             if (event.containsEndDate() && null != event.getEndDate()) {
-                Date truncatedDate = CalendarUtils.truncateTime(event.getEndDate(), TimeZones.UTC);
-                if (truncatedDate.equals(event.getStartDate())) {
-                    Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, truncatedDate);
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
-                    truncatedDate = calendar.getTime();
-                }
-                if (false == truncatedDate.equals(event.getEndDate())) {
-                    event.setEndDate(truncatedDate);
+                if (event.getEndDate().equals(event.getStartDate())) {
+                    event.setEndDate(event.getEndDate().addDuration(new Duration(1, 1, 0)));
                 }
             }
         }

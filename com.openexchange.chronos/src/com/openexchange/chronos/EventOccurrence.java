@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos;
 
-import java.util.Date;
 import java.util.SortedSet;
+import org.dmfs.rfc5545.DateTime;
 
 /**
  * {@link EventOccurrence}
@@ -61,8 +61,8 @@ import java.util.SortedSet;
 public class EventOccurrence extends UnmodifiableEvent {
 
     private final RecurrenceId recurrenceId;
-    private final Date startDate;
-    private final Date endDate;
+    private final DateTime startDate;
+    private final DateTime endDate;
 
     /**
      * Initializes a new {@link EventOccurrence}.
@@ -73,7 +73,7 @@ public class EventOccurrence extends UnmodifiableEvent {
     public EventOccurrence(Event seriesMaster, RecurrenceId recurrenceId) {
         super(seriesMaster);
         this.recurrenceId = recurrenceId;
-        this.startDate = new Date(recurrenceId.getValue());
+        this.startDate = calculateStart(seriesMaster, recurrenceId.getValue());
         this.endDate = calculateEnd(seriesMaster, recurrenceId.getValue());
     }
 
@@ -88,7 +88,7 @@ public class EventOccurrence extends UnmodifiableEvent {
     }
 
     @Override
-    public Date getStartDate() {
+    public DateTime getStartDate() {
         return startDate;
     }
 
@@ -98,7 +98,7 @@ public class EventOccurrence extends UnmodifiableEvent {
     }
 
     @Override
-    public Date getEndDate() {
+    public DateTime getEndDate() {
         return endDate;
     }
 
@@ -127,11 +127,23 @@ public class EventOccurrence extends UnmodifiableEvent {
         return false;
     }
 
-    private static Date calculateEnd(Event seriesMaster, long occurreneStart) {
-        long startMillis = seriesMaster.getStartDate().getTime();
-        long endMillis = seriesMaster.getEndDate().getTime();
+    private static DateTime calculateStart(Event seriesMaster, long occurreneStart) {
+        if (seriesMaster.getStartDate().isAllDay()) {
+            return new DateTime(occurreneStart).toAllDay();
+        }
+        return new DateTime(seriesMaster.getStartDate().getTimeZone(), occurreneStart);
+    }
+
+    private static DateTime calculateEnd(Event seriesMaster, long occurreneStart) {
+        //TODO
+        long startMillis = seriesMaster.getStartDate().getTimestamp();
+        long endMillis = seriesMaster.getEndDate().getTimestamp();
         long duration = endMillis - startMillis;
-        return new Date(occurreneStart + duration);
+        long occurrenceEnd = occurreneStart + duration;
+        if (seriesMaster.getEndDate().isAllDay()) {
+            return new DateTime(occurrenceEnd).toAllDay();
+        }
+        return new DateTime(seriesMaster.getEndDate().getTimeZone(), occurrenceEnd);
     }
 
 }

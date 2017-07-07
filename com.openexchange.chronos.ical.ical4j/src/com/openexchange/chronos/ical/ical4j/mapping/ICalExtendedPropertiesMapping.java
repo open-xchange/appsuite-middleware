@@ -63,6 +63,7 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.XProperty;
 
@@ -164,7 +165,11 @@ public abstract class ICalExtendedPropertiesMapping<T extends Component, U> exte
         ParameterList parameterList = new ParameterList();
         if (null != list && 0 < list.size()) {
             for (ExtendedPropertyParameter entry : list) {
-                parameterList.add(new XParameter(entry.getName(), entry.getValue()));
+                if (Parameter.VALUE.equals(entry.getName())) {
+                    parameterList.add(new Value(entry.getValue()));
+                } else {
+                    parameterList.add(new XParameter(entry.getName(), entry.getValue()));
+                }
             }
         }
         return parameterList;
