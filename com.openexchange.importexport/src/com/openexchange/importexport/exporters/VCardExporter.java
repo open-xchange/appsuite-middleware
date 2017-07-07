@@ -78,6 +78,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
@@ -204,6 +206,8 @@ public class VCardExporter implements BatchCapableExporter {
         Contact.YOMI_FIRST_NAME,
         Contact.YOMI_LAST_NAME
     };
+    
+    private static final String VCARD_CONTACTS_NAME = "Contacts";
 
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
@@ -444,7 +448,7 @@ public class VCardExporter implements BatchCapableExporter {
             String folderId = batchIds.keySet().iterator().next();
             List<String> contactIdList = batchIds.get(folderId);
             if (contactIdList.size() > 1) {
-                sb.append("Batch Contacts.");
+                sb.append(getLocalizedContactsName(sessionObj));
             } else {
                 //exactly one contact to export, file name equals contact name
                 String batchId = batchIds.get(folderId).get(0);                
@@ -452,7 +456,7 @@ public class VCardExporter implements BatchCapableExporter {
             }            
         } else {
             //batch of contact ids from different folders, file name is set to a default
-            sb.append("Batch Contacts.");
+            sb.append(getLocalizedContactsName(sessionObj));
         }        
         return sb.toString();
     }
@@ -482,5 +486,9 @@ public class VCardExporter implements BatchCapableExporter {
         }
         sb.append(".");
         return sb.toString();
+    }    
+    
+    private String getLocalizedContactsName(ServerSession session) {
+        return StringHelper.valueOf(session.getUser().getLocale()).getString(VCARD_CONTACTS_NAME)+".";
     }
 }
