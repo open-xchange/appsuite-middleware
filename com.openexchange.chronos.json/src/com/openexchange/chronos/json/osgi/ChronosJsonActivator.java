@@ -59,6 +59,7 @@ import com.openexchange.chronos.json.converter.CalendarExceptionDetailParser;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -91,6 +92,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             /*
              * register result converters
              */
+            registerService(ResultConverter.class, new FreeBusyConverter());
             registerService(ResultConverter.class, new EventResultConverter());
             registerService(ResultConverter.class, new EventConflictResultConverter());
             registerService(ResultConverter.class, new CalendarResultConverter());

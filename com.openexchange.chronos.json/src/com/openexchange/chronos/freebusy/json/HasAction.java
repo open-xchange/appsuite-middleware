@@ -49,43 +49,47 @@
 
 package com.openexchange.chronos.freebusy.json;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.json.converter.FreeBusyConverter;
+import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- *
- * {@link ChronosFreeBusyActionFactory}
+ * {@link HasAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosFreeBusyActionFactory implements AJAXActionServiceFactory {
+public class HasAction extends AbstractFreeBusyAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
 
-    public ChronosFreeBusyActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("has", new HasAction(services));
-        actions.put("check", new CheckConflictAction(services));
-        actions.put("events", new EventsAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link HasAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected HasAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
+        Date from = parseDate(requestData, "from");
+        Date until = parseDate(requestData, "until");
+        boolean[] hasEvents = freeBusyAccess.hasEventsBetween(from, until);
+        return new AJAXRequestResult(hasEvents, FreeBusyConverter.INPUT_FORMAT);
     }
 
 }

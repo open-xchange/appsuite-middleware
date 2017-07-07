@@ -617,7 +617,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
                 if (result == null) {
                     result = new ArrayList<>(eventConflicts.size());
                 }
-                for (EventConflict conflict : result) {
+                for (EventConflict conflict : eventConflicts) {
                     result.add(new IDManglingEventConflict(conflict, new IDManglingEvent(conflict.getConflictingEvent(), account.getAccountId())));
                 }
             }

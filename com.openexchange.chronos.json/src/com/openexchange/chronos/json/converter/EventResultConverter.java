@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.converter;
 
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -70,9 +72,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EventResultConverter implements ResultConverter {
 
+    public static final String INPUT_FORMAT = "event";
+
     @Override
     public String getInputFormat() {
-        return "event";
+        return INPUT_FORMAT;
     }
 
     @Override
@@ -109,6 +113,11 @@ public class EventResultConverter implements ResultConverter {
              * convert list of calendars
              */
             resultObject = convertEvents((List<Event>) resultObject, timeZoneID, session);
+        } else if (Map.class.isInstance(resultObject)) {
+            /*
+             * convert map of attendee events pairs
+             */
+            resultObject = convertEvents((Map<Attendee, List<Event>>) resultObject, timeZoneID, session);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -132,6 +141,29 @@ public class EventResultConverter implements ResultConverter {
             jsonArray.put(convertEvent(event, timeZoneID, session));
         }
         return jsonArray;
+    }
+
+    private JSONArray convertEvents(Map<Attendee, List<Event>> eventsPerAttendee, String timeZoneID, ServerSession session) throws OXException {
+        if (null == eventsPerAttendee) {
+            return null;
+        }
+        JSONArray resultArray = new JSONArray(eventsPerAttendee.size());
+        try {
+            for (Attendee att : eventsPerAttendee.keySet()) {
+                List<Event> events = eventsPerAttendee.get(att);
+                JSONObject json = new JSONObject(2);
+                json.put("attendee", att.getEntity());
+                JSONArray jsonArray = new JSONArray(events.size());
+                for (Event event : events) {
+                    jsonArray.put(convertEvent(event, timeZoneID, session));
+                }
+                json.put("events", jsonArray);
+                resultArray.put(json);
+            }
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+        return resultArray;
     }
 
 }

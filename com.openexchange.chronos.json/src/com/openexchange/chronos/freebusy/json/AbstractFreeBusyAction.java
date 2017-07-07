@@ -60,15 +60,18 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.action.GetAction;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -230,6 +233,25 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
             fields[x++] = EventField.valueOf(str.toUpperCase());
         }
         return fields;
+    }
+
+    protected static List<Attendee> parseAttendeesParameter(AJAXRequestData request) throws OXException {
+
+        String parameter = request.getParameter("attendees", String.class, false);
+        String[] splitByComma = Strings.splitByComma(parameter);
+        List<Attendee> attendees = new ArrayList<>(splitByComma.length);
+        for (String attendeeId : splitByComma) {
+            Attendee attendee = new Attendee();
+            attendee.setEntity(Integer.valueOf(attendeeId));
+            attendees.add(attendee);
+        }
+
+        return attendees;
+    }
+
+    protected static Date parseDate(AJAXRequestData request, String param) throws OXException {
+        Long parameter = request.getParameter(param, Long.class, false);
+        return new Date(parameter);
     }
 
 }

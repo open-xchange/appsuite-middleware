@@ -49,43 +49,68 @@
 
 package com.openexchange.chronos.freebusy.json;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.EventMapper;
+import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- *
- * {@link ChronosFreeBusyActionFactory}
+ * {@link CheckConflictAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ChronosFreeBusyActionFactory implements AJAXActionServiceFactory {
+public class CheckConflictAction extends AbstractFreeBusyAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
 
-    public ChronosFreeBusyActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("has", new HasAction(services));
-        actions.put("check", new CheckConflictAction(services));
-        actions.put("events", new EventsAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link CheckConflictAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected CheckConflictAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
+        List<Attendee> attendees = parseAttendeesParameter(requestData);
+        Object data = requestData.getData();
+        if (data == null || !(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        JSONObject jsonEvent = (JSONObject) data;
+
+        Event event;
+        try {
+            TimeZone tz = freeBusyAccess.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
+            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : requestData.getSession().getUser().getTimeZone().toString());
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+        List<EventConflict> conflicts = freeBusyAccess.checkForConflicts(event, attendees);
+        return new AJAXRequestResult(conflicts, "eventConflict");
     }
 
 }

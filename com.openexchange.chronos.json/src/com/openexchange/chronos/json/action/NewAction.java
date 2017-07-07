@@ -104,17 +104,16 @@ public class NewAction extends ChronosAction {
         Event event;
         try {
             TimeZone tz = calendarAccess.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : null);
+            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : requestData.getSession().getUser().getTimeZone().toString());
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
         try {
             CalendarResult calendarResult = calendarAccess.createEvent(parseFolderParameter(requestData), event);
             if (calendarResult.getCreations().size() != 1) {
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to parse create event"); //TODO anpassen
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to create new event");
             }
             Event createdEvent = calendarResult.getCreations().get(0).getCreatedEvent();
-
             return new AJAXRequestResult(createdEvent, createdEvent.getLastModified(), "event");
         } catch (OXException e) {
             if (isConflict(e)) {
