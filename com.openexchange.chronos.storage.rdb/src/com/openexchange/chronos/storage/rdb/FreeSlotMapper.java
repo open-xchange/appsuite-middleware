@@ -3,7 +3,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import java.util.EnumMap;
 import com.openexchange.chronos.CalendarFreeSlot;
-import com.openexchange.chronos.service.AvailabilityField;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
@@ -12,7 +12,7 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, AvailabilityField> {
+public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotField> {
 
     private static final FreeSlotMapper INSTANCE = new FreeSlotMapper();
 
@@ -48,8 +48,8 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Availabili
      * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
      */
     @Override
-    public AvailabilityField[] newArray(int size) {
-        return new AvailabilityField[size];
+    public FreeSlotField[] newArray(int size) {
+        return new FreeSlotField[size];
     }
 
     /*
@@ -58,8 +58,8 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Availabili
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
-    protected EnumMap<AvailabilityField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
-        EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarFreeSlot>>(AvailabilityField.class);
+    protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
+        EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>>(FreeSlotField.class);
         //TODO: implement the mppers
         return mappings;
     }
