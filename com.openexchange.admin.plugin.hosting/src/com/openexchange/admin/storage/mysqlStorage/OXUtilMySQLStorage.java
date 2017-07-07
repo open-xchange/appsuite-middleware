@@ -936,7 +936,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet rs = null;
         try {
             con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
@@ -949,18 +949,26 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final int id;
                 final int maxNumberOfContexts;
                 final int numberOfContexts;
+                final String uri;
+                final long size;
 
-                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
+                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts, String uri, long size) {
                     super();
                     this.id = id;
                     this.maxNumberOfContexts = maxNumberOfContexts;
                     this.numberOfContexts = numberOfContexts;
+                    this.uri = uri;
+                    this.size = size;
                 }
             }
 
             final List<Candidate> candidates = new LinkedList<Candidate>();
             do {
-                candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+                int maxNumberOfContexts = rs.getInt(2);
+                if (maxNumberOfContexts > 0) {
+                    int numberOfEntities = rs.getInt(3); // In case NULL, then 0 (zero) is returned
+                    candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, numberOfEntities, rs.getString(4), toMB(rs.getLong(5))));
+                }
             } while (rs.next());
 
             // Close resources as no more needed
@@ -970,9 +978,23 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Find a suitable one from ordered list of candidates
             for (final Candidate candidate : candidates) {
-                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
-                    // Get filestore
-                    final Filestore filestore = getFilestore(candidate.id, false, con);
+                if (candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                    // Create filestore instance froim candidate
+                    Filestore filestore = new Filestore();
+                    filestore.setId(I(candidate.id));
+                    filestore.setUrl(candidate.uri);
+                    filestore.setSize(L(candidate.size));
+                    filestore.setMaxContexts(I(candidate.maxNumberOfContexts));
+
+                    // Only consider context count for given file storage
+                    int numberOfEntities = candidate.numberOfContexts;
+                    FilestoreUsage usage = new FilestoreUsage(numberOfEntities, 0L);
+
+                    filestore.setUsed(L(toMB(usage.getUsage())));
+                    filestore.setCurrentContexts(I(usage.getCtxCount()));
+                    filestore.setReserved(L(getAverageFilestoreSpace() * usage.getCtxCount()));
+
+                    // Check filestore
                     if (enoughSpaceForContext(filestore)) {
                         return filestore;
                     }
