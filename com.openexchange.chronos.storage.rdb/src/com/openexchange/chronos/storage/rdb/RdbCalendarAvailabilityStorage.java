@@ -144,7 +144,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @param connection The writeable {@link Connection} to use
      * @return The affected rows
      * @throws OXException if an error is occurred
-     * @throws SQLException if an SQL error is occured
+     * @throws SQLException if an SQL error is occurred
      */
     private int insertCalendarFreeSlot(CalendarFreeSlot freeSlot, Connection connection) throws OXException, SQLException {
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
