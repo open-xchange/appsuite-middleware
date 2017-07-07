@@ -326,12 +326,6 @@ QueryParamChronosRecurrenceID:
   format: int64
   description: The recurrence identifier.
   required: false
-QueryParamChronosTimezone:
-  name: timezone
-  in: query
-  type: string
-  description: The timezone to use.
-  required: false
 QueryParamChronosFields:
   name: fields
   in: query
@@ -371,3 +365,23 @@ QueryParamChronosIncludePrivate:
   default: false
   description: Defines whether "private" events of the calendar owner, i.e. events whose classification is PRIVATE or CONFIDENTIAL should be included when fetching events from a shared folder or not.
   required: false
+ChronosFromTimeRange:
+  name: from
+  in: query
+  type: integer
+  format: int64
+  description: The start of the requested time range.
+  required: true
+ChronosUntilTimeRange:
+  name: until
+  in: query
+  type: integer
+  format: int64
+  description: The end of the requested time range.
+  required: true
+ChronosFreeBusyAttendees:
+  name: attendees
+  in: query
+  type: string
+  description: A comma-separated list of entityIds of attendees.
+  required: true

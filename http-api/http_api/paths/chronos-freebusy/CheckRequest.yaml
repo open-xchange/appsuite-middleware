@@ -1,0 +1,25 @@
+/chronos/freebusy?action=check:
+  put:
+    operationId: checkEvent
+    tags:
+      - Chronos-freebusy
+    summary: Checks a event for conflicts.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/ChronosFreeBusyAttendees"
+      - in: body
+        name: body
+        description: A JSON object containing the event's data.
+        required: true
+        schema:
+          $ref: "#/definitions/EventData"
+    responses:
+      200:
+        description: |
+          'A JSON array containing the conflicts. In case of errors the responsible fields
+          in the response are filled (see [Error handling](#error-handling)).'
+        schema:
+          $ref: "#/definitions/CheckEventResponse"

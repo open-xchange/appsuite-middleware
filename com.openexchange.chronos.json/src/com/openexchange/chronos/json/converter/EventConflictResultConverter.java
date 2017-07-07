@@ -73,9 +73,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EventConflictResultConverter implements ResultConverter {
 
+    public static final String INPUT_FORMAT = "eventConflict";
+
     @Override
     public String getInputFormat() {
-        return "eventConflict";
+        return INPUT_FORMAT;
     }
 
     @Override

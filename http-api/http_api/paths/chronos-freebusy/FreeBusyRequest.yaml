@@ -1,0 +1,18 @@
+/chronos/freebusy?action=freebusy:
+  get:
+    operationId: freebusy
+    tags:
+      - Chronos-freebusy
+    summary: Gets free-busy timeslots for the given attendees.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/ChronosFromTimeRange"
+      - $ref: "#/parameters/ChronosUntilTimeRange"
+      - $ref: "#/parameters/ChronosFreeBusyAttendees"
+    responses:
+      200:
+        description: |
+          An object containing an array of json objects for each attendee containing a list of free-busy times. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosFreeBusyResponse"

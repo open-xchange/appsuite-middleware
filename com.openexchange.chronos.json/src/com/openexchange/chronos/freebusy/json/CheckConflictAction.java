@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -108,7 +109,7 @@ public class CheckConflictAction extends AbstractFreeBusyAction {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
         List<EventConflict> conflicts = freeBusyAccess.checkForConflicts(event, attendees);
-        return new AJAXRequestResult(conflicts, "eventConflict");
+        return new AJAXRequestResult(conflicts, EventConflictResultConverter.INPUT_FORMAT);
     }
 
 }

@@ -25,7 +25,6 @@
         format: int64
         description: Upper exclusive limit of the queried range as a Date. Only events which end before this date are returned.
         required: false
-      - $ref: "#/parameters/QueryParamChronosTimezone"
       - $ref: "#/parameters/QueryParamChronosFields"
       - $ref: "#/parameters/QueryParamChronosOrder"
       - $ref: "#/parameters/QueryParamChronosSort"

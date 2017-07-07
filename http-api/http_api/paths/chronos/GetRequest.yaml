@@ -9,7 +9,6 @@
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosFields"
-      - $ref: "#/parameters/QueryParamChronosTimezone"
     responses:
       200:
         description: |

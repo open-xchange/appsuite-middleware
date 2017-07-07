@@ -1,19 +1,11 @@
 type: object
 properties:
   startDate:
-    type: integer
-    format: int64
+    $ref: "#/definitions/DateTimeData"
     description: The starting date of the event.
-  startTimezone:
-    type: string
-    description: The timezone of the startDate field.
   endDate:
-    type: integer
-    format: int64
+    $ref: "#/definitions/DateTimeData"
     description: The ending date of the event.
-  endTimezone:
-    type: string
-    description: The timezone of the endDate field.
   created:
     type: integer
     format: int64

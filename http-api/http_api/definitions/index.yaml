@@ -164,6 +164,16 @@ ChronosAttachment:
   $ref: ./chronos/Attachment.yaml
 ChronosExtendedProperty:
   $ref: ./chronos/ExtendedProperty.yaml
+DateTimeData:
+  $ref: ./chronos/DateTimeData.yaml
+ChronosConflictData:
+  $ref: ./chronos/ConflictData.yaml
+CheckEventResponse:
+  $ref: ./chronos/CheckEventResponse.yaml
+ChronosFreeBusyResponse:
+  $ref: ./chronos/FreeBusyResponse.yaml
+ChronosFreeBusyResponseData:
+  $ref: ./chronos/FreeBusyResponseData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

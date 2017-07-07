@@ -8,7 +8,6 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosTimezone"
       - $ref: "#/parameters/QueryParamChronosFields"
       - in: body
         name: body

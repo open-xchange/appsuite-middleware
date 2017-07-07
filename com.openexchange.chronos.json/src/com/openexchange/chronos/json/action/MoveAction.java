@@ -54,6 +54,7 @@ import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -101,7 +102,7 @@ public class MoveAction extends ChronosAction {
             return new AJAXRequestResult(moveResult, moveResult.getTimestamp(), "calendarResult");
         } catch (OXException e) {
             if (isConflict(e)) {
-                return new AJAXRequestResult(e.getProblematics(), "eventConflict");
+                return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
             }
             throw e;
         }

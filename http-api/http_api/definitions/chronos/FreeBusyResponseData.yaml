@@ -1,0 +1,25 @@
+type: object
+properties:
+  attendee:
+    type: integer
+    description: The entityId of the attendee.
+  freeBusyTime:
+    type: array
+    description: The free-busy times of the attendee.
+    items:
+      type: object
+      title: FreeBusyTime
+      description: A free-busy time slot.
+      properties:
+        startTime: 
+          type: integer
+          format: int64
+          description: The start time of the free-busy timeslot.
+        endTime: 
+          type: integer
+          format: int64
+          description: The end time of the free-busy timeslot.
+        fbType:
+          type: string
+          description: The type of the free-busy timeslot.
+

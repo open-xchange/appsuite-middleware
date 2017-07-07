@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.json.converter.ListItemMapping;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
@@ -140,7 +141,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 updateAttendeeResult = calendarAccess.updateAttendee(compositeEventID, attendee);
             } catch (OXException e) {
                 if (isConflict(e)) {
-                    return new AJAXRequestResult(e.getProblematics(), "eventConflict");
+                    return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
                 }
                 throw e;
             }
