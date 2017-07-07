@@ -121,6 +121,8 @@ public class Compat {
                     event.setEndDate(event.getEndDate().toAllDay());
                 } else if (null != startDate.getTimeZone()) {
                     event.setEndDate(new DateTime(startDate.getTimeZone(), event.getEndDate().getTimestamp()));
+                } else {
+                    event.setEndDate(new DateTime(null, event.getEndDate().getTimestamp()));
                 }
             }
         }
