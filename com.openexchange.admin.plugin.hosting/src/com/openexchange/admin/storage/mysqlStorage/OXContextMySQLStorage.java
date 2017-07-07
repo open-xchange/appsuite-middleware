@@ -65,7 +65,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -159,8 +158,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private final int CONTEXTS_PER_SCHEMA;
 
-    private final int NUM_BUFFERED_SCHEMAS;
-
     private final boolean lockOnWriteContextToPayloadDb;
 
     private final String selectionCriteria = "cid";
@@ -189,15 +186,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         } catch (final OXContextException e) {
             LOG.error("Error init", e);
-            CONTEXTS_PER_SCHEMA = 1;
         }
         this.CONTEXTS_PER_SCHEMA = CONTEXTS_PER_SCHEMA;
-
-        int NUM_BUFFERED_SCHEMAS = Integer.parseInt(prop.getProp("NUM_BUFFERED_SCHEMAS", "0"));
-        if (NUM_BUFFERED_SCHEMAS < 0) {
-            NUM_BUFFERED_SCHEMAS = 0;
-        }
-        this.NUM_BUFFERED_SCHEMAS = NUM_BUFFERED_SCHEMAS;
 
         boolean lockOnWriteContextToPayloadDb = false;
         try {
@@ -1553,9 +1543,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @return The possible schema result from cache that is needed for further processing
      */
     private SchemaResult findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
-        if (CONTEXTS_PER_SCHEMA == 1 && NUM_BUFFERED_SCHEMAS <= 0) {
+        if (CONTEXTS_PER_SCHEMA == 1) {
             // Ignore strategy as there shall be only one schema per context
-            generateAndSetUniqueSchemaName(db, configCon);
+            int schemaUnique;
+            try {
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            String schemaName = db.getName() + '_' + schemaUnique;
+            db.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
             return SchemaResult.AUTOMATIC;
         }
@@ -1571,7 +1568,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 return SchemaResult.SCHEMA_NAME;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
-                return inMemoryLookupSchema(configCon, db);s
+                return inMemoryLookupSchema(configCon, db);
             default:
                 automaticLookupSchema(configCon, db);
                 return SchemaResult.AUTOMATIC;
@@ -1631,24 +1628,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Freshly determine the next schema to use
-        String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db, configCon);
+        String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db.getId(), configCon);
         if (schemaName == null) {
-            generateAndSetUniqueSchemaName(db, configCon);
-            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);s
+            int schemaUnique;
+            try {
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            schemaName = db.getName() + '_' + schemaUnique;
+            db.setScheme(schemaName);
+            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
         } else {
             db.setScheme(schemaName);
-        }
-    }
-
-    private void generateAndSetUniqueSchemaName(Database db, Connection configCon) throws StorageException {
-        db.setScheme(generateUniqueSchemaName(db.getName(), configCon));
-    }
-
-    private String generateUniqueSchemaName(String dbName, Connection configCon) throws StorageException {
-        try {
-            return dbName + '_' + IDGenerator.getId(configCon);
-        } catch (SQLException e) {
-            throw new StorageException(e.getMessage(), e);
         }
     }
 
@@ -1697,45 +1689,30 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         });
     }
 
-    private String getNextUnfilledSchemaFromDB(Database db, Connection configCon) throws StorageException {
-        if (null == db) {
-            throw new StorageException("Database in getNextUnfilledSchemaFromDB must be != null");
+    private String getNextUnfilledSchemaFromDB(final Integer poolId, final Connection con) throws StorageException {
+        if (null == poolId) {
+            throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
-
         OXAdminPoolInterface pool = cache.getPool();
         final String[] unfilledSchemas;
         try {
-            if (NUM_BUFFERED_SCHEMAS <= 0) {
-                pool.lock(configCon, i(db.getId()), null);
-            }
-            unfilledSchemas = pool.getUnfilledSchemas(configCon, i(db.getId()), this.CONTEXTS_PER_SCHEMA);
+            pool.lock(con, i(poolId), null);
+            unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         }
-
-        if (NUM_BUFFERED_SCHEMAS > 0) {
-            int diff = NUM_BUFFERED_SCHEMAS - unfilledSchemas.length;
-            while (diff-- > 0) {
-                generateAndSetUniqueSchemaName(db, configCon);
-                OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
-                unfilledSchemas.add(0, db.getScheme());
-            }
-        }
-
         final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
         String found = null;
-        for (int j = 0; null == found && j < unfilledSchemas.length; j++) {
-            String schema = unfilledSchemas[j];
+        for (String schema : unfilledSchemas) {
             if (oxt.schemaBeingLockedOrNeedsUpdate(i(poolId), schema)) {
                 LOG.debug("schema {} is locked or updated, trying next one", schema);
             } else {
                 found = schema;
+                break;
             }
         }
-        if (null != found) {
-            LOG.debug("using schema {} it for next context", found);
-        }
+        LOG.debug("using schema {} it for next context", found);
         return found;
     }
 
@@ -2849,8 +2826,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public String createSchema(int targetClusterId) throws StorageException {
-        // Get connection to 'configdb'
         Connection configCon = null;
+
+        // Get connection to 'configdb'
         try {
             configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
@@ -2871,20 +2849,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e);
             }
 
-            // Clear schema cache
-            SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
-            if (null != optCache) {
-                optCache.clearFor(database.getId().intValue());
-            }
-
             // Create schema
             startTransaction(configCon);
             rollback = true;
-
-            generateAndSetUniqueSchemaName(database, configCon);
+            int schemaUnique;
+            try {
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            String schemaName = database.getName() + '_' + schemaUnique;
+            database.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(database, configCon);
             created = true;
-
             configCon.commit();
             rollback = false;
             error = false;

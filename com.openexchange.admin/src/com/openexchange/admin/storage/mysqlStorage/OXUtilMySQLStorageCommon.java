@@ -142,13 +142,6 @@ public class OXUtilMySQLStorageCommon {
 
     private static final AdminCache cache = ClientAdminThread.cache;
 
-    /**
-     * Creates a new database (schema) according to specified database instance.
-     *
-     * @param db The database describing the schema to create
-     * @param configdbCon The connection to ConfigDb
-     * @throws StorageException If creation fails
-     */
     public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
         Connection con = getSimpleSQLConnectionWithoutTimeout(db);
         boolean error = true;
@@ -175,7 +168,7 @@ public class OXUtilMySQLStorageCommon {
             rollback = false;
             error = false;
         } catch (final SQLException e) {
-            throw new StorageException(e.toString(), e);
+            throw new StorageException(e.toString());
         } finally {
             if (rollback) {
                 rollback(con);
@@ -188,13 +181,6 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    /**
-     * Actually performs the <code>"CREATE DATABASE"</code> statement
-     *
-     * @param con The connection pointing to the database, in which the schema shall be created
-     * @param name The schema name
-     * @throws StorageException If creating the schema fails
-     */
     private void createDatabaseSchema(final Connection con, final String name) throws StorageException {
         Statement stmt = null;
         try {
