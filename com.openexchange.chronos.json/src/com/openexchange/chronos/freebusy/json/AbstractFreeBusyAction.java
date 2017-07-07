@@ -52,7 +52,6 @@ package com.openexchange.chronos.freebusy.json;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECURRENCE_MASTER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMEZONE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
@@ -67,7 +66,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -80,7 +78,6 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -202,8 +199,6 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(Long.parseLong(value)));
             case "expand":
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
-            case "timezone":
-                return new AbstractMap.SimpleEntry<String, TimeZone>(PARAMETER_TIMEZONE, TimeZoneUtils.getTimeZone(value));
             case PARAMETER_IGNORE_CONFLICTS:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
             case PARAMETER_TIMESTAMP:

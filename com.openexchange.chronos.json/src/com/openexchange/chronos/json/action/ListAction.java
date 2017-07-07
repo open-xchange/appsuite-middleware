@@ -76,7 +76,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ListAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_FIELDS);
 
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";

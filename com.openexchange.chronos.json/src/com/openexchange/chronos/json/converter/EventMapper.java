@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.json.converter;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
@@ -66,6 +64,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,7 +92,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
+import com.openexchange.groupware.tools.mappings.json.DateTimeMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
@@ -549,7 +548,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeColor();
             }
         });
-        mappings.put(EventField.START_DATE, new TimeMapping<Event>("startDate", ColumnIDs.START_DATE) {
+        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>("startDate", ColumnIDs.START_DATE) {
 
             @Override
             public boolean isSet(Event object) {
@@ -557,12 +556,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
+            public void set(Event object, DateTime value) throws OXException {
                 object.setStartDate(value);
             }
 
             @Override
-            public Date get(Event object) {
+            public DateTime get(Event object) {
                 return object.getStartDate();
             }
 
@@ -571,29 +570,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeStartDate();
             }
         });
-        mappings.put(EventField.START_TIMEZONE, new StringMapping<Event>("startTimezone", ColumnIDs.START_TIMEZONE) {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsStartTimeZone();
-            }
-
-            @Override
-            public void set(Event object, String value) throws OXException {
-                object.setStartTimeZone(value);
-            }
-
-            @Override
-            public String get(Event object) {
-                return object.getStartTimeZone();
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeStartTimeZone();
-            }
-        });
-        mappings.put(EventField.END_DATE, new TimeMapping<Event>("endDate", ColumnIDs.END_DATE) {
+        mappings.put(EventField.END_DATE, new DateTimeMapping<Event>("endDate", ColumnIDs.END_DATE) {
 
             @Override
             public boolean isSet(Event object) {
@@ -601,62 +578,18 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
+            public void set(Event object, DateTime value) throws OXException {
                 object.setEndDate(value);
             }
 
             @Override
-            public Date get(Event object) {
+            public DateTime get(Event object) {
                 return object.getEndDate();
             }
 
             @Override
             public void remove(Event object) {
                 object.removeEndDate();
-            }
-        });
-        mappings.put(EventField.END_TIMEZONE, new StringMapping<Event>("endTimezone", ColumnIDs.END_TIMEZONE) {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsEndTimeZone();
-            }
-
-            @Override
-            public void set(Event object, String value) throws OXException {
-                object.setEndTimeZone(value);
-            }
-
-            @Override
-            public String get(Event object) {
-                return object.getEndTimeZone();
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeEndTimeZone();
-            }
-        });
-        mappings.put(EventField.ALL_DAY, new BooleanMapping<Event>("allDay", ColumnIDs.ALL_DAY) {
-
-            @Override
-            public boolean isSet(Event object) {
-                return object.containsAllDay();
-            }
-
-            @Override
-            public void set(Event object, Boolean value) throws OXException {
-                object.setAllDay(null == value ? false : b(value));
-            }
-
-            @Override
-            public Boolean get(Event object) {
-                return B(object.getAllDay());
-            }
-
-            @Override
-            public void remove(Event object) {
-                object.removeAllDay();
             }
         });
         mappings.put(EventField.TRANSP, new StringMapping<Event>("transp", ColumnIDs.TRANSP) {

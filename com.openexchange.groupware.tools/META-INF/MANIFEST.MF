@@ -46,5 +46,6 @@ Import-Package: com.fasterxml.jackson.core,
  gnu.trove.stack.array,
  gnu.trove.strategy,
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.json,
  org.slf4j

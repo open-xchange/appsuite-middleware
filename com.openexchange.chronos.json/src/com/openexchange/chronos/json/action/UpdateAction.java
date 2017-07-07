@@ -51,7 +51,6 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Set;
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,7 +59,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -77,7 +75,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIME
  */
 public class UpdateAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", PARAMETER_IGNORE_CONFLICTS, PARAMETER_TIMESTAMP);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_IGNORE_CONFLICTS, PARAMETER_TIMESTAMP);
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -104,8 +102,7 @@ public class UpdateAction extends ChronosAction {
 
         Event event;
         try {
-            TimeZone tz = calendarAccess.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values(), tz != null ? tz.toString() : requestData.getSession().getUser().getTimeZone());
+            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values());
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

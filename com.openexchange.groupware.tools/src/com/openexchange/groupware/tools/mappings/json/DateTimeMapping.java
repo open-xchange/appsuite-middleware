@@ -47,68 +47,60 @@
  *
  */
 
-package com.openexchange.chronos.freebusy.json;
+package com.openexchange.groupware.tools.mappings.json;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.List;
-import java.util.Set;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.json.converter.EventMapper;
-import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.session.Session;
 
 /**
- * {@link CheckConflictAction}
+ *
+ * {@link DateTimeMapping} - JSON specific mapping implementation for DateTimes.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
+ * @param <O> the type of the object
  */
-public class CheckConflictAction extends AbstractFreeBusyAction {
+public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O> {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
+    private static final String TIME_ZONE = "zzid";
+    private static final String VALUE = "value";
 
-    /**
-     * Initializes a new {@link CheckConflictAction}.
-     *
-     * @param services A service lookup reference
-     */
-    protected CheckConflictAction(ServiceLookup services) {
-        super(services);
+	public DateTimeMapping(final String ajaxName, final int columnID) {
+		super(ajaxName, columnID);
+	}
+
+    @Override
+    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+        JSONObject dateTimeJSON = from.getJSONObject(getAjaxName());
+        String value = dateTimeJSON.getString(VALUE);
+        String tz = null;
+        if (dateTimeJSON.has(TIME_ZONE)) {
+            tz = dateTimeJSON.getString(TIME_ZONE);
+        }
+        this.set(to, from.isNull(getAjaxName()) ? null : DateTime.parse(tz, value));
     }
 
     @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
+    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
+        deserialize(from, to);
     }
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
-        List<Attendee> attendees = parseAttendeesParameter(requestData);
-        Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONObject)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+	@Override
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+        DateTime value = this.get(from);
+        if (value == null) {
+            return JSONObject.NULL;
         }
-        JSONObject jsonEvent = (JSONObject) data;
-
-        Event event;
-        try {
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values());
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        JSONObject result = new JSONObject();
+        if (value.getTimeZone() != null) {
+            result.put(TIME_ZONE, value.getTimeZone().getID());
         }
-        List<EventConflict> conflicts = freeBusyAccess.checkForConflicts(event, attendees);
-        return new AJAXRequestResult(conflicts, "eventConflict");
-    }
+        result.put(VALUE, value.toString());
+        return result;
+	}
 
 }
