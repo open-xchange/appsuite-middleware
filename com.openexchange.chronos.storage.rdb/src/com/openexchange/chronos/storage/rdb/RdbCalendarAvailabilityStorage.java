@@ -55,12 +55,12 @@ import java.sql.SQLException;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.service.AvailabilityField;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
 /**
  * {@link RdbCalendarAvailabilityStorage}
@@ -99,10 +99,10 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            int caAmount = insertCalendarAvailabilityItem(calendarAvailability, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
+            int caAmount = insertCalendarAvailabilityItem(calendarAvailability, connection);
             int freeSlotsCount = 0;
             for (CalendarFreeSlot calendarFreeSlot : calendarAvailability.getCalendarFreeSlots()) {
-                freeSlotsCount += insertCalendarAvailabilityItem(calendarFreeSlot, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
+                freeSlotsCount += insertCalendarFreeSlot(calendarFreeSlot, connection);
             }
             txPolicy.commit(connection);
             LOG.debug("Inserted {} availability block(s and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
@@ -112,29 +112,53 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Inserts the specified calendar availability item to the storage
+     * Inserts the specified {@link CalendarAvailability} item with the specified {@link Connection} to the storage
      * 
-     * @param item The item to insert
-     * @param tableName The table name
-     * @param mapper The mapper to use
-     * @param connection The writeable connection
-     * @return The amount of affected rows
-     * @throws OXException
-     * @throws SQLException
+     * @param availability The {@link CalendarAvailability} to insert
+     * @param connection Tbe writeable {@link Connection} to use
+     * @return The affected rows
+     * @throws OXException if an error is occurred
+     * @throws SQLException if an SQL error is occurred
      */
-    private <O> int insertCalendarAvailabilityItem(O item, String tableName, DefaultDbMapper<O, AvailabilityField> mapper, Connection connection) throws OXException, SQLException {
-        AvailabilityField[] mappedFields = mapper.getMappedFields();
+    private int insertCalendarAvailabilityItem(CalendarAvailability availability, Connection connection) throws OXException, SQLException {
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(");");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(");");
+        sb.append("INSERT INTO ").append(CA_TABLE_NAME);
+        sb.append("(cid,accpount,").append(calendarAvailabilityMapper.getColumns(mappedFields)).append(");");
+        sb.append("VALUES (?,?,").append(calendarAvailabilityMapper.getParameters(mappedFields)).append(");");
         String sql = sb.toString();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
-            parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mappedFields);
+            parameterIndex = calendarAvailabilityMapper.setParameters(stmt, parameterIndex, availability, mappedFields);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Inserts the specified {@link CalendarFreeSlot} item with the specified {@link Connection} to the storage
+     * 
+     * @param freeSlot The {@link CalendarFreeSlot} item to insert
+     * @param connection The writeable {@link Connection} to use
+     * @return The affected rows
+     * @throws OXException if an error is occurred
+     * @throws SQLException if an SQL error is occured
+     */
+    private int insertCalendarFreeSlot(CalendarFreeSlot freeSlot, Connection connection) throws OXException, SQLException {
+        FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(CA_TABLE_NAME);
+        sb.append("(cid,accpount,").append(freeSlotMapper.getColumns(mappedFields)).append(");");
+        sb.append("VALUES (?,?,").append(freeSlotMapper.getParameters(mappedFields)).append(");");
+        String sql = sb.toString();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            parameterIndex = freeSlotMapper.setParameters(stmt, parameterIndex, freeSlot, mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
