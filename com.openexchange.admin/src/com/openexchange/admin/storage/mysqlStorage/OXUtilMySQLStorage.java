@@ -1349,19 +1349,23 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final int id;
                 final int maxNumberOfEntities;
                 final int numberOfEntities;
+                final String uri;
+                final long size;
 
-                Candidate(final int id, final int maxNumberOfEntities, final int numberOfEntities) {
+                Candidate(int id, int maxNumberOfEntities, int numberOfEntities, String uri, long size) {
                     super();
                     this.id = id;
                     this.maxNumberOfEntities = maxNumberOfEntities;
                     this.numberOfEntities = numberOfEntities;
+                    this.uri = uri;
+                    this.size = size;
                 }
             }
 
             // Load potential candidates
             List<Candidate> candidates = new LinkedList<>();
             {
-                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
                 rs = stmt.executeQuery();
 
                 if (!rs.next()) {
@@ -1372,7 +1376,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 do {
                     int maxNumberOfContexts = rs.getInt(2);
                     if (maxNumberOfContexts > 0) {
-                        candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, rs.getInt(3)));
+                        int numberOfEntities = rs.getInt(3); // In case NULL, then 0 (zero) is returned
+                        candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, numberOfEntities, rs.getString(4), toMB(rs.getLong(5))));
                     }
                 } while (rs.next());
 
@@ -1399,8 +1404,23 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 if (entityCount < candidate.maxNumberOfEntities) {
                     FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
 
-                    // Get filestore
-                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, null, userFilestoreUsage, con);
+                    // Create filestore instance froim candidate
+                    Filestore filestore = new Filestore();
+                    filestore.setId(I(candidate.id));
+                    filestore.setUrl(candidate.uri);
+                    filestore.setSize(L(candidate.size));
+                    filestore.setMaxContexts(I(candidate.maxNumberOfEntities));
+
+                    // Possible to pre-set context usage?
+                    FilestoreUsage contextFilestoreUsage = null;
+                    if (false == loadRealUsage) {
+                        // Only consider context count for given file storage
+                        int numberOfEntities = candidate.numberOfEntities;
+                        contextFilestoreUsage = new FilestoreUsage(numberOfEntities, 0L);
+                    }
+
+                    loadFilestoreUsageFor(filestore, loadRealUsage, contextFilestoreUsage, userFilestoreUsage, con);
+
                     if (forContext) {
                         if (enoughSpaceForContext(filestore)) {
                             return filestore;
@@ -2196,12 +2216,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
 
         // Load usage information
+        loadFilestoreUsageFor(fs, loadRealUsage, contextFilestoreUsage, userFilestoreUsage, configdbCon);
+        return fs;
+    }
+
+    private void loadFilestoreUsageFor(Filestore fs, boolean loadRealUsage, FilestoreUsage contextFilestoreUsage, FilestoreUsage userFilestoreUsage, Connection configdbCon) throws StorageException {
+        int id = fs.getId().intValue();
         FilestoreUsage usrCounts = null == userFilestoreUsage ? getUserUsage(id, loadRealUsage, configdbCon) : userFilestoreUsage;
         FilestoreUsage ctxCounts = null == contextFilestoreUsage ? getContextUsage(id, loadRealUsage, configdbCon) : contextFilestoreUsage;
         fs.setUsed(L(toMB(ctxCounts.usage + usrCounts.usage)));
         fs.setCurrentContexts(I(ctxCounts.entityCount + usrCounts.entityCount));
         fs.setReserved(L((getAverageFilestoreSpaceForContext() * ctxCounts.entityCount) + (getAverageFilestoreSpaceForUser() * usrCounts.entityCount)));
-        return fs;
     }
 
     private void updateFilestoresWithRealUsage(final List<Filestore> stores) throws StorageException {
