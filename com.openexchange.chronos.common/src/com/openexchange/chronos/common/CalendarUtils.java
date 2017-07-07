@@ -351,6 +351,16 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a date representing the supplied date-time's value.
+     *
+     * @param dateTime The date-time to get the corresponding date for
+     * @return The date, or <code>null</code> if passed date-time reference was null
+     */
+    public static Date asDate(DateTime dateTime) {
+        return null == dateTime ? null : new Date(dateTime.getTimestamp());
+    }
+
+    /**
      * Truncates the time part of the supplied date, i.e. sets the fields {@link Calendar#HOUR_OF_DAY}, {@link Calendar#MINUTE},
      * {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
      *
@@ -397,7 +407,7 @@ public class CalendarUtils {
      * @return The date in the target timezone, with the corresponding timezone offset applied
      */
     public static long getDateInTimeZone(DateTime floatingDate, TimeZone timeZone) {
-        if (false == floatingDate.isFloating() || null == floatingDate.getTimeZone()) {
+        if (false == floatingDate.isFloating() || null == timeZone) {
             return floatingDate.getTimestamp();
         }
         return floatingDate.getTimestamp() - timeZone.getOffset(floatingDate.getTimestamp());
