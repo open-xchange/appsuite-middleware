@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 
 /**
@@ -96,8 +97,8 @@ public class RankedEventComparator implements Comparator<Event>, Serializable {
 
     @Override
     public int compare(Event event1, Event event2) {
-        Date date1 = null != event1 ? event1.getStartDate() : null;
-        Date date2 = null != event2 ? event2.getStartDate() : null;
+        DateTime date1 = null != event1 ? event1.getStartDate() : null;
+        DateTime date2 = null != event2 ? event2.getStartDate() : null;
         if (date1 == date2) {
             return 0;
         } else if (null == date1) {
@@ -111,8 +112,8 @@ public class RankedEventComparator implements Comparator<Event>, Serializable {
         }
     }
 
-    private static double calculateRating(Date date, long relativeTo) {
-        long time = date.getTime();
+    private static double calculateRating(DateTime date1, long relativeTo) {
+        long time = date1.getTimestamp();
         if (time > relativeTo) {
             return Math.pow(((double)(time - relativeTo)) / MILLIS_PER_DAY, 2.0);
         } else {
