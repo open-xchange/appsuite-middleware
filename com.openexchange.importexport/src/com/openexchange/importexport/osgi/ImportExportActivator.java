@@ -92,7 +92,8 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			ConfigViewFactory.class,
             VCardService.class, 
             ICalService.class, 
-			FolderService.class
+			FolderService.class,
+			CalendarService.class
 		};
 	}
 
