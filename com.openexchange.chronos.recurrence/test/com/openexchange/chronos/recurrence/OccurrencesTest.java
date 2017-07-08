@@ -77,9 +77,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -114,9 +112,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, 3);
         int count = 0;
@@ -225,9 +221,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, getCal("03.10.2008 14:00:00"), getCal("07.10.2008 17:00:00"), null);
         int count = 0;
@@ -262,9 +256,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, getCal("03.10.2008 14:00:00"), getCal("07.10.2008 17:00:00"), 3);
         int count = 0;
@@ -292,9 +284,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, getCal(leftBoundary), null, null);
         int count = atEnd ? 1 : 0;
@@ -328,9 +318,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, getCal(leftBoundary), null, 1);
         int count = 0;
@@ -356,9 +344,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, getCal(rightBoundary), null);
         int count = 0;
@@ -396,9 +382,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, getCal(rightBoundary), 1);
         int count = 0;

@@ -55,12 +55,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,9 +93,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -137,9 +135,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("01.10.2008 14:45:00", tz)));
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
@@ -182,9 +178,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -226,9 +220,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -270,9 +262,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -308,9 +298,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -346,9 +334,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -384,9 +370,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -422,37 +406,36 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone utc = TimeZone.getTimeZone("UTC");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
 
         Event change = getInstance(master, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
-        change.setAllDay(true);
+        change.setStartDate(DT("03.10.2008 00:00:00", utc, true));
+        change.setEndDate(DT("04.10.2008 00:00:00", utc, true));
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
         Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, null, changeExceptions);
         boolean found1 = false, found2 = false, found3 = false, found4 = false, found5 = false;
         int count = 0;
-        Date previous = null;
+        DateTime previous = null;
         while (instances.hasNext()) {
             Event instance = instances.next();
-            if (instance.getStartDate().equals(D("01.10.2008 14:45:00", tz))) {
+            if (instance.getStartDate().equals(DT("01.10.2008 14:45:00", tz, false))) {
                 compareInstanceWithMaster(master, instance, D("01.10.2008 14:45:00", tz), D("01.10.2008 15:45:00", tz));
                 found1 = true;
-            } else if (instance.getStartDate().equals(D("02.10.2008 14:45:00", tz))) {
+            } else if (instance.getStartDate().equals(DT("02.10.2008 14:45:00", tz, false))) {
                 compareInstanceWithMaster(master, instance, D("02.10.2008 14:45:00", tz), D("02.10.2008 15:45:00", tz));
                 found2 = true;
-            } else if (instance.getStartDate().equals(D("03.10.2008 00:00:00", utc))) {
-                compareFullTimeChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
+            } else if (instance.getStartDate().equals(DT("03.10.2008 00:00:00", utc, true))) {
+                compareFullTimeChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), DT("03.10.2008 00:00:00", utc, true), DT("04.10.2008 00:00:00", utc, true));
                 found3 = true;
-            } else if (instance.getStartDate().equals(D("04.10.2008 14:45:00", tz))) {
+            } else if (instance.getStartDate().equals(DT("04.10.2008 14:45:00", tz, false))) {
                 compareInstanceWithMaster(master, instance, D("04.10.2008 14:45:00", tz), D("04.10.2008 15:45:00", tz));
                 found4 = true;
-            } else if (instance.getStartDate().equals(D("05.10.2008 14:45:00", tz))) {
+            } else if (instance.getStartDate().equals(DT("05.10.2008 14:45:00", tz, false))) {
                 compareInstanceWithMaster(master, instance, D("05.10.2008 14:45:00", tz), D("05.10.2008 15:45:00", tz));
                 found5 = true;
             } else {
@@ -480,38 +463,36 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone utc = TimeZone.getTimeZone("UTC");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 00:00:00", utc));
-        master.setEndDate(D("01.10.2008 00:00:00", utc));
-        setTimeZone(master, timeZone);
-        master.setAllDay(true);
+        setStartAndEndDates(master, "01.10.2008 00:00:00", "01.10.2008 00:00:00", true, utc);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 00:00:00", utc)));
         master.setChangeExceptionDates(changeExceptionDates);
 
         Event change = getInstance(master, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:35:00", tz), D("03.10.2008 16:35:00", tz));
-        change.removeAllDay();
+        change.setStartDate(DT("03.10.2008 14:35:00", tz, false));
+        change.setEndDate(DT("03.10.2008 16:35:00", tz, false));
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
         Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, null, changeExceptions);
         boolean found1 = false, found2 = false, found3 = false, found4 = false, found5 = false;
         int count = 0;
-        Date previous = null;
+        DateTime previous = null;
         while (instances.hasNext()) {
             Event instance = instances.next();
-            if (instance.getStartDate().equals(D("01.10.2008 00:00:00", utc))) {
+            if (instance.getStartDate().equals(DT("01.10.2008 00:00:00", utc, true))) {
                 compareInstanceWithMaster(master, instance, D("01.10.2008 00:00:00", utc), D("01.10.2008 00:00:00", utc));
                 found1 = true;
-            } else if (instance.getStartDate().equals(D("02.10.2008 00:00:00", utc))) {
+            } else if (instance.getStartDate().equals(DT("02.10.2008 00:00:00", utc, true))) {
                 compareInstanceWithMaster(master, instance, D("02.10.2008 00:00:00", utc), D("02.10.2008 00:00:00", utc));
                 found2 = true;
-            } else if (instance.getStartDate().equals(D("03.10.2008 14:35:00", tz))) {
-                compareChangeExceptionWithFullTimeMaster(master, instance, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:35:00", tz), D("03.10.2008 16:35:00", tz));
+            } else if (instance.getStartDate().equals(DT("03.10.2008 14:35:00", tz, false))) {
+                compareChangeExceptionWithFullTimeMaster(master, instance, D("03.10.2008 00:00:00", utc), DT("03.10.2008 14:35:00", tz, false), DT("03.10.2008 16:35:00", tz, false));
                 found3 = true;
-            } else if (instance.getStartDate().equals(D("04.10.2008 00:00:00", utc))) {
+            } else if (instance.getStartDate().equals(DT("04.10.2008 00:00:00", utc, true))) {
                 compareInstanceWithMaster(master, instance, D("04.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
                 found4 = true;
-            } else if (instance.getStartDate().equals(D("05.10.2008 00:00:00", utc))) {
+            } else if (instance.getStartDate().equals(DT("05.10.2008 00:00:00", utc, true))) {
                 compareInstanceWithMaster(master, instance, D("05.10.2008 00:00:00", utc), D("05.10.2008 00:00:00", utc));
                 found5 = true;
             } else {
@@ -538,9 +519,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("02.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);
@@ -576,9 +555,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(D("01.10.2008 14:45:00", tz));
-        master.setEndDate(D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
         changeExceptionDates.add(new DefaultRecurrenceId(D("03.10.2008 14:45:00", tz)));
         master.setChangeExceptionDates(changeExceptionDates);

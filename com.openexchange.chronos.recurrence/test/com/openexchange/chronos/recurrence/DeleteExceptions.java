@@ -91,9 +91,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("03.10.2008 14:45:00", tz)));
         master.setDeleteExceptionDates(deleteExceptions);
@@ -128,9 +126,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("01.10.2008 14:45:00", tz)));
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("03.10.2008 14:45:00", tz)));
@@ -164,9 +160,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("01.10.2008 14:45:00", tz)));
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("03.10.2008 14:45:00", tz)));
@@ -200,9 +194,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("03.10.2008 14:45:00", tz)));
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("05.10.2008 14:45:00", tz)));
@@ -239,9 +231,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("03.10.2008 14:45:00", tz)));
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("05.10.2008 14:45:00", tz)));
@@ -275,9 +265,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("01.10.2008 14:45:00", tz));
-        master.setEndDate(TimeTools.D("01.10.2008 15:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
         SortedSet<RecurrenceId> deleteExceptions = new TreeSet<RecurrenceId>();
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("01.10.2008 14:45:00", tz)));
         deleteExceptions.add(new DefaultRecurrenceId(TimeTools.D("02.10.2008 14:45:00", tz)));

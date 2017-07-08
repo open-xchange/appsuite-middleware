@@ -204,10 +204,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         Calendar e = GregorianCalendar.getInstance(utc);
         e.setTimeInMillis(s.getTimeInMillis());
         e.add(Calendar.DAY_OF_MONTH, 1);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        master.setAllDay(true);
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, s.getTime(), e.getTime(), true, null);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -247,9 +244,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         s.set(Calendar.MILLISECOND, 0);
         Calendar e = GregorianCalendar.getInstance(tz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L * 36);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, s.getTime(), e.getTime(), false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -282,9 +277,7 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         s.set(Calendar.MILLISECOND, 0);
         Calendar e = GregorianCalendar.getInstance(tz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, s.getTime(), e.getTime(), false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 

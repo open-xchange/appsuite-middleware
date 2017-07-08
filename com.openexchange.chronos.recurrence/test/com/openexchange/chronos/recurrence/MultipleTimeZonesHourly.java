@@ -204,11 +204,8 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
         Calendar e = GregorianCalendar.getInstance(utc);
         e.setTimeInMillis(s.getTimeInMillis());
         e.add(Calendar.DAY_OF_MONTH, 1);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        master.setAllDay(true);
-        master.setStartTimeZone(startTimeZone);
-        master.setEndTimeZone(endTimeZone);
+        master.setStartDate(DT(s.getTime(), TimeZone.getTimeZone(startTimeZone), true));
+        master.setEndDate(DT(e.getTime(), TimeZone.getTimeZone(endTimeZone), true));
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -249,10 +246,8 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
         s.set(Calendar.MILLISECOND, 0);
         Calendar e = GregorianCalendar.getInstance(endTz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L * 36);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        master.setStartTimeZone(startTimeZone);
-        master.setEndTimeZone(endTimeZone);
+        master.setStartDate(DT(s.getTime(), TimeZone.getTimeZone(startTimeZone), false));
+        master.setEndDate(DT(e.getTime(), TimeZone.getTimeZone(endTimeZone), false));
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -286,10 +281,8 @@ public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
         s.set(Calendar.MILLISECOND, 0);
         Calendar e = GregorianCalendar.getInstance(endTz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L);
-        master.setStartDate(s.getTime());
-        master.setEndDate(e.getTime());
-        master.setStartTimeZone(startTimeZone);
-        master.setEndTimeZone(endTimeZone);
+        master.setStartDate(DT(s.getTime(), TimeZone.getTimeZone(startTimeZone), false));
+        master.setEndDate(DT(e.getTime(), TimeZone.getTimeZone(endTimeZone), false));
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 

@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.chronos.Event;
@@ -105,8 +106,8 @@ public abstract class RecurrenceServiceTest {
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
-        clone.setStartDate(start);
-        clone.setEndDate(end);
+        clone.setStartDate(DT(start, clone.getStartDate().getTimeZone(), clone.getStartDate().isAllDay()));
+        clone.setEndDate(DT(end, clone.getEndDate().getTimeZone(), clone.getEndDate().isAllDay()));
 
         boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
@@ -122,14 +123,14 @@ public abstract class RecurrenceServiceTest {
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
         clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
-        clone.setStartDate(start);
-        clone.setEndDate(end);
+        clone.setStartDate(DT(start, clone.getStartDate().getTimeZone(), clone.getStartDate().isAllDay()));
+        clone.setEndDate(DT(end, clone.getEndDate().getTimeZone(), clone.getEndDate().isAllDay()));
 
         boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
-    protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
+    protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, DateTime start, DateTime end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
         Event clone = clone(master);
@@ -141,13 +142,12 @@ public abstract class RecurrenceServiceTest {
         clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
-        clone.setAllDay(true);
 
         boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
     }
 
-    protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
+    protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, Date recurrenceId, DateTime start, DateTime end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
         Event clone = clone(master);
@@ -159,7 +159,6 @@ public abstract class RecurrenceServiceTest {
         clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
-        clone.removeAllDay();
 
         boolean equals = equals(clone, instance);
         assertTrue("Not equal.", equals);
@@ -201,8 +200,8 @@ public abstract class RecurrenceServiceTest {
         instance.removeDeleteExceptionDates();
         instance.removeChangeExceptionDates();
         instance.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
-        instance.setStartDate(start);
-        instance.setEndDate(end);
+        instance.setStartDate(DT(start, instance.getStartDate().getTimeZone(), instance.getStartDate().isAllDay()));
+        instance.setEndDate(DT(end, instance.getEndDate().getTimeZone(), instance.getEndDate().isAllDay()));
         return instance;
     }
 
@@ -211,8 +210,6 @@ public abstract class RecurrenceServiceTest {
             return true;
         if (event == null)
             return null == other;
-        if (event.isAllDay() != other.isAllDay())
-            return false;
         if (event.getAttachments() == null) {
             if (other.getAttachments() != null)
                 return false;
@@ -262,11 +259,6 @@ public abstract class RecurrenceServiceTest {
                 return false;
         } else if (!event.getEndDate().equals(other.getEndDate()))
             return false;
-        if (event.getEndTimeZone() == null) {
-            if (other.getEndTimeZone() != null)
-                return false;
-        } else if (!event.getEndTimeZone().equals(other.getEndTimeZone()))
-            return false;
         if (event.getFilename() == null) {
             if (other.getFilename() != null)
                 return false;
@@ -312,11 +304,6 @@ public abstract class RecurrenceServiceTest {
                 return false;
         } else if (!event.getStartDate().equals(other.getStartDate()))
             return false;
-        if (event.getStartTimeZone() == null) {
-            if (other.getStartTimeZone() != null)
-                return false;
-        } else if (!event.getStartTimeZone().equals(other.getStartTimeZone()))
-            return false;
         if (event.getStatus() != other.getStatus())
             return false;
         if (event.getSummary() == null) {
@@ -339,9 +326,6 @@ public abstract class RecurrenceServiceTest {
 
     protected Event clone(Event event) {
         Event clone = new Event();
-        if (event.containsAllDay()) {
-            clone.setAllDay(event.getAllDay());
-        }
         if (event.containsAttachments()) {
             clone.setAttachments(cloneList(event.getAttachments()));
         }
@@ -377,9 +361,6 @@ public abstract class RecurrenceServiceTest {
         }
         if (event.containsEndDate()) {
             clone.setEndDate(event.getEndDate());
-        }
-        if (event.containsEndTimeZone()) {
-            clone.setEndTimeZone(event.getEndTimeZone());
         }
         if (event.containsFilename()) {
             clone.setFilename(event.getFilename());
@@ -417,9 +398,6 @@ public abstract class RecurrenceServiceTest {
         if (event.containsStartDate()) {
             clone.setStartDate(event.getStartDate());
         }
-        if (event.containsStartTimeZone()) {
-            clone.setStartTimeZone(event.getStartTimeZone());
-        }
         if (event.containsStatus()) {
             clone.setStatus(event.getStatus());
         }
@@ -451,6 +429,33 @@ public abstract class RecurrenceServiceTest {
         SortedSet<T> retval = new TreeSet<T>();
         retval.addAll(list);
         return retval;
+    }
+
+    protected static DateTime DT(String value, TimeZone timeZone, boolean allDay) {
+        return DT(TimeTools.D(value, timeZone), timeZone, allDay);
+    }
+
+    protected static DateTime DT(Date date, TimeZone timeZone, boolean allDay) {
+        if (allDay) {
+            return new DateTime(date.getTime()).toAllDay();
+        } else {
+            return new DateTime(timeZone, date.getTime());
+        }
+    }
+
+    protected static void setStartAndEndDates(Event event, Date startDate, Date endDate, boolean allDay, TimeZone timeZone) {
+        if (allDay) {
+            event.setStartDate(new DateTime(startDate.getTime()).toAllDay());
+            event.setEndDate(new DateTime(endDate.getTime()).toAllDay());
+        } else {
+            event.setStartDate(new DateTime(timeZone, startDate.getTime()));
+            event.setEndDate(new DateTime(timeZone, endDate.getTime()));
+        }
+    }
+
+    protected static void setStartAndEndDates(Event event, String start, String end, boolean allDay, TimeZone timeZone) {
+        event.setStartDate(DT(start, timeZone, allDay));
+        event.setEndDate(DT(end, timeZone, allDay));
     }
 
 }

@@ -97,9 +97,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("24.10.2008 01:00:00", tz));
-        master.setEndDate(TimeTools.D("24.10.2008 05:00:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "24.10.2008 01:00:00", "24.10.2008 05:00:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -132,9 +130,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("27.03.2009 01:00:00", tz));
-        master.setEndDate(TimeTools.D("27.03.2009 05:00:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "27.03.2009 01:00:00", "27.03.2009 05:00:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -167,9 +163,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("28.03.2009 02:15:00", tz));
-        master.setEndDate(TimeTools.D("28.03.2009 02:45:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "28.03.2009 02:15:00", "28.03.2009 02:45:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -196,9 +190,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("25.10.2008 02:00:00", tz));
-        master.setEndDate(TimeTools.D("25.10.2008 03:00:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "25.10.2008 02:00:00", "25.10.2008 03:00:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
@@ -225,9 +217,7 @@ public class DSTShiftTest extends AbstractSingleTimeZoneTest {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
-        master.setStartDate(TimeTools.D("25.10.2008 01:00:00", tz));
-        master.setEndDate(TimeTools.D("25.10.2008 02:00:00", tz));
-        setTimeZone(master, timeZone);
+        setStartAndEndDates(master, "25.10.2008 01:00:00", "25.10.2008 02:00:00", false, tz);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
         int count = 0;
