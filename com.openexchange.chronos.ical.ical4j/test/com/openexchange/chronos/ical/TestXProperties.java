@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical;
 
+import static com.openexchange.chronos.common.CalendarUtils.asDate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -131,10 +132,10 @@ public class TestXProperties extends ICalTest {
 
         assertEquals("040000008200E00074C5B7101A82E00800000000D0AA8057A561CC01000000000000000010000000B4762DB1A2E3C24BA17F2D09C0F0189F", event.getUid());
         assertEquals("mailto:otto@example.com", event.getOrganizer().getUri());
-        assertEquals(D("2011-12-08 12:00:00", "CET"), event.getStartDate());
-        assertEquals(D("2011-12-08 12:30:00", "CET"), event.getEndDate());
-        assertEquals("CET", event.getStartTimeZone());
-        assertEquals("CET", event.getEndTimeZone());
+        assertEquals(D("2011-12-08 12:00:00", "CET"), asDate(event.getStartDate()));
+        assertEquals(D("2011-12-08 12:30:00", "CET"), asDate(event.getEndDate()));
+        assertEquals("CET", event.getStartDate().getTimeZone().getID());
+        assertEquals("CET", event.getEndDate().getTimeZone().getID());
 
         assertNotNull(event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE"));
         assertEquals("1", event.getExtendedProperties().get("X-MICROSOFT-CDO-APPT-SEQUENCE").getValue());

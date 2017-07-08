@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical;
 
+import static com.openexchange.chronos.common.CalendarUtils.asDate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -92,8 +93,8 @@ public class BasicTest extends ICalTest {
         //        assertEquals(D("1996-07-04 12:00:00"), event.getCreated());
         assertEquals("uid1@example.com", event.getUid());
         assertEquals("mailto:jsmith@example.com", event.getOrganizer().getUri());
-        assertEquals(D("1996-09-18 14:30:00"), event.getStartDate());
-        assertEquals(D("1996-09-20 22:00:00"), event.getEndDate());
+        assertEquals(D("1996-09-18 14:30:00"), asDate(event.getStartDate()));
+        assertEquals(D("1996-09-20 22:00:00"), asDate(event.getEndDate()));
         assertEquals(EventStatus.CONFIRMED, event.getStatus());
         assertEquals(Collections.singletonList("CONFERENCE"), event.getCategories());
         assertEquals("Networld+Interop Conference", event.getSummary());
@@ -150,12 +151,12 @@ public class BasicTest extends ICalTest {
         assertEquals("Project XYZ Review Meeting", event.getDescription());
         assertEquals(Collections.singletonList("MEETING"), event.getCategories());
         assertEquals(Classification.PUBLIC, event.getClassification());
-        assertEquals(D("1998-03-09 13:00;00"), event.getCreated());
+        assertEquals(D("1998-03-09 13:00:00"), event.getCreated());
         assertEquals("XYZ Project Review", event.getSummary());
-        assertEquals(D("1998-03-12 08:30:00", "America/New_York"), event.getStartDate());
-        assertEquals(D("1998-03-12 09:30:00", "America/New_York"), event.getEndDate());
-        assertEquals("America/New_York", event.getStartTimeZone());
-        assertEquals("America/New_York", event.getEndTimeZone());
+        assertEquals(D("1998-03-12 08:30:00", "America/New_York"), asDate(event.getStartDate()));
+        assertEquals(D("1998-03-12 09:30:00", "America/New_York"), asDate(event.getEndDate()));
+        assertEquals("America/New_York", event.getStartDate().getTimeZone().getID());
+        assertEquals("America/New_York", event.getEndDate().getTimeZone().getID());
         assertEquals("1CP Conference Room 4350", event.getLocation());
     }
 
@@ -195,8 +196,8 @@ public class BasicTest extends ICalTest {
         assertNotNull(attendee);
         assertEquals("mailto:jsmith@example.com", attendee.getUri());
         assertEquals(Boolean.TRUE, attendee.isRsvp());
-        assertEquals(D("1997-03-24 12:30:00"), event.getStartDate());
-        assertEquals(D("1997-03-24 21:00:00"), event.getEndDate());
+        assertEquals(D("1997-03-24 12:30:00"), asDate(event.getStartDate()));
+        assertEquals(D("1997-03-24 21:00:00"), asDate(event.getEndDate()));
         assertEquals(Arrays.asList("MEETING", "PROJECT"), event.getCategories());
         assertEquals(Classification.PUBLIC, event.getClassification());
         assertEquals("Calendaring Interoperability Planning Meeting", event.getSummary());
@@ -335,10 +336,10 @@ public class BasicTest extends ICalTest {
         Event event = importEvent(iCal);
 
         assertEquals("2 Tage vorher", event.getSummary());
-        assertEquals(D("2030-06-28 17:00:00", "Europe/Berlin"), event.getStartDate());
-        assertEquals(D("2030-06-28 18:00:00", "Europe/Berlin"), event.getEndDate());
-        assertEquals("Europe/Berlin", event.getStartTimeZone());
-        assertEquals("Europe/Berlin", event.getEndTimeZone());
+        assertEquals(D("2030-06-28 17:00:00", "Europe/Berlin"), asDate(event.getStartDate()));
+        assertEquals(D("2030-06-28 18:00:00", "Europe/Berlin"), asDate(event.getEndDate()));
+        assertEquals("Europe/Berlin", event.getStartDate().getTimeZone().getID());
+        assertEquals("Europe/Berlin", event.getEndDate().getTimeZone().getID());
     }
 
     @Test
@@ -381,10 +382,10 @@ public class BasicTest extends ICalTest {
         Event event = importEvent(iCal);
 
         assertEquals("NewYork Event", event.getSummary());
-        assertEquals(D("2012-08-08 02:00:00", "America/New_York"), event.getStartDate());
-        assertEquals(D("2012-08-08 18:00:00", "America/New_York"), event.getEndDate());
-        assertEquals("America/New_York", event.getStartTimeZone());
-        assertEquals("America/New_York", event.getEndTimeZone());
+        assertEquals(D("2012-08-08 02:00:00", "America/New_York"), asDate(event.getStartDate()));
+        assertEquals(D("2012-08-08 18:00:00", "America/New_York"), asDate(event.getEndDate()));
+        assertEquals("America/New_York", event.getStartDate().getTimeZone().getID());
+        assertEquals("America/New_York", event.getEndDate().getTimeZone().getID());
     }
 
 }
