@@ -49,46 +49,64 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
-import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
+import com.openexchange.chronos.Repeat;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
- * {@link AlarmMappings}
+ * {@link RepeatMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmMappings {
-
-	/**
-	 * Holds a collection of all known alarm mappings.
-	 */
-	public static List<ICalMapping<VAlarm, Alarm>> ALL = Collections.<ICalMapping<VAlarm, Alarm>>unmodifiableList(Arrays.asList(
-		new TriggerMapping(),
-		new UidMapping(),
-		new ActionMapping(),
-		new AcknowledgedMapping(),
-        new DescriptionMapping(),
-        new RelatedToMapping(),
-        new RepeatMapping(),
-        new SummaryMapping(),
-        new ExtendedPropertiesMapping(
-            Property.SUMMARY, Property.REPEAT, Property.DURATION, Property.TRIGGER, Property.UID, Property.ACTION, 
-            Acknowledged.PROPERTY_NAME, Property.DESCRIPTION, Property.RELATED_TO
-        )
-	));
+public class RepeatMapping extends AbstractICalMapping<VAlarm, Alarm> {
 
     /**
-     * Initializes a new {@link AlarmMappings}.
+     * Initializes a new {@link RepeatMapping}.
      */
-	private AlarmMappings() {
+	public RepeatMapping() {
 		super();
+	}
+
+	@Override
+	public void export(Alarm object, VAlarm component, ICalParameters parameters, List<OXException> warnings) {
+        Repeat value = object.getRepeat();
+        removeProperties(component, Property.REPEAT);
+        removeProperties(component, Property.DURATION);
+        if (null != value) {
+            component.getProperties().add(new net.fortuna.ical4j.model.property.Repeat(value.getCount()));
+            component.getProperties().add(new net.fortuna.ical4j.model.property.Duration(new ParameterList(), value.getDuration()));
+        }
+	}
+
+	@Override
+	public void importICal(VAlarm component, Alarm object, ICalParameters parameters, List<OXException> warnings) {
+        Property property = component.getProperty(Property.REPEAT);
+        if (null == property || null == property.getValue()) {
+            object.setRepeat(null);
+            return;
+        }
+        int count;
+        try {
+            count = Integer.parseInt(property.getValue());
+        } catch (NumberFormatException e) {
+            addConversionWarning(warnings, e, Property.REPEAT, "Ignoring REPEAT due invalid value");
+            object.setRepeat(null);
+            return;
+        }
+        property = component.getProperty(Property.DURATION);
+        if (null == property || null == property.getValue()) {
+            addConversionWarning(warnings, Property.REPEAT, "Ignoring REPEAT due to missing DURATION");
+            object.setRepeat(null);
+            return;
+        }
+        object.setRepeat(new Repeat(count, property.getValue()));
 	}
 
 }

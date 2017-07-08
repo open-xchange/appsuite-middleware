@@ -49,46 +49,40 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
-import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.property.Summary;
 
 /**
- * {@link AlarmMappings}
+ * {@link SummaryMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmMappings {
-
-	/**
-	 * Holds a collection of all known alarm mappings.
-	 */
-	public static List<ICalMapping<VAlarm, Alarm>> ALL = Collections.<ICalMapping<VAlarm, Alarm>>unmodifiableList(Arrays.asList(
-		new TriggerMapping(),
-		new UidMapping(),
-		new ActionMapping(),
-		new AcknowledgedMapping(),
-        new DescriptionMapping(),
-        new RelatedToMapping(),
-        new RepeatMapping(),
-        new SummaryMapping(),
-        new ExtendedPropertiesMapping(
-            Property.SUMMARY, Property.REPEAT, Property.DURATION, Property.TRIGGER, Property.UID, Property.ACTION, 
-            Acknowledged.PROPERTY_NAME, Property.DESCRIPTION, Property.RELATED_TO
-        )
-	));
+public class SummaryMapping extends ICalTextMapping<VAlarm, Alarm> {
 
     /**
-     * Initializes a new {@link AlarmMappings}.
+     * Initializes a new {@link SummaryMapping}.
      */
-	private AlarmMappings() {
-		super();
-	}
+    public SummaryMapping() {
+        super(Property.SUMMARY);
+    }
+
+    @Override
+    protected String getValue(Alarm object) {
+        return object.getSummary();
+    }
+
+    @Override
+    protected void setValue(Alarm object, String value) {
+        object.setSummary(value);
+    }
+
+    @Override
+    protected Property createProperty() {
+        return new Summary();
+    }
 
 }
