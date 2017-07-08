@@ -259,7 +259,7 @@ public class ICalExporter implements Exporter {
                         if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
                             exportAppointments(session, folder.getObjectID(), objId, fieldsToBeExported, out);
                         } else {
-                            exportEvents(session, String.valueOf(folder.getObjectID()), String.valueOf(objId), fieldsToBeExported, out);
+                            exportEvents(session, folderID, optObjectID, fieldsToBeExported, out);
                         }
                     } else if (FolderObject.TASK == folder.getModule()) {
                         exportTasks(session, folder.getObjectID(), objId, fieldsToBeExported, out);
