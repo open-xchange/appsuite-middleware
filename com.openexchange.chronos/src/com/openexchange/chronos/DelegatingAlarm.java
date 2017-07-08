@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * {@link DelegatingAlarm}
@@ -112,16 +113,6 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public ExtendedProperties getExtendedProperties() {
-        return delegate.getExtendedProperties();
-    }
-
-    @Override
-    public boolean containsExtendedProperties() {
-        return delegate.containsExtendedProperties();
-    }
-
-    @Override
     public AlarmAction getAction() {
         return delegate.getAction();
     }
@@ -152,8 +143,58 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return delegate.equals(obj);
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
+    }
+
+    @Override
+    public boolean containsExtendedProperties() {
+        return delegate.containsExtendedProperties();
+    }
+
+    @Override
+    public List<Attachment> getAttachments() {
+        return delegate.getAttachments();
+    }
+
+    @Override
+    public boolean containsAttachments() {
+        return delegate.containsAttachments();
+    }
+
+    @Override
+    public String getDescription() {
+        return delegate.getDescription();
+    }
+
+    @Override
+    public boolean containsDescription() {
+        return delegate.containsDescription();
+    }
+
+    @Override
+    public String getSummary() {
+        return delegate.getSummary();
+    }
+
+    @Override
+    public boolean containsSummary() {
+        return delegate.containsSummary();
+    }
+
+    @Override
+    public List<Attendee> getAttendees() {
+        return delegate.getAttendees();
+    }
+
+    @Override
+    public boolean containsAttendees() {
+        return delegate.containsAttendees();
+    }
+
+    @Override
+    public boolean equals(Object arg0) {
+        return delegate.equals(arg0);
     }
 
     @Override
@@ -207,16 +248,6 @@ public abstract class DelegatingAlarm extends Alarm {
     }
 
     @Override
-    public void setExtendedProperties(ExtendedProperties value) {
-        delegate.setExtendedProperties(value);
-    }
-
-    @Override
-    public void removeExtendedProperties() {
-        delegate.removeExtendedProperties();
-    }
-
-    @Override
     public void setAction(AlarmAction value) {
         delegate.setAction(value);
     }
@@ -244,6 +275,61 @@ public abstract class DelegatingAlarm extends Alarm {
     @Override
     public void removeTrigger() {
         delegate.removeTrigger();
+    }
+
+    @Override
+    public void setExtendedProperties(ExtendedProperties value) {
+        delegate.setExtendedProperties(value);
+    }
+
+    @Override
+    public void removeExtendedProperties() {
+        delegate.removeExtendedProperties();
+    }
+
+    @Override
+    public void setAttachments(List<Attachment> attachments) {
+        delegate.setAttachments(attachments);
+    }
+
+    @Override
+    public void removeAttachments() {
+        delegate.removeAttachments();
+    }
+
+    @Override
+    public void setDescription(String description) {
+        delegate.setDescription(description);
+    }
+
+    @Override
+    public void removeDescription() {
+        delegate.removeDescription();
+    }
+
+    @Override
+    public void setSummary(String summary) {
+        delegate.setSummary(summary);
+    }
+
+    @Override
+    public void removeSummary() {
+        delegate.removeSummary();
+    }
+
+    @Override
+    public void setAttendees(List<Attendee> attendees) {
+        delegate.setAttendees(attendees);
+    }
+
+    @Override
+    public void removeAttendees() {
+        delegate.removeAttendees();
+    }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
     }
 
 }
