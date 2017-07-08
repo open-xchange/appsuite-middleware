@@ -80,20 +80,18 @@ public class CalendarContentType implements ContentType {
 
     @Override
     public String toString() {
-        //        return "calendar";
         return "event";
     }
 
     @Override
     public int getModule() {
         // From FolderObject.CALENDAR
-        // used at
         return 2;
     }
 
     @Override
     public int getPriority() {
-        return 46;
+        return 0;
     }
 
 }

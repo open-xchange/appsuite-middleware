@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -190,15 +191,15 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      *
      * @return The available content types
      */
-    public Map<Integer, ContentType> getAvailableContentTypes() {
+    public Map<Integer, List<ContentType>> getAvailableContentTypes() {
         ConcurrentMap<ContentType, FolderStorage> concreteStorages = getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
         if (concreteStorages.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
+        Map<Integer, List<ContentType>> ret = new HashMap<Integer, List<ContentType>>(concreteStorages.size());
         for (ContentType contentType : concreteStorages.keySet()) {
-            ret.put(Integer.valueOf(contentType.getModule()), contentType);
+            com.openexchange.tools.arrays.Collections.put(ret, I(contentType.getModule()), contentType);
         }
         return ret;
     }

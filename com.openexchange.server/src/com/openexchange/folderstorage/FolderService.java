@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -70,7 +71,7 @@ public interface FolderService {
      *
      * @return A map of available content types registered by folder storages
      */
-    Map<Integer, ContentType> getAvailableContentTypes();
+    Map<Integer, List<ContentType>> getAvailableContentTypes();
 
     /**
      * Parses a specific content type, either based on the content type's textual representation, or using the content type's module

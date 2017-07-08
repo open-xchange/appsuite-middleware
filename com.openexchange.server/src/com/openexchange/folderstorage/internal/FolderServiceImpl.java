@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
@@ -354,7 +355,7 @@ public final class FolderServiceImpl implements FolderService, TrashAwareFolderS
     }
 
     @Override
-    public Map<Integer, ContentType> getAvailableContentTypes() {
+    public Map<Integer, List<ContentType>> getAvailableContentTypes() {
         return ContentTypeRegistry.getInstance().getAvailableContentTypes();
     }
 
