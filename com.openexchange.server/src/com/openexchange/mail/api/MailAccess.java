@@ -287,7 +287,13 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param warnings The warnings to add
      */
     public void addWarnings(final Collection<OXException> warnings) {
-        this.warnings.addAll(warnings);
+        if (null != warnings) {
+            for (OXException warning : warnings) {
+                if (null != warning) {
+                    this.warnings.add(warning);
+                }
+            }
+        }
     }
 
     /**
