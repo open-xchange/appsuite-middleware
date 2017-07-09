@@ -1338,6 +1338,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private Filestore findFilestoreForEntity(boolean forContext) throws StorageException {
         Connection con = null;
+        boolean readOnly = true;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -1392,7 +1393,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
-            for (Candidate candidate : candidates) {
+            NextCandidate: for (Candidate candidate : candidates) {
                 int entityCount = candidate.numberOfEntities;
 
                 // Get user count information
@@ -1423,6 +1424,32 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
                     if (forContext) {
                         if (enoughSpaceForContext(filestore)) {
+                            // Switch from read-only to read-write connection
+                            closeSQLStuff(rs, stmt);
+                            cache.pushReadConnectionForConfigDB(con);
+                            con = null;
+                            con = cache.getWriteConnectionForConfigDB();
+                            readOnly = false;
+
+                            // Try to atomically increment filestore counter while preserving max. number of entities condition
+                            boolean first = true;
+                            boolean success;
+                            int current;
+                            do {
+                                if (first) {
+                                    current = candidate.numberOfEntities;
+                                    first = false;
+                                } else {
+                                    current = getCurrentCountFor(filestore.getId().intValue(), con);
+                                    if (current + (null == count ? 0 : count.getCount()) >= candidate.maxNumberOfEntities) {
+                                        // Exceeded... repeat with next candidate
+                                        continue NextCandidate;
+                                    }
+                                }
+                                success = optIncrement(filestore.getId().intValue(), current, con);
+                            } while (false == success);
+
+                            // Return...
                             return filestore;
                         }
                     } else {
@@ -1448,11 +1475,41 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushReadConnectionForConfigDB(con);
+                    if (readOnly) {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } else {
+                        cache.pushWriteConnectionForConfigDB(con);
+                    }
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    private boolean optIncrement(int filestoreId, int current, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=? WHERE filestore_id=? AND count=?");
+            stmt.setInt(1, current + 1);
+            stmt.setInt(2, filestoreId);
+            stmt.setInt(3, current);
+            return stmt.executeUpdate() > 0;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private int getCurrentCountFor(int filestoreId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT count FROM contexts_per_filestore WHERE filestore_id=?");
+            stmt.setInt(1, filestoreId);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 

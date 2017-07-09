@@ -256,7 +256,7 @@ public class OXContextMySQLStorageCommon {
     /**
      * Parses a dynamic attribute from the contextAttribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
-     * 
+     *
      * @throws StorageException
      */
     public static String[] parseDynamicAttribute(final String name) throws StorageException {
@@ -352,7 +352,7 @@ public class OXContextMySQLStorageCommon {
     /**
      * Checks if there are any context referencing the given schema on the given database. If this is not the case, then the database will
      * be deleted.
-     * 
+     *
      * @param poolId should be the pool identifier of the master database server of a database cluster.
      * @param dbSchema the name of the database schema that should be checked for deletion.
      * @throws StorageException if somehow the check and delete process fails.
@@ -666,15 +666,45 @@ public class OXContextMySQLStorageCommon {
             Databases.closeSQLStuff(stmt);
         }
     }
+    /**
+     * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
+     *
+     * @param ctx The context newly using a filestore
+     * @throws StorageException If a general SQL error occurs
+     */
+    public final void incrementContextsPerFilestoreCount(final Context ctx) throws StorageException {
+        Connection configdbCon;
+        try {
+            configdbCon = cache.getWriteConnectionForConfigDB();
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
+        try {
+            incrementContextsPerFilestoreCount(ctx, configdbCon);
+        } finally {
+            if (null != configdbCon) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(configdbCon);
+                } catch (PoolException e) {
+                    log.error("Failed to push back read-write connection for ConfigDB", e);
+                }
+            }
+        }
+    }
 
     /**
-     * <code>INSERT</code>s the data row into the "context" table.
+     * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
      *
      * @param ctx The context newly using a filestore
      * @param configdbCon A connection to the configdb
      * @throws StorageException If a general SQL error occurs
      */
-    private final void incrementContextsPerFilestoreTable(final Context ctx, final Connection configdbCon) throws StorageException {
+    public final void incrementContextsPerFilestoreCount(final Context ctx, final Connection configdbCon) throws StorageException {
+        if (null == configdbCon) {
+            incrementContextsPerFilestoreCount(ctx);
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");

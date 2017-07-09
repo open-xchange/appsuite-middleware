@@ -1118,9 +1118,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException("Context administrator is not defined.");
         }
 
+        boolean contextCreated = false;
+
         // Find filestore for context.
         ctx.setFilestore_name(FileStorages.getNameForContext(ctx.getId().intValue()));
-        Integer storeId = ctx.getFilestoreId();
+        boolean decrementFileStoreCount = false;
+        Filestore filestore;
+        {
+            Integer storeId = ctx.getFilestoreId();
+            if (null == storeId) {
+                // No filestore specified
+                filestore = OXUtilStorageInterface.getInstance().findFilestoreForContext();
+            } else {
+                OXUtilStorageInterface.getInstance().getFilestoreBasic(i(storeId));
+                contextCommon.incrementContextsPerFilestoreCount(ctx);
+            }
+            decrementFileStoreCount = true;
+        }
+
+
+
+
+        // Old stuff
+
         if (null == storeId) {
             storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
             ctx.setFilestoreId(storeId);
