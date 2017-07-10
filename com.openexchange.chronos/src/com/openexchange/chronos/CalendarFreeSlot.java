@@ -105,6 +105,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the uid
+     */
+    public void removeUid() {
+        this.uid = null;
+        fields.remove(FreeSlotField.uid);
+    }
+
+    /**
      * Sets the creationTimestamp
      *
      * @param creationTimestamp The creationTimestamp to set
@@ -134,6 +142,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the start time
+     */
+    public void removeStartTime() {
+        this.startTime = null;
+        fields.remove(FreeSlotField.dtstart);
+    }
+
+    /**
      * Sets the endTime
      *
      * @param endTime The endTime to set
@@ -141,6 +157,14 @@ public class CalendarFreeSlot implements FieldAware {
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
         fields.add(FreeSlotField.dtend);
+    }
+
+    /**
+     * Removes the end time
+     */
+    public void removeEndTime() {
+        this.endTime = null;
+        fields.remove(FreeSlotField.dtend);
     }
 
     /**
@@ -182,6 +206,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the created timestamp
+     */
+    public void removeCreated() {
+        this.created = null;
+        fields.remove(FreeSlotField.created);
+    }
+
+    /**
      * Gets the lastModified
      *
      * @return The lastModified
@@ -198,6 +230,14 @@ public class CalendarFreeSlot implements FieldAware {
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
         fields.add(FreeSlotField.lastModified);
+    }
+
+    /**
+     * Removes the last modified
+     */
+    public void removeLastModified() {
+        this.lastModified = null;
+        fields.remove(FreeSlotField.lastModified);
     }
 
     /**
@@ -220,6 +260,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the description
+     */
+    public void removeDescription() {
+        this.description = null;
+        fields.remove(FreeSlotField.description);
+    }
+
+    /**
      * Gets the summary
      *
      * @return The summary
@@ -236,6 +284,14 @@ public class CalendarFreeSlot implements FieldAware {
     public void setSummary(String summary) {
         this.summary = summary;
         fields.add(FreeSlotField.summary);
+    }
+
+    /**
+     * Removes the summary
+     */
+    public void removeSummary() {
+        this.summary = null;
+        fields.remove(FreeSlotField.summary);
     }
 
     /**
@@ -277,6 +333,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the categories
+     */
+    public void removeCategories() {
+        this.categories = null;
+        fields.remove(FreeSlotField.categories);
+    }
+
+    /**
      * Gets the extendedProperties
      *
      * @return The extendedProperties
@@ -293,6 +357,14 @@ public class CalendarFreeSlot implements FieldAware {
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
         fields.add(FreeSlotField.extendedProperties);
+    }
+
+    /**
+     * Removes the extended properties
+     */
+    public void removeExtendedProperties() {
+        this.extendedProperties = null;
+        fields.remove(FreeSlotField.extendedProperties);
     }
 
     /**
