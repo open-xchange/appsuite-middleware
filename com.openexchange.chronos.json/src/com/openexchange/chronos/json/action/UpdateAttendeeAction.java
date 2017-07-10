@@ -96,7 +96,7 @@ public class UpdateAttendeeAction extends ChronosAction {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_TIMESTAMP);
 
     private static final String ATTENDEE = "attendee";

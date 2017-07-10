@@ -20,3 +20,8 @@ properties:
         description: The deleted events.
         items:
           $ref: "#/definitions/EventData"
+      conflicts:
+        type: array
+        description: An array of conflicts.
+        items:
+          $ref: "#/definitions/ChronosConflictDataRaw"

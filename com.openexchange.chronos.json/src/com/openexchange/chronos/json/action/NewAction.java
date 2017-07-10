@@ -75,7 +75,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNO
  */
 public class NewAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", PARAMETER_IGNORE_CONFLICTS);
 
     /**
      * Initializes a new {@link NewAction}.

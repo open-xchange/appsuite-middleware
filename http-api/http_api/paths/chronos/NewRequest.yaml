@@ -10,6 +10,7 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosNotification"
       - in: body
         name: body
         description: A JSON object containing the event's data.

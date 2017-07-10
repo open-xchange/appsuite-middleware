@@ -73,7 +73,7 @@ public class MoveAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_NOTIFICATION, CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
 
     @Override
     protected Set<String> getRequiredParameters() {

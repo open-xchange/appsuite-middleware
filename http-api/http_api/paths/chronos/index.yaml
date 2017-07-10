@@ -7,3 +7,4 @@ requests:
   - NewRequest.yaml
   - DeleteRequest.yaml
   - UpdateAttendeeRequest.yaml
+  - MoveRequest.yaml

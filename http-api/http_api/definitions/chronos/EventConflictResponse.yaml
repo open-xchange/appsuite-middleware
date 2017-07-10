@@ -2,4 +2,4 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    $ref: "#/definition/ChronosConflictData"
+    $ref: "#/definitions/ChronosConflictData"

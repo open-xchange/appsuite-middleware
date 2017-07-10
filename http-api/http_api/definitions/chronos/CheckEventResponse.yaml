@@ -2,8 +2,11 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    conflicts:
-      type: array
-      description: An array of conflicts.
-      items:
-        $ref: ../chronos/ConflictDataRaw.yaml
+    type: object
+    title: CheckEventConflictResponse
+    properties:
+      conflicts:
+        type: array
+        description: An array of conflicts.
+        items:
+          $ref: "#/definitions/ChronosConflictDataRaw"

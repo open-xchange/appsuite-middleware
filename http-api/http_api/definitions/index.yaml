@@ -178,6 +178,8 @@ ChronosFreeBusyEventsResponse:
   $ref: ./chronos/FreeBusyEventsResponse.yaml
 ChronosFreeBusyEventsData:
   $ref: ./chronos/FreeBusyEventsData.yaml
+ChronosConflictDataRaw:
+  $ref: ./chronos/ConflictDataRaw.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

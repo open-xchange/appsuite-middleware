@@ -1,0 +1,83 @@
+startDate:
+    $ref: "#/definitions/DateTimeData"
+    description: The starting date of the event.
+endDate:
+  $ref: "#/definitions/DateTimeData"
+  description: The ending date of the event.
+created:
+  type: integer
+  format: int64
+  description: The creation time.
+uid:
+  type: string
+  description: the universal identifier.
+attendees:
+  type: array
+  description: The attendees of the event.
+  items:
+      $ref: "#/definitions/Attendee"
+alarms:
+  type: array
+  description: The alarms of the event for the current user.
+  items: 
+    $ref: "#/definitions/Alarm"
+lastModified:
+  type: integer
+  format: int64
+  description: The last modification time.
+modifiedBy:
+  type: integer
+  description: The id of the user who lastly modified the event.
+summary:
+  type: string
+  description: The summary of the event.
+sequence:
+  type: integer
+  description: The sequence number of the event.
+id:
+  type: string
+  description: The identifier of the event.
+class:
+  type: string
+  description: The class of the event.
+organizer:
+    $ref: "#/definitions/CalendarUser"
+    description: The organizer of the event.
+transp:
+  type: string
+  description: Defines whether the event is shown in the free-busy view.
+  enum: 
+    - OPAQUE
+    - TRANSPARENT
+allDay:
+  type: boolean
+  description: A flag indicating an all day event.
+color: 
+  type: string
+  description: The color of the even as a css3 color definition.
+folder:
+  type: string
+  description: The folder identifier.
+createdBy: 
+  $ref: "#/definitions/CalendarUser"
+  description: The creator of the event.
+recurrenceId:
+  type: integer
+  format: int64
+  description: The recurrence id of this recurrence.
+calendarUser:
+  type: integer
+  description: The user of this calendar.
+rrule:
+  type: string
+  description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
+attachments:
+  type: array
+  description: An array of attachments.
+  items:
+    $ref: "#/definitions/ChronosAttachment"
+extendedProperties:
+  type: array
+  description: An array of extended properties of this event.
+  items:
+    $ref: "#/definitions/ChronosExtendedProperty"

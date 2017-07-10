@@ -1,13 +1,15 @@
-/chronos?action=updateAttendee:
+/chronos?action=move:
   put:
-    operationId: updateAttendee
+    operationId: moveEvent
     tags:
       - Chronos
-    summary: Updates the attendee status of an event.
+    summary: Moves an event to another calendar folder.
     consumes:
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosNotification"
@@ -17,22 +19,6 @@
         format: int64
         description: Timestamp of the last update of the event.
         required: true
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
-      - in: body
-        name: body
-        description: A JSON object with the field `attendee` and `alarms`.
-        required: true
-        schema:
-          type: object
-          title: AttendeeAndAlarm
-          properties:
-            attendee:
-              $ref: "#/definitions/Attendee"
-            alarms:
-              type: array
-              description: A list of alarms for this event.
-              items:
-                $ref: "#/definitions/Alarm"
     responses:
       200:
         description: |
