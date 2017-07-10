@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.I;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -540,9 +542,10 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
         return result;
     }
 
-    private void mergeEventsBetween(boolean [] result, boolean [] newValues){
+    private void mergeEventsBetween(boolean [] result, boolean [] newValues) throws OXException{
         if(result.length != newValues.length){
-           //TODO throw exception
+            // Should never occur
+           throw new OXException(new InvalidParameterException("The two boolean arrays must not have different sizes!"));
         }
 
         for(int x=0; x<result.length; x++){
@@ -552,30 +555,25 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
 
     @Override
     public Map<Attendee, List<Event>> getFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<Event>> result=null;
-        for(CalendarAccount account: getAccounts()){
+        Map<Attendee, List<Event>> result = null;
+        for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
-            if(access instanceof FreeBusyAwareCalendarAccess){
+            if (access instanceof FreeBusyAwareCalendarAccess) {
                 Map<Attendee, List<Event>> eventsPerAttendee = ((FreeBusyAwareCalendarAccess) access).getFreeBusy(attendees, from, until);
-                if(result==null){
-                    result=eventsPerAttendee;
-                    for(Attendee att: result.keySet()){
+                if (result == null) {
+                    result = eventsPerAttendee;
+                    for (Attendee att : result.keySet()) {
                         result.put(att, withUniqueIDs(result.get(att), account.getAccountId()));
                     }
                 } else {
-                    for(Attendee att: eventsPerAttendee.keySet()){
+                    for (Attendee att : eventsPerAttendee.keySet()) {
                         result.get(att).addAll(withUniqueIDs(eventsPerAttendee.get(att), account.getAccountId()));
                     }
                 }
             }
         }
 
-        // Sort results
-
-        for(Attendee att: result.keySet()){
-            List<Event> events = result.get(att);
-            Collections.sort(events, new EventTimezoneComparator<>(null)); //TODO properly sort events or remove sorting?
-        }
+        //TODO properly sort events or remove sorting?
 
         return result;
     }
@@ -597,11 +595,10 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
             }
         }
 
-        // Sort results
-
+        // Merge results
         for(Attendee att: result.keySet()){
-            List<FreeBusyTime> events = result.get(att);
-            Collections.sort(events, new FreeBusyComparator<>(null)); //TODO properly sort FreeBusyTime's
+            List<FreeBusyTime> freeBusyTimes = result.get(att);
+            result.put(att, FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
         }
 
         return result;
