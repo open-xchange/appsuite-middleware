@@ -80,6 +80,14 @@ public interface EventStorage {
     String nextId() throws OXException;
 
     /**
+     * Gets the number of events in the storage, which includes the sum of all non-recurring events, the series master events, and the
+     * overridden exceptional occurrences from event series.
+     *
+     * @return The number of events in the storage
+     */
+    long countEvents() throws OXException;
+
+    /**
      * Loads a specific event.
      *
      * @param eventId The identifier of the event to load

@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -122,6 +123,19 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             throw asOXException(e);
         } finally {
             release(connection, 1);
+        }
+    }
+
+    @Override
+    public long countEvents() throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return countEvents(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
         }
     }
 
@@ -325,6 +339,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
+    private long countEvents(Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT COUNT(*) FROM prg_dates WHERE cid=?;")) {
+            stmt.setInt(1, context.getContextId());
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? l(resultSet.getLong(1)) : 0L;
+            }
+        }
+    }
     private static int deleteEvent(Connection connection, int contextID, int objectID) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates WHERE cid=? AND intfield01=?;")) {
             stmt.setInt(1, contextID);

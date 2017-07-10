@@ -133,6 +133,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return value;
     }
 
+    @Override
     public long countEvents() throws OXException {
         Connection connection = null;
         try {
