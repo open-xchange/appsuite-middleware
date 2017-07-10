@@ -63,9 +63,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.json.converter.ListItemMapping;
+import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -180,9 +182,9 @@ public class UpdateAttendeeAction extends ChronosAction {
 
             }
             if (results != null) {
-                return new AJAXRequestResult(results, results.get(results.size() - 1).getTimestamp(), "calendarResults");
+                return new AJAXRequestResult(results, results.get(results.size() - 1).getTimestamp(), MultipleCalendarResultConverter.INPUT_FORMAT);
             } else {
-                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, updateAttendeeResult.getTimestamp(), "calendarResult");
+                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, updateAttendeeResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
                 if (warnings != null) {
                     ajaxRequestResult.addWarnings(warnings);
                 }

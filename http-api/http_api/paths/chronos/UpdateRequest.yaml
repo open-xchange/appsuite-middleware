@@ -31,4 +31,4 @@
           A JSON object containing containing the result of the update. In case of errors the
           responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/ChronosUpdateResponse"
+          $ref: "#/definitions/ChronosCalendarResultResponse"

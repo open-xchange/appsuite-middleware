@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -111,8 +112,7 @@ public class NewAction extends ChronosAction {
             if (calendarResult.getCreations().size() != 1) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to create new event");
             }
-            Event createdEvent = calendarResult.getCreations().get(0).getCreatedEvent();
-            return new AJAXRequestResult(createdEvent, createdEvent.getLastModified(), "event");
+            return new AJAXRequestResult(calendarResult, calendarResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             if (isConflict(e)) {
                 return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);

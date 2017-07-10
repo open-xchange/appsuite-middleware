@@ -60,6 +60,7 @@ import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -104,7 +105,7 @@ public class AllAction extends ChronosAction {
                 timeStamp = event.getLastModified().getTime();
             }
         }
-        return new AJAXRequestResult(events, new Date(timeStamp), "event");
+        return new AJAXRequestResult(events, new Date(timeStamp), EventResultConverter.INPUT_FORMAT);
     }
 
 }

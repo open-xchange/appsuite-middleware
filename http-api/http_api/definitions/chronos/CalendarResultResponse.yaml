@@ -3,7 +3,7 @@ properties:
   $ref: ../common/CommonResponseData.yaml
   data:
     type: object
-    title: UpdateResult
+    title: CalendarResult
     properties:
       created:
         type: array

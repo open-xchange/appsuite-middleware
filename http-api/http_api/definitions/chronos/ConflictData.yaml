@@ -1,9 +1,0 @@
-type: object
-description: In case a conflict occurred the conflicts field is filled with informations about the conflicts. Otherwise the created or updated event is returned.
-properties:
-  $ref: "EventDataRaw.yaml"
-  conflicts:
-    type: array
-    description: An array of conflicts.
-    items:
-      $ref: "#/definitions/ChronosConflictDataRaw"

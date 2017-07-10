@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -109,7 +110,7 @@ public class UpdateAction extends ChronosAction {
         }
         try {
             CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event);
-            return new AJAXRequestResult(calendarResult, calendarResult.getTimestamp(), "calendarResult");
+            return new AJAXRequestResult(calendarResult, calendarResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             if (isConflict(e)) {
                 return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);

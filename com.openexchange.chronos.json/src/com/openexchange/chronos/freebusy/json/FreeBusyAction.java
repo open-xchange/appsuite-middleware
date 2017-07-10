@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -93,7 +94,7 @@ public class FreeBusyAction extends AbstractFreeBusyAction {
         Date from = parseDate(requestData, "from");
         Date until = parseDate(requestData, "until");
         Map<Attendee, List<FreeBusyTime>> mergedFreeBusy = freeBusyAccess.getMergedFreeBusy(attendees, from, until);
-        return new AJAXRequestResult(mergedFreeBusy, "freeBusy");
+        return new AJAXRequestResult(mergedFreeBusy, FreeBusyConverter.INPUT_FORMAT);
     }
 
 }
