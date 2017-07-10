@@ -160,22 +160,20 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
     private boolean needsConflictCheck(Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) {
-
-        if(originalAttendee.getPartStat().equals(ParticipationStatus.ACCEPTED)){
+        ParticipationStatus originalPartStat = null != originalAttendee.getPartStat() ? originalAttendee.getPartStat() : ParticipationStatus.NEEDS_ACTION;
+        ParticipationStatus updatedPartStat = null != updatedAttendee.getPartStat() ? updatedAttendee.getPartStat() : ParticipationStatus.NEEDS_ACTION;
+        if (originalPartStat.equals(ParticipationStatus.ACCEPTED)) {
             return false;
         }
-
-        if(updatedAttendee.getPartStat().equals(ParticipationStatus.ACCEPTED)){
-            if(originalAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE)){
+        if (updatedPartStat.equals(ParticipationStatus.ACCEPTED)) {
+            if (originalPartStat.equals(ParticipationStatus.TENTATIVE)) {
                 return false;
             }
             return true;
         }
-
-        if(updatedAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE) && (!originalAttendee.getPartStat().equals(ParticipationStatus.TENTATIVE))){
+        if (updatedPartStat.equals(ParticipationStatus.TENTATIVE) && (!originalPartStat.equals(ParticipationStatus.TENTATIVE))) {
             return true;
         }
-
         return false;
     }
 

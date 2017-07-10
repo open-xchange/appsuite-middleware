@@ -64,6 +64,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -157,6 +158,9 @@ public final class ConfirmAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        if (false == session.contains(CalendarParameters.PARAMETER_IGNORE_CONFLICTS)) {
+            session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        }
         String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         int recurrencePosition = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
