@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O> {
 
-    private static final String TIME_ZONE = "zzid";
+    private static final String TIME_ZONE = "tzid";
     private static final String VALUE = "value";
 
 	public DateTimeMapping(final String ajaxName, final int columnID) {
