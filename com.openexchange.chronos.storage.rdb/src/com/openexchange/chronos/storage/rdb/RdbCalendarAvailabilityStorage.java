@@ -155,7 +155,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws SQLException if an SQL error is occurred
      */
     private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItem(O item, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
-        String sql = constructInsertQueryBuilder(tableName, mapper).toString();
+        String sql = constructInsertQueryBuilder(tableName, mapper).append(";").toString();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -205,7 +205,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Constructs the initial INSERT SQL statement
+     * Constructs the initial INSERT SQL statement. The INSERT statement is NOT ended with the semicolon ';'.
      * 
      * @param tableName The table name
      * @param mapper The mapper to use
@@ -216,8 +216,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         E[] mappedFields = mapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(");");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(");");
+        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(") ");
+        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(")");
         return sb;
     }
 }
