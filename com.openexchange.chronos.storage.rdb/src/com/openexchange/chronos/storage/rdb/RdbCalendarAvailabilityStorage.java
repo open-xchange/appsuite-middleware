@@ -142,6 +142,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             release(connection, updated);
         }
     }
+    
+    ///////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////////
 
     /**
      * Inserts the specified item to the storage
