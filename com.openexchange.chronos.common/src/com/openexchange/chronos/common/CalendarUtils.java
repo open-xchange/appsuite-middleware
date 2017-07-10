@@ -738,8 +738,8 @@ public class CalendarUtils {
         if (null == dateTime2) {
             return 1;
         }
-        long timestamp1 = dateTime1.isFloating() ? dateTime1.swapTimeZone(timeZone).getTimestamp() : dateTime1.getTimestamp();
-        long timestamp2 = dateTime2.isFloating() ? dateTime2.swapTimeZone(timeZone).getTimestamp() : dateTime2.getTimestamp();
+        long timestamp1 = dateTime1.isFloating() ? getDateInTimeZone(dateTime1, timeZone) : dateTime1.getTimestamp();
+        long timestamp2 = dateTime2.isFloating() ? getDateInTimeZone(dateTime2, timeZone) : dateTime2.getTimestamp();
         return Long.compare(timestamp1, timestamp2);
     }
 
