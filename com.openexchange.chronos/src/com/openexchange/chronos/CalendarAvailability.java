@@ -89,7 +89,7 @@ public class CalendarAvailability implements FieldAware {
     private String location;
     private Organizer organizer;
     private String url;
-    private String comment;
+    private List<String> comments;
 
     private long duration; //FIXME: as integer or another type?
 
@@ -690,8 +690,8 @@ public class CalendarAvailability implements FieldAware {
      *
      * @return The comment
      */
-    public String getComment() {
-        return comment;
+    public List<String> getComments() {
+        return comments;
     }
 
     /**
@@ -699,16 +699,16 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param comment The comment to set
      */
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setComments(List<String> comments) {
+        this.comments = comments;
         fields.add(AvailabilityField.comment);
     }
 
     /**
      * Removes the comment
      */
-    public void removeComment() {
-        comment = null;
+    public void removeComments() {
+        comments = null;
         fields.remove(AvailabilityField.comment);
     }
 

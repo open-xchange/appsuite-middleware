@@ -387,6 +387,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the comments
+     */
+    public void removeComments() {
+        this.comments = null;
+        fields.remove(FreeSlotField.comment);
+    }
+
+    /**
      * Gets the uid
      *
      * @return The uid

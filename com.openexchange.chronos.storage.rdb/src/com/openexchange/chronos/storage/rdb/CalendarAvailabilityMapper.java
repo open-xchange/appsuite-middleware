@@ -465,9 +465,8 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
                 }
 
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(categories.get(0));
                 for (String category : categories) {
-                    stringBuilder.append(category);
+                    stringBuilder.append(category).append(",");
                 }
                 stringBuilder.setLength(stringBuilder.length() - 1);
 
@@ -488,17 +487,29 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
             @Override
             public void set(CalendarAvailability object, String value) throws OXException {
-                object.setComment(value);
+                String[] split = Strings.splitByCommaNotInQuotes(value);
+                object.setComments(split == null ? null : Arrays.asList(split));
             }
 
             @Override
             public String get(CalendarAvailability object) {
-                return object.getComment();
+                List<String> comments = object.getComments();
+                if (comments == null || comments.size() == 0) {
+                    return null;
+                }
+
+                StringBuilder stringBuilder = new StringBuilder();
+                for (String comment : comments) {
+                    stringBuilder.append(comment).append(",");
+                }
+                stringBuilder.setLength(stringBuilder.length() - 1);
+
+                return stringBuilder.toString();
             }
 
             @Override
             public void remove(CalendarAvailability object) {
-                object.removeComment();
+                object.removeComments();
             }
         });
         mappings.put(AvailabilityField.extendedProperties, new DefaultDbMapping<ExtendedProperties, CalendarAvailability>("extendedProperties", "Extended Properties", Types.BLOB) {
