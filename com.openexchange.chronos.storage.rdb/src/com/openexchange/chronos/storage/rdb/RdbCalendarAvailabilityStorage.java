@@ -105,10 +105,10 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            int caAmount = insertCalendarAvailabilityItem(calendarAvailability, calendarAvailabilityMapper, CA_TABLE_NAME, connection);
+            int caAmount = insertCalendarAvailabilityItem(calendarAvailability, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
             int freeSlotsCount = 0;
-            for (CalendarFreeSlot calendarFreeSlot : calendarAvailability.getCalendarFreeSlots()) {
-                freeSlotsCount += insertCalendarAvailabilityItem(calendarFreeSlot, freeSlotMapper, CA_FREE_SLOT_NAME, connection);
+            for (List<CalendarFreeSlot> slots : Lists.partition(calendarAvailability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+                freeSlotsCount += insertCalendarAvailabilityItems(slots, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
             }
             txPolicy.commit(connection);
             updated = caAmount + freeSlotsCount;
@@ -154,7 +154,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws OXException if an error is occurred
      * @throws SQLException if an SQL error is occurred
      */
-    private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItem(O item, DefaultDbMapper<O, E> mapper, String tableName, Connection connection) throws OXException, SQLException {
+    private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItem(O item, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
         String sql = constructInsertQueryBuilder(tableName, mapper).toString();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
