@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.chronos;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -58,6 +60,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.LoginResponse;
@@ -71,6 +74,8 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  * @since v7.10.0
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
+
+    protected SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
     protected ChronosApi api;
     private FoldersApi foldersApi;
@@ -134,4 +139,20 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return utcCalendar.getTime();
     }
 
+    protected DateTimeData getDateTime(long millis){
+        DateTimeData result = new DateTimeData();
+        result.setTzid(TimeZone.getDefault().getID());
+        result.setValue(BASIC_FORMATER.format(new Date(millis)));
+        return result;
+    }
+
+
+    protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
+        Date date = BASIC_FORMATER.parse(data.getValue());
+        return getDateTime(date.getTime()+millis);
+    }
+
+    protected Date getTime(DateTimeData time) throws ParseException {
+        return BASIC_FORMATER.parse(time.getValue());
+    }
 }

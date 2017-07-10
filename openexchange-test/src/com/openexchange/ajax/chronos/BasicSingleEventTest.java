@@ -62,10 +62,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosUpdateResponse;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.EventConflictResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -94,8 +93,8 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(System.currentTimeMillis());
-        singleEvent.setEndDate(System.currentTimeMillis() + 5000);
+        singleEvent.setStartDate(getDateTime(System.currentTimeMillis()));
+        singleEvent.setEndDate(getDateTime(System.currentTimeMillis()+5000));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
@@ -110,61 +109,61 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     @Test
     public void testCreateSingle() throws Exception {
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testCreateSingle"), false);
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testCreateSingle"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
+        EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
-        eventId.setId(createEvent.getData().getId());
+        eventId.setId(event.getId());
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, createEvent.getData().getId(), null, null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(createEvent.getData(), eventResponse.getData(), true);
+        EventUtil.compare(event, eventResponse.getData(), true);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testDeleteSingle() throws Exception {
 
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testDeleteSingle"), false);
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testDeleteSingle"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
+        EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
-        eventId.setId(createEvent.getData().getId());
+        eventId.setId(event.getId());
 
         CommonResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getError());
 
-        EventResponse eventResponse = api.getEvent(session, createEvent.getData().getId(), null, null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
         assertNotNull(eventResponse.getError());
         assertEquals("CAL-4040", eventResponse.getCode());
-
     }
 
     @Test
     public void testUpdateSingle() throws Exception {
         EventData initialEvent = createSingleEvent("testUpdateSingle");
-        EventConflictResponse createEvent = api.createEvent(session, folderId, initialEvent, false);
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, initialEvent, false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
+        EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
-        eventId.setId(createEvent.getData().getId());
+        eventId.setId(event.getId());
         rememberEventId(eventId);
 
-        EventData updatedData = createEvent.getData();
-        updatedData.setEndDate(updatedData.getEndDate()+5000);
+        event.setEndDate(addTimeToDateTimeData(event.getEndDate(), 5000));
 
-        ChronosUpdateResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), updatedData, System.currentTimeMillis(), true, null);
+        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), event, System.currentTimeMillis(), true, null, false);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
         List<EventData> updates = updateResponse.getData().getUpdated();
         assertTrue(updates.size()==1);
         EventUtil.compare(initialEvent, updates.get(0), false);
-        updatedData.setLastModified(updates.get(0).getLastModified());
-        updatedData.setSequence(updates.get(0).getSequence());
-        EventUtil.compare(updatedData, updates.get(0), true);
-
+        event.setLastModified(updates.get(0).getLastModified());
+        event.setSequence(updates.get(0).getSequence());
+        EventUtil.compare(event, updates.get(0), true);
     }
 
 
@@ -175,41 +174,42 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Date tomorrow = getAPIDate(TimeZone.getDefault(), date, 1);
 
         // Create a single event
-        EventConflictResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testGetEvent"), false);
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testGetEvent"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
+        EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
-        eventId.setId(createEvent.getData().getId());
+        eventId.setId(event.getId());
         rememberEventId(eventId);
 
         // Get event directly
-        EventResponse eventResponse = api.getEvent(session, createEvent.getData().getId(), null, null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(createEvent.getData(), eventResponse.getData(), true);
+        EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), tomorrow.getTime(), null, null, null, null, false, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), tomorrow.getTime(), null, null, null, false, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(1, eventsResponse.getData().size());
-        EventUtil.compare(createEvent.getData(), eventsResponse.getData().get(0), true);
+        EventUtil.compare(event, eventsResponse.getData().get(0), true);
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = api.getUpdates(session, folderId, date.getTime(), null, null, null, null, null, null, false, true);
+        ChronosUpdatesResponse updatesResponse = api.getUpdates(session, folderId, date.getTime(), null, null, null, null, null, false, true);
         assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
         assertNotNull(updatesResponse.getData());
         assertEquals(1, updatesResponse.getData().getNewAndModified().size());
-        EventUtil.compare(createEvent.getData(), updatesResponse.getData().getNewAndModified().get(0), true);
+        EventUtil.compare(event, updatesResponse.getData().getNewAndModified().get(0), true);
 
         // List events
         List<EventId> ids = new ArrayList<>(1);
         ids.add(eventId);
-        EventsResponse listResponse = api.getEventList(session, ids, null, null);
+        EventsResponse listResponse = api.getEventList(session, ids, null);
         assertNull(listResponse.getError(), listResponse.getError());
         assertNotNull(listResponse.getData());
         assertEquals(1, listResponse.getData().size());
-        EventUtil.compare(createEvent.getData(), listResponse.getData().get(0), true);
+        EventUtil.compare(event, listResponse.getData().get(0), true);
 
     }
 }
