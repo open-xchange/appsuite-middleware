@@ -437,14 +437,14 @@ public class ICalImporter extends AbstractImporter {
 			final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
 			throws OXException {
-		List<CalendarDataObject> appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
+	    List<CalendarDataObject> appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
 		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
 			errorMap.put(error.getIndex(), error);
 		}
 		if (null == appointments) {
-		    appointments = Collections.emptyList();
+		    appointments = Collections.<CalendarDataObject> emptyList();
 		}
 
 		sortSeriesMastersFirst(appointments);

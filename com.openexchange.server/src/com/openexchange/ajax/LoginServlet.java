@@ -519,7 +519,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null != secret) {
                                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
-                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {

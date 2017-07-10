@@ -47,65 +47,56 @@
  *
  */
 
-package com.openexchange.userfeedback;
+package com.openexchange.websockets.grizzly;
 
-import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
+import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.ProtocolHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.websockets.SendControl;
+import com.openexchange.websockets.WebSocketExceptionCodes;
 
 /**
- * {@link FeedbackType}
+ * {@link SendUtility} - Utility class for sending messages via a given Web Socket.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface FeedbackType {
+public class SendUtility {
 
     /**
-     * Stores Feedback data
+     * Initializes a new {@link SendUtility}.
+     */
+    private SendUtility() {
+        super();
+    }
+
+    /**
+     * Sends specified message via given Web Socket.
      *
-     * @param feedback The data
-     * @param con The write connection to the global db
-     * @return The id of the newly created entry or -1
-     * @throws OXException
+     * @param message The message to send
+     * @param webSocket The Web Socket to send by
+     * @return The send-control
+     * @throws OXException On illegal arguments or if given Web Socket is currently not connected
      */
-    public long storeFeedback(Object feedback, Connection con) throws OXException;
+    public static SendControl sendMessage(String message, SessionBoundWebSocket webSocket) throws OXException {
+        if (null == message) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(new IllegalArgumentException("Message must not be null"));
+        }
+        if (null == webSocket) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(new IllegalArgumentException("Web Socket must not be null"));
+        }
 
-    /**
-     * Retrieves the requested feedbacks wrapped in an {@link ExportResultConverter}.
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
+        if (false == webSocket.isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
+        }
 
-    /**
-     * Retrieves the requested feedbacks wrapped in an {@link ExportResultConverter}.
-     *
-     * @param metaDataList The feedback metadata to retrieve
-     * @param con A read connection to the global db
-     * @param configuration A read connection to the global db
-     * @return A list of feedback objects
-     * @throws OXException
-     */
-    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con, Map<String, String> configuration) throws OXException;
+        // Yield data-frame for given text message
+        ProtocolHandler protocolHandler = webSocket.getProtocolHandler();
+        DataFrame frameToSend = protocolHandler.toDataFrame(message);
+        frameToSend.getBytes(); // Pre-generate bytes to prevent possible NPE in DataFrame.toString()
 
-    /**
-     * Deletes multiple feedback entries
-     * 
-     * @param ids A list of feedback entries
-     * @param con A write connection to the global db
-     * @throws OXException
-     */
-    public void deleteFeedbacks(List<Long> ids, Connection con) throws OXException;
+        // Perform the send
+        return new FutureBackedSendControl(protocolHandler.send(frameToSend));
+    }
 
-    /**
-     * Retrieves the feedback type
-     *
-     * @return The feedback type
-     */
-    public String getType();
 }

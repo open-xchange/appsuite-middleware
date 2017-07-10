@@ -62,8 +62,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
@@ -71,6 +74,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateAction extends AbstractMailAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -92,10 +97,9 @@ public final class UpdateAction extends AbstractMailAction {
             final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final JSONObject bodyObj = (JSONObject) req.getRequest().requireData();
             final String destFolder = bodyObj.hasAndNotNull(FolderChildFields.FOLDER_ID) ? bodyObj.getString(FolderChildFields.FOLDER_ID) : null;
-            final Integer colorLabel =
-                bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
-            final Integer flagBits =
-                bodyObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) ? Integer.valueOf(bodyObj.getInt(MailJSONField.FLAGS.getKey())) : null;
+            final Integer colorLabel = bodyObj.hasAndNotNull(CommonFields.COLORLABEL) ? Integer.valueOf(bodyObj.getInt(CommonFields.COLORLABEL)) : null;
+            final Integer flagBits = bodyObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) ? Integer.valueOf(bodyObj.getInt(MailJSONField.FLAGS.getKey())) : null;
+            boolean collectAddresses = bodyObj.optBoolean("collect_addresses", false);
             boolean flagVal = false;
             if (flagBits != null) {
                 /*
@@ -209,6 +213,23 @@ public final class UpdateAction extends AbstractMailAction {
                  */
                 mailId = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, true)[0];
                 folderId = destFolder;
+            }
+            if (collectAddresses && null != uid) {
+                // Trigger contact collector
+                try {
+                    ServerUserSetting setting = ServerUserSetting.getInstance();
+                    ServerSession session = req.getSession();
+                    int contextId = session.getContextId();
+                    int userId = session.getUserId();
+                    if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
+                        MailMessage mail = mailInterface.getMessage(sourceFolder, mailId, false);
+                        if (null != mail) {
+                            triggerContactCollector(session, mail, false);
+                        }
+                    }
+                } catch (final OXException e) {
+                    LOG.warn("Contact collector could not be triggered.", e);
+                }
             }
             return new AJAXRequestResult(new JSONObject(4).put(FolderChildFields.FOLDER_ID, folderId).put(DataFields.ID, mailId), "json");
         } catch (final JSONException e) {

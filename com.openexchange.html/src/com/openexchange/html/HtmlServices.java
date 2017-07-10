@@ -458,7 +458,7 @@ public final class HtmlServices {
                 i = useJericho;
                 if (null == i) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
-                    boolean def = true;
+                    boolean def = false;
                     if (null == service) {
                         return def;
                     }
