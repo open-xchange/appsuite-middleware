@@ -142,7 +142,28 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             release(connection, updated);
         }
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailability(java.lang.String)
+     */
+    @Override
+    public void deleteCalendarAvailability(String calendarAvailabilityId) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteCalendarAvailabilityItem(calendarAvailabilityId, connection);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     ///////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////////
 
     /**
@@ -221,5 +242,43 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(") ");
         sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(")");
         return sb;
+    }
+
+    /**
+     * Deletes from the storage the {@link CalendarAvailability} item with the specified id and all {@link CalendarFreeSlot}s assigned to it.
+     * 
+     * @param calendarAvailabilityId The identifier of the calendar availability item
+     * @param connection The writeable connection
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteCalendarAvailabilityItem(String calendarAvailabilityId, Connection connection) throws SQLException {
+        int updated = deleteCalendarFreeSlots(calendarAvailabilityId, connection);
+
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND account=? AND id=?")) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
+            return logExecuteUpdate(stmt) + updated;
+        }
+    }
+
+    /**
+     * Deletes from the storage all {@link CalendarFreeSlot}s assigned to the {@link CalendarAvailability} with the specified id.
+     * 
+     * @param calendarAvailabilityId The identifier of the calendar availability item
+     * @param connection The writeable connection
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteCalendarFreeSlots(String calendarAvailabilityId, Connection connection) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND account=? AND calendarAvailability=?")) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
+            return logExecuteUpdate(stmt);
+        }
     }
 }
