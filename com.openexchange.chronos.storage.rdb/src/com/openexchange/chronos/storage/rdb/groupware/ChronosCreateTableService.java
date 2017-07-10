@@ -273,7 +273,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "categories VARCHAR(1024) DEFAULT, " +
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
-                "PRIMARY KEY (cid,account,id)" +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY uid (cid,account,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_free_slot",
@@ -299,7 +300,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)" +
-                "KEY calendar_availablity(cid, account,calendarAvailability,user)" +
+                "KEY calendar_availablity(cid, account,calendarAvailability,user)," +
+                "KEY uid (cid,account,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );*/
         return tablesByName; //@formatter:on
