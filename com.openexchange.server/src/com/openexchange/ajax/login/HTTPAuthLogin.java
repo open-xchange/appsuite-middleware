@@ -82,6 +82,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -112,7 +113,9 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
         try {
             doAuthHeaderLogin(req, resp);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (false == SessionUtility.isIpCheckError(e)) {
+                LOG.error(e.getMessage(), e);
+            }
             resp.addHeader("WWW-Authenticate", "NEGOTIATE");
             resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
