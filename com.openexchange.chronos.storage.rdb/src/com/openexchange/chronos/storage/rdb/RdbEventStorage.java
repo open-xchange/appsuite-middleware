@@ -627,6 +627,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
         Event event = MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix);
+        if (event.containsEndDate() && null != event.getEndDate() && null != event.getStartDate()) {
+            /*
+             * take over 'all-day' nature from start-date
+             */
+            if (event.getStartDate().isAllDay()) {
+                event.setEndDate(event.getEndDate().toAllDay());
+            }
+        }
         return entityProcessor.adjustAfterLoad(event);
     }
 
