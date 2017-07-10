@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FieldAware;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -107,7 +108,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             txPolicy.commit(connection);
             LOG.debug("Inserted {} availability block(s and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
