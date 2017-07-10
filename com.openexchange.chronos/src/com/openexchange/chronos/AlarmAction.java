@@ -82,7 +82,9 @@ public class AlarmAction extends EnumeratedProperty {
     public static final AlarmAction PROCEDURE = new AlarmAction("PROCEDURE");
 
     /**
-     * Sometime used to specify alarms with no action.
+     * Specifies a (default) alarm that does not alert the calendar.
+     *
+     * @see <a href="https://tools.ietf.org/html/draft-daboo-valarm-extensions-04#section-11.3">draft-daboo-valarm-extensions, section 11.3</a>
      */
     public static final AlarmAction NONE = new AlarmAction("NONE");
 
