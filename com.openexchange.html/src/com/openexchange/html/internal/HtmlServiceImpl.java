@@ -121,6 +121,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.jsoup.JsoupParser;
 import com.openexchange.html.internal.jsoup.handler.CleaningJsoupHandler;
+import com.openexchange.html.internal.jsoup.handler.CssOnlyCleaningJsoupHandler;
 import com.openexchange.html.internal.jsoup.handler.UrlReplacerJsoupHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
@@ -603,35 +604,70 @@ public final class HtmlServiceImpl implements HtmlService {
                 // Check if input is a full HTML document or a fragment of HTML to parse
                 boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
-                CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
-                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
-                handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
+                if (options.isSanitize()) {
+                    CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
+                    handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
+                    handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
 
-                boolean[] modified = options.getModified();
+                    boolean[] modified = options.getModified();
 
-                // Parse the HTML content
-                JsoupParser.getInstance().parse(html, handler, false);
+                    // Parse the HTML content
+                    JsoupParser.getInstance().parse(html, handler, false);
 
-                // Check if modified by handler
-                if (options.isDropExternalImages() && null != modified) {
-                    modified[0] |= handler.isImageURLFound();
-                }
+                    // Check if modified by handler
+                    if (options.isDropExternalImages() && null != modified) {
+                        modified[0] |= handler.isImageURLFound();
+                    }
 
-                // Get HTML content
-                if (options.isReplaceBodyWithDiv()) {
-                    html = handler.getHtml();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
-                    htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    // Get HTML content
+                    if (options.isReplaceBodyWithDiv()) {
+                        html = handler.getHtml();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                        htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    } else {
+                        Document document = handler.getDocument();
+                        html = hasBody ? document.outerHtml() : document.body().html();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    }
                 } else {
-                    Document document = handler.getDocument();
-                    html = hasBody ? document.outerHtml() : document.body().html();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    CssOnlyCleaningJsoupHandler handler = new CssOnlyCleaningJsoupHandler();
+                    handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
+                    handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
+
+                    boolean[] modified = options.getModified();
+
+                    // Parse the HTML content
+                    JsoupParser.getInstance().parse(html, handler, false);
+
+                    // Check if modified by handler
+                    if (options.isDropExternalImages() && null != modified) {
+                        modified[0] |= handler.isImageURLFound();
+                    }
+
+                    // Get HTML content
+                    if (options.isReplaceBodyWithDiv()) {
+                        html = handler.getHtml();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                        htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    } else {
+                        Document document = handler.getDocument();
+                        html = hasBody ? document.outerHtml() : document.body().html();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    }
                 }
             }
 
             // Replace HTML entities
             html = keepUnicodeForEntities(html);
             htmlSanitizeResult.setContent(html);
+
+            /*-
+             *
+            System.out.println(" ---------------------------------- ");
+            System.out.println("Was:\n" + htmlContent);
+            System.out.println(" >>>>>>>>>>>>>>>>>>>>>>>> ");
+            System.out.println("Now:\n" + htmlSanitizeResult.getContent());
+            */
 
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {

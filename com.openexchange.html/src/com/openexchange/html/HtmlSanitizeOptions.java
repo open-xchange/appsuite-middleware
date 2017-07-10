@@ -78,6 +78,7 @@ public class HtmlSanitizeOptions {
         private int maxContentSize;
         private boolean suppressLinks;
         private boolean replaceBodyWithDiv;
+        private boolean sanitize;
         private Session session;
 
         Builder() {
@@ -90,11 +91,18 @@ public class HtmlSanitizeOptions {
             suppressLinks = false;
             replaceBodyWithDiv = false;
             session = null;
+            sanitize = true;
         }
 
         /** Sets the session */
         public Builder setSession(Session session) {
             this.session = session;
+            return this;
+        }
+
+        /** Sets whether HTML/CSS content is supposed to be sanitized (against white-list). If <code>false</code> only CSS is processed to keep possible CSS prefix */
+        public Builder setSanitize(boolean sanitize) {
+            this.sanitize = sanitize;
             return this;
         }
 
@@ -141,12 +149,13 @@ public class HtmlSanitizeOptions {
 
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(session, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
+            return new HtmlSanitizeOptions(session, sanitize, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
         }
     }
 
     // ------------------------------------------------------------------------------------------------------------
 
+    private final boolean sanitize;
     private final String optConfigName;
     private final boolean dropExternalImages;
     private final boolean[] modified;
@@ -156,9 +165,10 @@ public class HtmlSanitizeOptions {
     private final boolean replaceBodyWithDiv;
     private final Session session;
 
-    HtmlSanitizeOptions(Session session, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
+    HtmlSanitizeOptions(Session session, boolean sanitize, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
         super();
         this.session = session;
+        this.sanitize = sanitize;
         this.optConfigName = optConfigName;
         this.dropExternalImages = dropExternalImages;
         this.modified = modified;
@@ -166,6 +176,15 @@ public class HtmlSanitizeOptions {
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
         this.replaceBodyWithDiv = replaceBodyWithDiv;
+    }
+
+    /**
+     * Checks whether HTML/CSS content is supposed to be sanitized (against white-list). If <code>false</code> only CSS is processed to keep possible CSS prefix
+     *
+     * @return <code>true</code> to sanitize; otherwise <code>false</code>
+     */
+    public boolean isSanitize() {
+        return sanitize;
     }
 
     /**
