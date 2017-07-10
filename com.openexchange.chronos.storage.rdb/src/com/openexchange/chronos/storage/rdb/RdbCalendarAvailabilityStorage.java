@@ -96,6 +96,24 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarAvailabilityId()
+     */
+    @Override
+    public String nextCalendarAvailabilityId() throws OXException {
+        return nextId(accountId, "calendar_availability_sequence");
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
+     */
+    @Override
+    public String nextCalendarFreeSlotId() throws OXException {
+        return nextId(accountId, "calendar_free_slot_sequence");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailability(com.openexchange.chronos.CalendarAvailability)
      */
     @Override

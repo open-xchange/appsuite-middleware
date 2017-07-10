@@ -303,6 +303,22 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY calendar_availablity(cid, account,calendarAvailability,user)," +
                 "KEY uid (cid,account,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_availability_sequence",
+            "CREATE TABLE calendar_availability_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+        );
+        tablesByName.put("calendar_free_slot_sequence",
+            "CREATE TABLE calendar_free_slot_sequence (" +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "account INT4 UNSIGNED NOT NULL," +
+                "id INT4 UNSIGNED NOT NULL," +
+                "PRIMARY KEY (cid,account)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );*/
         return tablesByName; //@formatter:on
     }

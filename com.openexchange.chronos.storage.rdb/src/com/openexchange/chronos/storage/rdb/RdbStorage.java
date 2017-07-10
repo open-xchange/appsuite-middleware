@@ -191,6 +191,32 @@ public abstract class RdbStorage {
     }
 
     /**
+     * Helper method for generating the next sequence identifier based on the specified sequence table
+     * 
+     * @param accountId The account identifier
+     * @param sequenceTable The sequence table name
+     * @return The next sequential identifier
+     * @throws OXException if the next seq id cannot be generated
+     */
+    protected String nextId(int accountId, String sequenceTable) throws OXException {
+        String value = null;
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            value = asString(nextId(connection, accountId, sequenceTable));
+            updated = 1;
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+        return value;
+    }
+
+    /**
      * Generates the next sequential identifier in the context for the supplied calendar account, based on the given sequence table.
      *
      * @param connection A connection within an active transaction

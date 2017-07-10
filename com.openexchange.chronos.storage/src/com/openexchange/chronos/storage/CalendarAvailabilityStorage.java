@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,6 +61,28 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface CalendarAvailabilityStorage {
+
+    /**
+     * Generates the next unique identifier for inserting new {@link CalendarAvailability} data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next unique event identifier
+     * @throws OXException if the next identifier cannot be generated or any other error is occurred
+     */
+    String nextCalendarAvailabilityId() throws OXException;
+
+    /**
+     * Generates the next unique identifier for inserting new {@link CalendarFreeSlot} data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     *
+     * @return The next unique event identifier
+     * @throws OXException if the next identifier cannot be generated or any other error is occurred
+     */
+    String nextCalendarFreeSlotId() throws OXException;
 
     /**
      * Inserts the specified {@link CalendarAvailability} block to the storage
