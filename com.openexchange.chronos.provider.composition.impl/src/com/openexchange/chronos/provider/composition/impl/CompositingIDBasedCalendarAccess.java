@@ -507,7 +507,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
         }
         CalendarAccountStorage accountStorage = storageFactory.create(ServerSessionAdapter.valueOf(session).getContext());
         CalendarAccount account = accountStorage.loadAccount(accountId);
-        if (null == account) {
+        if (null == account || account.getUserId() != session.getUserId()) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
         }
         return account;

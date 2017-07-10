@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,46 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.json;
+package com.openexchange.chronos.common;
 
+import java.util.Comparator;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.java.util.TimeZones;
 
 /**
+ * {@link DateTimeComparator}
  *
- * {@link DateTimeMapping} - JSON specific mapping implementation for DateTimes.
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @param <O> the type of the object
  */
-public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O> {
+public class DateTimeComparator implements Comparator<DateTime> {
 
-    private static final String TIME_ZONE = "tzid";
-    private static final String VALUE = "value";
+    private final TimeZone timeZone;
 
-	public DateTimeMapping(final String ajaxName, final int columnID) {
-		super(ajaxName, columnID);
-	}
+    /**
+     * Initializes a new {@link DateTimeComparator}.
+     *
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
+     */
+    public DateTimeComparator(TimeZone timeZone) {
+        super();
+        this.timeZone = timeZone;
+    }
 
-    @Override
-    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-        JSONObject dateTimeJSON = from.getJSONObject(getAjaxName());
-        String value = dateTimeJSON.getString(VALUE);
-        String tz = null;
-        if (dateTimeJSON.has(TIME_ZONE)) {
-            tz = dateTimeJSON.getString(TIME_ZONE);
-        }
-        this.set(to, from.isNull(getAjaxName()) ? null : DateTime.parse(tz, value));
+    /**
+     * Initializes a new {@link DateTimeComparator}.
+     * <p>/
+     * <i>Floating</i> dates are compared from an UTC timezone perspective.
+     */
+    public DateTimeComparator() {
+        this(TimeZones.UTC);
     }
 
     @Override
-    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
-        deserialize(from, to);
+    public int compare(DateTime dateTime1, DateTime dateTime2) {
+        return CalendarUtils.compare(dateTime1, dateTime2, timeZone);
     }
-
-	@Override
-	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
-        DateTime value = this.get(from);
-        if (value == null) {
-            return JSONObject.NULL;
-        }
-        JSONObject result = new JSONObject();
-        if (value.getTimeZone() != null) {
-            result.put(TIME_ZONE, value.getTimeZone().getID());
-        }
-        result.put(VALUE, value.toString());
-        return result;
-	}
 
 }
