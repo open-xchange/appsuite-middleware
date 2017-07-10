@@ -723,6 +723,27 @@ public class CalendarUtils {
     }
 
     /**
+     * Compares the supplied objects for order, from the perspective of the given timezone for <i>floating</i> dates.
+     *
+     * @param dateTime1 The first date-time to compare
+     * @param dateTime2 The second date-time to compare
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
+     * @return A negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+     */
+    public static int compare(DateTime dateTime1, DateTime dateTime2, TimeZone timeZone) {
+        if (null == dateTime1) {
+            return null == dateTime2 ? 0 : -1;
+        }
+        if (null == dateTime2) {
+            return 1;
+        }
+        long timestamp1 = dateTime1.isFloating() ? dateTime1.swapTimeZone(timeZone).getTimestamp() : dateTime1.getTimestamp();
+        long timestamp2 = dateTime2.isFloating() ? dateTime2.swapTimeZone(timeZone).getTimestamp() : dateTime2.getTimestamp();
+        return Long.compare(timestamp1, timestamp2);
+    }
+
+    /**
      * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
      *
      * @param attendees The attendees to filter
