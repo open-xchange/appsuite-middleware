@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
@@ -103,6 +104,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link EventConverter}
@@ -339,7 +341,7 @@ public abstract class EventConverter {
         if (appointment.containsFullTime()) {
             return appointment.getFullTime();
         }
-        if (null != originalEventHolder) {
+        if (null != originalEventHolder && null != originalEventHolder.get()) {
             return originalEventHolder.get().getStartDate().isAllDay();
         }
         return false;
@@ -367,7 +369,7 @@ public abstract class EventConverter {
         if (appointment.containsTimezone()) {
             return optTimeZone(appointment.getTimezone(), defaultTimeZone);
         }
-        if (null != originalEventHolder) {
+        if (null != originalEventHolder && null != originalEventHolder.get()) {
             return originalEventHolder.get().getStartDate().getTimeZone();
         }
         return defaultTimeZone;
@@ -428,8 +430,10 @@ public abstract class EventConverter {
                 long timestamp;
                 if (null != appointment.getStartDate()) {
                     timestamp = appointment.getStartDate().getTime();
-                } else {
+                } else if (null != originalEventHolder.get()) {
                     timestamp = originalEventHolder.get().getStartDate().getTimestamp();
+                } else {
+                    throw AjaxExceptionCodes.MISSING_FIELD.create(CalendarFields.START_DATE); // no other chance
                 }
                 if (isAllDay(appointment, originalEventHolder)) {
                     event.setStartDate(new DateTime(timestamp).toAllDay());

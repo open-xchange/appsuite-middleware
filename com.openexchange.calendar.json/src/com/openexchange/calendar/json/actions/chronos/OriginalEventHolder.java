@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.json.actions.chronos;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -65,7 +66,9 @@ import com.openexchange.exception.OXException;
  */
 public class OriginalEventHolder {
 
-    private static final EventField[] FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
+    /** The fields of the original event queried from the storage */
+    private static final EventField[] FIELDS = {
+        EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
     };
 
     private final EventConverter eventConverter;
@@ -86,17 +89,31 @@ public class OriginalEventHolder {
         this.eventConverter = eventConverter;
     }
 
-    Event get() throws OXException {
+    /**
+     * Gets the original event data.
+     *
+     * @return The original event data, or <code>null</code> if not available
+     */
+    Event get() {
         if (null == originalEventId) {
             return null;
         }
         if (null == originalEvent) {
-            originalEvent = eventConverter.getEvent(originalEventId, FIELDS);
+            try {
+                originalEvent = eventConverter.getEvent(originalEventId, FIELDS);
+            } catch (OXException e) {
+                getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", originalEventId, e);
+            }
         }
         return originalEvent;
     }
 
-    RecurrenceData getRecurrenceData() throws OXException {
+    /**
+     * Gets the recurrence data for the original event.
+     *
+     * @return The recurrence data, or <code>null</code> if not available
+     */
+    RecurrenceData getRecurrenceData() {
         if (null == originalRecurrenceData) {
             Event event = get();
             if (null == event) {
@@ -112,7 +129,11 @@ public class OriginalEventHolder {
             } else {
                 // recurrence data from fetched series master
                 EventID masterEventId = new EventID(event.getFolderId(), event.getSeriesId());
-                originalRecurrenceData = new DefaultRecurrenceData(eventConverter.getEvent(masterEventId, FIELDS));
+                try {
+                    originalRecurrenceData = new DefaultRecurrenceData(eventConverter.getEvent(masterEventId, FIELDS));
+                } catch (OXException e) {
+                    getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", masterEventId, e);
+                }
             }
         }
         return originalRecurrenceData;
