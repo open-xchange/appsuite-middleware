@@ -52,6 +52,8 @@ package com.openexchange.chronos.storage.rdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FieldAware;
@@ -76,6 +78,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     private static final String CA_TABLE_NAME = "calendar_availability";
     private static final String CA_FREE_SLOT_NAME = "calendar_free_slot";
 
+    private static final int INSERT_CHUNK_SIZE = 100;
+
     /**
      * Initialises a new {@link RdbCalendarAvailabilityStorage}.
      * 
@@ -97,6 +101,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     @Override
     public void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException {
         Connection connection = null;
+        int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
@@ -106,9 +111,35 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
                 freeSlotsCount += insertCalendarAvailabilityItem(calendarFreeSlot, freeSlotMapper, CA_FREE_SLOT_NAME, connection);
             }
             txPolicy.commit(connection);
+            updated = caAmount + freeSlotsCount;
             LOG.debug("Inserted {} availability block(s and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailabilities(java.util.List)
+     */
+    @Override
+    public void insertCalendarAvailabilities(List<CalendarAvailability> calendarAvailabilities) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (List<CalendarAvailability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
+                updated += insertCalendarAvailabilityItems(chunk, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
         }
     }
 
@@ -124,19 +155,69 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws SQLException if an SQL error is occurred
      */
     private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItem(O item, DefaultDbMapper<O, E> mapper, String tableName, Connection connection) throws OXException, SQLException {
-        E[] mappedFields = mapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(");");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(");");
-        String sql = sb.toString();
+        String sql = constructInsertQueryBuilder(tableName, mapper).toString();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
-            parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mappedFields);
+            parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mapper.getMappedFields());
             return logExecuteUpdate(stmt);
         }
+    }
+
+    /**
+     * Inserts multiple items to the storage
+     * 
+     * @param items The items to insert
+     * @param tableName The table name
+     * @param mapper The mapper to use
+     * @param connection The writeable connection
+     * @return The amount of affected rows
+     * @throws OXException if an error is occurred
+     * @throws SQLException if an SQL error is occurred
+     */
+    private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItems(List<O> items, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
+        if (items == null || items.size() == 0) {
+            return 0;
+        }
+
+        E[] mappedFields = mapper.getMappedFields();
+        // Prepare the initial query
+        StringBuilder sb = constructInsertQueryBuilder(tableName, mapper);
+        // Prepare for all items
+        for (int index = 0; index < items.size(); index++) {
+            sb.append(",(?,?,").append(mapper.getParameters(mappedFields)).append(")");
+
+        }
+        sb.append(";");
+
+        // Fill the statement with chunks' values
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            int parameterIndex = 1;
+            for (O item : items) {
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, accountId);
+                parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mappedFields);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Constructs the initial INSERT SQL statement
+     * 
+     * @param tableName The table name
+     * @param mapper The mapper to use
+     * @return The initial INSERT SQL statement
+     * @throws OXException if an error is occurred
+     */
+    private <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper) throws OXException {
+        E[] mappedFields = mapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(tableName);
+        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(");");
+        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(");");
+        return sb;
     }
 }

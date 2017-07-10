@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.exception.OXException;
 
@@ -63,6 +64,15 @@ public interface CalendarAvailabilityStorage {
      * Inserts the specified {@link CalendarAvailability} block to the storage
      * 
      * @param calendarAvailability The {@link CalendarAvailability} to insert
+     * @throws OXException if the object cannot be inserted or any other error is occurred
      */
     void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException;
+
+    /**
+     * Inserts a the specified {@link List} of {@link CalendarAvailability} objects to the storage
+     * 
+     * @param calendarAvailabilities The {@link List} with the {@link CalendarAvailability} objects
+     * @throws OXException if the objects cannot be inserted or any other error is occurred
+     */
+    void insertCalendarAvailabilities(List<CalendarAvailability> calendarAvailabilities) throws OXException;
 }
