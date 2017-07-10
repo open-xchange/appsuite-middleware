@@ -77,14 +77,12 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -549,7 +547,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (null != searchOptions && null != searchOptions.getUntil()) {
             stringBuilder.append(" AND e.rangeFrom<?");
         }
-        stringBuilder.append(" AND ").append(adapter.getClause()).append(getSortOptions(searchOptions, "e.")).append(';');
+        stringBuilder.append(" AND ").append(adapter.getClause()).append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
         List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -598,7 +596,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     .append("(e.folder IS NOT NULL AND e.user IN (").append(EventMapper.getParameters(entities.length)).append(")))");
             }
         }
-        stringBuilder.append(getSortOptions(searchOptions, "e.")).append(';');
+        stringBuilder.append(getSortOptions(MAPPER, searchOptions, "e.")).append(';');
         List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -630,40 +628,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
         Event event = MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix);
         return entityProcessor.adjustAfterLoad(event);
-    }
-
-    /**
-     * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
-     *
-     * @param searchOptions The search options to get the SQL representation for
-     * @param prefix The prefix to use, or <code>null</code> if not needed
-     * @return The <code>ORDER BY ... LIMIT ...</code> clause, or an empty string if no sort options were specified
-     */
-    private static String getSortOptions(SearchOptions searchOptions, String prefix) throws OXException {
-        if (null == searchOptions || SearchOptions.EMPTY.equals(searchOptions)) {
-            return "";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        SortOrder[] sortOrders = searchOptions.getSortOrders();
-        if (null != sortOrders && 0 < sortOrders.length) {
-            stringBuilder.append(" ORDER BY ").append(getColumnLabel(sortOrders[0].getBy(), prefix)).append(sortOrders[0].isDescending() ? " DESC" : " ASC");
-            for (int i = 1; i < sortOrders.length; i++) {
-                stringBuilder.append(", ").append(getColumnLabel(sortOrders[i].getBy(), prefix)).append(sortOrders[i].isDescending() ? " DESC" : " ASC");
-            }
-        }
-        if (0 < searchOptions.getLimit()) {
-            stringBuilder.append(" LIMIT ");
-            if (0 < searchOptions.getOffset()) {
-                stringBuilder.append(searchOptions.getOffset()).append(',');
-            }
-            stringBuilder.append(searchOptions.getLimit());
-        }
-        return stringBuilder.toString();
-    }
-
-    private static String getColumnLabel(EventField field, String prefix) throws OXException {
-        DbMapping<? extends Object, Event> mapping = MAPPER.get(field);
-        return null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
     }
 
     /**

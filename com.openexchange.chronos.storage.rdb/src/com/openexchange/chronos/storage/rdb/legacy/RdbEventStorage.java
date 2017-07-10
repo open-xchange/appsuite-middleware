@@ -74,7 +74,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.database.provider.DBProvider;
@@ -83,8 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.tools.mappings.database.DbMapping;
-import com.openexchange.groupware.tools.mappings.database.DbMultiMapping;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -94,6 +91,8 @@ import com.openexchange.search.SearchTerm;
  * @since v7.10.0
  */
 public class RdbEventStorage extends RdbStorage implements EventStorage {
+
+    private static final EventMapper MAPPER = EventMapper.getInstance();
 
     private final EntityResolver entityResolver;
 
@@ -233,7 +232,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = insertEvent(connection, context.getContextId(), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), event, connection, "prg_dates");
+            throw asOXException(e, MAPPER, event, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -251,7 +250,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), null, connection, "prg_dates");
+            throw asOXException(e, MAPPER, null, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -267,7 +266,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), event, connection, "prg_dates");
+            throw asOXException(e, MAPPER, event, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -283,7 +282,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = insertTombstoneEvent(connection, context.getContextId(), event);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), event, connection, "del_dates");
+            throw asOXException(e, MAPPER, event, connection, "del_dates");
         } finally {
             release(connection, updated);
         }
@@ -304,7 +303,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), null, connection, "del_dates");
+            throw asOXException(e, MAPPER, null, connection, "del_dates");
         } finally {
             release(connection, updated);
         }
@@ -320,7 +319,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = deleteEvent(connection, context.getContextId(), asInt(objectID));
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, EventMapper.getInstance(), null, connection, "prg_dates");
+            throw asOXException(e, MAPPER, null, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
@@ -343,31 +342,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
-        EventField[] mappedFields = EventMapper.getInstance().getMappedFields();
+        EventField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
-            .append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ")
-            .append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
+            .append("(cid,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
         Event eventData = Compat.adjustPriorSave(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, mappedFields);
+            MAPPER.setParameters(stmt, parameterIndex, eventData, mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
 
     private int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
-        EventField[] assignedfields = EventMapper.getInstance().getAssignedFields(event);
+        EventField[] assignedfields = MAPPER.getAssignedFields(event);
         String sql = new StringBuilder()
-            .append("UPDATE prg_dates SET ").append(EventMapper.getInstance().getAssignments(assignedfields)).append(' ')
+            .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
         Event eventData = Compat.adjustPriorSave(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, assignedfields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, eventData, assignedfields);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             return logExecuteUpdate(stmt);
@@ -375,9 +373,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private Event selectEvent(Connection connection, int contextID, int objectID, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
         String sql = new StringBuilder()
-            .append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates ")
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM prg_dates ")
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -392,9 +390,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private Event selectException(Connection connection, int contextID, int seriesID, long recurrenceDatePosition, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
         String sql = new StringBuilder()
-            .append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates ")
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM prg_dates ")
             .append("WHERE cid=? AND intfield02=? AND field08=? AND intfield01<>intfield02;")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -410,14 +408,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private Event readEvent(ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
-        return Compat.adjustAfterLoad(this, EventMapper.getInstance().fromResultSet(resultSet, fields, columnLabelPrefix));
+        return Compat.adjustAfterLoad(this, MAPPER.fromResultSet(resultSet, fields, columnLabelPrefix));
     }
 
     private List<Event> selectEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
         SearchAdapter adapter = new SearchAdapter(contextID, null, "d.", "m.", "e.").append(searchTerm).append(filters);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(' ')
+            .append("SELECT DISTINCT ").append(MAPPER.getColumns(mappedFields, "d.")).append(' ')
             .append("FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ")
         ;
         if (adapter.usesInternalAttendees()) {
@@ -437,7 +435,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 stringBuilder.append("AND d.timestampfield01<? ");
             }
         }
-        stringBuilder.append("AND ").append(adapter.getClause()).append(getSortOptions(searchOptions, "d.")).append(';');
+        stringBuilder.append("AND ").append(adapter.getClause()).append(getSortOptions(MAPPER, searchOptions, "d.")).append(';');
         List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -458,9 +456,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private List<Event> selectOverlappingEvents(Connection connection, int contextID, int[] userIDs, int[] otherEntityIDs, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
-        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
+            .append("SELECT DISTINCT ").append(MAPPER.getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
         if (null != userIDs && 0 < userIDs.length) {
             stringBuilder.append(" LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id");
         }
@@ -498,7 +496,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             stringBuilder.append(')');
         }
-        stringBuilder.append(getSortOptions(searchOptions, "d.")).append(';');
+        stringBuilder.append(getSortOptions(MAPPER, searchOptions, "d.")).append(';');
         List<Event> events = new ArrayList<Event>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -536,11 +534,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return The recurrence data, or <code>null</code> if not found
      */
     RecurrenceData selectRecurrenceData(Connection connection, int seriesID, boolean deleted) throws SQLException, OXException {
-        EventField[] fields = EventMapper.getInstance().getMappedFields(new EventField[] {
+        EventField[] fields = MAPPER.getMappedFields(new EventField[] {
             EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
         });
         String sql = new StringBuilder()
-            .append("SELECT ").append(EventMapper.getInstance().getColumns(fields))
+            .append("SELECT ").append(MAPPER.getColumns(fields))
             .append(" FROM ").append(deleted ? "del_dates" : "prg_dates")
             .append(" WHERE cid=? AND intfield01=? AND intfield02=?;")
         .toString();
@@ -563,47 +561,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      */
     EntityResolver getEntityResolver() {
         return entityResolver;
-    }
-
-    /**
-     * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
-     *
-     * @param sortOptions The sort options to get the SQL representation for
-     * @param prefix The prefix to use, or <code>null</code> if not needed
-     * @return The <code>ORDER BY ... LIMIT ...</code> clause, or an empty string if no sort options were specified
-     */
-    private static String getSortOptions(SearchOptions sortOptions, String prefix) throws OXException {
-        if (null == sortOptions || SearchOptions.EMPTY.equals(sortOptions)) {
-            return "";
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        SortOrder[] sortOrders = sortOptions.getSortOrders();
-        if (null != sortOrders && 0 < sortOrders.length) {
-            stringBuilder.append(" ORDER BY ").append(getColumnLabel(sortOrders[0].getBy(), prefix)).append(sortOrders[0].isDescending() ? " DESC" : " ASC");
-            for (int i = 1; i < sortOrders.length; i++) {
-                stringBuilder.append(", ").append(getColumnLabel(sortOrders[i].getBy(), prefix)).append(sortOrders[i].isDescending() ? " DESC" : " ASC");
-            }
-        }
-        if (0 < sortOptions.getLimit()) {
-            stringBuilder.append(" LIMIT ");
-            if (0 < sortOptions.getOffset()) {
-                stringBuilder.append(sortOptions.getOffset()).append(", ");
-            }
-            stringBuilder.append(sortOptions.getLimit());
-        }
-        return stringBuilder.toString();
-    }
-
-    private static String getColumnLabel(EventField field, String prefix) throws OXException {
-        DbMapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
-        if (DbMultiMapping.class.isInstance(mapping)) {
-            if (null != prefix) {
-                return ((DbMultiMapping<?, Event>) mapping).getColumnLabels(prefix)[0];
-            } else {
-                return ((DbMultiMapping<?, Event>) mapping).getColumnLabels()[0];
-            }
-        }
-        return null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
     }
 
 }

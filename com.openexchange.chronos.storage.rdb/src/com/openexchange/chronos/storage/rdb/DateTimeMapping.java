@@ -111,13 +111,10 @@ public abstract class DateTimeMapping<O> extends DefaultDbMultiMapping<DateTime,
         if (null == timestamp) {
             return null;
         }
-        String timeZoneId = resultSet.getString(columnLabels[1]);
-        int allDayValue = resultSet.getInt(columnLabels[2]);
-        boolean allDay = resultSet.wasNull() ? false : 1 == allDayValue;
-
-        if (allDay) {
+        if (1 == resultSet.getInt(columnLabels[2])) {
             return new DateTime(timestamp.getTime()).toAllDay();
         }
+        String timeZoneId = resultSet.getString(columnLabels[1]);
         return new DateTime(CalendarUtils.optTimeZone(timeZoneId, null), timestamp.getTime());
     }
 
