@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Transp;
 
 /**
  * {@link CalendarFolder}
@@ -101,5 +102,13 @@ public interface CalendarFolder {
      * @return The last modification date, or <code>null</code> if not defined
      */
     Date getLastModified();
+
+    /**
+     * Gets a value indicating whether the calendar object resources in the calendar will affect the owner's free/busy time information or not.
+     *
+     * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
+     */
+    Transp getTransparency();
 
 }

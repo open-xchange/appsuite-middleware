@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Transp;
 
 /**
  * {@link DefaultCalendarFolder}
@@ -66,6 +67,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private String color;
     private Date lastModified;
     private List<CalendarPermission> permissions;
+    private Transp transp;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
@@ -138,6 +140,15 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
+    }
+
+    @Override
+    public Transp getTransparency() {
+        return transp;
+    }
+
+    public void setTransparency(Transp transp) {
+        this.transp = transp;
     }
 
     @Override

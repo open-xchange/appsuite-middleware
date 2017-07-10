@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -180,6 +182,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
             folder.setName((String) config.get("name"));
             folder.setColor((String) config.get("color"));
             folder.setDescription((String) config.get("description"));
+            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
         }
         return folder;
     }
