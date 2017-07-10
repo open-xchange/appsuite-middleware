@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
@@ -115,7 +116,7 @@ public class ListAction extends ChronosAction {
                 }
             }
             List<Event> events = calendarAccess.getEvents(compositeEventIDs);
-            return new AJAXRequestResult(events, "event");
+            return new AJAXRequestResult(events, EventResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }

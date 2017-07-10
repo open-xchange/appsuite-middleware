@@ -144,8 +144,6 @@ EventResponse:
   $ref: ./chronos/EventResponse.yaml
 EventsResponse:
   $ref: ./chronos/EventsResponse.yaml
-EventConflictResponse:
-  $ref: ./chronos/EventConflictResponse.yaml
 EventData:
   $ref: ./chronos/EventData.yaml
 EventId:
@@ -156,8 +154,8 @@ Attendee:
   $ref: ./chronos/Attendee.yaml
 Alarm:
   $ref: ./chronos/Alarm.yaml
-ChronosUpdateResponse:
-  $ref: ./chronos/UpdateResponse.yaml
+ChronosCalendarResultResponse:
+  $ref: ./chronos/CalendarResultResponse.yaml
 ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
 ChronosAttachment:
@@ -166,8 +164,6 @@ ChronosExtendedProperty:
   $ref: ./chronos/ExtendedProperty.yaml
 DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
-ChronosConflictData:
-  $ref: ./chronos/ConflictData.yaml
 CheckEventResponse:
   $ref: ./chronos/CheckEventResponse.yaml
 ChronosFreeBusyResponse:

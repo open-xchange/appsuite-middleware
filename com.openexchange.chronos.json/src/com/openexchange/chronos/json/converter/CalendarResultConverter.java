@@ -76,9 +76,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CalendarResultConverter implements ResultConverter {
 
+    public static final String INPUT_FORMAT = "calendarResult";
+
     @Override
     public String getInputFormat() {
-        return "calendarResult";
+        return INPUT_FORMAT;
     }
 
     @Override
