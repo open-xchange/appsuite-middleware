@@ -57,6 +57,8 @@ import java.util.EnumSet;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum AvailabilityField implements CalendarAvailabilityField {
+    
+    id(true, false),
 
     // the following are REQUIRED but MUST NOT occur more than once
     dtstamp(true, false),

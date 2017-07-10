@@ -129,7 +129,30 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
     @Override
     protected EnumMap<AvailabilityField, ? extends DbMapping<? extends Object, CalendarAvailability>> createMappings() {
         EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarAvailability>> mappings = new EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarAvailability>>(AvailabilityField.class);
-        mappings.put(AvailabilityField.uid, new IntegerMapping<CalendarAvailability>("id", "Availability ID") {
+        mappings.put(AvailabilityField.id, new IntegerMapping<CalendarAvailability>("id", "Availability ID") {
+
+            @Override
+            public boolean isSet(CalendarAvailability object) {
+                return object.contains(AvailabilityField.id);
+            }
+
+            @Override
+            public void set(CalendarAvailability object, Integer value) throws OXException {
+                object.setId(Integer.toString(value));
+            }
+
+            @Override
+            public Integer get(CalendarAvailability object) {
+                return Integer.valueOf(object.getId());
+            }
+
+            @Override
+            public void remove(CalendarAvailability object) {
+                object.removeId();
+            }
+
+        });
+        mappings.put(AvailabilityField.uid, new IntegerMapping<CalendarAvailability>("uid", "Availability UID") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {

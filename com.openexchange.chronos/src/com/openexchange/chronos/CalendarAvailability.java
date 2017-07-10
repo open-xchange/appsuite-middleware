@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
+import com.openexchange.chronos.service.FreeSlotField;
 
 /**
  * {@link CalendarAvailability} - Defines periods of availability for a calendar user.
@@ -63,6 +64,8 @@ import com.openexchange.chronos.service.CalendarAvailabilityField;
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
 public class CalendarAvailability implements FieldAware {
+
+    private String id;
 
     /** The 'dtstamp' */
     private long creationTimestamp;
@@ -108,6 +111,32 @@ public class CalendarAvailability implements FieldAware {
     public CalendarAvailability() {
         super();
         fields = EnumSet.noneOf(AvailabilityField.class);
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(String id) {
+        fields.add(AvailabilityField.id);
+    }
+    
+    /**
+     * Removes the id
+     */
+    public void removeId() {
+        this.id = null;
+        fields.remove(AvailabilityField.id);
     }
 
     /**

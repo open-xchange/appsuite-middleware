@@ -63,6 +63,8 @@ import com.openexchange.chronos.service.FreeSlotField;
  */
 public class CalendarFreeSlot implements FieldAware {
 
+    private String id;
+
     private String uid;
     private Date creationTimestamp;
     private Date startTime;
@@ -92,6 +94,33 @@ public class CalendarFreeSlot implements FieldAware {
     public CalendarFreeSlot() {
         super();
         fields = EnumSet.noneOf(FreeSlotField.class);
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+        fields.add(FreeSlotField.id);
+    }
+
+    /**
+     * Removes the id
+     */
+    public void removeId() {
+        this.id = null;
+        fields.remove(FreeSlotField.id);
     }
 
     /**
