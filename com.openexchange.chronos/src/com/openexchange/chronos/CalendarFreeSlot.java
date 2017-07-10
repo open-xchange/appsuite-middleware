@@ -76,7 +76,7 @@ public class CalendarFreeSlot implements FieldAware {
     private String description;
     private String summary;
     private RecurrenceId recurrenceId;
-    //TODO: rrule
+    private String recurrenceRule;
 
     private List<String> categories;
     private ExtendedProperties extendedProperties;
@@ -314,6 +314,14 @@ public class CalendarFreeSlot implements FieldAware {
     }
 
     /**
+     * Removes the recurrence id
+     */
+    public void removeRecurrenceId() {
+        this.recurrenceId = null;
+        fields.remove(FreeSlotField.recurid);
+    }
+
+    /**
      * Gets the categories
      *
      * @return The categories
@@ -421,6 +429,32 @@ public class CalendarFreeSlot implements FieldAware {
         return startTime;
     }
 
+    /**
+     * Gets the recurrenceRule
+     *
+     * @return The recurrenceRule
+     */
+    public String getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    /**
+     * Sets the recurrenceRule
+     *
+     * @param recurrenceRule The recurrenceRule to set
+     */
+    public void setRecurrenceRule(String recurrenceRule) {
+        this.recurrenceRule = recurrenceRule;
+    }
+
+    /**
+     * Removes the recurrence rule
+     */
+    public void removeRecurrenceRule() {
+        this.recurrenceRule = null;
+        fields.remove(FreeSlotField.rrule);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -430,4 +464,5 @@ public class CalendarFreeSlot implements FieldAware {
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
+
 }

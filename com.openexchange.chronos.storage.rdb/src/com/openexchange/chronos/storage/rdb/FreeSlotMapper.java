@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.PreparedStatement;
@@ -61,6 +62,8 @@ import java.util.EnumMap;
 import java.util.List;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
@@ -260,6 +263,52 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
             @Override
             public void remove(CalendarFreeSlot object) {
                 object.removeDescription();
+            }
+        });
+        mappings.put(FreeSlotField.recurid, new BigIntMapping<CalendarFreeSlot>("recurrence", "Recurrence ID") {
+
+            @Override
+            public void set(CalendarFreeSlot object, Long value) {
+                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value.longValue()));
+            }
+
+            @Override
+            public boolean isSet(CalendarFreeSlot object) {
+                return object.contains(FreeSlotField.recurid);
+            }
+
+            @Override
+            public Long get(CalendarFreeSlot object) {
+                RecurrenceId value = object.getRecurrenceId();
+                return null == value ? null : L(value.getValue());
+            }
+
+            @Override
+            public void remove(CalendarFreeSlot object) {
+                object.removeRecurrenceId();
+            }
+        });
+        mappings.put(FreeSlotField.rrule, new VarCharMapping<CalendarFreeSlot>("rrule", "Recurrence Rule") {
+
+            @Override
+            public boolean isSet(CalendarFreeSlot object) {
+                return object.contains(FreeSlotField.rrule);
+            }
+
+            @Override
+            public void set(CalendarFreeSlot object, String value) throws OXException {
+                object.setRecurrenceRule(value);
+                ;
+            }
+
+            @Override
+            public String get(CalendarFreeSlot object) {
+                return object.getRecurrenceRule();
+            }
+
+            @Override
+            public void remove(CalendarFreeSlot object) {
+                object.removeRecurrenceRule();
             }
         });
         mappings.put(FreeSlotField.summary, new VarCharMapping<CalendarFreeSlot>("summary", "Summary") {
