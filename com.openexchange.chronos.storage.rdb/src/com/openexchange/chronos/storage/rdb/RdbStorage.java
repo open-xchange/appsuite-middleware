@@ -63,8 +63,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
@@ -75,6 +78,7 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapper;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DbMultiMapping;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -414,6 +418,45 @@ public abstract class RdbStorage {
             LOG.warn("Error determining maximum size of column {} in table {}", columnLabel, table, e);
             return -1;
         }
+    }
+
+    /**
+     * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
+     *
+     * @param mapper The underlying mapper
+     * @param sortOptions The sort options to get the SQL representation for
+     * @param prefix The prefix to use, or <code>null</code> if not needed
+     * @return The <code>ORDER BY ... LIMIT ...</code> clause, or an empty string if no sort options were specified
+     */
+    protected static String getSortOptions(DbMapper<Event, EventField> mapper, SearchOptions sortOptions, String prefix) throws OXException {
+        if (null == sortOptions || SearchOptions.EMPTY.equals(sortOptions)) {
+            return "";
+        }
+        StringBuilder stringBuilder = new StringBuilder(32);
+        SortOrder[] sortOrders = sortOptions.getSortOrders();
+        if (null != sortOrders && 0 < sortOrders.length) {
+            stringBuilder.append(" ORDER BY ").append(getColumnLabel(mapper, sortOrders[0].getBy(), prefix)).append(sortOrders[0].isDescending() ? " DESC" : " ASC");
+            for (int i = 1; i < sortOrders.length; i++) {
+                stringBuilder.append(", ").append(getColumnLabel(mapper, sortOrders[i].getBy(), prefix)).append(sortOrders[i].isDescending() ? " DESC" : " ASC");
+            }
+        }
+        if (0 < sortOptions.getLimit()) {
+            stringBuilder.append(" LIMIT ");
+            if (0 < sortOptions.getOffset()) {
+                stringBuilder.append(sortOptions.getOffset()).append(", ");
+            }
+            stringBuilder.append(sortOptions.getLimit());
+        }
+        return stringBuilder.toString();
+    }
+
+    private static <O, E extends Enum<E>> String getColumnLabel(DbMapper<O, E> mapper, E field, String prefix) throws OXException {
+        DbMapping<? extends Object, O> mapping = mapper.get(field);
+        if (DbMultiMapping.class.isInstance(mapping)) {
+            DbMultiMapping<?, O> multiMapping = (DbMultiMapping<?, O>) mapping;
+            return null != prefix ? multiMapping.getColumnLabels(prefix)[0] : multiMapping.getColumnLabels()[0];
+        }
+        return null != prefix ? mapping.getColumnLabel(prefix) : mapping.getColumnLabel();
     }
 
 }
