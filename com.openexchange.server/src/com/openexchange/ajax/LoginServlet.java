@@ -364,8 +364,8 @@ public class LoginServlet extends AJAXServlet {
                     SessionUtility.removeOXCookies(session, req, resp);
                     SessionUtility.removeJSESSIONID(req, resp);
                 } catch (OXException e) {
-                    if (SessionUtility.isSessionExpired(e)) {
-                        LOG.info("Status code 403 (FORBIDDEN): Session expired.");
+                    if (SessionUtility.isIpCheckError(e)) {
+                        LOG.info("Status code 403 (FORBIDDEN): Wrong client IP address.");
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -519,7 +519,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null != secret) {
                                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
-                            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {

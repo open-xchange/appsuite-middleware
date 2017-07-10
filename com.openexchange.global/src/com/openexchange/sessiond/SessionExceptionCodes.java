@@ -130,22 +130,16 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
      */
     CONTEXT_LOCKED("Context %1$d (%2$s) is currently not enabled.", CONTEXT_LOCKED_MSG, Category.CATEGORY_TRY_AGAIN, 204),
     /**
-     * Original:
      * Request to server was refused. Original client IP address changed. Please try again.<br>
      * Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.
-     * MW-810:
-     * Your session %s expired. Please start a new browser session.
      */
-    @Deprecated
-    WRONG_CLIENT_IP("Your session %s expired. Please start a new browser session.", SESSION_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 205),
+    WRONG_CLIENT_IP("Request to server was refused. Original client IP address changed. Please try again." +
+        System.getProperty("line.separator") + "Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.",
+        SESSION_INVALIDATED_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
     /**
-     * Original:
      * Your session was invalidated. Please try again.
-     * MW-810:
-     * Your session %s expired. Please start a new browser session.
      */
-    @Deprecated
-    WRONG_SESSION_SECRET("Your session %s expired. Please start a new browser session.", SESSION_EXPIRED_MSG, Category.CATEGORY_TRY_AGAIN, 206),
+    WRONG_SESSION_SECRET("Your session was invalidated. Please try again.", SESSION_INVALIDATED_MSG, Category.CATEGORY_TRY_AGAIN, 206),
     /**
      * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s
      */

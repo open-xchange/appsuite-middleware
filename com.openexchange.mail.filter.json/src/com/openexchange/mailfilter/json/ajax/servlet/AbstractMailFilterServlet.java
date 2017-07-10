@@ -170,7 +170,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
             checkMailfilterAvailable(session);
 
@@ -239,7 +239,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
             checkMailfilterAvailable(session);
 

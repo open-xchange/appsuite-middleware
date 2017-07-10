@@ -274,7 +274,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                         SessionUtility.checkIP(session, request.getRemoteAddr());
                         return session;
                     } catch (OXException e) {
-                        if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
+                        if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
                             LOG.debug("Client IP check failed during OAuth flow.");
                         } else {
                             throw e;
@@ -283,6 +283,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 }
             }
         }
+
         return null;
     }
 
@@ -399,7 +400,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
 
             return redirectLocation;
         } catch (OXException e) {
-            if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
+            if (SessionExceptionCodes.SESSION_EXPIRED.equals(e) || SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
                 Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
                 redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.SESSION_EXPIRED.getCode());
                 return URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
