@@ -55,8 +55,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
@@ -72,6 +74,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
@@ -585,6 +588,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             public void remove(Event object) {
                 object.removeStartDate();
             }
+
+            @Override
+            public int compare(Event event1, Event event2, Locale locale, TimeZone timeZone) {
+                return CalendarUtils.compare(get(event1), get(event2), timeZone);
+            }
         });
         mappings.put(EventField.END_DATE, new DefaultMapping<DateTime, Event>() {
 
@@ -606,6 +614,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeEndDate();
+            }
+
+            @Override
+            public int compare(Event event1, Event event2, Locale locale, TimeZone timeZone) {
+                return CalendarUtils.compare(get(event1), get(event2), timeZone);
             }
         });
         mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {

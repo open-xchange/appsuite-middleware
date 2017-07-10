@@ -61,7 +61,6 @@ import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getUntil;
 import static com.openexchange.chronos.impl.Utils.isExcluded;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
-import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -228,6 +227,22 @@ public abstract class AbstractQueryPerformer {
             }
         }
         return sortEvents(processedEvents, new SearchOptions(session));
+    }
+
+    /**
+     * Sorts a list of events.
+     *
+     * @param events The events to sort
+     * @param sortOptions The sort options to use
+     * @return The sorted events
+     */
+    protected List<Event> sortEvents(List<Event> events, SearchOptions sortOptions) throws OXException {
+        if (null == events || 2 > events.size() || null == sortOptions || SearchOptions.EMPTY.equals(sortOptions) ||
+            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
+            return events;
+        }
+        Collections.sort(events, session.getUtilities().getComparator(sortOptions.getSortOrders(), Utils.getTimeZone(session)));
+        return events;
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {

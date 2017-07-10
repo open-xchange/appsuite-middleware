@@ -54,7 +54,6 @@ import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
-import static com.openexchange.chronos.impl.Utils.sortEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;

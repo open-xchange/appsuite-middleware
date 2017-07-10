@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tools.mappings;
 
 import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Collators;
 
@@ -101,13 +102,23 @@ public abstract class DefaultMapping<T, O> implements Mapping<T, O> {
 	    return this.compare(o1, o2, null);
     }
 
-	/**
-	 * Default <code>compare</code> implementation, that uses locale-aware
-	 * comparison for {@link String}s properties. Override if applicable for
-	 * the mapped property.
-	 */
+    /**
+     * Default <code>compare</code> implementation, that uses locale-aware
+     * comparison for {@link String}s properties. Override if applicable for
+     * the mapped property.
+     */
     @Override
-	public int compare(O o1, O o2, Locale locale) {
+    public int compare(O o1, O o2, Locale locale) {
+        return compare(o1, o2, locale, null);
+    }
+
+    /**
+     * Default <code>compare</code> implementation, that uses locale-aware
+     * comparison for {@link String}s properties and ignores the timezone.
+     * Override if applicable for the mapped property.
+     */
+    @Override
+    public int compare(O o1, O o2, Locale locale, TimeZone timeZone) {
         T value1 = this.get(o1);
         T value2 = this.get(o2);
         if (value1 == value2) {
