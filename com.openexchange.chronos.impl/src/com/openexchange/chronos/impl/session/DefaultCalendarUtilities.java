@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.impl.session;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -59,9 +61,11 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -158,6 +162,40 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
             return session.getEntityResolver();
         }
         return new DefaultEntityResolver(contextId, services);
+    }
+
+    @Override
+    public Comparator<Event> getComparator(final SortOrder[] sortOrders, TimeZone timeZone) {
+        return new Comparator<Event>() {
+
+            @Override
+            public int compare(Event event1, Event event2) {
+                if (null == event1) {
+                    return null == event2 ? 0 : -1;
+                }
+                if (null == event2) {
+                    return 1;
+                }
+                if (null == sortOrders || 0 == sortOrders.length) {
+                    return 0;
+                }
+                int comparison = 0;
+                if (null != sortOrders && 0 < sortOrders.length) {
+                    for (SortOrder sortOrder : sortOrders) {
+                        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
+                        if (null == mapping) {
+                            org.slf4j.LoggerFactory.getLogger(DefaultCalendarUtilities.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
+                            continue;
+                        }
+                        comparison = mapping.compare(event1, event2);
+                        if (0 != comparison) {
+                            return sortOrder.isDescending() ? -1 * comparison : comparison;
+                        }
+                    }
+                }
+                return comparison;
+            }
+        };
     }
 
 }

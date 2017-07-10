@@ -60,8 +60,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,9 +85,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
-import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -345,46 +341,6 @@ public class Utils {
     }
 
     /**
-     * Gets an event comparator based on the supplied sort order of event fields.
-     *
-     * @param sortOrders The sort orders to get the comparator for
-     * @return The comparator
-     */
-    public static Comparator<Event> getComparator(final SortOrder[] sortOrders) {
-        return new Comparator<Event>() {
-
-            @Override
-            public int compare(Event event1, Event event2) {
-                if (null == event1) {
-                    return null == event2 ? 0 : -1;
-                }
-                if (null == event2) {
-                    return 1;
-                }
-                if (null == sortOrders || 0 == sortOrders.length) {
-                    return 0;
-                }
-                int comparison = 0;
-                if (null != sortOrders && 0 < sortOrders.length) {
-                    if (1 == 1)
-                        return 0;
-                    for (SortOrder sortOrder : sortOrders) {
-                        try {
-                            comparison = EventMapper.getInstance().get(sortOrder.getBy()).compare(event1, event2);
-                        } catch (OXException e) {
-                            throw new RuntimeException(e);
-                        }
-                        if (0 != comparison) {
-                            return sortOrder.isDescending() ? -1 * comparison : comparison;
-                        }
-                    }
-                }
-                return comparison;
-            }
-        };
-    }
-
-    /**
      * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
      * e.g. because ...
      * <ul>
@@ -516,22 +472,6 @@ public class Utils {
             }
         }
         return null;
-    }
-
-    /**
-     * Sorts a list of events.
-     *
-     * @param events The events to sort
-     * @param sortOptions The sort options to use
-     * @return The sorted events
-     */
-    public static List<Event> sortEvents(List<Event> events, SearchOptions sortOptions) {
-        if (null == events || 2 > events.size() || null == sortOptions || SearchOptions.EMPTY.equals(sortOptions) ||
-            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
-            return events;
-        }
-        Collections.sort(events, getComparator(sortOptions.getSortOrders()));
-        return events;
     }
 
     /**

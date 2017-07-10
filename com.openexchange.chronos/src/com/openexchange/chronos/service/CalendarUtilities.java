@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.Comparator;
+import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -111,5 +113,15 @@ public interface CalendarUtilities {
      * @return The entity resolver
      */
     EntityResolver getEntityResolver(int contextId) throws OXException;
+
+    /**
+     * Gets an event comparator based on the supplied sort order of event fields.
+     *
+     * @param sortOrders The sort orders to get the comparator for
+     * @param timeZone The timezone to consider for comparing <i>floating</i> date properties, i.e. the actual 'perspective' of the
+     *            comparison, or <code>null</code> to fall back to UTC
+     * @return The comparator
+     */
+    Comparator<Event> getComparator(SortOrder[] sortOrders, TimeZone timeZone);
 
 }

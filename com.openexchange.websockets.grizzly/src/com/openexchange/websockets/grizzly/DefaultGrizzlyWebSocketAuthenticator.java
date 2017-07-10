@@ -135,7 +135,7 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
             Cookie[] cookies = request.getCookies();
             if (cookies == null) {
                 // No cookies available. Hence, no need to check secret.
-                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(sessionId);
             }
 
             // Check secret...

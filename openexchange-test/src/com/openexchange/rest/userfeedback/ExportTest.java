@@ -265,7 +265,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
 
         LineNumberReader lnr = null;
         try {
-            File export = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0));
+            File export = userfeedbackApi.exportCSV("default", type, new Long(0), new Long(0), ";");
             assertEquals(200, getRestClient().getStatusCode());
             assertNotNull(export);
 

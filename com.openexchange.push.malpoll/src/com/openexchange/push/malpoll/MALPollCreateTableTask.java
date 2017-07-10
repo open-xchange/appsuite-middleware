@@ -110,7 +110,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch" };
+        return new String[] {};
     }
 
     @Override

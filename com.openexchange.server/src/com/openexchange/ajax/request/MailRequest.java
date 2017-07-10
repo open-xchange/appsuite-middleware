@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,11 +81,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailRequest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailRequest.class);
-
     static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
     static final String FOLDER_ID = FolderChildFields.FOLDER_ID;
-    static final String KEY = MailJSONField.FLAGS.getKey();
+    static final String FLAGS = MailJSONField.FLAGS.getKey();
     static final String COLORLABEL = CommonFields.COLORLABEL;
     static final String DATA = ResponseFields.DATA;
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
@@ -386,7 +383,7 @@ public final class MailRequest {
     }
 
     public static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(KEY);
+        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(FLAGS);
     }
 
     public static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
@@ -557,6 +554,7 @@ public final class MailRequest {
         private final String srcFld;
         private final int flagInt;
         private final boolean flagValue;
+        private final boolean collectAddresses;
 
         public FlagsCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
@@ -564,6 +562,7 @@ public final class MailRequest {
             final JSONObject bodyObj = JSONUtil.requireDataObject(dataObject);
             flagInt = JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), bodyObj);
             flagValue = JSONUtil.requireBoolean(MailJSONField.VALUE.getKey(), bodyObj);
+            collectAddresses = dataObject.optBoolean("collect_addresses", false);
         }
 
         @Override
@@ -579,7 +578,7 @@ public final class MailRequest {
 
         @Override
         public void performOperations(final ServerSession session, final OXJSONWriter writer, final MailServletInterface mailInterface) throws JSONException {
-            mailServlet.actionPutStoreFlagsMultiple(session, writer, getMailIDs(), srcFld, flagInt, flagValue, mailInterface);
+            mailServlet.actionPutStoreFlagsMultiple(session, writer, getMailIDs(), srcFld, flagInt, flagValue, collectAddresses, mailInterface);
         }
     }
 

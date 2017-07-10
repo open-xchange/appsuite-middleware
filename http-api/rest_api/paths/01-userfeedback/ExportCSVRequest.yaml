@@ -24,20 +24,25 @@
         type: string
         default: star-rating-v1
 
-      - 
-        name: start
+      - name: start
         in: query
         description: Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
         required: false
         type: integer
         format: int64
-      - 
-        name: end
+
+      - name: end
         in: query
         description: End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
         required: false
         type: integer
         format: int64
+
+      - name: delimiter
+        in: query
+        description: "The column delimiter used. Default: ';'"
+        required: false
+        type: string
     responses:
       200:
         description: Export data into a CSV file

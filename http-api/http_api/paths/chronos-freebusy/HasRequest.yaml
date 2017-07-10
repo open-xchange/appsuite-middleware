@@ -1,0 +1,22 @@
+/chronos/freebusy?action=has:
+  get:
+    operationId: freebusy_has
+    tags:
+      - Chronos-freebusy
+    summary: Checks every day of the given timeslot for events.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/ChronosFromTimeRange"
+      - $ref: "#/parameters/ChronosUntilTimeRange"
+    responses:
+      200:
+        description: |
+          A boolean array with an entry for each day of the given timeslot. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          type: array
+          title: HasResponse
+          description: A boolean array with a length equal to the number of days in the given timeslot.
+          items:
+            type: boolean
+            description: Defines whether the user has one or more events on this day.
