@@ -249,7 +249,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
 
         /* Calendar Availability Tables
         tablesByName.put("calendar_availability",
-            "CREATE TABLE calendar_alarm (" +
+            "CREATE TABLE calendar_availability (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
@@ -277,12 +277,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_free_slot",
-            "CREATE TABLE calendar_alarm (" +
+            "CREATE TABLE calendar_free_slot (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) DEFAULT NULL," +
+                "calendarAvailability INT4 UNSIGNED NOT NULL," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
@@ -298,6 +299,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)" +
+                "KEY calendar_availablity(cid, account,calendarAvailability,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );*/
         return tablesByName; //@formatter:on
