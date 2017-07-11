@@ -507,11 +507,15 @@ public class OXContextMySQLStorageCommon {
             db.setRead_id(db.getId());
         }
         fillContextTable(ctx, con);
-        incrementContextsPerFilestoreTable(ctx, con);
 
         try {
             final int serverId = cache.getServerId();
             cache.getPool().writeAssignment(con, new AssignmentInsertData() {
+
+                @Override
+                public boolean updateDatabaseCounters() {
+                    return false;
+                }
 
                 @Override
                 public int getContextId() {
@@ -666,13 +670,15 @@ public class OXContextMySQLStorageCommon {
             Databases.closeSQLStuff(stmt);
         }
     }
+
     /**
      * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
      *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param ctx The context newly using a filestore
      * @throws StorageException If a general SQL error occurs
      */
-    public final void incrementContextsPerFilestoreCount(final Context ctx) throws StorageException {
+    public final void updateContextsPerFilestoreCount(boolean increment, Context ctx) throws StorageException {
         Connection configdbCon;
         try {
             configdbCon = cache.getWriteConnectionForConfigDB();
@@ -680,7 +686,7 @@ public class OXContextMySQLStorageCommon {
             throw new StorageException(e);
         }
         try {
-            incrementContextsPerFilestoreCount(ctx, configdbCon);
+            updateContextsPerFilestoreCount(increment, ctx, configdbCon);
         } finally {
             if (null != configdbCon) {
                 try {
@@ -695,20 +701,130 @@ public class OXContextMySQLStorageCommon {
     /**
      * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
      *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param ctx The context newly using a filestore
      * @param configdbCon A connection to the configdb
      * @throws StorageException If a general SQL error occurs
      */
-    public final void incrementContextsPerFilestoreCount(final Context ctx, final Connection configdbCon) throws StorageException {
+    public final void updateContextsPerFilestoreCount(boolean increment, Context ctx, Connection configdbCon) throws StorageException {
         if (null == configdbCon) {
-            incrementContextsPerFilestoreCount(ctx);
+            updateContextsPerFilestoreCount(increment, ctx);
             return;
         }
 
         PreparedStatement stmt = null;
         try {
-            stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+            stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count" + (increment ? '+' : '-') + "1 WHERE filestore_id=?");
             stmt.setInt(1, ctx.getFilestoreId().intValue());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
+     * @param db The used database
+     * @throws StorageException If a general SQL error occurs
+     */
+    public final void updateContextsPerDBPoolCount(boolean increment, Database db) throws StorageException {
+        Connection configdbCon;
+        try {
+            configdbCon = cache.getWriteConnectionForConfigDB();
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
+        try {
+            updateContextsPerDBPoolCount(increment, db, configdbCon);
+        } finally {
+            if (null != configdbCon) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(configdbCon);
+                } catch (PoolException e) {
+                    log.error("Failed to push back read-write connection for ConfigDB", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
+     * @param db The used database
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     */
+    public final void updateContextsPerDBPoolCount(boolean increment, Database db, Connection configdbCon) throws StorageException {
+        if (null == configdbCon) {
+            updateContextsPerDBPoolCount(increment, db);
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdbCon.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=?");
+            stmt.setInt(1, db.getId().intValue());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
+     * @param schema The schema name
+     * @param db The used database
+     * @throws StorageException If a general SQL error occurs
+     */
+    public final void updateContextsPerDBSchemaCount(boolean increment, String schema, Database db) throws StorageException {
+        Connection configdbCon;
+        try {
+            configdbCon = cache.getWriteConnectionForConfigDB();
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
+        try {
+            updateContextsPerDBSchemaCount(increment, schema, db, configdbCon);
+        } finally {
+            if (null != configdbCon) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(configdbCon);
+                } catch (PoolException e) {
+                    log.error("Failed to push back read-write connection for ConfigDB", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     *
+     * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
+     * @param schema The schema name
+     * @param db The used database
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     */
+    public final void updateContextsPerDBSchemaCount(boolean increment, String schema, Database db, Connection configdbCon) throws StorageException {
+        if (null == configdbCon) {
+            updateContextsPerDBSchemaCount(increment, schema, db);
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdbCon.prepareStatement("UPDATE contexts_per_dbschema SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=? AND schemaname=?");
+            stmt.setInt(1, db.getId().intValue());
+            stmt.setString(2, schema);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);

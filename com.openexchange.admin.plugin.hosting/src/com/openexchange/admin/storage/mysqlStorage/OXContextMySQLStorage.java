@@ -57,6 +57,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.Serializable;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
@@ -102,7 +103,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheFinalize;
 import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -1118,174 +1118,127 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException("Context administrator is not defined.");
         }
 
-        boolean contextCreated = false;
-
-        // Find filestore for context.
-        ctx.setFilestore_name(FileStorages.getNameForContext(ctx.getId().intValue()));
+        Context context = null;
+        Database db = null;
         boolean decrementFileStoreCount = false;
-        Filestore filestore;
-        {
-            Integer storeId = ctx.getFilestoreId();
-            if (null == storeId) {
-                // No filestore specified
-                filestore = OXUtilStorageInterface.getInstance().findFilestoreForContext();
-            } else {
-                OXUtilStorageInterface.getInstance().getFilestoreBasic(i(storeId));
-                contextCommon.incrementContextsPerFilestoreCount(ctx);
-            }
-            decrementFileStoreCount = true;
-        }
+        boolean decrementDatabaseCount = false;
+        boolean decrementDatabaseSchemaCount = false;
+        OXUtilStorageInterface utils = OXUtilStorageInterface.getInstance();
 
-
-
-
-        // Old stuff
-
-        if (null == storeId) {
-            storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
-            ctx.setFilestoreId(storeId);
-        } else {
-            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore fs = oxu.getFilestoreBasic(i(storeId));
-            if (fs.getMaxContexts().intValue() <= 0) {
-                // Must not be used for a context association
-                throw new StorageException("Filestore " + storeId + " must not be used.");
-            }
-        }
-
-        // Load it to ensure validity
-        OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-        try {
-            URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(storeId)));
-            FileStorages.getFileStorageService().getFileStorage(uri);
-        } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
-
-        final Connection configCon;
+        // Initiate connection to ConfigDB
+        Connection configCon;
         try {
             configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
         try {
-            Integer dbId = null;
-            if (null != ctx.getWriteDatabase()) {
-                dbId = ctx.getWriteDatabase().getId();
-            }
-            final Database db;
-            try {
-                if (null == dbId || i(dbId) <= 0) {
-                    db = OXUtilStorageInterface.getInstance().getNextDBHandleByWeight(configCon);
+            // Find filestore for context.
+            ctx.setFilestore_name(FileStorages.getNameForContext(ctx.getId().intValue()));
+            Filestore filestore;
+            {
+                Integer storeId = ctx.getFilestoreId();
+                if (null == storeId) {
+                    // No filestore specified
+                    filestore = utils.findFilestoreForContext(configCon);
+                    ctx.setFilestoreId(filestore.getId());
                 } else {
-                    db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
+                    filestore = utils.getFilestoreBasic(i(storeId));
+                    contextCommon.updateContextsPerFilestoreCount(true, ctx);
+                }
+                decrementFileStoreCount = true;
+
+                // Load it to ensure validity
+                try {
+                    URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new URI(filestore.getUrl()));
+                    FileStorages.getFileStorageService().getFileStorage(uri);
+                } catch (OXException e) {
+                    throw new StorageException(e.getMessage(), e);
+                } catch (URISyntaxException e) {
+                    throw new StorageException("Filestore " + filestore.getId() + " contains invalid URI", e);
+                }
+            }
+
+            // Find database for context
+            {
+                Database givenDatabase = ctx.getWriteDatabase();
+                if (null == givenDatabase) {
+                    // No database specified
+                    db = utils.getNextDBHandleByWeight(configCon);
+                } else {
+                    db = OXToolStorageInterface.getInstance().loadDatabaseById(i(givenDatabase.getId()));
                     if (db.getMaxUnits().intValue() <= 0) {
                         // Must not be used for a context association
-                        throw new StorageException("Database " + dbId + " must not be used.");
+                        throw new StorageException("Database " + givenDatabase.getId() + " must not be used.");
                     }
+                    contextCommon.updateContextsPerDBPoolCount(decrementDatabaseCount, db, configCon);
                 }
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            } catch (StorageException e) {
-                LOG.error(e.getMessage(), e);
-                throw new StorageException("Unable to create context: " + e.getMessage());
+                decrementDatabaseCount = true;
             }
 
-            // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
-            int contextId = ctx.getId().intValue();
-            SchemaCacheFinalize cacheFinalize = null;
-            boolean contextCreated = false;
-            boolean rollback = false;
-            boolean configConCommitted = false;
-            boolean automaticStrategyUsed = true;
-            try {
-                // Start transaction & mark to perform a roll-back if any error occurs
+            // Find or create suitable schema (within transaction)
+            {
                 startTransaction(configCon);
-                rollback = true;
-
-                // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
-                SchemaResult schemaResult = findOrCreateSchema(configCon, db, schemaSelectStrategy);
-                cacheFinalize = schemaResult.getCacheFinalize();
-                automaticStrategyUsed = Strategy.AUTOMATIC == schemaResult.getStrategy();
-
-                // Write other configdb data
-                contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
-                contextCommon.fillLogin2ContextTable(ctx, configCon);
-
-                /*-
-                 * Continue with context creation depending on utilized schema-select strategy:
-                 *
-                 *
-                 * If AUTOMATIC was used, then write context data _before_ committing the configdb connection
-                 *
-                 * Otherwise commit the configdb connection and write context data _afterwards_
-                 */
-                Context retval;
-                if (automaticStrategyUsed) {
-                    // Write context data before COMMIT
-                    retval = writeContext(ctx, adminUser, access);
-
-                    // Commit transaction and unmark to perform a roll-back
+                boolean rollback = true;
+                try {
+                    SchemaResult schemaResult = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                    contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
                     configCon.commit();
                     rollback = false;
-                    configConCommitted = true;
-                } else {
-                    // Commit transaction
-                    configCon.commit();
-                    configConCommitted = true;
-
-                    // Write context data after COMMIT and unmark to perform a roll-back
-                    retval = writeContext(ctx, adminUser, access);
-                    rollback = false;
-                }
-
-                // Apparently, no error occurred
-                contextCreated = true;
-
-                LOG.info("Context {} created with strategy {}!", retval.getId(), schemaResult.getStrategy().toString());
-                return retval;
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            } catch (ContextExistsException e) {
-                throw e;
-            } catch (StorageException e) {
-                throw e;
-            } finally {
-                if (null != cacheFinalize) {
-                    try {
-                        cacheFinalize.finalize(contextCreated);
-                    } catch (Exception x) {
-                        LOG.debug("An error occurred while performing a finalisation on context '{}': {}", contextId, x.getMessage(), x);
-                    }
-                }
-
-                if (rollback) {
-                    // Perform the roll-back dependent on utilized strategy
-                    if (automaticStrategyUsed) {
-                        // A commit on configDb connection is guaranteed that is has not been performed
+                    decrementDatabaseSchemaCount = true;
+                } finally {
+                    if (rollback) {
                         rollback(configCon);
-                        OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
-                    } else {
-                        // Either commit on configDb connection or writeContext() invocation failed
-                        // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
-                        rollback(configCon);
-
-                        // Manually drop possibly already created data from configDb in case configDb connection has already been committed
-                        if (configConCommitted) {
-                            new OXContextMySQLStorageCommon().handleCreateContextRollback(configCon, contextId);
-                        }
                     }
+                    autocommit(configCon);
                 }
-
-                autocommit(configCon);
             }
+
+            // Create context (within transaction)
+            {
+                startTransaction(configCon);
+                boolean rollback = true;
+                try {
+                    contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
+                    contextCommon.fillLogin2ContextTable(ctx, configCon);
+
+                    context = writeContext(ctx, adminUser, access);
+
+                    configCon.commit();
+                    rollback = false;
+                } finally {
+                    if (rollback) {
+                        rollback(configCon);
+                    }
+                    autocommit(configCon);
+                }
+            }
+
+            // Everything successful
+            decrementDatabaseSchemaCount = false;
+            decrementDatabaseCount = false;
+            decrementFileStoreCount = false;
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
         } finally {
+            if (decrementDatabaseSchemaCount) {
+                contextCommon.updateContextsPerDBSchemaCount(false, db.getScheme(), db, configCon);
+            }
+            if (decrementDatabaseCount) {
+                contextCommon.updateContextsPerDBPoolCount(false, db, configCon);
+            }
+            if (decrementFileStoreCount) {
+                contextCommon.updateContextsPerFilestoreCount(false, ctx, configCon);
+            }
+
             try {
                 cache.pushWriteConnectionForConfigDB(configCon);
             } catch (PoolException e) {
                 LOG.error("Error pushing ox write connection to pool!", e);
             }
         }
+
+        return context;
     }
 
     /**
@@ -1563,20 +1516,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @return The possible schema result from cache that is needed for further processing
      */
     private SchemaResult findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
-        if (CONTEXTS_PER_SCHEMA == 1) {
-            // Ignore strategy as there shall be only one schema per context
-            int schemaUnique;
-            try {
-                schemaUnique = IDGenerator.getId(configCon);
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            String schemaName = db.getName() + '_' + schemaUnique;
-            db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
-            return SchemaResult.AUTOMATIC;
-        }
-
         // The effective strategy
         SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
 
@@ -1587,8 +1526,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
                 return SchemaResult.SCHEMA_NAME;
             case IN_MEMORY:
-                // Get the schema name advertised by cache
-                return inMemoryLookupSchema(configCon, db);
+                // Must no more be used
+                // fall-through
             default:
                 automaticLookupSchema(configCon, db);
                 return SchemaResult.AUTOMATIC;

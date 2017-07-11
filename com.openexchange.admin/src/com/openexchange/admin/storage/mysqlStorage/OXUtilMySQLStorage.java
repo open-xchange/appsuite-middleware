@@ -81,6 +81,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -1328,39 +1330,182 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
 
-        return findFilestoreForEntity(false);
+        return findFilestoreForEntity(false, null);
     }
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        return findFilestoreForEntity(true);
+        return findFilestoreForEntity(true, null);
     }
 
-    private Filestore findFilestoreForEntity(boolean forContext) throws StorageException {
+    @Override
+    public Filestore findFilestoreForContext(Connection configDbCon) throws StorageException {
+        return findFilestoreForEntity(true, configDbCon);
+    }
+
+    private static void wait(int retryCount, long baseMillis) {
+        long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
+        LockSupport.parkNanos(nanosToWait);
+    }
+
+    private boolean tryIncrementFilestoreCounter(int filestoreId, int currentCount, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            // Try to update counter
+            stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=? WHERE filestore_id=? AND count=?");
+            stmt.setInt(1, currentCount + 1);
+            stmt.setInt(2, filestoreId);
+            stmt.setInt(3, currentCount);
+            return stmt.executeUpdate() > 0;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private Filestore findFilestoreForEntity(boolean forContext, Connection configDbCon) throws StorageException {
         Connection con = null;
         boolean readOnly = true;
+        boolean manageConnection = true;
+        if (null != configDbCon) {
+            con = configDbCon;
+            readOnly = false;
+            manageConnection = false;
+        }
+
+        // Define candidate class
+        class Candidate {
+
+            final int id;
+            final int maxNumberOfEntities;
+            final int numberOfEntities;
+            final String uri;
+            final long size;
+
+            Candidate(int id, int maxNumberOfEntities, int numberOfEntities, String uri, long size) {
+                super();
+                this.id = id;
+                this.maxNumberOfEntities = maxNumberOfEntities;
+                this.numberOfEntities = numberOfEntities;
+                this.uri = uri;
+                this.size = size;
+            }
+        }
+
+        boolean loadRealUsage = false;
+
+        if (forContext) {
+            int retryCount = 0;
+            while (true) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    if (manageConnection) {
+                        con = cache.getWriteConnectionForConfigDB();
+                        readOnly = false;
+                    }
+                    if (null == con) {
+                        throw new StorageException("Missing connection to ConfigDB"); // Keep IDE happy...
+                    }
+
+                    stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                    rs = stmt.executeQuery();
+                    if (false == rs.next()) {
+                        throw new StorageException("No filestore found");
+                    }
+
+                    // Iterate candidates
+                    boolean checkNext = true;
+                    do {
+                        // Create appropriate candidate instance
+                        int maxNumberOfEntities = rs.getInt(2);
+                        if (maxNumberOfEntities > 0) {
+                            int numberOfContexts = rs.getInt(3); // In case NULL, then 0 (zero) is returned
+                            Candidate candidate = new Candidate(rs.getInt(1), maxNumberOfEntities, numberOfContexts, rs.getString(4), toMB(rs.getLong(5)));
+
+                            // Determine file storage user/context counts
+                            FilestoreCountCollection filestoreUserCounts = Filestore2UserUtil.getUserCounts(configDbCon);
+
+                            int entityCount = candidate.numberOfEntities;
+
+                            // Get user count information
+                            FilestoreCount count = filestoreUserCounts.get(candidate.id);
+                            if (null != count) {
+                                entityCount += count.getCount();
+                            }
+
+                            if (entityCount < candidate.maxNumberOfEntities) {
+                                FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
+
+                                // Create filestore instance from candidate
+                                Filestore filestore = new Filestore();
+                                filestore.setId(I(candidate.id));
+                                filestore.setUrl(candidate.uri);
+                                filestore.setSize(L(candidate.size));
+                                filestore.setMaxContexts(I(candidate.maxNumberOfEntities));
+
+                                // Possible to pre-set context usage?
+                                FilestoreUsage contextFilestoreUsage = null;
+                                if (false == loadRealUsage) {
+                                    // Only consider context count for given file storage
+                                    contextFilestoreUsage = new FilestoreUsage(numberOfContexts, 0L);
+                                }
+
+                                loadFilestoreUsageFor(filestore, loadRealUsage, contextFilestoreUsage, userFilestoreUsage, con);
+
+                                if (enoughSpaceForContext(filestore)) {
+                                    // Try to atomically increment filestore counter while preserving max. number of entities condition
+                                    if (tryIncrementFilestoreCounter(candidate.id, numberOfContexts, con)) {
+                                        // Return...
+                                        return filestore;
+                                    }
+
+                                    checkNext = false;
+                                }
+                            }
+                        }
+                    } while (checkNext && rs.next());
+
+                    if (checkNext) { // Loop was exited because rs.next() returned false
+                        // No suitable filestore found
+                        throw new StorageException("No usable or suitable filestore found");
+                    }
+                } catch (DataTruncation dt) {
+                    LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+                    throw AdminCache.parseDataTruncation(dt);
+                } catch (SQLException ecp) {
+                    LOG.error("SQL Error", ecp);
+                    throw new StorageException(ecp);
+                } catch (PoolException pe) {
+                    LOG.error("Pool Error", pe);
+                    throw new StorageException(pe);
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                    if (manageConnection && con != null) {
+                        try {
+                            if (readOnly) {
+                                cache.pushReadConnectionForConfigDB(con);
+                            } else {
+                                cache.pushWriteConnectionForConfigDB(con);
+                            }
+                        } catch (final PoolException exp) {
+                            LOG.error("Error pushing configdb connection to pool!", exp);
+                        }
+                    }
+                }
+
+                // Exponential back-off
+                wait(++retryCount, 100L);
+            }
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getReadConnectionForConfigDB();
-
-            // Define candidate class
-            class Candidate {
-
-                final int id;
-                final int maxNumberOfEntities;
-                final int numberOfEntities;
-                final String uri;
-                final long size;
-
-                Candidate(int id, int maxNumberOfEntities, int numberOfEntities, String uri, long size) {
-                    super();
-                    this.id = id;
-                    this.maxNumberOfEntities = maxNumberOfEntities;
-                    this.numberOfEntities = numberOfEntities;
-                    this.uri = uri;
-                    this.size = size;
-                }
+            if (manageConnection) {
+                con = cache.getReadConnectionForConfigDB();
+            }
+            if (null == con) {
+                throw new StorageException("Missing connection to ConfigDB"); // Keep IDE happy...
             }
 
             // Load potential candidates
@@ -1392,7 +1537,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             FilestoreCountCollection filestoreUserCounts = getFilestoreUserCounts();
 
             // Find a suitable one from ordered list of candidates
-            boolean loadRealUsage = false;
             NextCandidate: for (Candidate candidate : candidates) {
                 int entityCount = candidate.numberOfEntities;
 
@@ -1426,10 +1570,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         if (enoughSpaceForContext(filestore)) {
                             // Switch from read-only to read-write connection
                             closeSQLStuff(rs, stmt);
-                            cache.pushReadConnectionForConfigDB(con);
-                            con = null;
-                            con = cache.getWriteConnectionForConfigDB();
-                            readOnly = false;
+                            if (manageConnection && readOnly) {
+                                cache.pushReadConnectionForConfigDB(con);
+                                con = null;
+                                con = cache.getWriteConnectionForConfigDB();
+                                readOnly = false;
+                            }
 
                             // Try to atomically increment filestore counter while preserving max. number of entities condition
                             boolean first = true;
@@ -1473,7 +1619,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(pe);
         } finally {
             closeSQLStuff(rs, stmt);
-            if (con != null) {
+            if (manageConnection && con != null) {
                 try {
                     if (readOnly) {
                         cache.pushReadConnectionForConfigDB(con);
@@ -2893,8 +3039,85 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    private boolean tryIncrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            // Try to update counter
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=? WHERE db_pool_id=? AND count=?");
+            stmt.setInt(1, db.getCount() + 1);
+            stmt.setInt(2, i(db.getId()));
+            stmt.setInt(3, db.getCount());
+            return stmt.executeUpdate() > 0;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     @Override
     public Database getNextDBHandleByWeight(final Connection con) throws SQLException, StorageException {
+        if (this.USE_UNIT == UNIT_CONTEXT) {
+            int retryCount = 0;
+            while (true) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units < p.count))");
+                    rs = stmt.executeQuery();
+                    if (false == rs.next()) {
+                        // No databases at all...
+                        throw new StorageException("The maximum number of contexts in every database cluster has been reached. Use register-, create- or change database to resolve the problem.");
+                    }
+
+                    // Iterate candidates
+                    boolean checkNext = false;
+                    do {
+                        // Create appropriate database instance
+                        DatabaseHandle db = new DatabaseHandle();
+                        int pos = 1;
+                        db.setId(I(rs.getInt(pos++)));
+                        db.setUrl(rs.getString(pos++));
+                        db.setDriver(rs.getString(pos++));
+                        db.setLogin(rs.getString(pos++));
+                        db.setPassword(rs.getString(pos++));
+                        db.setName(rs.getString(pos++));
+                        final int slaveId = rs.getInt(pos++);
+                        if (slaveId > 0) {
+                            db.setRead_id(I(slaveId));
+                        }
+                        db.setClusterWeight(I(rs.getInt(pos++)));
+                        db.setMaxUnits(I(rs.getInt(pos++)));
+                        db.setCount(rs.getInt(pos++));
+                        if (rs.wasNull()) {
+                            throw new StorageException("Unable to count contexts of db_pool_id=" + db.getId());
+                        }
+
+                        // Try to update counter
+                        if (tryIncrementDBPoolCounter(db, con)) {
+                            try {
+                                int dbPoolId = i(db.getId());
+                                final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
+                                cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                                return db;
+                            } catch (final PoolException e) {
+                                LOG.error("Failed to connect to database {}", db.getId(), e);
+                                checkNext = true;
+                            }
+                        }
+                    } while (checkNext && rs.next());
+
+                    if (checkNext) { // Loop was exited because rs.next() returned false
+                        // No suitable filestore found
+                        throw new StorageException("All not full databases cannot be connected to.");
+                    }
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                }
+
+                // Exponential back-off
+                wait(++retryCount, 100L);
+            }
+        }
+
         // Load available databases
         List<DatabaseHandle> list = loadDatabases(con);
         int totalUnits = 0;

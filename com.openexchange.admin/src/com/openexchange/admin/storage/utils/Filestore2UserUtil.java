@@ -282,11 +282,18 @@ public class Filestore2UserUtil {
         }
     }
 
-    private static FilestoreCountCollection getUserCounts(Connection con) throws SQLException {
+    /**
+     * Gets the sorted (lowest first) file store user counts.
+     *
+     * @param configDbCon The connection to ConfigDB to use
+     * @return The sorted file store user counts
+     * @throws StorageException If file store user counts cannot be returned
+     */
+    public static FilestoreCountCollection getUserCounts(Connection configDbCon) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, filestore_id FROM filestore2user");
+            stmt = configDbCon.prepareStatement("SELECT cid, user, filestore_id FROM filestore2user");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return new FilestoreCountCollection(Collections.<Integer, FilestoreCount> emptyMap());

@@ -293,6 +293,13 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore findFilestoreForContext() throws StorageException;
 
     /**
+     * Iterates across all existing file storages and searches for one having enough space for a context.
+     *
+     * @param configDbCon A writable {@link Connection} to the ConfigDB
+     */
+    public abstract Filestore findFilestoreForContext(Connection configDbCon) throws StorageException;
+
+    /**
      * Iterates across all existing file storages and searches for one having enough space for a user.
      *
      * @param fileStoreId The optional identifier of the file storage to prefer during auto-selection or <code>-1</code> to ignore
