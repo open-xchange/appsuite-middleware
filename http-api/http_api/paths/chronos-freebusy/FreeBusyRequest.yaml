@@ -1,4 +1,4 @@
-/chronos/freebusy?action=freebusy:
+/chronos/freebusy?action=freeBusy:
   get:
     operationId: freebusy
     tags:
