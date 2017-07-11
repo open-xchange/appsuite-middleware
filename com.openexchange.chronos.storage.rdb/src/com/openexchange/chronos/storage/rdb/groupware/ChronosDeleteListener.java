@@ -126,7 +126,7 @@ public final class ChronosDeleteListener implements DeleteListener {
     private static int deleteAccounts(Connection connection, int cid, int user) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_account WHERE cid=? AND user=?;")) {
             stmt.setInt(1, cid);
-            stmt.setInt(1, user);
+            stmt.setInt(2, user);
             return stmt.executeUpdate();
         }
     }
