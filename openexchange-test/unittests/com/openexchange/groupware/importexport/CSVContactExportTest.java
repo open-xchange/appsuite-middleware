@@ -95,7 +95,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 
     @Test
     public void exportHead() throws OXException, IOException {
-        final InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf(folderId), TEST1_BASE, null);
+        final InputStream is = exp.exportFolderData(sessObj, Format.CSV, String.valueOf(folderId), TEST1_BASE, null);
         assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is));
     }
 
@@ -111,7 +111,7 @@ public class CSVContactExportTest extends AbstractContactTest {
         final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>(folderMappings.keySet()), null);
 
         //exporting and asserting
-        is = exp.exportData(sessObj, Format.CSV, String.valueOf(folderId), TEST2_BASE, null);
+        is = exp.exportFolderData(sessObj, Format.CSV, String.valueOf(folderId), TEST2_BASE, null);
         final CSVParser parser = new CSVParser();
         final String resStr = OXTestToolkit.readStreamAsString(is);
         assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr));
