@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
-import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
@@ -152,10 +151,7 @@ public class CheckUtil {
         }
 
         // Within the specified time period, availability defaults to a free-busy type of "BUSY-UNAVAILABLE" 
-        // Furthermore, the values of the 'BUSYTYPE' property correspond to those used by the "FBTYPE" parameter 
-        // used on a "FREEBUSY" property, with the exception that the "FREE" value is not used in this property.
-        // FIXME: Should we throw an exception instead?
-        if (!availability.contains(AvailabilityField.busytype) || availability.getBusyType().equals(FbType.FREE)) {
+        if (!availability.contains(AvailabilityField.busytype)) {
             availability.setBusyType(BusyType.BUSY_UNAVAILABLE);
         }
 
