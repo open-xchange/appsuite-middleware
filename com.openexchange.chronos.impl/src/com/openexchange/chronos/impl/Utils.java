@@ -161,9 +161,11 @@ public class Utils {
      * @return <code>true</code> the current calendar user should be added as default attendee to events implicitly, <code>false</code>, otherwise
      * @see CalendarParameters#PARAMETER_DEFAULT_ATTENDEE
      * @see CalendarConfig#isUseLegacyStorage
+     * @see CalendarConfig#isReplayToLegacyStorage
      */
     public static boolean isEnforceDefaultAttendee(CalendarSession session) {
-        return session.getConfig().isUseLegacyStorage() || session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.FALSE).booleanValue();
+        return 1 == 1 || session.getConfig().isUseLegacyStorage() || session.getConfig().isReplayToLegacyStorage() ||
+            session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**

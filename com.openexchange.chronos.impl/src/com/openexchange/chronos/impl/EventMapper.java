@@ -117,6 +117,36 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     }
 
     /**
+     * Copies some specific or all properties from one event into to another one.
+     *
+     * @param from The source event
+     * @param to The destination event, or <code>null</code> to copy into a newly initialized one
+     * @param considerUnset <code>true</code> to also consider not <i>set</i> properties of the source, <code>false</code>, otherwise
+     * @param fields The fields to copy, or <code>null</code> to copy all mapped fields
+     * @return The destination event
+     */
+    public Event copy(Event from, Event to, boolean considerUnset, EventField... fields) throws OXException {
+        if (null == to) {
+            to = new Event();
+        }
+        if (null == fields) {
+            for (Mapping<? extends Object, Event> mapping : getMappings().values()) {
+                if (considerUnset || mapping.isSet(from)) {
+                    mapping.copy(from, to);
+                }
+            }
+        } else {
+            for (EventField field : fields) {
+                Mapping<? extends Object, Event> mapping = get(field);
+                if (considerUnset || mapping.isSet(from)) {
+                    mapping.copy(from, to);
+                }
+            }
+        }
+        return to;
+    }
+
+    /**
      * Creates a new object and sets all those properties that are <i>set</i> and different in the supplied object to the values from the
      * second one, thus, generating some kind of a 'delta' object.
      *
@@ -190,7 +220,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      * @return The tombstone event
      */
     public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
-        Event tombstone = copy(event, newInstance(), TOMBSTONE_FIELDS);
+        Event tombstone = copy(event, new Event(), true, TOMBSTONE_FIELDS);
         Consistency.setModified(lastModified, tombstone, modifiedBy);
         return tombstone;
     }

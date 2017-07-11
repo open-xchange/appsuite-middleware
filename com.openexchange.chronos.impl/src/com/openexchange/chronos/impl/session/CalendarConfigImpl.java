@@ -132,6 +132,11 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public boolean isReplayToLegacyStorage() {
+        return false == isUseLegacyStack() && getConfigValue("com.openexchange.chronos.replayToLegacyStorage", Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    @Override
     public int getRecurrenceCalculationLimit() {
         return getConfigValue("com.openexchange.chronos.recurrenceCalculationLimit", Integer.class, I(1000)).intValue();
     }

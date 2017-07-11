@@ -58,6 +58,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
+import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosDeleteListener;
@@ -121,6 +122,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              * register storage services
              */
             DatabaseServiceDBProvider defaultDbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
+            registerService(ReplayingCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorageFactory());
             registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));

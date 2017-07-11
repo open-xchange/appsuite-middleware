@@ -61,6 +61,7 @@ import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
+import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -95,7 +96,7 @@ public class ChronosActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, FolderService.class, ContextService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, ThreadPoolService.class, LegacyCalendarStorageFactory.class };
+            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class };
     }
 
     @Override

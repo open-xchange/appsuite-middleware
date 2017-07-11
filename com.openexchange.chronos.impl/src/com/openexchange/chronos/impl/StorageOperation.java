@@ -57,6 +57,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
+import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -147,7 +148,9 @@ public abstract class StorageOperation<T> {
     }
 
     private CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
-        if (session.getConfig().isUseLegacyStorage()) {
+        if (session.getConfig().isReplayToLegacyStorage()) {
+            return Services.getService(ReplayingCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        } else if (session.getConfig().isUseLegacyStorage()) {
             return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         } else {
             return Services.getService(CalendarStorageFactory.class).create(context, 0, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);

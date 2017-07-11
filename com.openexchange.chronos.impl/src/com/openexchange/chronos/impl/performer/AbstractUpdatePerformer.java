@@ -66,6 +66,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -129,7 +130,8 @@ public abstract class AbstractUpdatePerformer {
      * @return The prepared exception event
      */
     protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
-        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), (EventField[]) null);
+        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
+        //        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), (EventField[]) null);
         exceptionEvent.setId(storage.getEventStorage().nextId());
         exceptionEvent.setRecurrenceId(recurrenceID);
         exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
@@ -331,7 +333,8 @@ public abstract class AbstractUpdatePerformer {
 
     /**
      * Inserts alarm data for an event of a specific user, optionally assigning new alarm UIDs in case the alarms are copied over from
-     * another event. A new unique alarm identifier is always assigned.
+     * another event. A new unique alarm identifier is always assigned, and the event is passed from the calendar user's folder view to the
+     * storage implicitly (based on {@link Utils#getFolderView}.
      *
      * @param event The event the alarms are associated with
      * @param userId The identifier of the user the alarms should be inserted for
@@ -350,6 +353,16 @@ public abstract class AbstractUpdatePerformer {
                 newAlarm.setUid(UUID.randomUUID().toString());
             }
             newAlarms.add(newAlarm);
+        }
+        final String folderView = Utils.getFolderView(storage, event, userId);
+        if (false == folderView.equals(event.getFolderId())) {
+            event = new DelegatingEvent(event) {
+
+                @Override
+                public String getFolderId() {
+                    return folderView;
+                }
+            };
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
     }
