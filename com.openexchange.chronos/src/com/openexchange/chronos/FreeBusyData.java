@@ -51,6 +51,7 @@ package com.openexchange.chronos;
 
 import java.util.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 
 /**
  * {@link FreeBusyData}
@@ -63,15 +64,10 @@ public class FreeBusyData {
 
     private String uid;
     private Date timestamp;
-
-    private Date startDate;
-    private String startTimeZone;
-    private Date endDate;
-    private String endTimeZone;
-
+    private DateTime startDate;
+    private DateTime endDate;
     private Organizer organizer;
     private List<Attendee> attendees;
-
     private List<FreeBusyTime> freeBusyTimes;
 
     /**
@@ -122,7 +118,7 @@ public class FreeBusyData {
      *
      * @return The start date
      */
-    public Date getStartDate() {
+    public DateTime getStartDate() {
         return startDate;
     }
 
@@ -131,26 +127,8 @@ public class FreeBusyData {
      *
      * @param value The start date to set
      */
-    public void setStartDate(Date value) {
+    public void setStartDate(DateTime value) {
         startDate = value;
-    }
-
-    /**
-     * Gets the start timezone of the free/busy data.
-     *
-     * @return The start timezone
-     */
-    public String getStartTimeZone() {
-        return startTimeZone;
-    }
-
-    /**
-     * Sets the start timezone of the free/busy data.
-     *
-     * @param value The start timezone to set
-     */
-    public void setStartTimeZone(String value) {
-        startTimeZone = value;
     }
 
     /**
@@ -158,7 +136,7 @@ public class FreeBusyData {
      *
      * @return The end date
      */
-    public Date getEndDate() {
+    public DateTime getEndDate() {
         return endDate;
     }
 
@@ -167,26 +145,8 @@ public class FreeBusyData {
      *
      * @param value The end date to set
      */
-    public void setEndDate(Date value) {
+    public void setEndDate(DateTime value) {
         endDate = value;
-    }
-
-    /**
-     * Gets the end timezone of the free/busy data.
-     *
-     * @return The end timezone
-     */
-    public String getEndTimeZone() {
-        return endTimeZone;
-    }
-
-    /**
-     * Sets the end timezone of the free/busy data.
-     *
-     * @param value The end timezone to set
-     */
-    public void setEndTimeZone(String value) {
-        endTimeZone = value;
     }
 
     /**

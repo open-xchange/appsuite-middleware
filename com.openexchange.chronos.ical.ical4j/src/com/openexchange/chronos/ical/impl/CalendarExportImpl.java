@@ -250,7 +250,7 @@ public class CalendarExportImpl implements CalendarExport {
          */
         VFreeBusy vFreeBusy = mapper.exportFreeBusy(freeBusyData, parameters, warnings);
         ICalUtils.removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
-        trackTimezones(freeBusyData.getStartTimeZone(), freeBusyData.getEndTimeZone());
+        trackTimezones(freeBusyData.getStartDate(), freeBusyData.getEndDate());
         return vFreeBusy;
     }
 

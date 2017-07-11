@@ -176,7 +176,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee;
                 try {
                     freeBusyPerAttendee = getCalendarSession().getFreeBusyService().getMergedFreeBusy(
-                        getCalendarSession(), freeBusyData.getAttendees(), freeBusyData.getStartDate(), freeBusyData.getEndDate());
+                        getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()));
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
                     continue;
@@ -240,9 +240,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
         freeBusyData.setAttendees(Collections.singletonList(attendee));
         freeBusyData.setUid(requestedData.getUid());
         freeBusyData.setStartDate(requestedData.getStartDate());
-        freeBusyData.setStartTimeZone(requestedData.getStartTimeZone());
         freeBusyData.setEndDate(requestedData.getEndDate());
-        freeBusyData.setEndTimeZone(requestedData.getEndTimeZone());
         freeBusyData.setOrganizer(requestedData.getOrganizer());
         freeBusyData.setFreeBusyTimes(freeBusyTimes);
         /*

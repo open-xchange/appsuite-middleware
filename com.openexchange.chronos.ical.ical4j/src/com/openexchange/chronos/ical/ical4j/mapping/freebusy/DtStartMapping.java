@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.freebusy;
 
-import java.util.Date;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.FreeBusyData;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalDateMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.DateProperty;
@@ -63,7 +63,7 @@ import net.fortuna.ical4j.model.property.DtStart;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DtStartMapping extends ICalDateMapping<VFreeBusy, FreeBusyData> {
+public class DtStartMapping extends ICalDateTimeMapping<VFreeBusy, FreeBusyData> {
 
     /**
      * Initializes a new {@link DtStartMapping}.
@@ -73,24 +73,13 @@ public class DtStartMapping extends ICalDateMapping<VFreeBusy, FreeBusyData> {
 	}
 
 	@Override
-    protected Date getValue(FreeBusyData object) {
+    protected DateTime getValue(FreeBusyData object) {
 		return object.getStartDate();
 	}
 
 	@Override
-    protected String getTimezone(FreeBusyData object) {
-		return object.getStartTimeZone();
-	}
-
-	@Override
-    protected boolean hasTime(FreeBusyData object) {
-        return true;
-	}
-
-	@Override
-    protected void setValue(FreeBusyData object, Date value, String timezone, boolean hasTime) {
+    protected void setValue(FreeBusyData object, DateTime value) {
 		object.setStartDate(value);
-		object.setStartTimeZone(timezone);
 	}
 
 	@Override
