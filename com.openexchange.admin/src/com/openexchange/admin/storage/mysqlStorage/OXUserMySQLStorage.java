@@ -2942,7 +2942,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Parses a dynamic attribute from the user_attribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
-     * 
+     *
      * @throws StorageException
      */
     private String[] parseDynamicAttribute(final String name) throws StorageException {
@@ -3583,11 +3583,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 UserConfigurationStorage.getInstance().invalidateCache(user.getUserId(), gwCtx);
             }
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
-            log.error("UserConfiguration Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 
