@@ -174,6 +174,8 @@ ChronosFreeBusyEventsResponse:
   $ref: ./chronos/FreeBusyEventsResponse.yaml
 ChronosFreeBusyEventsData:
   $ref: ./chronos/FreeBusyEventsData.yaml
+ChronosFreeBusyHasResponse:
+  $ref: ./chronos/FreeBusyHasResponse.yaml
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
 # Module: mail
