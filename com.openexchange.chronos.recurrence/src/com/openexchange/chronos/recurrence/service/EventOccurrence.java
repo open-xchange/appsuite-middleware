@@ -47,10 +47,14 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.recurrence.service;
 
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.common.CalendarUtils;
 
 /**
  * {@link EventOccurrence}
@@ -73,8 +77,8 @@ public class EventOccurrence extends UnmodifiableEvent {
     public EventOccurrence(Event seriesMaster, RecurrenceId recurrenceId) {
         super(seriesMaster);
         this.recurrenceId = recurrenceId;
-        this.startDate = calculateStart(seriesMaster, recurrenceId.getValue());
-        this.endDate = calculateEnd(seriesMaster, recurrenceId.getValue());
+        this.startDate = CalendarUtils.calculateStart(seriesMaster, recurrenceId);
+        this.endDate = CalendarUtils.calculateEnd(seriesMaster, recurrenceId);
     }
 
     @Override
@@ -125,25 +129,6 @@ public class EventOccurrence extends UnmodifiableEvent {
     @Override
     public boolean containsDeleteExceptionDates() {
         return false;
-    }
-
-    private static DateTime calculateStart(Event seriesMaster, long occurreneStart) {
-        if (seriesMaster.getStartDate().isAllDay()) {
-            return new DateTime(occurreneStart).toAllDay();
-        }
-        return new DateTime(seriesMaster.getStartDate().getTimeZone(), occurreneStart);
-    }
-
-    private static DateTime calculateEnd(Event seriesMaster, long occurreneStart) {
-        //TODO
-        long startMillis = seriesMaster.getStartDate().getTimestamp();
-        long endMillis = seriesMaster.getEndDate().getTimestamp();
-        long duration = endMillis - startMillis;
-        long occurrenceEnd = occurreneStart + duration;
-        if (seriesMaster.getEndDate().isAllDay()) {
-            return new DateTime(occurrenceEnd).toAllDay();
-        }
-        return new DateTime(seriesMaster.getEndDate().getTimeZone(), occurrenceEnd);
     }
 
 }
