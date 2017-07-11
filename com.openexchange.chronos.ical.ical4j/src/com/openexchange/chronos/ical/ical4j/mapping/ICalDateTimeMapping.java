@@ -121,6 +121,7 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
                     }
                 } else {
                     dateTime = new DateTime(true);
+                    dateTime.setTime(value.getTimestamp());
                 }
                 property.setDate(dateTime);
             }
