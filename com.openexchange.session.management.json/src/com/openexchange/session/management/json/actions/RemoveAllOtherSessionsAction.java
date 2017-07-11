@@ -50,17 +50,15 @@
 package com.openexchange.session.management.json.actions;
 
 import java.util.Collection;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementProperty;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -102,15 +100,9 @@ public class RemoveAllOtherSessionsAction implements AJAXActionService {
         // Remove all sessions except blacklisted and transmitted to keep
         try {
             String sessionIdToKeep = dataObject.getString(KEEP);
-            Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
+            Collection<ManagedSession> userSessions = service.getSessionsForUser(session, false);
 
-            // Load blacklisted
-            LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
-            if (null == configService) {
-                throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
-            }
-            String value = configService.getProperty(SessionManagementProperty.clientBlacklist);
-            String[] blacklistedClients = Strings.splitByComma(value);
+            Set<String> blacklistedClients = service.getBlacklistedClients();
 
             // Remove
             for (ManagedSession mSession : userSessions) {
@@ -118,7 +110,7 @@ public class RemoveAllOtherSessionsAction implements AJAXActionService {
                 if (sessionIdToKeep.equals(mSessionId)) {
                     continue;
                 }
-                if (isBlacklisted(mSessionId, blacklistedClients)) {
+                if (blacklistedClients.contains(mSession.getClient())) {
                     continue;
                 }
                 service.removeSession(session, mSessionId);
@@ -129,15 +121,4 @@ public class RemoveAllOtherSessionsAction implements AJAXActionService {
         return new AJAXRequestResult();
     }
 
-    private boolean isBlacklisted(String id, String[] blacklisted) {
-        if (null == blacklisted) {
-            return false;
-        }
-        for (String client : blacklisted) {
-            if (client.equals(id)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

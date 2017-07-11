@@ -50,10 +50,15 @@
 package com.openexchange.session.management.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.impl.SessionManagementProperty;
 import com.openexchange.session.management.impl.SessionManagementServiceImpl;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
@@ -66,6 +71,13 @@ import com.openexchange.user.UserService;
  */
 public class SessionManagementActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link SessionManagementActivator}.
+     */
+    public SessionManagementActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { SessiondService.class, LeanConfigurationService.class, UserService.class };
@@ -77,7 +89,22 @@ public class SessionManagementActivator extends HousekeepingActivator {
         trackService(GeoLocationService.class);
         trackService(HazelcastInstance.class);
         openTrackers();
-        registerService(SessionManagementService.class, new SessionManagementServiceImpl());
+
+        registerService(SessionManagementService.class, SessionManagementServiceImpl.getInstance());
+        registerService(Reloadable.class, new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                SessionManagementServiceImpl.getInstance().reinitBlacklistedClients();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(
+                    SessionManagementProperty.globalLookup.getFQPropertyName(),
+                    SessionManagementProperty.clientBlacklist.getFQPropertyName());
+            }
+        });
     }
 
 }

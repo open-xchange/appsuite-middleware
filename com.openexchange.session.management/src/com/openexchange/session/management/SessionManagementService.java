@@ -50,6 +50,7 @@
 package com.openexchange.session.management;
 
 import java.util.Collection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -65,10 +66,11 @@ public interface SessionManagementService {
      * Get all sessions (local and remote) for user identified by session
      *
      * @param session The user's session
+     * @param applyClientBlacklist <code>true</code> to apply client black-list to result set (drops the ones that occur); otherwise <code>false</code>
      * @return Collection containing user's sessions
      * @throws OXException On error
      */
-    Collection<ManagedSession> getSessionsForUser(Session session) throws OXException;
+    Collection<ManagedSession> getSessionsForUser(Session session, boolean applyClientBlacklist) throws OXException;
 
     /**
      * Remove session identified by sessionIdToRemove for user identified by session
@@ -78,5 +80,13 @@ public interface SessionManagementService {
      * @throws OXException On error
      */
     void removeSession(Session session, String sessionIdToRemove) throws OXException;
+
+    /**
+     * Gets the black-listed clients
+     *
+     * @return The black-listed clients
+     * @throws OXException If black-listed clients cannot be returned
+     */
+    Set<String> getBlacklistedClients() throws OXException;
 
 }

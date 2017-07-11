@@ -82,7 +82,7 @@ public class GetSessionsAction implements AJAXActionService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        Collection<ManagedSession> sessions = service.getSessionsForUser(session);
+        Collection<ManagedSession> sessions = service.getSessionsForUser(session, true);
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
@@ -91,7 +91,7 @@ public class GetSessionsAction implements AJAXActionService {
                 json.put("ipAddress", s.getIpAddress());
                 json.put("client", s.getClient());
                 json.put("userAgent", s.getUserAgent());
-                json.put("ctxId", s.getCtxId());
+                json.put("ctxId", s.getContextId());
                 json.put("userId", s.getUserId());
                 json.put("location", s.getLocation());
                 json.put("loginTime", s.getLoginTime());
