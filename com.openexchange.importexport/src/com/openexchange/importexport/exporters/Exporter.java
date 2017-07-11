@@ -50,6 +50,7 @@
 package com.openexchange.importexport.exporters;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
@@ -90,7 +91,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws OXException
 	 */
-	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+	SizedInputStream exportFolderData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
 
 	/**
      * @param session: The session object to be able to check permissions.
@@ -103,7 +104,19 @@ public interface Exporter {
      * @throws OXException
      */
     SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
+    
+    /**
+    *
+    * @param sessObj: The session object to be able to check permissions.
+    * @param format: Format the returned InputStream should be in.
+    * @param batchIds: Ids of multiple entries in different folders
+    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+    * @return InputStream in requested format.
+    * @throws OXException
+    */
+   SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+    
 	/**
 	 * Creates a proper export file name based on the folder to export
 	 *
@@ -112,5 +125,15 @@ public interface Exporter {
 	 * @return String the name of the export file.
 	 * @throws OXException
 	 */
-	String getExportFileName(ServerSession sessionObj, String folder) throws OXException;
+	String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException;
+	
+	/**
+     * Creates a proper export file name based on the batch of ids to export
+     *
+     * @param session: The session object to be able to check permissions.
+     * @param batchIds: The ids which determine the export file name.
+     * @return String the name of the export file.
+     * @throws OXException
+     */
+    String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException;
 }

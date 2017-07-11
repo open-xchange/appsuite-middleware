@@ -164,6 +164,16 @@ public final class SessionImpl implements PutIfAbsent {
         if (null != obj) {
             parameters.put(PARAM_OAUTH_ACCESS_TOKEN, obj);
         }
+
+        obj = s.getParameter(PARAM_USER_AGENT);
+        if (null != obj) {
+            parameters.put(PARAM_USER_AGENT, obj);
+        }
+
+        obj = s.getParameter(PARAM_LOGIN_TIME);
+        if (null != obj) {
+            parameters.put(PARAM_LOGIN_TIME, obj);
+        }
     }
 
     /**
@@ -190,6 +200,8 @@ public final class SessionImpl implements PutIfAbsent {
         sb.append(String.format(format, "Local IP", localIp, s.localIp));
         sb.append(String.format(format, "Random-Token", randomToken, s.randomToken));
         sb.append(String.format(format, "Hash", hash, s.hash));
+        sb.append(String.format(format, "User-Agent", parameters.get(PARAM_USER_AGENT), s.getParameter(PARAM_USER_AGENT)));
+        sb.append(String.format(format, "Login-time", parameters.get(PARAM_LOGIN_TIME), s.getParameter(PARAM_LOGIN_TIME)));
         logger.info(sb.toString());
     }
 
@@ -282,6 +294,24 @@ public final class SessionImpl implements PutIfAbsent {
                 return false;
             }
         } else if (object1.equals(object2)) {
+            return false;
+        }
+        Object ua1 = parameters.get(PARAM_USER_AGENT);
+        Object ua2 = s.getParameter(PARAM_USER_AGENT);
+        if (null == ua1) {
+            if (null != ua2) {
+                return false;
+            }
+        } else if (ua1.equals(ua2)) {
+            return false;
+        }
+        Object lt1 = parameters.get(PARAM_LOGIN_TIME);
+        Object lt2 = s.getParameter(PARAM_LOGIN_TIME);
+        if (null == lt1) {
+            if (null != lt2) {
+                return false;
+            }
+        } else if (lt1.equals(lt2)) {
             return false;
         }
         return true;

@@ -4795,6 +4795,10 @@ msgid ""
 "folder for tasks."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
+msgid "Not all of the objects could be stored due to a configured limitation"
+msgstr ""
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -8608,6 +8612,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessages.java:82
 msgid "Authentication failed for user name: %1$s"
+msgstr ""
+
+#. unknown location
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:64
+msgid "unknown location"
+msgstr ""
+
+#. Session not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/exception/SessionManagementExceptionMessages.java:64
+msgid "Session not found."
 msgstr ""
 
 #. No session found for identifier: %1$s

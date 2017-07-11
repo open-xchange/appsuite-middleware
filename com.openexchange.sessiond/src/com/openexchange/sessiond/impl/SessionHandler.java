@@ -54,6 +54,7 @@ import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -798,7 +799,7 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, SessionEnhancement enhancement) throws OXException {
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, SessionEnhancement enhancement, String userAgent) throws OXException {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -814,6 +815,10 @@ public final class SessionHandler {
         if (null != enhancement) {
             enhancement.enhanceSession(newSession);
         }
+        if (Strings.isNotEmpty(userAgent)) {
+            newSession.setParameter(Session.PARAM_USER_AGENT, userAgent);
+        }
+        newSession.setParameter(Session.PARAM_LOGIN_TIME, String.valueOf(new Date().getTime()));
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;

@@ -1,0 +1,131 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.session.management;
+
+import com.openexchange.session.Session;
+
+/**
+ * {@link ManagedSession}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.0
+ */
+public class ManagedSession {
+
+    private final String sessionId;
+    private final String ipAddress;
+    private final String client;
+    private final String userAgent;
+    private final long loginTime;
+    private final int ctxId;
+    private final int userId;
+    private String location;
+
+    public ManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId) {
+        super();
+        this.sessionId = sessionId;
+        this.ipAddress = ipAddress;
+        this.client = client;
+        this.userAgent = userAgent;
+        this.loginTime = loginTime;
+        this.ctxId = ctxId;
+        this.userId = userId;
+        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
+    }
+
+    public ManagedSession(Session session) {
+        super();
+        this.sessionId = session.getSessionID();
+        this.ipAddress = session.getLocalIp();
+        this.client = session.getClient();
+        this.userAgent = session.getParameter(Session.PARAM_USER_AGENT) != null ? (String) session.getParameter(Session.PARAM_USER_AGENT) : "unknown user-agent";
+        this.loginTime = session.getParameter(Session.PARAM_LOGIN_TIME) != null ? Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME))) : -1;
+        this.ctxId = session.getContextId();
+        this.userId = session.getUserId();
+        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public long getLoginTime() {
+        return loginTime;
+    }
+
+    public int getCtxId() {
+        return ctxId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+}

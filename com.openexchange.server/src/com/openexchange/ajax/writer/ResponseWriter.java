@@ -67,9 +67,12 @@ import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -549,7 +552,7 @@ public final class ResponseWriter {
          * Categories
          */
         {
-            List<Category> categories = exception.getCategories();
+            List<Category> categories = getCategoriesFrom(exception);
             int size = categories.size();
             if (1 == size) {
                 Category category = categories.get(0);
@@ -622,6 +625,32 @@ public final class ResponseWriter {
             }
             json.put(ERROR_STACK, jsonStack);
         }
+    }
+
+    private static List<Category> getCategoriesFrom(OXException exception) {
+        List<Category> categories = exception.getCategories();
+        if (null == categories) {
+            return Collections.emptyList();
+        }
+
+        List<Category> nonnulls = null;
+        for (ListIterator<Category> listIterator = categories.listIterator(); listIterator.hasNext();) {
+            int index = listIterator.nextIndex();
+            Category category = listIterator.next();
+            if (null == category) {
+                if (null == nonnulls) {
+                    nonnulls = new ArrayList<>(categories.size());
+                    if (index > 0) {
+                        nonnulls.addAll(categories.subList(0, index));
+                    }
+                }
+            } else {
+                if (null != nonnulls) {
+                    nonnulls.add(category);
+                }
+            }
+        }
+        return null == nonnulls ? categories : nonnulls;
     }
 
     private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
@@ -894,7 +923,7 @@ public final class ResponseWriter {
             }
         }
         {
-            List<Category> categories = exc.getCategories();
+            List<Category> categories = getCategoriesFrom(exc);
             int size = categories.size();
             if (1 == size) {
                 Category category = categories.get(0);

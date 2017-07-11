@@ -157,7 +157,7 @@ public class SAMLLoginTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash);
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
         }
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -216,9 +217,9 @@ public class InternalParticipant extends TaskParticipant implements Serializable
             ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bais);
             return (InternalParticipant) ois.readObject();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        } catch (IOException | ClassNotFoundException e) {
+            org.slf4j.LoggerFactory.getLogger(InternalParticipant.class).error("Unable to create a deep clone of the participant with id {} in folder {}. Will return original participant.", this.user.getIdentifier(), this.user.getPersonalFolderId(), e);
+            return this;
         }
     }
 }
