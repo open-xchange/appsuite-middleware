@@ -91,6 +91,10 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     private static final String ENDPOINT_LONG = "api-root";
     private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/export";
+
+    private static final String COLUMN_DELIMITER_LONG = "delimiter";
+    private static final char COLUMN_DELIMITER_DEFAULT = ';';
+
     private Path path;
 
     /**
@@ -108,7 +112,8 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
         options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
         options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is exported. If not set, all feedback up to -e is exported.");
         options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is exported. If not set, all feedback since -s is exported.");
-        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
+        options.addOption(null, ENDPOINT_LONG, true, "URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
+        options.addOption(null, COLUMN_DELIMITER_LONG, true, "The column delimiter used. Default: " + COLUMN_DELIMITER_DEFAULT);
     }
 
     @Override
@@ -126,7 +131,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getHeader() {
-        return "exportuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
+        return "exportuserfeedback [-t type] [-g ctx_grp] [-U myUser:myPassword] [-s time] [-e time] [--delimiter ,] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override
@@ -184,6 +189,9 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             }
             if (cmd.hasOption(END_SHORT)) {
                 target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
+            }
+            if (cmd.hasOption(COLUMN_DELIMITER_LONG)) {
+                target = target.queryParam("delimiter", cmd.getOptionValue(COLUMN_DELIMITER_LONG));
             }
             return target;
         } catch (URISyntaxException e) {

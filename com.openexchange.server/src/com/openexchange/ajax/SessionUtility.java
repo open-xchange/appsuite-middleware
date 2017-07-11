@@ -676,7 +676,7 @@ public final class SessionUtility {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
-            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
             oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
             throw oxe;
         }

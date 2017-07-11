@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,7 +68,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -150,11 +148,12 @@ public class ICal4JParser implements ICalParser {
     @Override
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
+            return parseAppointments(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
             LOG.error("", e);
         }
-        return Collections.emptyList();
+
+        return Collections.<CalendarDataObject> emptyList();
     }
 
     @Override
@@ -164,16 +163,23 @@ public class ICal4JParser implements ICalParser {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
 
             List<CalendarDataObject> appointments = null;
-            while (true) {
-                final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if (calendar == null) {
-                    break;
-                }
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 final ComponentList vevents = calendar.getComponents("VEVENT");
-                final int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size();
-                if (null == appointments) {
-                    appointments = new ArrayList<CalendarDataObject>(myLimit);
+
+                int myLimit;
+                if (limit >= 0 && limit < vevents.size()) {
+                    myLimit = limit;
+                    if (null == appointments) {
+                        appointments = new ArrayList<CalendarDataObject>(myLimit);
+                    }
+                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                } else {
+                    myLimit = vevents.size();
+                    if (null == appointments) {
+                        appointments = new ArrayList<CalendarDataObject>(myLimit);
+                    }
                 }
+
                 for (int i = 0; i < myLimit; i++) {
                     final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
@@ -194,51 +200,62 @@ public class ICal4JParser implements ICalParser {
             closeSafe(reader);
         }
 
-        return Collections.emptyList();
+        return Collections.<CalendarDataObject> emptyList();
     }
 
 	@Override
 	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseFreeBusy(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
+            return parseFreeBusy(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (UnsupportedCharsetException e) {
             LOG.error("", e);
         }
-        return Collections.emptyList();
+        return Collections.<FreeBusyInformation> emptyList();
 	}
 
 	@Override
-	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        List<FreeBusyInformation> fbInfos = new ArrayList<FreeBusyInformation>();
+    public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
-            while (true) {
-                net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if (null == calendar) {
-                	break;
-                }
+            List<FreeBusyInformation> fbInfos = null;
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList freebusies = calendar.getComponents("VFREEBUSY");
-                int myLimit = limit < 0 ? freebusies.size() : limit < freebusies.size() ? limit : freebusies.size();
+                int myLimit;
+                if (limit >= 0 && limit < freebusies.size()) {
+                    myLimit = limit;
+                    if (null == fbInfos) {
+                        fbInfos = new ArrayList<>(myLimit);
+                    }
+                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                } else {
+                    myLimit = freebusies.size();
+                    if (null == fbInfos) {
+                        fbInfos = new ArrayList<>(myLimit);
+                    }
+                }
+
                 for (int i = 0; i < myLimit; i++) {
                     Component vevent = (Component) freebusies.get(i);
                     try {
-                        fbInfos.add(convertFreeBusy(i, (VFreeBusy)vevent, defaultTZ, ctx, warnings));
+                        fbInfos.add(convertFreeBusy(i, (VFreeBusy) vevent, defaultTZ, ctx, warnings));
                     } catch (ConversionError conversionError) {
                         errors.add(conversionError);
                     }
                 }
             }
+            return fbInfos;
         } catch (UnsupportedCharsetException e) {
             LOG.error("", e);
             // IGNORE
         } catch (ConversionError e) {
-        	errors.add(e);
+            errors.add(e);
         } finally {
             closeSafe(reader);
         }
-        return fbInfos;
-	}
+
+        return Collections.<FreeBusyInformation> emptyList();
+    }
 
 	private FreeBusyInformation convertFreeBusy(int index, VFreeBusy freeBusy, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         FreeBusyInformation fbInfo = new FreeBusyInformation();
@@ -282,25 +299,34 @@ public class ICal4JParser implements ICalParser {
     @Override
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         try {
-            return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
+            return parseTasks(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
             LOG.error("", e);
         }
-        return new LinkedList<Task>();
+        return Collections.<Task> emptyList();
     }
 
     @Override
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        final List<Task> tasks = new ArrayList<Task>();
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
-            while(true) {
-                final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if(calendar == null) { break; }
-
+            List<Task> tasks = null;
+            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList todos = calendar.getComponents("VTODO");
-                int myLimit = limit < 0 ? todos.size() : limit < todos.size() ? limit : todos.size();
+                int myLimit;
+                if (limit >= 0 && limit < todos.size()) {
+                    myLimit = limit;
+                    if (null == tasks) {
+                        tasks = new ArrayList<>(myLimit);
+                    }
+                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                } else {
+                    myLimit = todos.size();
+                    if (null == tasks) {
+                        tasks = new ArrayList<>(myLimit);
+                    }
+                }
 
                 for(int i = 0; i < myLimit; i++) {
                     final Component vtodo = (Component) todos.get(i);
@@ -312,12 +338,14 @@ public class ICal4JParser implements ICalParser {
                 }
             }
 
+            return tasks;
         } catch (final UnsupportedCharsetException e) {
             // IGNORE
         } finally {
             closeSafe(reader);
         }
-        return tasks;
+
+        return Collections.<Task> emptyList();
     }
 
     protected static void closeSafe(final Closeable closeable) {
@@ -395,7 +423,7 @@ public class ICal4JParser implements ICalParser {
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
-		
+
 		if (inTZID == null) {
 		    inTZID = ParserTools.findTimeZoneReplacement(tzidName);
 		}

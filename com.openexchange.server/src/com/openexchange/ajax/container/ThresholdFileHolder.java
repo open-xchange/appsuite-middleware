@@ -54,7 +54,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -72,6 +71,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.InputStreamReadable;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -587,17 +587,23 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
         ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
-            return Streams.asInputStream(buf);
+            return new SizeKnowingInputStream(Streams.asInputStream(buf), buf.size());
         }
         File tempFile = this.tempFile;
         if (null == tempFile) {
             IOException e = new IOException("Already closed.");
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+        FileInputStream fis = null;
         try {
-            return new FileInputStream(tempFile);
+            fis = new FileInputStream(tempFile);
+            SizeKnowingInputStream retval = new SizeKnowingInputStream(fis, tempFile.length());
+            fis = null; // Avoid premature closing
+            return retval;
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(fis);
         }
     }
 
@@ -797,7 +803,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
     } // End of class TransferringOutStream
 
-    private static final class ClosingInputStream extends FilterInputStream {
+    private static final class ClosingInputStream extends SizeKnowingInputStream {
 
         private final ThresholdFileHolder fileHolder;
 
@@ -805,7 +811,7 @@ public final class ThresholdFileHolder implements IFileHolder {
          * Initializes a new {@link ClosingInputStream}.
          */
         protected ClosingInputStream(final ThresholdFileHolder fileHolder) throws OXException {
-            super(fileHolder.getStream());
+            super(fileHolder.getStream(), fileHolder.getLength());
             this.fileHolder = fileHolder;
         }
 

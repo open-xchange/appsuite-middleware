@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -124,6 +125,16 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             } else if (contentType.startsWith("application/force")) {
                 contentType.setBaseType(MimeType2ExtMap.getContentType(preparedFileName));
                 setContentType(contentType);
+            }
+        }
+        {
+            String contentId = uploadFile.getContentId();
+            if (Strings.isNotEmpty(contentId)) {
+                contentId = contentId.trim();
+                if (!contentId.startsWith("<") && !contentId.endsWith(">")) {
+                    contentId = new StringBuilder(contentId.length() + 2).append('<').append(contentId).append('>').toString();
+                }
+                setContentId(contentId);
             }
         }
         setFileName(preparedFileName);

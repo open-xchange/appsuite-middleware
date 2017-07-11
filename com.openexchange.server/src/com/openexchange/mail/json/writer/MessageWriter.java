@@ -269,7 +269,7 @@ public final class MessageWriter {
         }
 
         try {
-            JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.isAsMarkup(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
+            JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isSanitize(), params.isEmbedded(), params.isAsMarkup(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
             handler.setSizePolicy(params.getSizePolicy());
             if (null != params.getOptTimeZone()) {
                 handler.setTimeZone(params.getOptTimeZone());

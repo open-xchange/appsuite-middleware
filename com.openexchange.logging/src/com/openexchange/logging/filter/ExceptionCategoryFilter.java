@@ -127,7 +127,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
-            if (ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
+            if (null != category && ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
                 if (traceService.isEnabled()) {
                     try {
                         final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
