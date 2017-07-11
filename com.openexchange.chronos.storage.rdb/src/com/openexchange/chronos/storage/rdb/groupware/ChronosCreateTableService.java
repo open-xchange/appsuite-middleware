@@ -270,7 +270,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
                 "url VARCHAR(255) DEFAULT NULL," +
-                "categories VARCHAR(1024) DEFAULT, " +
+                "categories VARCHAR(1024) DEFAULT NULL, " +
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
@@ -296,11 +296,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "recurrence BIGINT(20) DEFAULT NULL," +
                 "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
-                "categories VARCHAR(1024) DEFAULT, " +
+                "categories VARCHAR(1024) DEFAULT NULL, " +
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
-                "PRIMARY KEY (cid,account,id)" +
-                "KEY calendar_availablity(cid, account,calendarAvailability,user)," +
+                "PRIMARY KEY (cid,account,id)," +
+                "KEY calendar_availablity (cid,account,calendarAvailability,user)," +
                 "KEY uid (cid,account,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
