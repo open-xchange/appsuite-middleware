@@ -55,8 +55,15 @@ public final class EngineIOProtocol {
         super();
     }
 
+    /**
+     * Encodes specified EngineIO package to its string representation
+     *
+     * @param packet The package to encode
+     * @return The package's string representation
+     */
     public static String encode(EngineIOPacket packet) {
-        return String.valueOf(packet.getType().value()) + packet.getTextData();
+        String textData = packet.getTextData();
+        return new StringBuilder(textData.length() + 2).append(Integer.toString(packet.getType().value())).append(textData).toString();
     }
 
     public static void binaryEncode(EngineIOPacket packet, OutputStream os) throws IOException {

@@ -17,7 +17,7 @@ BuildRequires:    java-devel >= 1.7.0
 BuildRequires:    systemd-rpm-macros
 %endif
 Version:          @OXVERSION@
-%define           ox_release 28
+%define           ox_release 29
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -138,6 +138,8 @@ systemctl daemon-reload &> /dev/null || :
 
 
 %changelog
+* Wed Jul 05 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-07-10 (4256)
 * Tue Jun 27 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-06-27 (4244)
 * Mon Jun 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

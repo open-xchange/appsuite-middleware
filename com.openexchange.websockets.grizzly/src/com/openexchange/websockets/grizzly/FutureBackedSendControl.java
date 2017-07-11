@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,51 +47,66 @@
  *
  */
 
-package com.openexchange.websockets;
+package com.openexchange.websockets.grizzly;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.glassfish.grizzly.websockets.DataFrame;
+import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.websockets.SendControl;
+
 
 /**
- * {@link SendControl} - Receives call-backs for message transmission results.
+ * {@link FutureBackedSendControl} - The send-control backed by a {@link Future} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
  */
-public interface SendControl {
+public class FutureBackedSendControl implements SendControl {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FutureBackedSendControl.class);
+
+    private final Future<DataFrame> future;
 
     /**
-     * Awaits until message transmission has been completed; either successfully or not.
-     *
-     * @throws InterruptedException If the current thread was interrupted while waiting
+     * Initializes a new {@link FutureBackedSendControl}.
      */
-    void awaitDone() throws InterruptedException;
+    public FutureBackedSendControl(Future<DataFrame> future) {
+        super();
+        this.future = future;
+    }
 
-    /**
-     * Awaits for at most the given time until message transmission has been completed; either successfully or not.
-     *
-     * @param timeout The maximum time to wait
-     * @param unit The time unit of the timeout argument
-     * @throws InterruptedException If the current thread was interrupted while waiting
-     * @throws TimeoutException If the wait timed out
-     */
-    void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;
+    @Override
+    public void awaitDone() throws InterruptedException {
+        try {
+            future.get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
+    }
 
-    /**
-     * Checks if message transmission completed; either successfully or due to a failure.
-     *
-     * @return {@code true} if this message transmission completed; otherwise <code>false</code>
-     */
-    boolean isDone();
+    @Override
+    public void awaitDone(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        try {
+            future.get(timeout, unit);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            ExceptionUtils.handleThrowable(cause);
+            LOG.error("Web Socket message could not be sent", cause);
+        }
+    }
 
-    /**
-     * Attempts to cancel message transmission.
-     * <p>
-     * After this method returns, subsequent calls to {@link #isDone} will always return <tt>true</tt>.
-     *
-     * @param mayInterruptIfRunning Whether the transferring thread should be interrupted
-     * @return <tt>false</tt> if the message transfer could not be cancelled, <tt>true</tt> otherwise
-     */
-    boolean cancel(boolean mayInterruptIfRunning);
+    @Override
+    public boolean isDone() {
+        return future.isDone();
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return future.cancel(mayInterruptIfRunning);
+    }
 
 }

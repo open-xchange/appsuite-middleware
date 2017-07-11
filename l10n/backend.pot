@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -7774,7 +7785,9 @@ msgstr ""
 #. * Folder "%1$s" has been closed. Probably your request took too long.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
-msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+msgid ""
+"Lost connection to mail server. Probably your request took too long. Please "
+"try again later."
 msgstr ""
 
 #. *
@@ -7782,8 +7795,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
-"took too long."
+"Connection closed to mail server %2$s. Probably your request took too long. "
+"Please try again later."
 msgstr ""
 
 #. *
@@ -7874,14 +7887,14 @@ msgstr ""
 #. * Lost connection to mail server.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
-msgid "Lost connection to mail server."
+msgid "Lost connection to mail server. Please try again later."
 msgstr ""
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
-msgid "Connection closed to mail server %1$s."
+msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
 
 #. *
@@ -7890,7 +7903,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
-"attempting to connect."
+"attempting to connect. Please try again later."
 msgstr ""
 
 #. *
@@ -7898,14 +7911,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid ""
-"The connection to remote server %1$s timed out while awaiting the response."
+"The connection to remote server %1$s timed out while awaiting the response. "
+"Please try again later."
 msgstr ""
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid "Mail server %1$s unexpectedly closed connection."
+msgid ""
+"Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
 
 #. *
@@ -7956,7 +7971,9 @@ msgstr ""
 
 #. Timeout while trying to send to the following recipient: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
-msgid "Timeout while trying to send to the following recipient: %1$s"
+msgid ""
+"Timeout while trying to send to the following recipient: %1$s. Please try "
+"again later."
 msgstr ""
 
 #. The message advertising that everything is fine with checked account

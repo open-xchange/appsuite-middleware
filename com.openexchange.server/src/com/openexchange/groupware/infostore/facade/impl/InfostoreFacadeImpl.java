@@ -893,6 +893,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         // Set modified information
         Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
         updatedCols.removeAll(Arrays.asList(Metadata.CREATED_BY_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.ID_LITERAL));
+        boolean checkWriteLock = true;
+        if (updatedCols.size() == 1 && updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+            // Skip lock check in case only permissions are changed
+            checkWriteLock = false;
+        }
         if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL) || null == document.getLastModified()) {
             document.setLastModified(new Date());
         }
@@ -901,8 +906,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-
-        DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
+        DocumentMetadata oldDocument;
+        if (checkWriteLock) {
+            oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
+        } else {
+            oldDocument = objectPermissionLoader.add(load(document.getId(), CURRENT_VERSION, session.getContext()), session.getContext(), null);
+        }
         getValidationChain().validate(session, document, oldDocument, updatedCols);
 
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());

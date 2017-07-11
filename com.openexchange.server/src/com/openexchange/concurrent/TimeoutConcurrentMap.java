@@ -70,8 +70,8 @@ public final class TimeoutConcurrentMap<K, V> {
      */
 
     private final ConcurrentMap<K, ValueWrapper<V>> map;
-    private final ScheduledTimerTask timeoutTask;
     private final boolean forceTimeout;
+    private volatile ScheduledTimerTask timeoutTask;
     private volatile TimeoutListener<V> defaultTimeoutListener;
     private volatile boolean disposed;
 
@@ -97,9 +97,32 @@ public final class TimeoutConcurrentMap<K, V> {
         super();
         this.forceTimeout = forceTimeout;
         map = new ConcurrentHashMap<K, ValueWrapper<V>>();
-        final TimerService timer = getInstance().getService(TimerService.class, true);
-        final int delay = shrinkerIntervalSeconds * 1000;
-        timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), delay, delay);
+
+        setShrinkerIntervalSeconds(shrinkerIntervalSeconds, true);
+    }
+
+    /**
+     * (Re-)set the shrinker interval in seconds
+     *
+     * @param shrinkerIntervalSeconds The shrinker interval in seconds
+     * @throws OXException If timer fails due to missing {@link TimerService timer service}
+     */
+    public void setShrinkerIntervalSeconds(int shrinkerIntervalSeconds) throws OXException {
+        setShrinkerIntervalSeconds(shrinkerIntervalSeconds, false);
+    }
+
+    private void setShrinkerIntervalSeconds(int shrinkerIntervalSeconds, boolean withInitialDelay) throws OXException {
+        TimerService timer = getInstance().getService(TimerService.class, true);
+
+        ScheduledTimerTask timeoutTask = this.timeoutTask;
+        if (null != timeoutTask) {
+            this.timeoutTask = null;
+            timeoutTask.cancel();
+            timer.purge();
+        }
+
+        int delayMillis = shrinkerIntervalSeconds * 1000;
+        this.timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), withInitialDelay ? delayMillis : 0L, delayMillis);
     }
 
     /**

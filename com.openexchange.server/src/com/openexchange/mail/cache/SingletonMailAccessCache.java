@@ -50,12 +50,17 @@
 package com.openexchange.mail.cache;
 
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -73,34 +78,23 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     private static volatile SingletonMailAccessCache singleton;
 
     /**
-     * Creates a new {@link SingletonMailAccessCache}
-     *
-     * @return A new {@link SingletonMailAccessCache}
-     * @throws OXException If initialization fails
-     */
-    public static SingletonMailAccessCache newInstance() throws OXException {
-        final SingletonMailAccessCache singletonCache = new SingletonMailAccessCache();
-        singletonCache.initCache();
-        return singletonCache;
-    }
-
-    /**
      * Gets the singleton instance.
      *
      * @return The singleton instance
      * @throws OXException If instance initialization fails
      */
     public static SingletonMailAccessCache getInstance() throws OXException {
-        if (null == singleton) {
+        SingletonMailAccessCache tmp = singleton;
+        if (null == tmp) {
             synchronized (SingletonMailAccessCache.class) {
-                if (null == singleton) {
-                    SingletonMailAccessCache tmp = new SingletonMailAccessCache();
-                    tmp.initCache();
+                tmp = singleton;
+                if (null == tmp) {
+                    tmp = new SingletonMailAccessCache();
                     singleton = tmp;
                 }
             }
         }
-        return singleton;
+        return tmp;
     }
 
     /**
@@ -116,20 +110,49 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * Releases the singleton instance.
      */
     public static void releaseInstance() {
-        if (null != singleton) {
+        SingletonMailAccessCache tmp = singleton;
+        if (null != tmp) {
             synchronized (SingletonMailAccessCache.class) {
-                if (null != singleton) {
-                    singleton.releaseCache();
+                tmp = singleton;
+                if (null != tmp) {
+                    tmp.releaseCache();
                     singleton = null;
                 }
             }
         }
     }
 
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                SingletonMailAccessCache tmp = singleton;
+                if (null != tmp) {
+                    try {
+                        int shrinkerSeconds = configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3);
+                        int idleSeconds = configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4);
+
+                        tmp.defaultIdleSeconds = idleSeconds;
+                        tmp.timeoutMap.setShrinkerIntervalSeconds(shrinkerSeconds);
+                    } catch (OXException e) {
+                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SingletonMailAccessCache.class);
+                        logger.error("Failed to re-initialize singleton mail-access cache", e);
+                    }
+                }
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
+            }
+        });
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------------
 
-    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
-    private int defaultIdleSeconds;
+    private final TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
+    private volatile int defaultIdleSeconds;
 
     /**
      * Prevent instantiation.
@@ -138,23 +161,11 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      */
     private SingletonMailAccessCache() throws OXException {
         super();
-        initCache();
-    }
-
-    /**
-     * Initializes cache reference.
-     *
-     * @throws OXException If initializing the time-out map reference fails
-     */
-    public void initCache() throws OXException {
         /*
          * Check for proper started mail cache configuration
          */
         if (!MailCacheConfiguration.getInstance().isStarted()) {
             throw MailExceptionCode.INITIALIZATION_PROBLEM.create();
-        }
-        if (timeoutMap != null) {
-            return;
         }
         timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
@@ -175,7 +186,6 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         }
         timeoutMap.timeoutAll();
         timeoutMap.dispose();
-        timeoutMap = null;
         defaultIdleSeconds = 0;
     }
 

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,57 @@
  *
  */
 
-package com.openexchange.websockets.grizzly.impl;
+package com.openexchange.websockets.grizzly;
 
-import java.util.concurrent.Future;
+import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.ProtocolHandler;
+import org.glassfish.grizzly.websockets.frametypes.TextFrameType;
+import com.openexchange.exception.OXException;
 import com.openexchange.websockets.SendControl;
-
+import com.openexchange.websockets.WebSocketExceptionCodes;
 
 /**
- * {@link SendControlImpl}
+ * {@link SendUtility} - Utility class for sending messages via a given Web Socket.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-public class SendControlImpl<V> implements SendControl {
-
-    private final Future<V> future;
+public class SendUtility {
 
     /**
-     * Initializes a new {@link SendControlImpl}.
-     *
-     * @param future The backing {@link Future} instance
+     * Initializes a new {@link SendUtility}.
      */
-    public SendControlImpl(Future<V> future) {
+    private SendUtility() {
         super();
-        this.future = future;
-
     }
 
-    @Override
-    public boolean isDone() {
-        return future.isDone();
+    /**
+     * Sends specified message via given Web Socket.
+     *
+     * @param message The message to send
+     * @param webSocket The Web Socket to send by
+     * @return The send-control
+     * @throws OXException On illegal arguments or if given Web Socket is currently not connected
+     */
+    public static SendControl sendMessage(String message, SessionBoundWebSocket webSocket) throws OXException {
+        if (null == message) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(new IllegalArgumentException("Message must not be null"));
+        }
+        if (null == webSocket) {
+            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(new IllegalArgumentException("Web Socket must not be null"));
+        }
+
+        if (false == webSocket.isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
+        }
+
+        // Yield data-frame for given text message
+        ProtocolHandler protocolHandler = webSocket.getProtocolHandler();
+        DataFrame frameToSend = new DataFrame(new TextFrameType(), message);
+        frameToSend.getBytes(); // Pre-generate bytes to prevent possible NPE in DataFrame.toString()
+
+        // Perform the send
+        return new FutureBackedSendControl(protocolHandler.send(frameToSend));
     }
 
 }

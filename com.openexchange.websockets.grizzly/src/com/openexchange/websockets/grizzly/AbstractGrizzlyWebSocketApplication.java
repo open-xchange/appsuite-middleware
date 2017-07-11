@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -93,6 +94,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
 
@@ -184,6 +186,21 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         defaultAuthenticator = new DefaultGrizzlyWebSocketAuthenticator(hashSource, services, LOGGER);
     }
 
+    private void doSendSessionInvalidation(S sessionBoundSocket) {
+        try {
+            SendControl sendControl = SendUtility.sendMessage("session:invalid", sessionBoundSocket);
+            sendControl.awaitDone(100, TimeUnit.MILLISECONDS);
+        } catch (OXException e) {
+            // Ignore unconnected socket
+            LOGGER.debug("Web Socket not connected", e);
+        } catch (InterruptedException e) {
+            // Interrupted
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // Expected. Ignore.
+        }
+    }
+
     /**
      * Shuts-down this application.
      */
@@ -191,7 +208,9 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<ConcurrentMap<ConnectionId, S>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<S> iter = i.next().values().iterator(); iter.hasNext();) {
                 S sessionBoundSocket = iter.next();
-                sessionBoundSocket.send("session:invalid");
+
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 iter.remove();
             }
@@ -252,7 +271,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
             return false;
         }
 
-        sessionBoundSocket.send("session:invalid");
+        doSendSessionInvalidation(sessionBoundSocket);
+
         closeSocketSafe(sessionBoundSocket);
         LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
         return true;
@@ -276,7 +296,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                sessionBoundSocket.send("session:invalid");
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
@@ -304,7 +325,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (sessionId.equals(sessionBoundSocket.getSessionId())) {
-                sessionBoundSocket.send("session:invalid");
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" bound to dropped/removed session {} for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), sessionId, I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));

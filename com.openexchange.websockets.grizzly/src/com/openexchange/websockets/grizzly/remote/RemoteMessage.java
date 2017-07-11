@@ -65,28 +65,17 @@ public class RemoteMessage {
     private final String pathFilter;
     private final int userId;
     private final int contextId;
-    private final boolean async;
     private volatile Integer hash;
 
     /**
      * Initializes a new {@link RemoteMessage}.
      */
-    public RemoteMessage(String message, String pathFilter, int userId, int contextId, boolean async) {
+    public RemoteMessage(String message, String pathFilter, int userId, int contextId) {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        this.async = async;
         this.pathFilter = pathFilter;
         payloads = new ConcurrentLinkedQueue<>(Arrays.asList(message));
-    }
-
-    /**
-     * Gets the async flag
-     *
-     * @return The async flag
-     */
-    public boolean isAsync() {
-        return async;
     }
 
     /**
@@ -154,7 +143,6 @@ public class RemoteMessage {
             // May be computed concurrently...
             int prime = 31;
             int result = 1;
-            result = prime * result + (async ? 1231 : 1237);
             result = prime * result + contextId;
             result = prime * result + userId;
             result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
@@ -176,9 +164,6 @@ public class RemoteMessage {
             return false;
         }
         RemoteMessage other = (RemoteMessage) obj;
-        if (async != other.async) {
-            return false;
-        }
         if (contextId != other.contextId) {
             return false;
         }

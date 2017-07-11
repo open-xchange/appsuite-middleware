@@ -66,6 +66,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -245,9 +246,14 @@ public final class SMTPCapabilityCache {
             this.smtpProperties = smtpProperties;
         }
 
+        private boolean isNotLastLine(String line) {
+            return line != null && line.length() >= 4 && line.charAt(3) == '-';
+        }
+
         @Override
         public Capabilities call() throws IOException {
             Socket s = null;
+            com.sun.mail.util.LineInputStream lineInputStream = null;
             try {
                 try {
                     if (isSecure) {
@@ -281,74 +287,45 @@ public final class SMTPCapabilityCache {
                 /*
                  * Read IMAP server greeting on connect
                  */
-                boolean skipLF = false;
-                boolean eol = false;
-                int i = -1;
-                while (!eol && ((i = in.read()) != -1)) {
-                    final char c = (char) i;
-                    if (c == '\r') {
-                        eol = true;
-                        skipLF = true;
-                    } else if (c == '\n') {
-                        eol = true;
-                        skipLF = false;
-                    } else {
-                        sb.append(c);
-                    }
+                lineInputStream = new com.sun.mail.util.LineInputStream(in);
+                {
+                    String line;
+                    do {
+                        line = lineInputStream.readLine();
+                        sb.append(line).append('\n');
+                    } while (isNotLastLine(line));
+                    line = null;
                 }
-                /*final String greeting = sb.toString();*/
                 if (sb.length() > 0) {
                     sb.setLength(0);
                 }
-                if (skipLF) {
-                    /*
-                     * Consume final LF
-                     */
-                    i = in.read();
-                    skipLF = false;
-                }
                 /*
-                 * Read CAPABILITY response
+                 * Request capabilities through EHLO command
                  */
-                final String command = "EHLO " + domain;
-                while (sb.length() == 0) {
-                    /*
-                     * Request capabilities through EHLO command
-                     */
-                    out.write((command + "\r\n").getBytes());
-                    out.flush();
-                    sb.append((char) in.read());
-                    for (int available; (available = in.available()) > 0;) {
-                        final byte[] chunk = new byte[available];
-                        final int read = in.read(chunk, 0, available);
-                        final char[] chars = new char[read];
-                        for (int j = 0; j < chars.length; j++) {
-                            chars[j] = (char) (chunk[j] & 0xff);
-                        }
-                        sb.append(chars, 0, read);
-                    }
-                    if (0 == sb.length()) {
-                        LOG.warn("Empty EHLO response for: {}", command);
-                    }
+                out.write(("EHLO " + domain + "\r\n").getBytes());
+                out.flush();
+                {
+                    String line;
+                    do {
+                        line = lineInputStream.readLine();
+                        sb.append(line).append('\n');
+                    } while (isNotLastLine(line));
+                    line = null;
                 }
-                final String capabilities = sb.toString();
+                String capabilities = sb.toString();
                 /*
                  * Close connection through QUIT command
                  */
                 out.write("QUIT\r\n".getBytes());
                 out.flush();
                 /*
-                 * Consume until socket closure
-                 */
-                i = in.read();
-                while (i != -1) {
-                    i = in.read();
-                }
-                /*
                  * Create new Capabilities object
                  */
                 return new Capabilities(capabilities);
             } finally {
+                if (lineInputStream != null) {
+                    Streams.close(lineInputStream);
+                }
                 if (s != null) {
                     try {
                         s.close();
