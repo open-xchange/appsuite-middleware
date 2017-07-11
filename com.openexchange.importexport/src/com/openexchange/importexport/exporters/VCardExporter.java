@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  */
-public class VCardExporter implements BatchCapableExporter {
+public class VCardExporter implements Exporter {
 
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
@@ -242,7 +242,7 @@ public class VCardExporter implements BatchCapableExporter {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportFolderData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         return export(session, format, folder, fieldsToBeExported, optionalParams, null);
     }
 
@@ -267,9 +267,9 @@ public class VCardExporter implements BatchCapableExporter {
               if (null != out) {
                   requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                   if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, folder) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getFolderExportFileName(session, folder) + Format.VCARD.getExtension());
                   } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getExportFileName(session, batchIds) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
                   } else {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=export."+ Format.VCARD.getExtension());
                   }
@@ -434,20 +434,20 @@ public class VCardExporter implements BatchCapableExporter {
     }
 
     @Override
-    public String getExportFileName(ServerSession sessionObj, String folder) throws OXException {
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
         //case export complete folder, file name equals folder name
         return createVcardName(sessionObj, folder, null);
     }
 
     @Override
-    public String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
         StringBuilder sb = new StringBuilder();
         if (batchIds.size() == 1) {
             //check for contacts of the same folder
             String folderId = batchIds.keySet().iterator().next();
             List<String> contactIdList = batchIds.get(folderId);
             if (contactIdList.size() > 1) {
-                sb.append(getLocalizedContactsName(sessionObj));
+                sb.append(createVcardName(sessionObj, folderId, null));
             } else {
                 //exactly one contact to export, file name equals contact name
                 String batchId = batchIds.get(folderId).get(0);                

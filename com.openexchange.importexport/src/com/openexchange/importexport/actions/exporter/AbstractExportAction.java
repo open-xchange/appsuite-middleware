@@ -60,7 +60,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exporters.Exporter;
-import com.openexchange.importexport.exporters.BatchCapableExporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.json.ExportRequest;
@@ -88,14 +87,15 @@ public abstract class AbstractExportAction implements AJAXActionService {
         Exporter exporter = getExporter();
 
         SizedInputStream sis;
+        
         if (doBatchExport(batchIds, exporter)) {
-            sis = ((BatchCapableExporter) exporter).exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
+            sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
             FolderAndId singleId = optSingleId(batchIds);
             if (null == singleId) {
                 String objectId = req.getObjectId();
                 if (null == objectId) {
-                    sis = exporter.exportData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
+                    sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
                 } else {
                     sis = exporter.exportSingleData(req.getSession(), getFormat(), req.getFolder(), objectId, fieldsToBeExported, getOptionalParams(req));
                 }
@@ -116,7 +116,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
     }
 
     private boolean doBatchExport(Map<String, List<String>> batchIds, Exporter exporter) {
-        return (exporter instanceof BatchCapableExporter) && (null != batchIds && false == batchIds.isEmpty());
+        return null != batchIds && false == batchIds.isEmpty();
     }
 
     private FolderAndId optSingleId(Map<String, List<String>> batchIds) {
@@ -151,9 +151,9 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
     private String getExportFileName(ExportRequest req) throws OXException{
         if (null == req.getBatchIds() || req.getBatchIds().isEmpty()) {
-            return getExporter().getExportFileName(req.getSession(), req.getFolder());
+            return getExporter().getFolderExportFileName(req.getSession(), req.getFolder());
         } else {
-            return ((BatchCapableExporter) getExporter()).getExportFileName(req.getSession(), req.getBatchIds());
+            return getExporter().getBatchExportFileName(req.getSession(), req.getBatchIds());
         }
     }
 

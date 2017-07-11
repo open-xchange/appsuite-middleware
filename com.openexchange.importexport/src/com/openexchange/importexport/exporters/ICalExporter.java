@@ -225,13 +225,19 @@ public class ICalExporter implements Exporter {
     }
 
     @Override
-    public SizedInputStream exportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportFolderData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         return doExportData(session, format, folderID, null, fieldsToBeExported, optionalParams);
     }
 
     @Override
     public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         return doExportData(session, format, folderID, objectID, fieldsToBeExported, optionalParams);
+    }
+    
+    @Override
+    public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private SizedInputStream doExportData(ServerSession session, Format format, String folderID, String optObjectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
@@ -252,7 +258,7 @@ public class ICalExporter implements Exporter {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+getExportFileName(session, folderID) + Format.ICAL.getExtension());
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+getFolderExportFileName(session, folderID) + Format.ICAL.getExtension());
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
@@ -516,7 +522,7 @@ public class ICalExporter implements Exporter {
     }
 
     @Override
-    public String getExportFileName(ServerSession session, String folder) throws OXException {
+    public String getFolderExportFileName(ServerSession session, String folder) throws OXException {
         return createExportFileName(session, folder);
     }
 
@@ -533,4 +539,9 @@ public class ICalExporter implements Exporter {
         return sb.toString();
     }
 
+    @Override
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
