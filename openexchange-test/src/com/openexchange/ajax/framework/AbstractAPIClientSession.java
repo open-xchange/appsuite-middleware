@@ -93,8 +93,8 @@ public abstract class AbstractAPIClientSession {
         super();
     }
 
-    protected LoginResponse login(TestUser user) throws Exception {
-        LoginResponse doLogin = loginApi.doLogin(user.getLogin(), user.getPassword(), null, null, null, null, null);
+    protected LoginResponse login(TestUser user, ApiClient client) throws Exception {
+        LoginResponse doLogin = new LoginApi(client).doLogin(user.getLogin(), user.getPassword(), null, null, null, null, null);
         if (doLogin.getError() == null) {
             return doLogin;
         }
@@ -131,6 +131,7 @@ public abstract class AbstractAPIClientSession {
 
     @After
     public void tearDown() throws Exception {
+        logoutClient(apiClient);
         TestContextPool.backContext(testContext);
     }
 
@@ -146,7 +147,7 @@ public abstract class AbstractAPIClientSession {
      * @param client to logout
      * @return <code>null</code> to prepare client for garbage collection
      */
-    protected final AJAXClient logoutClient(AJAXClient client) {
+    protected final ApiClient logoutClient(ApiClient client) {
         return logoutClient(client, false);
     }
 
@@ -163,7 +164,7 @@ public abstract class AbstractAPIClientSession {
      * @param loggin Whether to log an error or not
      * @return <code>null</code> to prepare client for garbage collection
      */
-    protected final AJAXClient logoutClient(AJAXClient client, boolean loggin) {
+    protected final ApiClient logoutClient(ApiClient client, boolean loggin) {
         try {
             if (client != null) {
                 client.logout();

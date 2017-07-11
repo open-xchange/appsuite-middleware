@@ -88,7 +88,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         super.setUp();
         api = new ChronosApi(getClient());
         foldersApi = new FoldersApi(getClient());
-        LoginResponse login = login(this.testUser);
+        LoginResponse login = login(this.testUser, this.apiClient);
         calUser = login.getUserId();
         session = login.getSession();
     }
