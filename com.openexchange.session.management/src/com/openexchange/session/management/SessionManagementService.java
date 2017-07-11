@@ -79,11 +79,4 @@ public interface SessionManagementService {
      */
     void removeSession(Session session, String sessionIdToRemove) throws OXException;
 
-    /**
-     * Determine location by IP associated with session
-     * @param session The session
-     * @throws OXException On error
-     */
-    void determineLocation(ManagedSession session) throws OXException;
-
 }

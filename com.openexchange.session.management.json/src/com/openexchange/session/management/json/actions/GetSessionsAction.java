@@ -86,8 +86,7 @@ public class GetSessionsAction implements AJAXActionService {
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
-                service.determineLocation(s);
-                JSONObject json = new JSONObject(5);
+                JSONObject json = new JSONObject(8);
                 json.put("sessionId", s.getSessionId());
                 json.put("ipAddress", s.getIpAddress());
                 json.put("client", s.getClient());
@@ -99,7 +98,7 @@ public class GetSessionsAction implements AJAXActionService {
                 result.add(0, json);
             }
         } catch (JSONException e) {
-            //
+            // should not happen
         }
         return new AJAXRequestResult(result, "json");
     }
