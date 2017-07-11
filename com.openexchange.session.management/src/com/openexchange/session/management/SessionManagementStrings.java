@@ -53,16 +53,18 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link SessionManagementStrings}
+ * {@link SessionManagementStrings} - Provides string constants.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
 public class SessionManagementStrings implements LocalizableStrings {
 
-    // unknown location
+    /** The string constant for unknown location; <code>"unknown location"</code> */
     public static final String UNKNOWN_LOCATION = "unknown location";
 
-    private SessionManagementStrings() {}
+    private SessionManagementStrings() {
+        super();
+    }
 
 }

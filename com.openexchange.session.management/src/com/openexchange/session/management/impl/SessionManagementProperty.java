@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.session.management;
+package com.openexchange.session.management.impl;
 
 import com.openexchange.config.lean.Property;
 
@@ -64,17 +64,18 @@ public enum SessionManagementProperty implements Property {
     ;
 
     private static final String PREFIX = "com.openexchange.session.management.";
-    private final String fqn;
+
+    private final String prefix;
     private final Object defaultValue;
 
-    private SessionManagementProperty(String fqn, Object defaultValue) {
-        this.fqn = fqn;
+    private SessionManagementProperty(String prefix, Object defaultValue) {
+        this.prefix = prefix;
         this.defaultValue = defaultValue;
     }
 
     @Override
     public String getFQPropertyName() {
-        return fqn + name();
+        return prefix + name();
     }
 
     @Override

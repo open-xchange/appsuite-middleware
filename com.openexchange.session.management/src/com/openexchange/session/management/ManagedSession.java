@@ -49,205 +49,68 @@
 
 package com.openexchange.session.management;
 
-import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.session.Session;
-import com.openexchange.session.management.osgi.Services;
-import com.openexchange.user.UserService;
-
 /**
- * {@link ManagedSession}
+ * {@link ManagedSession} - Represents a managed session providing login and session information.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
 public interface ManagedSession {
 
-    public String getSessionId();
+    /**
+     * Gets the identifier associated with spawned session.
+     *
+     * @return The session identifier
+     */
+    String getSessionId();
 
-    public String getIpAddress();
+    /**
+     * Gets the IP address associated with spawned session.
+     *
+     * @return The IP address
+     */
+    String getIpAddress();
 
-    public String getClient();
+    /**
+     * Gets the client identifier associated with spawned session.
+     *
+     * @return The client identifier
+     */
+    String getClient();
 
-    public String getUserAgent();
+    /**
+     * Gets the User-Agent associated with spawned session.
+     *
+     * @return The User-Agent identifier
+     */
+    String getUserAgent();
 
-    public long getLoginTime();
+    /**
+     * The time stamp when login happened, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @return The time stamp
+     */
+    long getLoginTime();
 
-    public int getCtxId();
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
 
-    public int getUserId();
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    int getUserId();
 
-    public String getLocation();
-
-    public final static class ManagedSessionBuilder {
-
-        private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedSessionBuilder.class);
-
-        private String sessionId;
-        private String ipAddress;
-        private String client;
-        private String userAgent;
-        private long loginTime;
-        private int ctxId;
-        private int userId;
-
-        public ManagedSessionBuilder() {
-            super();
-        }
-
-        public ManagedSessionBuilder(Session session) {
-            super();
-            this.sessionId = session.getSessionID();
-            this.ipAddress = session.getLocalIp();
-            this.client = session.getClient();
-            this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-            this.loginTime = Long.parseLong((String) session.getParameter(Session.PARAM_LOGIN_TIME));
-            this.ctxId = session.getContextId();
-            this.userId = session.getUserId();
-        }
-
-        public ManagedSessionBuilder setSessionId(String sessionId) {
-            this.sessionId = sessionId;
-            return this;
-        }
-
-        public ManagedSessionBuilder setIpAddress(String ipAddress) {
-            this.ipAddress = ipAddress;
-            return this;
-        }
-
-        public ManagedSessionBuilder setClient(String client) {
-            this.client = client;
-            return this;
-        }
-
-        public ManagedSessionBuilder setUserAgent(String userAgent) {
-            this.userAgent = userAgent;
-            return this;
-        }
-
-        public ManagedSessionBuilder setLoginTime(long loginTime) {
-            this.loginTime = loginTime;
-            return this;
-        }
-
-        public ManagedSessionBuilder setCtxId(int ctxId) {
-            this.ctxId = ctxId;
-            return this;
-        }
-
-        public ManagedSessionBuilder setUserId(int userId) {
-            this.userId = userId;
-            return this;
-        }
-
-        public DefaultManagedSession build() {
-            String location = SessionManagementStrings.UNKNOWN_LOCATION;
-            GeoLocationService service = Services.getService(GeoLocationService.class);
-            UserService userService = Services.getService(UserService.class);
-            if (null != userService) {
-                try {
-                    location = StringHelper.valueOf(userService.getUser(userId, ctxId).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION);
-                } catch (OXException e) {
-                    LOG.info(e.getMessage());
-                }
-            }
-            if (null != service && null != userService) {
-                try {
-                    GeoInformation geoInformation = service.getGeoInformation(ipAddress);
-                    StringBuilder sb = new StringBuilder();
-                    if (geoInformation.hasCity()) {
-                        sb.append(geoInformation.getCity());
-                    }
-                    if (geoInformation.hasCountry()) {
-                        sb.append(", ").append(geoInformation.getCountry());
-                    }
-                    location = sb.toString();
-                } catch (OXException e) {
-                    LOG.info(e.getMessage());
-                }
-            }
-            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, ctxId, userId, location);
-        }
-    }
-
-    public final static class DefaultManagedSession implements ManagedSession {
-
-        private final String sessionId;
-        private final String ipAddress;
-        private final String client;
-        private final String userAgent;
-        private final long loginTime;
-        private final int ctxId;
-        private final int userId;
-        private final String location;
-
-        public DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId, String location) {
-            super();
-            this.sessionId = sessionId;
-            this.ipAddress = ipAddress;
-            this.client = client;
-            this.userAgent = userAgent;
-            this.loginTime = loginTime;
-            this.ctxId = ctxId;
-            this.userId = userId;
-            this.location = SessionManagementStrings.UNKNOWN_LOCATION;
-        }
-
-        public DefaultManagedSession(Session session) {
-            super();
-            this.sessionId = session.getSessionID();
-            this.ipAddress = session.getLocalIp();
-            this.client = session.getClient();
-            this.userAgent = session.getParameter(Session.PARAM_USER_AGENT) != null ? (String) session.getParameter(Session.PARAM_USER_AGENT) : "unknown user-agent";
-            this.loginTime = session.getParameter(Session.PARAM_LOGIN_TIME) != null ? Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME))) : -1;
-            this.ctxId = session.getContextId();
-            this.userId = session.getUserId();
-            this.location = SessionManagementStrings.UNKNOWN_LOCATION;
-        }
-
-        @Override
-        public String getSessionId() {
-            return sessionId;
-        }
-
-        @Override
-        public String getIpAddress() {
-            return ipAddress;
-        }
-
-        @Override
-        public String getClient() {
-            return client;
-        }
-
-        @Override
-        public String getUserAgent() {
-            return userAgent;
-        }
-
-        @Override
-        public long getLoginTime() {
-            return loginTime;
-        }
-
-        @Override
-        public int getCtxId() {
-            return ctxId;
-        }
-
-        @Override
-        public int getUserId() {
-            return userId;
-        }
-
-        @Override
-        public String getLocation() {
-            return location;
-        }
-    }
+    /**
+     * Gets the (optional) location
+     *
+     * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}
+     */
+    String getLocation();
 
 }
