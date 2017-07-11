@@ -52,13 +52,13 @@ package com.openexchange.chronos.availability.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.availability.impl.performer.SetPerformer;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SetResult;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -68,8 +68,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CalendarAvailabilityServiceImpl.class);
 
     private final ServiceLookup services;
 
@@ -89,11 +87,15 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#setAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List)
      */
     @Override
-    public SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availabilities) throws OXException {
-        // Pre-condition checks
-        CheckUtil.check(availabilities);
+    public SetResult setAvailability(CalendarSession session, final List<CalendarAvailability> availabilities) throws OXException {
+        return new AbstractStorageOperation<SetResult>(services, session) {
 
-        return null;
+            @Override
+            protected SetResult execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                return new SetPerformer(storage, session).perform(availabilities);
+            }
+
+        }.executeUpdate();
     }
 
     /*
@@ -103,9 +105,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      */
     @Override
     public SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availabilities, boolean merge) throws OXException {
-        // Pre-condition checks
-        CheckUtil.check(availabilities);
-
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -185,5 +185,4 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
         // TODO Auto-generated method stub
 
     }
-
 }

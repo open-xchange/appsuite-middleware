@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl;
+package com.openexchange.chronos.availability.impl.performer;
 
 import java.util.Date;
 import java.util.List;
