@@ -74,6 +74,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -94,14 +95,13 @@ import com.openexchange.java.util.TimeZones;
  */
 public class Compat {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Compat.class);
-
     /**
      * Initializes a new {@link Compat}.
      */
     private Compat() {
         super();
     }
+
 
     /**
      * Adjusts certain properties of an event after loading it from the database.
@@ -110,91 +110,27 @@ public class Compat {
      * {@link EventField#START_TIMEZONE}, {@link EventField#START_DATE} and {@link EventField#END_DATE} were loaded.
      *
      * @param eventStorage The associated event storage
+     * @param connection The connection to use
      * @param event The event to adjust
      * @return The (possibly adjusted) event reference
      */
-    public static Event adjustAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
-        if (event.containsEndDate() && null != event.getEndDate()) {
-            DateTime startDate = event.getStartDate();
-            if (null != startDate) {
-                if (startDate.isAllDay()) {
-                    event.setEndDate(event.getEndDate().toAllDay());
-                } else if (null != startDate.getTimeZone()) {
-                    event.setEndDate(new DateTime(startDate.getTimeZone(), event.getEndDate().getTimestamp()));
-                } else {
-                    event.setEndDate(new DateTime(null, event.getEndDate().getTimestamp()));
-                }
+    public static Event adjustAfterLoad(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        if (event.containsEndDate() && null != event.getEndDate() && null != event.getStartDate()) {
+            /*
+             * take over 'all-day' character & timezone from start date
+             */
+            if (event.getStartDate().isAllDay()) {
+                event.setEndDate(event.getEndDate().toAllDay());
+            } else if (null != event.getStartDate().getTimeZone()) {
+                event.setEndDate(new DateTime(event.getStartDate().getTimeZone(), event.getEndDate().getTimestamp()));
+            } else {
+                event.setEndDate(new DateTime(null, event.getEndDate().getTimestamp()));
             }
         }
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-            /*
-             * convert legacy series pattern into proper recurrence rule after extracting
-             * series pattern and "absolute duration" / "recurrence calculator" field
-             */
-            TimeZone timeZone = null != event.getStartDate().getTimeZone() ? event.getStartDate().getTimeZone() : TimeZones.UTC;
-            int absoluteDuration = 0;
-            RecurrenceData recurrenceData = null;
-            try {
-                int idx = event.getRecurrenceRule().indexOf('~');
-                absoluteDuration = Integer.parseInt(event.getRecurrenceRule().substring(0, idx));
-                String databasePattern = event.getRecurrenceRule().substring(idx + 1);
-                recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.getStartDate().isAllDay());
-            } catch (IllegalArgumentException | OXException e) {
-                String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
-                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, message, e);
-            }
-            event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
-            if (null != recurrenceData) {
-                if (isSeriesMaster(event)) {
-                    /*
-                     * apply recurrence rule & adjust the recurrence master's actual start- and enddate
-                     */
-                    Period seriesPeriod = new Period(event);
-                    Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
-                    if (masterPeriod.isAllDay()) {
-                        event.setStartDate(new DateTime(masterPeriod.getStartDate().getTime()).toAllDay());
-                        event.setEndDate(new DateTime(masterPeriod.getEndDate().getTime()).toAllDay());
-                    } else {
-                        event.setStartDate(new DateTime(event.getStartDate().getTimeZone(), masterPeriod.getStartDate().getTime()));
-                        event.setEndDate(new DateTime(event.getEndDate().getTimeZone(), masterPeriod.getEndDate().getTime()));
-                    }
-                    /*
-                     * transform legacy "recurrence date positions" for exceptions to recurrence ids
-                     */
-                    if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                        event.setDeleteExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getDeleteExceptionDates()), EventField.DELETE_EXCEPTION_DATES));
-                    }
-                    if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
-                    }
-                } else if (isSeriesException(event)) {
-                    /*
-                     * drop recurrence information for change exceptions
-                     */
-                    event.removeRecurrenceRule();
-                    /*
-                     * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
-                     */
-                    if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
-                        int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
-                        try {
-                            event.setRecurrenceId(getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition));
-                        } catch (OXException e) {
-                            if (false == "CAL-4061".equals(e.getErrorCode())) {
-                                throw e;
-                            }
-                            event.removeSeriesId();
-                            event.removeRecurrenceId();
-                            event.removeChangeExceptionDates();
-                            event.removeDeleteExceptionDates();
-                            eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
-                        }
-                    }
-                    if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                        event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
-                    }
-                }
-            }
+        if (isSeriesMaster(event)) {
+            event = adjustRecurrenceForMasterAfterLoad(eventStorage, event);
+        } else if (isSeriesException(event)) {
+            event = adjustRecurrenceForExceptionAfterLoad(eventStorage, connection, event);
         } else if (null != event.getId() && event.getId().equals(event.getSeriesId())) {
             /*
              * ensure to remove recurrence remnants for events that used to be a series, but are no longer
@@ -233,8 +169,8 @@ public class Compat {
      * Adjusts certain properties of an event prior inserting it into the database.
      *
      * @param eventStorage The associated event storage
-     * @param event The event to adjust
      * @param connection The connection to use
+     * @param event The event to adjust
      * @return The adjusted event data to store
      */
     public static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
@@ -312,6 +248,116 @@ public class Compat {
             eventData.setChangeExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates())));
         }
         return eventData;
+    }
+
+    private static Event adjustRecurrenceForMasterAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            /*
+             * convert legacy series pattern into proper recurrence rule after extracting
+             * series pattern and "absolute duration" / "recurrence calculator" field
+             */
+            TimeZone timeZone = null != event.getStartDate().getTimeZone() ? event.getStartDate().getTimeZone() : TimeZones.UTC;
+            RecurrenceData recurrenceData = null;
+            int absoluteDuration = 0;
+            try {
+                int idx = event.getRecurrenceRule().indexOf('~');
+                absoluteDuration = Integer.parseInt(event.getRecurrenceRule().substring(0, idx));
+                String databasePattern = event.getRecurrenceRule().substring(idx + 1);
+                recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.getStartDate().isAllDay());
+            } catch (IllegalArgumentException | OXException e) {
+                String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
+                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, message, e);
+            }
+            /*
+             * adjust the recurrence master's actual start- and enddate
+             */
+            Period seriesPeriod = new Period(event);
+            Period masterPeriod = getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
+            if (masterPeriod.isAllDay()) {
+                event.setStartDate(new DateTime(masterPeriod.getStartDate().getTime()).toAllDay());
+                event.setEndDate(new DateTime(masterPeriod.getEndDate().getTime()).toAllDay());
+            } else {
+                event.setStartDate(new DateTime(event.getStartDate().getTimeZone(), masterPeriod.getStartDate().getTime()));
+                event.setEndDate(new DateTime(event.getEndDate().getTimeZone(), masterPeriod.getEndDate().getTime()));
+            }
+            if (null != recurrenceData) {
+                /*
+                 * apply recurrence rule & transform legacy "recurrence date positions" for exceptions to recurrence ids
+                 */
+                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
+                if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
+                    event.setDeleteExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getDeleteExceptionDates()), EventField.DELETE_EXCEPTION_DATES));
+                }
+                if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                    event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
+                }
+            } else {
+                /*
+                 * ensure to remove recurrence remnants for malformed recurrence data, or events that used to be a series, but are no longer
+                 */
+                event.removeRecurrenceRule();
+                event.removeSeriesId();
+                event.removeRecurrenceId();
+                event.removeChangeExceptionDates();
+                event.removeDeleteExceptionDates();
+            }
+        }
+        return event;
+    }
+
+    private static Event adjustRecurrenceForExceptionAfterLoad(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        /*
+         * drop recurrence information for change exceptions
+         */
+        event.removeRecurrenceRule();
+        /*
+         * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
+         */
+        if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+            /*
+             * load recurrence data from storage for further processing of change exception
+             */
+            RecurrenceId recurrenceId = null;
+            RecurrenceData recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            if (null != recurrenceData) {
+                int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
+                try {
+                    recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class), recurrenceData, recurrencePosition);
+                } catch (OXException e) {
+                    if (false == "CAL-4061".equals(e.getErrorCode())) {
+                        throw e;
+                    }
+                    eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
+                }
+            }
+            if (null != recurrenceId) {
+                /*
+                 * take over valid recurrence id
+                 */
+                event.setRecurrenceId(recurrenceId);
+            } else {
+                /*
+                 * ensure to remove recurrence remnants for malformed recurrence data
+                 */
+                event.removeSeriesId();
+                event.removeRecurrenceId();
+                event.removeChangeExceptionDates();
+            }
+        }
+        if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+            RecurrenceData recurrenceData;
+            if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                recurrenceData = (DataAwareRecurrenceId) event.getRecurrenceId();
+            } else {
+                recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            }
+            if (null != recurrenceData) {
+                event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
+            } else {
+                event.removeChangeExceptionDates();
+            }
+        }
+        return event;
     }
 
     private static List<Date> getDates(SortedSet<RecurrenceId> recurrenceIds) {
