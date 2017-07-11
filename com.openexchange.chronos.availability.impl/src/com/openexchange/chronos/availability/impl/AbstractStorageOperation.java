@@ -51,7 +51,6 @@ package com.openexchange.chronos.availability.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.chronos.availability.impl.osgi.Services;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
@@ -169,6 +168,6 @@ public abstract class AbstractStorageOperation<T> implements StorageOperation<T>
      * @throws OXException if the storage instance cannot be initialised
      */
     private CalendarAvailabilityStorage initStorage(DBProvider dbProvider) throws OXException {
-        return Services.getService(CalendarAvailabilityStorageFactory.class).create(context, 0, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        return services.getService(CalendarAvailabilityStorageFactory.class).create(context, 0, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 }
