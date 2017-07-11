@@ -2,9 +2,8 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-  	type: array
-  	title: HasResponse
-  	description: A boolean array with a length equal to the number of days in the given timeslot.
-  	items:
+    type: array
+    description: A boolean array with a length equal to the number of days in the given timeslot.
+    items:
       type: boolean
       description: Defines whether the user has one or more events on this day.
