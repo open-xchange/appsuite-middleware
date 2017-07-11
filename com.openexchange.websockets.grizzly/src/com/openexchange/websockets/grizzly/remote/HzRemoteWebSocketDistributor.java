@@ -60,10 +60,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -485,10 +483,10 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     @Override
-    public void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async) {
+    public void sendRemote(String message, String pathFilter, int userId, int contextId) {
         lock.lock();
         try {
-            remoteMsgs.offerOrReplaceAndReset(new RemoteMessage(message, pathFilter, userId, contextId, async));
+            remoteMsgs.offerOrReplaceAndReset(new RemoteMessage(message, pathFilter, userId, contextId));
 
             if (null == timerTask) {
                 // Timer task
@@ -563,7 +561,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
                 for (Map.Entry<DistributionKey, Set<String>> userMessages : sortyByUser(remoteMessages).entrySet()) {
                     DistributionKey key = userMessages.getKey();
-                    doSendRemote(new ArrayList<String>(userMessages.getValue()), key.userId, key.contextId, key.async, key.pathFilter, hzMap, otherMembers, hzInstance);
+                    doSendRemote(new ArrayList<String>(userMessages.getValue()), key.userId, key.contextId, key.pathFilter, hzMap, otherMembers, hzInstance);
                 }
             } catch (Exception e) {
                 LOGGER.warn("Failed to remotely distribute notifications", e);
@@ -583,7 +581,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * @param otherMembers The other cluster members (excluding this one)
      * @param hzInstance The Haszelcast instance to use
      */
-    private void doSendRemote(List<String> payloads, int userId, int contextId, boolean async, String pathFilter, MultiMap<String, String> hzMap, Set<Member> otherMembers, HazelcastInstance hzInstance) {
+    private void doSendRemote(List<String> payloads, int userId, int contextId, String pathFilter, MultiMap<String, String> hzMap, Set<Member> otherMembers, HazelcastInstance hzInstance) {
         // Determine other cluster members holding an open Web Socket connection for current user
         Set<Member> effectiveOtherMembers = new LinkedHashSet<>(otherMembers);
         for (Iterator<Member> it = effectiveOtherMembers.iterator(); it.hasNext(); ) {
@@ -603,58 +601,10 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             IExecutorService executor = hzInstance.getExecutorService("default");
 
             for (List<String> partition : Lists.partition(payloads, 5)) {
-                Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId, async), effectiveOtherMembers);
-                if (async) {
-                    WS_LOGGER.debug("Submitted {} message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", I(partition.size()), effectiveOtherMembers, pathFilter, I(userId), I(contextId));
-                } else {
-                    // Wait for completion of each submitted task
-                    int numOfPayloads = partition.size();
-                    for (Map.Entry<Member, Future<Void>> element : futureMap.entrySet()) {
-                        handleSubmittedFuture(element.getValue(), numOfPayloads, pathFilter, element.getKey(), userId, contextId);
-                    }
-                }
+                executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId), effectiveOtherMembers);
+                WS_LOGGER.debug("Submitted {} message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", I(partition.size()), effectiveOtherMembers, pathFilter, I(userId), I(contextId));
             }
         }
-    }
-
-    private void handleSubmittedFuture(Future<Void> future, int numOfPayloads, String pathFilter, Member member, int userId, int contextId) throws Error {
-        // Check Future's return value
-        int retryCount = 3;
-        while (retryCount-- > 0) {
-            try {
-                future.get();
-                retryCount = 0;
-                WS_LOGGER.debug("Transmitted {} message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", I(numOfPayloads), member, pathFilter, I(userId), I(contextId));
-            } catch (InterruptedException e) {
-                // Interrupted - Keep interrupted state
-                LOGGER.debug("Interrupted while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
-                Thread.currentThread().interrupt();
-            } catch (CancellationException e) {
-                // Canceled
-                LOGGER.debug("Canceled while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
-                retryCount = 0;
-            } catch (ExecutionException e) {
-                Throwable cause = e.getCause();
-
-                // Check for Hazelcast timeout
-                if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                    if (cause instanceof RuntimeException) {
-                        throw ((RuntimeException) cause);
-                    }
-                    if (cause instanceof Error) {
-                        throw (Error) cause;
-                    }
-                    throw new IllegalStateException("Not unchecked", cause);
-                }
-
-                // Timeout while awaiting remote result
-                if (retryCount <= 0) {
-                    // No further retry
-                    LOGGER.warn("Repeatedly failed transmitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
-                    cancelFutureSafe(future);
-                }
-            }
-        } // End of while loop
     }
 
     /**
@@ -666,7 +616,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     private Map<DistributionKey, Set<String>> sortyByUser(Collection<RemoteMessage> remoteMessages) {
         Map<DistributionKey, Set<String>> map = new LinkedHashMap<>();
         for (RemoteMessage remoteMessage : remoteMessages) {
-            DistributionKey key = new DistributionKey(remoteMessage.getUserId(), remoteMessage.getContextId(), remoteMessage.isAsync(), remoteMessage.getPathFilter());
+            DistributionKey key = new DistributionKey(remoteMessage.getUserId(), remoteMessage.getContextId(), remoteMessage.getPathFilter());
             Set<String> userMessages = map.get(key);
             if (null == userMessages) {
                 userMessages = new LinkedHashSet<>();
@@ -1009,22 +959,19 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
         final int userId;
         final int contextId;
-        final boolean async;
         final String pathFilter;
         private final int hash;
 
         /**
          * Initializes a new {@link RemoteMessage}.
          */
-        DistributionKey(int userId, int contextId, boolean async, String pathFilter) {
+        DistributionKey(int userId, int contextId, String pathFilter) {
             super();
             this.userId = userId;
             this.contextId = contextId;
-            this.async = async;
             this.pathFilter = pathFilter;
             int prime = 31;
             int result = 1;
-            result = prime * result + (async ? 1231 : 1237);
             result = prime * result + contextId;
             result = prime * result + userId;
             result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
@@ -1048,9 +995,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 return false;
             }
             DistributionKey other = (DistributionKey) obj;
-            if (async != other.async) {
-                return false;
-            }
             if (contextId != other.contextId) {
                 return false;
             }

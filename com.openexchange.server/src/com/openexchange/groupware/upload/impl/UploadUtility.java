@@ -65,6 +65,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -85,6 +86,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadFileListener;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -460,15 +462,30 @@ public final class UploadUtility {
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
 
+        FileItemHeaders headers = item.getHeaders();
+        String contentId = headers.getHeader("Content-Id");
+        retval.setContentId(contentId);
+
         // Deduce MIME type from passed file name
         String mimeType = MimeType2ExtMap.getContentType(fileName, null);
 
         // Set associated MIME type
         {
             // Check if we are forced to select the MIME type as signaled by file item
-            String forcedMimeType = item.getHeaders().getHeader("X-Forced-MIME-Type");
+            String forcedMimeType = headers.getHeader("X-Forced-MIME-Type");
             if (null == forcedMimeType) {
-                retval.setContentType(null == mimeType ? item.getContentType() : mimeType);
+                String itemContentType = item.getContentType();
+                ContentType contentType = getContentTypeSafe(itemContentType);
+                if (null == contentId) {
+                    contentId = contentType.getParameter("cid");
+                    retval.setContentId(contentId);
+                }
+
+                if (null == contentType) {
+                    retval.setContentType(null == mimeType ? itemContentType : mimeType);
+                } else {
+                    retval.setContentType(contentType.getBaseType());
+                }
             } else if (AJAXRequestDataTools.parseBoolParameter(forcedMimeType)) {
                 retval.setContentType(item.getContentType());
             } else {
@@ -565,6 +582,19 @@ public final class UploadUtility {
         retval.setSize(size);
         retval.setTmpFile(tmpFile);
         return retval;
+    }
+
+    private static ContentType getContentTypeSafe(String contentType) {
+        if (null == contentType) {
+            return null;
+        }
+
+        try {
+            return new ContentType(contentType);
+        } catch (Exception e) {
+            LOG.debug("MIME type could not be parsed", e);
+            return null;
+        }
     }
 
     private static void startUploadEvicterIfNotYetDone() {

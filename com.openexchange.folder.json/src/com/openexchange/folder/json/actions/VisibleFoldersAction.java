@@ -52,6 +52,7 @@ package com.openexchange.folder.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -140,6 +141,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         final String altNames = request.getParameter(sAltNames);
         final String sSuppressUnifiedMail = "suppressUnifiedMail";
         final Boolean suppressUnifiedMail = isSuppressUnifiedMail(request, session);
+        Locale optLocale = optLocale(request);
         final FolderResponse<UserizedFolder[]> privateResp =
             folderService.getVisibleFolders(
                 rootFolderId,
@@ -148,7 +150,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PrivateType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
+                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
                     "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all shared folders
@@ -161,7 +163,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 SharedType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Get all public folders
          */
@@ -173,7 +175,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 PublicType.getInstance(),
                 all,
                 session,
-                new FolderServiceDecorator().setLocale(optLocale(request)).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
+                new FolderServiceDecorator().setLocale(optLocale).setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(sAltNames, altNames).put(sSuppressUnifiedMail, suppressUnifiedMail));
         /*
          * Determine max. last-modified time stamp
          */

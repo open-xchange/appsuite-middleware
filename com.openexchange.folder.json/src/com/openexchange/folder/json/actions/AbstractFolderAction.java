@@ -87,6 +87,8 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
@@ -178,7 +180,29 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (null == locale) {
             LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
         }
-        return locale;
+
+        return tryBestFitFor(locale);
+    }
+
+    private static Locale tryBestFitFor(Locale locale) {
+        I18nServiceRegistry i18nServiceRegistry = ServiceRegistry.getInstance().getService(I18nServiceRegistry.class);
+        if (null == i18nServiceRegistry) {
+            // Don't know better
+            return null;
+        }
+
+        try {
+            I18nService i18nService = i18nServiceRegistry.getBestFittingI18nService(locale);
+            if (null == i18nService) {
+                LOG.warn("No suitable support for locale \"{}\". Using user's locale instead.", locale.toString());
+                return null;
+            }
+
+            return i18nService.getLocale();
+        } catch (OXException e) {
+            LOG.warn("Failed to check support for locale \"{}\". Using user's locale instead.", locale.toString(), e);
+            return null;
+        }
     }
 
     /**

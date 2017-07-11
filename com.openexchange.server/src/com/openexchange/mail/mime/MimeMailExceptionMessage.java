@@ -87,12 +87,12 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     /**
      * Folder "%1$s" has been closed. Probably your request took too long.
      */
-    public final static String FOLDER_CLOSED_MSG_DISPLAY = "Folder \"%1$s\" has been closed. Probably your request took too long.";
+    public final static String FOLDER_CLOSED_MSG_DISPLAY = "Lost connection to mail server. Probably your request took too long. Please try again later.";
 
     /**
      * Folder "%1$s" has been closed on mail server %2$s. Probably your request took too long.
      */
-    public final static String FOLDER_CLOSED_EXT_MSG_DISPLAY = "Folder \"%1$s\" has been closed on mail server %2$s. Probably your request took too long.";
+    public final static String FOLDER_CLOSED_EXT_MSG_DISPLAY = "Connection closed to mail server %2$s. Probably your request took too long. Please try again later.";
 
     /**
      * Mail(s) could not be found in the given folder.
@@ -152,27 +152,27 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     /**
      * Lost connection to mail server.
      */
-    public final static String STORE_CLOSED_MSG_DISPLAY = "Lost connection to mail server.";
+    public final static String STORE_CLOSED_MSG_DISPLAY = "Lost connection to mail server. Please try again later.";
 
     /**
      * Connection closed to mail server %1$s.
      */
-    public final static String STORE_CLOSED_EXT_MSG_DISPLAY = "Connection closed to mail server %1$s.";
+    public final static String STORE_CLOSED_EXT_MSG_DISPLAY = "Connection closed to mail server %1$s. Please try again later.";
 
     /**
      * The connection to remote server %1$s was refused or timed out while attempting to connect.
      */
-    public final static String CONNECT_ERROR_MSG_DISPLAY = "The connection to remote server %1$s was refused or timed out while attempting to connect.";
+    public final static String CONNECT_ERROR_MSG_DISPLAY = "The connection to remote server %1$s was refused or timed out while attempting to connect. Please try again later.";
 
     /**
      * The connection to remote server %1$s timed out while awaiting the response.
      */
-    public final static String READ_TIMEOUT_MSG_DISPLAY = "The connection to remote server %1$s timed out while awaiting the response.";
+    public final static String READ_TIMEOUT_MSG_DISPLAY = "The connection to remote server %1$s timed out while awaiting the response. Please try again later.";
 
     /**
      * Mail server %1$s unexpectedly closed connection for user %2$s.
      */
-    public final static String CONNECTION_CLOSED_MSG_DISPLAY = "Mail server %1$s unexpectedly closed connection.";
+    public final static String CONNECTION_CLOSED_MSG_DISPLAY = "Mail server %1$s unexpectedly closed connection. Please try again later.";
 
     /**
      * The allowed quota on mail server exceeded.
@@ -203,6 +203,6 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public static final String TEMPORARY_FAILURE = "The message could not be sent due to a mail server temporary failure. Please try again later.";
 
     // Timeout while trying to send to the following recipient: %1$s
-    public static final String SEND_TIMED_OUT_ERROR_MSG_DISPLAY = "Timeout while trying to send to the following recipient: %1$s";
+    public static final String SEND_TIMED_OUT_ERROR_MSG_DISPLAY = "Timeout while trying to send to the following recipient: %1$s. Please try again later.";
 
 }

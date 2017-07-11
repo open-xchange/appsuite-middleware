@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -84,18 +85,21 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPStoreCache {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
+    /** The logger instzance */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
-    private static final int SHRINKER_MILLIS = (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
+    /** Holder for shrinker frequency in milliseconds */
+    static final AtomicInteger SHRINKER_MILLIS = new AtomicInteger((MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000);
 
-    protected static final int IDLE_MILLIS = MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000;
+    /** Holder for idle time in milliseconds */
+    static final AtomicInteger IDLE_MILLIS = new AtomicInteger(MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000);
 
     private static volatile IMAPStoreCache instance;
 
     /**
      * Initializes this cache.
      */
-    public static void initInstance() {
+    public static synchronized void initInstance() {
         IMAPStoreCache tmp = instance;
         if (null != tmp) {
             return;
@@ -107,18 +111,19 @@ public final class IMAPStoreCache {
             LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"{}\" instead.", Container.getDefault().getId());
             container = Container.getDefault();
         }
-        tmp = instance = new IMAPStoreCache(checkConnected, container);
-        tmp.init();
+        tmp = new IMAPStoreCache(checkConnected, container);
+        tmp.reinit(true);
+        instance = tmp;
     }
 
     /**
      * Shuts-down this cache.
      */
-    public static void shutDownInstance() {
+    public static synchronized void shutDownInstance() {
         final IMAPStoreCache tmp = instance;
         if (null != tmp) {
-            tmp.shutDown();
             instance = null;
+            tmp.shutDown();
         }
     }
 
@@ -127,13 +132,17 @@ public final class IMAPStoreCache {
 
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
-               shutDownInstance();
-               initInstance();
+                SHRINKER_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000);
+                IDLE_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", 4) * 1000);
+                IMAPStoreCache tmp = instance;
+                if (null != tmp) {
+                    tmp.reinit(false);
+                }
             }
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections");
+                return Reloadables.interestsForProperties("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "com.openexchange.mail.mailAccessCacheIdleSeconds");
             }
         });
     }
@@ -158,6 +167,7 @@ public final class IMAPStoreCache {
         private final boolean debug;
 
         protected ContainerCloseElapsedRunnable(final IMAPStoreContainer container, final long stamp, final boolean debug) {
+            super();
             this.container = container;
             this.stamp = stamp;
             this.debug = debug;
@@ -203,6 +213,7 @@ public final class IMAPStoreCache {
 
     /**
      * Initializes a new {@link IMAPStoreCache}.
+     *
      * @param container
      */
     private IMAPStoreCache(final boolean checkConnected, final Container container) {
@@ -224,21 +235,29 @@ public final class IMAPStoreCache {
         return containerType.getStoreClass();
     }
 
-    private void init() {
-        final TimerService timer = Services.getService(TimerService.class);
-        final Runnable task = new CloseElapsedRunnable(this);
-        final int shrinkerMillis = SHRINKER_MILLIS;
-        timerTask = timer.scheduleWithFixedDelay(task, shrinkerMillis, shrinkerMillis);
+    private void reinit(boolean withInitialDelay) {
+        TimerService timer = Services.getService(TimerService.class);
+
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            this.timerTask = null;
+            timerTask.cancel();
+            timer.purge();
+        }
+
+        Runnable task = new CloseElapsedRunnable(this);
+        int delayMillis = SHRINKER_MILLIS.get();
+        this.timerTask = timer.scheduleWithFixedDelay(task, withInitialDelay ? delayMillis : 0L, delayMillis);
     }
 
     private void shutDown() {
         List<IMAPStoreContainer> containers = new ArrayList<IMAPStoreContainer>(this.map.values());
         this.map.clear();
 
-        final ScheduledTimerTask timerTask = this.timerTask;
+        ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
-            timerTask.cancel();
             this.timerTask = null;
+            timerTask.cancel();
         }
 
         if (!containers.isEmpty()) {
@@ -288,7 +307,7 @@ public final class IMAPStoreCache {
             boolean debug = LOG.isDebugEnabled();
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
             if (null != threadPool) {
-                long stamp = System.currentTimeMillis() - IDLE_MILLIS;
+                long stamp = System.currentTimeMillis() - IDLE_MILLIS.get();
                 do {
                     IMAPStoreContainer container = containers.next();
                     if (null != container && container.hasElapsed(stamp)) {
@@ -331,14 +350,14 @@ public final class IMAPStoreCache {
 
     private IMAPStoreContainer newContainer(String server, int port, int accountId, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         switch (containerType) {
-        case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
-        case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
-        case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
-        default:
-            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case UNBOUNDED:
+                return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case BOUNDARY_AWARE:
+                return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
+            case NON_CACHING:
+                return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
+            default:
+                return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         }
     }
 
@@ -549,5 +568,4 @@ public final class IMAPStoreCache {
             return true;
         }
     }
-
 }

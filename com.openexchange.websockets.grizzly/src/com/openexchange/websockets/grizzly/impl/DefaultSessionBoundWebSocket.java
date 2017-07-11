@@ -49,19 +49,12 @@
 
 package com.openexchange.websockets.grizzly.impl;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.glassfish.grizzly.CompletionHandler;
-import org.glassfish.grizzly.GrizzlyFuture;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
-import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -72,6 +65,8 @@ import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketSession;
+import com.openexchange.websockets.grizzly.CompletedSendControl;
+import com.openexchange.websockets.grizzly.FutureBackedSendControl;
 import com.openexchange.websockets.grizzly.SessionBoundWebSocket;
 
 /**
@@ -176,53 +171,45 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
     // ---------------------------------------------------------- Outbound ---------------------------------------------------------------
 
     @Override
-    public void sendMessage(String message) throws OXException {
+    public SendControl sendMessage(String message) throws OXException {
+        if (false == isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
+        }
+
         MessageTranscoder transcoder = this.transcoder;
 
         String transcoded = null == transcoder ? message : transcoder.onOutboundMessage(this, message);
         if (null != transcoded) {
-            blockingSend(transcoded);
+            return doSend(transcoded);
         }
+
+        // Don't know better...
+        return CompletedSendControl.getInstance();
     }
 
     @Override
-    public void sendMessageRaw(String message) throws OXException {
-        blockingSend(message);
-    }
-
-    private void blockingSend(String message) throws OXException {
-        GrizzlyFuture<DataFrame> grizzlyFuture = send(message);
-        try {
-            grizzlyFuture.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-            if (cause instanceof IOException) {
-                throw WebSocketExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
-            }
-            if (cause instanceof WebSocketException) {
-                throw WebSocketExceptionCodes.PROTOCOL_ERROR.create(cause, cause.getMessage());
-            }
-            throw WebSocketExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-        }
-    }
-
-    @Override
-    public SendControl sendMessageAsync(String message) throws OXException {
-        MessageTranscoder transcoder = this.transcoder;
-
-        String transcoded = null == transcoder ? message : transcoder.onOutboundMessage(this, message);
-        if (null == transcoded) {
-            return new SendControlImpl<>(new GetFuture<Void>(null));
+    public SendControl sendMessageRaw(String message) throws OXException {
+        if (false == isConnected()) {
+            throw WebSocketExceptionCodes.NOT_CONNECTED.create();
         }
 
-        GrizzlyFuture<DataFrame> f = send(message);
-        return new SendControlImpl<>(f);
+        return doSend(message);
+    }
+
+    /**
+     * Sends specified text message.
+     *
+     * @param message The text message to send
+     * @return The send control
+     */
+    protected SendControl doSend(String message) {
+        // Yield data-frame for given text message
+        ProtocolHandler protocolHandler = this.protocolHandler;
+        DataFrame frameToSend = protocolHandler.toDataFrame(message);
+        frameToSend.getBytes();
+
+        // Perform the send
+        return new FutureBackedSendControl(protocolHandler.send(frameToSend));
     }
 
     // ---------------------------------------------------------- Inbound ----------------------------------------------------------------
@@ -269,62 +256,6 @@ public class DefaultSessionBoundWebSocket extends SessionBoundWebSocket implemen
         }
         builder.append("}");
         return builder.toString();
-    }
-
-    // -----------------------------------------------------------------------------------------------------------
-
-    private static final class GetFuture<V> implements GrizzlyFuture<V> {
-
-        private final V result;
-
-        GetFuture(V result) {
-            this.result = result;
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isDone() {
-            return true;
-        }
-
-        @Override
-        public V get() throws InterruptedException, ExecutionException {
-            return result;
-        }
-
-        @Override
-        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            return result;
-        }
-
-        @Override
-        public void recycle() {
-            // Nothing
-        }
-
-        @Override
-        public void markForRecycle(boolean recycleResult) {
-            // Nothing
-        }
-
-        @Override
-        public void recycle(boolean recycleResult) {
-            // Nothing
-        }
-
-        @Override
-        public void addCompletionHandler(CompletionHandler<V> completionHandler) {
-            // Nothing
-        }
     }
 
 }
