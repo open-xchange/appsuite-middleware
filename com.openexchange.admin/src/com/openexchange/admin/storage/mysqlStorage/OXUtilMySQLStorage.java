@@ -1343,7 +1343,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return findFilestoreForEntity(true, configDbCon);
     }
 
-    private static void wait(int retryCount, long baseMillis) {
+    /**
+     * Performs a wait according to exponential back-off strategy.
+     * <pre>
+     *  (retry-count * base-millis)  +  random-millis
+     * </pre>
+     *
+     * @param retryCount The current number of retries
+     * @param baseMillis The base milliseconds
+     */
+    private static void exponentialBackoffWait(int retryCount, long baseMillis) {
         long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
         LockSupport.parkNanos(nanosToWait);
     }
@@ -1494,7 +1503,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 // Exponential back-off
-                wait(++retryCount, 100L);
+                exponentialBackoffWait(++retryCount, 100L);
             }
         }
 
@@ -3114,7 +3123,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 // Exponential back-off
-                wait(++retryCount, 100L);
+                exponentialBackoffWait(++retryCount, 100L);
             }
         }
 
