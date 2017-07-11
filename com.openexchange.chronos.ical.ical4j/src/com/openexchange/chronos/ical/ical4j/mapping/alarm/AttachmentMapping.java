@@ -49,48 +49,28 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.alarm;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
-import net.fortuna.ical4j.extensions.caldav.property.Acknowledged;
-import net.fortuna.ical4j.model.Property;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalAttachmentMapping;
 import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
- * {@link AlarmMappings}
+ * {@link AttachmentMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AlarmMappings {
+public class AttachmentMapping extends ICalAttachmentMapping<VAlarm, Alarm> {
 
-	/**
-	 * Holds a collection of all known alarm mappings.
-	 */
-	public static List<ICalMapping<VAlarm, Alarm>> ALL = Collections.<ICalMapping<VAlarm, Alarm>>unmodifiableList(Arrays.asList(
-		new TriggerMapping(),
-		new UidMapping(),
-		new ActionMapping(),
-		new AcknowledgedMapping(),
-        new DescriptionMapping(),
-        new RelatedToMapping(),
-        new RepeatMapping(),
-        new SummaryMapping(),
-        new AttachmentMapping(),
-        new AttendeeMapping(),
-        new ExtendedPropertiesMapping(
-            Property.SUMMARY, Property.REPEAT, Property.DURATION, Property.TRIGGER, Property.UID, Property.ACTION, 
-            Acknowledged.PROPERTY_NAME, Property.DESCRIPTION, Property.RELATED_TO, Property.ATTACH, Property.ATTENDEE
-        )
-	));
+    @Override
+    protected List<Attachment> getValue(Alarm object) {
+        return object.getAttachments();
+    }
 
-    /**
-     * Initializes a new {@link AlarmMappings}.
-     */
-	private AlarmMappings() {
-		super();
-	}
+    @Override
+    protected void setValue(Alarm object, List<Attachment> value) {
+        object.setAttachments(value);
+    }
 
 }
