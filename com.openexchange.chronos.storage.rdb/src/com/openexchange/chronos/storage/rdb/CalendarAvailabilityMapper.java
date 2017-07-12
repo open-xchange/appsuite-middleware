@@ -175,7 +175,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
         });
-        mappings.put(AvailabilityField.user, new IntegerMapping<CalendarAvailability>("calendarUser", "Calendar User ID") {
+        mappings.put(AvailabilityField.user, new IntegerMapping<CalendarAvailability>("user", "Calendar User ID") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {

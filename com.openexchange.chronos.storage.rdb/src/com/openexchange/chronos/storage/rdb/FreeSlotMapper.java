@@ -174,7 +174,7 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
                 object.removeCalendarAvailabilityId();
             }
         });
-        mappings.put(FreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("calendarUser", "Calendar User ID") {
+        mappings.put(FreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("user", "Calendar User ID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
