@@ -204,6 +204,27 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailabilities(java.util.List)
+     */
+    @Override
+    public void deleteCalendarAvailabilities(List<String> calendarAvailabilityIds) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteCalendarAvailabilityItems(calendarAvailabilityIds, connection);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     ///////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////////
 
     /**
@@ -299,6 +320,30 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
             return logExecuteUpdate(stmt) + updated;
         }
+    }
+
+    /**
+     * Deletes from the storage the {@link CalendarAvailability} item with the specified id and all {@link CalendarFreeSlot}s assigned to it.
+     * 
+     * @param calendarAvailabilityId The identifier of the calendar availability item
+     * @param connection The writeable connection
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteCalendarAvailabilityItems(List<String> calendarAvailabilityIds, Connection connection) throws SQLException {
+        int affectedRows = 0;
+        for (String calendarAvailabilityId : calendarAvailabilityIds) {
+            affectedRows += deleteCalendarFreeSlots(calendarAvailabilityId, connection);
+
+            int parameterIndex = 1;
+            // FIXME: Maybe use an 'IN' clause and delete multiple rows in a single statement?
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND id=?")) {
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
+                affectedRows += logExecuteUpdate(stmt);
+            }
+        }
+        return affectedRows;
     }
 
     /**

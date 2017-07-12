@@ -49,11 +49,13 @@
 
 package com.openexchange.chronos.impl.availability;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.impl.availability.performer.DeletePerformer;
 import com.openexchange.chronos.impl.availability.performer.SetPerformer;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -135,8 +137,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      */
     @Override
     public void deleteAvailability(CalendarSession session, String availabilityId) throws OXException {
-        // TODO Auto-generated method stub
-
+        deleteAvailabilities(session, Collections.singletonList(availabilityId));
     }
 
     /*
@@ -145,9 +146,16 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailabilities(com.openexchange.chronos.service.CalendarSession, java.util.List)
      */
     @Override
-    public void deleteAvailabilities(CalendarSession session, List<String> availabilityIds) throws OXException {
-        // TODO Auto-generated method stub
+    public void deleteAvailabilities(CalendarSession session, final List<String> availabilityIds) throws OXException {
+        new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
 
+            @Override
+            protected Void execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                new DeletePerformer(storage, session).perform(availabilityIds);
+                return null;
+            }
+
+        }.executeUpdate();
     }
 
     /*

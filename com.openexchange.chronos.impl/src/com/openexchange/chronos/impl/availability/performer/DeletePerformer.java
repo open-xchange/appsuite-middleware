@@ -50,45 +50,34 @@
 package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.List;
-import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SetResult;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SetPerformer}
+ * {@link DeletePerformer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SetPerformer extends AbstractUpdatePerformer {
+public class DeletePerformer extends AbstractUpdatePerformer {
 
     /**
-     * Initialises a new {@link SetPerformer}.
+     * Initialises a new {@link DeletePerformer}.
      * 
-     * @param storage
-     * @param session
+     * @param storage The storage instance
+     * @param session The server session
      */
-    public SetPerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
+    public DeletePerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
         super(storage, session);
     }
 
     /**
-     * Performs the update
-     * @param calendarAvailabilities
-     * @return
+     * Performs the operation
+     * 
+     * @param availabilityIds
      * @throws OXException
      */
-    public SetResult perform(List<CalendarAvailability> calendarAvailabilities) throws OXException {
-        // Pre-conditions check
-        CheckUtil.check(calendarAvailabilities);
-        
-        // Prepare for storage
-        List<String> availabilityIds = prepareForStorage(storage, calendarAvailabilities);
-        storage.insertCalendarAvailabilities(calendarAvailabilities);
-        
-        // Set the ids to the result
-        result.setIds(availabilityIds);
-        return result;
+    public void perform(List<String> availabilityIds) throws OXException {
+        storage.deleteCalendarAvailabilities(availabilityIds);
     }
 }

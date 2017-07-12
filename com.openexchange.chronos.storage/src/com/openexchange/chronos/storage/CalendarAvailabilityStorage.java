@@ -116,4 +116,12 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if the object cannot be deleted
      */
     void deleteCalendarAvailability(String calendarAvailabilityId) throws OXException;
+
+    /**
+     * Deletes the {@link CalendarAvailability} blocks and all free slots associated to them
+     * 
+     * @param calendarAvailabilityIds The calendar availability identifiers
+     * @throws OXException if the objects cannot be deleted
+     */
+    void deleteCalendarAvailabilities(List<String> calendarAvailabilityIds) throws OXException;
 }

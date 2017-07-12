@@ -55,8 +55,8 @@ import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.service.AvailabilityField;
-import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractUpdatePerformer<T> {
+abstract class AbstractUpdatePerformer {
 
     final CalendarAvailabilityStorage storage;
     final CalendarSession session;
@@ -81,15 +81,6 @@ abstract class AbstractUpdatePerformer<T> {
 
         result = new SetResultImpl();
     }
-
-    /**
-     * Performs the update
-     * 
-     * @param calendarAvailabilities The {@link List} with {@link CalendarAvailability} blocks
-     * @return The result of the operation
-     * @throws OXException if the operation fails
-     */
-    public abstract T perform(List<CalendarAvailability> calendarAvailabilities) throws OXException;
 
     ////////////////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
 
