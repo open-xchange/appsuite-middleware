@@ -79,6 +79,7 @@ Import-Package: com.davekoelle,
  com.openexchange.userconf,
  gnu.trove.map,
  gnu.trove.map.hash,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
