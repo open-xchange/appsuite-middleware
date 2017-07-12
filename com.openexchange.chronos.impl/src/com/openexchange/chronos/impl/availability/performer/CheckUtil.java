@@ -102,7 +102,7 @@ class CheckUtil {
             return;
         }
         for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
-            checkMandatory(freeSlot, FreeSlotField.dtstamp, FreeSlotField.uid, FreeSlotField.dtstart);
+            checkMandatory(freeSlot, FreeSlotField.uid, FreeSlotField.dtstart);
             checkConstraints(freeSlot);
         }
     }
