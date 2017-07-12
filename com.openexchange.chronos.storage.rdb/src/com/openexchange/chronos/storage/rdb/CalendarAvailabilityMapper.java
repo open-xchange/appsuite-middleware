@@ -197,7 +197,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
                 object.removeBusyType();
             }
         });
-        mappings.put(AvailabilityField.classification, new VarCharMapping<CalendarAvailability>("classification", "Classification") {
+        mappings.put(AvailabilityField.classification, new VarCharMapping<CalendarAvailability>("class", "Classification") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {
