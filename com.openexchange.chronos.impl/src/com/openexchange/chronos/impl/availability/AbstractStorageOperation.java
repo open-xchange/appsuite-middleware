@@ -53,12 +53,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -70,15 +67,15 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractStorageOperation<T> implements StorageOperation<T> {
+public abstract class AbstractStorageOperation<S, T> implements StorageOperation<T> {
 
     /** The session parameter name where the underlying database connection is held during transactions */
     public static final String PARAM_CONNECTION = Connection.class.getName();
 
-    private final CalendarSession session;
-    private final Context context;
+    protected final CalendarSession session;
+    protected final Context context;
 
-    private ServiceLookup services;
+    protected ServiceLookup services;
 
     /**
      * Initialises a new {@link StorageOperation}.
@@ -156,9 +153,7 @@ public abstract class AbstractStorageOperation<T> implements StorageOperation<T>
      * @param storage The initialised calendar availability storage to use
      * @return The result
      */
-    protected abstract T execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException;
-
-    ///////////////////////////////// HELPERS ///////////////////////////////
+    protected abstract T execute(CalendarSession session, S storage) throws OXException;
 
     /**
      * Initialises the storage
@@ -167,7 +162,5 @@ public abstract class AbstractStorageOperation<T> implements StorageOperation<T>
      * @return The storage instance
      * @throws OXException if the storage instance cannot be initialised
      */
-    private CalendarAvailabilityStorage initStorage(DBProvider dbProvider) throws OXException {
-        return services.getService(CalendarAvailabilityStorageFactory.class).create(context, 0, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-    }
+    protected abstract S initStorage(DBProvider dbProvider) throws OXException;
 }

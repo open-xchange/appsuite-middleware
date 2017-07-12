@@ -88,7 +88,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      */
     @Override
     public SetResult setAvailability(CalendarSession session, final List<CalendarAvailability> availabilities) throws OXException {
-        return new AbstractStorageOperation<SetResult>(services, session) {
+        return new AbstractCalendarAvailabilityStorageOperation<SetResult>(services, session) {
 
             @Override
             protected SetResult execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
