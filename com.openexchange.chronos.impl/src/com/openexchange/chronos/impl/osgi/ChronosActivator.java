@@ -135,7 +135,6 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
             CalendarAvailabilityServiceImpl service = new CalendarAvailabilityServiceImpl();
             registerService(CalendarAvailabilityService.class, service);
-            testCAService(calendarService, service);
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -147,25 +146,4 @@ public class ChronosActivator extends HousekeepingActivator {
         LOG.info("stopping bundle {}", context.getBundle());
         super.stopBundle();
     }
-
-    private void testCAService(CalendarService cs, CalendarAvailabilityService cas) throws OXException {
-        CalendarAvailability ca = new CalendarAvailability();
-        CalendarFreeSlot freeSlot = new CalendarFreeSlot();
-        freeSlot.setCreated(new Date());
-        freeSlot.setStartTime(new Date());
-        freeSlot.setUid(UUID.randomUUID().toString());
-        freeSlot.setEndTime(new Date(System.currentTimeMillis() + 3600));
-        freeSlot.setCreationTimestamp(new Date());
-        ca.setCalendarFreeSlots(Collections.singletonList(freeSlot));
-        ca.setStartTime(new Date(System.currentTimeMillis() - 14400));
-        ca.setEndTime(new Date(System.currentTimeMillis() + 14400));
-        ca.setCreated(new Date(System.currentTimeMillis()));
-        ca.setCreationTimestamp(System.currentTimeMillis());
-        ca.setUid(UUID.randomUUID().toString());
-        
-        
-        CalendarSession calendarSession = new DefaultCalendarSession(ServerSessionAdapter.valueOf(3, 31145), cs);
-        cas.setAvailability(calendarSession, Collections.singletonList(ca));
-    }
-
 }
