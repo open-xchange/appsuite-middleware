@@ -110,6 +110,37 @@ public interface CalendarAvailabilityStorage {
     void insertCalendarFreeSlot(String calendarAvailabilityId, CalendarFreeSlot freeSlot) throws OXException;
 
     /**
+     * Loads from the storage the {@link CalendarAvailability} with the specified identifier
+     * 
+     * @param calendarAvailabilityId The calendar availability identifier
+     * @return The {@link CalendarAvailability}
+     * @throws OXException if an error is occurred
+     */
+    CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException;
+
+    /**
+     * Loads from the storage the {@link CalendarFreeSlot}s for the {@link CalendarAvailability}
+     * with the specified identifier
+     * 
+     * @param calendarAvailabilityId The calendar availability identifier
+     * @return A {@link List} with all {@link CalendarFreeSlot}s bound to the {@link CalendarAvailability}
+     *         with the specified id
+     * @throws OXException if an error is occurred
+     */
+    List<CalendarFreeSlot> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException;
+
+    /**
+     * Loads from the storage the {@link CalendarFreeSlot} with the specified identifier bound
+     * to the {@link CalendarAvailability} with the specified identifier
+     * 
+     * @param calendarAvailabilityId The calendar availability identifier
+     * @param freeSlotId The free slot identifier
+     * @return The {@link CalendarFreeSlot}
+     * @throws OXException if an error is occurred
+     */
+    CalendarFreeSlot loadCalendarFreeSlot(String calendarAvailability, String freeSlotId) throws OXException;
+
+    /**
      * Deletes the {@link CalendarAvailability} and all free slots associated to it with the specified identifier
      * 
      * @param calendarAvailabilityId The calendar availability identifier
