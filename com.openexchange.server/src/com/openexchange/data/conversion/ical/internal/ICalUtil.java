@@ -147,7 +147,7 @@ public class ICalUtil {
         try {
             ICalParser iCalParser = ServerServiceRegistry.getServize(ICalParser.class, true);
             return iCalParser.parseAppointments(inputStream, TimeZone.getTimeZone(session.getUser().getTimeZone()),
-                session.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                session.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }
@@ -157,7 +157,7 @@ public class ICalUtil {
         try {
             ICalParser iCalParser = ServerServiceRegistry.getServize(ICalParser.class, true);
             return iCalParser.parseTasks(inputStream, TimeZone.getTimeZone(session.getUser().getTimeZone()),
-                session.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                session.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }

@@ -100,7 +100,7 @@ public class ICalImportTest extends AbstractICalImportTest {
             format,
             new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
             _folders(),
-            null);
+            null).getImportResults();
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }
@@ -119,7 +119,7 @@ public class ICalImportTest extends AbstractICalImportTest {
             format,
             new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
             _folders(),
-            null);
+            null).getImportResults();
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }
@@ -163,7 +163,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Missing or unexpected number of warnigns: " + (null == warnings ? "no warnings" : Integer.toString(warnings.size())), null != warnings && 1 == warnings.size());
         final OXException warning = warnings.iterator().next();
-        
+
         assertEquals("Should be truncation error", Category.CATEGORY_TRUNCATED, warning.getCategory());
         warning.printStackTrace();
         // assertEquals("SUMMARY was too long",Integer.valueOf(CalendarField.TITLE.getAppointmentObjectID()), Integer.valueOf(((OXException.Truncated) warning.getProblematics()[0]).getId()));
