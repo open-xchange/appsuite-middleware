@@ -54,7 +54,6 @@ import java.sql.Connection;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.impl.AbstractStorageOperation;
-import com.openexchange.chronos.impl.StorageOperation;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarSession;

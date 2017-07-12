@@ -70,8 +70,7 @@ abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperat
     /**
      * Initialises a new {@link AbstractCalendarStorageOperation}.
      * 
-     * @param services
-     * @param session
+     * @param session The server session
      * @throws OXException
      */
     public AbstractCalendarStorageOperation(CalendarSession session) throws OXException {

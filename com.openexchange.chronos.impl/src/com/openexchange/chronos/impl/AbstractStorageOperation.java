@@ -60,7 +60,6 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -84,7 +83,6 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
      * Initialises a new {@link StorageOperation}.
      *
      * @param session The server session
-     * @param services The {@link ServiceLookup} instance
      */
     public AbstractStorageOperation(CalendarSession session) throws OXException {
         super();
