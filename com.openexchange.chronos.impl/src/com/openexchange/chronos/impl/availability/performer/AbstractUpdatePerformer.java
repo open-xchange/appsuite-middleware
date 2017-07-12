@@ -79,10 +79,29 @@ abstract class AbstractUpdatePerformer<T> {
         result = new SetResultImpl();
     }
 
+    /**
+     * Performs the update
+     * 
+     * @param calendarAvailabilities The {@link List} with {@link CalendarAvailability} blocks
+     * @return The result of the operation
+     * @throws OXException if the operation fails
+     */
     public abstract T perform(List<CalendarAvailability> calendarAvailabilities) throws OXException;
 
     ////////////////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
 
+    /**
+     * Prepares the specified {@link List} of {@link CalendarAvailability} blocks for the storage.
+     * <ul>
+     * <li>Assigns identifiers for the {@link CalendarAvailability} blocks</li>
+     * <li>Assigns identifiers for the {@link CalendarFreeSlot} blocks</li>
+     * </ul>
+     * 
+     * @param storage The {@link CalendarAvailabilityStorage} instance
+     * @param availabilities A {@link List} with {@link CalendarAvailability} blocks to prepare
+     * @return The {@link List} with the {@link CalendarAvailability} identifiers
+     * @throws OXException if an error is occurred
+     */
     List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<CalendarAvailability> availabilities) throws OXException {
         // Set the identifiers
         List<String> caIds = new ArrayList<>(availabilities.size());
