@@ -839,7 +839,7 @@ public class Utils {
 
     private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
-        Connection connection = session.get(StorageOperation.PARAM_CONNECTION, Connection.class, null);
+        Connection connection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
         if (null != connection) {
             decorator.put(Connection.class.getName(), connection);
         }

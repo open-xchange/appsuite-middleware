@@ -81,7 +81,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public boolean[] hasEventsBetween(final CalendarSession session, final Date from, final Date until) throws OXException {
-        return new StorageOperation<boolean[]>(session) {
+        return new AbstractCalendarStorageOperation<boolean[]>(session) {
 
             @Override
             protected boolean[] execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -92,7 +92,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new StorageOperation<Map<Attendee, List<Event>>>(session) {
+        return new AbstractCalendarStorageOperation<Map<Attendee, List<Event>>>(session) {
 
             @Override
             protected Map<Attendee, List<Event>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -103,7 +103,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public List<EventConflict> checkForConflicts(CalendarSession session, final Event event, final List<Attendee> attendees) throws OXException {
-        return new StorageOperation<List<EventConflict>>(session) {
+        return new AbstractCalendarStorageOperation<List<EventConflict>>(session) {
 
             @Override
             protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -114,7 +114,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
     @Override
     public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new StorageOperation<Map<Attendee, List<FreeBusyTime>>>(session) {
+        return new AbstractCalendarStorageOperation<Map<Attendee, List<FreeBusyTime>>>(session) {
 
             @Override
             protected Map<Attendee, List<FreeBusyTime>> execute(CalendarSession session, CalendarStorage storage) throws OXException {

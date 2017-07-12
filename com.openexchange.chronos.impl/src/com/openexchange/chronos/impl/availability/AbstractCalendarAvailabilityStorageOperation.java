@@ -49,13 +49,14 @@
 
 package com.openexchange.chronos.impl.availability;
 
+import com.openexchange.chronos.impl.AbstractStorageOperation;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractCalendarAvailabilityStorageOperation}
@@ -71,8 +72,8 @@ abstract class AbstractCalendarAvailabilityStorageOperation<T> extends AbstractS
      * @param session
      * @throws OXException
      */
-    public AbstractCalendarAvailabilityStorageOperation(ServiceLookup services, CalendarSession session) throws OXException {
-        super(services, session);
+    public AbstractCalendarAvailabilityStorageOperation(CalendarSession session) throws OXException {
+        super(session);
     }
 
     /*
@@ -82,6 +83,6 @@ abstract class AbstractCalendarAvailabilityStorageOperation<T> extends AbstractS
      */
     @Override
     protected CalendarAvailabilityStorage initStorage(DBProvider dbProvider) throws OXException {
-        return services.getService(CalendarAvailabilityStorageFactory.class).create(context, 0, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        return Services.getService(CalendarAvailabilityStorageFactory.class).create(context, 0, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 }

@@ -69,16 +69,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityService {
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link CalendarAvailabilityServiceImpl}.
      * 
      * @param services The {@link ServiceLookup} instance
      */
-    public CalendarAvailabilityServiceImpl(ServiceLookup services) {
+    public CalendarAvailabilityServiceImpl() {
         super();
-        this.services = services;
     }
 
     /*
@@ -88,7 +85,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      */
     @Override
     public SetResult setAvailability(CalendarSession session, final List<CalendarAvailability> availabilities) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<SetResult>(services, session) {
+        return new AbstractCalendarAvailabilityStorageOperation<SetResult>(session) {
 
             @Override
             protected SetResult execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {

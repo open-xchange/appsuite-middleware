@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.impl.availability;
+package com.openexchange.chronos.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -68,6 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @param <S> The storage class
  * @param <T> The return type of the operation
  * 
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractStorageOperation<S, T> implements StorageOperation<T> {
@@ -78,17 +80,14 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
     protected final CalendarSession session;
     protected final Context context;
 
-    protected ServiceLookup services;
-
     /**
      * Initialises a new {@link StorageOperation}.
      *
      * @param session The server session
      * @param services The {@link ServiceLookup} instance
      */
-    public AbstractStorageOperation(ServiceLookup services, CalendarSession session) throws OXException {
+    public AbstractStorageOperation(CalendarSession session) throws OXException {
         super();
-        this.services = services;
         this.session = session;
         this.context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
     }
@@ -100,7 +99,7 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
      */
     @Override
     public T executeQuery() throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
+        DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection readConnection = null;
         try {
             readConnection = dbService.getReadOnly(context);
@@ -122,7 +121,7 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
     @Override
     public T executeUpdate() throws OXException {
         boolean committed = false;
-        DatabaseService dbService = services.getService(DatabaseService.class);
+        DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection writeConnection = null;
         try {
             writeConnection = dbService.getWritable(context);

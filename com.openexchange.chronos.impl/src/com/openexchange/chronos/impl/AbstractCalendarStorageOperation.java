@@ -47,32 +47,50 @@
  *
  */
 
-package com.openexchange.chronos.impl.availability;
+package com.openexchange.chronos.impl;
 
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
+import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link StorageOperation}
- * 
- * @param <T> The return type of the operation
+ * {@link AbstractCalendarStorageOperation}
  *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface StorageOperation<T> {
+abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperation<CalendarStorage, T> {
 
     /**
-     * Executes a read only storage operation.
+     * Initialises a new {@link AbstractCalendarStorageOperation}.
      * 
-     * @return The result of the operation
-     * @throws OXException if the operation fails
+     * @param services
+     * @param session
+     * @throws OXException
      */
-    T executeQuery() throws OXException;
+    public AbstractCalendarStorageOperation(CalendarSession session) throws OXException {
+        super(session);
+    }
 
-    /**
-     * Executes the read/write storage operation in a transaction.
+    /*
+     * (non-Javadoc)
      * 
-     * @return The result
-     * @throws OXException if the operation/transaction fails
+     * @see com.openexchange.chronos.impl.availability.AbstractStorageOperation#initStorage(com.openexchange.database.provider.DBProvider)
      */
-    T executeUpdate() throws OXException;
+    @Override
+    protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
+        if (session.getConfig().isReplayToLegacyStorage()) {
+            return Services.getService(ReplayingCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        } else if (session.getConfig().isUseLegacyStorage()) {
+            return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        } else {
+            return Services.getService(CalendarStorageFactory.class).create(context, 0, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        }
+    }
 }

@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.impl.StorageOperation;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
@@ -188,7 +189,7 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     private Connection optConnection() {
-        return session.get(StorageOperation.PARAM_CONNECTION, Connection.class, null);
+        return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
     }
 
     private <T> T getConfigValue(String property, Class<T> coerceTo, T defaultValue) {
