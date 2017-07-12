@@ -53,6 +53,8 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link StorageOperation}
+ * 
+ * @param <T> The return type of the operation
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

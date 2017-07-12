@@ -64,7 +64,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractStorageOperation}
- *
+ * 
+ * @param <S> The storage class
+ * @param <T> The return type of the operation
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractStorageOperation<S, T> implements StorageOperation<T> {
