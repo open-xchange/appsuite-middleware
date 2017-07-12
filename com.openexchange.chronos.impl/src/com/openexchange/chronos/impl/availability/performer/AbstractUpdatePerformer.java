@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
@@ -104,14 +105,19 @@ abstract class AbstractUpdatePerformer<T> {
      */
     List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<CalendarAvailability> availabilities) throws OXException {
         // Set the identifiers
+        Date timeNow = new Date(System.currentTimeMillis());
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (CalendarAvailability availability : availabilities) {
             String availabilityId = storage.nextCalendarAvailabilityId();
             availability.setId(availabilityId);
+            availability.setCalendarUser(session.getUserId());
+            availability.setLastModified(timeNow);
             caIds.add(availabilityId);
             for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
                 freeSlot.setId(storage.nextCalendarFreeSlotId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
+                freeSlot.setCalendarUser(session.getUserId());
+                freeSlot.setLastModified(timeNow);
             }
         }
         return caIds;

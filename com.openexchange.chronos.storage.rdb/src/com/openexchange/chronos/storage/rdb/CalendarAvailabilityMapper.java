@@ -175,6 +175,28 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
         });
+        mappings.put(AvailabilityField.user, new IntegerMapping<CalendarAvailability>("calendarUser", "Calendar User ID") {
+
+            @Override
+            public boolean isSet(CalendarAvailability object) {
+                return object.contains(AvailabilityField.user);
+            }
+
+            @Override
+            public void set(CalendarAvailability object, Integer value) throws OXException {
+                object.setCalendarUser(value);
+            }
+
+            @Override
+            public Integer get(CalendarAvailability object) {
+                return object.getCalendarUser();
+            }
+
+            @Override
+            public void remove(CalendarAvailability object) {
+                object.removeCalendarUser();
+            }
+        });
         mappings.put(AvailabilityField.busytype, new VarCharMapping<CalendarAvailability>("busyType", "Busy Type") {
 
             @Override

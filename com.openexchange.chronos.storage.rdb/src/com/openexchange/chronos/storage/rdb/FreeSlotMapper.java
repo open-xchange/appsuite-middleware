@@ -173,7 +173,28 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
             public void remove(CalendarFreeSlot object) {
                 object.removeCalendarAvailabilityId();
             }
+        });
+        mappings.put(FreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("calendarUser", "Calendar User ID") {
 
+            @Override
+            public boolean isSet(CalendarFreeSlot object) {
+                return object.contains(FreeSlotField.user);
+            }
+
+            @Override
+            public void set(CalendarFreeSlot object, Integer value) throws OXException {
+                object.setCalendarUser(value);
+            }
+
+            @Override
+            public Integer get(CalendarFreeSlot object) {
+                return object.getCalendarUser();
+            }
+
+            @Override
+            public void remove(CalendarFreeSlot object) {
+                object.removeCalendarUser();
+            }
         });
         mappings.put(FreeSlotField.uid, new VarCharMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
 

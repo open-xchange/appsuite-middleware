@@ -65,6 +65,7 @@ public class CalendarFreeSlot implements FieldAware {
 
     private String id;
 
+    private int calendarUser;
     private String calendarAvailabilityId;
     private String uid;
     private Date creationTimestamp;
@@ -510,6 +511,32 @@ public class CalendarFreeSlot implements FieldAware {
     public void removeCalendarAvailabilityId() {
         this.calendarAvailabilityId = null;
         fields.remove(FreeSlotField.calendarAvailabilityId);
+    }
+
+    /**
+     * Gets the calendarUser
+     *
+     * @return The calendarUser
+     */
+    public int getCalendarUser() {
+        return calendarUser;
+    }
+
+    /**
+     * Sets the calendarUser
+     *
+     * @param calendarUser The calendarUser to set
+     */
+    public void setCalendarUser(int calendarUser) {
+        this.calendarUser = calendarUser;
+        fields.add(FreeSlotField.user);
+    }
+
+    /**
+     * Removes the calendar user
+     */
+    public void removeCalendarUser() {
+        this.calendarUser = 0;
     }
 
     /*

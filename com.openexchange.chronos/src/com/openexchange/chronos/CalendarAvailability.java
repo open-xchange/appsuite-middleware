@@ -54,7 +54,6 @@ import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
-import com.openexchange.chronos.service.FreeSlotField;
 
 /**
  * {@link CalendarAvailability} - Defines periods of availability for a calendar user.
@@ -131,7 +130,7 @@ public class CalendarAvailability implements FieldAware {
         this.id = id;
         fields.add(AvailabilityField.id);
     }
-    
+
     /**
      * Removes the id
      */
