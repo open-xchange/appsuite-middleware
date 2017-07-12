@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl.performer;
+package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.List;
 import com.openexchange.chronos.service.SetResult;

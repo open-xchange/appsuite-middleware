@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl.performer;
+package com.openexchange.chronos.impl.availability;
 
-import java.util.List;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SetResult;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SetPerformer}
+ * {@link StorageOperation}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SetPerformer extends AbstractUpdatePerformer<SetResult> {
+public interface StorageOperation<T> {
 
     /**
-     * Initialises a new {@link SetPerformer}.
+     * Executes a read only storage operation.
      * 
-     * @param storage
-     * @param session
+     * @return The result of the operation
+     * @throws OXException if the operation fails
      */
-    public SetPerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
-        super(storage, session);
-    }
+    T executeQuery() throws OXException;
 
-    @Override
-    public SetResult perform(List<CalendarAvailability> calendarAvailabilities) throws OXException {
-        // Pre-conditions check
-        CheckUtil.check(calendarAvailabilities);
-        // Prepare for storage
-        List<String> availabilityIds = prepareForStorage(storage, calendarAvailabilities);
-        result.setIds(availabilityIds);
-        return result;
-    }
+    /**
+     * Executes the read/write storage operation in a transaction.
+     * 
+     * @return The result
+     * @throws OXException if the operation/transaction fails
+     */
+    T executeUpdate() throws OXException;
 }

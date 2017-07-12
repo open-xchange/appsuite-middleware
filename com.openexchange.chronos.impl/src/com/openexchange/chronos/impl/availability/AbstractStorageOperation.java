@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl;
+package com.openexchange.chronos.impl.availability;
 
 import java.sql.Connection;
 import java.sql.SQLException;

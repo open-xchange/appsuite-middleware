@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl.performer;
+package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.Date;
 import java.util.List;
@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CheckUtil {
+class CheckUtil {
 
     /**
      * Check the validity of the values of the specified {@link List} with {@link CalendarAvailability} blocks

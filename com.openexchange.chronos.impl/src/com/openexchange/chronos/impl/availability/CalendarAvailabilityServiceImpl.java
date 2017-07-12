@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.chronos.availability.impl;
+package com.openexchange.chronos.impl.availability;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.availability.impl.performer.SetPerformer;
+import com.openexchange.chronos.impl.availability.performer.SetPerformer;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SetResult;
