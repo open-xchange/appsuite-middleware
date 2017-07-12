@@ -128,6 +128,7 @@ public class CalendarAvailability implements FieldAware {
      * @param id The id to set
      */
     public void setId(String id) {
+        this.id = id;
         fields.add(AvailabilityField.id);
     }
     
