@@ -132,7 +132,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             }
             txPolicy.commit(connection);
             updated = caAmount + freeSlotsCount;
-            LOG.debug("Inserted {} availability block(s and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
+            LOG.debug("Inserted {} availability block(s) and {} free slot(s) for user {} in context {}.", caAmount, freeSlotsCount, calendarAvailability.getCalendarUser(), context.getContextId());
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
