@@ -73,7 +73,7 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 public class RdbCalendarAvailabilityStorage extends RdbStorage implements CalendarAvailabilityStorage {
 
     private static final CalendarAvailabilityMapper calendarAvailabilityMapper = CalendarAvailabilityMapper.getInstance();
-    private static final FreeSlotMapper freeSlotMapper = FreeSlotMapper.getInstance();
+    private static final CalendarFreeSlotMapper freeSlotMapper = CalendarFreeSlotMapper.getInstance();
     private int accountId;
     private static final String CA_TABLE_NAME = "calendar_availability";
     private static final String CA_FREE_SLOT_NAME = "calendar_free_slot";
