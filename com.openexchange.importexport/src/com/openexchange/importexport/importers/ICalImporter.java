@@ -81,6 +81,8 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ParseResult;
+import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -231,7 +233,7 @@ public class ICalImporter extends AbstractImporter {
 	}
 
 	@Override
-    public List<ImportResult> importData(final ServerSession session,
+    public ImportResults importData(final ServerSession session,
 			final Format format, final InputStream is,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
@@ -252,8 +254,10 @@ public class ICalImporter extends AbstractImporter {
 		final List<ImportResult> list = new ArrayList<ImportResult>();
 		final List<ConversionError> errors = new ArrayList<ConversionError>();
 		final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
+		TruncationInfo truncationInfo = null;
 
 		if (appointmentFolderId != -1) {
+<<<<<<< Upstream, based on branch 'chronos' of https://code.open-xchange.com/git/wd/backend
             if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
     			importAppointment(session, is, optionalParams, appointmentFolderId,
     					appointmentInterface, parser, ctx, defaultTz, list, errors,
@@ -261,21 +265,27 @@ public class ICalImporter extends AbstractImporter {
 		    } else {
                 list.addAll(importEvents(session, is, optionalParams, String.valueOf(appointmentFolderId)));
 		    }
+=======
+			truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
+					appointmentInterface, parser, ctx, defaultTz, list, errors,
+					warnings);
+>>>>>>> 22e79af Fix for bug 54593: Add warning if number of imported objects were truncated #2
 		}
 		if (taskFolderId != -1) {
-			importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
+			truncationInfo = importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
 					list, errors, warnings);
 		}
-		return list;
+		return new DefaultImportResults(list, truncationInfo);
 	}
 
-	private void importTask(final InputStream is, final Map<String, String[]> optionalParams, final int taskFolderId,
+	private TruncationInfo importTask(final InputStream is, final Map<String, String[]> optionalParams, final int taskFolderId,
 			final TasksSQLInterface taskInterface, final ICalParser parser,
 			final Context ctx, final TimeZone defaultTz,
 			final List<ImportResult> list, final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
 			throws OXException {
-		List<Task> tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
+		ParseResult<Task> tasks = parser.parseTasks(is, defaultTz, ctx, errors, warnings);
+		TruncationInfo truncationInfo = tasks.getTruncationInfo();
 		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
@@ -297,7 +307,7 @@ public class ICalImporter extends AbstractImporter {
         boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
         Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		int index = 0;
-		final Iterator<Task> iter = tasks.iterator();
+		final Iterator<Task> iter = tasks.getImportedObjects().iterator();
 		while (iter.hasNext()) {
 			final ImportResult importResult = new ImportResult();
 			final ConversionError error = errorMap.get(index);
@@ -356,6 +366,7 @@ public class ICalImporter extends AbstractImporter {
 				}
 			});
 		}
+		return truncationInfo;
 	}
 
     /**
@@ -428,7 +439,7 @@ public class ICalImporter extends AbstractImporter {
         return importResults;
     }
 
-	private void importAppointment(final ServerSession session,
+	private TruncationInfo importAppointment(final ServerSession session,
 			final InputStream is, final Map<String, String[]> optionalParams,
 			final int appointmentFolderId,
 			final AppointmentSQLInterface appointmentInterface,
@@ -437,7 +448,9 @@ public class ICalImporter extends AbstractImporter {
 			final List<ConversionError> errors,
 			final List<ConversionWarning> warnings)
 			throws OXException {
-	    List<CalendarDataObject> appointments = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
+	    ParseResult<CalendarDataObject> parseResult = parser.parseAppointments(is, defaultTz, ctx, errors, warnings);
+	    List<CalendarDataObject> appointments = parseResult.getImportedObjects();
+	    TruncationInfo truncationInfo = parseResult.getTruncationInfo();
 		final TIntObjectMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
 		for (final ConversionError error : errors) {
@@ -587,6 +600,7 @@ public class ICalImporter extends AbstractImporter {
 				}
 			});
 		}
+		return truncationInfo;
 	}
 
     private OXException makeMoreInformative(OXException e) {

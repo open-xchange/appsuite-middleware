@@ -106,6 +106,7 @@ public class AbstractICalTest extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractICalTest.class);
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -156,7 +157,7 @@ public class AbstractICalTest extends AbstractAJAXSession {
         final ICalParser parser = new ICal4JParser();
         final List<ConversionError> errors = new LinkedList<ConversionError>();
         final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
-        final List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings);
+        final List<CalendarDataObject> exportData = parser.parseAppointments(response.getICal(), timeZone, ctx, errors, warnings).getImportedObjects();
         if (!errors.isEmpty()) {
             throw errors.get(0);
         }
@@ -169,12 +170,12 @@ public class AbstractICalTest extends AbstractAJAXSession {
     public Task[] exportTask(final TimeZone timeZone, final Context ctx) throws Exception, OXException {
         final ICalExportRequest request = new ICalExportRequest(taskFolderId, Types.TASK);
         final ICalExportResponse response = Executor.execute(getClient(), request);
-    
+
         List<Task> exportData = new ArrayList<Task>();
         final ICalParser parser = new ICal4JParser();
         final List<ConversionError> errors = new LinkedList<ConversionError>();
         final List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
-        exportData = parser.parseTasks(response.getICal(), timeZone, ctx, errors, warnings);
+        exportData = parser.parseTasks(response.getICal(), timeZone, ctx, errors, warnings).getImportedObjects();
 
         return exportData.toArray(new Task[exportData.size()]);
     }

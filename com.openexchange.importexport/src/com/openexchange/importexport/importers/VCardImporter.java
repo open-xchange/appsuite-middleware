@@ -151,7 +151,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
     }
 
     @Override
-    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
+    public ImportResults importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
 
         int contactFolderId = -1;
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
@@ -188,7 +188,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             if (false == importVCards.hasNext()) {
                 throw ImportExportExceptionCodes.NO_VCARD_FOUND.create();
             }
-            
+
             String maxSimilarity = null;
             if (optionalParams.containsKey(MAX_SIMILARITY)) {
                 String[] tmpArray = optionalParams.get(MAX_SIMILARITY);
@@ -196,7 +196,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     maxSimilarity = tmpArray[0];
                 }
             }
-            
+
             while (importVCards.hasNext()) {
                 ImportResult importResult = new ImportResult();
                 if (limit <= 0 || count <= limit) {
@@ -250,7 +250,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             SearchIterators.close(importVCards);
         }
 
-        return list;
+        return new DefaultImportResults(list);
     }
 
     private Contact checkSimilarity(ServerSession session, Contact con, float maxSimilarity) throws OXException {
