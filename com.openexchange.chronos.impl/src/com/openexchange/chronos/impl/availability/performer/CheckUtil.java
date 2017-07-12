@@ -98,6 +98,9 @@ class CheckUtil {
             throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
         }
 
+        if (availability.getCalendarFreeSlots() == null) {
+            return;
+        }
         for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
             checkMandatory(freeSlot, FreeSlotField.dtstamp, FreeSlotField.uid, FreeSlotField.dtstart);
             checkConstraints(freeSlot);
