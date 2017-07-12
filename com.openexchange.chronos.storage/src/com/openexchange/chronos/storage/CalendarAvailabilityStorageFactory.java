@@ -65,10 +65,9 @@ public interface CalendarAvailabilityStorageFactory {
      * Initialises a new {@link CalendarAvailabilityStorage}
      * 
      * @param context The context
-     * @param accountId The account identifier
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      * @throws OXException if an error is occurred
      */
-    CalendarAvailabilityStorage create(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
+    CalendarAvailabilityStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
 }

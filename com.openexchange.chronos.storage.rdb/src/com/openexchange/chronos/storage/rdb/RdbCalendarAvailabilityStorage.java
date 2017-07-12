@@ -74,7 +74,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     private static final CalendarAvailabilityMapper calendarAvailabilityMapper = CalendarAvailabilityMapper.getInstance();
     private static final CalendarFreeSlotMapper freeSlotMapper = CalendarFreeSlotMapper.getInstance();
-    private int accountId;
     private static final String CA_TABLE_NAME = "calendar_availability";
     private static final String CA_FREE_SLOT_NAME = "calendar_free_slot";
 
@@ -87,9 +86,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbCalendarAvailabilityStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbCalendarAvailabilityStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
-        this.accountId = accountId;
 
     }
 
@@ -100,7 +98,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     @Override
     public String nextCalendarAvailabilityId() throws OXException {
-        return nextId(accountId, "calendar_availability_sequence");
+        return nextId("calendar_availability_sequence");
     }
 
     /*
@@ -110,7 +108,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     @Override
     public String nextCalendarFreeSlotId() throws OXException {
-        return nextId(accountId, "calendar_free_slot_sequence");
+        return nextId("calendar_free_slot_sequence");
     }
 
     /*
@@ -225,7 +223,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
             parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mapper.getMappedFields());
             return logExecuteUpdate(stmt);
         }
@@ -262,7 +259,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             int parameterIndex = 1;
             for (O item : items) {
                 stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, accountId);
                 parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mappedFields);
             }
             return logExecuteUpdate(stmt);
@@ -281,8 +277,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         E[] mappedFields = mapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(") ");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(")");
+        sb.append("(cid,").append(mapper.getColumns(mappedFields)).append(") ");
+        sb.append("VALUES (?,").append(mapper.getParameters(mappedFields)).append(")");
         return sb;
     }
 
@@ -298,9 +294,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         int updated = deleteCalendarFreeSlots(calendarAvailabilityId, connection);
 
         int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND account=? AND id=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND id=?")) {
             stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
             return logExecuteUpdate(stmt) + updated;
         }
@@ -316,9 +311,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private int deleteCalendarFreeSlots(String calendarAvailabilityId, Connection connection) throws SQLException {
         int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND account=? AND calendarAvailability=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND calendarAvailability=?")) {
             stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
             return logExecuteUpdate(stmt);
         }

@@ -198,14 +198,14 @@ public abstract class RdbStorage {
      * @return The next sequential identifier
      * @throws OXException if the next seq id cannot be generated
      */
-    protected String nextId(int accountId, String sequenceTable) throws OXException {
+    protected String nextId(String sequenceTable) throws OXException {
         String value = null;
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            value = asString(nextId(connection, accountId, sequenceTable));
+            value = asString(nextId(connection, sequenceTable));
             updated = 1;
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -214,6 +214,40 @@ public abstract class RdbStorage {
             release(connection, updated);
         }
         return value;
+    }
+    
+    /**
+     * Generates the next sequential identifier in the context based on the given sequence table.
+     *
+     * @param connection A connection within an active transaction
+     * @param sequenceTable The sequence number to use for identifier generation
+     * @return The next sequential identifier
+     */
+    //TODO: consolidate somehow with the duplicate method....
+    protected int nextId(Connection connection, String sequenceTable) throws SQLException {
+        if (connection.getAutoCommit()) {
+            throw new SQLException("Generating unique identifier is threadsafe if and only if it is executed in a transaction.");
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE " + sequenceTable + " SET id=LAST_INSERT_ID(id+1) WHERE cid=?;")) {
+            stmt.setInt(1, context.getContextId());
+            if (0 == logExecuteUpdate(stmt)) {
+                try (PreparedStatement stmt2 = connection.prepareStatement("INSERT INTO " + sequenceTable + " (cid,id) VALUES (?,0);")) {
+                    stmt2.setInt(1, context.getContextId());
+                    logExecuteUpdate(stmt2);
+                }
+                if (0 == logExecuteUpdate(stmt)) {
+                    throw new SQLException("Unable to initialize sequence table \"" + sequenceTable + "\" in context " + context.getContextId());
+                }
+            }
+        }
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT LAST_INSERT_ID();")) {
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        }
+        throw new SQLException("Unable to generate next sequential identifier via table \"" + sequenceTable + "\" in context " + context.getContextId());
     }
 
     /**
