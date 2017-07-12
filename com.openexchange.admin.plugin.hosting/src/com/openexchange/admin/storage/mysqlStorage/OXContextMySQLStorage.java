@@ -1118,7 +1118,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException("Context administrator is not defined.");
         }
 
-        Context context = null;
         Database db = null;
         boolean decrementFileStoreCount = false;
         boolean decrementDatabaseCount = false;
@@ -1195,6 +1194,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Create context (within transaction)
+            Context context;
             {
                 startTransaction(configCon);
                 boolean rollback = true;
@@ -1218,6 +1218,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             decrementDatabaseSchemaCount = false;
             decrementDatabaseCount = false;
             decrementFileStoreCount = false;
+            return context;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -1237,8 +1238,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("Error pushing ox write connection to pool!", e);
             }
         }
-
-        return context;
     }
 
     /**

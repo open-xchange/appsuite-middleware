@@ -672,7 +672,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_filestore" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param ctx The context newly using a filestore
@@ -699,7 +699,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_filestore" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_filestore" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param ctx The context newly using a filestore
@@ -725,7 +725,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_dbpool" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param db The used database
@@ -752,7 +752,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_dbpool" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param db The used database
@@ -778,7 +778,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_dbpool" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param schema The schema name
@@ -806,7 +806,7 @@ public class OXContextMySQLStorageCommon {
     }
 
     /**
-     * <code>UPDATE</code>s the data row into the "contexts_per_dbpool" table.
+     * <code>UPDATE</code>s the data row in the "contexts_per_dbpool" table.
      *
      * @param increment <code>true</code> to increment; otherwise <code>false</code> for decrement
      * @param schema The schema name
