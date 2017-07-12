@@ -49,12 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -70,10 +64,8 @@ import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -103,7 +95,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
      */
     @Override
@@ -113,7 +105,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
      */
     @Override
@@ -123,7 +115,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
@@ -557,36 +549,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
                 object.removeComments();
             }
         });
-        mappings.put(AvailabilityField.extendedProperties, new DefaultDbMapping<ExtendedProperties, CalendarAvailability>("extendedProperties", "Extended Properties", Types.BLOB) {
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, CalendarAvailability object) throws SQLException {
-                ExtendedProperties value = get(object);
-                if (null == value) {
-                    statement.setNull(parameterIndex, getSqlType());
-                } else {
-                    try {
-                        byte[] data = ExtendedPropertiesCodec.encode(value);
-                        statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
-                    } catch (IOException e) {
-                        throw new SQLException(e);
-                    }
-                }
-                return 1;
-            }
-
-            @Override
-            public ExtendedProperties get(ResultSet resultSet, String columnLabel) throws SQLException {
-                InputStream inputStream = null;
-                try {
-                    inputStream = resultSet.getBinaryStream(columnLabel);
-                    return ExtendedPropertiesCodec.decode(inputStream);
-                } catch (IOException e) {
-                    throw new SQLException(e);
-                } finally {
-                    Streams.close(inputStream);
-                }
-            }
+        mappings.put(AvailabilityField.extendedProperties, new ExtendedPropertiesMapping<CalendarAvailability>("extendedProperties", "Extended Properties") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {

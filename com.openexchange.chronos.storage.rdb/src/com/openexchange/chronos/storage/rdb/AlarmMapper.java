@@ -50,8 +50,6 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.L;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -69,12 +67,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Enums;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -330,37 +326,8 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             public void remove(Alarm alarm) {
                 alarm.removeTrigger();
             }
-
         });
-        mappings.put(AlarmField.EXTENDED_PROPERTIES, new DefaultDbMapping<ExtendedProperties, Alarm>("extendedProperties", "Extended Properties", Types.BLOB) {
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, Alarm object) throws SQLException {
-                try {
-                    byte[] data = ExtendedPropertiesCodec.encode(get(object));
-                    if (null == data) {
-                        statement.setNull(parameterIndex, getSqlType());
-                    } else {
-                        statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
-                    }
-                    return 1;
-                } catch (IOException e) {
-                    throw new SQLException(e);
-                }
-            }
-
-            @Override
-            public ExtendedProperties get(ResultSet resultSet, String columnLabel) throws SQLException {
-                InputStream inputStream = null;
-                try {
-                    inputStream = resultSet.getBinaryStream(columnLabel);
-                    return ExtendedPropertiesCodec.decode(inputStream);
-                } catch (IOException e) {
-                    throw new SQLException(e);
-                } finally {
-                    Streams.close(inputStream);
-                }
-            }
+        mappings.put(AlarmField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Alarm>("extendedProperties", "Extended Properties") {
 
             @Override
             public boolean isSet(Alarm object) {
@@ -381,7 +348,6 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             public void remove(Alarm object) {
                 object.removeExtendedProperties();
             }
-
         });
 
         return mappings;

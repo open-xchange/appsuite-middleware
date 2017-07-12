@@ -50,12 +50,6 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.L;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -70,15 +64,13 @@ import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarFreeSlotMapper}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, CalendarFreeSlotField> {
@@ -87,7 +79,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
 
     /**
      * Gets the mapper instance
-     * 
+     *
      * @return The mapper instance
      */
     public static CalendarFreeSlotMapper getInstance() {
@@ -103,7 +95,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
      */
     @Override
@@ -113,7 +105,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
      */
     @Override
@@ -123,7 +115,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
@@ -468,36 +460,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeComments();
             }
         });
-        mappings.put(CalendarFreeSlotField.extendedProperties, new DefaultDbMapping<ExtendedProperties, CalendarFreeSlot>("extendedProperties", "Extended Properties", Types.BLOB) {
-
-            @Override
-            public int set(PreparedStatement statement, int parameterIndex, CalendarFreeSlot object) throws SQLException {
-                ExtendedProperties value = get(object);
-                if (null == value) {
-                    statement.setNull(parameterIndex, getSqlType());
-                } else {
-                    try {
-                        byte[] data = ExtendedPropertiesCodec.encode(value);
-                        statement.setBinaryStream(parameterIndex, Streams.newByteArrayInputStream(data), data.length);
-                    } catch (IOException e) {
-                        throw new SQLException(e);
-                    }
-                }
-                return 1;
-            }
-
-            @Override
-            public ExtendedProperties get(ResultSet resultSet, String columnLabel) throws SQLException {
-                InputStream inputStream = null;
-                try {
-                    inputStream = resultSet.getBinaryStream(columnLabel);
-                    return ExtendedPropertiesCodec.decode(inputStream);
-                } catch (IOException e) {
-                    throw new SQLException(e);
-                } finally {
-                    Streams.close(inputStream);
-                }
-            }
+        mappings.put(CalendarFreeSlotField.extendedProperties, new ExtendedPropertiesMapping<CalendarFreeSlot>("extendedProperties", "Extended Properties") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
