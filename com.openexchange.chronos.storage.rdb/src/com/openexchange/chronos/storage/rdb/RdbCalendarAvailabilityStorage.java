@@ -251,7 +251,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         // Prepare the initial query
         StringBuilder sb = constructInsertQueryBuilder(tableName, mapper);
         // Prepare for all items
-        for (int index = 0; index < items.size(); index++) {
+        for (int index = 1; index < items.size(); index++) {
             sb.append(",(?,?,").append(mapper.getParameters(mappedFields)).append(")");
 
         }
