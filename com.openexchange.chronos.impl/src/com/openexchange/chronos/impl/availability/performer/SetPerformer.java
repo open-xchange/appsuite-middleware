@@ -80,6 +80,7 @@ public class SetPerformer extends AbstractUpdatePerformer<SetResult> {
         // Prepare for storage
         List<String> availabilityIds = prepareForStorage(storage, calendarAvailabilities);
         result.setIds(availabilityIds);
+        storage.insertCalendarAvailabilities(calendarAvailabilities);
         return result;
     }
 }
