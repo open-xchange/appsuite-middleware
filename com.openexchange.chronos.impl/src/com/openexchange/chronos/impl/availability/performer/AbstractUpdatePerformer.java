@@ -55,7 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.service.AvailabilityField;
-import com.openexchange.chronos.service.CalendarFreeSlotField;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -127,7 +127,7 @@ abstract class AbstractUpdatePerformer<T> {
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);
                 // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
-                if (!freeSlot.contains(CalendarFreeSlotField.dtstamp)) {
+                if (!freeSlot.contains(FreeSlotField.dtstamp)) {
                     freeSlot.setCreationTimestamp(timeNow);
                 }
             }

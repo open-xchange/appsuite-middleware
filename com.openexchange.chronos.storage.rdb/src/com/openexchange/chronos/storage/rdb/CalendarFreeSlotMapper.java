@@ -58,7 +58,7 @@ import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.service.CalendarFreeSlotField;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
@@ -73,7 +73,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, CalendarFreeSlotField> {
+public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotField> {
 
     private static final CalendarFreeSlotMapper INSTANCE = new CalendarFreeSlotMapper();
 
@@ -109,8 +109,8 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
      * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
      */
     @Override
-    public CalendarFreeSlotField[] newArray(int size) {
-        return new CalendarFreeSlotField[size];
+    public FreeSlotField[] newArray(int size) {
+        return new FreeSlotField[size];
     }
 
     /*
@@ -119,13 +119,13 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
-    protected EnumMap<CalendarFreeSlotField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
-        EnumMap<CalendarFreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<CalendarFreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>>(CalendarFreeSlotField.class);
-        mappings.put(CalendarFreeSlotField.id, new IntegerMapping<CalendarFreeSlot>("id", "Free Slot ID") {
+    protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
+        EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>>(FreeSlotField.class);
+        mappings.put(FreeSlotField.id, new IntegerMapping<CalendarFreeSlot>("id", "Free Slot ID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.id);
+                return object.contains(FreeSlotField.id);
             }
 
             @Override
@@ -144,11 +144,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
             }
 
         });
-        mappings.put(CalendarFreeSlotField.calendarAvailabilityId, new IntegerMapping<CalendarFreeSlot>("calendarAvailability", "Calendar Availability Parent ID") {
+        mappings.put(FreeSlotField.calendarAvailabilityId, new IntegerMapping<CalendarFreeSlot>("calendarAvailability", "Calendar Availability Parent ID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.calendarAvailabilityId);
+                return object.contains(FreeSlotField.calendarAvailabilityId);
             }
 
             @Override
@@ -166,11 +166,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeCalendarAvailabilityId();
             }
         });
-        mappings.put(CalendarFreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("user", "Calendar User ID") {
+        mappings.put(FreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("user", "Calendar User ID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.user);
+                return object.contains(FreeSlotField.user);
             }
 
             @Override
@@ -188,11 +188,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeCalendarUser();
             }
         });
-        mappings.put(CalendarFreeSlotField.uid, new VarCharMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
+        mappings.put(FreeSlotField.uid, new VarCharMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.uid);
+                return object.contains(FreeSlotField.uid);
             }
 
             @Override
@@ -211,11 +211,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
             }
 
         });
-        mappings.put(CalendarFreeSlotField.dtstart, new DateMapping<CalendarFreeSlot>("start", "Start DateTime") {
+        mappings.put(FreeSlotField.dtstart, new DateMapping<CalendarFreeSlot>("start", "Start DateTime") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.dtstart);
+                return object.contains(FreeSlotField.dtstart);
             }
 
             @Override
@@ -234,11 +234,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
             }
 
         });
-        mappings.put(CalendarFreeSlotField.dtend, new DateMapping<CalendarFreeSlot>("end", "End DateTime") {
+        mappings.put(FreeSlotField.dtend, new DateMapping<CalendarFreeSlot>("end", "End DateTime") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.dtend);
+                return object.contains(FreeSlotField.dtend);
             }
 
             @Override
@@ -256,11 +256,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeEndTime();
             }
         });
-        mappings.put(CalendarFreeSlotField.created, new BigIntMapping<CalendarFreeSlot>("created", "Created") {
+        mappings.put(FreeSlotField.created, new BigIntMapping<CalendarFreeSlot>("created", "Created") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.created);
+                return object.contains(FreeSlotField.created);
             }
 
             @Override
@@ -279,11 +279,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeCreated();
             }
         });
-        mappings.put(CalendarFreeSlotField.lastModified, new BigIntMapping<CalendarFreeSlot>("modified", "Last Modified") {
+        mappings.put(FreeSlotField.lastModified, new BigIntMapping<CalendarFreeSlot>("modified", "Last Modified") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.lastModified);
+                return object.contains(FreeSlotField.lastModified);
             }
 
             @Override
@@ -301,11 +301,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeLastModified();
             }
         });
-        mappings.put(CalendarFreeSlotField.description, new VarCharMapping<CalendarFreeSlot>("description", "Description") {
+        mappings.put(FreeSlotField.description, new VarCharMapping<CalendarFreeSlot>("description", "Description") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.description);
+                return object.contains(FreeSlotField.description);
             }
 
             @Override
@@ -324,7 +324,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeDescription();
             }
         });
-        mappings.put(CalendarFreeSlotField.recurid, new BigIntMapping<CalendarFreeSlot>("recurrence", "Recurrence ID") {
+        mappings.put(FreeSlotField.recurid, new BigIntMapping<CalendarFreeSlot>("recurrence", "Recurrence ID") {
 
             @Override
             public void set(CalendarFreeSlot object, Long value) {
@@ -333,7 +333,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.recurid);
+                return object.contains(FreeSlotField.recurid);
             }
 
             @Override
@@ -347,11 +347,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(CalendarFreeSlotField.rrule, new VarCharMapping<CalendarFreeSlot>("rrule", "Recurrence Rule") {
+        mappings.put(FreeSlotField.rrule, new VarCharMapping<CalendarFreeSlot>("rrule", "Recurrence Rule") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.rrule);
+                return object.contains(FreeSlotField.rrule);
             }
 
             @Override
@@ -370,11 +370,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(CalendarFreeSlotField.summary, new VarCharMapping<CalendarFreeSlot>("summary", "Summary") {
+        mappings.put(FreeSlotField.summary, new VarCharMapping<CalendarFreeSlot>("summary", "Summary") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.summary);
+                return object.contains(FreeSlotField.summary);
             }
 
             @Override
@@ -392,11 +392,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeSummary();
             }
         });
-        mappings.put(CalendarFreeSlotField.categories, new VarCharMapping<CalendarFreeSlot>("categories", "Categories") {
+        mappings.put(FreeSlotField.categories, new VarCharMapping<CalendarFreeSlot>("categories", "Categories") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.categories);
+                return object.contains(FreeSlotField.categories);
             }
 
             @Override
@@ -426,11 +426,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeCategories();
             }
         });
-        mappings.put(CalendarFreeSlotField.comment, new VarCharMapping<CalendarFreeSlot>("comment", "Comment") {
+        mappings.put(FreeSlotField.comment, new VarCharMapping<CalendarFreeSlot>("comment", "Comment") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.comment);
+                return object.contains(FreeSlotField.comment);
             }
 
             @Override
@@ -460,11 +460,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Ca
                 object.removeComments();
             }
         });
-        mappings.put(CalendarFreeSlotField.extendedProperties, new ExtendedPropertiesMapping<CalendarFreeSlot>("extendedProperties", "Extended Properties") {
+        mappings.put(FreeSlotField.extendedProperties, new ExtendedPropertiesMapping<CalendarFreeSlot>("extendedProperties", "Extended Properties") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
-                return object.contains(CalendarFreeSlotField.extendedProperties);
+                return object.contains(FreeSlotField.extendedProperties);
             }
 
             @Override

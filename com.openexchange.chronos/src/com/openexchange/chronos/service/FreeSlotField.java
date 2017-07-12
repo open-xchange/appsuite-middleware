@@ -52,11 +52,11 @@ package com.openexchange.chronos.service;
 import java.util.EnumSet;
 
 /**
- * {@link CalendarFreeSlotField}
+ * {@link FreeSlotField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum CalendarFreeSlotField implements CalendarAvailabilityField {
+public enum FreeSlotField implements CalendarAvailabilityField {
 
     id(true, false),
     calendarAvailabilityId(true, false),
@@ -92,12 +92,12 @@ public enum CalendarFreeSlotField implements CalendarAvailabilityField {
     private final boolean multiOccurrent;
 
     /**
-     * Initialises a new {@link CalendarFreeSlotField}.
+     * Initialises a new {@link FreeSlotField}.
      * 
      * @param mandatory whether the field is mandatory
      * @param multiOccurrent whether the field can appear more than once
      */
-    private CalendarFreeSlotField(boolean mandatory, boolean multiOccurrent) {
+    private FreeSlotField(boolean mandatory, boolean multiOccurrent) {
         this.mandatory = mandatory;
         this.multiOccurrent = multiOccurrent;
     }
@@ -127,7 +127,7 @@ public enum CalendarFreeSlotField implements CalendarAvailabilityField {
      * 
      * @return The mandatory fields
      */
-    public static EnumSet<CalendarFreeSlotField> getMandatoryFields() {
+    public static EnumSet<FreeSlotField> getMandatoryFields() {
         return EnumSet.of(dtstart, dtstamp, uid);
     }
 
