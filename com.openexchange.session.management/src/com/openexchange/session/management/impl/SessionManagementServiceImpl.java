@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,7 +63,9 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -76,7 +79,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementProperty;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.session.management.exception.SessionManagementExceptionCodes;
@@ -98,40 +100,124 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionManagementServiceImpl.class);
 
+    private static final SessionManagementServiceImpl INSTANCE = new SessionManagementServiceImpl();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static SessionManagementServiceImpl getInstance() {
+        return INSTANCE;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<Set<String>> blacklistedClients;
+
+    private SessionManagementServiceImpl() {
+        super();
+        blacklistedClients = new AtomicReference<Set<String>>(doGetBlacklistedClients());
+    }
+
+    /**
+     * Reinitializes clients black-list.
+     */
+    public void reinitBlacklistedClients() {
+        blacklistedClients.set(doGetBlacklistedClients());
+    }
+
     @Override
-    public Collection<ManagedSession> getSessionsForUser(Session session) throws OXException {
-        SessiondService service = Services.getService(SessiondService.class);
-        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
-        if (null == service) {
+    public Collection<ManagedSession> getSessionsForUser(Session session, boolean applyClientBlacklist) throws OXException {
+        if (null == session) {
+            return Collections.emptyList();
+        }
+
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        if (null == sessiondService) {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
-        List<String> blackListedClients = getBlacklistedClients();
 
-        Collection<Session> localSessions = service.getSessions(session.getUserId(), session.getContextId());
+        Set<String> blackListedClients = applyClientBlacklist ? Collections.<String> emptySet() : getBlacklistedClients();
+
+        Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
-        ArrayList<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        // Initialize default value for location
+        String location;
+        {
+            location = SessionManagementStrings.UNKNOWN_LOCATION;
+            UserService userService = Services.getService(UserService.class);
+            if (null != userService) {
+                try {
+                    location = StringHelper.valueOf(userService.getUser(session.getUserId(), session.getContextId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION);
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
+            }
+        }
+
+        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
+        int totalSize = localSessions.size() + remoteSessions.size();
+        Map<String, String> ip2locationCache = new HashMap<>(totalSize);
+        List<ManagedSession> result = new ArrayList<>(totalSize);
         for (Session s : localSessions) {
-            if (blackListedClients.contains(s.getClient())) {
-                continue;
+            if (false == blackListedClients.contains(s.getClient())) {
+                ManagedSession managedSession = DefaultManagedSession.builder(s)
+                    .setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService))
+                    .build();
+                result.add(managedSession);
             }
-            ManagedSession managedSession = new ManagedSession(s);
-            if (null != geoLocationService) {
-                determineLocation(managedSession);
-            }
-            result.add(managedSession);
         }
         for (PortableSession s : remoteSessions) {
-            if (blackListedClients.contains(s.getClient())) {
-                continue;
+            if (false == blackListedClients.contains(s.getClient())) {
+                ManagedSession managedSession = DefaultManagedSession.builder(s)
+                    .setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService))
+                    .build();
+                result.add(managedSession);
             }
-            ManagedSession managedSession = new ManagedSession(s);
-            if (null != geoLocationService) {
-                determineLocation(managedSession);
-            }
-            result.add(managedSession);
+
         }
         return result;
+    }
+
+    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
+        String ipAddress = s.getLocalIp();
+
+        // Check "cache" first
+        String location = ip2locationCache.get(ipAddress);
+        if (null != location) {
+            return location;
+        }
+
+        if (null != geoLocationService) {
+            try {
+                GeoInformation geoInformation = geoLocationService.getGeoInformation(ipAddress);
+
+                StringBuilder sb = null;
+                if (geoInformation.hasCity()) {
+                    sb = new StringBuilder(geoInformation.getCity());
+                }
+                if (geoInformation.hasCountry()) {
+                    if (null == sb) {
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(geoInformation.getCountry());
+                }
+                if (null != sb) {
+                    location = sb.toString();
+                    ip2locationCache.put(ipAddress, location);
+                    return location;
+                }
+            } catch (OXException e) {
+                LOG.warn("Failed to determine location for session with IP address {}", ipAddress, e);
+            }
+        }
+
+        ip2locationCache.put(ipAddress, def);
+        return def;
     }
 
     @Override
@@ -153,42 +239,27 @@ public class SessionManagementServiceImpl implements SessionManagementService {
     }
 
     @Override
-    public void determineLocation(ManagedSession session) throws OXException {
-        GeoLocationService service = Services.getService(GeoLocationService.class);
-        UserService userService = Services.getService(UserService.class);
-        if (null == service || null == userService) {
-            return;
-        }
-        try {
-            GeoInformation geoInformation = service.getGeoInformation(session.getIpAddress());
-            StringBuilder sb = new StringBuilder();
-            if (geoInformation.hasCity()) {
-                sb.append(geoInformation.getCity());
-            }
-            if (geoInformation.hasCountry()) {
-                sb.append(", ").append(geoInformation.getCountry());
-            }
-            session.setLocation(sb.toString());
-        } catch (OXException e) {
-            LOG.info(e.getMessage());
-            session.setLocation(StringHelper.valueOf(userService.getUser(session.getUserId(), session.getCtxId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION));
-        }
+    public Set<String> getBlacklistedClients() throws OXException {
+        return blacklistedClients.get();
     }
 
-    private List<String> getBlacklistedClients() {
+    private Set<String> doGetBlacklistedClients() {
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         if (null == configService) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
+
         String value = configService.getProperty(SessionManagementProperty.clientBlacklist);
         if (Strings.isEmpty(value)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
+
         String[] clients = Strings.splitByComma(value);
-        if (null == clients) {
-            return Collections.emptyList();
+        if (null == clients || clients.length == 0) {
+            return Collections.emptySet();
         }
-        return Arrays.asList(clients);
+
+        return ImmutableSet.copyOf(clients);
     }
 
     private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {

@@ -166,15 +166,18 @@ public class ICal4JParser implements ICalParser {
             for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 final ComponentList vevents = calendar.getComponents("VEVENT");
 
+                int size = vevents.size();
                 int myLimit;
-                if (limit >= 0 && limit < vevents.size()) {
+                if (limit >= 0 && limit < size) {
                     myLimit = limit;
                     if (null == appointments) {
                         appointments = new ArrayList<CalendarDataObject>(myLimit);
                     }
-                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                    for (int index = limit; index < size; index++) {
+                        warnings.add(ConversionWarning.truncatedConversionWarningFor(index, myLimit));
+                    }
                 } else {
-                    myLimit = vevents.size();
+                    myLimit = size;
                     if (null == appointments) {
                         appointments = new ArrayList<CalendarDataObject>(myLimit);
                     }
@@ -221,15 +224,18 @@ public class ICal4JParser implements ICalParser {
             List<FreeBusyInformation> fbInfos = null;
             for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList freebusies = calendar.getComponents("VFREEBUSY");
+                int size = freebusies.size();
                 int myLimit;
-                if (limit >= 0 && limit < freebusies.size()) {
+                if (limit >= 0 && limit < size) {
                     myLimit = limit;
                     if (null == fbInfos) {
                         fbInfos = new ArrayList<>(myLimit);
                     }
-                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                    for (int index = limit; index < size; index++) {
+                        warnings.add(ConversionWarning.truncatedConversionWarningFor(index, myLimit));
+                    }
                 } else {
-                    myLimit = freebusies.size();
+                    myLimit = size;
                     if (null == fbInfos) {
                         fbInfos = new ArrayList<>(myLimit);
                     }
@@ -314,15 +320,18 @@ public class ICal4JParser implements ICalParser {
             List<Task> tasks = null;
             for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
                 ComponentList todos = calendar.getComponents("VTODO");
+                int size = todos.size();
                 int myLimit;
-                if (limit >= 0 && limit < todos.size()) {
+                if (limit >= 0 && limit < size) {
                     myLimit = limit;
                     if (null == tasks) {
                         tasks = new ArrayList<>(myLimit);
                     }
-                    warnings.add(ConversionWarning.truncatedConversionWarningFor(myLimit));
+                    for (int index = limit; index < size; index++) {
+                        warnings.add(ConversionWarning.truncatedConversionWarningFor(index, myLimit));
+                    }
                 } else {
-                    myLimit = todos.size();
+                    myLimit = size;
                     if (null == tasks) {
                         tasks = new ArrayList<>(myLimit);
                     }

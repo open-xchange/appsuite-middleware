@@ -49,83 +49,68 @@
 
 package com.openexchange.session.management;
 
-import com.openexchange.session.Session;
-
 /**
- * {@link ManagedSession}
+ * {@link ManagedSession} - Represents a managed session providing login and session information.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class ManagedSession {
+public interface ManagedSession {
 
-    private final String sessionId;
-    private final String ipAddress;
-    private final String client;
-    private final String userAgent;
-    private final long loginTime;
-    private final int ctxId;
-    private final int userId;
-    private String location;
+    /**
+     * Gets the identifier associated with spawned session.
+     *
+     * @return The session identifier
+     */
+    String getSessionId();
 
-    public ManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId) {
-        super();
-        this.sessionId = sessionId;
-        this.ipAddress = ipAddress;
-        this.client = client;
-        this.userAgent = userAgent;
-        this.loginTime = loginTime;
-        this.ctxId = ctxId;
-        this.userId = userId;
-        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
-    }
+    /**
+     * Gets the IP address associated with spawned session.
+     *
+     * @return The IP address
+     */
+    String getIpAddress();
 
-    public ManagedSession(Session session) {
-        super();
-        this.sessionId = session.getSessionID();
-        this.ipAddress = session.getLocalIp();
-        this.client = session.getClient();
-        this.userAgent = session.getParameter(Session.PARAM_USER_AGENT) != null ? (String) session.getParameter(Session.PARAM_USER_AGENT) : "unknown user-agent";
-        this.loginTime = session.getParameter(Session.PARAM_LOGIN_TIME) != null ? Long.parseLong(String.valueOf(session.getParameter(Session.PARAM_LOGIN_TIME))) : -1;
-        this.ctxId = session.getContextId();
-        this.userId = session.getUserId();
-        this.location = SessionManagementStrings.UNKNOWN_LOCATION;
-    }
+    /**
+     * Gets the client identifier associated with spawned session.
+     *
+     * @return The client identifier
+     */
+    String getClient();
 
-    public String getSessionId() {
-        return sessionId;
-    }
+    /**
+     * Gets the User-Agent associated with spawned session.
+     *
+     * @return The User-Agent identifier
+     */
+    String getUserAgent();
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
+    /**
+     * The time stamp when login happened, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @return The time stamp
+     */
+    long getLoginTime();
 
-    public String getClient() {
-        return client;
-    }
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    int getContextId();
 
-    public String getUserAgent() {
-        return userAgent;
-    }
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    int getUserId();
 
-    public long getLoginTime() {
-        return loginTime;
-    }
-
-    public int getCtxId() {
-        return ctxId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    /**
+     * Gets the (optional) location
+     *
+     * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}
+     */
+    String getLocation();
 
 }
