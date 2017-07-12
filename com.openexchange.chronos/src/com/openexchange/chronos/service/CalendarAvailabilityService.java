@@ -65,8 +65,7 @@ public interface CalendarAvailabilityService {
 
     /**
      * Sets the availability for the specified user. If any of the specified {@link CalendarAvailability} overlaps
-     * with any of the existing {@link CalendarAvailability} exceptions will be raised to indicate that. In that case
-     * the new availability blocks will not be set.
+     * with any of the existing {@link CalendarAvailability} both blocks will be stored
      * 
      * @param session The {@link CalendarSession}
      * @param availability A list with {@link CalendarAvailability} groupings to set
@@ -75,27 +74,6 @@ public interface CalendarAvailabilityService {
      * @throws OXException if the availability cannot be set
      */
     SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availability) throws OXException;
-
-    /**
-     * <p>
-     * Sets the availability for the specified user. If any of the specified {@link CalendarAvailability} overlaps
-     * with any of the existing {@link CalendarAvailability} and the 'merge' flag is set to <code>true</code>, then
-     * the time ranges of both availability blocks will be merged. Any conflicting/overlapping information other
-     * than the time range will be overridden with the newest information from the specified {@link CalendarAvailability}.
-     * </p>
-     * 
-     * <p>
-     * In case the 'merge' flag is set to <code>false</code>, then new {@link CalendarAvailability} blocks will be
-     * created.
-     * </p>
-     * 
-     * @param session The {@link CalendarSession}
-     * @param availability A list with {@link CalendarAvailability} groupings to set
-     * @return A {@link SetResult} with the unique identifiers of the {@link CalendarAvailability} blocks and any
-     *         warnings that occurred during the operation
-     * @throws OXException if the availability cannot be set
-     */
-    SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availability, boolean merge) throws OXException;
 
     /**
      * Gets the {@link CalendarAvailability} for the current user
