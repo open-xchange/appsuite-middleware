@@ -72,9 +72,9 @@ import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponseData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FreeBusyTime;
+import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
 import edu.emory.mathcs.backport.java.util.Collections;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
@@ -240,7 +240,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
             assertEquals(null, freebusyHas2.getError());
             assertNotNull(freebusyHas2.getData());
             data2 = freebusyHas2.getData();
-            assertEquals(1, data2.getConflicts().size()); //TODO 1 or 0 ?
+            assertEquals(1, data2.getConflicts().size());
         }
     }
 
@@ -254,7 +254,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
                 if(user.containsId()){
                     att.setEntity(user.getUserId());
                 }
-                att.setUri("mailto:" + user.getLogin());
+                attendees.add(att);
             }
         }
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent(summary, start, end, attendees), true, false);
