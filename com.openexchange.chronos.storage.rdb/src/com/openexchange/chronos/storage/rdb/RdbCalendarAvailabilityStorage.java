@@ -225,6 +225,40 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#purgeCalendarAvailabilities(int)
+     */
+    @Override
+    public void purgeCalendarAvailabilities(int userId) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            int parameterIndex = 1;
+            // Delete all free slots
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND user=?")) {
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                updated += logExecuteUpdate(stmt);
+            }
+            parameterIndex = 1;
+            // Delete all availability blocks
+            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND user=?")) {
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                updated += logExecuteUpdate(stmt);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     ///////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////////
 
     /**

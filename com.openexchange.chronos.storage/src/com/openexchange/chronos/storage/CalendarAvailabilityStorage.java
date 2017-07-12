@@ -124,4 +124,11 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if the objects cannot be deleted
      */
     void deleteCalendarAvailabilities(List<String> calendarAvailabilityIds) throws OXException;
+
+    /**
+     * Purges all calendar availability blocks and free slots for the specified user
+     * 
+     * @throws OXException if the objects cannot be purged
+     */
+    void purgeCalendarAvailabilities(int userId) throws OXException;
 }
