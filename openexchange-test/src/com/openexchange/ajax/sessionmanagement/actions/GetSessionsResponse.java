@@ -58,7 +58,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.ManagedSession.DefaultManagedSession;
+import com.openexchange.session.management.impl.DefaultManagedSession;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -95,7 +95,7 @@ public class GetSessionsResponse extends AbstractAJAXResponse {
         long loginTime = obj.getLong("loginTime");
         int ctxId = obj.getInt("ctxId");
         int userId = obj.getInt("userId");
-        DefaultManagedSession session = new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, ctxId, userId, "");
+        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setCtxId(ctxId).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).setUserId(userId).build();
         return session;
     }
 
