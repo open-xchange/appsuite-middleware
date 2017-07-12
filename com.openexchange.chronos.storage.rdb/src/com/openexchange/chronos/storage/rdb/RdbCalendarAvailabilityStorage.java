@@ -214,7 +214,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @param item The item to insert
      * @param mapper The database mapper
      * @param tableName The table name
-     * @param connection The wrtieable connection to the storage
+     * @param connection The writeable connection to the storage
      * @return The amount of affected rows
      * @throws OXException if an error is occurred
      * @throws SQLException if an SQL error is occurred
