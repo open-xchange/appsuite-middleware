@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring.sockets.internal;
 
+import static com.openexchange.monitoring.sockets.internal.MonitoringSocketFactory.isDisabled;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -77,12 +78,22 @@ public class SocketMonitoringOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
+        if (isDisabled()) {
+            out.write(b);
+            return;
+        }
+
         out.write(b);
         SocketMonitoringSystem.getInstance().write(socket, b);
     }
 
     @Override
     public void write(byte[] b, int off, int length) throws IOException {
+        if (isDisabled()) {
+            out.write(b, off, length);
+            return;
+        }
+
         out.write(b, off, length);
         SocketMonitoringSystem.getInstance().write(socket, b, off, length);
     }
