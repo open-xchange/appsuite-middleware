@@ -67,6 +67,14 @@ public interface ParseResult<T> {
 
     /**
      * Gets the optional truncation information.
+     * <p>
+     * Check for truncated number of parsed objects:
+     * <pre>
+     *   ParseResult&lt;T&gt; parseResult = ...;
+     *   TruncationInfo truncationInfo = parseResult.getTruncationInfo();
+     *   boolean truncated = (null != truncationInfo) && truncationInfo.isTruncated();
+     *   ...
+     * </pre>
      *
      * @return The truncation information or <code>null</code>
      * @see TruncationInfo#isTruncated()
