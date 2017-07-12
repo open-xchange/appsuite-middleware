@@ -58,6 +58,8 @@ import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.AvailabilityField;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -207,12 +209,75 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailabilities(int)
+     */
+    @Override
+    public List<CalendarAvailability> loadCalendarAvailabilities(int userId) throws OXException {
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
+
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getReadConnection(context);
+
+            // Load the calendar availability block
+            PreparedStatement stmt = connection.prepareStatement("SELECT " + calendarAvailabilityMapper.getColumns(mappedFields) + " FROM " + CA_TABLE_NAME + " WHERE cid=? AND user=?;");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            List<CalendarAvailability> calendarAvailabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+
+            // Load the free slots
+            for (CalendarAvailability calendarAvailability : calendarAvailabilities) {
+                FreeSlotField[] freeSlotMappedFields = freeSlotMapper.getMappedFields();
+                stmt = connection.prepareStatement("SELECT " + freeSlotMapper.getColumns(freeSlotMappedFields) + " FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND calendarAvailability=?;");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, Integer.parseInt(calendarAvailability.getId()));
+                List<CalendarFreeSlot> freeSlots = freeSlotMapper.listFromResultSet(logExecuteQuery(stmt), freeSlotMappedFields);
+
+                calendarAvailability.setCalendarFreeSlots(freeSlots);
+            }
+            return calendarAvailabilities;
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.lang.String)
      */
     @Override
     public CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
+
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getReadConnection(context);
+
+            // Load the calendar availability block
+            PreparedStatement stmt = connection.prepareStatement("SELECT " + calendarAvailabilityMapper.getColumns(mappedFields) + " FROM " + CA_TABLE_NAME + " WHERE cid=? AND id=?;");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, Integer.parseInt(calendarAvailabilityId));
+            CalendarAvailability calendarAvailability = calendarAvailabilityMapper.fromResultSet(logExecuteQuery(stmt), mappedFields);
+
+            // Load the free slots
+            FreeSlotField[] freeSlotMappedFields = freeSlotMapper.getMappedFields();
+            stmt = connection.prepareStatement("SELECT " + freeSlotMapper.getColumns(freeSlotMappedFields) + " FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND calendarAvailability=?;");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, Integer.parseInt(calendarAvailability.getId()));
+            List<CalendarFreeSlot> freeSlots = freeSlotMapper.listFromResultSet(logExecuteQuery(stmt), freeSlotMappedFields);
+
+            calendarAvailability.setCalendarFreeSlots(freeSlots);
+            return calendarAvailability;
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
     }
 
     /*

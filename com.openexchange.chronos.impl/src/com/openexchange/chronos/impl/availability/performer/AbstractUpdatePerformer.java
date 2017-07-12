@@ -65,19 +65,15 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractUpdatePerformer {
+abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
-    final CalendarAvailabilityStorage storage;
-    final CalendarSession session;
     final SetResultImpl result;
 
     /**
      * Initialises a new {@link AbstractUpdatePerformer}.
      */
     AbstractUpdatePerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
-        super();
-        this.storage = storage;
-        this.session = session;
+        super(storage, session);
 
         result = new SetResultImpl();
     }

@@ -119,6 +119,15 @@ public interface CalendarAvailabilityStorage {
     CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException;
 
     /**
+     * Load all {@link CalendarAvailability} blocks for the specified user
+     * 
+     * @param userId The user identifier
+     * @return A {@link List} with all the {@link CalendarAvailability} objects for the user
+     * @throws OXException if an error is occurred
+     */
+    List<CalendarAvailability> loadCalendarAvailabilities(int userId) throws OXException;
+
+    /**
      * Loads from the storage the {@link CalendarFreeSlot}s for the {@link CalendarAvailability}
      * with the specified identifier
      * 
