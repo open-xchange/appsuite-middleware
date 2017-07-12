@@ -72,12 +72,12 @@ class CheckUtil {
      * according to the <a href="https://tools.ietf.org/html/rfc7953">RFC-7953</a>
      * 
      * @param availabilities The {@link List} of {@link CalendarAvailability} blocks to check
-     * @throws OXException if any of the fields in any of the {@link CalendarAvailability} does not meed
+     * @throws OXException if any of the fields in any of the {@link CalendarAvailability} does not meet
      *             the regulations of the RFC
      */
     static void check(List<CalendarAvailability> availabilities) throws OXException {
         for (CalendarAvailability availability : availabilities) {
-            checkMandatory(availability, AvailabilityField.dtstamp, AvailabilityField.uid);
+            checkMandatory(availability, AvailabilityField.uid);
             checkConstraints(availability);
             checkRanges(availability);
         }
