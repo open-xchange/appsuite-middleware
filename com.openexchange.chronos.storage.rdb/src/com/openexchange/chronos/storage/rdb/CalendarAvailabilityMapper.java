@@ -152,7 +152,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
         });
-        mappings.put(AvailabilityField.uid, new IntegerMapping<CalendarAvailability>("uid", "Availability UID") {
+        mappings.put(AvailabilityField.uid, new VarCharMapping<CalendarAvailability>("uid", "Availability UID") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {
@@ -160,13 +160,13 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public void set(CalendarAvailability object, Integer value) throws OXException {
-                object.setUid(Integer.toString(value));
+            public void set(CalendarAvailability object, String value) throws OXException {
+                object.setUid(value);
             }
 
             @Override
-            public Integer get(CalendarAvailability object) {
-                return Integer.valueOf(object.getUid());
+            public String get(CalendarAvailability object) {
+                return object.getUid();
             }
 
             @Override

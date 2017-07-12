@@ -175,7 +175,7 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
             }
 
         });
-        mappings.put(FreeSlotField.uid, new IntegerMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
+        mappings.put(FreeSlotField.uid, new VarCharMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
@@ -183,13 +183,13 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Integer value) throws OXException {
-                object.setUid(Integer.toString(value));
+            public void set(CalendarFreeSlot object, String value) throws OXException {
+                object.setUid(value);
             }
 
             @Override
-            public Integer get(CalendarFreeSlot object) {
-                return Integer.valueOf(object.getUid());
+            public String get(CalendarFreeSlot object) {
+                return object.getUid();
             }
 
             @Override
