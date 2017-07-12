@@ -67,7 +67,7 @@ public class CalendarAvailability implements FieldAware {
     private String id;
 
     /** The 'dtstamp' */
-    private long creationTimestamp;
+    private Date creationTimestamp;
     private String uid;
     private int calendarUser;
 
@@ -171,7 +171,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param creationTimestamp The creationTimestamp to set
      */
-    public void setCreationTimestamp(long creationTimestamp) {
+    public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
         fields.add(AvailabilityField.dtstamp);
     }
@@ -181,7 +181,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @return The creationTimestamp
      */
-    public long getCreationTimestamp() {
+    public Date getCreationTimestamp() {
         return creationTimestamp;
     }
 
@@ -189,8 +189,8 @@ public class CalendarAvailability implements FieldAware {
      * Removes the creation timestamp
      */
     public void removeCreationTimestamp() {
-        creationTimestamp = 0;
-        fields.remove(AvailabilityField.created);
+        creationTimestamp = null;
+        fields.remove(AvailabilityField.dtstamp);
     }
 
     /**

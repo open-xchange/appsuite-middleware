@@ -68,7 +68,8 @@ public class CalendarFreeSlot implements FieldAware {
     private int calendarUser;
     private String calendarAvailabilityId;
     private String uid;
-    private Date creationTimestamp;
+    /** dtstamp */
+    private Date creationTimestamp; 
     private Date startTime;
 
     private Date endTime;
@@ -151,6 +152,13 @@ public class CalendarFreeSlot implements FieldAware {
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
         fields.add(CalendarFreeSlotField.dtstamp);
+    }
+    
+    /**
+     * Removes the creation timestamp
+     */
+    public void removeCreationTimestamp() {
+        fields.remove(CalendarFreeSlotField.dtstamp);
     }
 
     /**

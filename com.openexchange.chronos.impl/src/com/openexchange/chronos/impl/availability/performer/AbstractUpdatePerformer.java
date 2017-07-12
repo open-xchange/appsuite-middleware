@@ -54,6 +54,8 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.service.AvailabilityField;
+import com.openexchange.chronos.service.CalendarFreeSlotField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -104,20 +106,30 @@ abstract class AbstractUpdatePerformer<T> {
      * @throws OXException if an error is occurred
      */
     List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<CalendarAvailability> availabilities) throws OXException {
-        // Set the identifiers
         Date timeNow = new Date(System.currentTimeMillis());
+
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (CalendarAvailability availability : availabilities) {
             String availabilityId = storage.nextCalendarAvailabilityId();
             availability.setId(availabilityId);
             availability.setCalendarUser(session.getUserId());
             availability.setLastModified(timeNow);
+            // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
+            if (!availability.contains(AvailabilityField.dtstamp)) {
+                availability.setCreationTimestamp(timeNow);
+            }
             caIds.add(availabilityId);
+
+            // Prepare the free slots
             for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
                 freeSlot.setId(storage.nextCalendarFreeSlotId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);
+                // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
+                if (!freeSlot.contains(CalendarFreeSlotField.dtstamp)) {
+                    freeSlot.setCreationTimestamp(timeNow);
+                }
             }
         }
         return caIds;
