@@ -108,7 +108,7 @@ public class CSVContactExportTest extends AbstractContactTest {
         is = new ByteArrayInputStream(TEST2_RESULT.getBytes());
         final Map<String, Integer> folderMappings = new HashMap<String, Integer>();
         folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT));
-        final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>(folderMappings.keySet()), null);
+        final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>(folderMappings.keySet()), null).getImportResults();
 
         //exporting and asserting
         is = exp.exportFolderData(sessObj, Format.CSV, String.valueOf(folderId), TEST2_BASE, null);
