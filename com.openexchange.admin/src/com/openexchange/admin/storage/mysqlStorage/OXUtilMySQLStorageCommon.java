@@ -121,7 +121,7 @@ public class OXUtilMySQLStorageCommon {
         return isWhitespace;
     }
 
-    private static Connection getSimpleSQLConnectionWithoutTimeout(Database db) throws StorageException {
+    private static Connection getSimpleSQLConnectionFor(Database db) throws StorageException {
         String passwd = "";
         if (db.getPassword() != null) {
             passwd = db.getPassword();
@@ -138,12 +138,28 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
+    /**
+     * Checks if the concrete database schema exists.
+     *
+     * @param db The database providing connect information as schema name
+     * @return <code>true</code> if such a database schema exists; otherwise <code>false</code>
+     * @throws StorageException If schema existence cannot be checked
+     */
+    public boolean existsDatabase(Database db) throws StorageException {
+        Connection con = getSimpleSQLConnectionFor(db);
+        try {
+            return existsDatabase(con, db.getScheme());
+        } finally {
+            cache.closeSimpleConnection(con);
+        }
+    }
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
 
     private static final AdminCache cache = ClientAdminThread.cache;
 
     public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
-        Connection con = getSimpleSQLConnectionWithoutTimeout(db);
+        Connection con = getSimpleSQLConnectionFor(db);
         boolean error = true;
         boolean created = false;
         boolean rollback = false;
@@ -231,7 +247,7 @@ public class OXUtilMySQLStorageCommon {
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, 0, ?)");
-            stmt.setInt(1, db.getId());
+            stmt.setInt(1, db.getId().intValue());
             stmt.setString(2, db.getScheme());
             stmt.setLong(3, System.currentTimeMillis());
             stmt.executeUpdate();
@@ -239,12 +255,12 @@ public class OXUtilMySQLStorageCommon {
             stmt = null;
 
             stmt = configdbCon.prepareStatement("INSERT INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
-            stmt.setInt(1, db.getId());
+            stmt.setInt(1, db.getId().intValue());
             stmt.setString(2, db.getScheme());
             stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
-        } catch (Exception e) {
+        } finally {
             Databases.closeSQLStuff(stmt);
         }
     }

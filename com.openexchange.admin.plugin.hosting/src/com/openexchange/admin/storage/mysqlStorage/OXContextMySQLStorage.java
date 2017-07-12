@@ -3047,39 +3047,56 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            // Drop non-existing ones held in count table
-            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname FROM contexts_per_dbschema LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
+            // Determine non-referenced ones (contained in 'contexts_per_dbschema' but not referenced within 'context_server2db_pool' associations)
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname, db_pool.url, db_pool.driver, db_pool.login, db_pool.password FROM contexts_per_dbschema JOIN db_pool ON contexts_per_dbschema.db_pool_id=db_pool.db_pool_id LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
             rs = stmt.executeQuery();
             if (rs.next()) {
-                class DbAndSchema {
-
-                    final int dbId;
-                    final String schema;
-
-                    DbAndSchema(int dbId, String schema) {
-                        super();
-                        this.dbId = dbId;
-                        this.schema = schema;
-                    }
-                }
-
-                List<DbAndSchema> ids = new LinkedList<DbAndSchema>();
+                List<Database> schemas = new LinkedList<Database>();
                 do {
-                    ids.add(new DbAndSchema(rs.getInt(1), rs.getString(2)));
+                    Database db = new Database(rs.getInt(1));
+                    db.setScheme(rs.getString(2));
+                    db.setUrl(rs.getString(3));
+                    db.setDriver(rs.getString(4));
+                    db.setLogin(rs.getString(5));
+                    db.setPassword(rs.getString(6));
+                    schemas.add(db);
                 } while (rs.next());
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
 
-                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
-                for (DbAndSchema das : ids) {
-                    stmt.setInt(1, das.dbId);
-                    stmt.setString(2, das.schema);
-                    stmt.addBatch();
+                // Check if really non-existent or simply empty
+                PreparedStatement deleteStmt = null;
+                PreparedStatement updateStmt = null;
+                try {
+                    for (Database schema : schemas) {
+                        if (OXUtilStorageInterface.getInstance().existsDatabase(schema)) {
+                            // Empty one...
+                            if (null == updateStmt) {
+                                updateStmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=0 WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            updateStmt.setInt(1, schema.getId().intValue());
+                            updateStmt.setString(2, schema.getScheme());
+                            updateStmt.addBatch();
+                        } else {
+                            // Non-existent
+                            if (null == deleteStmt) {
+                                deleteStmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            deleteStmt.setInt(1, schema.getId().intValue());
+                            deleteStmt.setString(2, schema.getScheme());
+                            deleteStmt.addBatch();
+                        }
+                    }
+                    if (null != deleteStmt) {
+                        deleteStmt.executeBatch();
+                    }
+                    if (null != updateStmt) {
+                        updateStmt.executeBatch();
+                    }
+                } finally {
+                    Databases.closeSQLStuff(deleteStmt, updateStmt);
                 }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
             } else {
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;

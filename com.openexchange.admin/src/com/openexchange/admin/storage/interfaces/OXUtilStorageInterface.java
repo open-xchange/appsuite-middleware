@@ -384,6 +384,16 @@ public abstract class OXUtilStorageInterface {
     public abstract int registerDatabase(final Database db) throws StorageException;
 
     /**
+     * Checks if such a database exists on given database host. Is used
+     * ONLY internally at the moment.
+     *
+     * @param db a database object to checked
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws StorageException
+     */
+    public abstract boolean existsDatabase(final Database db) throws StorageException;
+
+    /**
      * Creates a new database from scratch on the given database host. Is used
      * ONLY internally at the moment.
      *

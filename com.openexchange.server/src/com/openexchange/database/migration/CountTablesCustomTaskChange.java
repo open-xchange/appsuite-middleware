@@ -49,8 +49,10 @@
 
 package com.openexchange.database.migration;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -396,39 +399,70 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            // Drop non-existing ones held in count table
-            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname FROM contexts_per_dbschema LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
+            // Determine non-referenced ones (contained in 'contexts_per_dbschema' but not referenced within 'context_server2db_pool' associations)
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname, db_pool.url, db_pool.driver, db_pool.login, db_pool.password FROM contexts_per_dbschema JOIN db_pool ON contexts_per_dbschema.db_pool_id=db_pool.db_pool_id LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
             rs = stmt.executeQuery();
             if (rs.next()) {
                 class DbAndSchema {
 
                     final int dbId;
                     final String schema;
+                    final String url;
+                    final String driver;
+                    final String login;
+                    final String password;
 
-                    DbAndSchema(int dbId, String schema) {
+                    DbAndSchema(int dbId, String schema, String url, String driver, String login, String password) {
                         super();
                         this.dbId = dbId;
                         this.schema = schema;
+                        this.url = url;
+                        this.driver = driver;
+                        this.login = login;
+                        this.password = password;
                     }
                 }
 
-                List<DbAndSchema> ids = new LinkedList<DbAndSchema>();
+                List<DbAndSchema> schemas = new LinkedList<DbAndSchema>();
                 do {
-                    ids.add(new DbAndSchema(rs.getInt(1), rs.getString(2)));
+                    schemas.add(new DbAndSchema(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6)));
                 } while (rs.next());
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
 
-                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
-                for (DbAndSchema das : ids) {
-                    stmt.setInt(1, das.dbId);
-                    stmt.setString(2, das.schema);
-                    stmt.addBatch();
+                // Check if really non-existent or simply empty
+                PreparedStatement deleteStmt = null;
+                PreparedStatement updateStmt = null;
+                try {
+                    for (DbAndSchema schema : schemas) {
+                        if (existsDatabase(schema.schema, schema.url, schema.driver, schema.login, schema.password)) {
+                            // Empty one...
+                            if (null == updateStmt) {
+                                updateStmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=0 WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            updateStmt.setInt(1, schema.dbId);
+                            updateStmt.setString(2, schema.schema);
+                            updateStmt.addBatch();
+                        } else {
+                            // Non-existent
+                            if (null == deleteStmt) {
+                                deleteStmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            deleteStmt.setInt(1, schema.dbId);
+                            deleteStmt.setString(2, schema.schema);
+                            deleteStmt.addBatch();
+                        }
+                    }
+                    if (null != deleteStmt) {
+                        deleteStmt.executeBatch();
+                    }
+                    if (null != updateStmt) {
+                        updateStmt.executeBatch();
+                    }
+                } finally {
+                    Databases.closeSQLStuff(deleteStmt, updateStmt);
                 }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
             } else {
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
@@ -513,6 +547,52 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             stmt = null;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private boolean existsDatabase(String schema, String url, String driver, String login, String password) throws  SQLException {
+        Connection con = getSimpleSQLConnectionFor(url, driver, login, password);
+        try {
+            return existsDatabase(con, schema);
+        } finally {
+            try {
+                con.close();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    private boolean existsDatabase(Connection con, String schema) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SHOW DATABASES LIKE ?");
+            stmt.setString(1, schema);
+            result = stmt.executeQuery();
+            return result.next();
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private static Connection getSimpleSQLConnectionFor(String url, String driver, String login, String password) throws SQLException {
+        String passwd = "";
+        if (password != null) {
+            passwd = password;
+        }
+
+        try {
+            Class.forName(driver);
+            DriverManager.setLoginTimeout(120);
+
+            Properties props = new Properties();
+            props.put("user", login);
+            props.put("password", passwd);
+
+            return DriverManager.getConnection(url, props);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("No such driver class: " + driver, e);
         }
     }
 

@@ -817,6 +817,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public boolean existsDatabase(Database db) throws StorageException {
+        OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
+        return oxutilcommon.existsDatabase(db);
+    }
+
+    @Override
     public void createDatabase(final Database db, Connection con) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
         oxutilcommon.createDatabase(db, con);
