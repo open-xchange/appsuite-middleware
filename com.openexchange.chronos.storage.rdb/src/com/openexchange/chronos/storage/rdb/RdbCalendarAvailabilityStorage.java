@@ -277,30 +277,12 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @return The initial INSERT SQL statement
      * @throws OXException if an error is occurred
      */
-    private static <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper, String... extraFields) throws OXException {
+    private static <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper) throws OXException {
         E[] mappedFields = mapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields));
-
-        // Append any extra fields
-        if (extraFields.length > 0) {
-            for (String extraField : extraFields) {
-                sb.append(extraField).append(",");
-            }
-            sb.setLength(sb.length() - 1);
-        }
-        sb.append(") ");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields));
-
-        // Append parameters for any extra fields
-        if (extraFields.length > 0) {
-            for (int i = 0; i < extraFields.length; i++) {
-                sb.append("?").append(",");
-            }
-            sb.setLength(sb.length() - 1);
-        }
-        sb.append(")");
+        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(") ");
+        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(")");
         return sb;
     }
 
