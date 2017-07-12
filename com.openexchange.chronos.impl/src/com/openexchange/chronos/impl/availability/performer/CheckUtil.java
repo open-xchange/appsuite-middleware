@@ -126,7 +126,7 @@ class CheckUtil {
     private static void checkMandatory(FieldAware fieldAware, CalendarAvailabilityField... mandatoryFields) throws OXException {
         for (CalendarAvailabilityField field : mandatoryFields) {
             if (!fieldAware.contains(field)) {
-                throw new OXException(31145, "Mandatory fields are not set");
+                throw new OXException(31145, "The mandatory field '" + field + "' is not set");
             }
         }
     }
