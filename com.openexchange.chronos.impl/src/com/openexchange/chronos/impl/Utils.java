@@ -123,7 +123,7 @@ public class Utils {
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
