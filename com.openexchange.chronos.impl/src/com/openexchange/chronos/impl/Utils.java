@@ -766,7 +766,7 @@ public class Utils {
             Alarm originalAlarm = originalAlarms.get(0);
             Alarm updatedAlarm = updatedAlarms.get(0);
             Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
-                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION);
+                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
             if (differentFields.isEmpty()) {
                 return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
 
