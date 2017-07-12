@@ -158,7 +158,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
     private List<FreeBusyInformation> parseFreeBusyRequest(InputStream inputStream) throws WebdavProtocolException {
         try {
             return factory.getIcalParser().parseFreeBusy(inputStream, TimeZone.getTimeZone("UTC"), factory.getContext(),
-                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
         } catch (ConversionError e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }

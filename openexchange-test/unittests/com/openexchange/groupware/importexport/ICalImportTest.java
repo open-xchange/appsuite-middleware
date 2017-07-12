@@ -89,7 +89,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Can import?", imp.canImport(sessObj, format, _folders(), null));
 
-        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null).getImportResults();
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }
@@ -103,7 +103,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
         assertTrue("Can import?", imp.canImport(sessObj, format, _folders(), null));
 
-        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null).getImportResults();
         for (final ImportResult res : results) {
             assertTrue("Shouldn't have error", res.isCorrect());
         }

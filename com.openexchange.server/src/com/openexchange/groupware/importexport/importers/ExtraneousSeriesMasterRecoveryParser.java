@@ -56,8 +56,10 @@ import java.util.TimeZone;
 
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.DefaultParseResult;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ParseResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -83,49 +85,51 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     }
 
     @Override
-    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+    public ParseResult<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(ical, defaultTZ, ctx, errors, warnings));
     }
 
     @Override
-    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+    public ParseResult<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(icalText, defaultTZ, ctx, errors, warnings));
     }
 
-    private List<CalendarDataObject> splitIfNeeded(final List<CalendarDataObject> appointments) throws ConversionError {
+    private ParseResult<CalendarDataObject> splitIfNeeded(ParseResult<CalendarDataObject> appointmentsPraseResult) throws ConversionError {
+        List<CalendarDataObject> appointments = appointmentsPraseResult.getImportedObjects();
         if (appointments == null) {
             return null;
         }
 
         if (appointments.size() == 0) {
-            return appointments;
+            return appointmentsPraseResult;
         }
-        final CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
+
+        CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
+        List<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
         int index = 0;
-        final List<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
-        for (final CalendarDataObject appointment : appointments) {
+        for (CalendarDataObject appointment : appointments) {
             try {
-                if(appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
+                if (appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
                     final CalendarDataObject clone = appointment.clone();
                     tools.removeRecurringType(appointment);
                     copy.add(clone);
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 throw new ConversionError(index, e);
             }
             index++;
         }
 
-        return copy;
+        return DefaultParseResult.<CalendarDataObject> builder().importedObjects(copy).truncationInfo(appointmentsPraseResult.getTruncationInfo()).build();
     }
 
     @Override
-    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+    public ParseResult<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(ical, defaultTZ, context, errors, warnings);
     }
 
     @Override
-    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+    public ParseResult<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(icalText, defaultTZ, context, errors, warnings);
     }
 
@@ -135,12 +139,12 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     }
 
 	@Override
-	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+	public ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
 		return delegate.parseFreeBusy(icalText, defaultTZ, ctx, errors, warnings);
 	}
 
 	@Override
-	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+	public ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
 		return delegate.parseFreeBusy(ical, defaultTZ, ctx, errors, warnings);
 	}
 
