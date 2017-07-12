@@ -75,12 +75,14 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -165,8 +167,6 @@ public class CSVContactExporter implements Exporter {
      */
     protected static final ContactField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS.toArray(new ContactField[DEFAULT_FIELDS.size()]);
     
-    private static final String VCARD_CONTACTS_NAME = "Contacts";
-
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {
         if (!format.equals(Format.CSV)) {
@@ -339,7 +339,9 @@ public class CSVContactExporter implements Exporter {
                             }
                         } catch (final OXException e) {
                             LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
-                        }     
+                        } finally {
+                            SearchIterators.close(conIter);
+                        }
                     } catch (final OXException e) {
                         throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
                     }            
@@ -410,74 +412,14 @@ public class CSVContactExporter implements Exporter {
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
         return bob.toString();
     }
-
+    
     @Override
-    public String getFolderExportFileName(ServerSession session, String folder) throws OXException {
-        return createFolderExportFileName(session, folder);
-    }
-
-    private String createFolderExportFileName(ServerSession session, String folder) throws OXException {
-        FolderService folderService = ImportExportServices.getFolderService();
-        final StringBuilder sb = new StringBuilder();
-        try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-            sb.append(folderObj.getFolderName());
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-        }
-        sb.append(".");
-        return sb.toString();
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
     @Override
     public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        if (batchIds.size() == 1) {
-            //check for contacts of the same folder
-            String folderId = batchIds.keySet().iterator().next();
-            List<String> contactIdList = batchIds.get(folderId);
-            if (contactIdList.size() > 1) {
-                sb.append(createBatchFileName(sessionObj, folderId, null));
-            } else {
-                //exactly one contact to export, file name equals contact name
-                String batchId = batchIds.get(folderId).get(0);                
-                sb.append(createBatchFileName(sessionObj, folderId, batchId));
-            }            
-        } else {
-            //batch of contact ids from different folders, file name is set to a default
-            sb.append(getLocalizedContactsName(sessionObj));
-        }        
-        return sb.toString();
-    }
-    
-    private String createBatchFileName(ServerSession session, String folder, String batchId) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        if (null == batchId || batchId.equals("")) {
-            try {
-                FolderService folderService = ImportExportServices.getFolderService();
-                FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-                sb.append(folderObj.getFolderName());
-            } catch (OXException e) {
-                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-            }
-        } else {
-            try {
-                ContactService contactService = ImportExportServices.getContactService();
-                Contact contactObj = contactService.getContact(session, folder, batchId, null);
-                if (contactObj.containsMarkAsDistributionlist()) {
-                    sb.append(contactObj.getDisplayName());
-                } else {
-                    sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
-                }
-            } catch (OXException e) {
-                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-            }
-        }
-        sb.append(".");
-        return sb.toString();
-    }    
-    
-    private String getLocalizedContactsName(ServerSession session) {
-        return StringHelper.valueOf(session.getUser().getLocale()).getString(VCARD_CONTACTS_NAME)+".";
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }
