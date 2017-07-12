@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring.sockets.internal;
 
+import static com.openexchange.monitoring.sockets.internal.MonitoringSocketFactory.isDisabled;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Collection;
@@ -119,60 +120,100 @@ public class SocketMonitoringSystem implements SocketMonitoringService {
     }
 
     void write(Socket socket, int data) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.write(socket, data);
         }
     }
 
     void write(Socket socket, byte[] data, int offset, int length) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.write(socket, data, offset, length);
         }
     }
 
     void read(Socket socket, int data) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.read(socket, data);
         }
     }
 
     void read(Socket socket, byte[] data, int offset, int length) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.read(socket, data, offset, length);
         }
     }
 
     void closed(Socket socket) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.closed(socket);
         }
     }
 
     void connected(Socket socket) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.connected(socket);
         }
     }
 
     void readTimedOut(Socket socket, TimeoutFailure e) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.readTimedOut(socket, e);
         }
     }
 
     void readError(Socket socket, IOFailure e) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.readError(socket, e);
         }
     }
 
     void eof(Socket socket) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.eof(socket);
         }
     }
 
     void connectError(Socket socket, ConnectFailure e) throws IOException {
+        if (isDisabled()) {
+            return;
+        }
+
         for (SocketMonitor monitor : monitors) {
             monitor.connectError(socket, e);
         }
