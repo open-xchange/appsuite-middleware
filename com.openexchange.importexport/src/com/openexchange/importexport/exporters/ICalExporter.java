@@ -52,6 +52,7 @@ package com.openexchange.importexport.exporters;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -92,6 +93,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
@@ -235,7 +237,12 @@ public class ICalExporter implements Exporter {
     }
     
     @Override
-    public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return null;
+    }
+    
+    
+    private SizedInputStream doExportBatchData(ServerSession session, Format format, String folderID, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -520,28 +527,14 @@ public class ICalExporter implements Exporter {
         }
         return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
     }
-
+    
     @Override
-    public String getFolderExportFileName(ServerSession session, String folder) throws OXException {
-        return createExportFileName(session, folder);
-    }
-
-    private String createExportFileName(ServerSession session, String folder) throws OXException {
-        FolderService folderService = ImportExportServices.getFolderService();
-        final StringBuilder sb = new StringBuilder();
-        try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-            sb.append(folderObj.getFolderName());
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-        }
-        sb.append(".");
-        return sb.toString();
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
     @Override
     public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }

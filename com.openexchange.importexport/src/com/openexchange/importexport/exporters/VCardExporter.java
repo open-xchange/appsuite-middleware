@@ -82,6 +82,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
@@ -206,8 +207,6 @@ public class VCardExporter implements Exporter {
         Contact.YOMI_LAST_NAME
     };
     
-    private static final String VCARD_CONTACTS_NAME = "Contacts";
-
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -435,59 +434,11 @@ public class VCardExporter implements Exporter {
 
     @Override
     public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
-        //case export complete folder, file name equals folder name
-        return createVcardName(sessionObj, folder, null);
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
     @Override
     public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        if (batchIds.size() == 1) {
-            //check for contacts of the same folder
-            String folderId = batchIds.keySet().iterator().next();
-            List<String> contactIdList = batchIds.get(folderId);
-            if (contactIdList.size() > 1) {
-                sb.append(createVcardName(sessionObj, folderId, null));
-            } else {
-                //exactly one contact to export, file name equals contact name
-                String batchId = batchIds.get(folderId).get(0);                
-                sb.append(createVcardName(sessionObj, folderId, batchId));
-            }            
-        } else {
-            //batch of contact ids from different folders, file name is set to a default
-            sb.append(getLocalizedContactsName(sessionObj));
-        }        
-        return sb.toString();
-    }
-
-    private String createVcardName(ServerSession session, String folder, String batchId) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        if (null == batchId || batchId.equals("")) {
-            try {
-                FolderService folderService = ImportExportServices.getFolderService();
-                FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-                sb.append(folderObj.getFolderName());
-            } catch (OXException e) {
-                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-            }
-        } else {
-            try {
-                ContactService contactService = ImportExportServices.getContactService();
-                Contact contactObj = contactService.getContact(session, folder, batchId, null);
-                if (contactObj.containsMarkAsDistributionlist()) {
-                    sb.append(contactObj.getDisplayName());
-                } else {
-                    sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
-                }
-            } catch (OXException e) {
-                throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-            }
-        }
-        sb.append(".");
-        return sb.toString();
-    }    
-    
-    private String getLocalizedContactsName(ServerSession session) {
-        return StringHelper.valueOf(session.getUser().getLocale()).getString(VCARD_CONTACTS_NAME)+".";
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }
