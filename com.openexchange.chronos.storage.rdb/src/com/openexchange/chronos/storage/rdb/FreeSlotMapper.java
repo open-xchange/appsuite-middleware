@@ -129,7 +129,7 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
     @Override
     protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
         EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>>(FreeSlotField.class);
-        mappings.put(FreeSlotField.id, new IntegerMapping<CalendarFreeSlot>("id", "Availability ID") {
+        mappings.put(FreeSlotField.id, new IntegerMapping<CalendarFreeSlot>("id", "Free Slot ID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
@@ -152,7 +152,30 @@ public class FreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotFi
             }
 
         });
-        mappings.put(FreeSlotField.uid, new IntegerMapping<CalendarFreeSlot>("uid", "Availability UID") {
+        mappings.put(FreeSlotField.calendarAvailabilityId, new IntegerMapping<CalendarFreeSlot>("calendarAvailability", "Calendar Availability Parent ID") {
+
+            @Override
+            public boolean isSet(CalendarFreeSlot object) {
+                return object.contains(FreeSlotField.calendarAvailabilityId);
+            }
+
+            @Override
+            public void set(CalendarFreeSlot object, Integer value) throws OXException {
+                object.setCalendarAvailabilityId(Integer.toString(value));
+            }
+
+            @Override
+            public Integer get(CalendarFreeSlot object) {
+                return Integer.valueOf(object.getCalendarAvailabilityId());
+            }
+
+            @Override
+            public void remove(CalendarFreeSlot object) {
+                object.removeCalendarAvailabilityId();
+            }
+
+        });
+        mappings.put(FreeSlotField.uid, new IntegerMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {

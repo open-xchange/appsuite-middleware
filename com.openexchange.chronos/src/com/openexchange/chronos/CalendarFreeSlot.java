@@ -65,6 +65,7 @@ public class CalendarFreeSlot implements FieldAware {
 
     private String id;
 
+    private String calendarAvailabilityId;
     private String uid;
     private Date creationTimestamp;
     private Date startTime;
@@ -482,6 +483,33 @@ public class CalendarFreeSlot implements FieldAware {
     public void removeRecurrenceRule() {
         this.recurrenceRule = null;
         fields.remove(FreeSlotField.rrule);
+    }
+
+    /**
+     * Gets the calendarAvailabilityId
+     *
+     * @return The calendarAvailabilityId
+     */
+    public String getCalendarAvailabilityId() {
+        return calendarAvailabilityId;
+    }
+
+    /**
+     * Sets the calendarAvailabilityId
+     *
+     * @param calendarAvailabilityId The calendarAvailabilityId to set
+     */
+    public void setCalendarAvailabilityId(String calendarAvailabilityId) {
+        this.calendarAvailabilityId = calendarAvailabilityId;
+        fields.add(FreeSlotField.calendarAvailabilityId);
+    }
+
+    /**
+     * Removes the calendar availability parent id
+     */
+    public void removeCalendarAvailabilityId() {
+        this.calendarAvailabilityId = null;
+        fields.remove(FreeSlotField.calendarAvailabilityId);
     }
 
     /*

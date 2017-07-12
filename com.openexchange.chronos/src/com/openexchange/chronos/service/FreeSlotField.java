@@ -59,6 +59,7 @@ import java.util.EnumSet;
 public enum FreeSlotField implements CalendarAvailabilityField {
 
     id(true, false),
+    calendarAvailabilityId(true, false),
 
     // the following are REQUIRED but MUST NOT occur more than once
     dtstamp(true, false),

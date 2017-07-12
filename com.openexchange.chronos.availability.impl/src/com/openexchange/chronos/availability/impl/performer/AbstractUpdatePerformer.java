@@ -92,6 +92,7 @@ abstract class AbstractUpdatePerformer<T> {
             caIds.add(availabilityId);
             for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
                 freeSlot.setId(storage.nextCalendarFreeSlotId());
+                freeSlot.setCalendarAvailabilityId(availabilityId);
             }
         }
         return caIds;

@@ -102,8 +102,10 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     public String nextCalendarAvailabilityId() throws OXException {
         return nextId(accountId, "calendar_availability_sequence");
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
      */
     @Override
@@ -153,6 +155,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             for (List<CalendarAvailability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
                 updated += insertCalendarAvailabilityItems(chunk, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
             }
+            //TODO: insert the free slots as well
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -194,7 +197,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            //TODO: utilise the calendar availability id
             updated = insertCalendarAvailabilityItem(freeSlot, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -275,12 +277,30 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @return The initial INSERT SQL statement
      * @throws OXException if an error is occurred
      */
-    private <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper) throws OXException {
+    private static <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper, String... extraFields) throws OXException {
         E[] mappedFields = mapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,account,").append(mapper.getColumns(mappedFields)).append(") ");
-        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields)).append(")");
+        sb.append("(cid,account,").append(mapper.getColumns(mappedFields));
+
+        // Append any extra fields
+        if (extraFields.length > 0) {
+            for (String extraField : extraFields) {
+                sb.append(extraField).append(",");
+            }
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append(") ");
+        sb.append("VALUES (?,?,").append(mapper.getParameters(mappedFields));
+
+        // Append parameters for any extra fields
+        if (extraFields.length > 0) {
+            for (int i = 0; i < extraFields.length; i++) {
+                sb.append("?").append(",");
+            }
+            sb.setLength(sb.length() - 1);
+        }
+        sb.append(")");
         return sb;
     }
 
