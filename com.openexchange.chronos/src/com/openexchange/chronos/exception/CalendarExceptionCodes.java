@@ -259,7 +259,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The calendar provider \"%1$s\" is not available.</li>
      * <li>Missing calendar provider [provider: %1$s]</li>
      */
-    PROVIDER_NOT_AVAILABLE("Unexpected database error [%1$s]", PROVIDER_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5030),
+    PROVIDER_NOT_AVAILABLE("Missing calendar provider [provider: %1$s]", PROVIDER_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5030),
     /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
