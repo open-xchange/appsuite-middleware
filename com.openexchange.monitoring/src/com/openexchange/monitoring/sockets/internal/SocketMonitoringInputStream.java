@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring.sockets.internal;
 
+import static com.openexchange.monitoring.sockets.internal.MonitoringSocketFactory.isDisabled;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -80,6 +81,11 @@ public class SocketMonitoringInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
+        if (isDisabled()) {
+            // Only delegate...
+            return in.read();
+        }
+
         long st = System.currentTimeMillis();
         try {
             int result = in.read();
@@ -104,6 +110,11 @@ public class SocketMonitoringInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
+        if (isDisabled()) {
+            // Only delegate...
+            return in.read(b, off, len);
+        }
+
         long st = System.currentTimeMillis();
         try {
             int length = in.read(b, off, len);
