@@ -56,6 +56,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
@@ -126,6 +128,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));
+            registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
             /*
              * track management service to register mbean on demand
              */

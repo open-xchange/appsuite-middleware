@@ -53,12 +53,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
+import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
@@ -95,7 +98,7 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, FolderService.class, ContextService.class, UserService.class,
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class, FolderService.class, ContextService.class, UserService.class,
             GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class };
     }
 
@@ -122,6 +125,7 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
+            registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl(this));
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
