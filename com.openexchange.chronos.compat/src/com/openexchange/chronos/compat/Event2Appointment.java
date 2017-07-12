@@ -309,7 +309,7 @@ public class Event2Appointment {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static int getRecurrencePosition(RecurrenceService recurrenceService, RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
-        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next().getValue();
             if (nextMillis == recurrenceId.getValue()) {

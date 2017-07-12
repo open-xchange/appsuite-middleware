@@ -440,7 +440,7 @@ public class Compat {
          * iterate recurrence and take over start date of first occurrence
          */
         Date startDate;
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster), null, null);
+        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster));
         if (iterator.hasNext()) {
             calendar.setTimeInMillis(iterator.next().getValue());
             calendar.set(Calendar.HOUR_OF_DAY, startHour);

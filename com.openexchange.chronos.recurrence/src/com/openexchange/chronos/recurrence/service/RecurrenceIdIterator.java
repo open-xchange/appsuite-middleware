@@ -90,10 +90,11 @@ public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceI
      *            does not fall into the pattern, <code>false</code> otherwise
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with the first occurrence
      * @param limit The maximum number of calculated instances. Optional, can be null.
      */
-    public RecurrenceIdIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit) throws OXException {
-        super(recurrenceData, 0L, forwardToOccurrence, null, start, end, limit);
+    public RecurrenceIdIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
+        super(recurrenceData, 0L, forwardToOccurrence, null, start, end, startPosition, limit);
     }
 
     @Override

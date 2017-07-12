@@ -74,6 +74,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     public static final int MAX = 1000;
 
     protected final Calendar start;
+    protected final Integer startPosition;
     protected final Calendar end;
     protected final Integer limit;
     protected final long[] exceptionDates;
@@ -98,7 +99,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
     protected AbstractRecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this(new DefaultRecurrenceData(master), getEventDuration(master), forwardToOccurrence, ignoreExceptions ? null : getExceptionDates(master), start, end, limit);
+        this(new DefaultRecurrenceData(master), getEventDuration(master), forwardToOccurrence, ignoreExceptions ? null : getExceptionDates(master), start, end, null, limit);
     }
 
     /**
@@ -111,13 +112,15 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param exceptionDates A sorted array of change- and delete-exception timestamps to ignore during iteration, or <code>null</code> if not set
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param startPosition The start recurrence position for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
      */
-    protected AbstractRecurrenceIterator(RecurrenceData recurrenceData, long eventDuration, boolean forwardToOccurrence, long[] exceptionDates, Calendar start, Calendar end, Integer limit) throws OXException {
+    protected AbstractRecurrenceIterator(RecurrenceData recurrenceData, long eventDuration, boolean forwardToOccurrence, long[] exceptionDates, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
         super();
         this.recurrenceData = recurrenceData;
         this.eventDuration = eventDuration;
         this.start = start;
+        this.startPosition = startPosition;
         this.end = end;
         this.limit = limit;
         this.exceptionDates = exceptionDates;
@@ -133,7 +136,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     }
 
     private void init() {
-        if (this.start != null) {
+        if (null != start || null != startPosition && 1 < startPosition.intValue()) {
             while (inner.hasNext()) {
                 long nextMillis = inner.peekMillis();
                 if (isException(nextMillis)) {
@@ -141,7 +144,8 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
                     position++;
                     continue;
                 }
-                if (nextMillis + eventDuration > start.getTimeInMillis()) {
+                if (null != start && nextMillis + eventDuration > start.getTimeInMillis() ||
+                    null != startPosition && position + 1 >= startPosition.intValue()) {
                     break;
                 } else {
                     inner.nextMillis();

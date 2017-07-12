@@ -231,7 +231,7 @@ public class Recurrence {
                 rrule.setUntil(null);
                 DefaultRecurrenceData unlimitedRecurrenceData = new DefaultRecurrenceData(
                     rrule.toString(), recurrenceData.isAllDay(), recurrenceData.getTimeZoneID(), recurrenceData.getSeriesStart());
-                RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(unlimitedRecurrenceData, null, null);
+                RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(unlimitedRecurrenceData);
                 while (iterator.hasNext()) {
                     long occurrenceStart = iterator.next().getValue();
                     if (occurrenceStart > until.getTimestamp()) {
@@ -436,7 +436,7 @@ public class Recurrence {
      * @return The calculated until date (in UTC timezone, with truncated time fraction)
      */
     private static Date getUntilForUnlimited(RecurrenceService recurrenceService, RecurrenceData recurrenceData) throws OXException {
-        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         long millis = recurrenceData.getSeriesStart();
         for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue(), i++)
             ;

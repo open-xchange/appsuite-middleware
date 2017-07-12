@@ -78,6 +78,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 
@@ -263,7 +264,8 @@ public class Appointment2Event {
      */
     public static RecurrenceId getRecurrenceID(RecurrenceService recurrenceService, RecurrenceData recurrenceData, Date recurrenceDatePosition) throws OXException {
         Calendar calendar = initCalendar(TimeZones.UTC, recurrenceData.getSeriesStart());
-        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        //        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, recurrenceDatePosition, null);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next().getValue();
             calendar.setTimeInMillis(nextMillis);
@@ -299,7 +301,7 @@ public class Appointment2Event {
             recurrenceDatePositions = dateList;
         }
         SortedSet<RecurrenceId> recurrenceIDs = new TreeSet<RecurrenceId>();
-        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         nextPosition: for (Date recurrenceDatePosition : recurrenceDatePositions) {
             while (iterator.hasNext()) {
                 long nextMillis = iterator.next().getValue();
@@ -328,7 +330,7 @@ public class Appointment2Event {
      * @throws {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId getRecurrenceID(RecurrenceService recurrenceService, RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
-        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, Autoboxing.I(recurrencePosition), null);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next().getValue();
             if (recurrencePosition == iterator.getPosition()) {

@@ -603,7 +603,7 @@ public abstract class EventConverter {
                     recurrenceData = new DefaultRecurrenceData(event);
                 }
                 RecurrenceId firstRecurrenceId = null;
-                RecurrenceIterator<RecurrenceId> iterator = getRecurrenceService().iterateRecurrenceIds(recurrenceData, null, null);
+                RecurrenceIterator<RecurrenceId> iterator = getRecurrenceService().iterateRecurrenceIds(recurrenceData);
                 if (iterator.hasNext()) {
                     firstRecurrenceId = iterator.next();
                 }
