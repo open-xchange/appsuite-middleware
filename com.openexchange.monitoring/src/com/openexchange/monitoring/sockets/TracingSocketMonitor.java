@@ -66,6 +66,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
 import org.slf4j.MDC;
 import com.google.common.base.Preconditions;
 import com.openexchange.java.Strings;
@@ -267,6 +268,137 @@ public class TracingSocketMonitor implements SocketMonitor {
         }
     }
 
+    static final Logger STD_LOGGER = org.slf4j.LoggerFactory.getLogger(TracingSocketMonitor.class);
+
+    private static ch.qos.logback.classic.Logger staticFileLogger;
+    private static RollingFileAppender<ILoggingEvent> staticRollingFileAppender;
+
+    private static org.slf4j.Logger createOrReinitializeLogger(TracingSocketMonitorConfig config) {
+        if (false == config.isEnableDedicatedLogging()) {
+            return null;
+        }
+
+        // Check if a dedicated file location is specified
+        String fileLocation = config.getLoggingFileLocation();
+        if (Strings.isEmpty(fileLocation)) {
+            STD_LOGGER.warn("File location for dedicated logging is empty. Disabling logging...");
+            return null;
+        }
+
+        synchronized (TracingSocketMonitor.class) {
+            ch.qos.logback.classic.Logger logbackLogger = staticFileLogger;
+            if (null == logbackLogger) {
+                logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("SOCKET-MONITORING");
+                staticFileLogger = logbackLogger;
+            } else {
+                logbackLogger.detachAndStopAllAppenders();
+            }
+
+            RollingFileAppender<ILoggingEvent> rollingFileAppender = staticRollingFileAppender;
+            if (null != rollingFileAppender) {
+                rollingFileAppender.stop();
+                rollingFileAppender = null;
+            }
+
+            // Grab logger context from standard logger
+            ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) STD_LOGGER;
+            LoggerContext context = templateLogger.getLoggerContext();
+
+            String filePattern = fileLocation;
+
+            ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
+            encoder.setContext(context);
+            encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%sanitisedMessage%n%lmdc%exception{full}");
+
+            SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
+            triggeringPolicy.setContext(context);
+            triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(config.getLoggingFileLimit())));
+
+            FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+            rollingPolicy.setContext(context);
+            rollingPolicy.setFileNamePattern(filePattern + ".%i");
+            rollingPolicy.setMinIndex(1);
+            rollingPolicy.setMaxIndex(config.getLoggingFileCount());
+
+            rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+            staticRollingFileAppender = rollingFileAppender;
+            rollingFileAppender.setAppend(true);
+            rollingFileAppender.setContext(context);
+            rollingFileAppender.setEncoder(encoder);
+            rollingFileAppender.setFile(filePattern);
+            rollingFileAppender.setName("SocketMonitorAppender");
+            rollingFileAppender.setPrudent(false);
+            rollingFileAppender.setRollingPolicy(rollingPolicy);
+            rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
+
+            rollingPolicy.setParent(rollingFileAppender);
+
+            encoder.start();
+            triggeringPolicy.start();
+            rollingPolicy.start();
+            rollingFileAppender.start();
+
+            List<ch.qos.logback.core.status.Status> statuses = context.getStatusManager().getCopyOfStatusList();
+            if (null != statuses && false == statuses.isEmpty()) {
+                for (ch.qos.logback.core.status.Status status : statuses) {
+                    if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ch.qos.logback.core.status.ErrorStatus)) {
+                        ch.qos.logback.core.status.ErrorStatus errorStatus = (ch.qos.logback.core.status.ErrorStatus) status;
+                        Throwable throwable = errorStatus.getThrowable();
+                        if (null == throwable) {
+                            class FastThrowable extends Throwable {
+
+                                private static final long serialVersionUID = -1177996474876999361L;
+
+                                FastThrowable(String msg) {
+                                    super(msg);
+                                }
+
+                                @Override
+                                public synchronized Throwable fillInStackTrace() {
+                                    return this;
+                                }
+                            }
+                            throwable = new FastThrowable(errorStatus.getMessage());
+                        }
+
+                        STD_LOGGER.warn("Illegal logging configuration. Reason: '{}'. Disabling logging...", throwable.getMessage());
+                        return null;
+                    }
+                }
+            }
+
+            logbackLogger.addAppender(rollingFileAppender);
+            {
+                ch.qos.logback.classic.Level l;
+                String level = config.getLogLevel();
+                if (Strings.isEmpty(level)) {
+                    l = ch.qos.logback.classic.Level.ERROR;
+                } else {
+                    level = Strings.asciiLowerCase(level.trim());
+                    if ("all".equals(level)) {
+                        l = ch.qos.logback.classic.Level.ALL;
+                    } else if ("error".equals(level)) {
+                        l = ch.qos.logback.classic.Level.ERROR;
+                    } else if ("warn".equals(level) || "warning".equals(level)) {
+                        l = ch.qos.logback.classic.Level.WARN;
+                    } else if ("info".equals(level)) {
+                        l = ch.qos.logback.classic.Level.INFO;
+                    } else if ("debug".equals(level)) {
+                        l = ch.qos.logback.classic.Level.DEBUG;
+                    } else if ("trace".equals(level)) {
+                        l = ch.qos.logback.classic.Level.TRACE;
+                    } else {
+                        l = ch.qos.logback.classic.Level.ERROR;
+                    }
+                }
+                logbackLogger.setLevel(l);
+            }
+            logbackLogger.setAdditive(false);
+
+            return logbackLogger;
+        }
+    }
+
     // -----------------------------------------------------------------------------------------------------
 
     private final TracingSocketMonitorConfig config;
@@ -288,7 +420,6 @@ public class TracingSocketMonitor implements SocketMonitor {
             keepIdleThreshold = 300000L;
         }
 
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TracingSocketMonitor.class);
         final long thrsh = keepIdleThreshold;
         Runnable task = new Runnable() {
 
@@ -304,122 +435,13 @@ public class TracingSocketMonitor implements SocketMonitor {
                     }
                 } catch (Exception e) {
                     // Failed run...
-                    logger.error("", e);
+                    STD_LOGGER.error("", e);
                 }
             }
         };
         timerTask = timerService.scheduleAtFixedRate(task, 60000L, 60000L);
 
-        this.fileLogger = createLogger(config, logger);
-    }
-
-    private org.slf4j.Logger createLogger(TracingSocketMonitorConfig config, org.slf4j.Logger stdLogger) {
-        if (false == config.isEnableDedicatedLogging()) {
-            return null;
-        }
-
-        // Check if a dedicated file location is specified
-        String fileLocation = config.getLoggingFileLocation();
-        if (Strings.isEmpty(fileLocation)) {
-            stdLogger.warn("File location for dedicated logging is empty. Disabling logging...");
-            return null;
-        }
-
-        ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) stdLogger;
-        LoggerContext context = templateLogger.getLoggerContext();
-
-        String filePattern = fileLocation;
-
-        ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
-        encoder.setContext(context);
-        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%sanitisedMessage%n%lmdc%exception{full}");
-
-        SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
-        triggeringPolicy.setContext(context);
-        triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(config.getLoggingFileLimit())));
-
-        FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
-        rollingPolicy.setContext(context);
-        rollingPolicy.setFileNamePattern(filePattern + ".%i");
-        rollingPolicy.setMinIndex(1);
-        rollingPolicy.setMaxIndex(config.getLoggingFileCount());
-
-        RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
-        rollingFileAppender.setAppend(true);
-        rollingFileAppender.setContext(context);
-        rollingFileAppender.setEncoder(encoder);
-        rollingFileAppender.setFile(filePattern);
-        rollingFileAppender.setName("SocketMonitorAppender");
-        rollingFileAppender.setPrudent(false);
-        rollingFileAppender.setRollingPolicy(rollingPolicy);
-        rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
-
-        rollingPolicy.setParent(rollingFileAppender);
-
-        encoder.start();
-        triggeringPolicy.start();
-        rollingPolicy.start();
-        rollingFileAppender.start();
-
-        List<ch.qos.logback.core.status.Status> statuses = context.getStatusManager().getCopyOfStatusList();
-        if (null != statuses && false == statuses.isEmpty()) {
-            for (ch.qos.logback.core.status.Status status : statuses) {
-                if (rollingFileAppender.equals(status.getOrigin()) && (status instanceof ch.qos.logback.core.status.ErrorStatus)) {
-                    ch.qos.logback.core.status.ErrorStatus errorStatus = (ch.qos.logback.core.status.ErrorStatus) status;
-                    Throwable throwable = errorStatus.getThrowable();
-                    if (null == throwable) {
-                        class FastThrowable extends Throwable {
-
-                            private static final long serialVersionUID = -1177996474876999361L;
-
-                            FastThrowable(String msg) {
-                                super(msg);
-                            }
-
-                            @Override
-                            public synchronized Throwable fillInStackTrace() {
-                                return this;
-                            }
-                        }
-                        throwable = new FastThrowable(errorStatus.getMessage());
-                    }
-
-                    stdLogger.warn("Illegal logging configuration. Reason: '{}'. Disabling logging...", throwable.getMessage());
-                    return null;
-                }
-            }
-        }
-
-        ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("SOCKET-MONITORING");
-        {
-            ch.qos.logback.classic.Level l;
-            String level = config.getLogLevel();
-            if (Strings.isEmpty(level)) {
-                l = ch.qos.logback.classic.Level.ERROR;
-            } else {
-                level = Strings.asciiLowerCase(level.trim());
-                if ("all".equals(level)) {
-                    l = ch.qos.logback.classic.Level.ALL;
-                } else if ("error".equals(level)) {
-                    l = ch.qos.logback.classic.Level.ERROR;
-                } else if ("warn".equals(level) || "warning".equals(level)) {
-                    l = ch.qos.logback.classic.Level.WARN;
-                } else if ("info".equals(level)) {
-                    l = ch.qos.logback.classic.Level.INFO;
-                } else if ("debug".equals(level)) {
-                    l = ch.qos.logback.classic.Level.DEBUG;
-                } else if ("trace".equals(level)) {
-                    l = ch.qos.logback.classic.Level.TRACE;
-                } else {
-                    l = ch.qos.logback.classic.Level.ERROR;
-                }
-            }
-            logbackLogger.setLevel(l);
-        }
-        logbackLogger.setAdditive(false);
-        logbackLogger.addAppender(rollingFileAppender);
-
-        return logbackLogger;
+        this.fileLogger = createOrReinitializeLogger(config);
     }
 
     /**
