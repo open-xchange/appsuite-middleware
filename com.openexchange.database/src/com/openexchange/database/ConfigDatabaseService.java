@@ -173,5 +173,5 @@ public interface ConfigDatabaseService {
      */
     void deleteAssignment(Connection con, int contextId) throws OXException;
 
-    void lock(Connection con, int writePoolId, String schemaName) throws OXException;
+    void lock(Connection con, int writePoolId) throws OXException;
 }

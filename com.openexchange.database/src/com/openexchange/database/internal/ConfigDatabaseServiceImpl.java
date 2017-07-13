@@ -223,7 +223,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public void lock(Connection con, int writePoolId, String schemaName) throws OXException {
-        contextAssignment.lock(con, writePoolId, schemaName);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        contextAssignment.lock(con, writePoolId);
     }
 }
