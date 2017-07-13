@@ -567,14 +567,14 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * List of attendees
+     * Loads all {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
      * 
-     * @param connection
-     * @param attendees
-     * @param from
-     * @param until
-     * @return
-     * @throws OXException
+     * @param connection The read-only {@link Connection} to the storage
+     * @param attendees The {@link List} of {@link Attendee}s
+     * @param from The starting point of the interval
+     * @param until The ending point of the interval
+     * @return A {@link List} with the {@link CalendarAvailability} blocks of the specified {@link Attendee}s
+     * @throws OXException if an error is occurred
      */
     private List<CalendarAvailability> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
         // 1) Fetch all calendar availability items within the interval
