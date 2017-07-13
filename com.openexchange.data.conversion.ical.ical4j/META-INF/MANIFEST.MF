@@ -6,7 +6,10 @@ Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="18.0.0",
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.google.common.io,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.api2,
