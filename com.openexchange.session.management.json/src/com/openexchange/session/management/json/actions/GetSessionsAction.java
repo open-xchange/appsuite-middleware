@@ -82,7 +82,7 @@ public class GetSessionsAction implements AJAXActionService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        Collection<ManagedSession> sessions = service.getSessionsForUser(session, true);
+        Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
