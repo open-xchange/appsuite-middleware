@@ -128,7 +128,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
     }
 
     @Override
-    public Collection<ManagedSession> getSessionsForUser(Session session, boolean applyClientBlacklist) throws OXException {
+    public Collection<ManagedSession> getSessionsForUser(Session session) throws OXException {
         if (null == session) {
             return Collections.emptyList();
         }
@@ -138,7 +138,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
-        Set<String> blackListedClients = applyClientBlacklist ? Collections.<String> emptySet() : getBlacklistedClients();
+        Set<String> blackListedClients = getBlacklistedClients();
 
         Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
@@ -238,8 +238,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         }
     }
 
-    @Override
-    public Set<String> getBlacklistedClients() throws OXException {
+    private Set<String> getBlacklistedClients() {
         return blacklistedClients.get();
     }
 
