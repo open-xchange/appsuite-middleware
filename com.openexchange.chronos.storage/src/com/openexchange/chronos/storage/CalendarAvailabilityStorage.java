@@ -51,6 +51,8 @@ package com.openexchange.chronos.storage;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -118,6 +120,17 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if an error is occurred
      */
     CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException;
+
+    /**
+     * Loads the {@link CalendarAvailability} information for the specified {@link Attendee}s in the specified interval.
+     * 
+     * @param attendees The {@link List} of {@link Attendee}s
+     * @param from The starting point in the interval
+     * @param until The ending point in the interval
+     * @return A {@link Map} with the {@link CalendarAvailability} for each {@link Attendee}
+     * @throws OXException if the items cannot be retrieved
+     */
+    Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user

@@ -139,9 +139,15 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<Attendee, List<CalendarAvailability>> getAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public Map<Attendee, List<CalendarAvailability>> getAvailability(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
+        return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, List<CalendarAvailability>>>(session) {
+
+            @Override
+            protected Map<Attendee, List<CalendarAvailability>> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                return new GetPerformer(storage, session).perform(attendees, from, until);
+            }
+
+        }.executeQuery();
     }
 
     /*

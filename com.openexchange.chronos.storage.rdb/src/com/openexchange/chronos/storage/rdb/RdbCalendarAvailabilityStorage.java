@@ -54,7 +54,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.google.common.collect.Lists;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FieldAware;
@@ -211,6 +213,17 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         } finally {
             release(connection, updated);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     */
+    @Override
+    public Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /*
