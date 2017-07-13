@@ -100,11 +100,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
-import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
-import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheProvider;
-import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -207,14 +202,72 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void delete(final Context ctx) throws StorageException {
-
         // Delete filestores of the context
         LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
         Utils.removeFileStorages(ctx, true);
         LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
 
-        // Delete context
         AdminCacheExtended adminCache = cache;
+
+        // Delete context data from context-associated schema
+        try {
+            // Get connection and schema for given context
+            int poolId;
+            String scheme;
+            try {
+                poolId = adminCache.getDBPoolIdForContextId(ctx.getId().intValue());
+                scheme = adminCache.getSchemeForContextId(ctx.getId().intValue());
+            } catch (PoolException e) {
+                throw new StorageException(e);
+            }
+
+            DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                Connection conForContext = null;
+                try {
+                    // Initialize connection to context-associated database schema
+                    conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
+
+                    // Fetch tables which can contain context data and sort these tables magically by foreign keys
+                    LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
+                    List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
+                    LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
+
+                    // Sort the tables by references (foreign keys)
+                    List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
+                    LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
+
+                    // Loop through tables and execute delete statements on each table (using transaction)
+                    deleteContextData(ctx, conForContext, sorted_tables, poolId, scheme);
+                } catch (PoolException e) {
+                    LOG.error("Pool Error", e);
+                    throw new StorageException(e);
+                } catch (StorageException st) {
+                    // Examine cause
+                    SQLException sqle = DBUtils.extractSqlException(st);
+                    if (!condition.isFailedTransactionRollback(sqle)) {
+                        LOG.error("Storage Error", st);
+                        throw st;
+                    }
+                } catch (SQLException sql) {
+                    if (!condition.isFailedTransactionRollback(sql)) {
+                        LOG.error("SQL Error", sql);
+                        throw new StorageException(sql.toString(), sql);
+                    }
+                } finally {
+                    // Needs to be pushed back here, because in the "deleteContextFromConfigDB()" the connection is "reset" in the pool.
+                    try {
+                        adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                    } catch (PoolException e) {
+                        LOG.error("Pool Error", e);
+                    }
+                }
+            } while (retryDelete(condition, ctx));
+        } catch (SQLException sql) {
+            throw new StorageException(sql.toString(), sql);
+        }
+
+        // Delete context from ConfigDB
         try {
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
@@ -222,57 +275,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 condition.resetTransactionRollbackException();
                 boolean rollbackConfigDB = false;
                 try {
-
                     // Get connection for ConfigDB
                     conForConfigDB = adminCache.getWriteConnectionForConfigDB();
-
-                    // Get connection and scheme for given context
-                    LOG.debug("Fetching connection and scheme for context {}", ctx.getId());
-                    int poolId;
-                    Connection conForContext;
-                    try {
-                        poolId = adminCache.getDBPoolIdForContextId(ctx.getId().intValue());
-                        final String scheme = adminCache.getSchemeForContextId(ctx.getId().intValue());
-                        conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
-                        LOG.debug("Connection and scheme fetched for context {}", ctx.getId());
-                    } catch (final PoolException e) {
-                        LOG.error("Pool Error", e);
-                        throw new StorageException(e);
-                    }
-
-                    // Force to re-initialize schema cache on next access
-                    SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
-                    if (null != schemaCache) {
-                        schemaCache.clearFor(poolId);
-                    }
-
-                    // Delete context data from context-associated schema
-                    try {
-                        // Fetch tables which can contain context data and sort these tables magically by foreign keys
-                        LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-                        List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-                        LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
-
-                        // Sort the tables by references (foreign keys)
-                        List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
-                        LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
-
-                        // Loop through tables and execute delete statements on each table (using transaction)
-                        deleteContextData(ctx, conForContext, sorted_tables);
-                    } catch (SQLException e) {
-                        LOG.error("SQL Error", e);
-                        throw new StorageException(e);
-                    } catch (StorageException e) {
-                        throw new StorageException(e.getMessage());
-                    } finally {
-                        // Needs to be pushed back here, because in the "deleteContextFromConfigDB()" the connection is "reset" in the pool.
-                        try {
-                            adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
-                            conForContext = null;
-                        } catch (PoolException e) {
-                            LOG.error("Pool Error", e);
-                        }
-                    }
 
                     // Start transaction on ConfigDB
                     Databases.startTransaction(conForConfigDB);
@@ -296,7 +300,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         LOG.error("Storage Error", st);
                         throw st;
                     }
-                } catch (final SQLException sql) {
+                } catch (SQLException sql) {
                     if (!condition.isFailedTransactionRollback(sql)) {
                         LOG.error("SQL Error", sql);
                         throw new StorageException(sql.toString(), sql);
@@ -315,7 +319,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             } while (retryDelete(condition, ctx));
-        } catch (final SQLException sql) {
+        } catch (SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
 
@@ -347,15 +351,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (retry) {
             // Wait with exponential backoff
             int retryCount = condition.getCount();
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 100) + ((long) (Math.random() * 100)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             LOG.info("Retrying to delete context {} as suggested by: {}", ctx.getId(), sqle.getMessage());
         }
         return retry;
     }
 
-    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables) throws StorageException {
-        LOG.debug("Now deleting data for context {}", ctx.getId());
+    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables, int poolId, String scheme) throws StorageException {
+        LOG.debug("Now deleting data for context {} from schema {} in database {}", ctx.getId(), scheme, Integer.valueOf(poolId));
 
         boolean rollback = false;
         try {
@@ -375,7 +379,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             autocommit(con);
         }
 
-        LOG.debug("Data delete for context {} completed!", ctx.getId());
+        LOG.debug("Data delete for context {} from schema {} in database {} completed!", ctx.getId(), scheme, Integer.valueOf(poolId));
     }
 
     private void fireDeleteEventAndDeleteTableData(Context ctx, Connection con, List<TableObject> sorted_tables) throws SQLException {
@@ -383,7 +387,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-        } catch (OXException e) {
+        } catch (Exception e) {
+            SQLException sqle = DBUtils.extractSqlException(e);
+            if (null != sqle) {
+                throw sqle;
+            }
             LOG.error("Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.", e);
         }
 
@@ -761,13 +769,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
             configdb_write_con.commit();
             ox_db_write_con.commit();
-
-            // Force to re-initialize schema cache on next access
-            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
-            if (null != schemaCache) {
-                schemaCache.clearFor(source_database_id);
-                schemaCache.clearFor(target_database_id.getId().intValue());
-            }
         } catch (final TargetDatabaseException tde) {
             LOG.error("Exception caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, tde);
             LOG.error("Target database rollback starts for context {}", ctx.getId());
@@ -1180,7 +1181,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 startTransaction(configCon);
                 boolean rollback = true;
                 try {
-                    SchemaResult schemaResult = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                    findOrCreateSchema(configCon, db, schemaSelectStrategy);
                     contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
                     configCon.commit();
                     rollback = false;
@@ -1377,23 +1378,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             } while (retryWriteContextToPayloadDb(condition, ctx));
-        } catch (final SQLException sql) {
-            throw new StorageException(sql.toString(), sql);
+        } catch (StorageException e) {
+            throw e;
         }
 
         return ctx;
     }
 
-    private boolean retryWriteContextToPayloadDb(DBUtils.TransactionRollbackCondition condition, Context ctx) throws SQLException {
-        SQLException sqle = condition.getTransactionRollbackException();
-        boolean retry = condition.checkRetry();
-        if (retry) {
-            int numRetries = condition.getCount();
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((numRetries * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
-            LockSupport.parkNanos(nanosToWait);
-            LOG.info("Retrying to write data from context {} into payload database suggested by: {}", ctx.getId(), sqle.getMessage());
+    private boolean retryWriteContextToPayloadDb(DBUtils.TransactionRollbackCondition condition, Context ctx) throws StorageException {
+        try {
+            SQLException sqle = condition.getTransactionRollbackException();
+            boolean retry = condition.checkRetry();
+            if (retry) {
+                int numRetries = condition.getCount();
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((numRetries * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                LOG.info("Retrying to write data from context {} into payload database suggested by: {}", ctx.getId(), sqle.getMessage());
+            }
+            return retry;
+        } catch (SQLException e) {
+            // Max. retry count exceeded.
+            throw new StorageException("Repetitively failed to write context into payload database", e);
         }
-        return retry;
     }
 
     private void lockWriteContextToPayloadDb(int contextId, Connection con) throws SQLException {
@@ -1511,10 +1517,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      *
      * @param configCon a write connection to the configuration database that is already in a transaction.
      * @param db The database
-     * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
      * @return The possible schema result from cache that is needed for further processing
      */
-    private SchemaResult findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
+    private void findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         // The effective strategy
         SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
 
@@ -1523,47 +1528,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             case SCHEMA:
                 // Pre-defined schema name
                 applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
-                return SchemaResult.SCHEMA_NAME;
-            case IN_MEMORY:
-                // Must no more be used
+                return;
+            case AUTOMATIC:
                 // fall-through
             default:
                 automaticLookupSchema(configCon, db);
-                return SchemaResult.AUTOMATIC;
+                return;
         }
     }
 
     private void applyPredefinedSchemaName(String schemaName, Database db) throws StorageException {
-        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
-        if (null != optCache) {
-            optCache.clearFor(db.getId().intValue());
-        }
-
         // Pre-defined schema name
         db.setScheme(schemaName);
-    }
-
-    private SchemaResult inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
-        // Get cache instance
-        SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
-        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, cache.getPool());
-
-        // Get next known suitable schema
-        int poolId = db.getId().intValue();
-        SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
-        if (SchemaCacheResult.DATABASE_EMPTY == schemaResult) {
-            // No schema at all... Need to create one anyway
-            autoFindOrCreateSchema(configCon, db, true);
-            return SchemaResult.AUTOMATIC;
-        }
-        if (null != schemaResult) {
-            db.setScheme(schemaResult.getSchemaName());
-            return SchemaResult.inMemoryWith(schemaResult);
-        }
-
-        // No suitable schema known to cache. Therefore return null to initiate regular schema look-up/creation
-        automaticLookupSchema(configCon, db);
-        return SchemaResult.AUTOMATIC;
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
@@ -1579,27 +1555,24 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @throws StorageException If a suitable schema cannot be found
      */
     private void autoFindOrCreateSchema(Connection configCon, Database db, boolean forceCreate) throws StorageException {
-        // Clear schema cache once "live" schema information is requested
-        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
-        if (null != optCache) {
-            optCache.clearFor(db.getId().intValue());
-        }
-
         // Freshly determine the next schema to use
         String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db.getId(), configCon);
-        if (schemaName == null) {
-            int schemaUnique;
-            try {
-                schemaUnique = IDGenerator.getId(configCon);
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            schemaName = db.getName() + '_' + schemaUnique;
+        if (schemaName != null) {
+            // Found a suitable schema on specified database host
             db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
-        } else {
-            db.setScheme(schemaName);
+            return;
         }
+
+        // Need to create a new schema
+        int schemaUnique;
+        try {
+            schemaUnique = IDGenerator.getId(configCon);
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
+        schemaName = db.getName() + '_' + schemaUnique;
+        db.setScheme(schemaName);
+        OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
     }
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
@@ -1654,7 +1627,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = cache.getPool();
         final String[] unfilledSchemas;
         try {
-            pool.lock(con, i(poolId), null);
+            pool.lock(con, i(poolId));
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);

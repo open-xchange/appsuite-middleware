@@ -95,8 +95,6 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -837,6 +835,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con.setAutoCommit(false);
             rollback = true;
 
+            cache.getPool().lock(con, db.getId().intValue());
             OXUtilMySQLStorageCommon.deleteDatabase(db, con);
 
             con.commit();
@@ -1509,7 +1508,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 // Exponential back-off
-                exponentialBackoffWait(++retryCount, 100L);
+                exponentialBackoffWait(++retryCount, 1000L);
             }
         }
 
@@ -3129,7 +3128,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 // Exponential back-off
-                exponentialBackoffWait(++retryCount, 100L);
+                exponentialBackoffWait(++retryCount, 1000L);
             }
         }
 
@@ -3339,7 +3338,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        createSchema(configCon, db, true);
+        createSchema(configCon, db);
     }
 
     /**
@@ -3347,18 +3346,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for
-     * @param clearSchemaCache Whether schema cache is supposed to be cleared
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void createSchema(Connection configCon, Database db, boolean clearSchemaCache) throws StorageException {
-        // Clear schema cache once "live" schema information is requested
-        if (clearSchemaCache) {
-            SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
-            if (null != optCache) {
-                optCache.clearFor(db.getId().intValue());
-            }
-        }
-
+    private void createSchema(Connection configCon, Database db) throws StorageException {
         // Freshly determine the next schema to use
         int schemaUnique;
         try {

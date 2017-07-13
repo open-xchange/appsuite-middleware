@@ -298,30 +298,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.createDatabase(db, null);
     }
 
-    public void deleteDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        try {
-            doNullCheck(db);
-        } catch (final InvalidDataException e1) {
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
-        }
-
-        basicauth.doAuthentication(auth);
-
-        log.debug(db.toString());
-
-        try {
-            if (!db.mandatoryDeleteMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
-            } else {
-                oxutil.deleteDatabase(db);
-            }
-        } catch (EnforceableDataObjectException e) {
-            throw new InvalidDataException(e.getMessage());
-        }
-    }
-
     @Override
     public Database registerDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;

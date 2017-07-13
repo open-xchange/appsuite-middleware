@@ -118,5 +118,17 @@ public interface OXAdminPoolInterface {
      */
     Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException;
 
-    void lock(Connection con, int writePoolId, String schemaName) throws PoolException;
+    /**
+     * Acquires a global lock for specified database
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Given connection is required to be in transaction mode.
+     * </div>
+     * <p>
+     *
+     * @param con The connection (in transaction mode)
+     * @param writePoolId The identifier of the (read-write) database for which to acquire a lock
+     * @throws PoolException If lock cannot be acquired
+     */
+    void lock(Connection con, int writePoolId) throws PoolException;
 }

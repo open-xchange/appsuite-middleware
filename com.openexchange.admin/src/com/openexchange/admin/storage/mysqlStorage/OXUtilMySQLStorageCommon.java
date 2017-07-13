@@ -344,6 +344,13 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
+    /**
+     * Deletes specified database (schema) and associated schema-count entry.
+     *
+     * @param db The database instance providing at least identifier and schema name
+     * @param configdbCon The connection to the ConfigD (optional)
+     * @throws StorageException If deleting database (schema) fails
+     */
     public static void deleteDatabase(final Database db, final Connection configdbCon) throws StorageException {
         Connection con;
         try {
@@ -386,7 +393,10 @@ public class OXUtilMySQLStorageCommon {
      * @param configdbCon The connection to the ConfigD (optional)
      * @throws StorageException If deleting database (schema) fails
      */
-    public static void deleteDatabase(Connection con, Database db, Connection configdbCon) throws StorageException {
+    private static void deleteDatabase(Connection con, Database db, Connection configdbCon) throws StorageException {
+        if (null == db.getScheme()) {
+            throw new StorageException("Schema not set in specified Database instance");
+        }
         deleteDatabaseSchema(con, db);
         deleteSchemaCountEntry(db, configdbCon);
     }

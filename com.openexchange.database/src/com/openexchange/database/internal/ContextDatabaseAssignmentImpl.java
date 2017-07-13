@@ -495,7 +495,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     @Override
-    public void lock(Connection con, int writePoolId, String schemaName) throws OXException {
+    public void lock(Connection con, int writePoolId) throws OXException {
         PreparedStatement stmt = null;
         try {
             switch (lockMech) {
@@ -505,14 +505,8 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                     break;
                 }
                 case ROW_LOCK: {
-                    if (null == schemaName) {
-                        stmt = con.prepareStatement("SELECT 1 FROM dbpool_lock WHERE db_pool_id=? FOR UPDATE");
-                        stmt.setInt(1, writePoolId);
-                    } else {
-                        stmt = con.prepareStatement("SELECT 1 FROM dbschema_lock WHERE db_pool_id=? AND schemaname=? FOR UPDATE");
-                        stmt.setInt(1, writePoolId);
-                        stmt.setString(2, schemaName);
-                    }
+                    stmt = con.prepareStatement("SELECT 1 FROM dbpool_lock WHERE db_pool_id=? FOR UPDATE");
+                    stmt.setInt(1, writePoolId);
                     stmt.executeQuery();
                     break;
                 }

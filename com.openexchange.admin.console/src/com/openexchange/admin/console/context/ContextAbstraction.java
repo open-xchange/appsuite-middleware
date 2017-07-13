@@ -162,7 +162,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected String schemaStrategy;
 
     protected static final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
-    protected static final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
+    protected static final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available value: \"automatic\"";
 
     protected Integer filestoreid = null;
 
@@ -563,8 +563,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
             String strategyName = nextLine[strategyId];
             if (strategyName.equals("automatic")) {
                 return SchemaSelectStrategy.automatic();
-            } else if (strategyName.equals("in-memory")) {
-                return SchemaSelectStrategy.inMemory();
             } else {
                 throw new InvalidDataException(SCHEMA_NAME_ERROR);
             }

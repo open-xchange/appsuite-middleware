@@ -621,7 +621,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             throw new StorageException_Exception(e.getMessage(), faultDetail, e);
         }
     }
-    
+
     @Override
     public void checkCountsConsistency(CheckCountsConsistency parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
@@ -1111,10 +1111,8 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         } else if (schemaSelectStrategy.getStrategy() != null) {
             if (schemaSelectStrategy.getStrategy().equals("automatic")) {
                 return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
-            } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
-                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.inMemory();
             } else {
-                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible values: \"automatic\", \"in-memory\"");
+                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible value: \"automatic\"");
             }
         }
 

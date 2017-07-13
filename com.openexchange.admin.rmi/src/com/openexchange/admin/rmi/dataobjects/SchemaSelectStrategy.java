@@ -66,10 +66,12 @@ public class SchemaSelectStrategy implements Serializable {
 
     /** The strategy enumeration */
     public static enum Strategy {
-        SCHEMA, AUTOMATIC, IN_MEMORY;
+        SCHEMA, AUTOMATIC;
     }
 
     private static final long serialVersionUID = 2888117829864032432L;
+
+    private static final SchemaSelectStrategy AUTOMATIC_SELECT_STRATEGY = new SchemaSelectStrategy(Strategy.AUTOMATIC);
 
     /**
      * Creates a schema strategy for auto-determining schema name
@@ -77,16 +79,7 @@ public class SchemaSelectStrategy implements Serializable {
      * @return The appropriate schema strategy
      */
     public static SchemaSelectStrategy automatic() {
-        return new SchemaSelectStrategy(Strategy.AUTOMATIC);
-    }
-
-    /**
-     * Creates a schema strategy for fetching the schema name from in-memory cache.
-     *
-     * @return The appropriate schema strategy
-     */
-    public static SchemaSelectStrategy inMemory() {
-        return new SchemaSelectStrategy(Strategy.IN_MEMORY);
+        return AUTOMATIC_SELECT_STRATEGY;
     }
 
     /**

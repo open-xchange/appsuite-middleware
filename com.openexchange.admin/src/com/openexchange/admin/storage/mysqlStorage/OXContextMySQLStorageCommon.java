@@ -367,8 +367,7 @@ public class OXContextMySQLStorageCommon {
         }
         try {
             startTransaction(con);
-            cache.getPool().lock(con, poolId, dbSchema);
-            deleteEmptySchema(con, poolId, dbSchema, cache);
+            deleteSchemaIfEmpty(con, poolId, dbSchema, cache);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -392,7 +391,7 @@ public class OXContextMySQLStorageCommon {
      * If this method is used the surrounding code needs to take care, that according locks on the database tables are created. If they are
      * no such locks this method may delete schemas where another request currently writes to.
      */
-    public static void deleteEmptySchema(Connection con, int poolId, String dbSchema, AdminCache cache) throws StorageException {
+    public static void deleteSchemaIfEmpty(Connection con, int poolId, String dbSchema, AdminCache cache) throws StorageException, PoolException {
         final int[] otherContexts;
         try {
             otherContexts = cache.getPool().getContextInSchema(con, poolId, dbSchema);
@@ -403,6 +402,7 @@ public class OXContextMySQLStorageCommon {
         if (otherContexts.length == 0) {
             Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
             db.setScheme(dbSchema);
+            cache.getPool().lock(con, poolId);
             OXUtilMySQLStorageCommon.deleteDatabase(db, con);
         }
     }
@@ -411,14 +411,8 @@ public class OXContextMySQLStorageCommon {
         OXAdminPoolInterface pool = cache.getPool();
         PreparedStatement stmt = null;
         try {
-            // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
-            // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            int poolId = pool.getWritePool(contextId);
-            String dbSchema = pool.getSchemaName(contextId);
+            // Decrement filestore counter
             int filestoreId = getFilestoreIdFor(con, contextId);
-
-            pool.lock(con, poolId, dbSchema);
-
             if (0 != filestoreId) {
                 stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
@@ -427,9 +421,8 @@ public class OXContextMySQLStorageCommon {
                 stmt = null;
             }
 
-            // Delete association from "context_server2db_pool" table
+            // Delete association from "context_server2db_pool" table (and thus implicitly decrement counters for database/schema)
             pool.deleteAssignment(con, contextId);
-            deleteEmptySchema(con, poolId, dbSchema, cache);
 
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
