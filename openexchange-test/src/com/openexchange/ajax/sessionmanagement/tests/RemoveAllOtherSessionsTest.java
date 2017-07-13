@@ -130,15 +130,13 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
             GetSessionsResponse getResponse = testClient2.execute(getRequest);
             Assert.assertFalse(getResponse.hasError());
             Collection<ManagedSession> sessions = getResponse.getSessions();
-            Assert.assertThat("Not the excpected count of active clients", 2, is(sessions.size()));
+            
+            // Should not see blacklisted client
+            Assert.assertThat("Not the excpected count of active clients", 1, is(sessions.size()));
 
             for (ManagedSession session : sessions) {
-                if (sessionId.equals(session.getSessionId()) || blackListed.getSession().getId().equals(session.getSessionId())) {
-                    continue;
-                }
-                fail("Wrong session still logged in");
+                Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
             }
-
         } finally {
             saveLogout(blackListed);
         }
