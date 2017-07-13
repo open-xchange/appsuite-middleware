@@ -52,7 +52,9 @@ package com.openexchange.chronos.storage.rdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Lists;
@@ -222,8 +224,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     @Override
     public Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            return loadCalendarAvailability(connection, attendees, from, until);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
     }
 
     /*
@@ -545,6 +555,57 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
             return freeSlotMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
         }
+    }
+
+    /**
+     * List of attendees
+     * 
+     * @param connection
+     * @param attendees
+     * @param from
+     * @param until
+     * @return
+     * @throws OXException
+     */
+    private Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
+        // 0. Pre-fill the return map
+        Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
+        Map<Integer, Attendee> reverseLookup = new HashMap<>();
+        for (Attendee a : attendees) {
+            map.put(a, null);
+            reverseLookup.put(a.getEntity(), a);
+        }
+
+        // 1) Fetch all calendar availability items within the interval
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT DISTINCT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "e."));
+        sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS e");
+        sb.append(" LEFT JOIN calendar_attendee AS a ON e.cid=a.cid AND e.user=a.entity");
+        sb.append(" WHERE e.cid=?");
+        sb.append(" AND e.start >= ? AND e.end <= ?;");
+
+        List<CalendarAvailability> availabilities = null;
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setLong(parameterIndex++, from.getTime());
+            stmt.setLong(parameterIndex++, until.getTime());
+            availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+        }
+
+        // 2) Then fetch all free slots of the calendar availability items with in the interval
+        for (CalendarAvailability ca : availabilities) {
+            ca.setCalendarFreeSlots(loadCalendarFreeSlots(ca.getId()));
+            Attendee attendee = reverseLookup.get(ca.getCalendarUser());
+            List<CalendarAvailability> avs = map.get(attendee);
+            if (avs == null) {
+                avs = new ArrayList<>();
+                map.put(attendee, avs);
+            }
+            avs.add(ca);
+        }
+        return map;
     }
 
     /**

@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.filter;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -85,6 +88,13 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     public Map<Attendee, List<CalendarAvailability>> perform(List<Attendee> attendees, Date from, Date until) throws OXException {
+        // Prepare the attendees
+        attendees = session.getEntityResolver().prepare(attendees);
+        // Filter the external ones
+        attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        if (attendees.size() == 0) {
+            return Collections.emptyMap();
+        }
         return storage.loadCalendarAvailability(attendees, from, until);
     }
 }
