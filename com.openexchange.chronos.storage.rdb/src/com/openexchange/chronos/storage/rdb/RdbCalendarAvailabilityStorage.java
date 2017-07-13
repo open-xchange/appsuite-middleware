@@ -52,11 +52,8 @@ package com.openexchange.chronos.storage.rdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
@@ -224,7 +221,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAttendeeCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<Attendee, List<CalendarAvailability>> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -236,12 +233,14 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             release(connection, updated);
         }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<User, List<CalendarAvailability>> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException {
+    public List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -577,23 +576,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @return
      * @throws OXException
      */
-    private Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
-        // 0. Pre-fill the return map
-        Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
-        Map<Integer, Attendee> reverseLookup = new HashMap<>();
-        for (Attendee a : attendees) {
-            map.put(a, null);
-            reverseLookup.put(a.getEntity(), a);
-        }
-
+    private List<CalendarAvailability> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
         // 1) Fetch all calendar availability items within the interval
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT DISTINCT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "e."));
-        sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS e");
-        sb.append(" LEFT JOIN calendar_attendee AS a ON e.cid=a.cid AND e.user=a.entity");
-        sb.append(" WHERE e.cid=?");
-        sb.append(" AND e.start >= ? AND e.end <= ?;");
+        sb.append("SELECT DISTINCT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "c."));
+        sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS c");
+        sb.append(" LEFT JOIN calendar_attendee AS a ON c.cid=a.cid AND c.user=a.entity");
+        sb.append(" WHERE c.cid=?");
+        sb.append(" AND c.start >= ? AND c.end <= ?;");
 
         List<CalendarAvailability> availabilities = null;
         int parameterIndex = 1;
@@ -607,15 +598,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         // 2) Then fetch all free slots of the calendar availability items with in the interval
         for (CalendarAvailability ca : availabilities) {
             ca.setCalendarFreeSlots(loadCalendarFreeSlots(ca.getId()));
-            Attendee attendee = reverseLookup.get(ca.getCalendarUser());
-            List<CalendarAvailability> avs = map.get(attendee);
-            if (avs == null) {
-                avs = new ArrayList<>();
-                map.put(attendee, avs);
-            }
-            avs.add(ca);
         }
-        return map;
+        return availabilities;
     }
 
     /**

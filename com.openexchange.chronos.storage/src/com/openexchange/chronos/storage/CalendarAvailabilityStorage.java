@@ -131,9 +131,17 @@ public interface CalendarAvailabilityStorage {
      * @return A {@link Map} with the {@link CalendarAvailability} for each {@link Attendee}
      * @throws OXException if the items cannot be retrieved
      */
-    Map<Attendee, List<CalendarAvailability>> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
+    List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
     
-    Map<User, List<CalendarAvailability>> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException;
+    /**
+     * 
+     * @param users
+     * @param from
+     * @param until
+     * @return
+     * @throws OXException
+     */
+    List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user
