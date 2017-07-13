@@ -445,6 +445,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, userId);
+            stmt.setLong(parameterIndex++, from.getTime());
+            stmt.setLong(parameterIndex++, until.getTime());
             List<CalendarAvailability> availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
 
             for (CalendarAvailability availability : availabilities) {
