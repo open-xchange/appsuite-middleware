@@ -1,3 +1,4 @@
+type: object
 sessionId:
   type: string
   description: The session identifier
