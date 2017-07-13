@@ -144,7 +144,7 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
 
             @Override
             protected Map<Attendee, List<CalendarAvailability>> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                return new GetPerformer(storage, session).perform(attendees, from, until);
+                return new GetPerformer(storage, session).performForAttendees(attendees, from, until);
             }
 
         }.executeQuery();

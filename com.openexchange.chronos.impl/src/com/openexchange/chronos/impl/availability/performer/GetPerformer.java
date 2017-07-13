@@ -60,6 +60,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.arrays.Collections;
 
 /**
@@ -88,7 +89,7 @@ public class GetPerformer extends AbstractPerformer {
         return storage.loadCalenarAvailabilityInRange(session.getUserId(), from, until);
     }
 
-    public Map<Attendee, List<CalendarAvailability>> perform(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, List<CalendarAvailability>> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Prepare the attendees
         attendees = session.getEntityResolver().prepare(attendees);
         // Filter the external ones
@@ -97,21 +98,39 @@ public class GetPerformer extends AbstractPerformer {
             return java.util.Collections.emptyMap();
         }
 
-        // Pre-fill the return map
-        Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
+        // Create a reverse lookup index
+
         Map<Integer, Attendee> reverseLookup = new HashMap<>();
         for (Attendee a : attendees) {
-            map.put(a, java.util.Collections.<CalendarAvailability> emptyList());
             reverseLookup.put(a.getEntity(), a);
         }
         // Fetch
         List<CalendarAvailability> availabilities = storage.loadAttendeeCalendarAvailability(attendees, from, until);
         // Build the return map
+        Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
         for (CalendarAvailability availability : availabilities) {
             Attendee attendee = reverseLookup.get(availability.getCalendarUser());
             Collections.put(map, attendee, map.get(attendee));
         }
-        
+
+        return map;
+    }
+
+    public Map<User, List<CalendarAvailability>> performForUsers(List<User> users, Date from, Date until) throws OXException {
+        // Create a reverse lookup index
+        Map<Integer, User> reverseLookup = new HashMap<>();
+        for (User u : users) {
+            reverseLookup.put(u.getId(), u);
+        }
+        // Fetch
+        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(users, from, until);
+        // Build the return map
+        Map<User, List<CalendarAvailability>> map = new HashMap<>();
+        for (CalendarAvailability availability : availabilities) {
+            User user = reverseLookup.get(availability.getCalendarUser());
+            Collections.put(map, user, map.get(user));
+        }
+
         return map;
     }
 }
