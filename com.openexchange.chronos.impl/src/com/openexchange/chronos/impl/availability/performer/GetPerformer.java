@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.service.CalendarSession;
@@ -75,5 +76,9 @@ public class GetPerformer extends AbstractPerformer {
 
     public List<CalendarAvailability> perform() throws OXException {
         return storage.loadCalendarAvailabilities(session.getUserId());
+    }
+
+    public List<CalendarAvailability> performInRange(Date from, Date until) throws OXException {
+        return storage.loadCalenarAvailabilityInRange(session.getUserId(), from, until);
     }
 }
