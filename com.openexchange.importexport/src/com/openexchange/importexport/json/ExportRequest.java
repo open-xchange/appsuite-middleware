@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -86,8 +87,7 @@ public class ExportRequest {
         super();
         this.setSession(session);
         this.setRequest(request);
-
-        String ids = request.getParameter(AJAXServlet.PARAMETER_IDS);
+        String ids = request.requireData().toString();
         if (Strings.isNotEmpty(ids)) {
             try{
                 batchIds = extractBatchArrayFromRequest(ids);
@@ -122,20 +122,18 @@ public class ExportRequest {
         if (length <= 0) {
             return Collections.emptyMap();
         }
-
+        
         Map<String, List<String>> batchIds = new LinkedHashMap<String, List<String>>(length);
         for (int i = 0; i < length; i++) {
-            JSONArray jPair = jPairs.getJSONArray(i);
-            int innerLength = jPair.length();
-            if (innerLength > 0) {
-                String folderId = jPair.getString(0);
-                List<String> valueList = batchIds.get(folderId);
-                if (null == valueList) {
-                    valueList = new ArrayList<String>(innerLength);
-                    batchIds.put(folderId, valueList);
-                }
-                valueList.add(jPair.getString(1));
+            JSONObject tuple = jPairs.getJSONObject(i);
+            String folderId = tuple.getString(AJAXServlet.PARAMETER_FOLDERID);
+            String objectId = tuple.getString(AJAXServlet.PARAMETER_ID);
+            List<String> valueList = batchIds.get(folderId);
+            if (null == valueList) {
+                valueList = new ArrayList<String>();
+                batchIds.put(folderId, valueList);
             }
+            valueList.add(objectId);
         }
         return batchIds;
     }
