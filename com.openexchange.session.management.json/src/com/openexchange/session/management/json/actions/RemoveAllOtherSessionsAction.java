@@ -50,7 +50,6 @@
 package com.openexchange.session.management.json.actions;
 
 import java.util.Collection;
-import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -100,20 +99,14 @@ public class RemoveAllOtherSessionsAction implements AJAXActionService {
         // Remove all sessions except blacklisted and transmitted to keep
         try {
             String sessionIdToKeep = dataObject.getString(KEEP);
-            Collection<ManagedSession> userSessions = service.getSessionsForUser(session, false);
-
-            Set<String> blacklistedClients = service.getBlacklistedClients();
+            Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
 
             // Remove
             for (ManagedSession mSession : userSessions) {
                 String mSessionId = mSession.getSessionId();
-                if (sessionIdToKeep.equals(mSessionId)) {
-                    continue;
+                if (false == sessionIdToKeep.equals(mSessionId)) {
+                    service.removeSession(session, mSessionId);
                 }
-                if (blacklistedClients.contains(mSession.getClient())) {
-                    continue;
-                }
-                service.removeSession(session, mSessionId);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
