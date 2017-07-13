@@ -335,20 +335,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            int parameterIndex = 1;
-            // Delete all free slots
-            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND user=?")) {
-                stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, userId);
-                updated += logExecuteUpdate(stmt);
-            }
-            parameterIndex = 1;
-            // Delete all availability blocks
-            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND user=?")) {
-                stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, userId);
-                updated += logExecuteUpdate(stmt);
-            }
+            updated = purgeCalendarAvailabilityItems(connection, userId);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -595,6 +582,39 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(CA_FREE_SLOT_NAME).append(" AND calendarAvailability=?;").toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Purges all {@link CalendarAvailability} and {@link CalendarFreeSlot} items for the specified user
+     * 
+     * @param connection The writeable {@link Connection} to the storage
+     * @param userId The user identifier
+     * @return The amount of rows affected
+     * @throws SQLException if an SQL error is occurred
+     */
+    private int purgeCalendarAvailabilityItems(Connection connection, int userId) throws SQLException {
+        int updated = 0;
+        updated += purgeCalendarAvailabilityItems(connection, CA_FREE_SLOT_NAME, userId);
+        updated += purgeCalendarAvailabilityItems(connection, CA_TABLE_NAME, userId);
+        return updated;
+    }
+
+    /**
+     * Purges all items in the specified table for the specified user
+     * 
+     * @param connection The writeable {@link Connection} to the storage
+     * @param tableName The table name
+     * @param userId The user identifier
+     * @return The amount of rows affected
+     * @throws SQLException if an SQL error is occurred
+     */
+    private int purgeCalendarAvailabilityItems(Connection connection, String tableName, int userId) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(tableName).append(" AND user=?;").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, userId);
             return logExecuteUpdate(stmt);
         }
     }
