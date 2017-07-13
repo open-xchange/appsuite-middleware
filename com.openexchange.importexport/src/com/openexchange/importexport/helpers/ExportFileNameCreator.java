@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ExportFileNameCreator {
     
     /**
-     * The default name for an ical, csv or vcard export, when using batch data
+     * The default file name for an ical, csv or vcard export, when using batch data
      */
     private static final String VCARD_CONTACTS_NAME = "Contacts";    
     
