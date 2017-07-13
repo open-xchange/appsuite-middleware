@@ -7,7 +7,7 @@ properties:
       Search for user sessions in session storage and other cluster members
     defaultValue: true
     version: 7.10.0
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: sessionmanagement.properties
@@ -18,7 +18,7 @@ properties:
       A comma-separated list of blacklisted clients. Those sessions will not be listed.
     defaultValue: 
     version: 7.10.0
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: sessionmanagement.properties
