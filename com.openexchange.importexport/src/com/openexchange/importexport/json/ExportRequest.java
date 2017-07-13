@@ -75,6 +75,7 @@ public class ExportRequest {
 	private String folder;
 	private List<Integer> columns;
 	private Map<String, List<String>> batchIds;
+	private static String PARAMETER_FOLDER_ID = "folder_id";
 
     /**
      * Initializes a new {@link ExportRequest}.
@@ -126,7 +127,7 @@ public class ExportRequest {
         Map<String, List<String>> batchIds = new LinkedHashMap<String, List<String>>(length);
         for (int i = 0; i < length; i++) {
             JSONObject tuple = jPairs.getJSONObject(i);
-            String folderId = tuple.getString(AJAXServlet.PARAMETER_FOLDERID);
+            String folderId = tuple.getString(PARAMETER_FOLDER_ID);
             String objectId = tuple.getString(AJAXServlet.PARAMETER_ID);
             List<String> valueList = batchIds.get(folderId);
             if (null == valueList) {
