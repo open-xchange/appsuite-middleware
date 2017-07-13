@@ -418,7 +418,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND id=?;");
 
-        int parameterIndex = 0;
+        int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
@@ -441,7 +441,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND user=? AND start >= ? AND end <= ?;");
 
-        int parameterIndex = 0;
+        int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, userId);
@@ -469,7 +469,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND user=?;");
 
-        int parameterIndex = 0;
+        int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, userId);
@@ -519,7 +519,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_FREE_SLOT_NAME, freeSlotMapper).append(" AND calendarAvailability=?;");
 
-        int parameterIndex = 0;
+        int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
@@ -557,16 +557,21 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private int deleteCalendarAvailabilityItems(List<String> calendarAvailabilityIds, Connection connection) throws SQLException {
         int affectedRows = 0;
+        StringBuilder deleteCABuilder = SQLStatementBuilder.buildDeleteQueryBuilder(CA_TABLE_NAME).append(" AND id IN (");
         for (String calendarAvailabilityId : calendarAvailabilityIds) {
             affectedRows += deleteCalendarFreeSlots(calendarAvailabilityId, connection);
+            deleteCABuilder.append("?,");
+        }
+        deleteCABuilder.setLength(deleteCABuilder.length() - 1);
+        deleteCABuilder.append(");");
 
-            int parameterIndex = 1;
-            // FIXME: Maybe use an 'IN' clause and delete multiple rows in a single statement?
-            try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(CA_TABLE_NAME).append(" AND id=?;").toString())) {
-                stmt.setInt(parameterIndex++, context.getContextId());
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(deleteCABuilder.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            for (String calendarAvailabilityId : calendarAvailabilityIds) {
                 stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
-                affectedRows += logExecuteUpdate(stmt);
             }
+            affectedRows += logExecuteUpdate(stmt);
         }
         return affectedRows;
     }
