@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.CalendarAvailability;
@@ -228,6 +229,25 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalenarAvailabilityInRange(int, java.util.Date, java.util.Date)
+     */
+    @Override
+    public List<CalendarAvailability> loadCalenarAvailabilityInRange(int userId, Date from, Date until) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return loadCalendarAvailabilitiesInRange(connection, userId, from, until);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.lang.String)
      */
     @Override
@@ -351,7 +371,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws SQLException if an SQL error is occurred
      */
     private <O extends FieldAware, E extends Enum<E>> int insertCalendarAvailabilityItem(O item, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
-        String sql = constructInsertQueryBuilder(tableName, mapper).append(";").toString();
+        String sql = SQLStatementBuilder.buildInsertQueryBuilder(tableName, mapper).append(";").toString();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
@@ -379,7 +399,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
         E[] mappedFields = mapper.getMappedFields();
         // Prepare the initial query
-        StringBuilder sb = constructInsertQueryBuilder(tableName, mapper);
+        StringBuilder sb = SQLStatementBuilder.buildInsertQueryBuilder(tableName, mapper);
         // Prepare for all items
         for (int index = 1; index < items.size(); index++) {
             sb.append(",(?,?,").append(mapper.getParameters(mappedFields)).append(")");
@@ -409,10 +429,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private CalendarAvailability loadCalendarAvailability(Connection connection, String availabilityId) throws OXException, SQLException {
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(calendarAvailabilityMapper.getColumns(mappedFields));
-        sb.append("FROM ").append(CA_TABLE_NAME);
-        sb.append(" WHERE cid=? AND id=?;");
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND id=?;");
 
         int parameterIndex = 0;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
@@ -433,12 +450,35 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws OXException if the items cannot be loaded from the storage or any other error occurs
      * @throws SQLException if an SQL error is occurred
      */
+    private List<CalendarAvailability> loadCalendarAvailabilitiesInRange(Connection connection, int userId, Date from, Date until) throws OXException, SQLException {
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND user=? AND start >= ? AND end <= ?;");
+
+        int parameterIndex = 0;
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, userId);
+            List<CalendarAvailability> availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+
+            for (CalendarAvailability availability : availabilities) {
+                availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
+            }
+            return availabilities;
+        }
+    }
+
+    /**
+     * Loads all {@link CalendarAvailability} blocks for the specified user
+     * 
+     * @param A read-only {@link Connection} to the storage
+     * @param userId The user identifier
+     * @return A {@link List} with all the {@link CalendarAvailability} blocks for the specified user
+     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
+     * @throws SQLException if an SQL error is occurred
+     */
     private List<CalendarAvailability> loadCalendarAvailabilities(Connection connection, int userId) throws OXException, SQLException {
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(calendarAvailabilityMapper.getColumns(mappedFields));
-        sb.append("FROM ").append(CA_TABLE_NAME);
-        sb.append(" WHERE cid=? AND user=?;");
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND user=?;");
 
         int parameterIndex = 0;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
@@ -465,10 +505,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private CalendarFreeSlot loadCalendarFreeSlot(Connection connection, String availabilityId, String freeSlotId) throws OXException, SQLException {
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(freeSlotMapper.getColumns(mappedFields));
-        sb.append("FROM ").append(CA_FREE_SLOT_NAME);
-        sb.append(" WHERE cid=? AND calendarAvailability=? AND id=?;");
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_FREE_SLOT_NAME, freeSlotMapper).append(" AND calendarAvailability=? AND id=?;");
 
         int parameterIndex = 0;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
@@ -491,10 +528,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private List<CalendarFreeSlot> loadCalendarFreeSlots(Connection connection, String availabilityId) throws OXException, SQLException {
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(freeSlotMapper.getColumns(mappedFields));
-        sb.append("FROM ").append(CA_FREE_SLOT_NAME);
-        sb.append(" WHERE cid=? AND calendarAvailability=?;");
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_FREE_SLOT_NAME, freeSlotMapper).append(" AND calendarAvailability=?;");
 
         int parameterIndex = 0;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
@@ -503,23 +537,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
             return freeSlotMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
         }
-    }
-
-    /**
-     * Constructs the initial INSERT SQL statement. The INSERT statement is NOT ended with the semicolon ';'.
-     * 
-     * @param tableName The table name
-     * @param mapper The mapper to use
-     * @return The initial INSERT SQL statement
-     * @throws OXException if an error is occurred
-     */
-    private <O extends FieldAware, E extends Enum<E>> StringBuilder constructInsertQueryBuilder(String tableName, DefaultDbMapper<O, E> mapper) throws OXException {
-        E[] mappedFields = mapper.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ").append(tableName);
-        sb.append("(cid,").append(mapper.getColumns(mappedFields)).append(") ");
-        sb.append("VALUES (?,").append(mapper.getParameters(mappedFields)).append(")");
-        return sb;
     }
 
     /**
@@ -534,7 +551,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         int updated = deleteCalendarFreeSlots(calendarAvailabilityId, connection);
 
         int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND id=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(CA_TABLE_NAME).append(" AND id=?;").toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
             return logExecuteUpdate(stmt) + updated;
@@ -556,7 +573,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
             int parameterIndex = 1;
             // FIXME: Maybe use an 'IN' clause and delete multiple rows in a single statement?
-            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_TABLE_NAME + " WHERE cid=? AND id=?")) {
+            try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(CA_TABLE_NAME).append(" AND id=?;").toString())) {
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
                 affectedRows += logExecuteUpdate(stmt);
@@ -575,7 +592,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     private int deleteCalendarFreeSlots(String calendarAvailabilityId, Connection connection) throws SQLException {
         int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + CA_FREE_SLOT_NAME + " WHERE cid=? AND calendarAvailability=?")) {
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(CA_FREE_SLOT_NAME).append(" AND calendarAvailability=?;").toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, asInt(calendarAvailabilityId));
             return logExecuteUpdate(stmt);

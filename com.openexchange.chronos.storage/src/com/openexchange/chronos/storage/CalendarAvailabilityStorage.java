@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
@@ -126,6 +127,17 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if an error is occurred
      */
     List<CalendarAvailability> loadCalendarAvailabilities(int userId) throws OXException;
+
+    /**
+     * Loads the {@link CalendarAvailability} blocks for the specified user in the specified interval
+     * 
+     * @param userId The user identifier
+     * @param from The starting point in time
+     * @param until The ending point in time
+     * @return A {@link List} with all {@link CalendarAvailability} blocks or an empty {@link List}
+     * @throws OXException if the items cannot be retrieved or any other error is occurred
+     */
+    List<CalendarAvailability> loadCalenarAvailabilityInRange(int userId, Date from, Date until) throws OXException;
 
     /**
      * Loads from the storage the {@link CalendarFreeSlot}s for the {@link CalendarAvailability}
