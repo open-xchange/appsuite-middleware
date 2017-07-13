@@ -70,6 +70,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
 /**
@@ -220,10 +221,10 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAttendeeCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, List<CalendarAvailability>> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -234,6 +235,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         } finally {
             release(connection, updated);
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     */
+    @Override
+    public Map<User, List<CalendarAvailability>> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /*

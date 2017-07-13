@@ -95,6 +95,6 @@ public class GetPerformer extends AbstractPerformer {
         if (attendees.size() == 0) {
             return Collections.emptyMap();
         }
-        return storage.loadCalendarAvailability(attendees, from, until);
+        return storage.loadAttendeeCalendarAvailability(attendees, from, until);
     }
 }
