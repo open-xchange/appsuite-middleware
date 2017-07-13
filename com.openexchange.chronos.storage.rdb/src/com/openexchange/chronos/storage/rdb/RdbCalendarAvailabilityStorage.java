@@ -155,8 +155,14 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             txPolicy.setAutoCommit(connection, false);
             for (List<CalendarAvailability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
                 updated += insertCalendarAvailabilityItems(chunk, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
+
+                // Insert the free slots chunk-wise
+                for (CalendarAvailability availability : chunk) {
+                    for (List<CalendarFreeSlot> slots : Lists.partition(availability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+                        updated += insertCalendarAvailabilityItems(slots, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
+                    }
+                }
             }
-            //TODO: insert the free slots as well
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
