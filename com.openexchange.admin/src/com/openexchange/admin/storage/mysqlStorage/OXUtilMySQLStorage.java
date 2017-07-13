@@ -3026,17 +3026,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection configCon = null;
         try {
             configCon = cache.getWriteConnectionForConfigDB();
-            final Database db;
             startTransaction(configCon);
+
+            Database db;
             if (null == optDBId || i(optDBId) <= 0) {
                 db = getNextDBHandleByWeight(configCon);
             } else {
                 db = OXToolStorageInterface.getInstance().loadDatabaseById(i(optDBId));
-                if (db.getMaxUnits().intValue() <= 0) {
+                if (db.getMaxUnits().intValue() == 0) {
                     throw new StorageException("Database " + optDBId + " must not be used.");
                 }
             }
-            automaticLookupSchema(configCon, db);
+            createSchema(configCon, db);
+
             configCon.commit();
             return db;
         } catch (SQLException e) {
@@ -3335,10 +3337,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             closeSQLStuff(ps);
             closeSQLStuff(ppool);
         }
-    }
-
-    private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        createSchema(configCon, db);
     }
 
     /**
