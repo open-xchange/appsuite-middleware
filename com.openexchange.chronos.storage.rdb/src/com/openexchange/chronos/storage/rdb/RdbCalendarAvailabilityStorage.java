@@ -250,9 +250,17 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlot(java.lang.String, java.lang.String)
      */
     @Override
-    public CalendarFreeSlot loadCalendarFreeSlot(String calendarAvailability, String freeSlotId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public CalendarFreeSlot loadCalendarFreeSlot(String calendarAvailabilityId, String freeSlotId) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return loadCalendarFreeSlot(connection, calendarAvailabilityId, freeSlotId);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
     }
 
     /*
@@ -262,8 +270,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     @Override
     public List<CalendarFreeSlot> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return loadCalendarFreeSlots(connection, calendarAvailabilityId);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
     }
 
     /*
@@ -434,6 +450,33 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
                 availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
             }
             return availabilities;
+        }
+    }
+
+    /**
+     * Loads the {@link CalendarFreeSlot} with the specified identifier
+     * 
+     * @param connection The read-only {@link Connection} to the storage
+     * @param availabilityId The calendar availability identifier
+     * @param freeSlotId The free slot identifier
+     * @return The {@link CalendarFreeSlot
+     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
+     * @throws SQLException if an SQL error is occurred
+     */
+    private CalendarFreeSlot loadCalendarFreeSlot(Connection connection, String availabilityId, String freeSlotId) throws OXException, SQLException {
+        FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(freeSlotMapper.getColumns(mappedFields));
+        sb.append("FROM ").append(CA_FREE_SLOT_NAME);
+        sb.append(" WHERE cid=? AND calendarAvailability=? AND id=?;");
+
+        int parameterIndex = 0;
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
+            stmt.setInt(parameterIndex++, Integer.parseInt(freeSlotId));
+
+            return freeSlotMapper.fromResultSet(logExecuteQuery(stmt), mappedFields);
         }
     }
 
