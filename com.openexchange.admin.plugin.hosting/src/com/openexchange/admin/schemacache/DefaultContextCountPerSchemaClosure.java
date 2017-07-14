@@ -79,7 +79,7 @@ public class DefaultContextCountPerSchemaClosure implements ContextCountPerSchem
     @Override
     public Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException {
         try {
-            pool.lock(configCon, poolId, null);
+            pool.lock(configCon, poolId);
             return pool.getContextCountPerSchema(configCon, poolId, maxContexts);
         } catch (PoolException e) {
             throw new StorageException(e);
