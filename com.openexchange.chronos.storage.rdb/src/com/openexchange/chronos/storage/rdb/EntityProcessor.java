@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.github.mangstadt.vinnie.SyntaxStyle;
 import com.github.mangstadt.vinnie.VObjectParameters;
 import com.github.mangstadt.vinnie.VObjectProperty;
@@ -131,6 +134,86 @@ public class EntityProcessor {
         return event;
     }
 
+    /**
+     * Adjusts certain properties of an attendee prior inserting it into the database.
+     *
+     * @param attendee The attendee to adjust
+     * @return The (possibly adjusted) attendee reference
+     */
+    public Attendee adjustPriorSave(Attendee attendee) throws OXException {
+        if (isInternal(attendee) && null != entityResolver) {
+            Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+            savedAttendee.removeCn();
+            if (savedAttendee.containsUri()) {
+                ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
+                savedAttendee.setUri(resourceId.getURI());
+            }
+            return savedAttendee;
+        }
+        return attendee;
+    }
+
+    /**
+     * Adjusts certain properties of an attendee prior inserting it into the database.
+     * <p/>
+     * This includes the default adjustments for internal attendees, as well as assigning virtual (negative) entity identifiers for
+     * external attendees.
+     *
+     * @param attendee The attendee to adjust
+     * @param usedEntities The so far used entities to avoid hash collisions when generating virtual entity identifiers for external attendees
+     * @return The (possibly adjusted) attendee reference
+     */
+    public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities) throws OXException {
+        if (isInternal(attendee)) {
+            Attendee savedAttendee = adjustPriorSave(attendee);
+            usedEntities.add(I(savedAttendee.getEntity()));
+            return savedAttendee;
+        }
+        Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+        savedAttendee.setEntity(determineEntity(attendee, usedEntities));
+        return savedAttendee;
+    }
+
+    /**
+     * Adjusts certain properties of an event after loading it from the database.
+     *
+     * @param event The event to adjust
+     * @return The (possibly adjusted) event reference
+     */
+    public Event adjustAfterLoad(Event event) throws OXException {
+        if (null == entityResolver) {
+            return event;
+        }
+        if (null != event.getOrganizer()) {
+            /*
+             * decode organizer
+             */
+            event.setOrganizer(decode(event.getOrganizer().getUri()));
+        }
+        return event;
+    }
+
+    /**
+     * Adjusts certain properties of an attendee after loading it from the database.
+     *
+     * @param attendee The attendee to adjust
+     * @return The (possibly adjusted) attendee reference
+     */
+    public Attendee adjustAfterLoad(Attendee attendee) throws OXException {
+        /*
+         * remove virtual (negative) entity identifier for external attendees
+         */
+        if (0 > attendee.getEntity()) {
+            attendee.removeEntity();
+        }
+        /*
+         * apply entity data
+         */
+        if (null != entityResolver) {
+            attendee = entityResolver.applyEntityData(attendee);
+        }
+        return attendee;
+    }
 
     private String encode(Organizer organizer) throws OXException {
         if (null == organizer) {
@@ -216,60 +299,6 @@ public class EntityProcessor {
         return organizer;
     }
 
-    /**
-     * Adjusts certain properties of an attendee prior inserting it into the database.
-     *
-     * @param attendee The attendee to adjust
-     * @return The (possibly adjusted) attendee reference
-     */
-    public Attendee adjustPriorSave(Attendee attendee) throws OXException {
-        if (null == entityResolver) {
-            return attendee;
-        }
-        if (0 < attendee.getEntity()) {
-            Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
-            savedAttendee.removeCn();
-            if (savedAttendee.containsUri()) {
-                ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
-                savedAttendee.setUri(resourceId.getURI());
-            }
-            return savedAttendee;
-        }
-        return attendee;
-    }
-
-    /**
-     * Adjusts certain properties of an event after loading it from the database.
-     *
-     * @param event The event to adjust
-     * @return The (possibly adjusted) event reference
-     */
-    public Event adjustAfterLoad(Event event) throws OXException {
-        if (null == entityResolver) {
-            return event;
-        }
-        if (null != event.getOrganizer()) {
-            /*
-             * decode organizer
-             */
-            event.setOrganizer(decode(event.getOrganizer().getUri()));
-        }
-        return event;
-    }
-
-    /**
-     * Adjusts certain properties of an attendee after loading it from the database.
-     *
-     * @param attendee The attendee to adjust
-     * @return The (possibly adjusted) attendee reference
-     */
-    public Attendee adjustAfterLoad(Attendee attendee) throws OXException {
-        if (null == entityResolver) {
-            return attendee;
-        }
-        return entityResolver.applyEntityData(attendee);
-    }
-
     private static String writeVObjectProperty(VObjectProperty property) throws OXException {
         try (StringWriter stringWriter = new StringWriter(256);
             VObjectWriter vObjectWriter = new VObjectWriter(stringWriter, SyntaxStyle.NEW)) {
@@ -296,6 +325,28 @@ public class EntityProcessor {
         } catch (IOException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Determines the next unique entity identifier to use when inserting an entry into the <code>calendar_attendee</code> table. For
+     * <i>internal</i> attendees, this is always the (already unique) entity identifier itself. For <i>external</i> attendees, the
+     * identifier is always negative and based on the hash code of the URI.
+     *
+     * @param attendee The attendee to determine the entity for
+     * @param usedEntities The so far used entities to avoid hash collisions
+     * @return The entity
+     */
+    private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
+        if (isInternal(attendee)) {
+            usedEntities.add(I(attendee.getEntity()));
+            return attendee.getEntity();
+        }
+        String uri = attendee.getUri();
+        int entity = -1 * Math.abs(null != uri ? uri.hashCode() : 1);
+        while (false == usedEntities.add(I(entity))) {
+            entity--;
+        }
+        return entity;
     }
 
 }

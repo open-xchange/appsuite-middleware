@@ -74,7 +74,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
             "CREATE TABLE calendar_account (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "provider VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
+                "provider VARCHAR(64) NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "data BLOB," +
@@ -106,11 +106,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "user INT4 UNSIGNED NOT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
-                "uid VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
-                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "uid VARCHAR(1024) DEFAULT NULL," +
+                "rrule VARCHAR(255) DEFAULT NULL," +
                 "recurrence BIGINT(20) DEFAULT NULL," +
-                "deleteExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
-                "changeExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "deleteExceptions TEXT DEFAULT NULL," +
+                "changeExceptions TEXT DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "createdBy INT4 UNSIGNED NOT NULL," +
                 "modified BIGINT(20) NOT NULL," +
@@ -118,31 +118,31 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
-                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay INT4 UNSIGNED DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
-                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "status VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "class VARCHAR(64) DEFAULT NULL," +
+                "status VARCHAR(64) DEFAULT NULL," +
+                "organizer VARCHAR(767) DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "categories VARCHAR(1024) DEFAULT NULL," +
-                "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
-                "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "filename VARCHAR(1024) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY rangeFrom (cid,account,rangeFrom)," +
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY modified (cid,account,modified)," +
                 "KEY user (cid,account,user)," +
-                "KEY uid (cid,account,uid(767))," +
-                "KEY filename (cid,account,filename(767))" +
+                "KEY uid (cid,account,uid(191))," +
+                "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_event_tombstone",
@@ -153,11 +153,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "user INT4 UNSIGNED NOT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
-                "uid VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
-                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "uid VARCHAR(1024) DEFAULT NULL," +
+                "rrule VARCHAR(255) DEFAULT NULL," +
                 "recurrence BIGINT(20) DEFAULT NULL," +
-                "deleteExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
-                "changeExceptions TEXT CHARACTER SET latin1 DEFAULT NULL," +
+                "deleteExceptions TEXT DEFAULT NULL," +
+                "changeExceptions TEXT DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "createdBy INT4 UNSIGNED NOT NULL," +
                 "modified BIGINT(20) NOT NULL," +
@@ -165,31 +165,31 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "start datetime DEFAULT NULL," +
                 "end datetime DEFAULT NULL," +
-                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay INT4 UNSIGNED DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
-                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "status VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "class VARCHAR(64) DEFAULT NULL," +
+                "status VARCHAR(64) DEFAULT NULL," +
+                "organizer VARCHAR(767) DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "categories VARCHAR(1024) DEFAULT NULL," +
-                "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
-                "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
+                "filename VARCHAR(1024) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY rangeFrom (cid,account,rangeFrom)," +
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY modified (cid,account,modified)," +
                 "KEY user (cid,account,user)," +
-                "KEY uid (cid,account,uid(767))," +
-                "KEY filename (cid,account,filename(767))" +
+                "KEY uid (cid,account,uid(191))," +
+                "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_attendee",
@@ -197,18 +197,18 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "event INT4 UNSIGNED NOT NULL," +
-                "uri VARCHAR(512) CHARACTER SET latin1 NOT NULL," +
+                "entity INT4 NOT NULL," +
+                "uri VARCHAR(512) NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
-                "entity INT4 UNSIGNED DEFAULT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
-                "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "cuType VARCHAR(255) DEFAULT NULL," +
+                "role VARCHAR(255) DEFAULT NULL," +
+                "partStat VARCHAR(255) DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
-                "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
-                "PRIMARY KEY (cid,account,event,uri)," +
-                "KEY entity (cid,account,event,entity)," +
-                "KEY folder (cid,account,event,folder(190))" +
+                "member VARCHAR(1024) DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,event,entity)," +
+                "KEY uri (cid,account,event,uri(191))," +
+                "KEY folder (cid,account,event,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_attendee_tombstone",
@@ -216,18 +216,18 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "event INT4 UNSIGNED NOT NULL," +
-                "uri VARCHAR(512) CHARACTER SET latin1 NOT NULL," +
+                "entity INT4 NOT NULL," +
+                "uri VARCHAR(512) NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
-                "entity INT4 UNSIGNED DEFAULT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
-                "cuType VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "role VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "partStat VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "cuType VARCHAR(255) DEFAULT NULL," +
+                "role VARCHAR(255) DEFAULT NULL," +
+                "partStat VARCHAR(255) DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
-                "member VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
-                "PRIMARY KEY (cid,account,event,uri)," +
-                "KEY entity (cid,account,event,entity)," +
-                "KEY folder (cid,account,event,folder(190))" +
+                "member VARCHAR(1024) DEFAULT NULL," +
+                "PRIMARY KEY (cid,account,event,entity)," +
+                "KEY uri (cid,account,event,uri(191))," +
+                "KEY folder (cid,account,event,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_alarm",
@@ -240,10 +240,10 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "uid VARCHAR(767) DEFAULT NULL," +
                 "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "acknowledged BIGINT(20) DEFAULT NULL," +
-                "action VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
-                "repetition VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "triggerRelated VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
-                "triggerDuration VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "action VARCHAR(32) NOT NULL," +
+                "repetition VARCHAR(64) DEFAULT NULL," +
+                "triggerRelated VARCHAR(32) DEFAULT NULL," +
+                "triggerDuration VARCHAR(32) DEFAULT NULL," +
                 "triggerDate BIGINT(20) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
@@ -258,17 +258,17 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) DEFAULT NULL," +
-                "busyType VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
-                "class VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
+                "busyType VARCHAR(64) DEFAULT NULL," +
+                "class VARCHAR(64) DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
-                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
-                "organizer VARCHAR(767) CHARACTER SET latin1 DEFAULT NULL," +
+                "organizer VARCHAR(767) DEFAULT NULL," +
                 "priority INT4 UNSIGNED DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
@@ -289,14 +289,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "calendarAvailability INT4 UNSIGNED NOT NULL," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
-                "startTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
-                "endTimezone VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "recurrence BIGINT(20) DEFAULT NULL," +
-                "rrule VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
+                "rrule VARCHAR(255) DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
                 "categories VARCHAR(1024) DEFAULT NULL, " +
                 "comment VARCHAR(512) DEFAULT NULL," +
