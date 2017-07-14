@@ -351,7 +351,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (retry) {
             // Wait with exponential backoff
             int retryCount = condition.getCount();
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 100) + ((long) (Math.random() * 100)), TimeUnit.MILLISECONDS);
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
             LOG.info("Retrying to delete context {} as suggested by: {}", ctx.getId(), sqle.getMessage());
         }
