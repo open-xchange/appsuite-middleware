@@ -71,7 +71,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AlarmTestIOSCalendar.class,
     ExDateTest.class,
     SplitSeriesTest.class,
-    MailtoEncodingTest.class
+    MailtoEncodingTest.class,
+    GeoTest.class
 }) // @formatter:on
 public final class CalDAVTestSuite {
 
