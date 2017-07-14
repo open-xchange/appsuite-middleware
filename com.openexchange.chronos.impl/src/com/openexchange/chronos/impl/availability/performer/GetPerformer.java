@@ -61,7 +61,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.arrays.Collections;
 
 /**

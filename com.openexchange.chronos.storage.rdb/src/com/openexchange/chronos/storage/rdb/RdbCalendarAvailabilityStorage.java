@@ -584,12 +584,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS c");
         sb.append(" LEFT JOIN calendar_attendee AS a ON c.cid=a.cid AND c.user=a.entity");
         sb.append(" WHERE c.cid=?");
+        sb.append(" AND a.entity IN (").append(CalendarAvailabilityMapper.getParameters(attendees.size())).append(")");
         sb.append(" AND c.start >= ? AND c.end <= ?;");
 
         List<CalendarAvailability> availabilities = null;
         int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
+            for (Attendee attendee : attendees) {
+                stmt.setInt(parameterIndex++, attendee.getEntity());
+            }
             stmt.setLong(parameterIndex++, from.getTime());
             stmt.setLong(parameterIndex++, until.getTime());
             availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
