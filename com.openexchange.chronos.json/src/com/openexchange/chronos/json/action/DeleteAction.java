@@ -62,10 +62,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.exception.CalendarExceptionDetail;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -119,9 +121,10 @@ public class DeleteAction extends ChronosAction {
             }
 
             Map<CompositeEventID, OXException> errors = null;
+            CalendarResult deleteEvent = null;
             for (CompositeEventID id : compositeEventIDs) {
                 try {
-                    calendarAccess.deleteEvent(id);
+                    deleteEvent = calendarAccess.deleteEvent(id);
                 } catch (OXException e) {
                     if (errors == null) {
                         errors = new HashMap<>();
@@ -142,7 +145,7 @@ public class DeleteAction extends ChronosAction {
                     throw ex;
                 }
             }
-            return new AJAXRequestResult();
+            return new AJAXRequestResult(deleteEvent, deleteEvent.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
         }
