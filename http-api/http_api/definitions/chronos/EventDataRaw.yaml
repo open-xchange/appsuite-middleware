@@ -81,3 +81,16 @@ extendedProperties:
   description: An array of extended properties of this event.
   items:
     $ref: "#/definitions/ChronosExtendedProperty"
+geo:
+  type: object
+  description: The geolocation of the event.
+  properties:
+    lat: 
+      type: double
+      description: The latitude geographic coordinate.
+    long: 
+      type: double
+      description: The longitude geographic coordinate.
+url:
+  type: string
+  description: The uniform resource locator (URL) of the event.

@@ -871,8 +871,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
                 JSONObject geo = (JSONObject) from.get("geo");
                 double[] geoLocation = new double[2];
-                geoLocation[0] = geo.getDouble("long");
-                geoLocation[1] = geo.getDouble("lat");
+                geoLocation[0] = geo.getDouble("lat");
+                geoLocation[1] = geo.getDouble("long");
                 set(to, geoLocation);
             }
 
@@ -882,8 +882,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                     return null;
                 }
                 JSONObject geoLocationJson = new JSONObject(2);
-                geoLocationJson.put("long", from.getGeo()[0]);
-                geoLocationJson.put("lat", from.getGeo()[1]);
+                geoLocationJson.put("lat", from.getGeo()[0]);
+                geoLocationJson.put("long", from.getGeo()[1]);
                 return geoLocationJson;
             }
         });
