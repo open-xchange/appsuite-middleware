@@ -375,9 +375,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             for (String eventId : eventIds) {
                 stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
             }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                Collections.put(attendeesByEventId, resultSet.getString(1), readAttendee(resultSet, mappedFields));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    Collections.put(attendeesByEventId, resultSet.getString(1), readAttendee(resultSet, mappedFields));
+                }
             }
         }
         return attendeesByEventId;

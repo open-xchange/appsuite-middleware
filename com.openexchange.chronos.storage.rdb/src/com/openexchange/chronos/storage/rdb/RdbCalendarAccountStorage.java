@@ -223,19 +223,20 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                int id = resultSet.getInt(1);
-                String providerId = resultSet.getString(2);
-                Map<String, Object> data;
-                InputStream inputStream = null;
-                try {
-                    inputStream = resultSet.getBinaryStream(3);
-                    data = deserializeMap(inputStream);
-                } finally {
-                    Streams.close(inputStream);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    int id = resultSet.getInt(1);
+                    String providerId = resultSet.getString(2);
+                    Map<String, Object> data;
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = resultSet.getBinaryStream(3);
+                        data = deserializeMap(inputStream);
+                    } finally {
+                        Streams.close(inputStream);
+                    }
+                    accounts.add(new DefaultCalendarAccount(providerId, id, user, data));
                 }
-                accounts.add(new DefaultCalendarAccount(providerId, id, user, data));
             }
         }
         return accounts;
@@ -246,19 +247,20 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                String providerId = resultSet.getString(1);
-                int userId = resultSet.getInt(2);
-                Map<String, Object> data;
-                InputStream inputStream = null;
-                try {
-                    inputStream = resultSet.getBinaryStream(3);
-                    data = deserializeMap(inputStream);
-                } finally {
-                    Streams.close(inputStream);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    String providerId = resultSet.getString(1);
+                    int userId = resultSet.getInt(2);
+                    Map<String, Object> data;
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = resultSet.getBinaryStream(3);
+                        data = deserializeMap(inputStream);
+                    } finally {
+                        Streams.close(inputStream);
+                    }
+                    return new DefaultCalendarAccount(providerId, id, userId, data);
                 }
-                return new DefaultCalendarAccount(providerId, id, userId, data);
             }
         }
         return null;
