@@ -1111,14 +1111,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection con = null;
         PreparedStatement pstmt = null;
-        PreparedStatement cstmt = null;
 
         try {
 
             con = cache.getConnectionForConfigDB();
             final String my_search_pattern = search_pattern.replace('*', '%');
 
-            pstmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,hardlimit,max,initial,name,weight,max_units,read_db_pool_id,write_db_pool_id FROM db_pool JOIN db_cluster ON ( db_pool_id = db_cluster.write_db_pool_id OR db_pool_id = db_cluster.read_db_pool_id) WHERE name LIKE ? OR db_pool_id LIKE ? OR url LIKE ?");
+            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);
@@ -1130,9 +1129,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final Database db = new Database();
 
                 Boolean ismaster = Boolean.TRUE;
-                final int readid = rs.getInt("read_db_pool_id");
-                final int writeid = rs.getInt("write_db_pool_id");
-                final int id = rs.getInt("db_pool_id");
+                final int readid = rs.getInt("c.read_db_pool_id");
+                final int writeid = rs.getInt("c.write_db_pool_id");
+                final int id = rs.getInt("d.db_pool_id");
                 int masterid = 0;
                 int nrcontexts = 0;
                 if (readid == id) {
@@ -1140,29 +1139,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     masterid = writeid;
                 } else {
                     // we are master
-                    cstmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE write_db_pool_id = ?");
-                    cstmt.setInt(1, writeid);
-                    final ResultSet rs1 = cstmt.executeQuery();
-                    if (!rs1.next()) {
-                        throw new StorageException("Unable to count contexts");
+                    nrcontexts = rs.getInt("p.count");
+                    if (rs.wasNull()) {
+                        throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
-                    nrcontexts = Integer.parseInt(rs1.getString("COUNT(cid)"));
-                    rs1.close();
-                    cstmt.close();
                 }
-                db.setClusterWeight(rs.getInt("weight"));
-                db.setName(rs.getString("name"));
-                db.setDriver(rs.getString("driver"));
-                db.setId(rs.getInt("db_pool_id"));
-                db.setLogin(rs.getString("login"));
+                db.setClusterWeight(rs.getInt("c.weight"));
+                db.setName(rs.getString("d.name"));
+                db.setDriver(rs.getString("d.driver"));
+                db.setId(id);
+                db.setLogin(rs.getString("d.login"));
                 db.setMaster(ismaster.booleanValue());
                 db.setMasterId(masterid);
-                db.setMaxUnits(rs.getInt("max_units"));
-                db.setPassword(rs.getString("password"));
-                db.setPoolHardLimit(rs.getInt("hardlimit"));
-                db.setPoolInitial(rs.getInt("initial"));
-                db.setPoolMax(rs.getInt("max"));
-                db.setUrl(rs.getString("url"));
+                db.setMaxUnits(rs.getInt("c.max_units"));
+                db.setPassword(rs.getString("d.password"));
+                db.setPoolHardLimit(rs.getInt("d.hardlimit"));
+                db.setPoolInitial(rs.getInt("d.initial"));
+                db.setPoolMax(rs.getInt("d.max"));
+                db.setUrl(rs.getString("d.url"));
                 db.setCurrentUnits(nrcontexts);
                 tmp.add(db);
             }
@@ -1177,14 +1171,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (cstmt != null) {
-                    cstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
             try {
                 if (pstmt != null) {
                     pstmt.close();
