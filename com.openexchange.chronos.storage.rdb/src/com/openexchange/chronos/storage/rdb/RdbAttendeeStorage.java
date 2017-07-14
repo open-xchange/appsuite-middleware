@@ -55,9 +55,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.service.EntityResolver;
@@ -335,9 +337,10 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             for (Entry<String, List<Attendee>> entry : attendeesByEventId.entrySet()) {
+                Set<Integer> usedEntities = new HashSet<Integer>(entry.getValue().size());
                 int eventId = asInt(entry.getKey());
                 for (Attendee attendee : entry.getValue()) {
-                    attendee = entityProcessor.adjustPriorSave(attendee);
+                    attendee = entityProcessor.adjustPriorInsert(attendee, usedEntities);
                     stmt.setInt(parameterIndex++, context.getContextId());
                     stmt.setInt(parameterIndex++, accountId);
                     stmt.setInt(parameterIndex++, eventId);

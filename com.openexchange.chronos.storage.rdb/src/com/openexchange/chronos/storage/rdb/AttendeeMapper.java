@@ -105,6 +105,28 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 	protected EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>> createMappings() {
 		EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>> mappings = new
 			EnumMap<AttendeeField, DbMapping<? extends Object, Attendee>>(AttendeeField.class);
+        mappings.put(AttendeeField.ENTITY, new IntegerMapping<Attendee>("entity", "Entity") {
+
+            @Override
+            public void set(Attendee attendee, Integer value) {
+                attendee.setEntity(null == value ? 0 : i(value));
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsEntity();
+            }
+
+            @Override
+            public Integer get(Attendee attendee) {
+                return I(attendee.getEntity());
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeEntity();
+            }
+        });
         mappings.put(AttendeeField.URI, new VarCharMapping<Attendee>("uri", "URI") {
 
             @Override
@@ -147,28 +169,6 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removeCn();
-            }
-        });
-        mappings.put(AttendeeField.ENTITY, new IntegerMapping<Attendee>("entity", "Entity") {
-
-            @Override
-            public void set(Attendee attendee, Integer value) {
-                attendee.setEntity(null == value ? 0 : i(value));
-            }
-
-            @Override
-            public boolean isSet(Attendee attendee) {
-                return attendee.containsEntity();
-            }
-
-            @Override
-            public Integer get(Attendee attendee) {
-                return I(attendee.getEntity());
-            }
-
-            @Override
-            public void remove(Attendee attendee) {
-                attendee.removeEntity();
             }
         });
         mappings.put(AttendeeField.FOLDER_ID, new VarCharMapping<Attendee>("folder", "Folder ID") {
