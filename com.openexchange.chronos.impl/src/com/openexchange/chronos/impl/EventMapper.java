@@ -91,15 +91,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
     private static final EventMapper INSTANCE = new EventMapper();
 
-    /** The event fields that are preserved for reference in "tombstone" events */
-    private static final EventField[] TOMBSTONE_FIELDS = {
-        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
-        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID, EventField.LAST_MODIFIED,
-        EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
-        EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP, EventField.UID,
-        EventField.FILENAME, EventField.SEQUENCE
-    };
-
     /**
      * Gets the event mapper instance.
      *
@@ -209,20 +200,6 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 mapping.copy(from, to);
             }
         }
-    }
-
-    /**
-     * Generates a tombstone event object based on the supplied event, as used to track the deletion in the storage.
-     *
-     * @param event The event to create the tombstone for
-     * @param lastModified The last modification time to take over
-     * @param modifiedBy The identifier of the modifying user to take over
-     * @return The tombstone event
-     */
-    public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
-        Event tombstone = copy(event, new Event(), true, TOMBSTONE_FIELDS);
-        Consistency.setModified(lastModified, tombstone, modifiedBy);
-        return tombstone;
     }
 
     @Override

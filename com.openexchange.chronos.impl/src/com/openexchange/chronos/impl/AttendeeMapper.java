@@ -75,12 +75,6 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
 
     private static final AttendeeMapper INSTANCE = new AttendeeMapper();
 
-    /** The attendee fields that are preserved for reference in "tombstone" attendees */
-    private static final AttendeeField[] TOMBSTONE_FIELDS = {
-        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT,
-        AttendeeField.URI
-    };
-
     /**
      * Gets the Attendee mapper instance.
      *
@@ -95,33 +89,6 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
      */
     private AttendeeMapper() {
         super();
-    }
-
-    /**
-     * Generates tombstone attendee objects based on the supplied attendees, as used to track the deletion in the storage.
-     *
-     * @param attendees The attendees to create the tombstones for
-     * @return The tombstone attendees
-     */
-    public List<Attendee> getTombstones(List<Attendee> attendees) throws OXException {
-        if (null == attendees) {
-            return null;
-        }
-        List<Attendee> tombstoneAttendees = new ArrayList<Attendee>(attendees.size());
-        for (Attendee attendee : attendees) {
-            tombstoneAttendees.add(getTombstone(attendee));
-        }
-        return tombstoneAttendees;
-    }
-
-    /**
-     * Generates a tombstone attendee object based on the supplied attendee, as used to track the deletion in the storage.
-     *
-     * @param attendee The attendee to create the tombstone for
-     * @return The tombstone attendee
-     */
-    public Attendee getTombstone(Attendee attendee) throws OXException {
-        return copy(attendee, null, TOMBSTONE_FIELDS);
     }
 
     @Override

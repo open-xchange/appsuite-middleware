@@ -82,7 +82,6 @@ import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -264,7 +263,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 }
                 for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     if (calendarUserId == originalAttendee.getEntity()) {
-                        storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
+                        storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), getTombstone(originalAttendee));
                         storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
                         storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
                     } else {
@@ -322,7 +321,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * insert corresponding tombstone & also 'touch' parent event
          */
-        storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
         touch(originalEvent.getId());
     }
 
@@ -331,7 +330,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
         attendeeUpdate.setFolderID(folderId);
         if (attendeeUpdate.getFolderID() != originalAttendee.getFolderID()) {
-            storage.getAttendeeStorage().insertAttendeeTombstone(eventID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
+            storage.getAttendeeStorage().insertAttendeeTombstone(eventID, getTombstone(originalAttendee));
             storage.getAttendeeStorage().updateAttendee(eventID, attendeeUpdate);
         }
     }
@@ -342,7 +341,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setFolderId(folderId);
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
-            storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }

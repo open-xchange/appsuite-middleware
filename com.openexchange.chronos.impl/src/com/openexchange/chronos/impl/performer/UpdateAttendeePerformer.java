@@ -78,7 +78,6 @@ import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.CreateResultImpl;
-import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -198,8 +197,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * store tombstone references in case of a move operation for the attendee
              */
-            storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
-            storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
+            storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), getTombstone(originalAttendee));
         }
         /*
          * update attendee & 'touch' the corresponding event

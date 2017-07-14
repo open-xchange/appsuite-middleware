@@ -64,6 +64,7 @@ import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
@@ -98,6 +99,19 @@ import com.openexchange.java.Strings;
  */
 public abstract class AbstractUpdatePerformer {
 
+    /** The event fields that are preserved for reference in <i>tombstone</i> events */
+    private static final EventField[] EVENT_TOMBSTONE_FIELDS = {
+        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID, EventField.LAST_MODIFIED,
+        EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
+        EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP, EventField.UID, EventField.FILENAME, EventField.SEQUENCE
+    };
+
+    /** The attendee fields that are preserved for reference in <i>tombstone</i> attendees */
+    private static final AttendeeField[] ATTENDEE_TOMBSTONE_FIELDS = {
+        AttendeeField.CU_TYPE, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.PARTSTAT, AttendeeField.URI
+    };
+
     protected final CalendarSession session;
     protected final CalendarStorage storage;
     protected final int calendarUserId;
@@ -131,7 +145,6 @@ public abstract class AbstractUpdatePerformer {
      */
     protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
         Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
-        //        Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), (EventField[]) null);
         exceptionEvent.setId(storage.getEventStorage().nextId());
         exceptionEvent.setRecurrenceId(recurrenceID);
         exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
@@ -141,6 +154,47 @@ public abstract class AbstractUpdatePerformer {
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
         Consistency.setModified(timestamp, exceptionEvent, session.getUserId());
         return exceptionEvent;
+    }
+
+    /**
+     * Generates a <i>tombstone</i> event object based on the supplied event, as used to track the deletion in the storage.
+     *
+     * @param event The event to create the <i>tombstone</i> for
+     * @param lastModified The last modification time to take over
+     * @param modifiedBy The identifier of the modifying user to take over
+     * @return The <i>tombstone</i> event
+     */
+    protected Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
+        Event tombstone = EventMapper.getInstance().copy(event, new Event(), true, EVENT_TOMBSTONE_FIELDS);
+        Consistency.setModified(lastModified, tombstone, modifiedBy);
+        return tombstone;
+    }
+
+    /**
+     * Generates <i>tombstone</i> attendee objects based on the supplied attendees, as used to track the deletion in the storage.
+     *
+     * @param attendees The attendees to create the <i>tombstone</i> for
+     * @return The <i>tombstone</i> attendees
+     */
+    protected List<Attendee> getTombstones(List<Attendee> attendees) throws OXException {
+        if (null == attendees) {
+            return null;
+        }
+        List<Attendee> tombstoneAttendees = new ArrayList<Attendee>(attendees.size());
+        for (Attendee attendee : attendees) {
+            tombstoneAttendees.add(getTombstone(attendee));
+        }
+        return tombstoneAttendees;
+    }
+
+    /**
+     * Generates a <i>tombstone</i> attendee object based on the supplied attendee, as used to track the deletion in the storage.
+     *
+     * @param attendee The attendee to create the <i>tombstone</i> for
+     * @return The <i>tombstone</i> attendee
+     */
+    protected Attendee getTombstone(Attendee attendee) throws OXException {
+        return AttendeeMapper.getInstance().copy(attendee, null, ATTENDEE_TOMBSTONE_FIELDS);
     }
 
     /**
@@ -208,8 +262,8 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertAttendeeTombstones(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
+        storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getAttendeeStorage().insertAttendeeTombstones(id, getTombstones(originalEvent.getAttendees()));
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
@@ -246,7 +300,7 @@ public abstract class AbstractUpdatePerformer {
          * delete event data from storage for this attendee
          */
         String objectID = originalEvent.getId();
-        storage.getEventStorage().insertEventTombstone(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
         storage.getAttendeeStorage().insertAttendeeTombstone(objectID, originalAttendee);
         storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(objectID, userID);
