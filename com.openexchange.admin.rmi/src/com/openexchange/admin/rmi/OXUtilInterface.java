@@ -260,17 +260,19 @@ public interface OXUtilInterface extends Remote {
      * client_db.setPoolHardLimit(20);
      * client_db.setPoolInitial(2);
      * client_db.setPoolMax(100);
-     * client_db.setUrl(&quot;jdbc:mysql://localhost/?useUnicode=true&amp;characterEncoding=UTF-8&amp;&quot; + &quot;autoReconnect=false&amp;useUnicode=true&amp;useServerPrepStmts=false&amp;useTimezone=true&amp;&quot; + &quot;serverTimezone=UTC&amp;connectTimeout=15000&amp;socketTimeout=15000&quot;);
+     * client_db.setUrl(&quot;jdbc:mysql://localhost/?useUnicode=true&amp;characterEncoding=UTF-8&amp;&quot; + &quot;autoReconnect=false&amp;useUnicode=true&amp;useServerPrepStmts=false&amp;useTimezone=true&amp;&quot; +
+     * &quot;serverTimezone=UTC&amp;connectTimeout=15000&amp;socketTimeout=15000&quot;);
      * </pre>
      *
      * </blockquote>
      * </p>
      *
+     * @param db The database to register
+     * @param createSchemas Whether the schemas holding payload data are supposed to be pre-created
+     * @param optNumberOfSchemas Given that <code>createSchemas</code> is <code>true</code> that parameter specifies the number of schemas that shall be created;
+     *            if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     * @param auth Credentials for authenticating against server.
      * @return Contains the new database id.
-     * @param db
-     *            The database to register
-     * @param auth
-     *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
@@ -280,7 +282,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public Database registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Database registerDatabase(Database db, Boolean createSchemas, Integer optNumberOfSchemas, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Change parameters of a database registered in system
@@ -365,6 +367,25 @@ public interface OXUtilInterface extends Remote {
     public Database[] listDatabase(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
+     * Search for database schemas registered in the system.
+     *
+     * @return Containing the database schemas found by the search.
+     * @param search_pattern
+     *            Search pattern e.g "*" "*my*".
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occurred.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Database[] listDatabaseSchema(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
      * Convenience method for listing all databases registered in the system.
      *
      * @return Containing the databases found by the search.
@@ -380,6 +401,23 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public Database[] listAllDatabase(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Convenience method for listing all database schemas registered in the system.
+     *
+     * @return Containing the database schemas found by the search.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occurred.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Database[] listAllDatabaseSchema(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Checks databases by schema consistency.

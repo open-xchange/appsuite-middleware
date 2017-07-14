@@ -269,15 +269,32 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         return this.masterId;
     }
 
+    /**
+     * Sets the identifier of the associated master database.
+     * <p>
+     * Implicitly marks this database as a slave (suitable for read-only accesses)
+     *
+     * @param masterId The identifier of the master database
+     */
     public void setMasterId(final Integer masterId) {
         this.masterId = masterId;
         this.masterIdset = true;
     }
 
+    /**
+     * Signals if this database is a master (suitable for read-write accesses)
+     *
+     * @return <code>true</code> if master; otherwise <code>false</code>
+     */
     public Boolean isMaster() {
         return this.master;
     }
 
+    /**
+     * Sets if this database is a master (suitable for read-write accesses)
+     *
+     * @param master <code>true</code> if master; otherwise <code>false</code>
+     */
     public void setMaster(final Boolean master) {
         this.master = master;
         this.masterset = true;

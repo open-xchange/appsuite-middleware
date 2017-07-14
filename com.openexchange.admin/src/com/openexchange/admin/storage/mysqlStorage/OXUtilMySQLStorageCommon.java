@@ -145,7 +145,7 @@ public class OXUtilMySQLStorageCommon {
      * @return <code>true</code> if such a database schema exists; otherwise <code>false</code>
      * @throws StorageException If schema existence cannot be checked
      */
-    public boolean existsDatabase(Database db) throws StorageException {
+    public static boolean existsDatabase(Database db) throws StorageException {
         Connection con = getSimpleSQLConnectionFor(db);
         try {
             return existsDatabase(con, db.getScheme());
@@ -158,7 +158,7 @@ public class OXUtilMySQLStorageCommon {
 
     private static final AdminCache cache = ClientAdminThread.cache;
 
-    public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
+    public static void createDatabase(final Database db, Connection configdbCon) throws StorageException {
         Connection con = getSimpleSQLConnectionFor(db);
         boolean error = true;
         boolean created = false;
@@ -197,7 +197,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void createDatabaseSchema(final Connection con, final String name) throws StorageException {
+    private static void createDatabaseSchema(final Connection con, final String name) throws StorageException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -210,7 +210,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void createSchemaCountEntry(Database db) throws SQLException, StorageException {
+    private static void createSchemaCountEntry(Database db) throws SQLException, StorageException {
         Connection configdbCon = null;
         boolean rollback = false;
         try {
@@ -238,7 +238,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void createSchemaCountEntry(Database db, Connection configdbCon) throws SQLException, StorageException {
+    private static void createSchemaCountEntry(Database db, Connection configdbCon) throws SQLException, StorageException {
         if (null == configdbCon) {
             createSchemaCountEntry(db);
             return;
@@ -265,7 +265,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private boolean existsDatabase(final Connection con, final String name) throws StorageException {
+    private static boolean existsDatabase(final Connection con, final String name) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -281,7 +281,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
+    private static void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
         final Set<String> existingTables = new HashSet<String>();
         final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
         toCreate.addAll(createTables);
@@ -319,7 +319,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private CreateTableService findNext(final List<CreateTableService> toCreate, final Set<String> existingTables) {
+    private static CreateTableService findNext(final List<CreateTableService> toCreate, final Set<String> existingTables) {
         for (final CreateTableService service : toCreate) {
             final List<String> requiredTables = new ArrayList<String>();
             for (final String requiredTable : service.requiredTables()) {

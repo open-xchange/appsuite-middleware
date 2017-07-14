@@ -374,14 +374,16 @@ public abstract class OXUtilStorageInterface {
     public abstract MaintenanceReason[] listMaintenanceReasons(final String search_pattern) throws StorageException;
 
     /**
-     * Register a new Database in configdb
+     * Registers a new {@link Database#isMaster() master} or slave database (host) in configdb
      *
-     * @param db
-     *            a database object to register
-     * @return long with the id of the database
+     * @param db A database object to register
+     * @param createSchemas Whether the schemas holding payload data are supposed to be pre-created
+     * @param optNumberOfSchemas Given that <code>createSchemas</code> is <code>true</code> that parameter specifies the number of schemas that shall be created;
+     *                           if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     * @return The identifier of the database
      * @throws StorageException
      */
-    public abstract int registerDatabase(final Database db) throws StorageException;
+    public abstract int registerDatabase(Database db, boolean createSchemas, int optNumberOfSchemas) throws StorageException;
 
     /**
      * Checks if such a database exists on given database host. Is used
@@ -458,6 +460,16 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract Database[] searchForDatabase(final String search_pattern) throws StorageException;
+
+    /**
+     * Searches for databases schemas matching search_pattern
+     *
+     * @param search_pattern
+     *            a pattern to search for
+     * @return a database array with schema information
+     * @throws StorageException
+     */
+    public abstract Database[] searchForDatabaseSchema(final String search_pattern) throws StorageException;
 
     /**
      * Searchs for server matching given search_pattern

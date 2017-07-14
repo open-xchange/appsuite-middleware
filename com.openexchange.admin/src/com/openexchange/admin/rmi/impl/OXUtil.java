@@ -299,7 +299,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public Database registerDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Database registerDatabase(Database db, Boolean createSchemas, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(db);
@@ -359,7 +359,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
 
-        return new Database(oxutil.registerDatabase(db));
+        boolean bCreateSchemas = null != createSchemas && createSchemas.booleanValue();
+        int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
+        return new Database(oxutil.registerDatabase(db, bCreateSchemas, iOptNumberOfSchemas));
     }
 
     @Override
@@ -445,6 +447,31 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         oxutil.unregisterServer(server.getId());
+    }
+
+    @Override
+    public Database[] listDatabaseSchema(String search_pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug(search_pattern);
+
+        if (search_pattern.length() == 0) {
+            throw new InvalidDataException("Invalid search pattern");
+        }
+
+        return oxutil.searchForDatabaseSchema(search_pattern);
+    }
+
+    @Override
+    public Database[] listAllDatabaseSchema(final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return listDatabaseSchema("*", credentials);
     }
 
     @Override

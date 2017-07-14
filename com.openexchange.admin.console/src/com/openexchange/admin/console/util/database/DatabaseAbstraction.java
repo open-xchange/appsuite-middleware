@@ -57,6 +57,7 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
@@ -117,6 +118,10 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_IS_MASTER_LONG = "master";
 
+    protected final static String OPT_NAME_CREATE_SCHMEMAS_LONG = "create-userdb-schemas";
+
+    protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_LONG = "userdb-schema-count";
+
     protected final static String OPT_NAME_SCHEMA_LONG = "schema";
 
     protected CLIOption databaseIdOption = null;
@@ -147,9 +152,44 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected CLIOption schemaOption = null;
 
+    protected CLIOption createSchemasOption = null;
+
+    protected CLIOption numberOfSchemasOption = null;
+
     // Needed for right error output
     protected String dbid = null;
     protected String dbname = null;
+
+    protected Boolean createSchemas;
+    protected Integer numberOfSchemas;
+
+    protected void parseAndSetCreateAndNumberOfSchemas(final AdminParser parser) throws InvalidDataException {
+        String tmp = (String) parser.getOptionValue(this.createSchemasOption);
+        if (Strings.isEmpty(tmp)) {
+            createSchemas = Boolean.FALSE;
+            numberOfSchemas = Integer.valueOf(0);
+            return;
+        }
+        createSchemas = Boolean.valueOf(tmp.trim());
+
+        tmp = (String) parser.getOptionValue(this.numberOfSchemasOption);
+        if (createSchemas.booleanValue()) {
+            if (!Strings.isEmpty(tmp)) {
+                try {
+                    numberOfSchemas = Integer.valueOf(tmp.trim());
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option. Should be a number.", e);
+                }
+            } else {
+                numberOfSchemas = Integer.valueOf(0);
+            }
+        } else {
+            if (!Strings.isEmpty(tmp)) {
+                throw new InvalidDataException("\"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option can only be set, if \"" + OPT_NAME_CREATE_SCHMEMAS_LONG + "\" is set to \"true\"");
+            }
+            numberOfSchemas = Integer.valueOf(0);
+        }
+    }
 
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         dbid = (String) parser.getOptionValue(this.databaseIdOption);
@@ -269,6 +309,11 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
                 throw new InvalidDataException("Master ID can only be set if this is a slave.");
             }
         }
+    }
+
+    protected void setCreateAndNumberOfSchemasOption(final AdminParser parser) {
+        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created. Accepts: true/false", true, false);
+        this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
     }
 
     protected void setDatabaseIDOption(final AdminParser parser) {
