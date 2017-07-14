@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.filter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +58,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -93,7 +94,7 @@ public class GetPerformer extends AbstractPerformer {
         // Prepare the attendees
         attendees = session.getEntityResolver().prepare(attendees);
         // Filter the external ones
-        attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        attendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
         if (attendees.size() == 0) {
             return java.util.Collections.emptyMap();
         }
@@ -117,13 +118,18 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     public Map<CalendarUser, List<CalendarAvailability>> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
-        // Create a reverse lookup index
+        // Create a reverse lookup index and filter internal users
         Map<Integer, CalendarUser> reverseLookup = new HashMap<>();
+        List<CalendarUser> filtered = new ArrayList<>();
         for (CalendarUser u : users) {
-            reverseLookup.put(u.getEntity(), u);
+            if (CalendarUtils.isInternal(u, CalendarUserType.INDIVIDUAL)) {
+                reverseLookup.put(u.getEntity(), u);
+                filtered.add(u);
+            }
         }
+
         // Fetch
-        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(users, from, until);
+        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(filtered, from, until);
         // Build the return map
         Map<CalendarUser, List<CalendarAvailability>> map = new HashMap<>();
         for (CalendarAvailability availability : availabilities) {
