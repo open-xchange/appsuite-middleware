@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class BooleanMapping<O> extends DefaultJsonMapping<Boolean, O> {
 
-	public BooleanMapping(final String ajaxName, final int columnID) {
+    public BooleanMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

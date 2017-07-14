@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ListMapping<T, O> extends DefaultJsonMapping<List<T>, O> {
 
-    public ListMapping(String ajaxName, int columnID) {
+    public ListMapping(String ajaxName, Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

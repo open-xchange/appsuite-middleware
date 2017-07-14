@@ -89,15 +89,6 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
     E getMappedField(String ajaxName);
 
 	/**
-	 * Gets an int array of column IDs from the supplied fields.
-	 *
-	 * @param fields the fields
-	 * @return the column IDs in an array
-	 * @throws OXException
-	 */
-	int[] getColumnIDs(E[] fields) throws OXException;
-
-	/**
 	 * Gets the fields whose mappings denotes the supplied column IDs. The
 	 * field order is preserved.
 	 *

@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class LongMapping<O> extends DefaultJsonMapping<Long, O> {
 
-	public LongMapping(final String ajaxName, final int columnID) {
+    public LongMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

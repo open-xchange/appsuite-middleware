@@ -790,6 +790,28 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeStatus();
             }
         });
+        mappings.put(EventField.URL, new StringMapping<Event>("url", null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsUrl();
+            }
+
+            @Override
+            public void set(Event object, String value) throws OXException {
+                object.setUrl(value);
+            }
+
+            @Override
+            public String get(Event object) {
+                return object.getUrl();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeUrl();
+            }
+        });
         mappings.put(EventField.ORGANIZER, new DefaultJsonMapping<Organizer, Event>("organizer", ColumnIDs.ORGANIZER) {
 
             @Override
@@ -821,6 +843,48 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
                 return serializeCalendarUser(from.getOrganizer());
+            }
+        });
+        mappings.put(EventField.GEO, new DefaultJsonMapping<double[], Event>("geo", null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsOrganizer();
+            }
+
+            @Override
+            public void set(Event object, double[] value) throws OXException {
+                object.setGeo(value);
+            }
+
+            @Override
+            public double[] get(Event object) {
+                return object.getGeo();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeOrganizer();
+            }
+
+            @Override
+            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
+                JSONObject geo = (JSONObject) from.get("geo");
+                double[] geoLocation = new double[2];
+                geoLocation[0] = geo.getDouble("long");
+                geoLocation[1] = geo.getDouble("lat");
+                set(to, geoLocation);
+            }
+
+            @Override
+            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
+                if (from.getGeo() == null || from.getGeo().length != 2) {
+                    return null;
+                }
+                JSONObject geoLocationJson = new JSONObject(2);
+                geoLocationJson.put("long", from.getGeo()[0]);
+                geoLocationJson.put("lat", from.getGeo()[1]);
+                return geoLocationJson;
             }
         });
         mappings.put(EventField.ATTENDEES, new ListItemMapping<Attendee, Event, JSONObject>("attendees", ColumnIDs.ATTENDEES) {
