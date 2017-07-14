@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
@@ -68,6 +67,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
 /**
@@ -218,10 +218,29 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAttendeeCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            return loadCalendarAvailability(connection, attendees, from, until);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     */
+    @Override
+    public List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -545,6 +564,42 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
             return freeSlotMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
         }
+    }
+
+    /**
+     * Loads all {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * 
+     * @param connection The read-only {@link Connection} to the storage
+     * @param attendees The {@link List} of {@link Attendee}s
+     * @param from The starting point of the interval
+     * @param until The ending point of the interval
+     * @return A {@link List} with the {@link CalendarAvailability} blocks of the specified {@link Attendee}s
+     * @throws OXException if an error is occurred
+     */
+    private List<CalendarAvailability> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
+        // 1) Fetch all calendar availability items within the interval
+        AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT DISTINCT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "c."));
+        sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS c");
+        sb.append(" LEFT JOIN calendar_attendee AS a ON c.cid=a.cid AND c.user=a.entity");
+        sb.append(" WHERE c.cid=?");
+        sb.append(" AND c.start >= ? AND c.end <= ?;");
+
+        List<CalendarAvailability> availabilities = null;
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setLong(parameterIndex++, from.getTime());
+            stmt.setLong(parameterIndex++, until.getTime());
+            availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+        }
+
+        // 2) Then fetch all free slots of the calendar availability items with in the interval
+        for (CalendarAvailability ca : availabilities) {
+            ca.setCalendarFreeSlots(loadCalendarFreeSlots(ca.getId()));
+        }
+        return availabilities;
     }
 
     /**

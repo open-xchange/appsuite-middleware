@@ -57,6 +57,7 @@ import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CalendarAvailabilityStorage}
@@ -130,7 +131,17 @@ public interface CalendarAvailabilityStorage {
      * @return A {@link Map} with the {@link CalendarAvailability} for each {@link Attendee}
      * @throws OXException if the items cannot be retrieved
      */
-    Map<Attendee, List<CalendarAvailability>> loadCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
+    List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
+    
+    /**
+     * 
+     * @param users
+     * @param from
+     * @param until
+     * @return
+     * @throws OXException
+     */
+    List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user
