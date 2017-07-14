@@ -70,12 +70,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ExportRequest {
 
+    private static final String PARAMETER_FOLDER_ID = "folder_id";
+
 	private ServerSession session;
 	private AJAXRequestData request;
 	private String folder;
 	private List<Integer> columns;
 	private Map<String, List<String>> batchIds;
-	private static String PARAMETER_FOLDER_ID = "folder_id";
 
     /**
      * Initializes a new {@link ExportRequest}.
@@ -88,7 +89,7 @@ public class ExportRequest {
         super();
         this.setSession(session);
         this.setRequest(request);
-        
+
         if (null != request.getData()) {
             String ids = request.requireData().toString();
             try{
@@ -124,7 +125,7 @@ public class ExportRequest {
         if (length <= 0) {
             return Collections.emptyMap();
         }
-        
+
         Map<String, List<String>> batchIds = new LinkedHashMap<String, List<String>>(length);
         for (int i = 0; i < length; i++) {
             JSONObject tuple = jPairs.getJSONObject(i);
