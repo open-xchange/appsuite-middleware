@@ -100,7 +100,7 @@ public class UpdatesAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         Date date = new Date((Long) parseParameter(requestData, PARAMETER_TIMESTAMP, true).getValue());
         UpdatesResult updatesResult = calendarAccess.getUpdatedEventsInFolder(parseFolderParameter(requestData), date);
-        return new AJAXRequestResult(updatesResult, CalendarResultConverter.INPUT_FORMAT);
+        return new AJAXRequestResult(updatesResult, updatesResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
     }
 
 }

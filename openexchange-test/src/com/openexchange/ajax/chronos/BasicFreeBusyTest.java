@@ -61,6 +61,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CheckEventConflictResponse;
 import com.openexchange.testing.httpclient.models.CheckEventResponse;
@@ -70,11 +71,15 @@ import com.openexchange.testing.httpclient.models.ChronosFreeBusyEventsResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyHasResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponseData;
+import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.FreeBusyTime;
+import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
+import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.EventsResponse;
+import com.openexchange.testing.httpclient.models.FreeBusyTime;
+import com.openexchange.testing.httpclient.models.LoginResponse;
 import edu.emory.mathcs.backport.java.util.Collections;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
@@ -189,6 +194,88 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertEquals(day5+TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(2).getEndTime().longValue());
         assertEquals("BUSY", freeBusyTimes.get(2).getFbType());
     }
+    
+    @Test
+    public void testFreeBusyTimeWithOverlappingEventsWithDifferentStati() throws Exception {
+    	// Define starting dates
+        long first = 1000 * (System.currentTimeMillis()/ 1000);
+        long second = first + TimeUnit.MINUTES.toMillis(30);
+        long third = second + TimeUnit.MINUTES.toMillis(30);
+        long nextWeek = first + TimeUnit.DAYS.toMillis(7);
+        
+        // Define two users
+        IdWrappingTestUser[] users = new IdWrappingTestUser[2];
+        users[0] = new IdWrappingTestUser(testUser);
+        users[0].setUserId(calUser);
+        users[1] = new IdWrappingTestUser(testUser2);
+        ApiClient client = generateClient(testUser2);
+        LoginResponse login = login(testUser2, client);
+        String secondSession = login.getSession();        		
+        users[1].setUserId(login.getUserId());
+
+        ChronosApi secondUserChronosApi = new ChronosApi(client);
+        String secondUserFolder = getDefaultFolder(secondSession, client);
+        EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, secondUserFolder, 0l, 10000l, null, null, null, false, true);
+        Long timestamp = allEvents.getTimestamp();
+        
+        // Create three overlapping events
+        createEvent("dayOne", first, first+TimeUnit.HOURS.toMillis(1), users);
+        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp, null, null, null, null, null, false, true);
+        String newEventId = updates.getData().getNewAndModified().get(0).getId();
+        AttendeeAndAlarm body = new AttendeeAndAlarm();
+        Attendee att = new Attendee();
+        att.setEntity(users[1].getUserId());
+        att.setCuType(CuTypeEnum.INDIVIDUAL);
+        att.setPartStat("ACCEPTED");
+        body.setAttendee(att);
+        secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
+        
+        createEvent("dayThree", second, second+TimeUnit.HOURS.toMillis(1), users);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updates.getTimestamp(), null, null, null, null, null, false, true);
+        newEventId = updates.getData().getNewAndModified().get(0).getId();
+        body = new AttendeeAndAlarm();
+        att = new Attendee();
+        att.setEntity(users[1].getUserId());
+        att.setCuType(CuTypeEnum.INDIVIDUAL);
+        att.setPartStat("TENTATIVE");
+        body.setAttendee(att);
+        secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
+        
+        createEvent("dayFive", third, third+TimeUnit.HOURS.toMillis(1), users);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updates.getTimestamp(), null, null, null, null, null, false, true);
+        newEventId = updates.getData().getNewAndModified().get(0).getId();
+        body = new AttendeeAndAlarm();
+        att = new Attendee();
+        att.setEntity(users[1].getUserId());
+        att.setCuType(CuTypeEnum.INDIVIDUAL);
+        att.setPartStat("DECLINED");
+        body.setAttendee(att);
+        ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
+
+        
+        ChronosFreebusyApi secondUserFreeBusyApi = new ChronosFreebusyApi(client);
+        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, first, nextWeek, Integer.toString(users[1].getUserId()));
+        logoutClient(client);
+        assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
+        assertNotNull(freeBusy.getData());
+        List<ChronosFreeBusyResponseData> data = freeBusy.getData();
+        //Expect only one event for the given attendee
+        assertEquals(1, data.size());
+        List<FreeBusyTime> freeBusyTimes = data.get(0).getFreeBusyTime();
+        // Expect 3 free busy times. One each for every event
+        assertEquals(3, freeBusyTimes.size());
+        assertEquals(first, freeBusyTimes.get(0).getStartTime().longValue());
+        assertEquals(first+TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(0).getEndTime().longValue());
+        assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
+
+        assertEquals(second, freeBusyTimes.get(1).getStartTime().longValue());
+        assertEquals(second+TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(1).getEndTime().longValue());
+        assertEquals("BUSY", freeBusyTimes.get(1).getFbType());
+
+        assertEquals(third, freeBusyTimes.get(2).getStartTime().longValue());
+        assertEquals(third+TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(2).getEndTime().longValue());
+        assertEquals("BUSY", freeBusyTimes.get(2).getFbType());
+    }
 
     @Test
     public void testCheckEvent() throws Exception {
@@ -264,6 +351,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         rememberEventId(eventId);
+        setLastTimestamp(createEvent.getTimestamp());
         return event;
     }
 

@@ -65,6 +65,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -229,19 +230,7 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
         } finally {
             SearchIterators.close(searchIterator);
         }
-        return new UpdatesResult() {
-
-            @Override
-            public List<Event> getNewAndModifiedEvents() {
-                return events;
-            }
-
-            @Override
-            public List<Event> getDeletedEvents() {
-                //TODO
-                return null;
-            }
-        };
+        return new DefaultUpdatesResult(events, null);
     }
 
     private Date getFrom() {

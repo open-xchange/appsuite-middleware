@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,7 +57,7 @@ import java.util.List;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarResult {
+public interface CalendarResult extends TimestampAwareResult {
 
     /**
      * Gets the underlying calendar session.
@@ -74,14 +73,6 @@ public interface CalendarResult {
      * @return The identifier of the actual calendar user
      */
     int getCalendarUser();
-
-    /**
-     * Gets the updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually
-     * also returned to clients.
-     *
-     * @return The server timestamp
-     */
-    Date getTimestamp();
 
     /**
      * Gets the identifier of the folder the action has been performed in, representing the view of the calendar user.

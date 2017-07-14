@@ -58,7 +58,7 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdatesResult {
+public interface UpdatesResult extends TimestampAwareResult{
 
     /**
      * Gets a list of events that have been created or updated since the supplied client timestamp.

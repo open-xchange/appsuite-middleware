@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -162,6 +163,11 @@ public class IDMangling {
             public List<Event> getDeletedEvents() {
                 return withUniqueIDs(updatesResult.getDeletedEvents(), accountId);
             }
+
+			@Override
+			public Date getTimestamp() {
+				return updatesResult.getTimestamp();
+			}
         };
     }
 

@@ -60,6 +60,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
@@ -82,6 +83,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     protected String session;
     List<EventId> eventIds;
     protected int calUser;
+    private long lastTimeStamp;
 
     @Override
     public void setUp() throws Exception {
@@ -128,6 +130,26 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         }
         throw new Exception("Unable to find default calendar folder!");
     }
+    
+    protected String getDefaultFolder(String session, ApiClient client) throws Exception {
+        FoldersVisibilityResponse visibleFolders = new FoldersApi(client).getVisibleFolders(session, "event", "1,308", "0");
+        if (visibleFolders.getError() != null) {
+            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
+        }
+
+        Object privateFolders = visibleFolders.getData().getPrivate();
+        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        if (privateList.size() == 1) {
+            return (String) privateList.get(0).get(0);
+        } else {
+            for (ArrayList<?> folder : privateList) {
+                if ((boolean) folder.get(1)) {
+                    return (String) folder.get(0);
+                }
+            }
+        }
+        throw new Exception("Unable to find default calendar folder!");
+    }
 
     protected Date getAPIDate(TimeZone localtimeZone, Date localDate, int datesToAdd) {
         Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
@@ -154,5 +176,13 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected Date getTime(DateTimeData time) throws ParseException {
         return BASIC_FORMATER.parse(time.getValue());
+    }
+    
+    protected void setLastTimestamp(long timestamp){
+    	this.lastTimeStamp=timestamp;
+    }
+    
+    protected long getLastTimestamp(){
+    	return lastTimeStamp;
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -63,6 +64,7 @@ public class DefaultUpdatesResult implements UpdatesResult {
 
     private final List<Event> newAndModifiedEvents;
     private final List<Event> deletedEvents;
+	private Date timestamp;
 
     /**
      * Initializes a new {@link DefaultUpdatesResult}.
@@ -70,11 +72,21 @@ public class DefaultUpdatesResult implements UpdatesResult {
      * @param newAndModifiedEvents The list of new/modified events
      * @param deletedEvents The list of deleted events
      */
-    public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents) {
-        super();
-        this.newAndModifiedEvents = newAndModifiedEvents;
-        this.deletedEvents = deletedEvents;
-    }
+	public DefaultUpdatesResult(List<Event> newAndModifiedEvents, List<Event> deletedEvents) {
+		super();
+		this.newAndModifiedEvents = newAndModifiedEvents;
+		if (newAndModifiedEvents != null) {
+			for (Event event : newAndModifiedEvents) {
+				applyTimestamp(event.getLastModified());
+			}
+		}
+		this.deletedEvents = deletedEvents;
+		if (deletedEvents != null) {
+			for (Event event : deletedEvents) {
+				applyTimestamp(event.getLastModified());
+			}
+		}
+	}
 
     @Override
     public List<Event> getNewAndModifiedEvents() {
@@ -89,6 +101,27 @@ public class DefaultUpdatesResult implements UpdatesResult {
     @Override
     public String toString() {
         return "DefaultUpdatesResult [newAndModifiedEvents=" + newAndModifiedEvents + ", deletedEvents=" + deletedEvents + "]";
+    }
+    
+    @Override
+    public Date getTimestamp() {
+        return timestamp;
+    }
+    
+    /**
+     * Applies an updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually
+     * also returned to clients.
+     * <p/>
+     * The timestamp is taken over into the result in case no previous timestamp was set, or the passed timestamp is <i>after</i> the
+     * previously set one.
+     *
+     * @param timestamp The timestamp to apply
+     * @return A self reference
+     */
+    public void applyTimestamp(Date timestamp) {
+        if (null == this.timestamp || null != timestamp && timestamp.after(this.timestamp)) {
+            this.timestamp = timestamp;
+        }
     }
 
 }

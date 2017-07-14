@@ -65,6 +65,7 @@ import java.util.List;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -184,18 +185,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
     }
 
     private static UpdatesResult getResult(final List<Event> newAndModifiedEvents, final List<Event> deletedEvents) {
-        return new UpdatesResult() {
-
-            @Override
-            public List<Event> getNewAndModifiedEvents() {
-                return newAndModifiedEvents;
-            }
-
-            @Override
-            public List<Event> getDeletedEvents() {
-                return deletedEvents;
-            }
-        };
+        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
 
 }
