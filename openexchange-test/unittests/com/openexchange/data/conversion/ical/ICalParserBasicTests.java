@@ -1189,7 +1189,7 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
 
     @Test
     public void testAppShouldWarnOnUnhandleableFields() throws ConversionError {
-        //TODO        
+        //TODO
     }
 
     @Test
@@ -1199,10 +1199,10 @@ public class ICalParserBasicTests extends AbstractICalParserTest {
         try {
             parser.setLimit(10);
 
-            List<CalendarDataObject> appointments = parser.parseAppointments(fixtures.severalVevents(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+            List<CalendarDataObject> appointments = parser.parseAppointments(fixtures.severalVevents(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
             assertEquals("Ten appointments only", 10, appointments.size());
 
-            List<Task> tasks = parser.parseTasks(fixtures.severalVtodos(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+            List<Task> tasks = parser.parseTasks(fixtures.severalVtodos(20), TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
             assertEquals("Ten tasks only", 10, tasks.size());
         } finally {
             parser.setLimit(-1);

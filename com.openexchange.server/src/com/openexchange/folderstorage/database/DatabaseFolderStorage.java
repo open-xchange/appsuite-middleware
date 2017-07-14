@@ -1301,7 +1301,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(user, userPermissionBits, ctx, con);
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(user.getLocale());
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final String[] sa : subfolderIds) {

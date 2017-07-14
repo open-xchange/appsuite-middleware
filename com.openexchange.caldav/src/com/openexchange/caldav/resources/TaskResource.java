@@ -150,7 +150,7 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void deserialize(InputStream body) throws OXException {
-        List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+        List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>()).getImportedObjects();
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } else {

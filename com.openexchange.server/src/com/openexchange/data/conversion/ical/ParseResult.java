@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,37 @@
  *
  */
 
-package com.openexchange.importexport.importers;
+package com.openexchange.data.conversion.ical;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * This interface defines an importer, meaning a class able to
- * import one or more data formats into the OX.
+ * {@link ParseResult} - Represents a result for parsed iCal objects.
  *
- * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Importer {
+public interface ParseResult<T> {
 
-	/**
-	 *
-	 * @param sessObj: Session object enabling us to check write access.
-	 * @param format: Format of the data that is meant to be imported
-	 * @param folders: Those folders the data is meant to be imported int
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return true, if this importer can import this format for this module; false otherwise
-	 * @see com.openexchange.groupware.Types
-	 */
-	boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
+    /**
+     * Gets a list of parsed objects.
+     *
+     * @return The list of parsed objects
+     */
+    List<T> getImportedObjects();
 
-	/**
-	 *
-	 * @param sessObj: session object enabling us to check access rights (write rights needed)
-	 * @param format: Format of the data to be imported
-	 * @param is: InputStream containing data to be imported
-	 * @param folders: Identifiers for folders (plus their type as int) - usually only one, but iCal may need two and future extensions might need even more (remember: Folders can have only one type, so type is not a necessary argument)
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return
-	 * @throws OXException
-	 * @see com.openexchange.groupware.Types
-	 */
-	ImportResults importData(ServerSession sessObj, Format format, InputStream is, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
-
+    /**
+     * Gets the optional truncation information.
+     * <p>
+     * Check for truncated number of parsed objects:
+     * <pre>
+     *   ParseResult&lt;T&gt; parseResult = ...;
+     *   TruncationInfo truncationInfo = parseResult.getTruncationInfo();
+     *   boolean truncated = (null != truncationInfo) && truncationInfo.isTruncated();
+     *   ...
+     * </pre>
+     *
+     * @return The truncation information or <code>null</code>
+     * @see TruncationInfo#isTruncated()
+     */
+    TruncationInfo getTruncationInfo();
 }

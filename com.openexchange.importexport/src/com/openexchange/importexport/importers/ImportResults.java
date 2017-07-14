@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,20 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.importexport.importers;
 
 import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.data.conversion.ical.TruncationInfo;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * {@link BatchCapableExporter}
+ * {@link ImportResults} - A collection of import results.
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface BatchCapableExporter extends Exporter {
-    
-    /**
-    *
-    * @param sessObj: The session object to be able to check permissions.
-    * @param format: Format the returned InputStream should be in.
-    * @param batchIds: Ids of multiple entries in different folders
-    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-    * @return InputStream in requested format.
-    * @throws OXException
-    */
-   SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+public interface ImportResults {
 
-    /**
-     * Creates a proper export file name based on the batch of ids to export
-     * 
-     * @param session: The session object to be able to check permissions.
-     * @param batchIds: The ids which determine the export file name.
-     * @return String the name of the export file.
-     * @throws OXException
-     */
-    String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException;
+    List<ImportResult> getImportResults();
+
+    TruncationInfo getTruncationInfo();
 }

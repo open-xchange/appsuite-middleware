@@ -343,7 +343,7 @@ public final class ICalJSONDataHandler implements DataHandler {
     private List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
         final InputStream inputStream = inputStreamCopy.getInputStream();
         try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
+            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }
@@ -352,7 +352,7 @@ public final class ICalJSONDataHandler implements DataHandler {
     private List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
         final InputStream inputStream = inputStreamCopy.getInputStream();
         try {
-            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
+            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }

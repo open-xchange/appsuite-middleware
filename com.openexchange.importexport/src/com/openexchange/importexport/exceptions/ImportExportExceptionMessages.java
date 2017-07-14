@@ -137,8 +137,12 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     // The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
     public static final String CONTACT_TOO_SIMILAR = "The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s";
-    
+
     public static final String COULD_NOT_CREATE_FILE_NAME = "Could not create a proper name for the export file.";
+
+    public static final String TRUNCATED_RESULTS_MSG = "Not all of the objects could be imported due to a configured limitation";
+
+    public static final String WARNINGS_AND_TRUNCATED_RESULTS_MSG = "%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation";
 
     private ImportExportExceptionMessages() {
         super();
