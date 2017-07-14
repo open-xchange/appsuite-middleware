@@ -130,7 +130,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         }
         throw new Exception("Unable to find default calendar folder!");
     }
-    
+
+    @SuppressWarnings("unchecked")
     protected String getDefaultFolder(String session, ApiClient client) throws Exception {
         FoldersVisibilityResponse visibleFolders = new FoldersApi(client).getVisibleFolders(session, "event", "1,308", "0");
         if (visibleFolders.getError() != null) {
@@ -177,11 +178,11 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     protected Date getTime(DateTimeData time) throws ParseException {
         return BASIC_FORMATER.parse(time.getValue());
     }
-    
+
     protected void setLastTimestamp(long timestamp){
     	this.lastTimeStamp=timestamp;
     }
-    
+
     protected long getLastTimestamp(){
     	return lastTimeStamp;
     }
