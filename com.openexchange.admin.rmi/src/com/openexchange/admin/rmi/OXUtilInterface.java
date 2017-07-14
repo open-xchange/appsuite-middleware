@@ -270,7 +270,7 @@ public interface OXUtilInterface extends Remote {
      * @param db The database to register
      * @param createSchemas Whether the schemas holding payload data are supposed to be pre-created
      * @param optNumberOfSchemas Given that <code>createSchemas</code> is <code>true</code> that parameter specifies the number of schemas that shall be created;
-     *            if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     *            if not set number of schemas is determined by max. units for associated database divided by <code>CONTEXTS_PER_SCHEMA</code> configuration option
      * @param auth Credentials for authenticating against server.
      * @return Contains the new database id.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
