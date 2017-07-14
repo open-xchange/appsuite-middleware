@@ -96,9 +96,11 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		super();
 		this.mappings = createMappings();
 		this.columnMap = new TIntObjectHashMap<E>(this.mappings.size());
-		for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
-			this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
-		}
+        for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
+            if (entry.getValue().getColumnID() != null) {
+                this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
+            }
+        }
 	}
 
 	@Override
@@ -248,18 +250,6 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
         }
         return null;
     }
-
-	@Override
-	public int[] getColumnIDs(final E[] fields) throws OXException {
-		if (null == fields) {
-			throw new IllegalArgumentException("fields");
-		}
-		final int[] columnIDs = new int[fields.length];
-		for (int i = 0; i < fields.length; i++) {
-			columnIDs[i] = this.get(fields[i]).getColumnID();
-		}
-		return columnIDs;
-	}
 
 	@Override
 	public E[] getFields(final int[] columnIDs) throws OXException {

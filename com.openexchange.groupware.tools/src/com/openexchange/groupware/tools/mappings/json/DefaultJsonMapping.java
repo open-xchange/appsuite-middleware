@@ -66,9 +66,9 @@ import com.openexchange.session.Session;
 public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> implements JsonMapping<T, O> {
 
 	private final String ajaxName;
-	private final int columnID;
+    private final Integer columnID;
 
-	public DefaultJsonMapping(String ajaxName, int columnID) {
+    public DefaultJsonMapping(String ajaxName, Integer columnID) {
 		this.ajaxName = ajaxName;
 		this.columnID = columnID;
 	}
@@ -79,7 +79,7 @@ public abstract class DefaultJsonMapping<T, O> extends DefaultMapping<T, O> impl
 	}
 
 	@Override
-	public int getColumnID() {
+    public Integer getColumnID() {
 		return this.columnID;
 	}
 

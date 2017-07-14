@@ -74,11 +74,11 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	String getAjaxName();
 
 	/**
-	 * Gets the column ID of the mapped property.
-	 *
-	 * @return the column ID
-	 */
-	int getColumnID();
+     * Gets the column ID of the mapped property or null.
+     *
+     * @return the column ID or null
+     */
+    Integer getColumnID();
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it

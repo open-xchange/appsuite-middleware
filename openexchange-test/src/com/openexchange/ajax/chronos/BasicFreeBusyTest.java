@@ -77,7 +77,6 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.FreeBusyTime;
 import com.openexchange.testing.httpclient.models.LoginResponse;
@@ -229,10 +228,10 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("ACCEPTED");
         body.setAttendee(att);
-        secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
+        ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
 
         createEvent("second", second, second + TimeUnit.HOURS.toMillis(1), users);
-        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updates.getTimestamp(), null, null, null, null, null, false, true);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee.getTimestamp(), null, null, null, null, null, false, true);
         newEventId = updates.getData().getNewAndModified().get(0).getId();
         body = new AttendeeAndAlarm();
         att = new Attendee();
@@ -240,10 +239,10 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("TENTATIVE");
         body.setAttendee(att);
-        secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
+        ChronosCalendarResultResponse updateAttendee2 = secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
 
-        EventData createEvent = createEvent("third", third, third + TimeUnit.HOURS.toMillis(1), users);
-        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updates.getTimestamp(), null, null, null, null, null, false, true);
+        createEvent("third", third, third + TimeUnit.HOURS.toMillis(1), users);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee2.getTimestamp(), null, null, null, null, null, false, true);
         newEventId = updates.getData().getNewAndModified().get(0).getId();
         body = new AttendeeAndAlarm();
         att = new Attendee();
@@ -251,9 +250,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("DECLINED");
         body.setAttendee(att);
-        ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
-
-        EventResponse eventResponse = api.getEvent(session, createEvent.getId(), null, null);
+        secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
 
         ChronosFreebusyApi secondUserFreeBusyApi = new ChronosFreebusyApi(client);
         ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, first, nextWeek, Integer.toString(users[1].getUserId()));
@@ -339,7 +336,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
             }
         }
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent(summary, start, end, attendees), true, false);
-        assertNull(createEvent.getError(), createEvent.getError());
+        assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
