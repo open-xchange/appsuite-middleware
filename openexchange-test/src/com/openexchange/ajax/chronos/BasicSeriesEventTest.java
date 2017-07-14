@@ -64,7 +64,6 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
-import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -135,7 +134,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventId eventId = new EventId();
         eventId.setId(event.getId());
 
-        CommonResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
+        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getError());
 
         EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
@@ -173,7 +172,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         occurence.setId(eventId.getId());
         occurence.setRecurrenceId(eventsResponse.getData().get(2).getRecurrenceId());
 
-        CommonResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(occurence));
+        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(occurence));
         assertNull(deleteResponse.getError());
 
         EventResponse eventResponse = api.getEvent(session, occurence.getId(), occurence.getRecurrenceId(), null);
