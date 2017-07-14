@@ -95,6 +95,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_TIMEZONE_MSG = "The supplied timezone is invalid. Please select a valid timezone and try again.";
 
+    public static final String INVALID_GEO_LOCATION_MSG = "The supplied geographical location is invalid. Please select valid coordinates and try again.";
+
     public static final String UNSUPPORTED_RRULE_MSG = "The supplied recurrence rule is not supported. Please use adjust the rule and try again.";
 
     public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";

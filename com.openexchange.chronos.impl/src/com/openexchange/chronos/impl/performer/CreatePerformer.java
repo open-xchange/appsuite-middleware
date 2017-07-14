@@ -173,7 +173,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         //        Consistency.setTimeZone(session, event, calendarUserId);
         /*
-         * classification, status, transparency, color
+         * classification, status, transparency, color, geo
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
             event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
@@ -183,6 +183,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         event.setStatus(eventData.containsStatus() && null != eventData.getStatus() ? eventData.getStatus() : EventStatus.CONFIRMED);
         event.setTransp(eventData.containsTransp() && null != eventData.getTransp() ? eventData.getTransp() : TimeTransparency.OPAQUE);
         event.setColor(eventData.containsColor() ? eventData.getColor() : null);
+        if (eventData.containsGeo()) {
+            event.setGeo(Check.geoLocationIsValid(eventData));
+        }
         /*
          * recurrence related fields
          */
@@ -196,7 +199,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * copy over further (unchecked) event fields
          */
-        return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME);
+        return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME, EventField.URL);
     }
 
 }

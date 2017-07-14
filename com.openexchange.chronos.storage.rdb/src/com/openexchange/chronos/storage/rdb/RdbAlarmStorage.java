@@ -398,10 +398,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             stmt.setInt(parameterIndex++, asInt(eventId));
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                int userId = resultSet.getInt("user");
-                com.openexchange.tools.arrays.Collections.put(alarmsByUserId, I(userId), readAlarm(eventId, resultSet, mappedFields));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    int userId = resultSet.getInt("user");
+                    com.openexchange.tools.arrays.Collections.put(alarmsByUserId, I(userId), readAlarm(eventId, resultSet, mappedFields));
+                }
             }
         }
         return alarmsByUserId;
@@ -428,10 +429,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             for (String eventId : eventIds) {
                 stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
             }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                String eventId = resultSet.getString(1);
-                com.openexchange.tools.arrays.Collections.put(alarmsByEventId, eventId, readAlarm(eventId, resultSet, mappedFields));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    String eventId = resultSet.getString(1);
+                    com.openexchange.tools.arrays.Collections.put(alarmsByEventId, eventId, readAlarm(eventId, resultSet, mappedFields));
+                }
             }
         }
         return alarmsByEventId;
@@ -457,16 +459,17 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             for (String eventId : eventIds) {
                 stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
             }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                String eventID = resultSet.getString(1);
-                Map<Integer, List<Alarm>> alarmsByUser = alarmsByUserById.get(eventID);
-                if (null == alarmsByUser) {
-                    alarmsByUser = new HashMap<Integer, List<Alarm>>();
-                    alarmsByUserById.put(eventID, alarmsByUser);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    String eventID = resultSet.getString(1);
+                    Map<Integer, List<Alarm>> alarmsByUser = alarmsByUserById.get(eventID);
+                    if (null == alarmsByUser) {
+                        alarmsByUser = new HashMap<Integer, List<Alarm>>();
+                        alarmsByUserById.put(eventID, alarmsByUser);
+                    }
+                    int userId = I(resultSet.getInt(2));
+                    com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(eventID, resultSet, mappedFields));
                 }
-                int userId = I(resultSet.getInt(2));
-                com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(eventID, resultSet, mappedFields));
             }
         }
         return alarmsByUserById;

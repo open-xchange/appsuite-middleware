@@ -122,6 +122,14 @@ public enum EventField {
      */
     COLOR,
     /**
+     * The uniform resource locator (URL) of the event.
+     */
+    URL,
+    /**
+     * The global position of the event.
+     */
+    GEO,
+    /**
      * The start date of the event.
      */
     START_DATE,

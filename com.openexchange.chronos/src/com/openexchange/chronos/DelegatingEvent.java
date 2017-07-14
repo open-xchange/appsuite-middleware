@@ -380,6 +380,66 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public String getFilename() {
+        return delegate.getFilename();
+    }
+
+    @Override
+    public void setFilename(String value) {
+        delegate.setFilename(value);
+    }
+
+    @Override
+    public void removeFilename() {
+        delegate.removeFilename();
+    }
+
+    @Override
+    public boolean containsFilename() {
+        return delegate.containsFilename();
+    }
+
+    @Override
+    public String getUrl() {
+        return delegate.getUrl();
+    }
+
+    @Override
+    public void setUrl(String value) {
+        delegate.setUrl(value);
+    }
+
+    @Override
+    public void removeUrl() {
+        delegate.removeUrl();
+    }
+
+    @Override
+    public boolean containsUrl() {
+        return delegate.containsUrl();
+    }
+
+    @Override
+    public double[] getGeo() {
+        return delegate.getGeo();
+    }
+
+    @Override
+    public void setGeo(double[] value) {
+        delegate.setGeo(value);
+    }
+
+    @Override
+    public void removeGeo() {
+        delegate.removeGeo();
+    }
+
+    @Override
+    public boolean containsGeo() {
+        return delegate.containsGeo();
+    }
+
+    @Override
     public DateTime getStartDate() {
         return delegate.getStartDate();
     }

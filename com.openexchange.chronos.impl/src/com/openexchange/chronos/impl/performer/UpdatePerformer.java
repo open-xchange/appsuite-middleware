@@ -726,6 +726,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                             String.valueOf(eventUpdate.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                     break;
+                case GEO:
+                    /*
+                     * check validity
+                     */
+                    Check.geoLocationIsValid(eventUpdate);
+                    break;
                 case RECURRENCE_RULE:
                     /*
                      * deny update for change exceptions (but ignore if set to 'null')

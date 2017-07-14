@@ -85,6 +85,7 @@ import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
+import com.openexchange.groupware.tools.mappings.database.PointMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
@@ -791,6 +792,50 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeColor();
+            }
+        });
+        mappings.put(EventField.URL, new VarCharMapping<Event>("url", "Url") {
+
+            @Override
+            public void set(Event event, String value) {
+                event.setUrl(value);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsUrl();
+            }
+
+            @Override
+            public String get(Event event) {
+                return event.getUrl();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeUrl();
+            }
+        });
+        mappings.put(EventField.GEO, new PointMapping<Event>("geo", "Geo location") {
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsGeo();
+            }
+
+            @Override
+            public void set(Event event, double[] value) throws OXException {
+                event.setGeo(value);
+            }
+
+            @Override
+            public double[] get(Event event) {
+                return event.getGeo();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeGeo();
             }
         });
         mappings.put(EventField.FILENAME, new VarCharMapping<Event>("filename", "Filename") {

@@ -374,6 +374,28 @@ public class Check {
     }
 
     /**
+     * Checks an event's geo location for validity.
+     *
+     * @param event The event to check
+     * @return The passed event's geo location, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_GEO_LOCATION}
+     */
+    public static double[] geoLocationIsValid(Event event) throws OXException {
+        double[] geo = event.getGeo();
+        if (null != geo) {
+            if (2 != geo.length) {
+                throw CalendarExceptionCodes.INVALID_GEO_LOCATION.create(geo);
+            }
+            double latitude = geo[0];
+            double longitude = geo[1];
+            if (90 < latitude || -90 > latitude || 180 < longitude || -180 > longitude) {
+                throw CalendarExceptionCodes.INVALID_GEO_LOCATION.create(geo);
+            }
+        }
+        return geo;
+    }
+
+    /**
      * Checks an event's recurrence rule for validity.
      *
      * @param recurrenceService A reference to the recurrence service

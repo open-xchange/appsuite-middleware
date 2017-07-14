@@ -597,6 +597,50 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeColor();
             }
         });
+        mappings.put(EventField.URL, new DefaultMapping<String, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsUrl();
+            }
+
+            @Override
+            public void set(Event object, String value) throws OXException {
+                object.setUrl(value);
+            }
+
+            @Override
+            public String get(Event object) {
+                return object.getUrl();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeUrl();
+            }
+        });
+        mappings.put(EventField.GEO, new DefaultMapping<double[], Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsGeo();
+            }
+
+            @Override
+            public void set(Event object, double[] value) throws OXException {
+                object.setGeo(value);
+            }
+
+            @Override
+            public double[] get(Event object) {
+                return object.getGeo();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeGeo();
+            }
+        });
         mappings.put(EventField.START_DATE, new DefaultMapping<DateTime, Event>() {
 
             @Override

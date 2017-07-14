@@ -132,6 +132,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "description TEXT DEFAULT NULL," +
                 "categories VARCHAR(1024) DEFAULT NULL," +
                 "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "url VARCHAR(767) DEFAULT NULL," +
+                "geo POINT DEFAULT NULL," +
                 "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
@@ -177,6 +179,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "description TEXT DEFAULT NULL," +
                 "categories VARCHAR(1024) DEFAULT NULL," +
                 "color VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+                "url VARCHAR(767) DEFAULT NULL," +
+                "geo POINT DEFAULT NULL," +
                 "filename VARCHAR(1024) CHARACTER SET latin1 DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +

@@ -59,6 +59,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
@@ -245,6 +246,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Invalid recurrence rule [rule %1$s]</li>
      */
     INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4002),
+    /**
+     * <li>The supplied geographical location is invalid. Please select valid coordinates and try again.</li>
+     * <li>Invalid geo location [geo %1$s]</li>
+     */
+    INVALID_GEO_LOCATION("Invalid geo location [geo %1$s]", INVALID_GEO_LOCATION_MSG, Category.CATEGORY_USER_INPUT, 4003),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>Unexpected error [%1$s]</li>

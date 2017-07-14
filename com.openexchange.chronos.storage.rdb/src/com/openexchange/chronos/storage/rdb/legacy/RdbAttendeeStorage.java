@@ -383,7 +383,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                             /*
                              * invalid calendar user; possibly a no longer existing group or resource - skip
                              */
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping non-existent user " + internalAttendee, e);
+                            addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping non-existent " + internalAttendee, e);
                             continue;
                         }
                         throw e;

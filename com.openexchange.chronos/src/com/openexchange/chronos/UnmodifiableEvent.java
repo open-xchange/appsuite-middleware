@@ -222,6 +222,26 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
+    public void setUrl(String value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeUrl() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setGeo(double[] value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeGeo() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setStartDate(DateTime value) {
         throw new UnsupportedOperationException();
     }

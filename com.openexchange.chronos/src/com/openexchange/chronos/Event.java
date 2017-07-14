@@ -82,6 +82,8 @@ public class Event {
     private List<String> categories;
     private Classification classification;
     private String color;
+    private String url;
+    private double[] geo;
 
     private DateTime startDate;
     private DateTime endDate;
@@ -696,6 +698,78 @@ public class Event {
      */
     public boolean containsColor() {
         return setFields.contains(EventField.COLOR);
+    }
+
+    /**
+     * Gets the url of the event.
+     *
+     * @return The url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Sets the url of the event.
+     *
+     * @param value The url to set
+     */
+    public void setUrl(String value) {
+        url = value;
+        setFields.add(EventField.URL);
+    }
+
+    /**
+     * Removes the url of the event.
+     */
+    public void removeUrl() {
+        url = null;
+        setFields.remove(EventField.URL);
+    }
+
+    /**
+     * Gets a value indicating whether the url of the event has been set or not.
+     *
+     * @return <code>true</code> if the url is set, <code>false</code>, otherwise
+     */
+    public boolean containsUrl() {
+        return setFields.contains(EventField.URL);
+    }
+
+    /**
+     * Gets the global position of the event.
+     *
+     * @return The global position
+     */
+    public double[] getGeo() {
+        return geo;
+    }
+
+    /**
+     * Sets the global position of the event.
+     *
+     * @param value The global position to set
+     */
+    public void setGeo(double[] value) {
+        geo = value;
+        setFields.add(EventField.GEO);
+    }
+
+    /**
+     * Removes the global position of the event.
+     */
+    public void removeGeo() {
+        geo = null;
+        setFields.remove(EventField.GEO);
+    }
+
+    /**
+     * Gets a value indicating whether the global position of the event has been set or not.
+     *
+     * @return <code>true</code> if the global position is set, <code>false</code>, otherwise
+     */
+    public boolean containsGeo() {
+        return setFields.contains(EventField.GEO);
     }
 
     /**
