@@ -472,7 +472,8 @@ public abstract class MailConfig {
         }
 
         MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return new UrlInfo(storage.getMailAccount(accountId, userId, contextId).generateMailServerURL(), storage.getMailAccount(accountId, userId, contextId).isMailStartTls());
+        MailAccount mailAccount = storage.getMailAccount(accountId, userId, contextId);
+        return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
 
     private static final class UserID {
