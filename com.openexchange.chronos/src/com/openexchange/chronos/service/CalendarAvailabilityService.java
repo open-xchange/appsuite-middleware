@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -94,6 +95,19 @@ public interface CalendarAvailabilityService {
      * @throws OXException if an error is occurred
      */
     List<CalendarAvailability> getAvailability(CalendarSession session, Date from, Date until) throws OXException;
+    
+    /**
+     * Gets the {@link CalendarAvailability} information for the specified {@link CalendarUser}s in the specified
+     * interval.
+     * 
+     * @param session The {@link CalendarSession}
+     * @param attendees The {@link List} of the {@link CalendarUser}s
+     * @param from The start date of the interval
+     * @param until The end date of the interval
+     * @return An unmodifiable {@link Map} with {@link CalendarAvailability} for the specified {@link CalendarUser}s
+     * @throws OXException if an error is occurred
+     */
+    Map<CalendarUser, List<CalendarAvailability>> getUserAvailability(CalendarSession session, List<CalendarUser> users, Date from, Date until) throws OXException;
 
     /**
      * Gets the {@link CalendarAvailability} information for the specified {@link Attendee}s in the specified
@@ -106,7 +120,7 @@ public interface CalendarAvailabilityService {
      * @return An unmodifiable {@link Map} with {@link CalendarAvailability} for the specified {@link Attendee}s
      * @throws OXException if an error is occurred
      */
-    Map<Attendee, List<CalendarAvailability>> getAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, List<CalendarAvailability>> getAttendeeAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Deletes the {@link CalendarAvailability} block with the specified identifier

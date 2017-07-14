@@ -55,6 +55,7 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -141,7 +142,7 @@ public interface CalendarAvailabilityStorage {
      * @return
      * @throws OXException
      */
-    List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException;
+    List<CalendarAvailability> loadUserCalendarAvailability(List<CalendarUser> users, Date from, Date until) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user

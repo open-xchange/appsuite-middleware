@@ -58,6 +58,7 @@ import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.AvailabilityField;
@@ -67,7 +68,6 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 
 /**
@@ -240,7 +240,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public List<CalendarAvailability> loadUserCalendarAvailability(List<User> users, Date from, Date until) throws OXException {
+    public List<CalendarAvailability> loadUserCalendarAvailability(List<CalendarUser> users, Date from, Date until) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
