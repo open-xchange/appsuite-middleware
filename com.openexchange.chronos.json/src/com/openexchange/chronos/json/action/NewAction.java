@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Set;
 import org.json.JSONException;
@@ -56,7 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventMapper;
@@ -66,7 +66,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 
 /**
  * {@link NewAction}
@@ -103,7 +102,7 @@ public class NewAction extends ChronosAction {
 
         Event event;
         try {
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values());
+            event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields());
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
