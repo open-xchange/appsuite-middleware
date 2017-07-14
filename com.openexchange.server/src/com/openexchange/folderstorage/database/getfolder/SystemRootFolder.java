@@ -113,15 +113,6 @@ public final class SystemRootFolder {
         return retval;
     }
 
-    /**
-     * Gets the subfolder identifiers of database folder representing system root folder for given user.
-     *
-     * @return The subfolder identifiers of database folder representing system root folder for given user
-     */
-    public static List<String[]> getSystemRootFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        return getSystemRootFolderSubfolder(user.getLocale());
-    }
-
     private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
 
     /**
@@ -129,7 +120,7 @@ public final class SystemRootFolder {
      *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    private static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
         /*
          * The system root folder
          */
