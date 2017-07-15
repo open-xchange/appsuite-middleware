@@ -48,6 +48,9 @@
  */
 package com.openexchange.oidc.state;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Manager of all client states, that try to login with OpenID features.
  *
@@ -62,6 +65,6 @@ public interface StateManagement {
      * @param args
      * @return
      */
-    AuthenticationRequestInfo addAuthenticationRequest(String... args);
+    String addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
 
 }

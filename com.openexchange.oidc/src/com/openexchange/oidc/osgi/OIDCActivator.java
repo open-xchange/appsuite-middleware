@@ -49,13 +49,12 @@
 package com.openexchange.oidc.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
-import com.openexchange.oidc.spi.AbstractOIDCBackend;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
-import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -70,7 +69,7 @@ public class OIDCActivator extends HousekeepingActivator{
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {LeanConfigurationService.class, HttpService.class, DispatcherPrefixService.class};
+        return new Class<?>[] {LeanConfigurationService.class, HttpService.class, DispatcherPrefixService.class, HazelcastInstance.class};
     }
 
     @Override

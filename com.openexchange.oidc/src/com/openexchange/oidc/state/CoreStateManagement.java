@@ -48,6 +48,10 @@
  */
 package com.openexchange.oidc.state;
 
+import java.util.UUID;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.java.util.UUIDs;
+
 /**
  * Contains and manages all current client states.
  *
@@ -55,11 +59,20 @@ package com.openexchange.oidc.state;
  * @since v7.10.0
  */
 public class CoreStateManagement implements StateManagement {
-
+    
+    private final HazelcastInstance hazelcast;
+    private static final String HAZELCAST_AUTHREQUEST_INFO_MAP = "oidcAuthenticationRequestInfos";
+    
+    public CoreStateManagement(HazelcastInstance hazelcast) {
+        super();
+        this.hazelcast = hazelcast;
+    }
+    
     @Override
-    public AuthenticationRequestInfo addAuthenticationRequest(String... args) {
-        //TODO QS-VS: state erstellen als Hashwert.
-        return null;
+    public String addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo) {
+        String id = UUIDs.getUnformattedString(UUID.randomUUID());
+        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(id, authenticationRequestInfo);
+        return id;
     }
 
 }

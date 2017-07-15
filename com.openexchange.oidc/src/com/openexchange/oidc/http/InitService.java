@@ -97,17 +97,17 @@ public class InitService extends OIDCServlet {
             return;
         }
         try {
-            String redirectURI = getRedirectURI(flow);
+            String redirectURI = getRedirectURI(flow, httpRequest);
             buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
         } catch (Exception e) {
             // TODO: handle exception
         }
     }
 
-    private String getRedirectURI(String flow) {
+    private String getRedirectURI(String flow, HttpServletRequest httpRequest) {
         String redirectUri = "";
         if (flow.equals("login")) {
-            redirectUri = provider.getLoginRedirectRequest();
+            redirectUri = provider.getLoginRedirectRequest(httpRequest);
         }
         return redirectUri;
     }

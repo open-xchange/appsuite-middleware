@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
@@ -112,7 +113,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(config, oidcBackend, new CoreStateManagement());
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(config, oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)));
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 registerServlet(servlets, httpService, getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, services, config), "init");

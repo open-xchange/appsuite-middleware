@@ -48,11 +48,18 @@
  */
 package com.openexchange.oidc.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.openid.connect.sdk.Nonce;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCBackend;
+import com.openexchange.oidc.state.AuthenticationRequestInfo;
+import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
 
 
@@ -78,7 +85,17 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
     
     @Override
-    public String getLoginRedirectRequest() {
+    public String getLoginRedirectRequest(HttpServletRequest httpRequest) {
+        State state = new State();
+        Nonce nonce = new Nonce();
+        
+        //TODO QS-VS get the needed information from the request
+        String deepLink = "";
+        String hostname = "";
+        Map<String, String> additionalClientInformation = new HashMap<>();
+        
+        AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation);
+        
         return null;
     }
 

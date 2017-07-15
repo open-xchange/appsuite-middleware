@@ -5,11 +5,13 @@ Bundle-SymbolicName: com.openexchange.oidc
 Bundle-Version: 7.8.10
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.hazelcast.core,
+ com.openexchange.config,
  com.openexchange.config.lean,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.java,
+ com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.servlet;version="3.1.0",

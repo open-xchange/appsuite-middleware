@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc;
 
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Provides the web features for OpenID SSO services.
@@ -62,5 +63,5 @@ public interface OIDCWebSSOProvider {
      * 
      * @return
      */
-    String getLoginRedirectRequest();
+    String getLoginRedirectRequest(HttpServletRequest httpRequest);
 }
