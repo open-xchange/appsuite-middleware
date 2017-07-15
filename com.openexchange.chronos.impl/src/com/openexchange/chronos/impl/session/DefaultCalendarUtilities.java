@@ -55,7 +55,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.EventUpdateImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;

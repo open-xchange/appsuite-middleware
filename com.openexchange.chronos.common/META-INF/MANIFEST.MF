@@ -7,12 +7,12 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .,
  lib/lib-recur-0.9.6.jar,
- lib/rfc5545-datetime-0.2.4.jar,
  lib/vinnie-2.0.0.jar 
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
  com.openexchange.exception,
+ com.openexchange.groupware.tools.mappings,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.search,
@@ -25,5 +25,6 @@ Import-Package: com.openexchange.chronos,
 Export-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,
  com.openexchange.chronos.common,
+ com.openexchange.chronos.common.mapping,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset

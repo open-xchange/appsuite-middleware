@@ -67,6 +67,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;

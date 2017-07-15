@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common.mapping;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
