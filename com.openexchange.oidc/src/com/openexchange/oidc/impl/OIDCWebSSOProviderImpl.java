@@ -95,6 +95,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         Map<String, String> additionalClientInformation = new HashMap<>();
         
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation);
+        String authRequestHzID = stateManagement.addAuthenticationRequest(authenticationRequestInfo);
         
         return null;
     }
