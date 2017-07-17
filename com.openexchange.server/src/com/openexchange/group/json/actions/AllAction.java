@@ -57,7 +57,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.Group.Field;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
@@ -82,16 +81,13 @@ public final class AllAction extends AbstractGroupAction {
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
         Date timestamp = new Date(0);
 
-        List<Field> fields = new LinkedList<Field>();
         boolean loadMembers = false;
         {
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             for (final int column : columns) {
-                final Field field = Group.Field.getByColumnNumber(column);
-                if (field == Group.Field.MEMBERS) {
+                if (Group.Field.MEMBERS.getColNumber() == column) {
                     loadMembers = true;
                 }
-                fields.add(field);
             }
         }
 
