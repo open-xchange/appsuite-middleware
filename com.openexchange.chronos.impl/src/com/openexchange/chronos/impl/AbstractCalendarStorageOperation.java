@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.Random;
 import java.util.concurrent.locks.LockSupport;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -147,7 +146,7 @@ abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperat
         }
         retryCount++;
         int delay = RETRY_BASE_DELAY * retryCount + RANDOM.nextInt(RETRY_BASE_DELAY);
-        LOG.info("Error performing storage operation (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), i(retryCount), I(maxRetries));
+        LOG.info("Error performing storage operation (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), I(retryCount), I(maxRetries));
         LockSupport.parkNanos(delay * 1000000L);
         return true;
     }
