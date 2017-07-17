@@ -88,7 +88,11 @@ public class DtStampMapping extends ICalUtcMapping<Available, CalendarFreeSlot> 
      */
     @Override
     protected void setValue(CalendarFreeSlot object, Date value) {
-        object.setLastModified(new Date(value.getTime()));
+        Date lastModified = new Date();
+        if (value != null) {
+            lastModified = new Date(value.getTime());
+        }
+        object.setLastModified(lastModified);
     }
 
     /*
