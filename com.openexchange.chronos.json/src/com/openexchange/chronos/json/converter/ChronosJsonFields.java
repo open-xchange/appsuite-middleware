@@ -300,6 +300,13 @@ public class ChronosJsonFields {
          * The managed id of the attachment. See {@link com.openexchange.chronos.Attachment#getManagedId()}
          */
         public static final String MANAGED_ID = "managedId";
+
+        /**
+         * An uniform resource identifier to the attachment file.
+         */
+        public static final String URI = "uri";
+
+
     }
 
     /**

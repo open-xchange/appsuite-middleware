@@ -1036,12 +1036,14 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             public Attachment deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
                 Attachment attachment = new Attachment();
 
-                if (from.has(ChronosJsonFields.Attachment.FILENAME)) {
-                    attachment.setFilename(from.getString(ChronosJsonFields.Attachment.FILENAME));
-                }
                 if (from.has(ChronosJsonFields.Attachment.FORMAT_TYPE)) {
                     attachment.setFormatType(from.getString(ChronosJsonFields.Attachment.FORMAT_TYPE));
                 }
+
+                if (from.has(ChronosJsonFields.Attachment.FILENAME)) {
+                    attachment.setFilename(from.getString(ChronosJsonFields.Attachment.FILENAME));
+                }
+
                 if (from.has(ChronosJsonFields.Attachment.SIZE)) {
                     attachment.setSize(from.getLong(ChronosJsonFields.Attachment.SIZE));
                 }
@@ -1050,10 +1052,20 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                     date -= timeZone.getOffset(date);
                     attachment.setCreated(new Date(date));
                 }
+
+                /**
+                 *  The attachment is either a uri or a managed id.
+                 */
+                if (from.has(ChronosJsonFields.Attachment.URI)){
+                    attachment.setUri(from.getString(ChronosJsonFields.Attachment.URI));
+                    return attachment;
+                }
+
                 if (from.has(ChronosJsonFields.Attachment.MANAGED_ID)) {
                     attachment.setManagedId(from.getInt(ChronosJsonFields.Attachment.MANAGED_ID));
+                    return attachment;
                 }
-                return attachment;
+                throw new JSONException("Missing required field. At least one of ["+ChronosJsonFields.Attachment.MANAGED_ID+","+ChronosJsonFields.Attachment.URI+"] must be present.");
             }
 
             @Override
@@ -1076,6 +1088,11 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 if (0 < attachment.getManagedId()) {
                     jsonObject.put(ChronosJsonFields.Attachment.MANAGED_ID, attachment.getManagedId());
                 }
+
+                if (null != attachment.getUri()){
+                    jsonObject.put(ChronosJsonFields.Attachment.URI, attachment.getUri());
+                }
+
                 return jsonObject;
             }
         });

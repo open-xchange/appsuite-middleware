@@ -17,3 +17,6 @@ properties:
   managedId:
     type: integer
     description: The manage id of the attachment.
+  uri:
+    type: string
+    description: An uniform resource identifier to the attachment file.
