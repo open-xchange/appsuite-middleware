@@ -104,7 +104,7 @@ public class NewAction extends ChronosAction {
         try {
             event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields());
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
         try {
             CalendarResult calendarResult = calendarAccess.createEvent(parseFolderParameter(requestData), event);

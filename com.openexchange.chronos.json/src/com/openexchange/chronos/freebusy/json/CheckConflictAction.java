@@ -106,7 +106,7 @@ public class CheckConflictAction extends AbstractFreeBusyAction {
         try {
             event = EventMapper.getInstance().deserialize(jsonEvent, EventField.values());
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
         List<EventConflict> conflicts = freeBusyAccess.checkForConflicts(event, attendees);
         return new AJAXRequestResult(conflicts, EventConflictResultConverter.INPUT_FORMAT);

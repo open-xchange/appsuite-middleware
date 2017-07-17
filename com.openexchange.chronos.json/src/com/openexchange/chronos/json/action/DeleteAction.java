@@ -71,6 +71,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link DeleteAction}
@@ -147,7 +148,7 @@ public class DeleteAction extends ChronosAction {
             }
             return new AJAXRequestResult(deleteEvent, deleteEvent.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
     }
 
