@@ -51,8 +51,10 @@ package com.openexchange.chronos.ical;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import java.util.List;
 import org.junit.Test;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarFreeSlot;
 
 /**
  * {@link AvailabilityTest}
@@ -87,5 +89,12 @@ public class AvailabilityTest extends ICalTest {
         CalendarAvailability availability = importICal.getAvailabilities().get(0);
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uiddoes not match", "0428C7D2-688E-4D2E-AC52-CD112E2469DF", availability.getUid());
+
+        List<CalendarFreeSlot> freeSlots = availability.getCalendarFreeSlots();
+        assertNotNull("No 'available' sub-components found", freeSlots);
+        assertEquals("More than one 'available' sub-components found", 1, freeSlots.size());
+
+        CalendarFreeSlot freeSlot = freeSlots.get(0);
+        assertEquals("The summary does not math", "Monday to Friday from 9:00 to 17:00", freeSlot.getSummary());
     }
 }
