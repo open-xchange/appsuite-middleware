@@ -238,7 +238,7 @@ public class ICalMapper {
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(availableBlocks.size());
         Iterator<?> iterator = availableBlocks.iterator();
         while (iterator.hasNext()) {
-            importAvailable((Available) iterator.next(), parameters, warnings);
+            freeSlots.add(importAvailable((Available) iterator.next(), parameters, warnings));
         }
         return freeSlots;
     }
