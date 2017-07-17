@@ -158,10 +158,14 @@ public class CTMUtils {
                 appointmentObj.setLocation(jsonArray.getString(pos));
                 break;
             case Appointment.FULL_TIME:
-                appointmentObj.setFullTime(jsonArray.getBoolean(pos));
+                if (false == jsonArray.isNull(pos)) {
+                    appointmentObj.setFullTime(jsonArray.getBoolean(pos));
+                }
                 break;
             case Appointment.PRIVATE_FLAG:
-                appointmentObj.setPrivateFlag(jsonArray.getBoolean(pos));
+                if (false == jsonArray.isNull(pos)) {
+                    appointmentObj.setPrivateFlag(jsonArray.getBoolean(pos));
+                }
                 break;
             case Appointment.CATEGORIES:
                 appointmentObj.setCategories(jsonArray.getString(pos));
