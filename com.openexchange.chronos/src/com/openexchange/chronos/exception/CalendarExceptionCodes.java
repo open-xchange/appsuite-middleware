@@ -262,6 +262,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     DB_ERROR("Unexpected database error [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5001),
     /**
+     * <li>Error while reading/writing data from/to the database.</li>
+     * <li>Unexpected database error, try again [%1$s]</li>
+     */
+    DB_ERROR_TRY_AGAIN("Unexpected database error, try again [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 5002),
+    /**
      * <li>The calendar provider \"%1$s\" is not available.</li>
      * <li>Missing calendar provider [provider: %1$s]</li>
      */

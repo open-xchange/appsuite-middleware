@@ -192,7 +192,7 @@ public abstract class RdbStorage {
 
     /**
      * Helper method for generating the next sequence identifier based on the specified sequence table
-     * 
+     *
      * @param accountId The account identifier
      * @param sequenceTable The sequence table name
      * @return The next sequential identifier
@@ -215,7 +215,7 @@ public abstract class RdbStorage {
         }
         return value;
     }
-    
+
     /**
      * Generates the next sequential identifier in the context based on the given sequence table.
      *
@@ -331,6 +331,9 @@ public abstract class RdbStorage {
      * @return The OX exception
      */
     protected static OXException asOXException(SQLException e) {
+        if (DBUtils.isTransactionRollbackException(e)) {
+            return CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e, e.getMessage());
+        }
         return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
     }
 
@@ -375,7 +378,7 @@ public abstract class RdbStorage {
                 return oxException;
             }
         }
-        return CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        return asOXException(e);
     }
 
     /**

@@ -61,15 +61,17 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AbstractStorageOperation}
- * 
+ *
  * @param <S> The storage class
  * @param <T> The return type of the operation
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
 public abstract class AbstractStorageOperation<S, T> implements StorageOperation<T> {
 
@@ -80,9 +82,9 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
     protected final Context context;
 
     /**
-     * Initialises a new {@link StorageOperation}.
+     * Initializes a new {@link StorageOperation}.
      *
-     * @param session The server session
+     * @param session The calendar session
      */
     public AbstractStorageOperation(CalendarSession session) throws OXException {
         super();
@@ -90,11 +92,6 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
         this.context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.impl.StorageOperation#executeQuery()
-     */
     @Override
     public T executeQuery() throws OXException {
         DatabaseService dbService = Services.getService(DatabaseService.class);
@@ -111,11 +108,6 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.impl.StorageOperation#executeUpdate()
-     */
     @Override
     public T executeUpdate() throws OXException {
         boolean committed = false;
@@ -130,6 +122,9 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
             committed = true;
             return result;
         } catch (SQLException e) {
+            if (DBUtils.isTransactionRollbackException(e)) {
+                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e, e.getMessage());
+            }
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             session.set(PARAM_CONNECTION, null);
@@ -157,7 +152,7 @@ public abstract class AbstractStorageOperation<S, T> implements StorageOperation
 
     /**
      * Initialises the storage
-     * 
+     *
      * @param dbProvider The database provider
      * @return The storage instance
      * @throws OXException if the storage instance cannot be initialised
