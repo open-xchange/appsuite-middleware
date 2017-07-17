@@ -87,7 +87,7 @@ public class NewAction extends AbstractAction {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject requestBody = getRequestBody(requestData);
+        JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
         try {
             CalendarAvailability availability = CalendarAvailabilityMapper.getInstance().deserialize(requestBody, CalendarAvailabilityMapper.getInstance().getMappedFields());
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);

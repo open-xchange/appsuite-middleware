@@ -77,26 +77,33 @@ abstract class AbstractAction implements AJAXActionService {
         super();
         this.services = services;
     }
-    
+
+    /**
+     * Initialises a new {@link CalendarSession} from the specified groupware {@link Session}
+     * 
+     * @param session The groupware {@link Session}
+     * @return The {@link CalendarSession}
+     * @throws OXException if an error is occurred
+     */
     CalendarSession getSession(Session session) throws OXException {
         return services.getService(CalendarService.class).init(session);
     }
 
     /**
+     * Retrieves the request body from the specified {@link AJAXRequestData}
      * 
-     * @param requestData
-     * @return
-     * @throws OXException
+     * @param requestData The request payload
+     * @return The request body
+     * @throws OXException if the request body is missing or is invalid
      */
-    <T extends JSONValue> T getRequestBody(AJAXRequestData requestData) throws OXException {
+    <T extends JSONValue> T getRequestBody(AJAXRequestData requestData, Class<T> type) throws OXException {
         Object data = requestData.getData();
         if (data == null) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        if (!(data instanceof JSONValue)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        if (data.getClass().equals(type)) {
+            return type.cast(data);
         }
-        return (T) data;
+        throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
     }
-
 }
