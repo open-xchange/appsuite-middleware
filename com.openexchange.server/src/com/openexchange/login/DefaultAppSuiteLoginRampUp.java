@@ -53,10 +53,14 @@ import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -65,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -74,6 +79,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
@@ -120,6 +126,28 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         }
     }
 
+    public static interface Contribution {
+
+        /**
+         * Gets the key of this contribution.
+         * <p>
+         * Must not be one of {@link RampUpKey reserved keys}.
+         *
+         * @return The key
+         */
+        String getKey();
+
+        /**
+         * Gets the result object.
+         *
+         * @param session The session providing user information
+         * @param loginRequest The login request
+         * @return The result object
+         * @throws OXException If result object cannot be returned
+         */
+        Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException;
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------------------------------ //
 
     /** The service look-up */
@@ -154,16 +182,29 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
     /** The ramp-up keys. Keep order! */
     private static final List<RampUpKey> KEYS;
+    private static final Set<String> RESERVED;
     static {
         RampUpKey[] values = RampUpKey.values();
         int len = values.length;
-        List<RampUpKey> keys = new ArrayList<>(len);
+        ImmutableList.Builder<RampUpKey> keys = ImmutableList.builder();
+        ImmutableSet.Builder<String> reserved = ImmutableSet.builder();
         for (RampUpKey rampUpKey : values) {
             if (RampUpKey.ERRORS != rampUpKey) {
                 keys.add(rampUpKey);
             }
+            reserved.add(Strings.asciiLowerCase(rampUpKey.key));
         }
-        KEYS = ImmutableList.copyOf(keys);
+        KEYS = keys.build();
+        RESERVED = reserved.build();
+    }
+
+    /**
+     * Gets extended contributions
+     *
+     * @return The extended contributions
+     */
+    protected Collection<Contribution> getExtendedContributions() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -427,13 +468,45 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
         }));
 
+        // Check for extended contributions
+        List<String> extendedKeys = null;
+        {
+            Collection<Contribution> contributions = getExtendedContributions();
+            if (null != contributions && false == contributions.isEmpty()) {
+                extendedKeys = new ArrayList<>(contributions.size());
+                for (final Contribution contribution : contributions) {
+                    if (RESERVED.contains(Strings.asciiLowerCase(contribution.getKey()))) {
+                        // Illegal key... Ignore
+                    } else {
+                        rampUps.put(contribution.getKey(), threads.submit(new AbstractTrackableTask<Object>() {
+
+                            @Override
+                            public Object call() throws Exception {
+                                return contribution.getResult(session, loginRequest);
+                            }
+                        }));
+                        extendedKeys.add(contribution.getKey());
+                    }
+                }
+            }
+        }
+
         try {
             // Grab tasks to complete in preserved order
-            List<RampUpFuture> taskCompletions = new ArrayList<>(numberOfKeys);
+            List<RampUpFuture> taskCompletions = new LinkedList<>();
             for (RampUpKey rampUpKey : KEYS) {
                 Future<Object> taskCompletion = rampUps.get(rampUpKey.key);
                 if (null != taskCompletion) {
                     taskCompletions.add(new RampUpFuture(rampUpKey, taskCompletion));
+                }
+            }
+
+            if (null != extendedKeys) {
+                for (String extendedKey : extendedKeys) {
+                    Future<Object> taskCompletion = rampUps.get(extendedKey);
+                    if (null != taskCompletion) {
+                        taskCompletions.add(new RampUpFuture(extendedKey, taskCompletion));
+                    }
                 }
             }
 
@@ -485,17 +558,23 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
     private static final class RampUpFuture {
 
-        private final RampUpKey rampUpKey;
+        private final String key;
         private final Future<Object> rampUpTask;
 
         RampUpFuture(RampUpKey rampUpKey, Future<Object> rampUpTask) {
             super();
-            this.rampUpKey = rampUpKey;
+            this.key = rampUpKey.key;
+            this.rampUpTask = rampUpTask;
+        }
+
+        RampUpFuture(String key, Future<Object> rampUpTask) {
+            super();
+            this.key = key;
             this.rampUpTask = rampUpTask;
         }
 
         String getKey() {
-            return rampUpKey.key;
+            return key;
         }
 
         boolean cancel(boolean mayInterruptIfRunning) {

@@ -57,6 +57,7 @@ import com.openexchange.appsuite.AppSuiteLoginRampUp;
 import com.openexchange.appsuite.AppsLoadServlet;
 import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
+import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
@@ -104,6 +105,7 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         // Track file contributors
         final RankingAwareNearRegistryServiceTracker<FileContributor> contributorTracker = new RankingAwareNearRegistryServiceTracker<FileContributor>(context, FileContributor.class);
         rememberTracker(contributorTracker);
+        trackService(OnboardingService.class);
         openTrackers();
 
         // ... and register a composite file contributor
