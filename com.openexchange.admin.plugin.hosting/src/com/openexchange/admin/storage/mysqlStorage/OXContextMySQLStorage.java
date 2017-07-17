@@ -91,7 +91,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -1119,6 +1118,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException("Context administrator is not defined.");
         }
 
+        // The effective strategy
+        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
+
         Database db = null;
         boolean decrementFileStoreCount = false;
         boolean decrementDatabaseCount = false;
@@ -1160,11 +1162,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Find database for context
+            boolean updateContextsPerDBSchemaCount = true;
             {
                 Database givenDatabase = ctx.getWriteDatabase();
                 if (null == givenDatabase) {
                     // No database specified
                     db = utils.getNextDBHandleByWeight(configCon);
+                    // Resolved with respect to schema?
+                    String preferredSchema = db.getScheme();
+                    if (null != preferredSchema) {
+                        effectiveStrategy = SchemaSelectStrategy.schema(preferredSchema);
+                        updateContextsPerDBSchemaCount = false;
+                    }
                 } else {
                     db = OXToolStorageInterface.getInstance().loadDatabaseById(i(givenDatabase.getId()));
                     if (db.getMaxUnits().intValue() <= 0) {
@@ -1176,23 +1185,40 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 decrementDatabaseCount = true;
             }
 
-            // Find or create suitable schema (within transaction)
-            {
-                startTransaction(configCon);
-                boolean rollback = true;
-                try {
-                    findOrCreateSchema(configCon, db, schemaSelectStrategy);
-                    contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
-                    configCon.commit();
-                    rollback = false;
-                    decrementDatabaseSchemaCount = true;
-                } finally {
-                    if (rollback) {
-                        rollback(configCon);
+            // Determine the schema name according to effective strategy
+            switch (effectiveStrategy.getStrategy()) {
+                case SCHEMA: {
+                    // Pre-defined schema name
+                    applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
+                    if (updateContextsPerDBSchemaCount) {
+                        contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
                     }
-                    autocommit(configCon);
+                    decrementDatabaseSchemaCount = true;
+                    break;
+                }
+                case AUTOMATIC:
+                    // fall-through
+                default: {
+                    // Find or create suitable schema (within transaction)
+                    startTransaction(configCon);
+                    boolean rollback = true;
+                    try {
+                        automaticLookupSchema(configCon, db);
+                        contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
+                        configCon.commit();
+                        rollback = false;
+                        decrementDatabaseSchemaCount = true;
+                    } finally {
+                        if (rollback) {
+                            rollback(configCon);
+                        }
+                        autocommit(configCon);
+                    }
+                    break;
                 }
             }
+
+            LOG.debug("Using schema \"{}\" from database {} for creation of context {}", db.getScheme(), db.getId(), ctx.getId());
 
             // Create context (within transaction)
             Context context;
@@ -1512,32 +1538,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    /**
-     * Looks-up the next suitable schema dependent on given strategy (fall-back is {@link Strategy#AUTOMATIC automatic}).
-     *
-     * @param configCon a write connection to the configuration database that is already in a transaction.
-     * @param db The database
-     * @return The possible schema result from cache that is needed for further processing
-     */
-    private void findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
-        // The effective strategy
-        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
-
-        // Determine the schema name according to effective strategy
-        switch (effectiveStrategy.getStrategy()) {
-            case SCHEMA:
-                // Pre-defined schema name
-                applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
-                return;
-            case AUTOMATIC:
-                // fall-through
-            default:
-                automaticLookupSchema(configCon, db);
-                return;
-        }
-    }
-
-    private void applyPredefinedSchemaName(String schemaName, Database db) throws StorageException {
+    private void applyPredefinedSchemaName(String schemaName, Database db) {
         // Pre-defined schema name
         db.setScheme(schemaName);
     }
@@ -1576,7 +1577,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
-        findOrCreateSchema(con, db, null);
+        automaticLookupSchema(con, db);
         try {
             updateContextServer2DbPool(db, con, contextId);
         } catch (PoolException e) {

@@ -438,7 +438,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 try {
                     cache.pushWriteConnectionForConfigDB(configDbCon);
                 } catch (PoolException e) {
-                    // Ignroe
+                    LOG.debug("Failed to push connection back to pool", e);
                 }
             }
         }
@@ -505,7 +505,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
-                    // Ignroe
+                    LOG.debug("Failed to push connection back to pool", e);
                 }
             }
         }
@@ -578,7 +578,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
-                    // Ignroe
+                    LOG.debug("Failed to push connection back to pool", e);
                 }
             }
         }
@@ -629,7 +629,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
-                    // Ignroe
+                    LOG.debug("Failed to push connection back to pool", e);
                 }
             }
         }
@@ -750,13 +750,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (null != url) {
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET uri = ? WHERE id = ?");
                 prep.setString(1, url);
-                prep.setInt(2, id);
+                prep.setInt(2, id.intValue());
                 prep.executeUpdate();
                 prep.close();
             }
 
             final Long store_size = fstore.getSize();
-            if (null != store_size && fstore.getSize() != -1) {
+            if (null != store_size && store_size.longValue() != -1) {
                 final Long l_max = MAX_FILESTORE_CAPACITY;
                 if (store_size.longValue() > l_max.longValue()) {
                     throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
@@ -765,7 +765,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 store_size_double = store_size_double << 20;
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET size = ? WHERE id = ?");
                 prep.setLong(1, store_size_double);
-                prep.setInt(2, id);
+                prep.setInt(2, id.intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -773,8 +773,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final Integer maxContexts = fstore.getMaxContexts();
             if (null != maxContexts) {
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET max_context = ? WHERE id = ?");
-                prep.setInt(1, maxContexts);
-                prep.setInt(2, id);
+                prep.setInt(1, maxContexts.intValue());
+                prep.setInt(2, id.intValue());
                 prep.executeUpdate();
                 prep.close();
             }
@@ -783,13 +783,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             rollback = false;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of configdb connection!", expd);
-            }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
@@ -798,11 +791,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", exp);
             throw new StorageException(exp);
         } finally {
+            closeSQLStuff(prep);
+
             if (rollback) {
                 rollback(configdb_write_con);
             }
 
-            closeSQLStuff(prep);
             autocommit(configdb_write_con);
             if (configdb_write_con != null) {
                 try {
@@ -910,10 +904,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT id,text FROM reason_text");
-            final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<>();
+
+            ResultSet rs = stmt.executeQuery();
+            List<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
+                list.add(new MaintenanceReason(I(rs.getInt("id")), rs.getString("text")));
             }
             rs.close();
 
@@ -953,10 +948,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             stmt = con.prepareStatement("SELECT id,text FROM reason_text WHERE text like ?");
             stmt.setString(1, new_search_pattern);
-            final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<>();
+
+            ResultSet rs = stmt.executeQuery();
+            List<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
+                list.add(new MaintenanceReason(I(rs.getInt("id")), rs.getString("text")));
             }
             rs.close();
 
@@ -1009,10 +1005,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 stmt.setInt(stmt_count, element);
                 stmt_count++;
             }
-            final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<>();
+
+            ResultSet rs = stmt.executeQuery();
+            List<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
+                list.add(new MaintenanceReason(I(rs.getInt("id")), rs.getString("text")));
             }
             rs.close();
 
@@ -1246,7 +1243,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep = null;
 
                 prep = con.prepareStatement("SELECT cluster_id FROM db_cluster WHERE write_db_pool_id = ?");
-                prep.setInt(1, db.getMasterId());
+                prep.setInt(1, db.getMasterId().intValue());
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     throw new StorageException("No such master with ID=" + db.getMasterId() + " IN db_cluster TABLE");
@@ -1311,7 +1308,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public int registerFilestore(final Filestore fstore) throws StorageException {
         Connection con = null;
-        long store_size = fstore.getSize();
+        long store_size = fstore.getSize().longValue();
         final Long l_max = MAX_FILESTORE_CAPACITY;
         if (store_size > l_max.longValue()) {
             throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
@@ -1330,7 +1327,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(1, fstore_id);
             stmt.setString(2, fstore.getUrl());
             stmt.setLong(3, store_size);
-            stmt.setInt(4, fstore.getMaxContexts());
+            stmt.setInt(4, fstore.getMaxContexts().intValue());
             stmt.executeUpdate();
             stmt.close();
 
@@ -1762,7 +1759,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     private boolean isEntityLimitReached(Filestore filestore) {
         // 0 is the special value for not adding contexts to this filestore.
         // and check if the current contexts stored in the filestore reach the maximum context value for the filestore.
-        return 0 == filestore.getMaxContexts().intValue() || filestore.getCurrentContexts().intValue() >= filestore.getMaxContexts().intValue();
+        int maxContexts = filestore.getMaxContexts().intValue();
+        return 0 == maxContexts || filestore.getCurrentContexts().intValue() >= maxContexts;
     }
 
     private boolean enoughSpaceForContext(Filestore filestore) throws StorageException {
@@ -1882,19 +1880,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 int nrcontexts = rs.getInt("s.count");
                 if (false == rs.wasNull()) {
                     Database db = new Database();
-                    db.setCurrentUnits(nrcontexts);
-                    db.setClusterWeight(rs.getInt("c.weight"));
+                    db.setCurrentUnits(I(nrcontexts));
+                    db.setClusterWeight(I(rs.getInt("c.weight")));
                     db.setName(rs.getString("d.name"));
                     db.setDriver(rs.getString("d.driver"));
-                    db.setId(id);
+                    db.setId(I(id));
                     db.setLogin(rs.getString("d.login"));
                     db.setMaster(ismaster);
-                    db.setMasterId(masterid);
-                    db.setMaxUnits(CONTEXTS_PER_SCHEMA);
+                    db.setMasterId(I(masterid));
+                    db.setMaxUnits(I(CONTEXTS_PER_SCHEMA));
                     db.setPassword(rs.getString("d.password"));
-                    db.setPoolHardLimit(rs.getInt("d.hardlimit"));
-                    db.setPoolInitial(rs.getInt("d.initial"));
-                    db.setPoolMax(rs.getInt("d.max"));
+                    db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
+                    db.setPoolInitial(I(rs.getInt("d.initial")));
+                    db.setPoolMax(I(rs.getInt("d.max")));
                     db.setUrl(rs.getString("d.url"));
                     db.setScheme(rs.getString("s.schemaname"));
                     tmp.add(db);
@@ -1956,20 +1954,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
                 }
-                db.setClusterWeight(rs.getInt("c.weight"));
+                db.setClusterWeight(I(rs.getInt("c.weight")));
                 db.setName(rs.getString("d.name"));
                 db.setDriver(rs.getString("d.driver"));
-                db.setId(id);
+                db.setId(I(id));
                 db.setLogin(rs.getString("d.login"));
-                db.setMaster(ismaster.booleanValue());
-                db.setMasterId(masterid);
-                db.setMaxUnits(rs.getInt("c.max_units"));
+                db.setMaster(ismaster);
+                db.setMasterId(I(masterid));
+                db.setMaxUnits(I(rs.getInt("c.max_units")));
                 db.setPassword(rs.getString("d.password"));
-                db.setPoolHardLimit(rs.getInt("d.hardlimit"));
-                db.setPoolInitial(rs.getInt("d.initial"));
-                db.setPoolMax(rs.getInt("d.max"));
+                db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
+                db.setPoolInitial(I(rs.getInt("d.initial")));
+                db.setPoolMax(I(rs.getInt("d.max")));
                 db.setUrl(rs.getString("d.url"));
-                db.setCurrentUnits(nrcontexts);
+                db.setCurrentUnits(I(nrcontexts));
                 tmp.add(db);
             }
             rs.close();
@@ -2014,7 +2012,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final ArrayList<Server> tmp = new ArrayList<>();
             while (rs.next()) {
                 final Server srv = new Server();
-                srv.setId(rs.getInt("server_id"));
+                srv.setId(I(rs.getInt("server_id")));
                 srv.setName(rs.getString("name"));
                 tmp.add(srv);
             }
@@ -2058,50 +2056,58 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             lock(con);
 
             if (isMaster) {
-                try {
-                    stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
-                    stmt.setInt(1, dbId);
-                    stmt.executeUpdate();
-                } finally {
-                    closeSQLStuff(stmt);
-                }
-                try {
-                    stmt = con.prepareStatement("DELETE FROM db_cluster WHERE write_db_pool_id=?");
-                    stmt.setInt(1, dbId);
-                    stmt.executeUpdate();
-                } finally {
-                    closeSQLStuff(stmt);
-                }
-                try {
-                    stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
-                    stmt.setInt(1, dbId);
-                    stmt.executeUpdate();
-                } finally {
-                    closeSQLStuff(stmt);
-                }
-                try {
-                    stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
-                    stmt.setInt(1, dbId);
-                    stmt.executeUpdate();
-                } finally {
-                    closeSQLStuff(stmt);
-                }
-            } else {
-                try {
-                    stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
-                    stmt.setInt(1, dbId);
-                    stmt.executeUpdate();
-                } finally {
-                    closeSQLStuff(stmt);
-                }
-            }
-            try {
-                stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id=?");
+                stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
                 stmt.setInt(1, dbId);
                 stmt.executeUpdate();
-            } finally {
                 closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM db_cluster WHERE write_db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                // Just to be sure...
+                {
+                    stmt = con.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            } else {
+                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
             }
+
+            stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id=?");
+            stmt.setInt(1, dbId);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = null;
+
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -2111,6 +2117,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("Runtime Error", e);
             throw new StorageException(e);
         } finally {
+            closeSQLStuff(stmt);
             if (rollback) {
                 rollback(con);
             }
@@ -3139,7 +3146,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-            LOG.error("The specified cluster id '{}' has no database pool references", clusterId);
+            LOG.error("The specified cluster id '{}' has no database pool references", I(clusterId));
             throw new StorageException("The specified cluster id '" + clusterId + "' has no database pool references");
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
@@ -3155,7 +3162,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database createSchema(Integer optDBId) throws StorageException {
+    public Database createSchema(Integer optDatabaseId) throws StorageException {
 
         Connection configCon = null;
         try {
@@ -3163,12 +3170,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             startTransaction(configCon);
 
             Database db;
-            if (null == optDBId || i(optDBId) <= 0) {
+            if (null == optDatabaseId || i(optDatabaseId) <= 0) {
                 db = getNextDBHandleByWeight(configCon);
             } else {
-                db = OXToolStorageInterface.getInstance().loadDatabaseById(i(optDBId));
+                db = OXToolStorageInterface.getInstance().loadDatabaseById(i(optDatabaseId));
                 if (db.getMaxUnits().intValue() == 0) {
-                    throw new StorageException("Database " + optDBId + " must not be used.");
+                    throw new StorageException("Database " + optDatabaseId + " must not be used.");
                 }
             }
             createSchema(configCon, db);
@@ -3193,11 +3200,33 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         try {
             // Try to update counter
-            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=? WHERE db_pool_id=? AND count=?");
-            stmt.setInt(1, db.getCount() + 1);
+            String schema = db.getScheme();
+            if (null == schema) {
+                stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=? WHERE db_pool_id=? AND count=?");
+                stmt.setInt(1, db.getCount() + 1);
+                stmt.setInt(2, i(db.getId()));
+                stmt.setInt(3, db.getCount());
+                return stmt.executeUpdate() > 0;
+            }
+
+            int schemaCount = db.getSchemaCount();
+            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=? WHERE db_pool_id=? AND schemaname=? AND count=?");
+            stmt.setInt(1, schemaCount + 1);
             stmt.setInt(2, i(db.getId()));
-            stmt.setInt(3, db.getCount());
-            return stmt.executeUpdate() > 0;
+            stmt.setString(3, schema);
+            stmt.setInt(4, schemaCount);
+            boolean success = stmt.executeUpdate() > 0;
+            closeSQLStuff(stmt);
+            stmt = null;
+
+            if (false == success) {
+                return false;
+            }
+
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count+1 WHERE db_pool_id=?");
+            stmt.setInt(1, db.getId().intValue());
+            stmt.executeUpdate();
+            return true;
         } finally {
             closeSQLStuff(stmt);
         }
@@ -3206,12 +3235,19 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public Database getNextDBHandleByWeight(final Connection con) throws SQLException, StorageException {
         if (this.USE_UNIT == UNIT_CONTEXT) {
+            int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             int retryCount = 0;
             while (true) {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count ASC");
+                    boolean preferSchemaCount = true;
+                    if (preferSchemaCount) {
+                        // Prefer non-exceeded databases having less filled schemas available
+                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count,s.schemaname,s.count FROM contexts_per_dbpool AS p JOIN db_cluster AS c ON p.db_pool_id=c.write_db_pool_id LEFT JOIN contexts_per_dbschema AS s ON p.db_pool_id=s.db_pool_id JOIN db_pool AS d ON p.db_pool_id=d.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count, s.count ASC");
+                    } else {
+                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count ASC");
+                    }
                     rs = stmt.executeQuery();
                     if (false == rs.next()) {
                         // No databases at all...
@@ -3219,44 +3255,101 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     }
 
                     // Iterate candidates
-                    boolean checkNext = false;
+                    Map<Integer, DatabaseHandle> dbsWithoutSchema = null;
+                    boolean checkNext;
+                    int lastDatabaseId = 0;
                     do {
-                        // Create appropriate database instance
-                        DatabaseHandle db = new DatabaseHandle();
                         int pos = 1;
-                        db.setId(I(rs.getInt(pos++)));
-                        db.setUrl(rs.getString(pos++));
-                        db.setDriver(rs.getString(pos++));
-                        db.setLogin(rs.getString(pos++));
-                        db.setPassword(rs.getString(pos++));
-                        db.setName(rs.getString(pos++));
-                        final int slaveId = rs.getInt(pos++);
-                        if (slaveId > 0) {
-                            db.setRead_id(I(slaveId));
-                        }
-                        db.setClusterWeight(I(rs.getInt(pos++)));
-                        db.setMaxUnits(I(rs.getInt(pos++)));
-                        db.setCount(rs.getInt(pos++));
-                        if (rs.wasNull()) {
-                            throw new StorageException("Unable to count contexts of db_pool_id=" + db.getId());
-                        }
+                        int databaseId = rs.getInt(pos++);
+                        if (lastDatabaseId == 0 || lastDatabaseId != databaseId) {
+                            checkNext = false;
+                            lastDatabaseId = databaseId;
 
-                        // Try to update counter
-                        if (tryIncrementDBPoolCounter(db, con)) {
-                            try {
-                                int dbPoolId = i(db.getId());
-                                final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
-                                cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
-                                return db;
-                            } catch (final PoolException e) {
-                                LOG.error("Failed to connect to database {}", db.getId(), e);
-                                checkNext = true;
+                            // Create appropriate database instance
+                            DatabaseHandle db = new DatabaseHandle();
+                            db.setId(I(databaseId));
+                            db.setUrl(rs.getString(pos++));
+                            db.setDriver(rs.getString(pos++));
+                            db.setLogin(rs.getString(pos++));
+                            db.setPassword(rs.getString(pos++));
+                            db.setName(rs.getString(pos++));
+                            final int slaveId = rs.getInt(pos++);
+                            if (slaveId > 0) {
+                                db.setRead_id(I(slaveId));
                             }
+                            db.setClusterWeight(I(rs.getInt(pos++)));
+                            db.setMaxUnits(I(rs.getInt(pos++)));
+                            db.setCount(rs.getInt(pos++));
+                            if (rs.wasNull()) {
+                                throw new StorageException("Unable to count contexts of db_pool_id=" + db.getId());
+                            }
+
+                            boolean selectDatabase = true;
+                            if (preferSchemaCount) {
+                                String scheme = rs.getString(pos++); // if the value is SQL NULL, the value returned is null
+                                if (null != scheme) {
+                                    int schemaCount = rs.getInt(pos++);
+                                    if (schemaCount < CONTEXTS_PER_SCHEMA) {
+                                        db.setScheme(scheme);
+                                        db.setSchemaCount(schemaCount);
+                                    } else {
+                                        selectDatabase = false;
+                                        checkNext = true;
+                                    }
+                                } else {
+                                    // Database w/o a schema
+                                    if (null == dbsWithoutSchema) {
+                                        dbsWithoutSchema = new LinkedHashMap<>();
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    } else if (false == dbsWithoutSchema.containsKey(I(databaseId))) {
+                                        dbsWithoutSchema.put(I(databaseId), db);
+                                    }
+                                    selectDatabase = false;
+                                    checkNext = true;
+                                }
+                            }
+
+                            // Try to update counter
+                            if (selectDatabase) {
+                                dbsWithoutSchema = null;
+                                if (tryIncrementDBPoolCounter(db, con)) {
+                                    try {
+                                        int dbPoolId = i(db.getId());
+                                        final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
+                                        cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                                        return db;
+                                    } catch (final PoolException e) {
+                                        LOG.error("Failed to connect to database {}", db.getId(), e);
+                                        checkNext = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            checkNext = true;
                         }
                     } while (checkNext && rs.next());
 
+                    if (null != dbsWithoutSchema) {
+                        Iterator<DatabaseHandle> it = dbsWithoutSchema.values().iterator();
+                        do {
+                            DatabaseHandle dbWithoutSchema = it.next();
+                            checkNext = false;
+                            if (tryIncrementDBPoolCounter(dbWithoutSchema, con)) {
+                                try {
+                                    int dbPoolId = i(dbWithoutSchema.getId());
+                                    final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
+                                    cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                                    return dbWithoutSchema;
+                                } catch (final PoolException e) {
+                                    LOG.error("Failed to connect to database {}", dbWithoutSchema.getId(), e);
+                                    checkNext = true;
+                                }
+                            }
+                        } while (checkNext && it.hasNext());
+                    }
+
                     if (checkNext) { // Loop was exited because rs.next() returned false
-                        // No suitable filestore found
+                        // No suitable database found
                         throw new StorageException("All not full databases cannot be connected to.");
                     }
                 } finally {
@@ -3397,7 +3490,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     /**
      * count the number of contexts (or users) on the given database
      *
-     * @param db
+     * @param db The database
      * @param configdb_con
      * @return number of units (contexts/user depending on settings)
      * @throws SQLException
@@ -3461,7 +3554,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } finally {
                     closeSQLStuff(rpool);
                 }
-                LOG.debug("***** found {} users on {}", count, pool_id);
+                LOG.debug("***** found {} users on {}", I(count), I(pool_id));
             } else {
                 throw new StorageException("UNKNOWN UNIT TO COUNT: " + this.USE_UNIT);
             }
@@ -3474,7 +3567,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     /**
-     * Creates a new db schema.
+     * Creates a new database schema.
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for

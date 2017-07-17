@@ -127,6 +127,7 @@ import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -2222,7 +2223,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     ConfigView view = viewFactory.getView(userId, ctx.getId());
                     check = view.get("com.openexchange.mail.useStaticDefaultFolders", Boolean.class);
                 } catch (OXException e) {
-                    log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
+                    if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                        // Context is about being created...
+                    } else {
+                        log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
+                    }
                 }
             }
 

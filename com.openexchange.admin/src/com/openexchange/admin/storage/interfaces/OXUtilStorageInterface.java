@@ -494,11 +494,11 @@ public abstract class OXUtilStorageInterface {
     /**
      * Creates a new schema in the given database if possible. In case the optDBId is null the best suitable DB is selected automatically.
      *
-     * @param optDBId Optional database identifier. If missing the best suitable database is selected automatically.
+     * @param optDatabaseId Optional database identifier. If missing the best suitable database is selected automatically.
      * @return The schema name.
      * @throws StorageException
      */
-    public abstract Database createSchema(Integer optDBId) throws StorageException;
+    public abstract Database createSchema(Integer optDatabaseId) throws StorageException;
 
     /**
      * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
