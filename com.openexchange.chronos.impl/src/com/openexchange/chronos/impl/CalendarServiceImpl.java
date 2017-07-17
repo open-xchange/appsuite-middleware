@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
@@ -262,7 +263,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(event);
+                return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(new UnmodifiableEvent(event));
             }
         }.executeUpdate());
     }
@@ -279,7 +280,7 @@ public class CalendarServiceImpl implements CalendarService {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), event, clientTimestamp);
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
 
         }.executeUpdate());
