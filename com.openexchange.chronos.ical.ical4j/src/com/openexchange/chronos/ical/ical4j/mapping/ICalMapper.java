@@ -226,6 +226,14 @@ public class ICalMapper {
         return calendarAvailability;
     }
 
+    /**
+     * Imports the specified {@link Available} blocks
+     * 
+     * @param availableBlocks The {@link Available} blocks to import
+     * @param parameters Further options to use, or <code>null</code> to stick with the defaults
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @return A {@link List} with the imported {@link Available} data
+     */
     public List<CalendarFreeSlot> importAvailable(ComponentList availableBlocks, ICalParameters parameters, List<OXException> warnings) {
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(availableBlocks.size());
         Iterator<?> iterator = availableBlocks.iterator();

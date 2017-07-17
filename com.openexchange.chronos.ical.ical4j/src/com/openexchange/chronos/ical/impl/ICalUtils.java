@@ -271,9 +271,9 @@ public class ICalUtils {
             return null;
         }
         List<CalendarAvailability> availabilities = new ArrayList<CalendarAvailability>(availabilityComponents.size());
-        int index = 0;
-        for (Iterator<?> iterator = availabilityComponents.iterator(); iterator.hasNext(); index++) {
-            availabilities.add(importAvailability(index, (VAvailability) iterator.next(), mapper, parameters));
+        Iterator<?> iterator = availabilityComponents.iterator();
+        while (iterator.hasNext()) {
+            availabilities.add(importAvailability((VAvailability) iterator.next(), mapper, parameters));
         }
         return availabilities;
     }
@@ -287,14 +287,13 @@ public class ICalUtils {
     /**
      * Imports the specified {@link VAvailability} component
      * 
-     * @param index The position of the {@link VAvailability} in the ical file
      * @param vAvailability The {@link VAvailability} to import
      * @param mapper The {@link ICalMapper} to use
      * @param parameters The {@link ICalParameters}
      * @return The imported {@link VAvailability} component as {@link CalendarAvailability}
      * @throws OXException if a parsing error occurs
      */
-    static CalendarAvailability importAvailability(int index, VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static CalendarAvailability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return mapper.importVAvailability(vAvailability, parameters, warnings);
