@@ -67,6 +67,7 @@ public class Calendar {
     private String name;
     private List<Event> events;
     private List<FreeBusyData> freeBusyDatas;
+    private List<CalendarAvailability> availabilities;
     private ExtendedProperties extendedProperties;
 
     /**
@@ -200,6 +201,24 @@ public class Calendar {
      */
     public void setFreeBusyDatas(List<FreeBusyData> freeBusyDatas) {
         this.freeBusyDatas = freeBusyDatas;
+    }
+
+    /**
+     * Gets the availabilities
+     *
+     * @return The availabilities
+     */
+    public List<CalendarAvailability> getAvailabilities() {
+        return availabilities;
+    }
+
+    /**
+     * Sets the availabilities
+     *
+     * @param availabilities The availabilities to set
+     */
+    public void setAvailabilities(List<CalendarAvailability> availabilities) {
+        this.availabilities = availabilities;
     }
 
     /**

@@ -64,6 +64,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -115,6 +116,7 @@ import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VAvailability;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.parameter.XParameter;
@@ -198,6 +200,9 @@ public class ICalUtils {
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
         importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
+
+        //FIXME: Set the VAvailability components as "sub-components" of the imported calendar?
+        importedCalendar.setAvailabilities(importAvailabilities(vCalendar.getAvailabilities(), mapper, parameters));
         return importedCalendar;
     }
 
@@ -252,10 +257,47 @@ public class ICalUtils {
         return alarms;
     }
 
+    /**
+     * Imports the specified {@link VAvailability} components
+     * 
+     * @param availabilityComponents A {@link ComponentList} with all the {@link VAvailability} components
+     * @param mapper The {@link ICalMapper}
+     * @param parameters The {@link ICalParameters}
+     * @return A {@link List} with the imported {@link CalendarAvailability} components
+     * @throws OXException if an error is occurred
+     */
+    static List<CalendarAvailability> importAvailabilities(ComponentList availabilityComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        if (null == availabilityComponents) {
+            return null;
+        }
+        List<CalendarAvailability> alarms = new ArrayList<CalendarAvailability>(availabilityComponents.size());
+        int index = 0;
+        for (Iterator<?> iterator = availabilityComponents.iterator(); iterator.hasNext(); index++) {
+            alarms.add(importAvailability(index, (VAvailability) iterator.next(), mapper, parameters));
+        }
+        return alarms;
+    }
+
     static FreeBusyData importFreeBusy(int index, VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return mapper.importVFreeBusy(vFreeBusy, parameters, warnings);
+    }
+
+    /**
+     * Imports the specified {@link VAvailability} component
+     * 
+     * @param index The position of the {@link VAvailability} in the ical file
+     * @param vAvailability The {@link VAvailability} to import
+     * @param mapper The {@link ICalMapper} to use
+     * @param parameters The {@link ICalParameters}
+     * @return The imported {@link VAvailability} component as {@link CalendarAvailability}
+     * @throws OXException if a parsing error occurs
+     */
+    static CalendarAvailability importAvailability(int index, VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        List<OXException> warnings = new ArrayList<OXException>();
+        removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        return mapper.importVAvailability(vAvailability, parameters, warnings);
     }
 
     static ThresholdFileHolder exportCalendar(Calendar calendar, ICalParameters parameters) throws OXException {
@@ -424,8 +466,7 @@ public class ICalUtils {
     }
 
     private static VEvent parseVEventComponent(InputStream inputStream, ICalParameters parameters, List<OXException> warnings) throws OXException {
-        Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(
-            Streams.newByteArrayInputStream(VEVENT_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VEVENT_EPILOGUE)));
+        Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(Streams.newByteArrayInputStream(VEVENT_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VEVENT_EPILOGUE)));
         SequenceInputStream sequenceStream = null;
         Calendar calendar = null;
         CalendarBuilder calendarBuilder = getCalendarBuilder(parameters);
@@ -451,8 +492,7 @@ public class ICalUtils {
     }
 
     static VAlarm parseVAlarmComponent(InputStream inputStream, ICalParameters parameters, List<OXException> warnings) throws OXException {
-        Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(
-            Streams.newByteArrayInputStream(VALARM_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VALARM_EPILOGUE)));
+        Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(Streams.newByteArrayInputStream(VALARM_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VALARM_EPILOGUE)));
         SequenceInputStream sequenceStream = null;
         Calendar calendar = null;
         CalendarBuilder calendarBuilder = getCalendarBuilder(parameters);

@@ -47,99 +47,73 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j;
+package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.ValidationException;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VAvailability;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtStart;
 
 /**
- * {@link VCalendar}
+ * {@link DtStartMapping}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class VCalendar extends Component {
-
-    private static final long serialVersionUID = 6337610616448759858L;
-
-    private final net.fortuna.ical4j.model.Calendar calendar;
+public class DtStartMapping extends ICalDateTimeMapping<VAvailability, CalendarAvailability> {
 
     /**
-     * Initializes a new {@link VCalendar}.
+     * Initialises a new {@link DtStartMapping}.
      */
-    public VCalendar() {
-        this(new net.fortuna.ical4j.model.Calendar());
+    public DtStartMapping() {
+        super(Property.DTSTART);
     }
 
-    /**
-     * Initializes a new {@link VCalendar}.
-     *
-     * @param calendar The underlying iCal4j calendar
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
-    public VCalendar(net.fortuna.ical4j.model.Calendar calendar) {
-        super(net.fortuna.ical4j.model.Calendar.VCALENDAR, calendar.getProperties());
-        this.calendar = calendar;
-    }
-
-    /**
-     * Gets the underlying iCal4j calendar
-     *
-     * @return The underlying iCal4j calendar
-     */
-    public net.fortuna.ical4j.model.Calendar getCalendar() {
-        return calendar;
-    }
-
-    /**
-     * Gets the contained <code>VEVENT</code> components.
-     *
-     * @return The event components
-     */
-    public ComponentList getEvents() {
-        return calendar.getComponents(Component.VEVENT);
-    }
-
-    /**
-     * Gets the contained <code>VFREEBUSY</code> components.
-     *
-     * @return The free/busy components
-     */
-    public ComponentList getFreeBusys() {
-        return calendar.getComponents(Component.VFREEBUSY);
-    }
-
-    /**
-     * Gets the contained <code>VAVAILABILITY</code> components.
-     *
-     * @return The availability components
-     */
-    public ComponentList getAvailabilities() {
-        return calendar.getComponents(Component.VAVAILABILITY);
-    }
-
-    /**
-     * Adds an additional component.
-     *
-     * @param component The component to add
-     */
-    public void add(Component component) {
-        calendar.getComponents().add(component);
-    }
-
-    /**
-     * Adds an additional component.
-     *
-     * @param index The index to add the component at
-     * @param component The component to add
-     */
-    public void add(int index, Component component) {
-        calendar.getComponents().add(index, component);
-    }
-
     @Override
-    public void validate(boolean recurse) throws ValidationException {
-        // no
+    protected DateTime getValue(CalendarAvailability object) {
+        return new DateTime(object.getStartTime().getTime());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
+     */
+    @Override
+    protected void setValue(CalendarAvailability object, DateTime value) {
+        object.setStartTime(new Date(value.getTimestamp()));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
+     */
+    @Override
+    protected DateProperty createProperty() {
+        return new DtStart();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
+     */
+    @Override
+    protected DateProperty getProperty(VAvailability component) {
+        DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
+        if (dtStart == null) {
+            return new DtStart(new Date(0));
+        }
+        return dtStart;
     }
 
 }

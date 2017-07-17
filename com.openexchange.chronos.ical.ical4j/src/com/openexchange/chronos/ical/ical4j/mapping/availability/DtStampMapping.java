@@ -47,99 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j;
+package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.ValidationException;
+import java.util.Date;
+import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VAvailability;
+import net.fortuna.ical4j.model.property.DtStamp;
+import net.fortuna.ical4j.model.property.UtcProperty;
 
 /**
- * {@link VCalendar}
+ * {@link DtStampMapping}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class VCalendar extends Component {
-
-    private static final long serialVersionUID = 6337610616448759858L;
-
-    private final net.fortuna.ical4j.model.Calendar calendar;
+public class DtStampMapping extends ICalUtcMapping<VAvailability, CalendarAvailability> {
 
     /**
-     * Initializes a new {@link VCalendar}.
+     * Initialises a new {@link DtStampMapping}.
      */
-    public VCalendar() {
-        this(new net.fortuna.ical4j.model.Calendar());
+    public DtStampMapping() {
+        super(Property.DTSTAMP);
     }
 
-    /**
-     * Initializes a new {@link VCalendar}.
-     *
-     * @param calendar The underlying iCal4j calendar
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
      */
-    public VCalendar(net.fortuna.ical4j.model.Calendar calendar) {
-        super(net.fortuna.ical4j.model.Calendar.VCALENDAR, calendar.getProperties());
-        this.calendar = calendar;
-    }
-
-    /**
-     * Gets the underlying iCal4j calendar
-     *
-     * @return The underlying iCal4j calendar
-     */
-    public net.fortuna.ical4j.model.Calendar getCalendar() {
-        return calendar;
-    }
-
-    /**
-     * Gets the contained <code>VEVENT</code> components.
-     *
-     * @return The event components
-     */
-    public ComponentList getEvents() {
-        return calendar.getComponents(Component.VEVENT);
-    }
-
-    /**
-     * Gets the contained <code>VFREEBUSY</code> components.
-     *
-     * @return The free/busy components
-     */
-    public ComponentList getFreeBusys() {
-        return calendar.getComponents(Component.VFREEBUSY);
-    }
-
-    /**
-     * Gets the contained <code>VAVAILABILITY</code> components.
-     *
-     * @return The availability components
-     */
-    public ComponentList getAvailabilities() {
-        return calendar.getComponents(Component.VAVAILABILITY);
-    }
-
-    /**
-     * Adds an additional component.
-     *
-     * @param component The component to add
-     */
-    public void add(Component component) {
-        calendar.getComponents().add(component);
-    }
-
-    /**
-     * Adds an additional component.
-     *
-     * @param index The index to add the component at
-     * @param component The component to add
-     */
-    public void add(int index, Component component) {
-        calendar.getComponents().add(index, component);
-    }
-
     @Override
-    public void validate(boolean recurse) throws ValidationException {
-        // no
+    protected Date getValue(CalendarAvailability object) {
+        return object.getLastModified();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
+     */
+    @Override
+    protected void setValue(CalendarAvailability object, Date value) {
+        object.setLastModified(value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
+     */
+    @Override
+    protected UtcProperty createProperty() {
+        return new DtStamp();
+    }
 }

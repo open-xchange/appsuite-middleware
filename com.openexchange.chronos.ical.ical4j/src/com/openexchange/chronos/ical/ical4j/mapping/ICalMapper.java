@@ -51,17 +51,20 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.List;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.alarm.AlarmMappings;
+import com.openexchange.chronos.ical.ical4j.mapping.availability.AvailabilityMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.calendar.CalendarMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.event.EventMappings;
 import com.openexchange.chronos.ical.ical4j.mapping.freebusy.FreeBusyMappings;
 import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VAvailability;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 
@@ -199,4 +202,20 @@ public class ICalMapper {
         return freeBusy;
     }
 
+    /**
+     * Imports a VAvailability component
+     * 
+     * @param vAvailability The VAvailability component to import
+     * @param parameters Further options to use, or <code>null</code> to stick with the defaults
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @return The imported {@link CalendarAvailability} data
+     */
+    public CalendarAvailability importVAvailability(VAvailability vAvailability, ICalParameters parameters, List<OXException> warnings) {
+        CalendarAvailability calendarAvailability = new CalendarAvailability();
+        ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
+        for (ICalMapping<VAvailability, CalendarAvailability> mapping : AvailabilityMappings.ALL) {
+            mapping.importICal(vAvailability, calendarAvailability, iCalParameters, warnings);
+        }
+        return calendarAvailability;
+    }
 }

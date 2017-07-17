@@ -50,6 +50,7 @@
 package com.openexchange.chronos.availability.json.mapper;
 
 import java.util.EnumMap;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.exception.OXException;
@@ -159,6 +160,28 @@ public class CalendarAvailabilityMapper extends DefaultJsonMapper<CalendarAvaila
             @Override
             public void remove(CalendarAvailability object) {
                 object.removeUid();
+            }
+        });
+        mappings.put(AvailabilityField.busytype, new StringMapping<CalendarAvailability>("busyType", 12) {
+
+            @Override
+            public boolean isSet(CalendarAvailability object) {
+                return object.contains(AvailabilityField.busytype);
+            }
+
+            @Override
+            public void set(CalendarAvailability object, String value) throws OXException {
+                object.setBusyType(BusyType.parseFromString(value));
+            }
+
+            @Override
+            public String get(CalendarAvailability object) {
+                return object.getBusyType().getValue();
+            }
+
+            @Override
+            public void remove(CalendarAvailability object) {
+                object.removeBusyType();
             }
         });
         return mappings;
