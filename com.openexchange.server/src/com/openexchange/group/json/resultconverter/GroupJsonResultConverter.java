@@ -111,6 +111,7 @@ public class GroupJsonResultConverter implements ResultConverter {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException, JSONException {
         Object resultObject = result.getResultObject();
         if (resultObject instanceof Group) {
@@ -181,13 +182,9 @@ public class GroupJsonResultConverter implements ResultConverter {
             Collection<Group> groups = (Collection<Group>) resultObject;
 
             int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            boolean loadMembers = false;
             List<Field> fields = new LinkedList<Field>();
             for (int column : columns) {
                 Field field = Group.Field.getByColumnNumber(column);
-                if (field == Group.Field.MEMBERS) {
-                    loadMembers = true;
-                }
                 fields.add(field);
             }
 
