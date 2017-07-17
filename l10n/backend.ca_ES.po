@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.ca_ES\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-12 12:50+0000\n"
+"POT-Creation-Date: 2017-07-17 12:20+0000\n"
 "PO-Revision-Date: 2016-03-02 09:51+0000\n"
 "Last-Translator: Marcus <marcus.klein@open-xchange.com>\n"
 "Language-Team: \n"
@@ -3232,6 +3232,11 @@ msgstr ""
 msgid "The HTML content cannot be safely displayed"
 msgstr ""
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr ""
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -3496,6 +3501,11 @@ msgid ""
 msgstr ""
 "No és possible establir una nova connexió actualment amb el servidor %1$s "
 "amb connexió %2$s. Per favor, provau-ho de nou."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+msgid ""
+"Update of folder failed. Owner is required to keep administrative rights."
+msgstr ""
 
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -4131,7 +4141,12 @@ msgstr ""
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
-msgid "The scope %1$s is not supported by the provider"
+msgid "The scope %1$s is not supported by the provider or has been disabled"
+msgstr ""
+
+#. Thrown in case OAuth for a certain provider access has been disabled for a user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
+msgid "'%1$s' OAuth service is not enabled for you."
 msgstr ""
 
 #. *
@@ -5275,11 +5290,12 @@ msgid "Appointments must have at least one participant."
 msgstr "Les cites han de tenir almenys un participant."
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
 
 #. *
@@ -5724,6 +5740,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
 msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
+msgid "Invalid number of properties for distribution list."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
@@ -7224,6 +7244,10 @@ msgstr "Convidat"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
 msgstr "Fitxer CSV danyat."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
+msgid "Error at row %1$s: %2$s"
+msgstr ""
 
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
@@ -10484,12 +10508,12 @@ msgstr ""
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr ""
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
 
 #. The value given in the property %1$s is no integer value
