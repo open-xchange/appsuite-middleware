@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Random;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -57,6 +61,7 @@ import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,24 +69,45 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.0
  */
 abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperation<CalendarStorage, T> {
 
+    /** A named logger instance */
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCalendarStorageOperation.class);
+
+    /** The default maximum number of retry attempts */
+    private static final int DEFAULT_RETRIES = 3;
+
+    /** The base number of milliseconds to wait until retrying */
+    private static final int RETRY_BASE_DELAY = 500;
+
+    /** The random number generator */
+    private static final Random RANDOM = new Random();
+
+    private final int maxRetries;
+    private int retryCount;
+
     /**
-     * Initialises a new {@link AbstractCalendarStorageOperation}.
-     * 
-     * @param session The server session
-     * @throws OXException
+     * Initializes a new {@link AbstractCalendarStorageOperation}.
+     *
+     * @param session The calendar session
      */
     public AbstractCalendarStorageOperation(CalendarSession session) throws OXException {
-        super(session);
+        this(session, DEFAULT_RETRIES);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.impl.availability.AbstractStorageOperation#initStorage(com.openexchange.database.provider.DBProvider)
+    /**
+     * Initializes a new {@link AbstractCalendarStorageOperation}.
+     *
+     * @param session The calendar session
+     * @param maxRetries The maximum number of retry attempts when encountering recoverable storage errors, or <code>0</code> for no retries
      */
+    public AbstractCalendarStorageOperation(CalendarSession session, int maxRetries) throws OXException {
+        super(session);
+        this.maxRetries = maxRetries;
+    }
+
     @Override
     protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
         if (session.getConfig().isReplayToLegacyStorage()) {
@@ -92,4 +118,51 @@ abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperat
             return Services.getService(CalendarStorageFactory.class).create(context, 0, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         }
     }
+
+    @Override
+    public T executeUpdate() throws OXException {
+        while (true) {
+            try {
+                return super.executeUpdate();
+            } catch (OXException e) {
+                if (tryAgain(e)) {
+                    continue;
+                }
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Checks if the operation may be tried again in case of recoverable errors, based on the excecption's category and the current retry
+     * count. In case it's worth to try again, the thread is sent to sleep for a certain timespan to mimic some kind of exponential
+     * backoff before trying again.
+     *
+     * @param e The encountered exception
+     * @return <code>true</code> if the operation may be tried again, <code>false</code>, otherwise
+     */
+    private boolean tryAgain(OXException e) {
+        if (retryCount > maxRetries || false == mayTryAgain(e)) {
+            return false;
+        }
+        retryCount++;
+        int delay = RETRY_BASE_DELAY * retryCount + RANDOM.nextInt(RETRY_BASE_DELAY);
+        LOG.info("Error performing storage operation (\"{}\"), trying again in {}ms ({}/{})...", e.getMessage(), I(delay), i(retryCount), I(maxRetries));
+        LockSupport.parkNanos(delay * 1000000L);
+        return true;
+    }
+
+    /**
+     * Gets a value indicating whether the storage operation may be tried again for an occurred exception or not.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if the operation may be tried again, <code>false</code>, otherwise
+     */
+    protected boolean mayTryAgain(OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return Category.CATEGORY_TRY_AGAIN.equals(e.getCategory());
+    }
+
 }
