@@ -47,57 +47,62 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.availability;
+package com.openexchange.chronos.ical.ical4j.mapping.available;
 
 import java.util.Date;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
+import java.util.List;
+import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VAvailability;
-import net.fortuna.ical4j.model.property.DtStamp;
-import net.fortuna.ical4j.model.property.UtcProperty;
+import net.fortuna.ical4j.model.component.Available;
+import net.fortuna.ical4j.model.property.DtStart;
+import net.fortuna.ical4j.model.property.Duration;
 
 /**
- * {@link DtStampMapping}
+ * {@link DurationMapping}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DtStampMapping extends ICalUtcMapping<VAvailability, CalendarAvailability> {
+public class DurationMapping extends AbstractICalMapping<Available, CalendarFreeSlot> {
 
     /**
-     * Initialises a new {@link DtStampMapping}.
+     * Initialises a new {@link DurationMapping}.
      */
-    public DtStampMapping() {
-        super(Property.DTSTAMP);
+    public DurationMapping() {
+        super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    protected Date getValue(CalendarAvailability object) {
-        return object.getLastModified();
+    public void export(CalendarFreeSlot object, Available component, ICalParameters parameters, List<OXException> warnings) {
+        removeProperties(component, Property.DURATION); // stick to DTEND for export
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    protected void setValue(CalendarAvailability object, Date value) {
-        object.setLastModified(new Date(value.getTime()));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
-     */
-    @Override
-    protected UtcProperty createProperty() {
-        return new DtStamp();
+    public void importICal(Available component, CalendarFreeSlot object, ICalParameters parameters, List<OXException> warnings) {
+        Duration duration = (Duration) component.getProperty(Property.DURATION);
+        if (null == duration || null == duration.getDuration()) {
+            return;
+        }
+        // If duration and startDate are set, then try to determine the endDate
+        DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
+        if (null != dtStart && null != dtStart.getDate()) {
+            CalendarFreeSlot freeSlot = new CalendarFreeSlot();
+            new DtStartMapping().importICal(component, freeSlot, parameters, warnings);
+            Date startDate = freeSlot.getStartTime();
+            java.util.Date endDate = duration.getDuration().getTime(new Date(startDate.getTime()));
+            object.setEndTime(new Date(endDate.getTime()));
+        }
     }
 }

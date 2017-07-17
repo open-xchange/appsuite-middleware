@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,73 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.available;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import org.junit.Test;
-import com.openexchange.chronos.CalendarAvailability;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.Available;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.DtStart;
 
 /**
- * {@link AvailabilityTest}
+ * {@link DtStartMapping}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailabilityTest extends ICalTest {
+public class DtStartMapping extends ICalDateTimeMapping<Available, CalendarFreeSlot> {
 
-    @Test
-    public void testImportSingleVAvailability() throws Exception {
-        // @formatter:off
-        String iCal = "BEGIN:VCALENDAR\n" +
-            "BEGIN:VAVAILABILITY\n" + 
-            "ORGANIZER:mailto:bernard@example.com\n" + 
-            "UID:0428C7D2-688E-4D2E-AC52-CD112E2469DF\n" + 
-            "DTSTAMP:20111005T133225Z\n" + 
-            "BEGIN:AVAILABLE\n" + 
-            "UID:34EDA59B-6BB1-4E94-A66C-64999089C0AF\n" + 
-            "SUMMARY:Monday to Friday from 9:00 to 17:00\n" + 
-            "DTSTART;TZID=America/Montreal:20111002T090000\n" + 
-            "DTEND;TZID=America/Montreal:20111002T170000\n" + 
-            "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR\n" + 
-            "END:AVAILABLE\n" + 
-            "END:VAVAILABILITY\n" + 
-            "END:VCALENDAR\n";
-        // @formatter:on        
-
-        ImportedCalendar importICal = importICal(iCal);
-        assertNotNull("No availability components found", importICal.getAvailabilities());
-        assertEquals("More than one availability components found", 1, importICal.getAvailabilities().size());
-
-        CalendarAvailability availability = importICal.getAvailabilities().get(0);
-        assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
-        assertEquals("The uiddoes not match", "0428C7D2-688E-4D2E-AC52-CD112E2469DF", availability.getUid());
+    /**
+     * Initialises a new {@link DtStartMapping}.
+     */
+    public DtStartMapping() {
+        super(Property.DTSTART);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
+     */
+    @Override
+    protected DateTime getValue(CalendarFreeSlot object) {
+        return new DateTime(object.getStartTime().getTime());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
+     */
+    @Override
+    protected void setValue(CalendarFreeSlot object, DateTime value) {
+        object.setStartTime(new Date(value.getTimestamp()));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
+     */
+    @Override
+    protected DateProperty createProperty() {
+        return new DtStart();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
+     */
+    @Override
+    protected DateProperty getProperty(Available component) {
+        DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
+        if (dtStart == null) {
+            return new DtStart(new Date(0));
+        }
+        return dtStart;
+    }
+
 }

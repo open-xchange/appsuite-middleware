@@ -270,12 +270,12 @@ public class ICalUtils {
         if (null == availabilityComponents) {
             return null;
         }
-        List<CalendarAvailability> alarms = new ArrayList<CalendarAvailability>(availabilityComponents.size());
+        List<CalendarAvailability> availabilities = new ArrayList<CalendarAvailability>(availabilityComponents.size());
         int index = 0;
         for (Iterator<?> iterator = availabilityComponents.iterator(); iterator.hasNext(); index++) {
-            alarms.add(importAvailability(index, (VAvailability) iterator.next(), mapper, parameters));
+            availabilities.add(importAvailability(index, (VAvailability) iterator.next(), mapper, parameters));
         }
-        return alarms;
+        return availabilities;
     }
 
     static FreeBusyData importFreeBusy(int index, VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) throws OXException {

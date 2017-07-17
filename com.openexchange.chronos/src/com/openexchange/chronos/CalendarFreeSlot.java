@@ -69,7 +69,7 @@ public class CalendarFreeSlot implements FieldAware {
     private String calendarAvailabilityId;
     private String uid;
     /** dtstamp */
-    private Date creationTimestamp; 
+    private Date creationTimestamp;
     private Date startTime;
 
     private Date endTime;
@@ -79,6 +79,7 @@ public class CalendarFreeSlot implements FieldAware {
     private Date lastModified;
 
     private String description;
+    private String location;
     private String summary;
     private RecurrenceId recurrenceId;
     private String recurrenceRule;
@@ -153,7 +154,7 @@ public class CalendarFreeSlot implements FieldAware {
         this.creationTimestamp = creationTimestamp;
         fields.add(FreeSlotField.dtstamp);
     }
-    
+
     /**
      * Removes the creation timestamp
      */
@@ -547,6 +548,32 @@ public class CalendarFreeSlot implements FieldAware {
         this.calendarUser = 0;
     }
 
+    /**
+     * Gets the location
+     *
+     * @return The location
+     */
+    public String getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location
+     *
+     * @param location The location to set
+     */
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    /**
+     * Removes the location
+     */
+    public void removeLocation() {
+        this.location = null;
+        fields.remove(FreeSlotField.location);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -556,5 +583,4 @@ public class CalendarFreeSlot implements FieldAware {
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
-
 }

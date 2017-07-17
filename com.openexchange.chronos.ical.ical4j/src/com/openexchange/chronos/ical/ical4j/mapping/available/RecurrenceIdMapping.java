@@ -47,57 +47,73 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.availability;
+package com.openexchange.chronos.ical.ical4j.mapping.available;
 
-import java.util.Date;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VAvailability;
-import net.fortuna.ical4j.model.property.DtStamp;
-import net.fortuna.ical4j.model.property.UtcProperty;
+import net.fortuna.ical4j.model.component.Available;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.RecurrenceId;
 
 /**
- * {@link DtStampMapping}
+ * {@link RecurrenceIdMapping}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DtStampMapping extends ICalUtcMapping<VAvailability, CalendarAvailability> {
+public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, CalendarFreeSlot> {
 
     /**
-     * Initialises a new {@link DtStampMapping}.
+     * Initializes a new {@link RecurrenceIdMapping}.
      */
-    public DtStampMapping() {
-        super(Property.DTSTAMP);
+    public RecurrenceIdMapping() {
+        super(Property.RECURRENCE_ID);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
-    protected Date getValue(CalendarAvailability object) {
-        return object.getLastModified();
+    protected DateTime getValue(CalendarFreeSlot object) {
+        com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
+        if (value == null) {
+            return null;
+        }
+        // FIXME: Consider all day for AVAILABLE subcomponents?
+        return new DateTime(value.getValue());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
-    protected void setValue(CalendarAvailability object, Date value) {
-        object.setLastModified(new Date(value.getTime()));
+    protected void setValue(CalendarFreeSlot object, DateTime value) {
+        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value.getTimestamp()) : null);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#createProperty()
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
      */
     @Override
-    protected UtcProperty createProperty() {
-        return new DtStamp();
+    protected DateProperty createProperty() {
+        return new RecurrenceId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
+     */
+    @Override
+    protected DateProperty getProperty(Available component) {
+        return (DateProperty) component.getProperty(Property.RECURRENCE_ID);
     }
 }

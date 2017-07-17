@@ -47,45 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.ical4j.mapping.available;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import org.junit.Test;
-import com.openexchange.chronos.CalendarAvailability;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import net.fortuna.ical4j.model.component.Available;
 
 /**
- * {@link AvailabilityTest}
+ * {@link AvailableMappings}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailabilityTest extends ICalTest {
+public class AvailableMappings {
 
-    @Test
-    public void testImportSingleVAvailability() throws Exception {
-        // @formatter:off
-        String iCal = "BEGIN:VCALENDAR\n" +
-            "BEGIN:VAVAILABILITY\n" + 
-            "ORGANIZER:mailto:bernard@example.com\n" + 
-            "UID:0428C7D2-688E-4D2E-AC52-CD112E2469DF\n" + 
-            "DTSTAMP:20111005T133225Z\n" + 
-            "BEGIN:AVAILABLE\n" + 
-            "UID:34EDA59B-6BB1-4E94-A66C-64999089C0AF\n" + 
-            "SUMMARY:Monday to Friday from 9:00 to 17:00\n" + 
-            "DTSTART;TZID=America/Montreal:20111002T090000\n" + 
-            "DTEND;TZID=America/Montreal:20111002T170000\n" + 
-            "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR\n" + 
-            "END:AVAILABLE\n" + 
-            "END:VAVAILABILITY\n" + 
-            "END:VCALENDAR\n";
-        // @formatter:on        
+    /**
+     * Holds a collection of all known availability mappings.
+     */
+    //@formatter:off
+    public static List<ICalMapping<Available, CalendarFreeSlot>> ALL = Collections.<ICalMapping<Available, CalendarFreeSlot>> unmodifiableList(Arrays.asList(
+        new DtStampMapping(),
+        new DtStartMapping(),
+        new UidMapping(),
+        new DtEndMapping(),
+        new DurationMapping(),
+        new CreatedMapping(),
+        new DescriptionMapping(),
+        new LastModifiedMapping(),
+        new LocationMapping(),
+        new RecurrenceIdMapping(),
+        new RRuleMapping(),
+        new SummaryMapping()
+        //new CategoriesMapping(),
+        //new CommentMapping(),
+        //new ContactMapping(),
+        //new ExDateMapping(),
+        //new RDateMapping(),
+        //new ExtendedPropertiesMapping()
+        ));
+    //@formatter:on
 
-        ImportedCalendar importICal = importICal(iCal);
-        assertNotNull("No availability components found", importICal.getAvailabilities());
-        assertEquals("More than one availability components found", 1, importICal.getAvailabilities().size());
-
-        CalendarAvailability availability = importICal.getAvailabilities().get(0);
-        assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
-        assertEquals("The uiddoes not match", "0428C7D2-688E-4D2E-AC52-CD112E2469DF", availability.getUid());
+    /**
+     * Initialises a new {@link AvailableMappings}.
+     */
+    public AvailableMappings() {
+        super();
     }
 }
