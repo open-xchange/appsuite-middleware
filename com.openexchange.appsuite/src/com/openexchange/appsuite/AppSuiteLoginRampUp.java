@@ -56,11 +56,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.client.onboarding.ClientDevice;
-import com.openexchange.client.onboarding.CompositeId;
-import com.openexchange.client.onboarding.Device;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
 import com.openexchange.server.ServiceLookup;
@@ -85,50 +80,6 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
     @Override
     public boolean contributesTo(String client) {
         return "open-xchange-appsuite".equals(client);
-    }
-
-    @Override
-    protected Collection<Contribution> getExtendedContributions() {
-        OnboardingService onboardingService = services.getOptionalService(OnboardingService.class);
-        if (null == onboardingService) {
-            super.getExtendedContributions();
-        }
-
-        return Collections.<Contribution> singletonList(new OnboardingContribution(onboardingService));
-    }
-
-    // --------------------------------------------------------------------------------------
-
-    private static final class OnboardingContribution implements Contribution {
-
-        private final OnboardingService onboardingService;
-
-        OnboardingContribution(OnboardingService onboardingService) {
-            super();
-            this.onboardingService = onboardingService;
-        }
-
-        @Override
-        public String getKey() {
-            return "onboardingDevices";
-        }
-
-        @Override
-        public Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException {
-            try {
-                OnboardingView onboardingView = onboardingService.getViewFor(ClientDevice.IMPLIES_ALL, session);
-                Map<Device, List<CompositeId>> availableDevices = onboardingView.getDevices();
-
-                Device[] devices = Device.values();
-                JSONObject jResult = new JSONObject(devices.length);
-                for (Device device : devices) {
-                    jResult.put(device.getId(), availableDevices.containsKey(device));
-                }
-                return jResult;
-            } catch (JSONException e) {
-                throw OXException.general("JSON error", e);
-            }
-        }
     }
 
 }
