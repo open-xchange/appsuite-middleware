@@ -498,7 +498,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     private long countEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm) throws SQLException, OXException {
         SearchAdapter adapter = new SearchAdapter(contextID, null, "d.", "m.", "e.").append(searchTerm);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT COUNT (DISTINCT d.intfield01) FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ")
+            .append("SELECT COUNT(DISTINCT d.intfield01) FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ")
         ;
         if (adapter.usesInternalAttendees()) {
             stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")
