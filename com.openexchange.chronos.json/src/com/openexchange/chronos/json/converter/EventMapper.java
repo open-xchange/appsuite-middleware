@@ -1145,9 +1145,9 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                             trigger.setDuration(duration);
                         }
                         if (triggerJSON.has(ChronosJsonFields.Alarm.Trigger.DATE_TIME)) {
-                            long date = triggerJSON.getLong(ChronosJsonFields.Alarm.Trigger.DATE_TIME);
-                            date -= timezone.getOffset(date);
-                            trigger.setDateTime(new Date(date));
+                            String date = triggerJSON.getString(ChronosJsonFields.Alarm.Trigger.DATE_TIME);
+                            DateTime dateTime = DateTime.parse("UTC", date);
+                            trigger.setDateTime(new Date(dateTime.getTimestamp()));
                         }
                         alarm.setTrigger(trigger);
                     }
@@ -1233,9 +1233,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                         }
                         triggerJsonObject.putOpt(ChronosJsonFields.Alarm.Trigger.DURATION, trigger.getDuration());
                         if (null != trigger.getDateTime()) {
-                            long date = trigger.getDateTime().getTime();
-                            date += timeZone.getOffset(date);
-                            jsonObject.put(ChronosJsonFields.Alarm.Trigger.DATE_TIME, date);
+                            DateTime dateTime = new DateTime(trigger.getDateTime().getTime());
+                            jsonObject.put(ChronosJsonFields.Alarm.Trigger.DATE_TIME, dateTime.toString());
                         }
                         jsonObject.put(ChronosJsonFields.Alarm.TRIGGER, triggerJsonObject);
                     }
