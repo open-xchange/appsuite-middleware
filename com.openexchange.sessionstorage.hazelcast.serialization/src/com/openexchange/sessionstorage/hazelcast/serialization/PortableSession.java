@@ -167,6 +167,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
         Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
         // Add static remote parameters
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+        remoteParameterNames.add(PARAM_USER_AGENT);
+        remoteParameterNames.add(PARAM_LOGIN_TIME);
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;

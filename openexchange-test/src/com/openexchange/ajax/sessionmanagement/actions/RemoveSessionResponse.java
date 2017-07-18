@@ -47,42 +47,22 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.ajax.sessionmanagement.actions;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link BatchCapableExporter}
+ * {@link RemoveSessionResponse}
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.0
  */
-public interface BatchCapableExporter extends Exporter {
-    
-    /**
-    *
-    * @param sessObj: The session object to be able to check permissions.
-    * @param format: Format the returned InputStream should be in.
-    * @param batchIds: Ids of multiple entries in different folders
-    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-    * @return InputStream in requested format.
-    * @throws OXException
-    */
-   SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+public class RemoveSessionResponse extends AbstractAJAXResponse {
 
-    /**
-     * Creates a proper export file name based on the batch of ids to export
-     * 
-     * @param session: The session object to be able to check permissions.
-     * @param batchIds: The ids which determine the export file name.
-     * @return String the name of the export file.
-     * @throws OXException
-     */
-    String getExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException;
+    protected RemoveSessionResponse(Response response) {
+        super(response);
+    }
+
 }

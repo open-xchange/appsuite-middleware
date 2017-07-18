@@ -194,26 +194,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessContacts(2, OPT_ACCESS_CONTACTS, false),
         accessDelegatetasks(3, OPT_ACCESS_DELEGATE_TASKS, false),
         accessEditPublicFolder(4, OPT_ACCESS_EDIT_PUBLIC_FOLDERS, false),
-        accessIcal(6, OPT_ACCESS_ICAL, false),
-        accessInfostore(7, OPT_ACCESS_INFOSTORE, false),
-        accessReadCreateSharedFolders(10, OPT_ACCESS_READCREATE_SHARED_FOLDERS, false),
-        accessSyncML(13, OPT_ACCESS_SYNCML, false),
-        accessTasks(14, OPT_ACCESS_TASKS, false),
-        accessVcard(15, OPT_ACCESS_VCARD, false),
-        accessWebdav(16, OPT_ACCESS_WEBDAV, false),
-        accessWebdavxml(17, OPT_ACCESS_WEBDAV_XML, false),
-        accessWebmail(18, OPT_ACCESS_WEBMAIL, false),
-        accessEditgroup(19, OPT_ACCESS_EDIT_GROUP, false),
-        accessEditresource(20, OPT_ACCESS_EDIT_RESOURCE, false),
-        accessEditpassword(21, OPT_ACCESS_EDIT_PASSWORD, false),
-        accessCollectemailaddresses(22, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES, false),
-        accessMultiplemailaccounts(23, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS, false),
-        accessSubscription(24, OPT_ACCESS_SUBSCRIPTION, false),
-        accessPublication(25, OPT_ACCESS_PUBLICATION, false),
-        accessActiveSync(26, OPT_ACCESS_ACTIVE_SYNC, false),
-        accessUsm(27, OPT_ACCESS_USM, false),
-        accessOlox20(28, OPT_ACCESS_OLOX20, false),
-        accessDeniedPortal(29, OPT_ACCESS_DENIED_PORTAL, false);
+        accessIcal(5, OPT_ACCESS_ICAL, false),
+        accessInfostore(6, OPT_ACCESS_INFOSTORE, false),
+        accessReadCreateSharedFolders(7, OPT_ACCESS_READCREATE_SHARED_FOLDERS, false),
+        accessSyncML(8, OPT_ACCESS_SYNCML, false),
+        accessTasks(9, OPT_ACCESS_TASKS, false),
+        accessVcard(10, OPT_ACCESS_VCARD, false),
+        accessWebdav(11, OPT_ACCESS_WEBDAV, false),
+        accessWebdavxml(12, OPT_ACCESS_WEBDAV_XML, false),
+        accessWebmail(13, OPT_ACCESS_WEBMAIL, false),
+        accessEditgroup(14, OPT_ACCESS_EDIT_GROUP, false),
+        accessEditresource(15, OPT_ACCESS_EDIT_RESOURCE, false),
+        accessEditpassword(16, OPT_ACCESS_EDIT_PASSWORD, false),
+        accessCollectemailaddresses(17, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES, false),
+        accessMultiplemailaccounts(18, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS, false),
+        accessSubscription(19, OPT_ACCESS_SUBSCRIPTION, false),
+        accessPublication(20, OPT_ACCESS_PUBLICATION, false),
+        accessActiveSync(21, OPT_ACCESS_ACTIVE_SYNC, false),
+        accessUsm(22, OPT_ACCESS_USM, false),
+        accessOlox20(23, OPT_ACCESS_OLOX20, false),
+        accessDeniedPortal(24, OPT_ACCESS_DENIED_PORTAL, false),
+        accessGlobalAddressBookDisabled(25, OPT_DISABLE_GAB, false);
 
         private final String string;
 
@@ -939,6 +940,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != w) {
             if (nextLine[w].length() > 0) {
                 moduleaccess.setWebmail(stringToBool(nextLine[w]));
+            }
+        }
+        final int w2 = idarray[AccessCombinations.accessGlobalAddressBookDisabled.getIndex()];
+        if (-1 != w2) {
+            if (nextLine[w2].length() > 0) {
+                moduleaccess.setGlobalAddressBookDisabled(stringToBool(nextLine[w2]));
             }
         }
         return moduleaccess;

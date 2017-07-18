@@ -231,6 +231,7 @@ public final class MonitoringActivator extends HousekeepingActivator implements 
         TracingSocketMonitor tracingSocketMonitor = this.tracingSocketMonitor;
         if (null != tracingSocketMonitor) {
             this.tracingSocketMonitor = null;
+            SocketMonitoringSystem.getInstance().remove(tracingSocketMonitor);
             tracingSocketMonitor.stop();
         }
 

@@ -50,15 +50,16 @@
 package com.openexchange.importexport.actions.importer;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.importers.ImportResults;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.json.ImportRequest;
 import com.openexchange.importexport.json.ImportWriter;
@@ -86,25 +87,34 @@ public abstract class AbstractImportAction implements AJAXActionService {
 
     private AJAXRequestResult perform(ImportRequest req) throws OXException {
         try {
-            final List<ImportResult> importResult =
-                getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), req.getOptionalParams());
+            ImportResults importResults = getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), req.getOptionalParams());
             OXJSONWriter jsonWriter = new OXJSONWriter();
             try {
-                new ImportWriter(jsonWriter, req.getSession()).writeObjects(importResult);
+                new ImportWriter(jsonWriter, req.getSession()).writeObjects(importResults.getImportResults());
             } catch (JSONException e1) {
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractImportAction.class);
                 logger.error("JSON error", e1);
             }
+
             AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
             int num = 0;
-            for (ImportResult res : importResult) {
+            for (ImportResult res : importResults.getImportResults()) {
                 if (res.getWarnings() != null && res.getWarnings().size() > 0) {
                     num += res.getWarnings().size();
                 }
             }
+
+            TruncationInfo truncationInfo = importResults.getTruncationInfo();
             if (num > 0) {
-                result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
+                if (null != truncationInfo && truncationInfo.isTruncated()) {
+                    result.setException(ImportExportExceptionCodes.WARNINGS_AND_TRUNCATED_RESULTS.create(I(num), I(truncationInfo.getLimit())));
+                } else {
+                    result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
+                }
+            } else if (null != truncationInfo && truncationInfo.isTruncated()) {
+                result.setException(ImportExportExceptionCodes.TRUNCATED_RESULTS.create(I(truncationInfo.getLimit())));
             }
+
             return result;
         } finally {
             final AJAXRequestData ajaxRequestData = req.getRequest();

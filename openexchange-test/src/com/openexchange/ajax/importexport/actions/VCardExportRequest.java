@@ -60,7 +60,6 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
 
     private final boolean failOnError;
     private final Boolean exportDlists;
-    private final String batchContactIds;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
         this(folderId, null, failOnError);
@@ -70,14 +69,6 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
-        batchContactIds = null;
-    }
-
-    public VCardExportRequest(int folderId, Boolean exportDlists, String batchIds, boolean failOnError) {
-        super(Action.VCard, folderId);
-        this.failOnError = failOnError;
-        this.exportDlists = exportDlists;
-        this.batchContactIds = batchIds;
     }
 
     @Override
@@ -85,9 +76,6 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         Parameter[] parameters = super.getParameters();
         if (null != exportDlists) {
             parameters = parametersToAdd(new Parameter("export_dlists", exportDlists.booleanValue()), parameters);
-        }
-        if (null != batchContactIds) {
-            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_IDS, batchContactIds), parameters);
         }
         if (this.getFolderId() < 0) {
             parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);

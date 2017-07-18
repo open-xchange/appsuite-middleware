@@ -632,3 +632,14 @@ specific field data of single or multiple objects.
 |headers | The headers attribute|
 |picture | The url to the message picture.|
 
+
+## Group data
+
+| ID | Name | Type | Value |
+|:----|:------|:------|:-------|
+| 1 | id | String | Object ID |
+| 5 | last_modified | Time | Date and time of the last modification.|
+| 700 | name | String | The name of the group.|
+| 701 | display_name | String | The display name of the group.|
+| 702 | members | String | A comma separated list of user ids.|
+

@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-05-12 08:50+0200\n"
+"PO-Revision-Date: 2017-07-13 09:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3819,6 +3819,10 @@ msgstr ""
 "Der Kontakt mit der UID %1$s ist dem bestehenden Kontakt mit der UID %2$s im "
 "Ordner %3$s zu ähnlich"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
+msgid "Could not create a proper name for the export file."
+msgstr "Es konnte kein passender Name für die Exportdatei erstellt werden."
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -5282,6 +5286,13 @@ msgid ""
 msgstr ""
 "Die Konvertierung liefert einige Objekte, die aufgrund eines fehlenden "
 "Aufgabenordners nicht gespeichert werden können."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
+#, fuzzy
+msgid "Not all of the objects could be stored due to a configured limitation"
+msgstr ""
+"Aufgrund einer konfigurierten Beschränkung können nicht alle Objekte "
+"gespeichert werden"
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -9080,21 +9091,23 @@ msgstr ""
 #. * Folder "%1$s" has been closed. Probably your request took too long.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
-msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+msgid ""
+"Lost connection to mail server. Probably your request took too long. Please "
+"try again later."
 msgstr ""
-"Ordner \"%1$s\" wurde geschlossen. Wahrscheinlich dauerte Ihre Anfrage zu "
-"lang."
+"Die Verbindung zum Mailserver ist abgebrochen. Wahrscheinlich daurte Ihre "
+"Anfrage zu lange. Bitte versuchen Sie es später erneut."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s. Probably your request took too long.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
-"took too long."
+"Connection closed to mail server %2$s. Probably your request took too long. "
+"Please try again later."
 msgstr ""
-"Der Ordner \"%1$s\" wurde auf dem Mailserver %2$s geschlossen. "
-"Wahrscheinlich dauerte Ihre Anfrage zu lang."
+"Die Verbindung zum Mailserver %2$s ist abgebrochen. Wahrscheinlich daurte "
+"Ihre Anfrage zu lange. Bitte versuchen Sie es später erneut."
 
 #. *
 #. * Mail(s) could not be found in the given folder.
@@ -9193,15 +9206,19 @@ msgstr ""
 #. * Lost connection to mail server.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
-msgid "Lost connection to mail server."
-msgstr "Die Verbindung zum Mailserver ist abgebrochen."
+msgid "Lost connection to mail server. Please try again later."
+msgstr ""
+"Die Verbindung zum Mailserver ist abgebrochen. Bitte versuchen Sie es später "
+"erneut."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
-msgid "Connection closed to mail server %1$s."
-msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
+msgid "Connection closed to mail server %1$s. Please try again later."
+msgstr ""
+"Die Verbindung zum Mailserver %1$s ist abgebrochen. Bitte versuchen Sie es "
+"später erneut."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
@@ -9209,27 +9226,33 @@ msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
-"attempting to connect."
+"attempting to connect. Please try again later."
 msgstr ""
-"Die Verbindung zum entfernten Server %1$s wurde verweigert oder es gab eine "
-"Zeitüberschreitung beim Versuch, eine Verbindung herzustellen."
+"Die Verbindung zum entfernten Server %1$s wurde entweder abgelehnt oder ist "
+"aufgrund einer Zeitüberschreitung beim Verbindungsversuch abgebrochen. Bitte "
+"versuchen Sie es später erneut."
 
 #. *
 #. * The connection to remote server %1$s timed out while awaiting the response.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid ""
-"The connection to remote server %1$s timed out while awaiting the response."
+"The connection to remote server %1$s timed out while awaiting the response. "
+"Please try again later."
 msgstr ""
-"Zeitüberschreitung bei der Verbindung zum entfernten Server %1$s beim Warten "
-"auf Antwort."
+"Die Verbindung zum entfernten Server %1$s ist aufgrund einer "
+"Zeitüberschreitung beim Warten auf Antwort abgebrochen. Bitte versuchen Sie "
+"es später erneut."
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid "Mail server %1$s unexpectedly closed connection."
-msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
+msgid ""
+"Mail server %1$s unexpectedly closed connection. Please try again later."
+msgstr ""
+"Die Verbindung zum Mailserver %1$s ist unerwarteterweise abgebrochen. Bitte "
+"versuchen Sie es später erneut."
 
 #. *
 #. * The allowed quota on mail server exceeded.
@@ -9288,8 +9311,12 @@ msgstr ""
 
 #. Timeout while trying to send to the following recipient: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
-msgid "Timeout while trying to send to the following recipient: %1$s"
-msgstr "Zeitüberschreitung beim Versuch, an folgende Empfänger zu senden: %1$s"
+msgid ""
+"Timeout while trying to send to the following recipient: %1$s. Please try "
+"again later."
+msgstr ""
+"Zeitüberschreitung beim Versuch, an den folgenden Empfänger zu senden: %1$s. "
+"Bitte versuchen Sie es später erneut."
 
 #. The message advertising that everything is fine with checked account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -11138,8 +11165,8 @@ msgstr ""
 
 #. A XING error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:62
-msgid "A XING error occurred: %1$s"
-msgstr "Es trat ein XING-Fehler auf: %1$s"
+msgid "Unexpected error returned by XING service."
+msgstr "Unerwarteter Fehler vom XING-Dienst zurückgegeben."
 
 #. The XING resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:65
@@ -13370,6 +13397,49 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed. Probably your request took too long."
+#~ msgstr ""
+#~ "Ordner \"%1$s\" wurde geschlossen. Wahrscheinlich dauerte Ihre Anfrage zu "
+#~ "lang."
+
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s. Probably your "
+#~ "request took too long."
+#~ msgstr ""
+#~ "Der Ordner \"%1$s\" wurde auf dem Mailserver %2$s geschlossen. "
+#~ "Wahrscheinlich dauerte Ihre Anfrage zu lang."
+
+#~ msgid "Lost connection to mail server."
+#~ msgstr "Die Verbindung zum Mailserver ist abgebrochen."
+
+#~ msgid "Connection closed to mail server %1$s."
+#~ msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
+
+#~ msgid ""
+#~ "The connection to remote server %1$s was refused or timed out while "
+#~ "attempting to connect."
+#~ msgstr ""
+#~ "Die Verbindung zum entfernten Server %1$s wurde verweigert oder es gab "
+#~ "eine Zeitüberschreitung beim Versuch, eine Verbindung herzustellen."
+
+#~ msgid ""
+#~ "The connection to remote server %1$s timed out while awaiting the "
+#~ "response."
+#~ msgstr ""
+#~ "Zeitüberschreitung bei der Verbindung zum entfernten Server %1$s beim "
+#~ "Warten auf Antwort."
+
+#~ msgid "Mail server %1$s unexpectedly closed connection."
+#~ msgstr "Die Verbindung zum Mailserver %1$s ist abgebrochen."
+
+#~ msgid "Timeout while trying to send to the following recipient: %1$s"
+#~ msgstr ""
+#~ "Zeitüberschreitung beim Versuch, an folgende Empfänger zu senden: %1$s"
+
+#~ msgid "A XING error occurred: %1$s"
+#~ msgstr "Es trat ein XING-Fehler auf: %1$s"
 
 #~ msgid "The scope %1$s is not supported by the provider"
 #~ msgstr "%1$s wird vom Provider nicht unterstützt"

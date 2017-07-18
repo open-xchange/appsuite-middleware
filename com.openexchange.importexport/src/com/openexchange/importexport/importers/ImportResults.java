@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.importexport.importers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.io.IOException;
 import java.util.List;
-import org.json.JSONException;
-import org.junit.Test;
-import com.openexchange.ajax.contact.AbstractManagedContactTest;
-import com.openexchange.ajax.importexport.actions.CSVExportRequest;
-import com.openexchange.ajax.importexport.actions.CSVExportResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.csv.CSVParser;
-
+import com.openexchange.data.conversion.ical.TruncationInfo;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * {@link CSVSingleExportTest}
+ * {@link ImportResults} - A collection of import results.
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CSVSingleExportTest extends AbstractManagedContactTest {
-    
-    @Test
-    public void testSingleCSVExport() throws OXException, IOException, JSONException {
-        generateContact("First Contact");        
-        Contact secondContact = generateContact("Second Contact");
-        int secondId = cotm.newAction(secondContact).getObjectID();
-        
-        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID,String.valueOf(secondId)));
-        
-        CSVParser parser = new CSVParser();
-        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
-        List<String> testList = actual.get(1);
-        assertTrue(testList.toString().contains(secondContact.getSurName()));
-        assertEquals("There should only be one exported Contact", 2, actual.size());
-    }
+public interface ImportResults {
+
+    List<ImportResult> getImportResults();
+
+    TruncationInfo getTruncationInfo();
 }

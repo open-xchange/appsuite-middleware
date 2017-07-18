@@ -1,0 +1,3 @@
+requests:
+  - GetSessionsRequest.yaml
+  - RemoveSessionRequest.yaml

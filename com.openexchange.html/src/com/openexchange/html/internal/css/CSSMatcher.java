@@ -174,30 +174,22 @@ public final class CSSMatcher {
         /*
          * Regular expression for CSS2 values
          */
-        final String strINTEGER = "(?:(?:\\+|-)?[0-9]+)";
+        final String strINTEGER = "(?:[+-]?[0-9]+)";
 
-        final String strREAL = "(?:(?:\\+|-)?[0-9]*\\.[0-9]+)";
+        final String strNUMBER = "(?:[+-]?(?:[0-9]*\\.[0-9]+|[0-9]+))";
 
-        final String strNUMBER = RegexUtility.group(RegexUtility.OR(strINTEGER, strREAL), GroupType.NON_CAPTURING);
+        final String strREL_UNITS = "em|ex|px";
+        final String strABS_UNITS = "in|cm|mm|pt|pc";
+        final String strUNITS = "(?:" + strREL_UNITS + "|" + strABS_UNITS + ")";
+        final String strUNITS_OR_PERCENTAGE = "(?:" + strREL_UNITS + "|" + strABS_UNITS + "|%" + ")";
 
-        final String strREL_UNITS = "(?:em|ex|px)";
-
-        final String strABS_UNITS = "(?:in|cm|mm|pt|pc)";
-
-        final String strUNITS = RegexUtility.group(RegexUtility.OR(strREL_UNITS, strABS_UNITS), GroupType.NON_CAPTURING);
-
-        final String strLENGTH = RegexUtility.group(RegexUtility.OR(RegexUtility.concat(strNUMBER, strUNITS), RegexUtility.concat(
-            "(?:\\\\+|-)?",
-            "0",
-            RegexUtility.optional(strUNITS))), GroupType.NON_CAPTURING);
-
-        final String strPERCENTAGE = RegexUtility.group(RegexUtility.concat(strNUMBER, "%"), GroupType.NON_CAPTURING);
-
-        final String strLENGTH_OR_PERCENTAGE = RegexUtility.group(RegexUtility.OR(strLENGTH, strPERCENTAGE), GroupType.NON_CAPTURING);
+        final String strLENGTH = "(?:" + strNUMBER + RegexUtility.optional(strUNITS) + ")";
+        final String strLENGTH_OR_PERCENTAGE = "(?:" + strNUMBER + RegexUtility.optional(strUNITS_OR_PERCENTAGE) + ")";
+        final String strPERCENTAGE = "(?:" + strNUMBER + "%?" + ")";
 
         final String strTIME_UNITS = "(?:ms|s)";
 
-        final String strTIME = RegexUtility.group(RegexUtility.concat(strNUMBER, strTIME_UNITS), GroupType.NON_CAPTURING);
+        final String strTIME = "(?:" + strNUMBER + RegexUtility.optional(strTIME_UNITS) + ")";
 
         final String strURL = "url\\(\"?[\\p{ASCII}\\p{L}]+\"?\\)";
 

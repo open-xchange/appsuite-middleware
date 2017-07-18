@@ -179,7 +179,7 @@ public class CSVContactImporter extends AbstractImporter {
 
 
     @Override
-    public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
+    public ImportResults importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         final String folder = folders.get(0);
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
@@ -293,7 +293,7 @@ public class CSVContactImporter extends AbstractImporter {
         if (exceeds) {
             throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
         }
-        return results;
+        return new DefaultImportResults(results);
     }
 
     /**

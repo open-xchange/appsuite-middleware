@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +74,7 @@ public interface Importer {
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
+	boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
 
 	/**
 	 *
@@ -88,11 +87,6 @@ public interface Importer {
 	 * @throws OXException
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract List<ImportResult> importData(
-			ServerSession sessObj,
-			Format format,
-			InputStream is,
-			List<String> folders,
-			Map<String, String[]> optionalParams ) throws OXException;
+	ImportResults importData(ServerSession sessObj, Format format, InputStream is, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
 
 }

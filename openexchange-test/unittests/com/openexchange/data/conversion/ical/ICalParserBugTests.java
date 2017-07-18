@@ -80,7 +80,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
         final StringBuilder combiner = new StringBuilder();
         combiner.append(fixtures.veventWithUTCDTStartAndDTEnd(start1, end1)).append('\n').append(fixtures.veventWithUTCDTStartAndDTEnd(start2, end2));
 
-        final List<CalendarDataObject> appointments = parser.parseAppointments(combiner.toString(), TimeZone.getTimeZone("UTC"), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        final List<CalendarDataObject> appointments = parser.parseAppointments(combiner.toString(), TimeZone.getTimeZone("UTC"), null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
 
         assertEquals(2, appointments.size());
     }

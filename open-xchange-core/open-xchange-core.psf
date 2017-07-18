@@ -70,6 +70,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.frontend.uwa.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.geolocation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.guest.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.search"/>
@@ -168,6 +169,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.serverconfig.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.management"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.management.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.sessionstorage"/>

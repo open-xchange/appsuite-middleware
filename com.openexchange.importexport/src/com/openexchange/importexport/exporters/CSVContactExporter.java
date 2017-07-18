@@ -63,7 +63,6 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactStringGetter;
@@ -73,12 +72,14 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -162,8 +163,7 @@ public class CSVContactExporter implements Exporter {
      * The possible contact fields as array
      */
     protected static final ContactField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS.toArray(new ContactField[DEFAULT_FIELDS.size()]);
-
-
+    
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {
         if (!format.equals(Format.CSV)) {
@@ -192,7 +192,7 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+    public SizedInputStream exportFolderData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         if (!canExport(sessObj, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
@@ -281,6 +281,74 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e, e.getMessage());
         }
     }
+    
+    @Override
+    public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExport(sessObj, format, batchEntry.getKey(), optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }
+        }     
+        ContactField[] fields;
+        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
+            fields = DEFAULT_FIELDS_ARRAY;
+        } else {
+            EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
+            fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
+        }
+        final boolean exportDlists;
+        if (optionalParams == null) {
+            exportDlists = true;
+        } else {
+            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+        }        
+        List<ContactField> fieldList = Arrays.asList(fields.clone());
+        if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
+            fieldList = new ArrayList<>(fieldList);
+            fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
+        }
+        try { 
+            ThresholdFileHolder sink = new ThresholdFileHolder();
+            OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
+            writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));        
+                for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                    SearchIterator<Contact> conIter;
+                    List<String> contacts = batchEntry.getValue();
+                    String[] contactsId = new String[contacts.size()];
+                    contactsId = contacts.toArray(contactsId);
+                    try {                
+                        conIter = ImportExportServices.getContactService().getContacts(sessObj, batchEntry.getKey(), contactsId, fieldList.toArray(new ContactField[fieldList.size()]));
+                        try {
+                            while (conIter.hasNext()) {
+                                Contact current;
+                                try {
+                                    current = conIter.next();
+                                    if (!exportDlists && current.getMarkAsDistribtuionlist()) {
+                                        continue;
+                                    }
+                                    writer.write(convertToLine(convertToList(current, fields)));
+                                } catch (final SearchIteratorException e) {
+                                    LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
+                                } catch (final OXException e) {
+                                    LOG.error("Could not retrieve contact from folder {}, OXException was: ", batchEntry.getKey(), e);
+                                }
+
+                            }
+                        } catch (final OXException e) {
+                            LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
+                        } finally {
+                            SearchIterators.close(conIter);
+                        }
+                    } catch (final OXException e) {
+                        throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
+                    }            
+                }                
+            writer.flush();
+            return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
+        } catch (IOException e) {
+            throw ImportExportExceptionCodes.IOEXCEPTION.create(e, e.getMessage());
+        }
+    }
 
     @Override
     public SizedInputStream exportSingleData(final ServerSession sessObj, final Format format, final String folder, final String objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
@@ -341,22 +409,14 @@ public class CSVContactExporter implements Exporter {
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
         return bob.toString();
     }
-
+    
     @Override
-    public String getExportFileName(ServerSession session, String folder) throws OXException {
-        return createExportFileName(session, folder);
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
-    private String createExportFileName(ServerSession session, String folder) throws OXException {
-        FolderService folderService = ImportExportServices.getFolderService();
-        final StringBuilder sb = new StringBuilder();
-        try {
-            FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-            sb.append(folderObj.getFolderName());
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
-        }
-        sb.append(".");
-        return sb.toString();
+    @Override
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }
