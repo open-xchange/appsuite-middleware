@@ -91,7 +91,19 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String name = example.getName();
 
         String sql = null;
-        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof MySQLDatabase) {
+            sql = "show indexes from `" + database.correctObjectName(example.getTable().getName(), Table.class) + "`" + 
+                " where key_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
+            List<Map> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Map> result = new ArrayList<Map>(rows.size());
+            for (Map row : rows) {
+                Map<String, String> resultMap = new LinkedHashMap<>();
+                resultMap.put("COLUMN_NAME", (String) row.get("COLUMN_NAME"));
+                resultMap.put("CONSTRAINT_NAME", (String) row.get("KEY_NAME"));
+                result.add(resultMap);
+            }
+            return result;
+        } else if (database instanceof HsqlDatabase) {
             sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
                     "from information_schema.table_constraints const " +
                     "join information_schema.key_column_usage col " +
