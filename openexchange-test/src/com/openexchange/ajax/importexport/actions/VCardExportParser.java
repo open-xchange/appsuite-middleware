@@ -49,12 +49,18 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.io.IOException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 public class VCardExportParser extends AbstractAJAXParser<VCardExportResponse> {
 
+    private HttpResponse httpResponse;
+    
     /**
      * @param failOnError
      */
@@ -75,14 +81,19 @@ public class VCardExportParser extends AbstractAJAXParser<VCardExportResponse> {
      */
     @Override
     public VCardExportResponse parse(final String body) throws JSONException {
-        final VCardExportResponse retval = new VCardExportResponse();
+        final VCardExportResponse retval = new VCardExportResponse(httpResponse);
         retval.setVCard(body);
         return retval;
     }
 
     @Override
     protected VCardExportResponse createResponse(final Response response) throws JSONException {
-        throw new UnsupportedOperationException();
+        return new VCardExportResponse(httpResponse);
     }
-
+    
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        this.httpResponse = resp;
+        return super.checkResponse(resp, request);
+    }
 }

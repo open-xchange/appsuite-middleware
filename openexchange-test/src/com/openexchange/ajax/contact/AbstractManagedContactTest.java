@@ -61,17 +61,22 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
     protected int folderID;
     protected int secondFolderID;
+    
+    protected String folderName1;
+    protected String folderName2;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         UserValues values = getClient().getValues();
-        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        this.folderName1 = ("ManagedContactTest_" + (new Date().getTime()));
+        FolderObject folder = ftm.generatePublicFolder(folderName1, Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
         
-        folder = ftm.generatePublicFolder("ManagedContactTest2_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        this.folderName2 = ("ManagedContactTest_2" + (new Date().getTime()));
+        folder = ftm.generatePublicFolder(folderName2, Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folder = ftm.insertFolderOnServer(folder);
         secondFolderID = folder.getObjectID();
     }
