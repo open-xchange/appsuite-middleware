@@ -66,6 +66,7 @@ import java.util.TreeMap;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -132,11 +133,12 @@ public abstract class RdbStorage {
      *
      * @param eventId The identifier of the event the warning is associated with
      * @param field The corresponding event field of the invalid data
+     * @param severity The problem severity
      * @param message The message providing details of the warning
      * @param cause The optional initial cause
      */
-    public void addInvalidDataWaring(String eventId, EventField field, String message, Throwable cause) {
-        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, message);
+    public void addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, severity.toString().toLowerCase(), message);
         LOG.info(warning.getLogMessage());
         addWarning(eventId, warning);
     }

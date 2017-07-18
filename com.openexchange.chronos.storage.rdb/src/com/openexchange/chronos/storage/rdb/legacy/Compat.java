@@ -81,6 +81,7 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
@@ -266,7 +267,7 @@ public class Compat {
                 recurrenceData = getRecurrenceData(new SeriesPattern(databasePattern), timeZone, event.getStartDate().isAllDay());
             } catch (IllegalArgumentException | OXException e) {
                 String message = "Ignoring invalid legacy series pattern \"" + event.getRecurrenceRule() + '"';
-                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, message, e);
+                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, message, e);
             }
             /*
              * adjust the recurrence master's actual start- and enddate
@@ -327,7 +328,7 @@ public class Compat {
                     if (false == "CAL-4061".equals(e.getErrorCode())) {
                         throw e;
                     }
-                    eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
+                    eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
                 }
             }
             if (null != recurrenceId) {
@@ -506,7 +507,7 @@ public class Compat {
                 if (false == "CAL-4061".equals(e.getErrorCode())) {
                     throw e;
                 }
-                eventStorage.addInvalidDataWaring(eventId, field, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
+                eventStorage.addInvalidDataWaring(eventId, field, ProblemSeverity.MINOR, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
             }
         }
         return recurrenceIDs;

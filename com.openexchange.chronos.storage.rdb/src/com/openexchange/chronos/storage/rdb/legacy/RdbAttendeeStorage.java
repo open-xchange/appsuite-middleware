@@ -77,6 +77,7 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -330,9 +331,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         if (null != externalAttendee) {
                             attendees.add(entityResolver.applyEntityData(externalAttendee));
                             String message = "Falling back to external attendee representation for non-existent user " + userAttendee;
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, message, e);
+                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
                         } else {
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping non-existent user " + userAttendee, e);
+                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + userAttendee, e);
                         }
                         continue;
                     }
@@ -359,13 +360,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * no suitable entry in prg_date_rights (anymore), skip attendee
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping orphaned user attendee " + userAttendee, null);
                     } else {
                         /*
                          * no suitable entry in prg_date_rights (anymore), take over as individual user attendee
                          */
                         attendees.add(userAttendee);
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, "Preserving orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Preserving orphaned user attendee " + userAttendee, null);
                     }
                 }
             }
@@ -383,7 +384,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                             /*
                              * invalid calendar user; possibly a no longer existing group or resource - skip
                              */
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, "Skipping non-existent " + internalAttendee, e);
+                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, "Skipping non-existent " + internalAttendee, e);
                             continue;
                         }
                         throw e;
@@ -422,7 +423,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 CalendarUserType probedCUType = entityResolver.probeCUType(entity);
                 if (null != probedCUType && false == probedCUType.equals(cuType)) {
                     String message = "Auto-correcting stored calendar user type for " + internalAttendee + " to \"" + probedCUType + '"';
-                    addInvalidDataWaring(eventId, EventField.ATTENDEES, message, e);
+                    addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, message, e);
                     internalAttendee.setCuType(probedCUType);
                     return internalAttendee;
                 }

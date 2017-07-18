@@ -80,6 +80,7 @@ import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
@@ -312,7 +313,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             return getAlarms(event, userID, reminderData);
         } catch (OXException e) {
-            addInvalidDataWaring(event.getId(), EventField.ALARMS, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
+            addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
             return null;
         }
     }
