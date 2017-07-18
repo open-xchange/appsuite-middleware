@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class CheckConflictAction extends AbstractFreeBusyAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
 
     /**
      * Initializes a new {@link CheckConflictAction}.

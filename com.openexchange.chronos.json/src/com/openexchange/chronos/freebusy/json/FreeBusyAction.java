@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class FreeBusyAction extends AbstractFreeBusyAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("timezone", CalendarParameters.PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
 
     /**
      * Initializes a new {@link FreeBusyAction}.
