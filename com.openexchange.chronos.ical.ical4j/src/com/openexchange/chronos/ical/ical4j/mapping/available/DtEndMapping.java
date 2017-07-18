@@ -84,7 +84,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, CalendarFreeSlo
      */
     @Override
     protected org.dmfs.rfc5545.DateTime getValue(CalendarFreeSlot object) {
-        return new org.dmfs.rfc5545.DateTime(object.getEndTime().getTime());
+        return object.getEndTime();
     }
 
     /*
@@ -94,7 +94,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, CalendarFreeSlo
      */
     @Override
     protected void setValue(CalendarFreeSlot object, org.dmfs.rfc5545.DateTime value) {
-        object.setEndTime(new Date(value.getTimestamp()));
+        object.setEndTime(value);
     }
 
     /*

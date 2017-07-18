@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Classification;
@@ -61,7 +62,6 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
-import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
@@ -279,7 +279,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
                 object.removeDescription();
             }
         });
-        mappings.put(AvailabilityField.dtstart, new DateMapping<CalendarAvailability>("start", "Start DateTime") {
+        mappings.put(AvailabilityField.dtstart, new DateTimeMapping<CalendarAvailability>("start", "startTimezone", "allDay", "Start DateTime") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {
@@ -287,12 +287,12 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public void set(CalendarAvailability object, Date value) throws OXException {
+            public void set(CalendarAvailability object, DateTime value) throws OXException {
                 object.setStartTime(value);
             }
 
             @Override
-            public Date get(CalendarAvailability object) {
+            public DateTime get(CalendarAvailability object) {
                 return object.getStartTime();
             }
 
@@ -302,7 +302,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
         });
-        mappings.put(AvailabilityField.dtend, new DateMapping<CalendarAvailability>("end", "End DateTime") {
+        mappings.put(AvailabilityField.dtend, new DateTimeMapping<CalendarAvailability>("end", "endTimezone", "allDay", "End DateTime") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {
@@ -310,12 +310,12 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public void set(CalendarAvailability object, Date value) throws OXException {
+            public void set(CalendarAvailability object, DateTime value) throws OXException {
                 object.setEndTime(value);
             }
 
             @Override
-            public Date get(CalendarAvailability object) {
+            public DateTime get(CalendarAvailability object) {
                 return object.getEndTime();
             }
 

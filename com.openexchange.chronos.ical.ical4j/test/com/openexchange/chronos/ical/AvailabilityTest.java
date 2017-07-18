@@ -102,6 +102,8 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The summary does not math", "Monday to Friday from 9:00 to 17:00", freeSlot.getSummary());
         assertEquals("The uid does not math", "34EDA59B-6BB1-4E94-A66C-64999089C0AF", freeSlot.getUid());
         assertEquals("The recurrence rule does not match", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR", freeSlot.getRecurrenceRule());
+        assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), freeSlot.getStartTime().getTimeZone());
+        assertEquals("The end timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), freeSlot.getEndTime().getTimeZone());
     }
 
     /**

@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
@@ -61,7 +62,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
-import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
@@ -211,7 +211,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
         });
-        mappings.put(FreeSlotField.dtstart, new DateMapping<CalendarFreeSlot>("start", "Start DateTime") {
+        mappings.put(FreeSlotField.dtstart, new DateTimeMapping<CalendarFreeSlot>("start", "startTimezone", "allDay", "Start DateTime") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
@@ -219,12 +219,12 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Date value) throws OXException {
+            public void set(CalendarFreeSlot object, DateTime value) throws OXException {
                 object.setStartTime(value);
             }
 
             @Override
-            public Date get(CalendarFreeSlot object) {
+            public DateTime get(CalendarFreeSlot object) {
                 return object.getStartTime();
             }
 
@@ -234,7 +234,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
         });
-        mappings.put(FreeSlotField.dtend, new DateMapping<CalendarFreeSlot>("end", "End DateTime") {
+        mappings.put(FreeSlotField.dtend, new DateTimeMapping<CalendarFreeSlot>("end", "endTimezone", "allDay", "End DateTime") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
@@ -242,12 +242,12 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Date value) throws OXException {
+            public void set(CalendarFreeSlot object, DateTime value) throws OXException {
                 object.setEndTime(value);
             }
 
             @Override
-            public Date get(CalendarFreeSlot object) {
+            public DateTime get(CalendarFreeSlot object) {
                 return object.getEndTime();
             }
 

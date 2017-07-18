@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.chronos.service.FreeSlotField;
 
@@ -70,9 +71,9 @@ public class CalendarFreeSlot implements FieldAware {
     private String uid;
     /** dtstamp */
     private Date creationTimestamp;
-    private Date startTime;
+    private DateTime startTime;
 
-    private Date endTime;
+    private DateTime endTime;
     private long duration; //FIXME: use another type?
 
     private Date created;
@@ -167,7 +168,7 @@ public class CalendarFreeSlot implements FieldAware {
      *
      * @param startTime The startTime to set
      */
-    public void setStartTime(Date startTime) {
+    public void setStartTime(DateTime startTime) {
         this.startTime = startTime;
         fields.add(FreeSlotField.dtstart);
     }
@@ -177,7 +178,7 @@ public class CalendarFreeSlot implements FieldAware {
      *
      * @return The endTime
      */
-    public Date getEndTime() {
+    public DateTime getEndTime() {
         return endTime;
     }
 
@@ -194,7 +195,7 @@ public class CalendarFreeSlot implements FieldAware {
      *
      * @param endTime The endTime to set
      */
-    public void setEndTime(Date endTime) {
+    public void setEndTime(DateTime endTime) {
         this.endTime = endTime;
         fields.add(FreeSlotField.dtend);
     }
@@ -465,7 +466,7 @@ public class CalendarFreeSlot implements FieldAware {
      *
      * @return The startTime
      */
-    public Date getStartTime() {
+    public DateTime getStartTime() {
         return startTime;
     }
 

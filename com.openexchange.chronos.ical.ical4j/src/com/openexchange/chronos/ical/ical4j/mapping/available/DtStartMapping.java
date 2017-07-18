@@ -79,7 +79,7 @@ public class DtStartMapping extends ICalDateTimeMapping<Available, CalendarFreeS
      */
     @Override
     protected DateTime getValue(CalendarFreeSlot object) {
-        return new DateTime(object.getStartTime().getTime());
+        return object.getStartTime();
     }
 
     /*
@@ -89,7 +89,7 @@ public class DtStartMapping extends ICalDateTimeMapping<Available, CalendarFreeS
      */
     @Override
     protected void setValue(CalendarFreeSlot object, DateTime value) {
-        object.setStartTime(new Date(value.getTimestamp()));
+        object.setStartTime(value);
     }
 
     /*

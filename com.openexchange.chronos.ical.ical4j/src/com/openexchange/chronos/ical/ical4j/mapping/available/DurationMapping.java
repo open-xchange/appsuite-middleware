@@ -51,6 +51,7 @@ package com.openexchange.chronos.ical.ical4j.mapping.available;
 
 import java.util.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
@@ -100,9 +101,9 @@ public class DurationMapping extends AbstractICalMapping<Available, CalendarFree
         if (null != dtStart && null != dtStart.getDate()) {
             CalendarFreeSlot freeSlot = new CalendarFreeSlot();
             new DtStartMapping().importICal(component, freeSlot, parameters, warnings);
-            Date startDate = freeSlot.getStartTime();
-            java.util.Date endDate = duration.getDuration().getTime(new Date(startDate.getTime()));
-            object.setEndTime(new Date(endDate.getTime()));
+            DateTime startDate = freeSlot.getStartTime();
+            java.util.Date endDate = duration.getDuration().getTime(new Date(startDate.getTimestamp()));
+            object.setEndTime(new DateTime(endDate.getTime()));
         }
     }
 }

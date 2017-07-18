@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
-import java.util.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
@@ -143,13 +143,13 @@ class CheckUtil {
     private static void checkRanges(CalendarAvailability availability) throws OXException {
         // If "DTSTART" is not present, then the start time is unbounded.
         if (!availability.contains(AvailabilityField.dtstart)) {
-            availability.setStartTime(new Date(Long.MAX_VALUE));
+            availability.setStartTime(new DateTime(Long.MAX_VALUE));
             //availability.setStartTimeZone(startTimeZone); //FIXME: set user's timezone?
         }
 
         // If "DTEND" or "DURATION" are not present, then the end time is unbounded. 
         if (!availability.contains(AvailabilityField.dtend) && !availability.contains(AvailabilityField.duration)) {
-            availability.setEndTime(new Date(Long.MAX_VALUE));
+            availability.setEndTime(new DateTime(Long.MAX_VALUE));
             //availability.setEndTimezone(endTimeZone); //FIXME: set user's timezone?
         }
 

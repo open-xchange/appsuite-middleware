@@ -49,22 +49,15 @@
 
 package com.openexchange.chronos.impl.osgi;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
-import com.openexchange.chronos.impl.session.DefaultCalendarSession;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -77,7 +70,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -85,7 +77,6 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -105,10 +96,14 @@ public class ChronosActivator extends HousekeepingActivator {
         super();
     }
 
+    //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class, FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class, 
+            FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, 
+            ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class };
     }
+    //@formatter:on
 
     @Override
     protected Class<?>[] getOptionalServices() {

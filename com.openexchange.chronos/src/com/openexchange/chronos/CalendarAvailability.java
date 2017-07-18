@@ -52,6 +52,7 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
 
@@ -81,10 +82,8 @@ public class CalendarAvailability implements FieldAware {
     private int createdBy;
     private Date lastModified;
 
-    private Date startTime;
-    private String startTimeZone;
-    private Date endTime;
-    private String endTimeZone;
+    private DateTime startTime;
+    private DateTime endTime;
 
     private String description;
     private String summary;
@@ -386,7 +385,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @return The startTime
      */
-    public Date getStartTime() {
+    public DateTime getStartTime() {
         return startTime;
     }
 
@@ -395,7 +394,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param startTime The startTime to set
      */
-    public void setStartTime(Date startTime) {
+    public void setStartTime(DateTime startTime) {
         this.startTime = startTime;
         fields.add(AvailabilityField.dtstart);
     }
@@ -409,37 +408,11 @@ public class CalendarAvailability implements FieldAware {
     }
 
     /**
-     * Gets the startTimeZone
-     *
-     * @return The startTimeZone
-     */
-    public String getStartTimeZone() {
-        return startTimeZone;
-    }
-
-    /**
-     * Sets the startTimeZone
-     *
-     * @param startTimeZone The startTimeZone to set
-     */
-    public void setStartTimeZone(String startTimeZone) {
-        this.startTimeZone = startTimeZone;
-    }
-
-    /**
-     * Removes the start timezone
-     */
-    public void removeStartTimeZone() {
-        startTimeZone = null;
-        //fields.remove(AvailabilityField.);
-    }
-
-    /**
      * Gets the endTime
      *
      * @return The endTime
      */
-    public Date getEndTime() {
+    public DateTime getEndTime() {
         return endTime;
     }
 
@@ -448,7 +421,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param endTime The endTime to set
      */
-    public void setEndTime(Date endTime) {
+    public void setEndTime(DateTime endTime) {
         this.endTime = endTime;
         fields.add(AvailabilityField.dtend);
     }
@@ -459,24 +432,6 @@ public class CalendarAvailability implements FieldAware {
     public void removeEndTime() {
         endTime = null;
         fields.remove(AvailabilityField.dtend);
-    }
-
-    /**
-     * Gets the endTimeZone
-     *
-     * @return The endTimeZone
-     */
-    public String getEndTimeZone() {
-        return endTimeZone;
-    }
-
-    /**
-     * Sets the endTimeZone
-     *
-     * @param endTimeZone The endTimeZone to set
-     */
-    public void setEndTimeZone(String endTimeZone) {
-        this.endTimeZone = endTimeZone;
     }
 
     /**
