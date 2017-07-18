@@ -64,7 +64,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import org.dmfs.rfc5545.DateTime;
 import java.util.Set;
+import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -229,9 +231,11 @@ public abstract class ChronosAction implements AJAXActionService {
     private static Entry<String, ?> parseParameter(String parameter, String value) throws IllegalArgumentException {
         switch (parameter) {
             case "rangeStart":
-                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(Long.parseLong(value)));
+                DateTime startTime = DateTime.parse(TimeZone.getTimeZone("UTC"), value);
+                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(startTime.getTimestamp()));
             case "rangeEnd":
-                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(Long.parseLong(value)));
+                DateTime endTime = DateTime.parse(TimeZone.getTimeZone("UTC"), value);
+                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(endTime.getTimestamp()));
             case "expand":
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
             case PARAMETER_IGNORE_CONFLICTS:
