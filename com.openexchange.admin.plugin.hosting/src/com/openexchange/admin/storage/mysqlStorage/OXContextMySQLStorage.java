@@ -1203,7 +1203,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     startTransaction(configCon);
                     boolean rollback = true;
                     try {
-                        automaticLookupSchema(configCon, db);
+                        autoFindOrCreateSchema(configCon, db);
                         contextCommon.updateContextsPerDBSchemaCount(true, db.getScheme(), db, configCon);
                         configCon.commit();
                         rollback = false;
@@ -1543,21 +1543,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         db.setScheme(schemaName);
     }
 
-    private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
-        autoFindOrCreateSchema(configCon, db, false);
-    }
-
     /**
-     * Looks-up the next suitable schema.
+     * Looks-up the next suitable schema or creates one.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Acquires a lock for specified database/pool.</div>
+     * <p>
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for
      * @param forceCreate <code>true</code> to enforce schema creation <b>w/o</b> checking if an unfilled one is available; otherwise <code>false</code> to check prior to creation
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean forceCreate) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db) throws StorageException {
         // Freshly determine the next schema to use
-        String schemaName = forceCreate ? null : getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
         if (schemaName != null) {
             // Found a suitable schema on specified database host
             db.setScheme(schemaName);
@@ -1577,7 +1576,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
-        automaticLookupSchema(con, db);
+        autoFindOrCreateSchema(con, db);
         try {
             updateContextServer2DbPool(db, con, contextId);
         } catch (PoolException e) {
