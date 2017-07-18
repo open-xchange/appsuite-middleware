@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
@@ -97,4 +103,19 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
     protected Contact generateContact() {
         return generateContact("Surname");
     }
+    
+    protected void assertFileName(HttpResponse httpResp, String expectedFileName) {
+        Header[] headers = httpResp.getHeaders("Content-Disposition");
+        for (Header header : headers) {
+            assertNotNull(header.getValue());
+            assertTrue(header.getValue().contains(expectedFileName));
+        }
+    }    
+    
+    protected JSONObject addRequestIds(int folderId, int objectId) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id", objectId);
+        json.put("folder_id", folderId);
+        return json;
+    }   
 }
