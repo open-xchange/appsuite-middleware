@@ -424,8 +424,16 @@ public class AdminCache {
         return this.pool.getConnectionForConfigDB();
     }
 
+    public Connection getConnectionForConfigDBNoTimeout() throws PoolException {
+        return this.pool.getConnectionForConfigDBNoTimeout();
+    }
+
     public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
         return this.pool.pushConnectionForConfigDB(con);
+    }
+
+    public boolean pushConnectionForConfigDBNoTimeout(final Connection con) throws PoolException {
+        return this.pool.pushConnectionForConfigDBNoTimeout(con);
     }
 
     public int getServerId() throws PoolException {
