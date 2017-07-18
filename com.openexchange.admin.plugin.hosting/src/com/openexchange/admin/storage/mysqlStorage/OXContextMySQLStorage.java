@@ -2889,7 +2889,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // Get connection to 'configdb'
         Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getConnectionForConfigDBNoTimeout();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -2913,7 +2913,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             autocommit(configCon);
             try {
-                cache.pushConnectionForConfigDB(configCon);
+                cache.pushConnectionForConfigDBNoTimeout(configCon);
             } catch (PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
