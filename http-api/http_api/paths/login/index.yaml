@@ -9,3 +9,4 @@ requests:
   - RedirectRequest.yaml
   - ChangeIPRequest.yaml
   - RedeemTokenRequest.yaml
+  - AutoLoginRequest.yaml

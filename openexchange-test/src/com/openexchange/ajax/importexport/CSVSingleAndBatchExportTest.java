@@ -49,50 +49,51 @@
 
 package com.openexchange.ajax.importexport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
-import com.openexchange.ajax.importexport.actions.VCardExportRequest;
-import com.openexchange.ajax.importexport.actions.VCardExportResponse;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.importexport.csv.CSVParser;
+
 
 /**
- * {@link VCardSingleAndBatchExportTest}
+ * {@link CSVSingleAndBatchExportTest}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10
  */
-public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
-
-    public VCardSingleAndBatchExportTest() {
-        super();
-    }
+public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
     
     @Test
-    public void testVCardSingleExport() throws OXException, IOException, JSONException {
-        Contact contact = generateContact("Singlecontact");
-        int contactId = cotm.newAction(contact).getObjectID();
+    public void testCSVSingleExport() throws OXException, IOException, JSONException {
+        generateContact("First Contact");        
+        Contact secondContact = generateContact("Second Contact");
+        int secondId = cotm.newAction(secondContact).getObjectID();
         
-        JSONArray array = new JSONArray();        
-        array.put(addRequestIds(folderID, contactId));
+        JSONArray array = new JSONArray();
+        array.put(addRequestIds(folderID, secondId));
         
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, false, true));
-        String vcard = (String) vcardExportResponse.getData();
-        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("One vCard expected!", 1, result.length);        
-        assertFileName(vcardExportResponse.getHttpResponse(), contact.getGivenName()+" "+contact.getSurName()+".vcf");
-    }
+        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        assertEquals("There should only be one exported Contact", 2, actual.size());
+        assertFileName(exportResponse.getHttpResponse(), secondContact.getGivenName()+" "+secondContact.getSurName()+".csv");
+    }    
     
     @Test
-    public void testVCardSingleDistributionListExport() throws OXException, IOException, JSONException {
+    public void testCSVSingleDistributionListExport() throws OXException, JSONException, IOException {
         Contact list = generateContact("Distribution list");
         list.setDistributionList(new DistributionListEntryObject[] { new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
         });
@@ -102,15 +103,18 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         JSONArray array = new JSONArray();        
         array.put(addRequestIds(folderID, distlistId));
         
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
-        String vcard = (String) vcardExportResponse.getData();
-        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("One vCard expected!", 1, result.length);        
-        assertFileName(vcardExportResponse.getHttpResponse(), list.getDisplayName()+".vcf");
-    }  
+        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());        
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains("my displayname"));
+        assertEquals("There should only be one exported Contact", 2, actual.size());
+        assertFileName(exportResponse.getHttpResponse(), list.getDisplayName()+".csv");
+    }
     
     @Test
-    public void testVCardMultipleExport() throws OXException, IOException, JSONException {
+    public void testCSVMultipleExport() throws JSONException, OXException, IOException {
         Contact firstContact = generateContact("First Contact");
         int firstId = cotm.newAction(firstContact).getObjectID();
         
@@ -127,30 +131,42 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, secondId));
         array.put(addRequestIds(folderID, thirdId));
         
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
-        String vcard = (String) vcardExportResponse.getData();
-        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("Three vCard expected!", 3, result.length);        
-        assertFileName(vcardExportResponse.getHttpResponse(), folderName1+".vcf");
-    }
+        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        
+        CSVParser parser = new CSVParser();        
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());  
+        assertEquals("There should be three exported Contacts", 4, actual.size());
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(firstContact.getSurName()));
+        testList = actual.get(2);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        testList = actual.get(3);
+        assertTrue(testList.toString().contains(list.getDisplayName()));        
+        assertFileName(exportResponse.getHttpResponse(), folderName1+".csv");
+    }    
     
     @Test
-    public void testVCardOldFolderExport() throws OXException, IOException, JSONException {
+    public void testCSVOldFolderExport() throws OXException, IOException, JSONException {
         Contact firstContact = generateContact("First Contact");
         cotm.newAction(firstContact).getObjectID();
         
         Contact secondContact = generateContact("Second Contact");
         cotm.newAction(secondContact).getObjectID();
         
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(folderID, false));
-        String vcard = (String) vcardExportResponse.getData();        
-        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("Two vCards expected!", 2, result.length);
-        assertFileName(vcardExportResponse.getHttpResponse(), folderName1);
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID, true));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());
+        assertEquals("There should be two exported Contacts", 3, actual.size());
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(firstContact.getSurName()));
+        testList = actual.get(2);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        assertFileName(exportResponse.getHttpResponse(), folderName1+".csv");
     }    
     
     @Test
-    public void testCrossFolderBatchExportTest() throws OXException, IOException, JSONException {
+    public void testCSVCrossFolderBatchExportTest() throws OXException, JSONException, IOException {
         Contact firstContact = generateContact("First Contact");
         int firstId = cotm.newAction(firstContact).getObjectID();
         
@@ -171,16 +187,25 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(secondFolderID, thirdId));
         array.put(addRequestIds(secondFolderID, fourthId));
         
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
-        String vcard = (String) vcardExportResponse.getData();
-        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
-        assertEquals("Four vCards expected!", 4, result.length);
-        assertFileName(vcardExportResponse.getHttpResponse(), "Contacts.vcf");
-    }     
+        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        
+        CSVParser parser = new CSVParser();
+        List<List<String>> actual = parser.parse((String) exportResponse.getData());
+        assertEquals("There should be four exported Contacts", 5, actual.size());
+        List<String> testList = actual.get(1);
+        assertTrue(testList.toString().contains(firstContact.getSurName()));
+        testList = actual.get(2);
+        assertTrue(testList.toString().contains(secondContact.getSurName()));
+        testList = actual.get(3);
+        assertTrue(testList.toString().contains(thirdContact.getSurName()));
+        testList = actual.get(4);
+        assertTrue(testList.toString().contains(list.getDisplayName()));
+        assertFileName(exportResponse.getHttpResponse(), "Contacts.csv");
+    }
     
     //---------------------------------------------------------------
     
-    private class BatchExportRequest extends VCardExportRequest {
+    private class CSVBatchExportRequest extends CSVExportRequest {
         
         private final JSONArray jsonArray;
         
@@ -189,8 +214,8 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
             return Method.PUT;
         }
 
-        public BatchExportRequest(int folderId, JSONArray jsonArray, Boolean exportDlists, boolean failOnError) {           
-            super(folderId, exportDlists, failOnError);
+        public CSVBatchExportRequest(int folderId, JSONArray jsonArray, Boolean exportDlists) {           
+            super(folderId, exportDlists);
             this.jsonArray = jsonArray;
         }
 
