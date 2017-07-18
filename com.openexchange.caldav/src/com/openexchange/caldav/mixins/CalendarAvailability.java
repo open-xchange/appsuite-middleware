@@ -52,43 +52,29 @@ package com.openexchange.caldav.mixins;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-
 /**
- * {@link SupportedCalendarComponentSet}
+ * {@link CalendarAvailability}
  *
- * Specifies the calendar component types (e.g., VEVENT, VTODO, etc.) that
- * calendar object resources can contain in the calendar collection.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
+public class CalendarAvailability extends SingleXMLPropertyMixin {
 
-    public static final String VEVENT = "VEVENT";
-    public static final String VTODO = "VTODO";
-    public static final String VAVAILABILITY = "VAVAILABILITY";
-
-    private final String[] components;
-
-    public SupportedCalendarComponentSet() {
-        this(VEVENT);
-    }
-
-    public SupportedCalendarComponentSet(String...components) {
-        super(CaldavProtocol.CAL_NS.getURI(), "supported-calendar-component-set");
-        this.components = components;
+    /**
+     * Initializes a new {@link CalendarAvailability}.
+     */
+    public CalendarAvailability() {
+        super(CaldavProtocol.CAL_NS.getURI(), "calendar-availability");
     }
 
     @Override
     protected String getValue() {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (null != this.components) {
-            for (String component : components) {
-                stringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");
-            }
-        }
-        return stringBuilder.toString();
-//        return "<CAL:comp name=\"VEVENT\"/><CAL:comp name=\"VTODO\"/>";
+        /*
+         * When no DAV:href element is present, the client MUST substitute
+         * the scheme and authority parts of the attachment URI with the
+         * scheme and authority part of the calendar home collection absolute
+         * URI.
+         */
+        return "";
     }
 
 }

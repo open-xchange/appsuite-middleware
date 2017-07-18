@@ -57,6 +57,7 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
+import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.dav.mixins.SyncToken;
@@ -89,7 +90,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY));
     }
 
     @Override
