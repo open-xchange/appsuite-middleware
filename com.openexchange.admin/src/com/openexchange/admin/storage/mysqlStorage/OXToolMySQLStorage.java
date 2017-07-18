@@ -2711,7 +2711,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new InvalidDataException("email1 not set but required!");
             }
         }
-        
+
         if (usr.isDriveFolderModeSet() && OXFolderDefaultMode.fromString(usr.getDriveFolderMode()) == null) {
             String modes = "";
             for (OXFolderDefaultMode mode : OXFolderDefaultMode.values()) {
@@ -2894,6 +2894,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Database retval = new Database();
             int pos = 1;
             retval.setId(I(id));
+            retval.setMaster(Boolean.TRUE);
             retval.setUrl(rs.getString(pos++));
             retval.setDriver(rs.getString(pos++));
             retval.setLogin(rs.getString(pos++));

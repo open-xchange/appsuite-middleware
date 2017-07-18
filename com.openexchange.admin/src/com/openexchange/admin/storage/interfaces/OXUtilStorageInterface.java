@@ -386,14 +386,14 @@ public abstract class OXUtilStorageInterface {
     public abstract int registerDatabase(Database db, boolean createSchemas, int optNumberOfSchemas) throws StorageException;
 
     /**
-     * Checks if such a database exists on given database host. Is used
-     * ONLY internally at the moment.
+     * Creates schemas on given database host.
      *
-     * @param db a database object to checked
-     * @return <code>true</code> if exists; otherwise <code>false</code>
-     * @throws StorageException
+     * @param db A database host
+     * @param optNumberOfSchemas Specifies the number of schemas that shall be created; if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     * @return The newly created schemas
+     * @throws StorageException If schemas cannot be created
      */
-    public abstract boolean existsDatabase(final Database db) throws StorageException;
+    public abstract List<String> createDatabaseSchemas(Database db, int optNumberOfSchemas) throws StorageException;
 
     /**
      * Creates a new database from scratch on the given database host. Is used

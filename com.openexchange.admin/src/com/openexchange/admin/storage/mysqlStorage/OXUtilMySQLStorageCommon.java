@@ -59,7 +59,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -138,6 +140,50 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
+
+    private static final AdminCache cache = ClientAdminThread.cache;
+
+    /**
+     * Determines all existing schemas for specified database host.
+     *
+     * @param db The database providing connect information
+     * @return A listing of available database schemas
+     * @throws StorageException If database schemas cannot be returned
+     */
+    public static List<String> listDatabases(Database db) throws StorageException {
+        Connection con = getSimpleSQLConnectionFor(db);
+        try {
+            return listDatabases(con, db.getName());
+        } finally {
+            cache.closeSimpleConnection(con);
+        }
+    }
+
+    private static List<String> listDatabases(Connection con, String name) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SHOW DATABASES LIKE ?");
+            stmt.setString(1, name + "\\_%");
+            result = stmt.executeQuery();
+            if (false == result.next()) {
+                return Collections.emptyList();
+            }
+
+            List<String> schemas = new LinkedList<>();
+            do {
+                schemas.add(result.getString(1));
+            } while (result.next());
+            return schemas;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
     /**
      * Checks if the concrete database schema exists.
      *
@@ -154,9 +200,21 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
-
-    private static final AdminCache cache = ClientAdminThread.cache;
+    private static boolean existsDatabase(final Connection con, final String name) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SHOW DATABASES LIKE ?");
+            stmt.setString(1, name);
+            result = stmt.executeQuery();
+            return result.next();
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
 
     public static void createDatabase(final Database db, Connection configdbCon) throws StorageException {
         Connection con = getSimpleSQLConnectionFor(db);
@@ -265,22 +323,6 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static boolean existsDatabase(final Connection con, final String name) throws StorageException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SHOW DATABASES LIKE ?");
-            stmt.setString(1, name);
-            result = stmt.executeQuery();
-            return result.next();
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
     private static void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
         final Set<String> existingTables = new HashSet<String>();
         final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
@@ -336,9 +378,12 @@ public class OXUtilMySQLStorageCommon {
         final UpdateTaskV2[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         final SchemaStore store = SchemaStore.getInstance();
         try {
-            for (final UpdateTaskV2 task : tasks) {
-                store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
+            List<String> taskNames = new ArrayList<>(tasks.length);
+            for (UpdateTaskV2 task : tasks) {
+                taskNames.add(task.getClass().getName());
             }
+
+            store.addExecutedTasks(con, taskNames, true, poolId, schema);
         } catch (final OXException e) {
             throw new StorageException(e.getMessage(), e);
         }

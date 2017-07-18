@@ -365,6 +365,33 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
+    public String[] createSchemas(Database db, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(db);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+
+        basicauth.doAuthentication(auth);
+
+        log.debug(db.toString());
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchDatabaseException(e);
+        }
+
+        db = tool.loadDatabaseById(db.getId()); // Implicitly checks existence
+
+        int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
+        List<String> createdSchemas = oxutil.createDatabaseSchemas(db, iOptNumberOfSchemas);
+        return createdSchemas.toArray(new String[createdSchemas.size()]);
+    }
+
+    @Override
     public Server registerServer(final Server srv, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {

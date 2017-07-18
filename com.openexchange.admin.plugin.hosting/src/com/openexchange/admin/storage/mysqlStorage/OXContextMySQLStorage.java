@@ -3043,7 +3043,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 PreparedStatement updateStmt = null;
                 try {
                     for (Database schema : schemas) {
-                        if (OXUtilStorageInterface.getInstance().existsDatabase(schema)) {
+                        if (OXUtilMySQLStorageCommon.existsDatabase(schema)) {
                             // Empty one...
                             if (null == updateStmt) {
                                 updateStmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=0 WHERE db_pool_id=? AND schemaname=?");

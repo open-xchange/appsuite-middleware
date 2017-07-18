@@ -49,10 +49,11 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import com.openexchange.caching.CacheService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -147,27 +148,58 @@ public abstract class SchemaStore {
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;
 
     public final void addExecutedTask(final int contextId, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
-        final Connection con = Database.get(contextId, true);
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             addExecutedTask(con, taskName, success, poolId, schema);
+
             con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
+            rollback = false;
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.back(contextId, true, con);
         }
     }
 
     /**
-     * @param con a writable database connection but into transaction mode.
+     * @param con a writable database connection, but in transaction mode.
      */
     public abstract void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException;
+
+    public final void addExecutedTasks(int contextId, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
+        final Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            addExecutedTasks(con, taskNames, success, poolId, schema);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    /**
+     * @param con a writable database connection, but in transaction mode.
+     */
+    public abstract void addExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException;
 
     public abstract void setCacheService(CacheService cacheService);
 

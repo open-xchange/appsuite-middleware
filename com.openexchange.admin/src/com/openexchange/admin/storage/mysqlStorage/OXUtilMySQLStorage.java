@@ -809,11 +809,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public boolean existsDatabase(Database db) throws StorageException {
-        return OXUtilMySQLStorageCommon.existsDatabase(db);
-    }
-
-    @Override
     public void createDatabase(final Database db, Connection con) throws StorageException {
         OXUtilMySQLStorageCommon.createDatabase(db, con);
     }
@@ -1094,6 +1089,96 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         } finally {
             if (rollback) {
                 rollback(con);
+            }
+        }
+    }
+
+    @Override
+    public List<String> createDatabaseSchemas(Database db, int optNumberOfSchemas) throws StorageException {
+        int numberOfSchemas = optNumberOfSchemas;
+        if (numberOfSchemas <= 0) {
+            // Number of schemas not specified; try to auto-determine
+            int maxUnits = db.getMaxUnits().intValue();
+            if (maxUnits < 0) {
+                // Infinite...
+                throw new StorageException("Number of schemas cannot be automatically calculated, since max. units is set to \"-1\". Please specify number of schemas explicitly.");
+            }
+
+            int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+            int maxNumberOfSchemas = maxUnits / CONTEXTS_PER_SCHEMA;
+
+            // Check how many are allowed to be created
+            List<String> existingSchemas = OXUtilMySQLStorageCommon.listDatabases(db);
+            numberOfSchemas = null == existingSchemas || existingSchemas.isEmpty() ? maxNumberOfSchemas : maxNumberOfSchemas - existingSchemas.size();
+            if (numberOfSchemas <= 0) {
+                // No more schemas are allowed to be created
+                throw new StorageException("No more schemas are allowed to be created for database " + db.getId() + ". Please extend max. units or register a new database in order to create more schemas.");
+            }
+        }
+
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getWriteConnectionForConfigDBNoTimeout();
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            List<String> createdSchemas = doCreateSchemas(db, numberOfSchemas, con);
+
+            con.commit();
+            rollback = false;
+            return createdSchemas;
+        } catch (PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            if (con != null) {
+                try {
+                    cache.pushWriteConnectionForConfigDBNoTimeout(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private List<String> doCreateSchemas(Database db, int numberOfSchemas, Connection con) throws StorageException {
+        List<String> schemasToRemove = null;
+        try {
+            schemasToRemove = new ArrayList<>(numberOfSchemas);
+
+            // Create new schemas
+            for (int i = numberOfSchemas; i-- > 0;) {
+                int schemaUnique;
+                try {
+                    schemaUnique = IDGenerator.getId(con);
+                } catch (SQLException e) {
+                    throw new StorageException(e.getMessage(), e);
+                }
+                String schemaName = db.getName() + '_' + schemaUnique;
+                db.setScheme(schemaName);
+                OXUtilMySQLStorageCommon.createDatabase(db, con);
+                schemasToRemove.add(schemaName);
+            }
+
+            // All fine
+            List<String> createdSchemas = new ArrayList<>(schemasToRemove);
+            schemasToRemove = null;
+            return createdSchemas;
+        } finally {
+            if (null != schemasToRemove) {
+                // Drop created schemas in case an error occurred
+                for (String schemaName : schemasToRemove) {
+                    db.setScheme(schemaName);
+                    OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+                }
             }
         }
     }
