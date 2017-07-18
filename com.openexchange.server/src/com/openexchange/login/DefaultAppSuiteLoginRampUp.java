@@ -150,6 +150,62 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException;
     }
 
+    public static abstract class AbstractDispatcherContribution implements Contribution {
+
+        private final Dispatcher ox;
+
+        /**
+         * Initializes a new {@link DefaultAppSuiteLoginRampUp.AbstractDispatcherContribution}.
+         */
+        protected AbstractDispatcherContribution(Dispatcher ox) {
+            super();
+            this.ox = ox;
+        }
+
+        @Override
+        public Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException {
+            AJAXRequestResult requestResult = null;
+            Exception exc = null;
+            try {
+                AJAXRequestData requestData = request().session(session).module(getModule()).action(getAction()).params(getParams()).format("json").build(loginRequest);
+                requestResult = ox.perform(requestData, null, session);
+                return requestResult.getResultObject();
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+                exc = x;
+                throw x;
+            } catch (RuntimeException x) {
+                // Omit result on error. Let the UI deal with this
+                exc = x;
+                throw x;
+            } finally {
+                Dispatchers.signalDone(requestResult, exc);
+            }
+        }
+
+        /**
+         * Gets the parameters to pass to dispatcher action
+         *
+         * @return The parameters
+         */
+        protected abstract String[] getParams();
+
+        /**
+         * Gets the action to call
+         *
+         * @return The action
+         */
+        protected abstract String getAction();
+
+        /**
+         * Gets the dispatcher module
+         *
+         * @return The module
+         */
+        protected abstract String getModule();
+
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------------------------------ //
 
     /** The service look-up */

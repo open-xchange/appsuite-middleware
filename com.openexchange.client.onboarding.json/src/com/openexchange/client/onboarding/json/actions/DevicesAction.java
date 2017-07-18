@@ -47,55 +47,53 @@
  *
  */
 
-package com.openexchange.client.onboarding.json;
+package com.openexchange.client.onboarding.json.actions;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.client.onboarding.json.actions.AllScenariosAction;
-import com.openexchange.client.onboarding.json.actions.ConfigAction;
-import com.openexchange.client.onboarding.json.actions.DevicesAction;
-import com.openexchange.client.onboarding.json.actions.ExecuteAction;
-import com.openexchange.client.onboarding.json.actions.GetScenarioAction;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.client.onboarding.ClientDevice;
+import com.openexchange.client.onboarding.CompositeId;
+import com.openexchange.client.onboarding.Device;
+import com.openexchange.client.onboarding.service.OnboardingService;
+import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OnboardingActionFactory}
+ * {@link DevicesAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public class DevicesAction extends AbstractOnboardingAction {
 
     /**
-     * Initializes a new {@link OnboardingActionFactory}.
+     * Initializes a new {@link DevicesAction}.
+     *
      * @param services
      */
-    public OnboardingActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("config", new ConfigAction(services));
-        actions.put("devices", new DevicesAction(services));
-        actions.put("get", new GetScenarioAction(services));
-        actions.put("scenarios", new AllScenariosAction(services));
-        actions.put("execute", new ExecuteAction(services));
-        this.actions = actions.build();
+    public DevicesAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        OnboardingService onboardingService = getOnboardingService();
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+        OnboardingView view = onboardingService.getViewFor(ClientDevice.IMPLIES_ALL, session);
+        Map<Device, List<CompositeId>> availableDevices = view.getDevices();
+
+        Device[] devices = Device.values();
+        JSONObject jResult = new JSONObject(devices.length);
+        for (Device device : devices) {
+            jResult.put(device.getId(), availableDevices.containsKey(device));
+        }
+        return new AJAXRequestResult(jResult, "json");
     }
 
 }
