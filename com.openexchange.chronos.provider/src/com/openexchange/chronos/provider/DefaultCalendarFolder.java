@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Transp;
 
 /**
@@ -68,12 +69,18 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private Transp transp;
+    private Set<CalendarFolderProperty> properties;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
      */
     public DefaultCalendarFolder() {
         super();
+
+        // Add default properties
+        for (DefaultCalendarFolderProperties property : DefaultCalendarFolderProperties.values()) {
+            properties.add(property.getProperty());
+        }
     }
 
     /**
@@ -152,8 +159,25 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     @Override
+    public Set<CalendarFolderProperty> getProperties() {
+        return properties;
+    }
+
+    public void setProperty(CalendarFolderProperty property) {
+        try {
+            // Make sure only one property with the same name exists
+            if (properties.contains(property)) {
+                properties.remove(property);
+            }
+            properties.add(property);
+
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    @Override
     public String toString() {
         return "DefaultCalendarFolder [id=" + id + ", name=" + name + "]";
     }
-
 }

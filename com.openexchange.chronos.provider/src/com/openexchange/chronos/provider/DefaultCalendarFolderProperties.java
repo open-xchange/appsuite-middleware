@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,75 +49,68 @@
 
 package com.openexchange.chronos.provider;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.openexchange.chronos.Transp;
-
 /**
- * {@link CalendarFolder}
+ * {@link DefaultCalendarFolderProperties}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public enum DefaultCalendarFolderProperties {
+
+    /** Subscribe flag */
+    SUBSCRIBED(DefaultCalendarFolderProperties.SUBSCRIBED_FLAG, Boolean.FALSE),
+
+    /** Sync flag */
+    SYNCED(DefaultCalendarFolderProperties.SYNC_FLAG, Boolean.FALSE),
+
+    /** Potential own display name of the folder */
+    DISPLAYNAME(DefaultCalendarFolderProperties.OWN_DISPLAYNAME, ""),
+
+    /** Potential own description for the folder */
+    DESCRIPTION(DefaultCalendarFolderProperties.OWN_DESCRIPTION, "")
+
+    ;
+
+    public static final String SUBSCRIBED_FLAG = "subscribed";
+    public static final String SYNC_FLAG = "sync";
+    public static final String OWN_DISPLAYNAME = "ownDisplayname";
+    public static final String OWN_DESCRIPTION = "ownDescription";
+
+    private final String pName;
+    private final Object defaultValue;
 
     /**
-     * Gets the identifier of the calendar folder.
-     *
-     * @return The folder identifier
+     * Initializes a new {@link DefaultCalendarFolderProperties}.
      */
-    String getId();
+    private DefaultCalendarFolderProperties(String pName, Object defaultValue) {
+        this.pName = pName;
+        this.defaultValue = defaultValue;
+    }
 
     /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
-
-    /**
-     * Gets the permissions
-     *
-     * @return
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the calendar description.
-     *
-     * @return The calendar description, or <code>null</code> if not defined
-     */
-    String getDescription();
-
-    /**
-     * Gets the calendar color.
-     *
-     * @return The calendar color, or <code>null</code> if not defined
-     */
-    String getColor();
-
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
-
-    /**
-     * Gets a value indicating whether the calendar object resources in the calendar will affect the owner's free/busy time information or not.
-     *
-     * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
-     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
-     */
-    Transp getTransparency();
-    
-    
-    /**
-     * Get additional properties the CalendarFolder might have
+     * Get the property represented by its synonym
      * 
-     * @return A {@link Set} of {@link CalendarFolderProperty}. See also {@link DefaultCalendarFolderProperties}.
+     * @return The property
      */
-    Set<CalendarFolderProperty> getProperties();
+    public CalendarFolderProperty getProperty() {
+        return new CalendarFolderProperty(pName, defaultValue);
+    }
 
+    /**
+     * The name of the property
+     * 
+     * @return The name
+     */
+    public String getPropertyName() {
+        return pName;
+    }
+
+    /**
+     * The default value of the property
+     * 
+     * @return The default value
+     */
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

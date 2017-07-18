@@ -51,8 +51,10 @@ package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.CalendarPermission;
 
 /**
@@ -113,4 +115,8 @@ public class IDManglingFolder implements CalendarFolder {
         return delegate.getTransparency();
     }
 
+    @Override
+    public Set<CalendarFolderProperty> getProperties() {
+        return delegate.getProperties();
+    }
 }
