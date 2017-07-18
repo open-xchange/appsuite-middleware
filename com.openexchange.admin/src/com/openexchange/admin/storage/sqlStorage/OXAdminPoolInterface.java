@@ -66,6 +66,8 @@ public interface OXAdminPoolInterface {
 
     Connection getReadConnectionForConfigDB() throws PoolException;
 
+    Connection getWriteConnectionForConfigDBNoTimeout() throws PoolException;
+
     Connection getConnectionForContext(int contextId) throws PoolException;
 
     Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
@@ -78,6 +80,8 @@ public interface OXAdminPoolInterface {
     boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException;
 
     boolean pushReadConnectionForConfigDB(Connection con) throws PoolException;
+
+    boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException;
 
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
 

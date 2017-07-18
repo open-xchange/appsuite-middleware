@@ -115,6 +115,16 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public Connection getWriteConnectionForConfigDBNoTimeout() throws PoolException {
+        try {
+            return getService().getForUpdateTask();
+        } catch (OXException e) {
+            log.error("Error pickup no-timeout configdb database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
     public Connection getConnectionForContext(int contextId) throws PoolException {
         try {
             return getService().getWritable(contextId);
@@ -195,6 +205,24 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             throw new PoolException(e.getMessage());
         } finally {
             getService().backWritable(con);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing no-timeout configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backForUpdateTask(con);
         }
         return true;
     }
