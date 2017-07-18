@@ -249,8 +249,8 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
     }
 
     protected static Date parseDate(AJAXRequestData request, String param) throws OXException {
-        Long parameter = request.getParameter(param, Long.class, false);
-        return new Date(parameter);
+        String parameter = request.getParameter(param, String.class, false);
+        return new Date(DateTime.parse(TimeZone.getTimeZone("UTC"), parameter).getTimestamp());
     }
 
 }
