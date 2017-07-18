@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -135,10 +134,28 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public long countEvents() throws OXException {
+        return countEvents(null);
+    }
+
+    @Override
+    public long countEvents(SearchTerm<?> searchTerm) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return countEvents(connection);
+            return countEvents(connection, false, searchTerm);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public long countEventTombstones(SearchTerm<?> searchTerm) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return countEvents(connection, true, searchTerm);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -354,16 +371,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private long countEvents(Connection connection) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT COUNT(*) FROM calendar_event WHERE cid=? AND account=?;")) {
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, accountId);
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? l(resultSet.getLong(1)) : 0L;
-            }
-        }
-    }
-
     private int deleteEvent(Connection connection, String id) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_event WHERE cid=? AND account=? AND id=?;")) {
             stmt.setInt(1, context.getContextId());
@@ -568,6 +575,27 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         return events;
+    }
+
+    private long countEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm) throws SQLException, OXException {
+        SearchAdapter adapter = new SearchAdapter(context.getContextId(), null, "e.", "a.").append(searchTerm);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT COUNT (DISTINCT id) FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e ")
+        ;
+        if (adapter.usesAttendees()) {
+            stringBuilder.append(" LEFT JOIN ").append(deleted ? "calendar_attendee_tombstone" : "calendar_attendee").append(" AS a ")
+            .append("ON e.cid=a.cid AND e.account=a.account AND e.id=a.event");
+        }
+        stringBuilder.append(" WHERE e.cid=? AND e.account=? AND ").append(adapter.getClause()).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            adapter.setParameters(stmt, parameterIndex++);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? resultSet.getLong(1) : 0;
+            }
+        }
     }
 
     private List<Event> selectOverlappingEvents(Connection connection, int[] entities, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {

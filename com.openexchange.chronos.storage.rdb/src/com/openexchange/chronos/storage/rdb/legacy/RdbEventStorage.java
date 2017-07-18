@@ -51,7 +51,6 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -131,10 +130,28 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public long countEvents() throws OXException {
+        return countEvents(null);
+    }
+
+    @Override
+    public long countEvents(SearchTerm<?> searchTerm) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return countEvents(connection);
+            return countEvents(connection, false, context.getContextId(), searchTerm);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public long countEventTombstones(SearchTerm<?> searchTerm) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return countEvents(connection, true, context.getContextId(), searchTerm);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -348,14 +365,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private long countEvents(Connection connection) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SELECT COUNT(*) FROM prg_dates WHERE cid=?;")) {
-            stmt.setInt(1, context.getContextId());
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? l(resultSet.getLong(1)) : 0L;
-            }
-        }
-    }
     private static int deleteEvent(Connection connection, int contextID, int objectID) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates WHERE cid=? AND intfield01=?;")) {
             stmt.setInt(1, contextID);
@@ -484,6 +493,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         return events;
+    }
+
+    private long countEvents(Connection connection, boolean deleted, int contextID, SearchTerm<?> searchTerm) throws SQLException, OXException {
+        SearchAdapter adapter = new SearchAdapter(contextID, null, "d.", "m.", "e.").append(searchTerm);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT COUNT (DISTINCT d.intfield01) FROM ").append(deleted ? "del_dates" : "prg_dates").append(" AS d ")
+        ;
+        if (adapter.usesInternalAttendees()) {
+            stringBuilder.append("LEFT JOIN ").append(deleted ? "del_dates_members" : "prg_dates_members").append(" AS m ")
+                .append("ON d.cid=m.cid AND d.intfield01=m.object_id ");
+        }
+        if (adapter.usesExternalAttendees()) {
+            stringBuilder.append("LEFT JOIN ").append(deleted ? "delDateExternal" : "dateExternal").append(" AS e ")
+                .append("ON d.cid=e.cid AND d.intfield01=e.objectId ");
+        }
+        stringBuilder.append("WHERE d.cid=? ").append("AND ").append(adapter.getClause()).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            adapter.setParameters(stmt, parameterIndex);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? resultSet.getLong(1) : 0;
+            }
+        }
     }
 
     private List<Event> selectOverlappingEvents(Connection connection, int contextID, int[] userIDs, int[] otherEntityIDs, boolean includeTransparent, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {

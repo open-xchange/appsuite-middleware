@@ -88,6 +88,22 @@ public interface EventStorage {
     long countEvents() throws OXException;
 
     /**
+     * Counts the number of events matching specific search criteria.
+     *
+     * @param searchTerm The search term to use
+     * @return The number of matching events
+     */
+    long countEvents(SearchTerm<?> searchTerm) throws OXException;
+
+    /**
+     * Counts the number of <i>tombstone</i> events matching specific search criteria.
+     *
+     * @param searchTerm The search term to use
+     * @return The number of matching events
+     */
+    long countEventTombstones(SearchTerm<?> searchTerm) throws OXException;
+
+    /**
      * Loads a specific event.
      *
      * @param eventId The identifier of the event to load

@@ -95,6 +95,16 @@ public class RdbEventStorage implements EventStorage {
     }
 
     @Override
+    public long countEvents(SearchTerm<?> searchTerm) throws OXException {
+        return delegate.countEvents(searchTerm);
+    }
+
+    @Override
+    public long countEventTombstones(SearchTerm<?> searchTerm) throws OXException {
+        return delegate.countEventTombstones(searchTerm);
+    }
+
+    @Override
     public Event loadEvent(String eventId, EventField[] fields) throws OXException {
         return delegate.loadEvent(eventId, fields);
     }
