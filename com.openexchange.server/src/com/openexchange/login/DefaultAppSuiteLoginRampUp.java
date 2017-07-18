@@ -91,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link DefaultAppSuiteLoginRampUp} - The default ramp-up implementation.
  * <p>
+ * Additional/extended contributions may be added through overriding {@link #getExtendedContributions()} method.
+ * <p>
  * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
  * <b>Note</b><br>
  * The passed {@link ServiceLookup} instance needs to track the following singleton services:
