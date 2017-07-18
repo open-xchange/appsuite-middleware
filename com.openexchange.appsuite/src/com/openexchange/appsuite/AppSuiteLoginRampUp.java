@@ -49,17 +49,8 @@
 
 package com.openexchange.appsuite;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppSuiteLoginRampUp}
