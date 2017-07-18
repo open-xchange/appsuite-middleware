@@ -1113,6 +1113,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         int numberOfSchemas = 0;
         if (createSchemas) {
+            if (false == master) {
+                throw new StorageException("Schemas cannot be created for slave database hosts.");
+            }
+
             numberOfSchemas = optNumberOfSchemas;
             if (numberOfSchemas <= 0) {
                 // Number of schemas not specified; try to auto-determine
@@ -1129,7 +1133,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection con = null;
         boolean rollback = false;
         try {
-            con = cache.getWriteConnectionForConfigDB();
+            con = createSchemas ? cache.getWriteConnectionForConfigDBNoTimeout() : cache.getWriteConnectionForConfigDB();
 
             int databaseId = nextId(con);
             int clusterId = master ? nextId(con) : -1;
@@ -1156,7 +1160,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             if (con != null) {
                 try {
-                    cache.pushWriteConnectionForConfigDB(con);
+                    if (createSchemas) {
+                        cache.pushWriteConnectionForConfigDBNoTimeout(con);
+                    } else {
+                        cache.pushWriteConnectionForConfigDB(con);
+                    }
                 } catch (final PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }

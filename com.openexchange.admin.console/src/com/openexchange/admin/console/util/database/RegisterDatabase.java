@@ -90,7 +90,14 @@ public class RegisterDatabase extends DatabaseAbstraction {
 
             parseAndSetCreateAndNumberOfSchemas(parser);
 
-            // Trigger database registration
+            if (null == createSchemas || !createSchemas.booleanValue()) {
+                // Simple database registration w/o pre-creation of schemas
+                displayRegisteredMessage(oxutil.registerDatabase(db, createSchemas, numberOfSchemas, auth).getId().toString(), parser);
+                sysexit(0);
+                return;
+            }
+
+            // Trigger database registration w/ pre-creation of schemas
             final AtomicInteger dbId = new AtomicInteger(0);
             final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
             Runnable runnbable = new Runnable() {
@@ -108,8 +115,8 @@ public class RegisterDatabase extends DatabaseAbstraction {
             new Thread(ft, "Open-Xchange Database Registerer").start();
 
             // Await termination
-            System.out.print("Registering database");
-            int c = 20;
+            System.out.print("Registering database and pre-creating schemas. This may take a while");
+            int c = 68;
             while (false == ft.isDone()) {
                 System.out.print(".");
                 if (c++ >= 76) {
