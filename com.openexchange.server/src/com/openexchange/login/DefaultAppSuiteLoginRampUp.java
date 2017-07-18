@@ -484,7 +484,16 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
                             @Override
                             public Object call() throws Exception {
-                                return contribution.getResult(session, loginRequest);
+                                try {
+                                    return contribution.getResult(session, loginRequest);
+                                } catch (OXException x) {
+                                    // Omit result on error. Let the UI deal with this
+                                    handleException(x, contribution.getKey(), errors);
+                                } catch (RuntimeException x) {
+                                    // Omit result on error. Let the UI deal with this
+                                    handleException(x, contribution.getKey());
+                                }
+                                return null;
                             }
                         }));
                         extendedKeys.add(contribution.getKey());
