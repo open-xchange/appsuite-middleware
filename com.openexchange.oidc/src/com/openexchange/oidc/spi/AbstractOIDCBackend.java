@@ -49,7 +49,9 @@
 package com.openexchange.oidc.spi;
 
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
+import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
 
@@ -62,8 +64,13 @@ import com.openexchange.oidc.osgi.Services;
 public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
-    public OIDCConfig getConfig() {
+    public OIDCConfig getOIDCConfig() {
         return new OIDCConfigImpl(Services.getService(LeanConfigurationService.class));
+    }
+    
+    @Override
+    public OIDCBackendConfig getBackendConfig() {
+        return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class));
     }
     
     @Override

@@ -58,45 +58,28 @@ import com.nimbusds.openid.connect.sdk.Nonce;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class DefaultAuthenticationRequestInfo implements AuthenticationRequestInfo {
+public class DefaultAuthenticationRequestInfo implements AuthenticationRequestInfo{
 
-    private State state;
+    private String state;
     private String domainName;
     private String deepLink;
-    private Nonce nonce;
+    private String nonce;
     private Map<String, String> additionalClientInformation;
+    private String uiClientID;
 
-    public DefaultAuthenticationRequestInfo(State state, String domainName, String deepLink, Nonce nonce, Map<String, String> additionalClientInformation) {
+    //TODO QS-VS: Builder pattern
+    public DefaultAuthenticationRequestInfo(State state, String domainName, String deepLink, Nonce nonce, Map<String, String> additionalClientInformation, String uiClientID) {
         super();
-        this.state = state;
+        this.state = state.getValue();
         this.domainName = domainName;
         this.deepLink = deepLink;
-        this.nonce = nonce;
+        this.nonce = nonce.getValue();
         this.additionalClientInformation = additionalClientInformation;
-    }
-
-    public void setState(State state) {
-        this.state = state;
-    }
-
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
-    }
-
-    public void setDeepLink(String deepLink) {
-        this.deepLink = deepLink;
-    }
-
-    public void setNonce(Nonce nonce) {
-        this.nonce = nonce;
-    }
-
-    public void setAdditionalClientInformation(Map<String, String> additionalClientInformation) {
-        this.additionalClientInformation = additionalClientInformation;
+        this.uiClientID = uiClientID;
     }
 
     @Override
-    public State getState() {
+    public String getState() {
         return this.state;
     }
 
@@ -111,14 +94,18 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
     }
 
     @Override
-    public Nonce getNonce() {
-        nonce.hashCode();
+    public String getNonce() {
         return this.nonce;
     }
 
     @Override
     public Map<String, String> getAdditionalClientInformation() {
         return this.additionalClientInformation;
+    }
+
+    @Override
+    public String getUiClientID() {
+        return this.uiClientID;
     }
     
 }

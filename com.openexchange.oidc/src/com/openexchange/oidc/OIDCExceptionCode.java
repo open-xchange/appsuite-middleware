@@ -62,7 +62,9 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum OIDCExceptionCode implements OXExceptionCode {
     MISSING_BACKEND_CONFIGURATION("Unable to find a configuration for the given OpenID Backend: %1$s", Category.CATEGORY_CONFIGURATION, 1),
-    INVALID_BACKEND_PATH("Path contains invalid characters: $1$s", Category.CATEGORY_CONFIGURATION, 2);
+    INVALID_BACKEND_PATH("Path contains invalid characters: $1$s", Category.CATEGORY_CONFIGURATION, 2),
+    CORRUPTED_URI("A provided URI is corrupted: $1$s, $2$s", Category.CATEGORY_CONFIGURATION, 3),
+    UNABLE_TO_CREATE_AUTHENTICATION_REQUEST("Unable to create the authentication request, please check the provided backend configuration of backend: $1$s", Category.CATEGORY_ERROR, 4);
 
     private final String message;
     private final String displayMessage;

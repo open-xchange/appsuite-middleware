@@ -48,9 +48,8 @@
  */
 package com.openexchange.oidc.state;
 
-import java.util.UUID;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.java.util.UUIDs;
+import com.openexchange.oidc.hz.PortableAuthenticationRequest;
 
 /**
  * Contains and manages all current client states.
@@ -69,10 +68,8 @@ public class CoreStateManagement implements StateManagement {
     }
     
     @Override
-    public String addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo) {
-        String id = UUIDs.getUnformattedString(UUID.randomUUID());
-        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(id, authenticationRequestInfo);
-        return id;
+    public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo) {
+        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo));
     }
 
 }

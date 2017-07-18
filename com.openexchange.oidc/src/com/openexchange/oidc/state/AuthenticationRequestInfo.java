@@ -65,7 +65,7 @@ public interface AuthenticationRequestInfo {
      * 
      * @return The state of the client. Never <code>null</code>
      */
-    State getState();
+    String getState();
     
     /**
      * The domain name, the request is coming from.
@@ -86,7 +86,7 @@ public interface AuthenticationRequestInfo {
      * 
      * @return The nonce for the client. Never <code>null</code>
      */
-    Nonce getNonce();
+    String getNonce();
     
     /**
      * The request potentially contained additional information about
@@ -95,4 +95,6 @@ public interface AuthenticationRequestInfo {
      * @return A map with all additional client information. Never <code>null</code>
      */
     Map<String, String> getAdditionalClientInformation();
+    
+    String getUiClientID();
 }

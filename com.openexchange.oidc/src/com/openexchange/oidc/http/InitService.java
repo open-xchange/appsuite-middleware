@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCWebSSOProvider;
@@ -100,11 +101,10 @@ public class InitService extends OIDCServlet {
             String redirectURI = getRedirectURI(flow, httpRequest);
             buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
         } catch (Exception e) {
-            // TODO: handle exception
-        }
+            LOG.error(e.getCause().getMessage());        }
     }
 
-    private String getRedirectURI(String flow, HttpServletRequest httpRequest) {
+    private String getRedirectURI(String flow, HttpServletRequest httpRequest) throws OXException {
         String redirectUri = "";
         if (flow.equals("login")) {
             redirectUri = provider.getLoginRedirectRequest(httpRequest);
@@ -120,7 +120,7 @@ public class InitService extends OIDCServlet {
             httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
             httpResponse.setContentType("application/json");
             PrintWriter writer = httpResponse.getWriter();
-            writer.write("{\"redirect_uri\":\"" + redirectURI + "\"}");
+            writer.write("{\"redirect\":\"" + redirectURI + "\"}");
             writer.flush();
         }
     }

@@ -105,7 +105,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
 
         if (backends.addIfAbsent(oidcBackend)) {
             try {
-                OIDCConfig config = oidcBackend.getConfig();
+                OIDCConfig config = oidcBackend.getOIDCConfig();
                 String path = oidcBackend.getPath();
                 if (config == null) {
                     throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(path.isEmpty() ? "No path available" : path);
@@ -113,7 +113,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(config, oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)));
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)));
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 registerServlet(servlets, httpService, getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, services, config), "init");

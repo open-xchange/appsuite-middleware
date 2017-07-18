@@ -46,8 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.spi;
 
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 
 /**
@@ -63,7 +65,9 @@ public interface OIDCBackend {
      * 
      * @return The configuration, never <code>null</code>
      */
-    OIDCConfig getConfig();
+    OIDCConfig getOIDCConfig();
+
+    OIDCBackendConfig getBackendConfig();
 
     /**
      * Get the OpenID part of this backends servlet path.

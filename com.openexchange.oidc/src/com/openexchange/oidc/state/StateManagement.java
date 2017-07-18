@@ -65,6 +65,6 @@ public interface StateManagement {
      * @param args
      * @return
      */
-    String addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
+    void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
 
 }

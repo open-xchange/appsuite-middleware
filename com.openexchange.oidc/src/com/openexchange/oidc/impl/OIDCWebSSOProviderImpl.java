@@ -48,15 +48,26 @@
  */
 package com.openexchange.oidc.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
-import com.openexchange.oidc.OIDCConfig;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
+import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
@@ -72,32 +83,84 @@ import com.openexchange.oidc.state.StateManagement;
 public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
-    private final OIDCConfig config;
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
     
     
-    public OIDCWebSSOProviderImpl(OIDCConfig config, OIDCBackend backend, StateManagement stateManagement) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
         super();
-        this.config = config;
         this.backend = backend;
         this.stateManagement = stateManagement;
     }
     
     @Override
-    public String getLoginRedirectRequest(HttpServletRequest httpRequest) {
+    public String getLoginRedirectRequest(HttpServletRequest httpRequest) throws OXException{
         State state = new State();
         Nonce nonce = new Nonce();
         
-        //TODO QS-VS get the needed information from the request
-        String deepLink = "";
-        String hostname = "";
+        String requestString = getRequestString(state, nonce);
+        
+        if (requestString.isEmpty()) {
+            throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
+        }
+        
+        addRequestToStateManager(httpRequest, state, nonce);
+        
+        return requestString;
+    }
+    
+    private String getRequestString(State state, Nonce nonce) throws OXException {
+        String requestString = "";
+        String authorizationEndpoint = backend.getBackendConfig().getAuthorizationEndpoint();
+        String redirectURI = backend.getBackendConfig().getRedirectURI();
+        try {
+            AuthenticationRequest request = new AuthenticationRequest(
+                new URI(authorizationEndpoint),
+                new ResponseType(backend.getOIDCConfig().getResponseType()),
+                Scope.parse(backend.getOIDCConfig().getScope()),
+                new ClientID(backend.getBackendConfig().getClientID()),
+                new URI(redirectURI),
+                state,
+                nonce);
+            requestString = request.toURI().toString();
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.CORRUPTED_URI.create(e, authorizationEndpoint, redirectURI);
+        }
+        return requestString;
+    }
+    
+    private void addRequestToStateManager(HttpServletRequest httpRequest, State state, Nonce nonce) {
+        String deepLink = httpRequest.getParameter("deep_link");
+        String uiClientID = getUiClient(httpRequest);
+        String hostname = getDomainName(Services.getService(HostnameService.class), httpRequest);
         Map<String, String> additionalClientInformation = new HashMap<>();
         
-        AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation);
-        String authRequestHzID = stateManagement.addAuthenticationRequest(authenticationRequestInfo);
-        
-        return null;
+        AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation, uiClientID);
+        stateManagement.addAuthenticationRequest(authenticationRequestInfo);
     }
+    
+    private String getUiClient(HttpServletRequest httpRequest) {
+        String uiClientID = httpRequest.getParameter("client");
+        
+        if (uiClientID == null || uiClientID.isEmpty()) {
+           
+            LoginConfiguration loginConfiguration =  LoginServlet.getLoginConfiguration();
+            uiClientID = loginConfiguration.getDefaultClient();
+        }
+        
+        return uiClientID;
+    }
+    
+    private String getDomainName(HostnameService hostnameService, HttpServletRequest httpRequest) {
+        if (hostnameService == null) {
+            return httpRequest.getServerName();
+        }
 
+        String hostname = hostnameService.getHostname(-1, -1);
+        if (hostname == null) {
+            return httpRequest.getServerName();
+        }
+
+        return hostname;
+    }
 }
