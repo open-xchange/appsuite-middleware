@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-17 12:40+0000\n"
+"POT-Creation-Date: 2017-07-18 07:21+0000\n"
 "PO-Revision-Date: 2016-10-19 02:51+0000\n"
 "Last-Translator: batuyanga <batuyanga@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3529,6 +3529,20 @@ msgid ""
 "%2$s in folder %3$s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
+msgid "Could not create a proper name for the export file."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
+msgid "Not all of the objects could be imported due to a configured limitation"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
+msgid ""
+"%1$sd warnings when importing file and not all of the objects could be "
+"imported due to a configured limitation"
+msgstr ""
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -4792,6 +4806,10 @@ msgstr ""
 msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
+msgid "The object could not be stored due to a configured limitation"
 msgstr ""
 
 #. You do not have a valid session. Please login again.
@@ -7878,7 +7896,9 @@ msgstr ""
 #. * Folder "%1$s" has been closed. Probably your request took too long.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
-msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+msgid ""
+"Lost connection to mail server. Probably your request took too long. Please "
+"try again later."
 msgstr ""
 
 #. *
@@ -7886,8 +7906,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
-"took too long."
+"Connection closed to mail server %2$s. Probably your request took too long. "
+"Please try again later."
 msgstr ""
 
 #. *
@@ -7978,14 +7998,14 @@ msgstr ""
 #. * Lost connection to mail server.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
-msgid "Lost connection to mail server."
+msgid "Lost connection to mail server. Please try again later."
 msgstr ""
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
-msgid "Connection closed to mail server %1$s."
+msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
 
 #. *
@@ -7994,7 +8014,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
-"attempting to connect."
+"attempting to connect. Please try again later."
 msgstr ""
 
 #. *
@@ -8002,14 +8022,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid ""
-"The connection to remote server %1$s timed out while awaiting the response."
+"The connection to remote server %1$s timed out while awaiting the response. "
+"Please try again later."
 msgstr ""
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid "Mail server %1$s unexpectedly closed connection."
+msgid ""
+"Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
 
 #. *
@@ -8060,7 +8082,9 @@ msgstr ""
 
 #. Timeout while trying to send to the following recipient: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
-msgid "Timeout while trying to send to the following recipient: %1$s"
+msgid ""
+"Timeout while trying to send to the following recipient: %1$s. Please try "
+"again later."
 msgstr ""
 
 #. The message advertising that everything is fine with checked account
@@ -8601,6 +8625,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessages.java:82
 msgid "Authentication failed for user name: %1$s"
+msgstr ""
+
+#. * The string constant for unknown location; <code>"unknown location"</code>
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:64
+msgid "unknown location"
+msgstr ""
+
+#. Session not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/exception/SessionManagementExceptionMessages.java:64
+msgid "Session not found."
 msgstr ""
 
 #. No session found for identifier: %1$s
@@ -9632,7 +9666,7 @@ msgstr ""
 
 #. A XING error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:62
-msgid "A XING error occurred: %1$s"
+msgid "Unexpected error returned by XING service."
 msgstr ""
 
 #. The XING resource does not exist: %1$s
