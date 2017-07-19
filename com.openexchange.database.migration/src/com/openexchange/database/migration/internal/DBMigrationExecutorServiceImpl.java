@@ -130,8 +130,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = migration.getConnectionProvider().get();
-        	liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
-        	return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
+            return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
             if (exception instanceof OXException) {
                 throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
@@ -147,10 +147,10 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
                 throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
             }
         } finally {
-        	LiquibaseHelper.cleanUpLiquibase(liquibase);
-        	if (null != connection) {
-        	    migration.getConnectionProvider().back(connection);
-        	}
+            LiquibaseHelper.cleanUpLiquibase(liquibase);
+            if (null != connection) {
+                migration.getConnectionProvider().back(connection);
+            }
         }
     }
 

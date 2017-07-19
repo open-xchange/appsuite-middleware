@@ -108,11 +108,6 @@ public class DBMigrationExecutor implements Runnable {
                     LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
                     scheduledExecution.setDone(null);
                     notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
-                    try {
-                        connectionProvider.backAfterReading(connectionProvider.get());
-                    } catch (OXException e) {
-                        LOG.error("", e);
-                    }
                     continue;
                 }
             } catch (ValidationFailedException validationFailedException) {
@@ -232,11 +227,12 @@ public class DBMigrationExecutor implements Runnable {
      * @throws ValidationFailedException
      */
     private static boolean needsUpdate(ScheduledExecution scheduledExecution) throws ValidationFailedException {
+        DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
         Liquibase liquibase = null;
         boolean releaseLocks = true;
         Connection connection = null;
         try {
-            connection = scheduledExecution.getConnectionProvider().get();
+            connection = connectionProvider.get();
             liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
             if (false == scheduledExecution.isRollback()) {
                 List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
@@ -252,6 +248,9 @@ public class DBMigrationExecutor implements Runnable {
                 LiquibaseHelper.cleanUpLiquibase(liquibase, releaseLocks);
             } catch (Exception e) {
                 LOG.warn("", e);
+            }
+            if (null != connection) {
+                connectionProvider.back(connection);
             }
         }
         return true;
