@@ -84,11 +84,11 @@ public abstract class DateTimeMapping<O> extends DefaultDbMultiMapping<DateTime,
         if (null == value) {
             statement.setNull(parameterIndex, Types.TIMESTAMP);
             statement.setNull(parameterIndex + 1, Types.VARCHAR);
-            statement.setNull(parameterIndex + 2, Types.INTEGER);
+            statement.setNull(parameterIndex + 2, Types.BOOLEAN);
         } else {
             statement.setTimestamp(parameterIndex, new Timestamp(value.getTimestamp()));
             statement.setString(parameterIndex + 1, null == value.getTimeZone() ? null : value.getTimeZone().getID());
-            statement.setInt(parameterIndex + 2, value.isAllDay() ? 1 : 0);
+            statement.setBoolean(parameterIndex + 2, value.isAllDay());
         }
         return 3;
     }

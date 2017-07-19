@@ -120,7 +120,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
-                "allDay INT4 UNSIGNED DEFAULT NULL," +
+                "allDay BOOLEAN DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
@@ -167,7 +167,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
-                "allDay INT4 UNSIGNED DEFAULT NULL," +
+                "allDay BOOLEAN DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
@@ -266,7 +266,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
-                "allDay TINYINT DEFAULT NULL," +
+                "allDay BOOLEAN DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "organizer VARCHAR(767) DEFAULT NULL," +
@@ -292,7 +292,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
-                "allDay TINYINT DEFAULT NULL," +
+                "allDay BOOLEAN DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
