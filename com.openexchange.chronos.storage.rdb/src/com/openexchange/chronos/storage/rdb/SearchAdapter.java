@@ -127,12 +127,14 @@ public class SearchAdapter {
      * @return A self reference
      */
     public SearchAdapter append(SearchTerm<?> term) throws OXException {
-        if (SingleSearchTerm.class.isInstance(term)) {
-            append((SingleSearchTerm) term);
-        } else if (CompositeSearchTerm.class.isInstance(term)) {
-            append((CompositeSearchTerm) term);
-        } else {
-            throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+        if (null != term) {
+            if (SingleSearchTerm.class.isInstance(term)) {
+                append((SingleSearchTerm) term);
+            } else if (CompositeSearchTerm.class.isInstance(term)) {
+                append((CompositeSearchTerm) term);
+            } else {
+                throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
+            }
         }
         return this;
     }
