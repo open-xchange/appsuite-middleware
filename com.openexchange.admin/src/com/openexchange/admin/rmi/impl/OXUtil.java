@@ -384,11 +384,45 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new NoSuchDatabaseException(e);
         }
 
-        db = tool.loadDatabaseById(db.getId()); // Implicitly checks existence
+        db = tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
 
         int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
         List<String> createdSchemas = oxutil.createDatabaseSchemas(db, iOptNumberOfSchemas);
         return createdSchemas.toArray(new String[createdSchemas.size()]);
+    }
+
+    @Override
+    public void deleteSchema(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(db);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+
+        if (null == db.getScheme()) {
+            throw new InvalidDataException("Schema not specified");
+        }
+
+        basicauth.doAuthentication(auth);
+
+        log.debug(db.toString());
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchDatabaseException(e);
+        }
+
+        Database existing = tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
+
+        if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
+            throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+        }
+
+        existing.setScheme(db.getScheme());
+        oxutil.deleteDatabaseSchema(existing);
     }
 
     @Override

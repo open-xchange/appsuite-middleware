@@ -131,6 +131,9 @@ case "${BNAME}" in
     "createschemas")
     ACTION="util.database.CreateSchemas"
     ;;
+    "deleteemptyschema")
+    ACTION="util.database.DeleteEmptySchema"
+    ;;
     "registerfilestore")
     ACTION="util.filestore.RegisterFilestore"
     ;;

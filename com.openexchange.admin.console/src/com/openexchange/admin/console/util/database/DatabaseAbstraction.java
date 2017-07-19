@@ -344,7 +344,11 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     }
 
     protected void setDatabaseSchemaOption(final AdminParser parser) {
-        this.schemaOption = setLongOpt(parser, OPT_NAME_SCHEMA_LONG, "The optional schema name of the database.", true, false);
+        setDatabaseSchemaOption(parser, false);
+    }
+
+    protected void setDatabaseSchemaOption(final AdminParser parser, boolean required) {
+        this.schemaOption = setLongOpt(parser, OPT_NAME_SCHEMA_LONG, "The optional schema name of the database.", true, required);
     }
 
     protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {

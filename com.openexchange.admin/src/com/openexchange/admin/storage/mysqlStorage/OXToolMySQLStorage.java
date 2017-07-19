@@ -1730,6 +1730,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean schemaInUse(int pool_id, String schemaName) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            stmt = con.prepareStatement("SELECT 1 FROM context_server2db_pool WHERE (write_db_pool_id = ? OR read_db_pool_id = ?) AND db_schema=?");
+            stmt.setInt(1, pool_id);
+            stmt.setInt(2, pool_id);
+            stmt.setString(3, schemaName);
+            rs = stmt.executeQuery();
+
+            return rs.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException {
         int context_id = ctx.getId().intValue();
         Connection con = null;

@@ -814,42 +814,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public void deleteDatabase(final Database db) throws StorageException {
-        Connection con = null;
-        boolean rollback = false;
-        try {
-            con = cache.getWriteConnectionForConfigDB();
-            con.setAutoCommit(false);
-            rollback = true;
-
-            cache.getPool().lock(con, db.getId().intValue());
-            OXUtilMySQLStorageCommon.deleteDatabase(db, con);
-
-            con.commit();
-            rollback = false;
-        } catch (PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        } catch (SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            if (rollback) {
-                rollback(con);
-            }
-
-            autocommit(con);
-            if (con != null) {
-                try {
-                    cache.pushWriteConnectionForConfigDB(con);
-                } catch (final PoolException exp) {
-                    LOG.error("Error pushing configdb connection to pool!", exp);
-                }
-            }
-        }
-    }
-
-    @Override
     public void deleteMaintenanceReason(final int[] reason_ids) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1090,6 +1054,104 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (rollback) {
                 rollback(con);
             }
+        }
+    }
+
+    @Override
+    public void deleteDatabaseSchema(Database db) throws StorageException {
+        if (null == db.getId()) {
+            throw new StorageException("ID not set in given Database instance");
+        }
+        if (null == db.getScheme()) {
+            throw new StorageException("Schema not set in given Database instance");
+        }
+
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getWriteConnectionForConfigDBNoTimeout();
+
+            int newCount = Integer.MAX_VALUE; // Should be greater than CONTEXTS_PER_SCHEMA
+            if (tryUpdateDBSchemaCounter(0, newCount, db, con)) {
+                con.setAutoCommit(false);
+                rollback = true;
+
+                // Acquire lock
+                cache.getPool().lock(con, db.getId().intValue());
+
+                // Check if counter still matches
+                if (newCount != readDBSchemaCounter(db, con)) {
+                    throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+                }
+
+                // Delete the schema from database host
+                OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+
+                con.commit();
+                rollback = false;
+            } else {
+                boolean exists = OXUtilMySQLStorageCommon.existsDatabase(db);
+                if (readDBSchemaCounter(db, con) < 0) {
+                    // Does not exist
+                    if (exists) {
+                        throw new StorageException("Inconsisten count value detected for Schema \"" + db.getScheme() + "\" of database " + db.getId() + ". Consider running 'checkcountsconsistency' tool.");
+                    }
+                } else {
+                    if (false == exists) {
+                        throw new StorageException("Inconsisten count value detected for Schema \"" + db.getScheme() + "\" of database " + db.getId() + ". Consider running 'checkcountsconsistency' tool.");
+                    }
+                }
+
+                throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+            }
+        } catch (PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            if (con != null) {
+                try {
+                    cache.pushWriteConnectionForConfigDBNoTimeout(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private boolean tryUpdateDBSchemaCounter(int expected, int update, Database db, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=? WHERE db_pool_id=? AND schemaname=? AND count=?");
+            stmt.setInt(1, update);
+            stmt.setInt(2, i(db.getId()));
+            stmt.setString(3, db.getScheme());
+            stmt.setInt(4, expected);
+            boolean success = stmt.executeUpdate() > 0;
+            closeSQLStuff(stmt);
+            stmt = null;
+            return success;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private int readDBSchemaCounter(Database db, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT count FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+            stmt.setInt(1, i(db.getId()));
+            stmt.setString(2, db.getScheme());
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -3290,13 +3352,21 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     private boolean tryIncrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException {
+        return tryUpdateDBPoolCounter(true, db, con);
+    }
+
+    private boolean tryDecrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException {
+        return tryUpdateDBPoolCounter(false, db, con);
+    }
+
+    private boolean tryUpdateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             // Try to update counter
             String schema = db.getScheme();
             if (null == schema) {
                 stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=? WHERE db_pool_id=? AND count=?");
-                stmt.setInt(1, db.getCount() + 1);
+                stmt.setInt(1, increment ? db.getCount() + 1 : db.getCount() - 1);
                 stmt.setInt(2, i(db.getId()));
                 stmt.setInt(3, db.getCount());
                 return stmt.executeUpdate() > 0;
@@ -3304,7 +3374,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             int schemaCount = db.getSchemaCount();
             stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=? WHERE db_pool_id=? AND schemaname=? AND count=?");
-            stmt.setInt(1, schemaCount + 1);
+            stmt.setInt(1, increment ? schemaCount + 1 : schemaCount - 1);
             stmt.setInt(2, i(db.getId()));
             stmt.setString(3, schema);
             stmt.setInt(4, schemaCount);
@@ -3316,7 +3386,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 return false;
             }
 
-            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count+1 WHERE db_pool_id=?");
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? "+" : "-") + "1 WHERE db_pool_id=?");
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
             return true;

@@ -115,8 +115,19 @@ public class RegisterDatabase extends DatabaseAbstraction {
             new Thread(ft, "Open-Xchange Database Registerer").start();
 
             // Await termination
-            System.out.print("Registering database and pre-creating schemas. This may take a while");
-            int c = 68;
+            String infoMessage;
+            if (null == numberOfSchemas || numberOfSchemas.intValue() <= 0) {
+                infoMessage = "Registering database " + dbname + " and pre-creating schemas. This may take a while";
+            } else {
+                int numSchemas = numberOfSchemas.intValue();
+                if (1 == numSchemas) {
+                    infoMessage = "Registering database " + dbname + " and pre-creating 1 schema. This may take a while";
+                } else {
+                    infoMessage = "Registering database " + dbname + " and pre-creating " + numSchemas + " schemas. This may take a while";
+                }
+            }
+            System.out.print(infoMessage);
+            int c = infoMessage.length();
             while (false == ft.isDone()) {
                 System.out.print(".");
                 if (c++ >= 76) {

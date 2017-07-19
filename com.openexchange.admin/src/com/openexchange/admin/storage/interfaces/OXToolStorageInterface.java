@@ -477,6 +477,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
 
+    public abstract boolean schemaInUse(int pool_id, String schemaName) throws StorageException;
+
     public abstract void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException;
 
     public final boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {

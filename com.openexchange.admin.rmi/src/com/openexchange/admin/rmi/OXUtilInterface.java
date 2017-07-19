@@ -256,6 +256,19 @@ public interface OXUtilInterface extends Remote {
     public String[] createSchemas(Database db, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
 
     /**
+     * Deletes an existing schema from given database host.
+     *
+     * @param db The database host and {@link Database#getScheme() scheme}
+     * @param credentials Credentials for authenticating against server
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If schemas cannot be created
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws NoSuchDatabaseException If no such database exists
+     */
+    public void deleteSchema(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
+
+    /**
      * Register a new database to the system.
      * HINT: Use unregisterDatabase to remove/unregister.
      *

@@ -49,10 +49,6 @@
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
@@ -64,10 +60,10 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class CreateSchemas extends DatabaseAbstraction {
+public class DeleteEmptySchema extends DatabaseAbstraction {
 
-    public CreateSchemas(final String[] args2) {
-        final AdminParser parser = new AdminParser("createschemas");
+    public DeleteEmptySchema(final String[] args2) {
+        final AdminParser parser = new AdminParser("deleteemptyschema");
         setOptions(parser);
 
         String successtext = null;
@@ -82,60 +78,13 @@ public class CreateSchemas extends DatabaseAbstraction {
             final Database db = new Database();
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
-            parseAndSetNumberOfSchemas(parser);
+            parseAndSetSchema(parser, db);
 
-            successtext = nameOrIdSet(this.dbid, this.dbname, "database");
+            successtext = nameOrIdSet(this.dbid, this.dbname, "database schema");
 
-            // Trigger creation of schemas
-            final AtomicReference<String[]> createdSchemas = new AtomicReference<>(null);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
-            Runnable runnbable = new Runnable() {
+            oxutil.deleteSchema(db, auth);
 
-                @Override
-                public void run() {
-                    try {
-                        createdSchemas.set(oxutil.createSchemas(db, numberOfSchemas, auth));
-                    } catch (Exception e) {
-                        errorRef.set(e);
-                    }
-                }
-            };
-            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
-            new Thread(ft, "Open-Xchange Database Schema Creator").start();
-
-            // Await termination
-            String infoMessage;
-            if (null == numberOfSchemas || numberOfSchemas.intValue() <= 0) {
-                infoMessage = "Creating schemas in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
-            } else {
-                int numSchemas = numberOfSchemas.intValue();
-                if (1 == numSchemas) {
-                    infoMessage = "Creating 1 schema in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
-                } else {
-                    infoMessage = "Creating "+numSchemas+" schemas in database " + (null == dbid ? dbname : dbid) + ". This may take a while";
-                }
-            }
-            System.out.print(infoMessage);
-            int c = infoMessage.length();
-            while (false == ft.isDone()) {
-                System.out.print(".");
-                if (c++ >= 76) {
-                    c = 0;
-                    System.out.println();
-                }
-                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
-            }
-            System.out.println();
-
-            // Check for error
-            Exception error = errorRef.get();
-            if (null != error) {
-                throw error;
-            }
-
-            // Success..
-            String[] schemas = createdSchemas.get();
-            System.out.println(schemas.length + " schemas successfully created for database " + (null == dbid ? dbname : dbid));
+            System.out.println("Schema \"" + db.getScheme() + "\" successfully deleted from database " + (null == dbid ? dbname : dbid));
 
             sysexit(0);
         } catch (final Exception e) {
@@ -146,11 +95,11 @@ public class CreateSchemas extends DatabaseAbstraction {
 
     @Override
     protected String getObjectName() {
-        return "database schemas";
+        return "database schema";
     }
 
     public static void main(final String args[]) {
-        new CreateSchemas(args);
+        new DeleteEmptySchema(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -159,6 +108,6 @@ public class CreateSchemas extends DatabaseAbstraction {
         setDatabaseIDOption(parser);
         setDatabaseNameOption(parser, NeededQuadState.eitheror);
 
-        setNumberOfSchemasOption(parser);
+        setDatabaseSchemaOption(parser, true);
     }
 }

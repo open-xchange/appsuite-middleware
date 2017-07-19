@@ -396,6 +396,14 @@ public abstract class OXUtilStorageInterface {
     public abstract List<String> createDatabaseSchemas(Database db, int optNumberOfSchemas) throws StorageException;
 
     /**
+     * Deletes specified empty schema from given database host.
+     *
+     * @param db A database host and schema
+     * @throws StorageException If schema cannot be deleted
+     */
+    public abstract void deleteDatabaseSchema(Database db) throws StorageException;
+
+    /**
      * Creates a new database from scratch on the given database host. Is used
      * ONLY internally at the moment.
      *
@@ -404,16 +412,6 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract void createDatabase(final Database db, Connection con) throws StorageException;
-
-    /**
-     * Delete a complete database(scheme) from the given database host. Is used
-     * ONYL internally at the moment.
-     *
-     * @param db
-     *            a database object to be deleted
-     * @throws StorageException
-     */
-    public abstract void deleteDatabase(final Database db) throws StorageException;
 
     // TODO: cutamasta: please fill javadoc comment
     /**
