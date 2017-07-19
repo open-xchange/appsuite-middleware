@@ -78,6 +78,7 @@ import net.fortuna.ical4j.model.component.VFreeBusy;
  * {@link ICalMapper}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class ICalMapper {
@@ -138,6 +139,33 @@ public class ICalMapper {
             mapping.export(freeBusyData, vFreeBusy, iCalParameters, warnings);
         }
         return vFreeBusy;
+    }
+
+    /**
+     * Exports the specified {@link CalendarAvailability} block to a {@link VAvailability} component.
+     * 
+     * @param availability The {@link CalendarAvailability} block to export
+     * @param parameters Further options to use, or <code>null</code> to stick with the defaults
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
+     * @return The exported {@link CalendarAvailability} as a {@link VAvailability} component
+     */
+    public VAvailability exportAvailability(CalendarAvailability availability, ICalParameters parameters, List<OXException> warnings) {
+        VAvailability vAvailability = new VAvailability();
+        ICalParameters icalParams = ICalUtils.getParametersOrDefault(parameters);
+        for (ICalMapping<VAvailability, CalendarAvailability> mapping : AvailabilityMappings.ALL) {
+            mapping.export(availability, vAvailability, icalParams, warnings);
+        }
+
+        // Parse the free slots/available sub-components
+        for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
+            Available available = new Available();
+            for (ICalMapping<Available, CalendarFreeSlot> mapping : AvailableMappings.ALL) {
+                mapping.export(freeSlot, available, parameters, warnings);
+            }
+            vAvailability.getAvailable().add(available);
+        }
+
+        return vAvailability;
     }
 
     /**

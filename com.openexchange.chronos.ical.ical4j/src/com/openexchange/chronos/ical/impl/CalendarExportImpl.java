@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
@@ -72,6 +73,7 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VAvailability;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Method;
@@ -169,6 +171,17 @@ public class CalendarExportImpl implements CalendarExport {
         return this;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.CalendarExport#add(com.openexchange.chronos.CalendarAvailability)
+     */
+    @Override
+    public CalendarExport add(CalendarAvailability calendarAvailability) throws OXException {
+        vCalendar.add(exportAvailability(calendarAvailability));
+        return this;
+    }
+
     @Override
     public CalendarExport add(String timeZoneID) {
         trackTimezones(timeZoneID);
@@ -252,6 +265,19 @@ public class CalendarExportImpl implements CalendarExport {
         ICalUtils.removeProperties(vFreeBusy, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         trackTimezones(freeBusyData.getStartDate(), freeBusyData.getEndDate());
         return vFreeBusy;
+    }
+
+    /**
+     * Exports the specified {@link CalendarAvailability} to a {@link VAvailability} component
+     * 
+     * @param availability The {@link CalendarAvailability} to export
+     * @return The exported {@link VAvailability} component
+     * @throws OXException if an error is occurred
+     */
+    private VAvailability exportAvailability(CalendarAvailability availability) throws OXException {
+        VAvailability vAvailability = mapper.exportAvailability(availability, parameters, warnings);
+        ICalUtils.removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        return vAvailability;
     }
 
     private boolean trackTimezones(String... timeZoneIDs) {
