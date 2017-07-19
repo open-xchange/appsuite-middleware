@@ -83,7 +83,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
     /**
      * Prepares the specified {@link List} of {@link CalendarAvailability} blocks for the storage.
      * <ul>
-     * <li>Assigns identifiers for the {@link CalendarAvailability} blocks</li>
+     * <li>Assigns identifiers for the {@link CalendarAvailability} blocks (if no identifiers are present)</li>
      * <li>Assigns identifiers for the {@link CalendarFreeSlot} blocks</li>
      * </ul>
      * 
@@ -97,7 +97,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (CalendarAvailability availability : availabilities) {
-            String availabilityId = storage.nextCalendarAvailabilityId();
+            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextCalendarAvailabilityId();
             availability.setId(availabilityId);
             availability.setCalendarUser(session.getUserId());
             availability.setLastModified(timeNow);
@@ -109,7 +109,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
             // Prepare the free slots
             for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
-                freeSlot.setId(storage.nextCalendarFreeSlotId());
+                freeSlot.setId(freeSlot.contains(FreeSlotField.id) ? freeSlot.getId() : storage.nextCalendarFreeSlotId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);

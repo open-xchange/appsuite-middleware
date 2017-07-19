@@ -58,7 +58,6 @@ import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CalendarAvailabilityStorage}
@@ -70,8 +69,8 @@ public interface CalendarAvailabilityStorage {
     /**
      * Generates the next unique identifier for inserting new {@link CalendarAvailability} data.
      * <p/>
-     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialised using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favour of an externally controlled transaction.
      *
      * @return The next unique event identifier
      * @throws OXException if the next identifier cannot be generated or any other error is occurred
@@ -81,8 +80,8 @@ public interface CalendarAvailabilityStorage {
     /**
      * Generates the next unique identifier for inserting new {@link CalendarFreeSlot} data.
      * <p/>
-     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialised using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favour of an externally controlled transaction.
      *
      * @return The next unique event identifier
      * @throws OXException if the next identifier cannot be generated or any other error is occurred
@@ -133,7 +132,7 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if the items cannot be retrieved
      */
     List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
-    
+
     /**
      * 
      * @param users
