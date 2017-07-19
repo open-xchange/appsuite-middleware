@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.caldav.mixins;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
@@ -64,22 +65,22 @@ import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link AbstractCalendarAvailability}
+ * {@link CalendarAvailability}. Defines a calendar availability mixin with the
+ * {@link CaldavProtocol#CALENDARSERVER_NS} namespace
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractCalendarAvailability extends SingleXMLPropertyMixin {
+public class CalendarAvailability extends SingleXMLPropertyMixin {
 
-    protected final GroupwareCaldavFactory factory;
+    private final GroupwareCaldavFactory factory;
 
     /**
-     * Initialises a new {@link AbstractCalendarAvailability}.
+     * Initialises a new {@link CalendarAvailability}.
      * 
-     * @param namespace
-     * @param name
+     * @param factory
      */
-    AbstractCalendarAvailability(String namespace, String name, GroupwareCaldavFactory factory) {
-        super(namespace, name);
+    public CalendarAvailability(GroupwareCaldavFactory factory) {
+        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "calendar-availability");
         this.factory = factory;
     }
 

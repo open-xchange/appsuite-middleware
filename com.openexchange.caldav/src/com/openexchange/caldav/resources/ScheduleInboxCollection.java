@@ -55,8 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.mixins.CalendarAvailabilityApple;
-import com.openexchange.caldav.mixins.CalendarAvailabilityCalendarServer;
+import com.openexchange.caldav.mixins.CalendarAvailability;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -101,7 +100,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailabilityCalendarServer(factory), new CalendarAvailabilityApple(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailability(factory));
     }
 
     @Override
@@ -191,6 +190,10 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
             ImportedCalendar importedIcal = iCalService.importICal(inputStream, iCalService.initParameters());
 
             CalendarAvailabilityService service = getFactory().getService(CalendarAvailabilityService.class);
+            List<com.openexchange.chronos.CalendarAvailability> availabilities = service.getAvailability(calendarSession);
+            if (availabilities != null && availabilities.size() > 0) {
+                service.purgeAvailabilities(calendarSession);
+            }
             service.setAvailability(calendarSession, importedIcal.getAvailabilities());
         } catch (OXException e) {
             e.printStackTrace();
