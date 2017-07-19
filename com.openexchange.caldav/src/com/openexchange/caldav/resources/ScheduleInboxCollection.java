@@ -49,12 +49,13 @@
 
 package com.openexchange.caldav.resources;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.mixins.CalendarAvailabilityCalDAV;
+import com.openexchange.caldav.mixins.CalendarAvailabilityApple;
 import com.openexchange.caldav.mixins.CalendarAvailabilityCalendarServer;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
@@ -62,13 +63,21 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
@@ -92,7 +101,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailabilityCalendarServer(factory), new CalendarAvailabilityCalDAV(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailabilityCalendarServer(factory), new CalendarAvailabilityApple(factory));
     }
 
     @Override
@@ -164,4 +173,29 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
         return Collections.emptyList();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.dav.resources.DAVCollection#internalPutProperty(com.openexchange.webdav.protocol.WebdavProperty)
+     */
+    @Override
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+        String ical = prop.getValue();
+        InputStream inputStream = null;
+        try {
+            CalendarService calendarService = getFactory().getService(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(getFactory().getSession());
+
+            ICalService iCalService = getFactory().getService(ICalService.class);
+            inputStream = new ByteArrayInputStream(ical.getBytes());
+            ImportedCalendar importedIcal = iCalService.importICal(inputStream, iCalService.initParameters());
+
+            CalendarAvailabilityService service = getFactory().getService(CalendarAvailabilityService.class);
+            service.setAvailability(calendarSession, importedIcal.getAvailabilities());
+        } catch (OXException e) {
+            e.printStackTrace();
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
 }

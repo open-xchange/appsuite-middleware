@@ -89,7 +89,7 @@ public class CreatedMapping extends ICalUtcMapping<VAvailability, CalendarAvaila
      */
     @Override
     protected void setValue(CalendarAvailability object, Date value) {
-        object.setCreated(value);
+        object.setCreated(value == null ? new Date() : value);
     }
 
     /*

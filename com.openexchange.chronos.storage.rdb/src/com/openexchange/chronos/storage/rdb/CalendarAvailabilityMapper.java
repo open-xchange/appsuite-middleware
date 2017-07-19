@@ -232,7 +232,8 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
             @Override
             public String get(CalendarAvailability object) {
-                return object.getClassification().getValue();
+                Classification classification = object.getClassification();
+                return classification == null ? null : classification.getValue();
             }
 
             @Override

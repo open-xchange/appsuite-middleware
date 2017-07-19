@@ -89,7 +89,7 @@ public class CreatedMapping extends ICalUtcMapping<Available, CalendarFreeSlot> 
      */
     @Override
     protected void setValue(CalendarFreeSlot object, Date value) {
-        object.setCreated(value);
+        object.setCreated(value == null ? new Date() : value);
     }
 
     /*
