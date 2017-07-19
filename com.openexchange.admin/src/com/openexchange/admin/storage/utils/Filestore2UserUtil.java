@@ -56,6 +56,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,17 +67,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.java.Strings;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Filestore2UserUtil}
@@ -683,7 +689,7 @@ public class Filestore2UserUtil {
 
     private static Set<FilestoreEntry> determineAllEntries(Set<PoolAndSchema> pools, final DatabaseService databaseService) throws StorageException {
         // Setup completion service
-        CompletionService<Set<FilestoreEntry>> completionService = new ThreadPoolCompletionService<Set<FilestoreEntry>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        CompletionService<Set<FilestoreEntry>> completionService = new BoundedCompletionService<Set<FilestoreEntry>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class), 10);
         int taskCount = 0;
 
         // Determine entries for each pool/schema
@@ -692,41 +698,73 @@ public class Filestore2UserUtil {
 
                 @Override
                 public Set<FilestoreEntry> call() throws StorageException {
-                    Connection con = null;
-                    PreparedStatement stmt = null;
-                    ResultSet result = null;
-                    try {
-                        con = databaseService.getNoTimeout(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
+                    int maxRunCount = 5;
+                    int runCount = 0;
+                    while (runCount < maxRunCount) {
+                        Connection con = null;
+                        PreparedStatement stmt = null;
+                        ResultSet result = null;
+                        try {
+                            con = databaseService.getNoTimeout(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
 
-                        if (!columnExists(con, "user","filestore_id")) {
-                            // This schema cannot hold users having an individual file storage assigned
-                            return Collections.emptySet();
-                        }
+                            if (!columnExists(con, "user", "filestore_id")) {
+                                // This schema cannot hold users having an individual file storage assigned
+                                return Collections.emptySet();
+                            }
 
-                        stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id>0 AND (filestore_owner=0 OR filestore_owner=id)");
-                        result = stmt.executeQuery();
+                            stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id>0 AND (filestore_owner=0 OR filestore_owner=id)");
+                            result = stmt.executeQuery();
 
-                        if (false == result.next()) {
-                            return Collections.emptySet();
-                        }
+                            if (false == result.next()) {
+                                return Collections.emptySet();
+                            }
 
-                        Set<FilestoreEntry> entries = new LinkedHashSet<FilestoreEntry>();
-                        do {
-                            entries.add(new FilestoreEntry(result.getInt(1), result.getInt(2), result.getInt(3)));
-                        } while (result.next());
-                        return entries;
-                    } catch (OXException e) {
-                        LOG.error("Pool Error", e);
-                        throw new StorageException(e);
-                    } catch (SQLException e) {
-                        LOG.error("SQL Error", e);
-                        throw new StorageException(e);
-                    } finally {
-                        closeSQLStuff(result, stmt);
-                        if (null != con) {
-                            databaseService.backNoTimeoout(poolAndSchema.getPoolId(), con);
+                            Set<FilestoreEntry> entries = new LinkedHashSet<FilestoreEntry>();
+                            do {
+                                entries.add(new FilestoreEntry(result.getInt(1), result.getInt(2), result.getInt(3)));
+                            } while (result.next());
+                            return entries;
+                        } catch (OXException e) {
+                            boolean doThrow = true;
+
+                            if (DBPoolingExceptionCodes.NO_CONNECTION.equals(e)) {
+                                SQLException sqle = DBUtils.extractSqlException(e);
+                                if (sqle instanceof SQLNonTransientConnectionException) {
+                                    SQLNonTransientConnectionException connectionException = (SQLNonTransientConnectionException) sqle;
+                                    if (isTooManyConnections(connectionException) && (++runCount < maxRunCount)) {
+                                        waitWithExponentialBackoff(runCount, 1000L);
+                                        doThrow = false;
+                                    }
+                                }
+                            }
+
+                            if (doThrow) {
+                                LOG.error("Failed to determine user-associated file storages for schema \"" + poolAndSchema.getSchema() + "\" in database " + poolAndSchema.getPoolId(), e);
+                                throw new StorageException(e);
+                            }
+                        } catch (SQLException e) {
+                            LOG.error("Failed to determine user-associated file storages for schema \"" + poolAndSchema.getSchema() + "\" in database " + poolAndSchema.getPoolId(), e);
+                            throw new StorageException(e);
+                        } finally {
+                            Databases.closeSQLStuff(result, stmt);
+                            if (null != con) {
+                                databaseService.backNoTimeoout(poolAndSchema.getPoolId(), con);
+                            }
                         }
                     }
+
+                    // Should not be reached
+                    throw new StorageException("Failed to determine user-associated file storages for schema \"" + poolAndSchema.getSchema() + "\" in database " + poolAndSchema.getPoolId());
+                }
+
+                private boolean isTooManyConnections(SQLNonTransientConnectionException connectionException) {
+                    String message = connectionException.getMessage();
+                    return null != message && Strings.asciiLowerCase(message).indexOf("too many connections") >= 0;
+                }
+
+                private void waitWithExponentialBackoff(int retryCount, long baseMillis) {
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
                 }
             });
             taskCount++;
