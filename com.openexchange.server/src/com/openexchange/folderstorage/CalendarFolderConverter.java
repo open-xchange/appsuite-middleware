@@ -56,10 +56,7 @@ import java.util.Map;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.CalendarPermission;
-import com.openexchange.chronos.provider.DefaultCalendarFolder;
-import com.openexchange.chronos.provider.DefaultCalendarFolderProperties;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -97,8 +94,13 @@ public class CalendarFolderConverter {
         folder.setType(PrivateType.getInstance());
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubfolderIDs(new String[0]);
-        folder.setSubscribedSubfolders(false);       
-        setMeta(folder, calendarFolder);
+        folder.setSubscribedSubfolders(false);
+        Map<String, Object> meta = new HashMap<String, Object>();
+        String color = calendarFolder.getColor();
+        if (null != color) {
+            meta.put("color", color);
+            meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
+        }
         return folder;
     }
 
@@ -125,7 +127,13 @@ public class CalendarFolderConverter {
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
         //        folder.setSupportedCapabilities(capabilities);
-        setMeta(folder, calendarFolder);
+        Map<String, Object> meta = new HashMap<String, Object>();
+        String color = calendarFolder.getColor();
+        if (null != color) {
+            meta.put("color", color);
+            meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
+        }
+        folder.setMeta(meta);
         return folder;
     }
 
@@ -178,7 +186,12 @@ public class CalendarFolderConverter {
         permission.setGroup(calendarPermission.isGroup());
         permission.setAdmin(calendarPermission.isAdmin());
         permission.setSystem(calendarPermission.getSystem());
-        permission.setAllPermissions(calendarPermission.getFolderPermission(), calendarPermission.getReadPermission(), calendarPermission.getWritePermission(), calendarPermission.getDeletePermission());
+        permission.setAllPermissions(
+            calendarPermission.getFolderPermission(),
+            calendarPermission.getReadPermission(),
+            calendarPermission.getWritePermission(),
+            calendarPermission.getDeletePermission()
+        );
         return permission;
     }
 
@@ -200,8 +213,17 @@ public class CalendarFolderConverter {
         calendarFolder.setName(folder.getName());
         calendarFolder.setParentId(getCalendarParent(folder.getParentID()));
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
-        calendarFolder.setProperty(DefaultCalendarFolderProperties.SUBSCRIBED.getProperty().setValue(folder.isSubscribed()));
-        convertMeta(folder, calendarFolder);
+        Map<String, Object> meta = folder.getMeta();
+        if (null != meta) {
+            Object colorValue = meta.get("color");
+            if (null != colorValue && String.class.isInstance(colorValue)) {
+                calendarFolder.setColor((String) colorValue);
+            }
+            Object colorLabelValue = meta.get("color_label");
+            if (null != colorLabelValue && Integer.class.isInstance(colorLabelValue)) {
+                calendarFolder.setColor(Appointment2Event.getColor(((Integer) colorLabelValue).intValue()));
+            }
+        }
         return calendarFolder;
     }
 
@@ -231,7 +253,16 @@ public class CalendarFolderConverter {
      * @return The calendar permission
      */
     public static CalendarPermission getCalendarPermission(Permission permission) {
-        return new DefaultCalendarPermission(permission.getEntity(), permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin(), permission.isGroup(), permission.getSystem());
+        return new DefaultCalendarPermission(
+            permission.getEntity(),
+            permission.getFolderPermission(),
+            permission.getReadPermission(),
+            permission.getWritePermission(),
+            permission.getDeletePermission(),
+            permission.isAdmin(),
+            permission.isGroup(),
+            permission.getSystem()
+        );
     }
 
     /**
@@ -283,60 +314,6 @@ public class CalendarFolderConverter {
         //            return null;
         //        }
         return storageParentId;
-    }
-    
-    /**
-     * Set all additional properties as meta-data in the folder
-     * 
-     * @param folder The folder to update
-     * @param calendarFolder The folder the data is received from
-     */
-    private static void setMeta(Folder folder, CalendarFolder calendarFolder) {
-        Map<String, Object> meta = new HashMap<String, Object>();
-        String color = calendarFolder.getColor();
-        if (null != color) {
-            meta.put("color", color);
-            meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
-        }
-        String subscribed = DefaultCalendarFolderProperties.SUBSCRIBED_FLAG;
-        for (CalendarFolderProperty prop : calendarFolder.getProperties()) {
-            if (subscribed.equals(prop.getName())) {
-                // Set subscribed
-                boolean sub = ((Boolean) prop.getValue()).booleanValue();
-                folder.setSubscribed(sub);
-            } else {
-                meta.put(prop.getName(), prop.getValue());
-            }
-        }
-        folder.setMeta(meta);
-    }
-
-    /**
-     * Converts meta data from folder object into properties
-     * 
-     * @param folder The folder with the data
-     * @param calendarFolder The calendar folder to update
-     */
-    private static void convertMeta(Folder folder, DefaultCalendarFolder calendarFolder) {
-        Map<String, Object> meta = folder.getMeta();
-        if (null != meta) {
-            // Set colour
-            Object colorValue = meta.get("color");
-            if (null != colorValue && String.class.isInstance(colorValue)) {
-                calendarFolder.setColor((String) colorValue);
-            }
-            Object colorLabelValue = meta.get("color_label");
-            if (null != colorLabelValue && Integer.class.isInstance(colorLabelValue)) {
-                calendarFolder.setColor(Appointment2Event.getColor(((Integer) colorLabelValue).intValue()));
-            }
-            // Set additional properties
-            for (DefaultCalendarFolderProperties property : DefaultCalendarFolderProperties.values()) {
-                Object data = meta.get(property.getPropertyName());
-                if (null != data) {
-                    calendarFolder.setProperty(property.getProperty().setValue(data));
-                }
-            }
-        }
     }
 
     /**

@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.Transp;
 
 /**
@@ -111,13 +110,5 @@ public interface CalendarFolder {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
      */
     Transp getTransparency();
-    
-    
-    /**
-     * Get additional properties the CalendarFolder might have
-     * 
-     * @return A {@link Set} of {@link CalendarFolderProperty}. See also {@link DefaultCalendarFolderProperties}.
-     */
-    Set<CalendarFolderProperty> getProperties();
 
 }
