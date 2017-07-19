@@ -138,7 +138,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param services A service lookup reference
      */
     public DefaultEntityResolver(int contextId, ServiceLookup services) throws OXException {
-        this(services.getService(ContextService.class).getContext(contextId), services);
+        this(services.getService(ContextService.class).loadContext(contextId), services);
     }
 
     /**
