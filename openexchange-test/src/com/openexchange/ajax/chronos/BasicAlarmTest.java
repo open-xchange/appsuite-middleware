@@ -324,8 +324,8 @@ public class BasicAlarmTest extends AbstractChronosTest {
             alarm.setTrigger(trigger);
             List<ChronosAttachment> attachments = new ArrayList<>(1);
             ChronosAttachment attachment = new ChronosAttachment();
-            attachment.filename("test.mp3");
-            attachment.setManagedId(123);
+            attachment.setUri("fpt://some.fake.ftp.server/file.mp3");
+            attachment.setFmtType("audio/mpeg");
             attachments.add(attachment);
             alarm.setAttachments(attachments);
             updateData.setAlarms(Collections.singletonList(alarm));

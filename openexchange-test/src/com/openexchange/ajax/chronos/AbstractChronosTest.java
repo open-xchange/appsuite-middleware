@@ -76,8 +76,11 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
 
-    protected SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    protected SimpleDateFormat ZULU_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    protected static SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+    protected static SimpleDateFormat ZULU_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+    static {
+        ZULU_FORMATER.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     protected ChronosApi api;
     private FoldersApi foldersApi;
@@ -163,24 +166,30 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return utcCalendar.getTime();
     }
 
-    protected DateTimeData getDateTime(long millis){
+    protected DateTimeData getZuluDateTime(long millis){
         DateTimeData result = new DateTimeData();
-        result.setTzid(TimeZone.getDefault().getID());
-        result.setValue(BASIC_FORMATER.format(new Date(millis)));
+        result.setTzid("UTC");
+        Date date = new Date(millis);
+        result.setValue(ZULU_FORMATER.format(date));
         return result;
     }
 
-    protected DateTimeData getZuluTime(long millis){
+    protected DateTimeData getDateTime(long millis) {
+        return getDateTime(TimeZone.getDefault().getID(), millis);
+    }
+
+    protected DateTimeData getDateTime(String timezoneId, long millis) {
         DateTimeData result = new DateTimeData();
-        result.setTzid("UTC");
-        result.setValue(BASIC_FORMATER.format(new Date(millis)));
+        result.setTzid(timezoneId);
+        Date date = new Date(millis);
+        result.setValue(BASIC_FORMATER.format(date));
         return result;
     }
 
 
     protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
         Date date = BASIC_FORMATER.parse(data.getValue());
-        return getDateTime(date.getTime()+millis);
+        return getDateTime(data.getTzid(), date.getTime()+millis);
     }
 
     protected Date getTime(DateTimeData time) throws ParseException {

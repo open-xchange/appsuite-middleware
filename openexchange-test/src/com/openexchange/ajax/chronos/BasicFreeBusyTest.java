@@ -135,7 +135,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         createEvent("dayThree", day3, day3+TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5+TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyHasResponse freebusyHas = freeBusyApi.freebusyHas(session, getZuluTime(day1).toString(), getZuluTime(nextWeek).toString());
+        ChronosFreeBusyHasResponse freebusyHas = freeBusyApi.freebusyHas(session, getZuluDateTime(day1).getValue(), getZuluDateTime(nextWeek).getValue());
         assertEquals(freebusyHas.getErrorDesc(), null, freebusyHas.getError());
         assertNotNull(freebusyHas.getData());
         List<Boolean> data = freebusyHas.getData();
@@ -152,7 +152,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         long nextWeek = day1 + TimeUnit.DAYS.toMillis(7);
         EventData event = createEvent("dayOne", day1, day1+TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyEventsResponse freeBusyEvents = freeBusyApi.freebusyEvents(session, getZuluTime(day1).toString(), getZuluTime(nextWeek).toString(), Integer.toString(calUser));
+        ChronosFreeBusyEventsResponse freeBusyEvents = freeBusyApi.freebusyEvents(session, getZuluDateTime(day1).getValue(), getZuluDateTime(nextWeek).getValue(), Integer.toString(calUser));
         assertEquals(freeBusyEvents.getErrorDesc(), null, freeBusyEvents.getError());
         assertNotNull(freeBusyEvents.getData());
         List<ChronosFreeBusyEventsData> data = freeBusyEvents.getData();
@@ -173,7 +173,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         createEvent("dayThree", day3, day3+TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5+TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyResponse freeBusy = freeBusyApi.freebusy(session, getZuluTime(day1).toString(), getZuluTime(nextWeek).toString(), Integer.toString(calUser));
+        ChronosFreeBusyResponse freeBusy = freeBusyApi.freebusy(session, getZuluDateTime(day1).getValue(), getZuluDateTime(nextWeek).getValue(), Integer.toString(calUser));
         assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
         assertNotNull(freeBusy.getData());
         List<ChronosFreeBusyResponseData> data = freeBusy.getData();
@@ -254,7 +254,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         secondUserChronosApi.updateAttendee(secondSession, newEventId, getLastTimestamp(), body, null, false, true);
 
         ChronosFreebusyApi secondUserFreeBusyApi = new ChronosFreebusyApi(client);
-        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, getZuluTime(first).toString(), getZuluTime(nextWeek).toString(), Integer.toString(users[1].getUserId()));
+        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, getZuluDateTime(first).getValue(), getZuluDateTime(nextWeek).getValue(), Integer.toString(users[1].getUserId()));
         logoutClient(client);
         assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
         assertNotNull(freeBusy.getData());

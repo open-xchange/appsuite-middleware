@@ -188,7 +188,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, getZuluTime(today.getTime()).getValue(), getZuluTime(tomorrow.getTime()).getValue(), null, null, null, false, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, getZuluDateTime(today.getTime()).getValue(), getZuluDateTime(tomorrow.getTime()).getValue(), null, null, null, false, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(1, eventsResponse.getData().size());
