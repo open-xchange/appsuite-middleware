@@ -377,6 +377,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         if (null != internalAttendees) {
             for (Attendee internalAttendee : internalAttendees) {
                 if (false == CalendarUserType.INDIVIDUAL.equals(internalAttendee.getCuType())) {
+                    if (CalendarUtils.contains(attendees, internalAttendee.getEntity())) {
+                        /*
+                         * duplicate calendar user; just skip
+                         */
+                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping duplicate " + internalAttendee, null);
+                        continue;
+                    }
                     try {
                         attendees.add(entityResolver.applyEntityData(sanitizeCUType(eventId, internalAttendee)));
                     } catch (OXException e) {
