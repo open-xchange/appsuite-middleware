@@ -399,7 +399,6 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             @Override
             public void set(CalendarFreeSlot object, String value) throws OXException {
                 object.setRecurrenceRule(value);
-                ;
             }
 
             @Override

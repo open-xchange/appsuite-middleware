@@ -486,6 +486,7 @@ public class CalendarFreeSlot implements FieldAware {
      */
     public void setRecurrenceRule(String recurrenceRule) {
         this.recurrenceRule = recurrenceRule;
+        fields.add(FreeSlotField.rrule);
     }
 
     /**
