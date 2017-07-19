@@ -79,7 +79,7 @@ public class DtStartMapping extends ICalDateTimeMapping<VAvailability, CalendarA
      */
     @Override
     protected DateTime getValue(CalendarAvailability object) {
-        return object.getStartTime();
+        return object.getStartTime().getTimestamp() == 0 ? null : object.getStartTime();
     }
 
     /*
