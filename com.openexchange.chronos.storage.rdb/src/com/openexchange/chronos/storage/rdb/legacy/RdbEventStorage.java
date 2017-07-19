@@ -76,9 +76,6 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
-import com.openexchange.chronos.storage.rdb.migration.MigrationResult;
-import com.openexchange.chronos.storage.rdb.migration.StorageMigration;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -249,21 +246,6 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public void insertEvent(Event event) throws OXException {
-
-        boolean ja = false;
-        if (ja)
-        {
-            StorageMigration storageMigration = new StorageMigration(Services.get(), context.getContextId());
-            //                        storageMigration.checkRead();
-            try {
-                MigrationResult result = storageMigration.run();
-
-                System.out.println(result);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         int updated = 0;
         Connection connection = null;
         try {

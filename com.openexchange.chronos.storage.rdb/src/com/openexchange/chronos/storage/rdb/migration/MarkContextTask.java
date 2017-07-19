@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.mbean;
+package com.openexchange.chronos.storage.rdb.migration;
 
-import javax.management.MBeanException;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link StorageMigrationMBean}
+ * {@link MarkContextTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface StorageMigrationMBean {
+public class MarkContextTask extends MigrationTask {
 
-    static final String DOMAIN = "com.openexchange.chronos.storage";
-
-    /**
-     * Performs the calendar storage migration for a specific context.
-     *
-     * @param contextId The identifier of the context to perform the storage migration for
-     * @return The migration result
-     */
-    String migrate(int contextId) throws MBeanException;
+    private final Map<String, String> attributesToSet;
 
     /**
-     * Performs the calendar storage migration for a specific context.
+     * Initializes a new {@link MarkContextTask}.
      *
-     * @param contextId The identifier of the context to perform the storage migration for
-     * @param batchSize The batch size to use when migrating calendar data
-     * @return The migration result
+     * @param config The migration config
+     * @param contextId The identifier of the context being migrated
+     * @param sourceStorage The source calendar storage
+     * @param destinationStorage The destination calendar storage
+     * @param attributesToSet The attributes to set
      */
-    String migrate(int contextId, int batchSize) throws MBeanException;
+    public MarkContextTask(MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage, Map<String, String> attributesToSet) {
+        super(config, contextId, sourceStorage, destinationStorage);
+        this.attributesToSet = attributesToSet;
+    }
 
-    //    int clearDestinationStorage(int contextId) throws MBeanException;
-
-    /**
-     * Gets a value indicating whether the calendar data of a specific context has been migrated or not.
-     *
-     * @param contextId The identifier of the context to check
-     * @return <code>true</code> if the storage migration has been performed for the context, <code>false</code>, otherwise
-     */
-    //    boolean isMigrated(int contextId) throws MBeanException;
-
-    /**
-     * Permanently deletes all calendar data from the legacy storage for a specific context identifier.
-     *
-     * @param contextId The context identifier to purge the legacy data for
-     */
-    //    void purgeLegacyStorage(int contextId) throws MBeanException;
+    @Override
+    protected void perform() throws OXException {
+        if (config.isUncommitted()) {
+            LOG.info("Skipping {} as migration is running in 'uncommitted' mode in context {}.", getName(), I(contextId));
+            return;
+        }
+        ContextService contextService = config.getServiceLookup().getService(ContextService.class);
+        for (Entry<String, String> entry : attributesToSet.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+            LOG.trace("About to set attribute \"{}\" to \"{}\" in context {}...", name, value, I(contextId));
+            contextService.setAttribute(entry.getKey(), entry.getValue(), contextId);
+            LOG.trace("Successfully set attribute \"{}\" to \"{}\" in context {}.", name, value, I(contextId));
+        }
+        LOG.info("Successfully set {} attributes in context {}.", I(attributesToSet.size()), I(contextId));
+    }
 
 }

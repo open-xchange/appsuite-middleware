@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb.osgi;
 
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.caching.CacheService;
@@ -63,6 +62,8 @@ import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosDeleteListener;
+import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -70,7 +71,6 @@ import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -93,7 +93,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class, ConfigurationService.class };
     }
 
     @Override
@@ -106,8 +106,6 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
         return true;
     }
 
-    private volatile ServiceTracker<ManagementService, ManagementService> mgmtTracker;
-
     @Override
     protected void startBundle() throws Exception {
         try {
@@ -116,7 +114,8 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             /*
              * register services for infrastructure
              */
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(this)));
+            //            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(this), new ChronosStorageMigrationTask(this)));
             registerService(CreateTableService.class, new ChronosCreateTableService());
             registerService(DeleteListener.class, new ChronosDeleteListener());
             /*
@@ -128,12 +127,6 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
             registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));
             registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
-            /*
-             * track management service to register mbean on demand
-             */
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
-            this.mgmtTracker = mgmtTracker;
-            mgmtTracker.open();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -143,11 +136,6 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
-        ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
-        if (null != mgmtTracker) {
-            mgmtTracker.close();
-            this.mgmtTracker = null;
-        }
         Services.set(null);
         super.stopBundle();
     }

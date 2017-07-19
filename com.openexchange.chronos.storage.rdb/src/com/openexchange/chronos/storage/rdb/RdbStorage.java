@@ -138,8 +138,13 @@ public abstract class RdbStorage {
      * @param cause The optional initial cause
      */
     public void addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
-        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, severity.toString().toLowerCase(), message);
-        LOG.info(warning.getLogMessage());
+        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, String.valueOf(severity), message);
+        //        warning.setProperty(ProblemSeverity.class.getName(), severity.name());
+        if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
+            LOG.info(warning.getLogMessage());
+        } else {
+            LOG.debug(warning.getLogMessage());
+        }
         addWarning(eventId, warning);
     }
 
