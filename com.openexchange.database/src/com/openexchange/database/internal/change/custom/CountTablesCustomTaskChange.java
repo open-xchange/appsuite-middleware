@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.database.migration;
+package com.openexchange.database.internal.change.custom;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
@@ -64,10 +64,11 @@ import java.util.Properties;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.change.custom.CustomTaskRollback;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
@@ -115,17 +116,13 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
     @Override
     public void execute(Database database) throws CustomChangeException {
-        DatabaseService databaseService;
-        try {
-            databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, false);
-            if (null == databaseService) {
-                throw new CustomChangeException("DatabaseService is missing");
-            }
-        } catch (OXException e) {
-            throw new CustomChangeException("DatabaseService is missing");
+        DatabaseConnection databaseConnection = database.getConnection();
+        if (!(databaseConnection instanceof JdbcConnection)) {
+            throw new CustomChangeException("Cannot get underlying connection because database connection is not of type " + JdbcConnection.class.getName() + ", but of type: " + databaseConnection.getClass().getName());
         }
 
-        Connection configDbCon = getConfigDbCon(databaseService);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CountTablesCustomTaskChange.class);
+        Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
         boolean rollback = false;
         try {
             Databases.startTransaction(configDbCon);
@@ -135,14 +132,22 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
             configDbCon.commit();
             rollback = false;
+
+            logger.info("Count tables for ConfigDB successfully initialized");
         } catch (SQLException e) {
+            logger.info("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("SQL error", e);
+        } catch (CustomChangeException e) {
+            logger.info("Failed to initialize count tables for ConfigDB", e);
+            throw e;
+        } catch (RuntimeException e) {
+            logger.info("Failed to initialize count tables for ConfigDB", e);
+            throw new CustomChangeException("Runtime error", e);
         } finally {
             if (rollback) {
                 Databases.rollback(configDbCon);
             }
             Databases.autocommit(configDbCon);
-            databaseService.backForUpdateTask(configDbCon);
         }
     }
 
