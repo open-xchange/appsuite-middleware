@@ -154,7 +154,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         event.setEndDate(addTimeToDateTimeData(event.getEndDate(), 5000));
 
         ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), event, System.currentTimeMillis(), true, null, false);
-        assertNull(updateResponse.getError());
+        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
         List<EventData> updates = updateResponse.getData().getUpdated();
@@ -169,8 +169,8 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     @Test
     public void testGetEvent() throws Exception {
         Date date = new Date();
-        Date today = getAPIDate(TimeZone.getDefault(), date, 0);
-        Date tomorrow = getAPIDate(TimeZone.getDefault(), date, 1);
+        Date today = getAPIDate(TimeZone.getTimeZone("UTC"), date, 0);
+        Date tomorrow = getAPIDate(TimeZone.getTimeZone("UTC"), date, 1);
 
         // Create a single event
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testGetEvent"), false, false);
@@ -188,7 +188,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), tomorrow.getTime(), null, null, null, false, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, getZuluTime(today.getTime()).getValue(), getZuluTime(tomorrow.getTime()).getValue(), null, null, null, false, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(1, eventsResponse.getData().size());

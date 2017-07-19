@@ -77,6 +77,7 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
 public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+    protected SimpleDateFormat ZULU_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 
     protected ChronosApi api;
     private FoldersApi foldersApi;
@@ -169,6 +170,13 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return result;
     }
 
+    protected DateTimeData getZuluTime(long millis){
+        DateTimeData result = new DateTimeData();
+        result.setTzid("UTC");
+        result.setValue(BASIC_FORMATER.format(new Date(millis)));
+        return result;
+    }
+
 
     protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
         Date date = BASIC_FORMATER.parse(data.getValue());
@@ -187,3 +195,4 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     	return lastTimeStamp;
     }
 }
+

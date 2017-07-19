@@ -64,6 +64,7 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
+import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -148,8 +149,8 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     public void testDeleteSeriesOccurence() throws Exception {
 
         Date date = new Date();
-        Date today = getAPIDate(TimeZone.getDefault(), date, 0);
-        Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
+        DateTimeData today = getZuluTime(date.getTime());
+        DateTimeData nextWeek = getZuluTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testDeleteSeriesOccurence"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
@@ -159,7 +160,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         eventId.setId(event.getId());
         rememberEventId(eventId);
 
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), nextWeek.getTime(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.toString(), nextWeek.toString(), null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -218,8 +219,8 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testUpdateSeriesOccurence() throws Exception {
         Date date = new Date();
-        Date today = getAPIDate(TimeZone.getDefault(), date, 0);
-        Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
+        DateTimeData today = getZuluTime(date.getTime());
+        DateTimeData nextWeek = getZuluTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         EventData initialEvent = createSeriesEvent("testUpdateSeriesOccurence");
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, initialEvent, false, false);
@@ -230,7 +231,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         masterId.setId(event.getId());
         rememberEventId(masterId);
 
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), nextWeek.getTime(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.toString(), nextWeek.toString(), null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -272,8 +273,8 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testGetSeries() throws Exception {
         Date date = new Date();
-        Date today = getAPIDate(TimeZone.getDefault(), date, 0);
-        Date nextWeek = getAPIDate(TimeZone.getDefault(), date, 7);
+        DateTimeData today = getZuluTime(date.getTime());
+        DateTimeData nextWeek = getZuluTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEvent("testGetSeries"), false, false);
@@ -291,7 +292,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getTime(), nextWeek.getTime(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.toString(), nextWeek.toString(), null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
