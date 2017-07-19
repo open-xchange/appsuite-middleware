@@ -266,6 +266,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
+                "allDay TINYINT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
                 "organizer VARCHAR(767) DEFAULT NULL," +
@@ -291,6 +292,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
+                "allDay TINYINT DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
                 "description TEXT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
