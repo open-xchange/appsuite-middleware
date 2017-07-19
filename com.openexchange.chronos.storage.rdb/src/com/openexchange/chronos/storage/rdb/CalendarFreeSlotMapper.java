@@ -50,6 +50,11 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -58,12 +63,14 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Strings;
@@ -234,7 +241,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
         });
-        mappings.put(FreeSlotField.dtend, new DateTimeMapping<CalendarFreeSlot>("end", "endTimezone", "allDay", "End DateTime") {
+        mappings.put(FreeSlotField.dtend, new DefaultDbMultiMapping<DateTime, CalendarFreeSlot>(new String[] { "end", "endTimezone" }, "End date") {
 
             @Override
             public boolean isSet(CalendarFreeSlot object) {
@@ -254,6 +261,41 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             @Override
             public void remove(CalendarFreeSlot object) {
                 object.removeEndTime();
+            }
+
+            @Override
+            public DateTime get(ResultSet resultSet, String[] columnLabels) throws SQLException {
+                Timestamp timestamp;
+                try {
+                    timestamp = resultSet.getTimestamp(columnLabels[0]);
+                } catch (SQLException e) {
+                    if ("S1009".equals(e.getSQLState())) {
+                        /*
+                         * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
+                         * DATETIME values that are composed entirely of zeros result in an exception with state S1009
+                         */
+                        return null;
+                    }
+                    throw e;
+                }
+                if (null == timestamp) {
+                    return null;
+                }
+                String timeZoneId = resultSet.getString(columnLabels[1]);
+                return new DateTime(CalendarUtils.optTimeZone(timeZoneId, null), timestamp.getTime());
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, CalendarFreeSlot object) throws SQLException {
+                DateTime value = get(object);
+                if (null == value) {
+                    statement.setNull(parameterIndex, Types.TIMESTAMP);
+                    statement.setNull(parameterIndex + 1, Types.VARCHAR);
+                } else {
+                    statement.setTimestamp(parameterIndex, new Timestamp(value.getTimestamp()));
+                    statement.setString(parameterIndex + 1, null == value.getTimeZone() ? null : value.getTimeZone().getID());
+                }
+                return 2;
             }
         });
         mappings.put(FreeSlotField.created, new BigIntMapping<CalendarFreeSlot>("created", "Created") {

@@ -49,6 +49,11 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -59,11 +64,13 @@ import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Strings;
@@ -302,7 +309,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
         });
-        mappings.put(AvailabilityField.dtend, new DateTimeMapping<CalendarAvailability>("end", "endTimezone", "allDay", "End DateTime") {
+        mappings.put(AvailabilityField.dtend, new DefaultDbMultiMapping<DateTime, CalendarAvailability>(new String[] { "end", "endTimezone" }, "End date") {
 
             @Override
             public boolean isSet(CalendarAvailability object) {
@@ -322,6 +329,41 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             @Override
             public void remove(CalendarAvailability object) {
                 object.removeEndTime();
+            }
+
+            @Override
+            public DateTime get(ResultSet resultSet, String[] columnLabels) throws SQLException {
+                Timestamp timestamp;
+                try {
+                    timestamp = resultSet.getTimestamp(columnLabels[0]);
+                } catch (SQLException e) {
+                    if ("S1009".equals(e.getSQLState())) {
+                        /*
+                         * http://dev.mysql.com/doc/refman/5.0/en/connector-j-reference-configuration-properties.html
+                         * DATETIME values that are composed entirely of zeros result in an exception with state S1009
+                         */
+                        return null;
+                    }
+                    throw e;
+                }
+                if (null == timestamp) {
+                    return null;
+                }
+                String timeZoneId = resultSet.getString(columnLabels[1]);
+                return new DateTime(CalendarUtils.optTimeZone(timeZoneId, null), timestamp.getTime());
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, CalendarAvailability object) throws SQLException {
+                DateTime value = get(object);
+                if (null == value) {
+                    statement.setNull(parameterIndex, Types.TIMESTAMP);
+                    statement.setNull(parameterIndex + 1, Types.VARCHAR);
+                } else {
+                    statement.setTimestamp(parameterIndex, new Timestamp(value.getTimestamp()));
+                    statement.setString(parameterIndex + 1, null == value.getTimeZone() ? null : value.getTimeZone().getID());
+                }
+                return 2;
             }
         });
         mappings.put(AvailabilityField.lastModified, new BigIntMapping<CalendarAvailability>("modified", "Last Modified") {
