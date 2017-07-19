@@ -53,7 +53,8 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 
 /**
- * {@link CalendarAvailabilityCalendarServer}
+ * {@link CalendarAvailabilityCalendarServer}. Defines a calendar availability mixin with the
+ * {@link CaldavProtocol#CALENDARSERVER_NS} namespace
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

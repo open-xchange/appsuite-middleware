@@ -53,18 +53,19 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 
 /**
- * {@link CalendarAvailabilityCalDAV}
+ * {@link CalendarAvailabilityApple}. Defines a calendar availability mixin with the
+ * {@link CaldavProtocol#APPLE_NS} namespace
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailabilityCalDAV extends AbstractCalendarAvailability {
+public class CalendarAvailabilityApple extends AbstractCalendarAvailability {
 
     /**
-     * Initialises a new {@link CalendarAvailabilityCalDAV}.
+     * Initialises a new {@link CalendarAvailabilityApple}.
      * 
      * @param factory
      */
-    public CalendarAvailabilityCalDAV(GroupwareCaldavFactory factory) {
-        super(CaldavProtocol.CAL_NS.getURI(), "calendar-availability", factory);
+    public CalendarAvailabilityApple(GroupwareCaldavFactory factory) {
+        super(CaldavProtocol.APPLE_NS.getURI(), "calendar-availability", factory);
     }
 }
