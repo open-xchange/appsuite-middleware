@@ -54,7 +54,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.mixins.CalendarAvailability;
+import com.openexchange.caldav.mixins.CalendarAvailabilityCalDAV;
+import com.openexchange.caldav.mixins.CalendarAvailabilityCalendarServer;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -77,7 +78,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * A scheduling Inbox collection contains copies of incoming scheduling
  * messages. These can be requests sent by an Organizer, or replies sent by an
- * Attendee in response to a request.  The scheduling Inbox collection is also
+ * Attendee in response to a request. The scheduling Inbox collection is also
  * used to manage scheduling privileges.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -91,14 +92,12 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailability(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY), new CalendarAvailabilityCalendarServer(factory), new CalendarAvailabilityCalDAV(factory));
     }
 
     @Override
     public Permission[] getPermissions() {
-        return new Permission[] {
-            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
-                Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
+        return new Permission[] { new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
         };
     }
 
@@ -108,8 +107,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-    }
+    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {}
 
     @Override
     public String getDisplayName() throws WebdavProtocolException {
@@ -122,20 +120,16 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void delete() throws WebdavProtocolException {
-    }
+    public void delete() throws WebdavProtocolException {}
 
     @Override
-    public void setLanguage(String language) throws WebdavProtocolException {
-    }
+    public void setLanguage(String language) throws WebdavProtocolException {}
 
     @Override
-    public void setLength(Long length) throws WebdavProtocolException {
-    }
+    public void setLength(Long length) throws WebdavProtocolException {}
 
     @Override
-    public void setContentType(String type) throws WebdavProtocolException {
-    }
+    public void setContentType(String type) throws WebdavProtocolException {}
 
     @Override
     public String getSource() throws WebdavProtocolException {
@@ -143,8 +137,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void setSource(String source) throws WebdavProtocolException {
-    }
+    public void setSource(String source) throws WebdavProtocolException {}
 
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
@@ -170,7 +163,5 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         return Collections.emptyList();
     }
-    
-    
 
 }
