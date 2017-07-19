@@ -49,21 +49,38 @@
 
 package com.openexchange.caldav.mixins;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link CalendarAvailability}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CalendarAvailability extends SingleXMLPropertyMixin {
 
+    private GroupwareCaldavFactory factory;
+
     /**
-     * Initializes a new {@link CalendarAvailability}.
+     * Initialises a new {@link CalendarAvailability}.
+     * 
+     * @param factory
      */
-    public CalendarAvailability() {
-        super(CaldavProtocol.CAL_NS.getURI(), "calendar-availability");
+    public CalendarAvailability(GroupwareCaldavFactory factory) {
+        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "calendar-availability");
+        this.factory = factory;
     }
 
     @Override
@@ -74,6 +91,28 @@ public class CalendarAvailability extends SingleXMLPropertyMixin {
          * scheme and authority part of the calendar home collection absolute
          * URI.
          */
+        InputStream inputStream = null;
+        try {
+            CalendarService calendarService = factory.getService(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(factory.getSession());
+
+            CalendarAvailabilityService service = factory.getService(CalendarAvailabilityService.class);
+            List<com.openexchange.chronos.CalendarAvailability> availability = service.getAvailability(calendarSession);
+            // export the availability
+            ICalService iCalService = factory.getService(ICalService.class);
+            CalendarExport exportICal = iCalService.exportICal(iCalService.initParameters());
+            for (com.openexchange.chronos.CalendarAvailability av : availability) {
+                exportICal.add(av);
+            }
+            inputStream = exportICal.getClosingStream();
+            return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
+        } catch (OXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            Streams.close(inputStream);
+        }
         return "";
     }
 
