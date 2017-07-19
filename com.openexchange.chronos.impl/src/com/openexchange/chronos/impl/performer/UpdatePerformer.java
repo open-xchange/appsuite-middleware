@@ -824,9 +824,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     // ignore implicitly
                     eventUpdate.removeSequence();
                     break;
+                case FOLDER_ID:
+                    if (Utils.getFolderView(storage, originalEvent, calendarUserId).equals(eventUpdate.getFolderId())) {
+                        // ignore implicitly
+                        eventUpdate.removeFolderId();
+                        break;
+                    }
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 case UID:
                 case SERIES_ID:
-                case FOLDER_ID:
                 case CALENDAR_USER:
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 default:
