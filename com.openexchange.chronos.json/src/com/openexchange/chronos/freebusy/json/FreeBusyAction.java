@@ -51,6 +51,7 @@ package com.openexchange.chronos.freebusy.json;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +95,12 @@ public class FreeBusyAction extends AbstractFreeBusyAction {
         Date from = parseDate(requestData, "from");
         Date until = parseDate(requestData, "until");
         Map<Attendee, List<FreeBusyTime>> mergedFreeBusy = freeBusyAccess.getMergedFreeBusy(attendees, from, until);
-        return new AJAXRequestResult(mergedFreeBusy, FreeBusyConverter.INPUT_FORMAT);
+        // Sort in requested order
+        LinkedHashMap<Attendee, List<FreeBusyTime>> result = new LinkedHashMap<>(mergedFreeBusy.keySet().size());
+        for(Attendee att: attendees){
+            result.put(att, mergedFreeBusy.get(att));
+        }
+        return new AJAXRequestResult(result, FreeBusyConverter.INPUT_FORMAT);
     }
 
 }
