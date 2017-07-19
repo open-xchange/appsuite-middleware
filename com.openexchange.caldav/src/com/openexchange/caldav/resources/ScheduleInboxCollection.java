@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.CalendarAvailability;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
@@ -196,7 +197,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
             }
             service.setAvailability(calendarSession, importedIcal.getAvailabilities());
         } catch (OXException e) {
-            e.printStackTrace();
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         } finally {
             Streams.close(inputStream);
         }
