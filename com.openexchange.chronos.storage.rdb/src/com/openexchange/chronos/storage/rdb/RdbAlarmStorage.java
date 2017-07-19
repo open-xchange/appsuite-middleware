@@ -638,6 +638,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             if (null != fmtTypeParameter) {
                 attachment.setFormatType(fmtTypeParameter.getValue());
             }
+            ExtendedPropertyParameter filenameParameter = attachmentProperty.getParameter("FILENAME");
+            if (null != filenameParameter) {
+                attachment.setFilename(filenameParameter.getValue());
+            }
+            ExtendedPropertyParameter sizeParameter = attachmentProperty.getParameter("SIZE");
+            if (null != sizeParameter) {
+                try {
+                    attachment.setSize(Long.parseLong(sizeParameter.getValue()));
+                } catch (NumberFormatException e) {
+                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
+                }
+            }
             ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
             if (null != valueParameter && "BINARY".equals(valueParameter.getValue())) {
                 try {
@@ -687,6 +699,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 }
                 if (null != attachment.getFormatType()) {
                     parameters.add(new ExtendedPropertyParameter("FMTTYPE", attachment.getFormatType()));
+                }
+                if (null != attachment.getFilename()) {
+                    parameters.add(new ExtendedPropertyParameter("FILENAME", attachment.getFilename()));
+                }
+                if (0 < attachment.getSize()) {
+                    parameters.add(new ExtendedPropertyParameter("SIZE", String.valueOf(attachment.getSize())));
                 }
                 modified |= extendedProperties.add(new ExtendedProperty("ATTACH", value, parameters));
             }
