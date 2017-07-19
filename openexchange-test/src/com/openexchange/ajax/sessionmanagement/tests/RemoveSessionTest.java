@@ -51,6 +51,7 @@ package com.openexchange.ajax.sessionmanagement.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import org.junit.After;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 import com.openexchange.ajax.sessionmanagement.actions.GetSessionsRequest;
 import com.openexchange.ajax.sessionmanagement.actions.GetSessionsResponse;
 import com.openexchange.ajax.sessionmanagement.actions.RemoveSessionRequest;
+import com.openexchange.ajax.sessionmanagement.actions.RemoveSessionResponse;
 import com.openexchange.session.management.ManagedSession;
 
 
@@ -80,26 +82,26 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
     @Override
     @After
     public void tearDown() throws Exception {
-        super.tearDown();
+        testClient1.logout();
     }
 
-//    @Test
-//    public void testRemoveSession() throws Exception {
-//        String sessionId = testClient2.getSession().getId();
-//        RemoveSessionRequest req = new RemoveSessionRequest(sessionId);
-//        RemoveSessionResponse resp = testClient1.execute(req);
-//        assertFalse(resp.hasError());
-//
-//        GetSessionsRequest getReq = new GetSessionsRequest();
-//        GetSessionsResponse getResp = testClient1.execute(getReq);
-//        assertFalse(getResp.hasError());
-//        Collection<ManagedSession> sessions = getResp.getSessions();
-//        assertEquals(1, sessions.size());
-//        for (ManagedSession session : sessions) {
-//            assertEquals(testClient1.getSession().getId(), session.getSessionId());
-//            assertNotEquals(sessionId, session.getSessionId());
-//        }
-//    }
+    @Test
+    public void testRemoveSession() throws Exception {
+        String sessionId = testClient2.getSession().getId();
+        RemoveSessionRequest req = new RemoveSessionRequest(sessionId);
+        RemoveSessionResponse resp = testClient1.execute(req);
+        assertFalse(resp.hasError());
+
+        GetSessionsRequest getReq = new GetSessionsRequest();
+        GetSessionsResponse getResp = testClient1.execute(getReq);
+        assertFalse(getResp.hasError());
+        Collection<ManagedSession> sessions = getResp.getSessions();
+        assertEquals(1, sessions.size());
+        for (ManagedSession session : sessions) {
+            assertEquals(testClient1.getSession().getId(), session.getSessionId());
+            assertNotEquals(sessionId, session.getSessionId());
+        }
+    }
 
     @Test
     public void testRemoveSession_WrongSessionId() throws Exception {
