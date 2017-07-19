@@ -68,6 +68,7 @@ import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
@@ -180,21 +181,28 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     @Override
     protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-        String ical = prop.getValue();
+        // Namespace and property name check
+        if (!(DAVProtocol.CALENDARSERVER_NS.getURI().equals(prop.getNamespace()) && "calendar-availability".equals(prop.getName()))) {
+            return;
+        }
+
+        final String iCalAvailability = prop.getValue();
         InputStream inputStream = null;
         try {
             CalendarService calendarService = getFactory().getService(CalendarService.class);
             CalendarSession calendarSession = calendarService.init(getFactory().getSession());
-
+            // Parse the iCal availability to an internal POJO
             ICalService iCalService = getFactory().getService(ICalService.class);
-            inputStream = new ByteArrayInputStream(ical.getBytes());
+            inputStream = new ByteArrayInputStream(iCalAvailability.getBytes());
             ImportedCalendar importedIcal = iCalService.importICal(inputStream, iCalService.initParameters());
-
+            // Check for already existing availability blocks...
             CalendarAvailabilityService service = getFactory().getService(CalendarAvailabilityService.class);
             List<com.openexchange.chronos.CalendarAvailability> availabilities = service.getAvailability(calendarSession);
+            // ...purge the old ones...
             if (availabilities != null && availabilities.size() > 0) {
                 service.purgeAvailabilities(calendarSession);
             }
+            // ...and set the new one(s)
             service.setAvailability(calendarSession, importedIcal.getAvailabilities());
         } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
