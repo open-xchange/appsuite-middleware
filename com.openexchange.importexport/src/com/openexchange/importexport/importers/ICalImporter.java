@@ -257,19 +257,16 @@ public class ICalImporter extends AbstractImporter {
 		TruncationInfo truncationInfo = null;
 
 		if (appointmentFolderId != -1) {
-<<<<<<< Upstream, based on branch 'chronos' of https://code.open-xchange.com/git/wd/backend
             if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
-    			importAppointment(session, is, optionalParams, appointmentFolderId,
-    					appointmentInterface, parser, ctx, defaultTz, list, errors,
-    					warnings);
+                truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
+                    appointmentInterface, parser, ctx, defaultTz, list, errors,
+                    warnings);
 		    } else {
-                list.addAll(importEvents(session, is, optionalParams, String.valueOf(appointmentFolderId)));
+                //TODO: import events instead
+	            truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
+                    appointmentInterface, parser, ctx, defaultTz, list, errors,
+                    warnings);
 		    }
-=======
-			truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
-					appointmentInterface, parser, ctx, defaultTz, list, errors,
-					warnings);
->>>>>>> 22e79af Fix for bug 54593: Add warning if number of imported objects were truncated #2
 		}
 		if (taskFolderId != -1) {
 			truncationInfo = importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,

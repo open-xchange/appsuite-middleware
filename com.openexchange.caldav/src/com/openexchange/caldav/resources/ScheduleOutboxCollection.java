@@ -160,17 +160,11 @@ public class ScheduleOutboxCollection extends DAVCollection {
 
     private List<FreeBusyData> parseFreeBusyRequest(InputStream inputStream) throws WebdavProtocolException {
         try {
-<<<<<<< Upstream, based on branch 'chronos' of https://code.open-xchange.com/git/wd/backend
             ICalService iCalService = getFactory().requireService(ICalService.class);
             ICalParameters parameters = iCalService.initParameters();
             ImportedCalendar calendarImport = iCalService.importICal(inputStream, parameters);
             return calendarImport.getFreeBusyDatas();
         } catch (OXException e) {
-=======
-            return factory.getIcalParser().parseFreeBusy(inputStream, TimeZone.getTimeZone("UTC"), factory.getContext(),
-                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
-        } catch (ConversionError e) {
->>>>>>> 22e79af Fix for bug 54593: Add warning if number of imported objects were truncated #2
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
