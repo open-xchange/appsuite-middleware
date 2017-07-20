@@ -97,6 +97,7 @@ import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePrefer
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
+import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -329,6 +330,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         AllMessagesFolder allMessagesFolder = new AllMessagesFolder(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, allMessagesFolder);
+
+        Whitelist whitelist = new Whitelist(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, whitelist);
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
