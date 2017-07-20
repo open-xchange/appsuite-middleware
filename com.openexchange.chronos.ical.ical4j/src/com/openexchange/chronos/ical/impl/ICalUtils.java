@@ -200,8 +200,6 @@ public class ICalUtils {
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
         importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
-
-        //FIXME: Set the VAvailability components as "sub-components" of the imported calendar?
         importedCalendar.setAvailabilities(importAvailabilities(vCalendar.getAvailabilities(), mapper, parameters));
         return importedCalendar;
     }
