@@ -79,18 +79,22 @@ public abstract class MigrationTask extends AbstractTask<Void> {
     protected final int contextId;
     protected final CalendarStorage sourceStorage;
     protected final CalendarStorage destinationStorage;
+    private final MigrationProgress progress;
 
     private long lastLogTime;
 
     /**
      * Initializes a new {@link MigrationTask}.
      *
+     * @param progress The migration progress callback, or <code>null</code> if not used
+     * @param config The migration config to use
      * @param contextId The context identifier
      * @param sourceStorage The source calendar storage
      * @param destinationStorage The destination calendar storage
      */
-    protected MigrationTask(MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage) {
+    protected MigrationTask(MigrationProgress progress, MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage) {
         super();
+        this.progress = progress;
         this.config = config;
         this.contextId = contextId;
         this.sourceStorage = sourceStorage;
@@ -119,10 +123,13 @@ public abstract class MigrationTask extends AbstractTask<Void> {
         return getClass().getSimpleName();
     }
 
-    protected void setProgress(long actual, long total) {
+    protected void setProgress(long current, long total) {
+        if (null != progress) {
+            progress.setTaskProgress(current, total);
+        }
         long currentTimeMillis = System.currentTimeMillis();
         if (currentTimeMillis - lastLogTime > TimeUnit.SECONDS.toMillis(10L)) {
-            LOG.info("Migration task {} finished {}% for context {}.", getName(), I((int) (actual * 100 / total)), I(contextId));
+            LOG.info("Migration task {} finished {}% for context {}.", getName(), I((int) (current * 100 / total)), I(contextId));
         }
         lastLogTime = currentTimeMillis;
     }
@@ -131,6 +138,9 @@ public abstract class MigrationTask extends AbstractTask<Void> {
     public Void call() throws Exception {
         long startTime = System.currentTimeMillis();
         LOG.info("Starting migration task {} in context {}.", getName(), I(contextId));
+        if (null != progress) {
+            progress.nextTask();
+        }
         lastLogTime = startTime;
         try {
             perform();

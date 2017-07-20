@@ -85,13 +85,14 @@ public class CopyCalendarDataTask extends MigrationTask {
     /**
      * Initializes a new {@link CopyCalendarDataTask}.
      *
-     * @param config The migration config
+     * @param progress The migration progress callback, or <code>null</code> if not used
+     * @param config The migration config to use
      * @param contextId The identifier of the context being migrated
      * @param sourceStorage The source calendar storage
      * @param destinationStorage The destination calendar storage
      */
-    public CopyCalendarDataTask(MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage) {
-        super(config, contextId, sourceStorage, destinationStorage);
+    public CopyCalendarDataTask(MigrationProgress progress, MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage) {
+        super(progress, config, contextId, sourceStorage, destinationStorage);
     }
 
     public long getCopiedEvents() {

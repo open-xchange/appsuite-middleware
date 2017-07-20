@@ -49,53 +49,41 @@
 
 package com.openexchange.chronos.storage.rdb.migration;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.ProgressState;
 
 /**
- * {@link MarkContextTask}
+ * {@link MigrationProgress}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class MarkContextTask extends MigrationTask {
+public class MigrationProgress {
 
-    private final Map<String, String> attributesToSet;
+    private final ProgressState delegate;
+
+    private int currentTask;
 
     /**
-     * Initializes a new {@link MarkContextTask}.
+     * Initializes a new {@link MigrationProgress}.
      *
-     * @param progress The migration progress callback, or <code>null</code> if not used
-     * @param config The migration config to use
-     * @param contextId The identifier of the context being migrated
-     * @param sourceStorage The source calendar storage
-     * @param destinationStorage The destination calendar storage
-     * @param attributesToSet The attributes to set
+     * @param delegate The parent update task progress state to use
+     * @param totalTasks The total number of migration tasks to expect
      */
-    public MarkContextTask(MigrationProgress progress, MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage, Map<String, String> attributesToSet) {
-        super(progress, config, contextId, sourceStorage, destinationStorage);
-        this.attributesToSet = attributesToSet;
+    public MigrationProgress(ProgressState delegate, int totalTasks) {
+        super();
+        this.delegate = delegate;
+        delegate.setTotal(totalTasks * 100);
     }
 
-    @Override
-    protected void perform() throws OXException {
-        if (config.isUncommitted()) {
-            LOG.info("Skipping {} as migration is running in 'uncommitted' mode in context {}.", getName(), I(contextId));
-            return;
-        }
-        ContextService contextService = config.getServiceLookup().getService(ContextService.class);
-        for (Entry<String, String> entry : attributesToSet.entrySet()) {
-            String name = entry.getKey();
-            String value = entry.getValue();
-            LOG.trace("About to set attribute \"{}\" to \"{}\" in context {}...", name, value, I(contextId));
-            contextService.setAttribute(entry.getKey(), entry.getValue(), contextId);
-            LOG.trace("Successfully set attribute \"{}\" to \"{}\" in context {}.", name, value, I(contextId));
-        }
-        LOG.info("Successfully set {} attributes in context {}.", I(attributesToSet.size()), I(contextId));
+    void nextTask() {
+        currentTask++;
+        delegate.setState(currentTask * 100);
+    }
+
+    void setTaskProgress(long current, long total) {
+        int taskProgress = 0 >= total ? 0 : (int) (current * 100 / total);
+        delegate.setState(currentTask * 100 + taskProgress);
     }
 
 }
+

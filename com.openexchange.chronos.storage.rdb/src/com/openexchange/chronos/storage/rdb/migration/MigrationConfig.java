@@ -76,7 +76,7 @@ public class MigrationConfig {
     /**
      * Initializes a new {@link MigrationConfig}.
      *
-     * @param services A service lookup referenc
+     * @param services A service lookup reference
      */
     public MigrationConfig(ServiceLookup services) {
         super();
