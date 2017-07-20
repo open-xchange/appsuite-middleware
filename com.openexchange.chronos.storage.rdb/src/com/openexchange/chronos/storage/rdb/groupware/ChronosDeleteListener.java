@@ -61,6 +61,7 @@ import com.openexchange.groupware.delete.DeleteListener;
  * {@link ChronosDeleteListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public final class ChronosDeleteListener implements DeleteListener {
@@ -89,17 +90,37 @@ public final class ChronosDeleteListener implements DeleteListener {
         }
     }
 
+    /**
+     * Purges the user data
+     * 
+     * @param writeCon The writeable {@link Connection}
+     * @param cid The context identifier
+     * @param user The user identifier
+     * @throws OXException
+     */
     private void purgeUserData(Connection writeCon, int cid, int user) throws OXException {
         try {
             /*
              * delete calendar accounts of user
              */
             deleteAccounts(writeCon, cid, user);
+            /*
+             * delete all availability data of the user
+             */
+            deleteAvailabilities(writeCon, cid, user);
+            deleteFreeSlots(writeCon, cid, user);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
+    /**
+     * Purges the context data
+     * 
+     * @param writeCon The writeable {@link Connection}
+     * @param cid The context identifier
+     * @throws OXException
+     */
     private void purgeContextData(Connection writeCon, int cid) throws OXException {
         try {
             /*
@@ -110,25 +131,52 @@ public final class ChronosDeleteListener implements DeleteListener {
              * delete any 'tombstone' records
              */
             //...
-
+            /*
+             * delete all availability data in the context
+             */
+            deleteAvailabilities(writeCon, cid);
+            deleteFreeSlots(writeCon, cid);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
     private static int deleteAccounts(Connection connection, int cid) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_account WHERE cid=?;")) {
+        return deleteForContext(connection, "calendar_account", cid);
+    }
+
+    private static int deleteAccounts(Connection connection, int cid, int user) throws SQLException {
+        return deleteForUser(connection, "calendar_account", cid, user);
+    }
+
+    private static int deleteAvailabilities(Connection connection, int cid) throws SQLException {
+        return deleteForContext(connection, "calendar_availability", cid);
+    }
+
+    private static int deleteAvailabilities(Connection connection, int cid, int user) throws SQLException {
+        return deleteForUser(connection, "calendar_availability", cid, user);
+    }
+
+    private static int deleteFreeSlots(Connection connection, int cid) throws SQLException {
+        return deleteForContext(connection, "calendar_free_slot", cid);
+    }
+
+    private static int deleteFreeSlots(Connection connection, int cid, int user) throws SQLException {
+        return deleteForUser(connection, "calendar_free_slot", cid, user);
+    }
+
+    private static int deleteForContext(Connection connection, String tableName, int cid) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + tableName + " WHERE cid=?;")) {
             stmt.setInt(1, cid);
             return stmt.executeUpdate();
         }
     }
 
-    private static int deleteAccounts(Connection connection, int cid, int user) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_account WHERE cid=? AND user=?;")) {
+    private static int deleteForUser(Connection connection, String tableName, int cid, int user) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM " + tableName + " WHERE cid=? AND user=?;")) {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             return stmt.executeUpdate();
         }
     }
-
 }
