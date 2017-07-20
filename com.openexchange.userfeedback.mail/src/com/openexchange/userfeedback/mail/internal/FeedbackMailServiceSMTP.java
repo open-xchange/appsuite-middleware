@@ -142,6 +142,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             smtpProperties.put("mail.smtp.auth", "false");
             smtpUser = null;
             smtpPass = null;
+        } else {
+            // setting mail.smtp.auth to true enables attempts to use AUTH
+            smtpProperties.put("mail.smtp.auth", "true");
         }
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
