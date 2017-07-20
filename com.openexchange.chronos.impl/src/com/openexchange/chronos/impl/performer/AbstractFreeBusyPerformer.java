@@ -225,7 +225,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @return The matching folder, or <code>null</code> if not found
      */
     private static UserizedFolder findFolder(Collection<UserizedFolder> folders, String id) {
-        if (null != folders) {
+        if (null != folders && null != id) {
             for (UserizedFolder folder : folders) {
                 if (id.equals(folder.getID())) {
                     return folder;
