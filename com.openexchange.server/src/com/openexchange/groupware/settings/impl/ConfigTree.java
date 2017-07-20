@@ -389,6 +389,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck.class,
             com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing.class,
             com.openexchange.groupware.settings.tree.modules.mail.AllMessagesFolder.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Whitelist.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.MsgFormat.class,
             com.openexchange.groupware.settings.tree.modules.mail.Namespace.class,

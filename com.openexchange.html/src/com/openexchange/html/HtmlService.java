@@ -51,6 +51,7 @@ package com.openexchange.html;
 
 import java.io.Reader;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
@@ -363,4 +364,12 @@ public interface HtmlService {
      * @return input encoded for use as an HTML attribute
      */
     String encodeForHTMLAttribute(String input);
+
+    /**
+     * Gets the currently applicable white-lists for HTML and CSS
+     *
+     * @param withCss Whether returned white-list should also contain the CSS stuff (if <code>false</code> an empty map is returned for {@link Whitelist#getStyleWhitelist()})
+     * @return The HTML/CSS white-lists
+     */
+    Whitelist getWhitelist(boolean withCss);
 }
