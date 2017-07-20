@@ -51,17 +51,10 @@ package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.Dur;
-import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAvailability;
-import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.DtEnd;
-import net.fortuna.ical4j.model.property.DtStart;
-import net.fortuna.ical4j.model.property.Duration;
-import net.fortuna.ical4j.util.Dates;
 
 /**
  * {@link DtEndMapping}
@@ -114,26 +107,6 @@ public class DtEndMapping extends ICalDateTimeMapping<VAvailability, CalendarAva
      */
     @Override
     protected DateProperty getProperty(VAvailability component) {
-        DtEnd dtEnd = (DtEnd) component.getProperty(Property.DTEND);
-        if (dtEnd != null) {
-            return dtEnd;
-        }
-        DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
-        if (dtStart == null) {
-            return dtEnd == null ? new DtEnd(new Date(0)) : dtEnd;
-        }
-
-        Duration duration = (Duration) component.getProperty(Property.DURATION);
-        if (null == duration) {
-            // If "DTSTART" is not present, then the start time is unbounded. (see: RFC 7953, 3.1 VAvailability Component)
-            duration = new Duration(new Dur(0, 0, 0, 0));
-        }
-        dtEnd = new DtEnd(Dates.getInstance(duration.getDuration().getTime(dtStart.getDate()), (Value) dtStart.getParameter(Parameter.VALUE)));
-        if (dtStart.isUtc()) {
-            dtEnd.setUtc(true);
-        } else {
-            dtEnd.setTimeZone(dtStart.getTimeZone());
-        }
-        return dtEnd;
+        return (DtEnd) component.getProperty(Property.DTEND);
     }
 }
