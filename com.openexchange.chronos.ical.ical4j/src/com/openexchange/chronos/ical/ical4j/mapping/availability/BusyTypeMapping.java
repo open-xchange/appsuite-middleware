@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,52 +49,63 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAvailability;
 
 /**
- * {@link AvailabilityMappings}
+ * {@link BusyTypeMapping}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailabilityMappings {
+public class BusyTypeMapping extends ICalTextMapping<VAvailability, CalendarAvailability> {
 
     /**
-     * Holds a collection of all known availability mappings.
+     * Initialises a new {@link BusyTypeMapping}.
      */
-    //@formatter:off
-    public static List<ICalMapping<VAvailability, CalendarAvailability>> ALL = Collections.<ICalMapping<VAvailability, CalendarAvailability>> unmodifiableList(Arrays.asList(
-        new DtStampMapping(),
-        new UidMapping(),
-        new BusyTypeMapping(),
-        new ClassificationMapping(),
-        new CreatedMapping(),
-        new DescriptionMapping(),
-        new DtStartMapping(),
-        new LastModifiedMapping(),
-        new LocationMapping(),
-        new OrganizerMapping(),
-        //new PriorityMapping(),
-        //new SequenceMapping(),
-        new SummaryMapping(),
-        new UrlMapping(),
-        new DtEndMapping(),
-        new DurationMapping()
-        //new CategoriesMapping(),
-        //new CommentMapping(),
-        //new ContactMapping(),
-        //new ExtendedPropertiesMapping()
-        ));
-    //@formatter:on
+    public BusyTypeMapping() {
+        super(Property.BUSYTYPE);
+    }
 
-    /**
-     * Initialises a new {@link AvailabilityMappings}.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
      */
-    public AvailabilityMappings() {
-        super();
+    @Override
+    protected String getValue(CalendarAvailability object) {
+        BusyType value = object.getBusyType();
+        return value != null ? value.getValue() : null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
+     */
+    @Override
+    protected void setValue(CalendarAvailability object, String value) {
+        BusyType busyType = null;
+        if (value != null) {
+            try {
+                busyType = BusyType.valueOf(value);
+            } catch (IllegalArgumentException e) {
+                // Should never happen; if it does, fall back to 'BUSY-UNAVAILABLE' 
+                busyType = BusyType.BUSY_UNAVAILABLE;
+            }
+        }
+        object.setBusyType(busyType);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#createProperty()
+     */
+    @Override
+    protected Property createProperty() {
+        return new net.fortuna.ical4j.model.property.BusyType();
     }
 }
