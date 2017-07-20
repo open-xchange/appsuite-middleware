@@ -77,7 +77,7 @@ public class DtEndMapping extends ICalDateTimeMapping<VAvailability, CalendarAva
      */
     @Override
     protected org.dmfs.rfc5545.DateTime getValue(CalendarAvailability object) {
-        return object.getEndTime().getTimestamp() == 0 ? null : object.getEndTime();
+        return object.getEndTime() == null || object.getEndTime().getTimestamp() == 0 ? null : object.getEndTime();
     }
 
     /*
