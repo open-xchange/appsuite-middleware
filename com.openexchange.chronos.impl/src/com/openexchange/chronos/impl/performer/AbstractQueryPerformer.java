@@ -99,7 +99,7 @@ public abstract class AbstractQueryPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractQueryPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+    protected AbstractQueryPerformer(CalendarSession session, CalendarStorage storage) {
         super();
         this.session = session;
         this.storage = storage;
