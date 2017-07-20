@@ -1776,14 +1776,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             // Determine file storage user/context counts
-            FilestoreCountCollection filestoreUserCounts = getFilestoreUserCounts();
+            //FilestoreCountCollection filestoreUserCounts = getFilestoreUserCounts();
 
             // Find a suitable one from ordered list of candidates
             NextCandidate: for (Candidate candidate : candidates) {
                 int entityCount = candidate.numberOfEntities;
 
                 // Get user count information
-                FilestoreCount count = filestoreUserCounts.get(candidate.id);
+                FilestoreCount count = Filestore2UserUtil.getUserCount(candidate.id, this.cache);
                 if (null != count) {
                     entityCount += count.getCount();
                 }
@@ -3246,16 +3246,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
         return new FilestoreUsage(users.size(), used);
-    }
-
-    /**
-     * Gets the file storage user counts for given database pools
-     *
-     * @return The user counts
-     * @throws StorageException If operation fails
-     */
-    private FilestoreCountCollection getFilestoreUserCounts() throws StorageException {
-        return Filestore2UserUtil.getUserCounts(this.cache);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------
