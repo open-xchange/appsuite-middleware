@@ -169,6 +169,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Tika tika;
     private final String lineSeparator;
     private final HTMLEntityCodec htmlCodec;
+    private final DefaultWhitelist fullWhitelist;
+    private final DefaultWhitelist htmlOnlyWhitelist;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -190,6 +192,15 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
+
+        DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
+        fullWhitelist = builder.build();
+
+        builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        htmlOnlyWhitelist = builder.build();
     }
 
     @Override
@@ -488,12 +499,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public Whitelist getWhitelist(boolean withCss) {
-        DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
-        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
-        if (withCss) {
-            builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
-        }
-        return builder.build();
+        return withCss ? fullWhitelist : htmlOnlyWhitelist;
     }
 
     /**
