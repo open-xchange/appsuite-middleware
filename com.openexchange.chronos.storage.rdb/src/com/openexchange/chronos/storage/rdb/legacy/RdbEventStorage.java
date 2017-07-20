@@ -403,12 +403,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                return readEvent(connection, resultSet, mappedFields, null);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? readEvent(connection, resultSet, mappedFields, null) : null;
             }
         }
-        return null;
     }
 
     private Event selectException(Connection connection, int contextID, int seriesID, long recurrenceDatePosition, EventField[] fields) throws SQLException, OXException {
@@ -421,12 +419,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(1, contextID);
             stmt.setInt(2, seriesID);
             stmt.setString(3, String.valueOf(recurrenceDatePosition));
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                return readEvent(connection, resultSet, mappedFields, null);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? readEvent(connection, resultSet, mappedFields, null) : null;
             }
         }
-        return null;
     }
 
     private Event readEvent(Connection connection, ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {
@@ -469,9 +465,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 stmt.setTimestamp(parameterIndex++, new Timestamp(searchOptions.getUntil().getTime()));
             }
             adapter.setParameters(stmt, parameterIndex);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(connection, resultSet, mappedFields, "d."));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(connection, resultSet, mappedFields, "d."));
+                }
             }
         }
         return events;
@@ -563,9 +560,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                     stmt.setInt(parameterIndex++, id);
                 }
             }
-            ResultSet resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                events.add(readEvent(connection, resultSet, mappedFields, "d."));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(connection, resultSet, mappedFields, "d."));
+                }
             }
         }
         return events;
@@ -592,12 +590,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, seriesID);
             stmt.setInt(3, seriesID);
-            ResultSet resultSet = logExecuteQuery(stmt);
-            if (resultSet.next()) {
-                return new DefaultRecurrenceData(readEvent(connection, resultSet, fields, null));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? new DefaultRecurrenceData(readEvent(connection, resultSet, fields, null)) : null;
             }
         }
-        return null;
     }
 
     /**
