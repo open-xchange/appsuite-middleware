@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,52 +49,51 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAvailability;
+import net.fortuna.ical4j.model.property.Priority;
 
 /**
- * {@link AvailabilityMappings}
+ * {@link PriorityMapping}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailabilityMappings {
+public class PriorityMapping extends AbstractICalMapping<VAvailability, CalendarAvailability> {
 
     /**
-     * Holds a collection of all known availability mappings.
+     * Initialises a new {@link PriorityMapping}.
      */
-    //@formatter:off
-    public static List<ICalMapping<VAvailability, CalendarAvailability>> ALL = Collections.<ICalMapping<VAvailability, CalendarAvailability>> unmodifiableList(Arrays.asList(
-        new DtStampMapping(),
-        new UidMapping(),
-        new BusyTypeMapping(),
-        new ClassificationMapping(),
-        new CreatedMapping(),
-        new DescriptionMapping(),
-        new DtStartMapping(),
-        new LastModifiedMapping(),
-        new LocationMapping(),
-        new OrganizerMapping(),
-        new PriorityMapping(),
-        //new SequenceMapping(),
-        new SummaryMapping(),
-        new UrlMapping(),
-        new DtEndMapping(),
-        new DurationMapping()
-        //new CategoriesMapping(),
-        //new CommentMapping(),
-        //new ContactMapping(),
-        //new ExtendedPropertiesMapping()
-        ));
-    //@formatter:on
-
-    /**
-     * Initialises a new {@link AvailabilityMappings}.
-     */
-    public AvailabilityMappings() {
+    public PriorityMapping() {
         super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
+     */
+    @Override
+    public void export(CalendarAvailability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
+        if (object.getPriority() >= 0 && object.getPriority() <= 9) {
+            component.getProperties().add(new Priority(object.getPriority()));
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
+     */
+    @Override
+    public void importICal(VAvailability component, CalendarAvailability object, ICalParameters parameters, List<OXException> warnings) {
+        Priority priority = (Priority) component.getProperty(Property.PRIORITY);
+        if (priority != null) {
+            object.setPriority(priority.getLevel());
+        }
     }
 }
