@@ -2972,6 +2972,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt.executeBatch();
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
+
+                stmt = configCon.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
+                for (Integer id : ids) {
+                    stmt.setInt(1, id.intValue());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
             } else {
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
@@ -3002,6 +3011,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt.setInt(1, entry.getKey().intValue());
                 stmt.setInt(2, count);
                 stmt.setInt(3, count);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+
+            stmt = configCon.prepareStatement("INSERT IGNORE INTO dbpool_lock (db_pool_id) VALUES (?)");
+            for (Map.Entry<Integer, Integer> entry : counts.entrySet()) {
+                stmt.setInt(1, entry.getKey().intValue());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -3040,6 +3058,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Check if really non-existent or simply empty
                 PreparedStatement deleteStmt = null;
                 PreparedStatement updateStmt = null;
+                PreparedStatement updateStmt2 = null;
                 try {
                     for (Database schema : schemas) {
                         if (OXUtilMySQLStorageCommon.existsDatabase(schema)) {
@@ -3058,6 +3077,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             deleteStmt.setInt(1, schema.getId().intValue());
                             deleteStmt.setString(2, schema.getScheme());
                             deleteStmt.addBatch();
+                            if (null == updateStmt2) {
+                                updateStmt2 = configCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            updateStmt2.setInt(1, schema.getId().intValue());
+                            updateStmt2.setString(2, schema.getScheme());
+                            updateStmt2.addBatch();
                         }
                     }
                     if (null != deleteStmt) {
@@ -3065,6 +3090,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                     if (null != updateStmt) {
                         updateStmt.executeBatch();
+                    }
+                    if (null != updateStmt2) {
+                        updateStmt2.executeBatch();
                     }
                 } finally {
                     Databases.closeSQLStuff(deleteStmt, updateStmt);
@@ -3120,23 +3148,39 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
             }
 
-            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
-            long now = System.currentTimeMillis();
-            for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
-                int poolId = entry.getKey().intValue();
-                List<SchemaCount> schemaCounts = entry.getValue();
-                for (SchemaCount schemaCount : schemaCounts) {
-                    stmt.setInt(1, poolId);
-                    stmt.setString(2, schemaCount.schemaName);
-                    stmt.setInt(3, schemaCount.count);
-                    stmt.setLong(4, now);
-                    stmt.setInt(5, schemaCount.count);
-                    stmt.addBatch();
+            if (false == counts.isEmpty()) {
+                stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+                long now = System.currentTimeMillis();
+                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                    int poolId = entry.getKey().intValue();
+                    List<SchemaCount> schemaCounts = entry.getValue();
+                    for (SchemaCount schemaCount : schemaCounts) {
+                        stmt.setInt(1, poolId);
+                        stmt.setString(2, schemaCount.schemaName);
+                        stmt.setInt(3, schemaCount.count);
+                        stmt.setLong(4, now);
+                        stmt.setInt(5, schemaCount.count);
+                        stmt.addBatch();
+                    }
                 }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+
+                stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                    int poolId = entry.getKey().intValue();
+                    List<SchemaCount> schemaCounts = entry.getValue();
+                    for (SchemaCount schemaCount : schemaCounts) {
+                        stmt.setInt(1, poolId);
+                        stmt.setString(2, schemaCount.schemaName);
+                        stmt.addBatch();
+                    }
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
             }
-            stmt.executeBatch();
-            Databases.closeSQLStuff(rs, stmt);
-            stmt = null;
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);

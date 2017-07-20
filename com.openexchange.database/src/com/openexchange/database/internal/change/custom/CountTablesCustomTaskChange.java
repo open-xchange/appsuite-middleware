@@ -128,7 +128,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             Databases.startTransaction(configDbCon);
             rollback = true;
 
-            execute(configDbCon);
+            execute(configDbCon, logger);
 
             configDbCon.commit();
             rollback = false;
@@ -151,16 +151,19 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
         }
     }
 
-    private void execute(Connection configDbCon) throws CustomChangeException {
+    private void execute(Connection configDbCon, org.slf4j.Logger logger) throws CustomChangeException {
         try {
+            logger.info("Creating count tables for ConfigDB");
             createFilestoreCountTable(configDbCon);
             createDBPoolCountTable(configDbCon);
             createDBPoolSchemaCountTable(configDbCon);
             createSemaphoreTable(configDbCon);
 
+            logger.info("Count tables successfully created. Initializing count tables for ConfigDB");
             checkFilestoreCountConsistency(configDbCon);
             checkDBPoolCountConsistency(configDbCon);
             checkDBPoolSchemaCountConsistency(configDbCon);
+            logger.info("Count tables successfully initialized");
         } catch (SQLException e) {
             throw new CustomChangeException("SQL error", e);
         }
@@ -343,7 +346,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
 
-                stmt = configCon.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                stmt = configCon.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
                 for (Integer id : ids) {
                     stmt.setInt(1, id.intValue());
                     stmt.addBatch();
@@ -439,6 +442,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                 // Check if really non-existent or simply empty
                 PreparedStatement deleteStmt = null;
                 PreparedStatement updateStmt = null;
+                PreparedStatement updateStmt2 = null;
                 try {
                     for (DbAndSchema schema : schemas) {
                         if (existsDatabase(schema.schema, schema.url, schema.driver, schema.login, schema.password)) {
@@ -457,6 +461,12 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                             deleteStmt.setInt(1, schema.dbId);
                             deleteStmt.setString(2, schema.schema);
                             deleteStmt.addBatch();
+                            if (null == updateStmt2) {
+                                updateStmt2 = configCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            updateStmt2.setInt(1, schema.dbId);
+                            updateStmt2.setString(2, schema.schema);
+                            updateStmt2.addBatch();
                         }
                     }
                     if (null != deleteStmt) {
@@ -464,6 +474,9 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                     }
                     if (null != updateStmt) {
                         updateStmt.executeBatch();
+                    }
+                    if (null != updateStmt2) {
+                        updateStmt2.executeBatch();
                     }
                 } finally {
                     Databases.closeSQLStuff(deleteStmt, updateStmt);
@@ -519,37 +532,39 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
                 stmt = null;
             }
 
-            stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
-            long now = System.currentTimeMillis();
-            for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
-                int poolId = entry.getKey().intValue();
-                List<SchemaCount> schemaCounts = entry.getValue();
-                for (SchemaCount schemaCount : schemaCounts) {
-                    stmt.setInt(1, poolId);
-                    stmt.setString(2, schemaCount.schemaName);
-                    stmt.setInt(3, schemaCount.count);
-                    stmt.setLong(4, now);
-                    stmt.setInt(5, schemaCount.count);
-                    stmt.addBatch();
+            if (false == counts.isEmpty()) {
+                stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+                long now = System.currentTimeMillis();
+                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                    int poolId = entry.getKey().intValue();
+                    List<SchemaCount> schemaCounts = entry.getValue();
+                    for (SchemaCount schemaCount : schemaCounts) {
+                        stmt.setInt(1, poolId);
+                        stmt.setString(2, schemaCount.schemaName);
+                        stmt.setInt(3, schemaCount.count);
+                        stmt.setLong(4, now);
+                        stmt.setInt(5, schemaCount.count);
+                        stmt.addBatch();
+                    }
                 }
-            }
-            stmt.executeBatch();
-            Databases.closeSQLStuff(rs, stmt);
-            stmt = null;
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
 
-            stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
-            for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
-                int poolId = entry.getKey().intValue();
-                List<SchemaCount> schemaCounts = entry.getValue();
-                for (SchemaCount schemaCount : schemaCounts) {
-                    stmt.setInt(1, poolId);
-                    stmt.setString(2, schemaCount.schemaName);
-                    stmt.addBatch();
+                stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
+                    int poolId = entry.getKey().intValue();
+                    List<SchemaCount> schemaCounts = entry.getValue();
+                    for (SchemaCount schemaCount : schemaCounts) {
+                        stmt.setInt(1, poolId);
+                        stmt.setString(2, schemaCount.schemaName);
+                        stmt.addBatch();
+                    }
                 }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
             }
-            stmt.executeBatch();
-            Databases.closeSQLStuff(rs, stmt);
-            stmt = null;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
