@@ -1636,6 +1636,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         boolean loadRealUsage = false;
 
         if (forContext) {
+            // Determine file storage user/context counts
+            FilestoreCountCollection filestoreUserCounts = Filestore2UserUtil.getUserCounts(configDbCon);
+            
             int retryCount = 0;
             while (true) {
                 PreparedStatement stmt = null;
@@ -1663,9 +1666,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         if (maxNumberOfEntities > 0) {
                             int numberOfContexts = rs.getInt(3); // In case NULL, then 0 (zero) is returned
                             Candidate candidate = new Candidate(rs.getInt(1), maxNumberOfEntities, numberOfContexts, rs.getString(4), toMB(rs.getLong(5)));
-
-                            // Determine file storage user/context counts
-                            FilestoreCountCollection filestoreUserCounts = Filestore2UserUtil.getUserCounts(configDbCon);
 
                             int entityCount = candidate.numberOfEntities;
 
