@@ -603,7 +603,13 @@ public class Multiple extends SessionServlet {
                     final MailServletInterface mi;
                     tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
                     if (tmp == null) {
-                        mi = MailServletInterface.getInstance(session);
+                        final boolean decrypt = jsonObj.optBoolean("decrypt", false);
+                        if(decrypt) {
+                            mi = MailServletInterface.getInstanceWithDecryptionSupport(session, null /* by now only using session attached auth */);
+                        }
+                        else {
+                            mi = MailServletInterface.getInstance(session);
+                        }
                         req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
                     } else {
                         mi = ((MailServletInterface) tmp);
