@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Chronos calendar provider caching bundle
+Bundle-SymbolicName: com.openexchange.chronos.provider.caching
+Bundle-Version: 7.8.4
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.osgi.util,
+ com.openexchange.search,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.id,
+ com.openexchange.tools.session,
+ com.openexchange.tx,
+ org.apache.commons.lang3,
+ org.dmfs.rfc5545,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Export-Package: com.openexchange.chronos.provider.caching
+Bundle-Activator: com.openexchange.chronos.provider.caching.osgi.CachingCalendarAccessActivator
