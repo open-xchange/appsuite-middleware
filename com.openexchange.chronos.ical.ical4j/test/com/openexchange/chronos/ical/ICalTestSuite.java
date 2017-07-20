@@ -62,10 +62,11 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    AvailabilityTest.class,
     BasicTest.class,
+    Bug17963Test.class,
     PreserveOriginalTest.class,
-    TestXProperties.class,
-    Bug17963Test.class
+    TestXProperties.class
 })
 public final class ICalTestSuite {
 

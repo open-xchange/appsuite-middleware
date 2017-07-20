@@ -290,6 +290,5 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The location does not match", "Montreal", freeSlot.getLocation());
         assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), freeSlot.getStartTime().getTimeZone());
         assertEquals("The end timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), freeSlot.getEndTime().getTimeZone());
-
     }
 }
