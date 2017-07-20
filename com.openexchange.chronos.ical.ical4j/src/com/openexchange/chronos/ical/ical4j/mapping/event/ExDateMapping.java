@@ -53,12 +53,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.chronos.ical.ical4j.mapping.TimeZoneUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.DateTime;
@@ -85,10 +87,12 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
             DateList dateList = new DateList();
             dateList.setUtc(true);
             for (RecurrenceId date : value) {
-                if (hasTime(object)) {
-                    dateList.add(new DateTime(date.getValue()));
+                if (date.getValue().isAllDay()) {
+                    dateList.add(new net.fortuna.ical4j.model.Date(date.getValue().getTimestamp()));
                 } else {
-                    dateList.add(new net.fortuna.ical4j.model.Date(date.getValue()));
+                    DateTime dateTime = new net.fortuna.ical4j.model.DateTime(true);
+                    dateTime.setTime(date.getValue().getTimestamp());
+                    dateList.add(dateTime);
                 }
             }
             component.getProperties().add(new ExDate(dateList));
@@ -104,7 +108,19 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
                 ExDate property = (ExDate) iterator.next();
                 for (Iterator<?> i = property.getDates().iterator(); i.hasNext();) {
                     net.fortuna.ical4j.model.Date date = (net.fortuna.ical4j.model.Date) i.next();
-                    deleteExceptionDates.add(new DefaultRecurrenceId(date.getTime()));
+                    org.dmfs.rfc5545.DateTime exceptionDate;
+                    if (DateTime.class.isInstance(date)) {
+                        net.fortuna.ical4j.model.TimeZone parsedTimeZone = ((DateTime) date).getTimeZone();
+                        if (null != parsedTimeZone) {
+                            TimeZone timeZone = TimeZoneUtils.selectTimeZone(parsedTimeZone, parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class));
+                            exceptionDate = new org.dmfs.rfc5545.DateTime(timeZone, date.getTime());
+                        } else {
+                            exceptionDate = new org.dmfs.rfc5545.DateTime(date.getTime());
+                        }
+                    } else {
+                        exceptionDate = new org.dmfs.rfc5545.DateTime(date.getTime()).toAllDay();
+                    }
+                    deleteExceptionDates.add(new DefaultRecurrenceId(exceptionDate));
                 }
             }
             object.setDeleteExceptionDates(deleteExceptionDates);

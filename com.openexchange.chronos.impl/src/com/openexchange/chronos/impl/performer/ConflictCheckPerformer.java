@@ -245,11 +245,11 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             return Collections.emptyList();
         }
         long masterEventDuration = masterEvent.getEndDate().getTimestamp() - masterEvent.getStartDate().getTimestamp();
-        Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue() + masterEventDuration);
+        Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue().getTimestamp() + masterEventDuration);
         if (today.after(until)) {
             return Collections.emptyList();
         }
-        Date from = new Date(eventRecurrenceIds.get(0).getValue());
+        Date from = new Date(eventRecurrenceIds.get(0).getValue().getTimestamp());
         /*
          * search for potentially conflicting events in period
          */
@@ -289,12 +289,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
-                        if (eventRecurrenceId.getValue() >= recurrenceId.getValue() + duration) {
+                        if (eventRecurrenceId.getValue().getTimestamp() >= recurrenceId.getValue().getTimestamp() + duration) {
                             /*
                              * further occurrences are also "after" the checked event occurrence
                              */
                             break;
-                        } else if (eventRecurrenceId.getValue() + masterEventDuration > recurrenceId.getValue()) {
+                        } else if (eventRecurrenceId.getValue().getTimestamp() + masterEventDuration > recurrenceId.getValue().getTimestamp()) {
                             /*
                              * add conflict for occurrence
                              */
@@ -305,12 +305,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 }
             } else {
                 for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
-                    if (eventRecurrenceId.getValue() >= eventInPeriod.getEndDate().getTimestamp()) {
+                    if (eventRecurrenceId.getValue().getTimestamp() >= eventInPeriod.getEndDate().getTimestamp()) {
                         /*
                          * further occurrences are also "after" the checked event
                          */
                         break;
-                    } else if (eventRecurrenceId.getValue() + masterEventDuration > eventInPeriod.getStartDate().getTimestamp()) {
+                    } else if (eventRecurrenceId.getValue().getTimestamp() + masterEventDuration > eventInPeriod.getStartDate().getTimestamp()) {
                         /*
                          * add conflict
                          */

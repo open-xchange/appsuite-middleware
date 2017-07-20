@@ -367,7 +367,7 @@ public class Compat {
         }
         List<Date> dates = new ArrayList<Date>(recurrenceIds.size());
         for (RecurrenceId recurrenceId : recurrenceIds) {
-            dates.add(new Date(recurrenceId.getValue()));
+            dates.add(new Date(recurrenceId.getValue().getTimestamp()));
         }
         return dates;
     }
@@ -378,7 +378,7 @@ public class Compat {
         }
         SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
         for (Date date : dates) {
-            recurrenceIds.add(new DefaultRecurrenceId(date));
+            recurrenceIds.add(new DefaultRecurrenceId(new DateTime(date.getTime())));
         }
         return recurrenceIds;
     }
@@ -443,7 +443,7 @@ public class Compat {
         Date startDate;
         Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster));
         if (iterator.hasNext()) {
-            calendar.setTimeInMillis(iterator.next().getValue());
+            calendar.setTimeInMillis(iterator.next().getValue().getTimestamp());
             calendar.set(Calendar.HOUR_OF_DAY, startHour);
             calendar.set(Calendar.MINUTE, startMinute);
             calendar.set(Calendar.SECOND, startSecond);
@@ -455,7 +455,7 @@ public class Compat {
          * iterate recurrence and take over end date of "last" occurrence
          */
         long millis = seriesMaster.getEndDate().getTimestamp();
-        for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue(), i++)
+        for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue().getTimestamp(), i++)
             ;
         calendar.setTimeInMillis(millis);
         calendar.set(Calendar.HOUR_OF_DAY, endHour);

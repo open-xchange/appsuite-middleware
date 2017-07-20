@@ -298,7 +298,7 @@ public class EventPatches {
                     EventID eventId = new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), resource.getEvent().getRecurrenceId());
                     Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, eventId.getFolderID(), eventId);
                     Event originalOccurrence = null;
-                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue()), null);
+                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
                     if (iterator.hasNext()) {
                         originalOccurrence = iterator.next();
                     }

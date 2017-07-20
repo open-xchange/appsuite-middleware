@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -81,7 +82,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected final RecurrenceData recurrenceData;
     protected final long eventDuration;
 
-    protected Long next;
+    protected DateTime next;
     protected int count;
     protected int position;
     protected RecurrenceRuleIterator inner;
@@ -213,7 +214,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        next = inner.nextMillis();
+        next = inner.nextDateTime();
         count++;
         position++;
     }
@@ -253,7 +254,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         long[] timestamps = new long[exceptionDates.size()];
         int position = 0;
         for (RecurrenceId recurrenceId : exceptionDates) {
-            timestamps[position++] = recurrenceId.getValue();
+            timestamps[position++] = recurrenceId.getValue().getTimestamp();
         }
         return timestamps;
     }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition;
 
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
@@ -66,9 +67,9 @@ public class CompositeEventID extends CompositeID {
 
     /**
      * Parses a {@link CompositeEventID} from a mangled unique identifier string. The optional recurrence identifier may be supplied as
-     * trailing {@link Long}.
+     * trailing date-time.
      *
-     * @param uniqueID The composite identifier; e.g. <code>4://35/8687</code> or <code>4://8687/1486138800000</code>
+     * @param uniqueID The composite identifier; e.g. <code>4://35/8687</code> or <code>4://8687/20170723</code>
      * @throws IllegalArgumentException If passed identifier can't be unmangled
      */
     public static CompositeEventID parse(String uniqueID) {
@@ -79,7 +80,7 @@ public class CompositeEventID extends CompositeID {
         int accountId = Integer.parseInt(unmangled.get(0));
         String folderId = unmangled.get(1);
         String eventId = unmangled.get(2);
-        RecurrenceId recurrenceId = 3 < unmangled.size() ? new DefaultRecurrenceId(Long.parseLong(unmangled.get(3))) : null;
+        RecurrenceId recurrenceId = 3 < unmangled.size() ? new DefaultRecurrenceId(DateTime.parse(unmangled.get(3))) : null;
         return new CompositeEventID(accountId, folderId, eventId, recurrenceId);
     }
 
@@ -167,7 +168,7 @@ public class CompositeEventID extends CompositeID {
         int result = super.hashCode();
         result = prime * result + ((eventId == null) ? 0 : eventId.hashCode());
         result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
-        result = prime * result + ((recurrenceId == null) ? 0 : (int) (recurrenceId.getValue() ^ (recurrenceId.getValue() >>> 32)));
+        result = prime * result + ((recurrenceId == null) ? 0 : recurrenceId.hashCode());
         return result;
     }
 

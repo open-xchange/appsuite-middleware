@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,8 +111,9 @@ public class ListAction extends ChronosAction {
                 JSONObject jsonObject = ids.getJSONObject(x);
                 String id = jsonObject.getString(ID_FIELD);
                 if (jsonObject.has(RECURENCE_ID_FIELD)) {
+                    //TODO: recurrence id as datetime string
                     long recurrenceId = jsonObject.getLong(RECURENCE_ID_FIELD);
-                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(recurrenceId)));
+                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(new DateTime(recurrenceId))));
                 } else {
                     compositeEventIDs.add(CompositeEventID.parse(id));
                 }

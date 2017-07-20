@@ -74,32 +74,28 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, Calendar
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
     protected DateTime getValue(CalendarFreeSlot object) {
         com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
-        if (value == null) {
-            return null;
-        }
-        // FIXME: Consider all day for AVAILABLE subcomponents?
-        return new DateTime(value.getValue());
+        return null == value ? null : value.getValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
     protected void setValue(CalendarFreeSlot object, DateTime value) {
-        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value.getTimestamp()) : null);
+        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
      */
     @Override
@@ -109,7 +105,7 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, Calendar
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
      */
     @Override

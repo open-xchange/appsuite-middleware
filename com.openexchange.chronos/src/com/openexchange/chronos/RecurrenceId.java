@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos;
 
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+
 /**
  * {@link RecurrenceId}
  *
@@ -64,6 +67,10 @@ public interface RecurrenceId extends Comparable<RecurrenceId> {
      *
      * @return The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
-    long getValue();
+    //    long getValue();
+
+    DateTime getValue();
+
+    int compareTo(RecurrenceId other, TimeZone timeZone);
 
 }

@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.common;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link DataAwareRecurrenceId}
@@ -68,9 +66,9 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
      * Initializes a new {@link DataAwareRecurrenceId}.
      *
      * @param recurrenceData The underlying recurrence data of the corresponding series
-     * @param value The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @param value The recurrence-id value
      */
-    public DataAwareRecurrenceId(RecurrenceData recurrenceData, long value) {
+    public DataAwareRecurrenceId(RecurrenceData recurrenceData, DateTime value) {
         super(value);
         this.recurrenceData = recurrenceData;
     }
@@ -107,12 +105,7 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
 
     @Override
     public String toString() {
-        if (null != getTimeZoneID()) {
-            return super.toString();
-        }
-        SimpleDateFormat dateFormat = new SimpleDateFormat(isAllDay() ? "yyyyMMdd" : "yyyyMMdd'T'HHmmss");
-        dateFormat.setTimeZone(TimeZones.UTC);
-        return dateFormat.format(new Date(value));
+        return super.toString();
     }
 
 }

@@ -122,7 +122,7 @@ public abstract class RecurrenceServiceTest {
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
-        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
+        clone.setRecurrenceId(new DefaultRecurrenceId(DT(recurrenceId, master.getStartDate().getTimeZone(), master.getStartDate().isAllDay())));
         clone.setStartDate(DT(start, clone.getStartDate().getTimeZone(), clone.getStartDate().isAllDay()));
         clone.setEndDate(DT(end, clone.getEndDate().getTimeZone(), clone.getEndDate().isAllDay()));
 
@@ -130,7 +130,7 @@ public abstract class RecurrenceServiceTest {
         assertTrue("Not equal.", equals);
     }
 
-    protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, DateTime start, DateTime end) {
+    protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, DateTime recurrenceId, DateTime start, DateTime end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
         Event clone = clone(master);
@@ -147,7 +147,7 @@ public abstract class RecurrenceServiceTest {
         assertTrue("Not equal.", equals);
     }
 
-    protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, Date recurrenceId, DateTime start, DateTime end) {
+    protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, DateTime recurrenceId, DateTime start, DateTime end) {
         assertNotNull("Master must not be null.", master);
         assertNotNull("Instance must not be null", instance);
         Event clone = clone(master);
@@ -199,7 +199,7 @@ public abstract class RecurrenceServiceTest {
         instance.removeRecurrenceRule();
         instance.removeDeleteExceptionDates();
         instance.removeChangeExceptionDates();
-        instance.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
+        instance.setRecurrenceId(new DefaultRecurrenceId(DT(recurrenceId, master.getStartDate().getTimeZone(), master.getStartDate().isAllDay())));
         instance.setStartDate(DT(start, instance.getStartDate().getTimeZone(), instance.getStartDate().isAllDay()));
         instance.setEndDate(DT(end, instance.getEndDate().getTimeZone(), instance.getEndDate().isAllDay()));
         return instance;

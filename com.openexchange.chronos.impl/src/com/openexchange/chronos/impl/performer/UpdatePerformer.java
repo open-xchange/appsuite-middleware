@@ -98,6 +98,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -387,11 +388,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null != originalEvent.getChangeExceptionDates()) {
                 exceptionDates.addAll(originalEvent.getChangeExceptionDates());
             }
-            Collections.sort(exceptionDates);
+            Collections.sort(exceptionDates, new RecurrenceIdComparator());
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast().getValue());
             untilCalendar.add(Calendar.DATE, 1);
             List<RecurrenceId> possibleExceptionDates = asList(session.getRecurrenceService().iterateRecurrenceIds(
-                eventUpdate.getUpdate(), new Date(exceptionDates.getFirst().getValue()), untilCalendar.getTime()));
+                eventUpdate.getUpdate(), new Date(exceptionDates.getFirst().getValue().getTimestamp()), untilCalendar.getTime()));
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */
@@ -522,7 +523,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
                     RecurrenceId recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, newDeleteException);
-                    if (contains(originalEvent.getChangeExceptionDates(), newDeleteException.getValue())) {
+                    if (contains(originalEvent.getChangeExceptionDates(), newDeleteException)) {
                         /*
                          * remove attendee from existing change exception
                          */

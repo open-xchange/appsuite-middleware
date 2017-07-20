@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -267,11 +268,11 @@ public class Appointment2Event {
         //        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, null, null);
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, recurrenceDatePosition, null);
         while (iterator.hasNext()) {
-            long nextMillis = iterator.next().getValue();
-            calendar.setTimeInMillis(nextMillis);
+            DateTime next = iterator.next().getValue();
+            calendar.setTimeInMillis(next.getTimestamp());
             long nextDatePosition = truncateTime(calendar).getTimeInMillis();
             if (recurrenceDatePosition.getTime() == nextDatePosition) {
-                return new PositionAwareRecurrenceId(recurrenceData, nextMillis, iterator.getPosition(), calendar.getTime());
+                return new PositionAwareRecurrenceId(recurrenceData, next, iterator.getPosition(), calendar.getTime());
             }
             if (nextDatePosition > recurrenceDatePosition.getTime()) {
                 break;
@@ -304,10 +305,10 @@ public class Appointment2Event {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         nextPosition: for (Date recurrenceDatePosition : recurrenceDatePositions) {
             while (iterator.hasNext()) {
-                long nextMillis = iterator.next().getValue();
-                long nextDatePosition = truncateTime(initCalendar(TimeZones.UTC, nextMillis)).getTimeInMillis();
+                DateTime next = iterator.next().getValue();
+                long nextDatePosition = truncateTime(initCalendar(TimeZones.UTC, next.getTimestamp())).getTimeInMillis();
                 if (recurrenceDatePosition.getTime() == nextDatePosition) {
-                    recurrenceIDs.add(new PositionAwareRecurrenceId(recurrenceData, nextMillis, iterator.getPosition(), recurrenceDatePosition));
+                    recurrenceIDs.add(new PositionAwareRecurrenceId(recurrenceData, next, iterator.getPosition(), recurrenceDatePosition));
                     continue nextPosition;
                 }
                 if (nextDatePosition > recurrenceDatePosition.getTime()) {
@@ -332,9 +333,9 @@ public class Appointment2Event {
     public static RecurrenceId getRecurrenceID(RecurrenceService recurrenceService, RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, Autoboxing.I(recurrencePosition), null);
         while (iterator.hasNext()) {
-            long nextMillis = iterator.next().getValue();
+            DateTime next = iterator.next().getValue();
             if (recurrencePosition == iterator.getPosition()) {
-                return new PositionAwareRecurrenceId(recurrenceData, nextMillis, recurrencePosition, truncateTime(new Date(nextMillis), TimeZones.UTC));
+                return new PositionAwareRecurrenceId(recurrenceData, next, recurrencePosition, truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
             }
         }
         throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create("legacy recurrence position " + recurrencePosition, recurrenceData.getRecurrenceRule());

@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.common;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.java.util.TimeZones;
 
@@ -62,55 +62,49 @@ import com.openexchange.java.util.TimeZones;
  */
 public class DefaultRecurrenceId implements RecurrenceId {
 
-    protected final long value;
+    protected final DateTime value;
 
     /**
      * Initializes a new {@link DefaultRecurrenceId}.
      *
-     * @param value The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @param value The recurrence-id value
      */
-    public DefaultRecurrenceId(long value) {
+    public DefaultRecurrenceId(DateTime value) {
         super();
+        if (null == value) {
+            throw new NullPointerException("value");
+        }
         this.value = value;
     }
 
-    /**
-     * Initializes a new {@link DefaultRecurrenceId}.
-     *
-     * @param value The date of the recurrence
-     */
-    public DefaultRecurrenceId(Date value) {
-        this(value.getTime());
-    }
-
     @Override
-    public long getValue() {
+    public DateTime getValue() {
         return value;
     }
 
     @Override
+    public int compareTo(RecurrenceId other, TimeZone timeZone) {
+        return null == other ? 1 : CalendarUtils.compare(value, other.getValue(), timeZone);
+    }
+
+    @Override
     public int compareTo(RecurrenceId other) {
-        return null == other ? 1 : Long.compare(getValue(), other.getValue());
+        return compareTo(other, TimeZones.UTC);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (value ^ (value >>> 32));
-        return result;
+        return value.hashCode();
     }
 
     @Override
     public boolean equals(Object other) {
-        return null != other && RecurrenceId.class.isInstance(other) && value == ((RecurrenceId) other).getValue();
+        return null != other && RecurrenceId.class.isInstance(other) && value.equals(((RecurrenceId) other).getValue());
     }
 
     @Override
     public String toString() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-        dateFormat.setTimeZone(TimeZones.UTC);
-        return dateFormat.format(new Date(value));
+        return value.toString();
     }
 
 }

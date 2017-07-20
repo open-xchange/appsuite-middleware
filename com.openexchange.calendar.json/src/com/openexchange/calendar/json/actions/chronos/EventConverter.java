@@ -610,14 +610,14 @@ public abstract class EventConverter {
                 if (event.containsStartDate()) {
                     appointment.setFullTime(recurrenceData.isAllDay());
                     appointment.setTimezone(recurrenceData.getTimeZoneID());
-                    long timestamp = null != firstRecurrenceId ? firstRecurrenceId.getValue() : event.getStartDate().getTimestamp();
+                    long timestamp = null != firstRecurrenceId ? firstRecurrenceId.getValue().getTimestamp() : event.getStartDate().getTimestamp();
                     appointment.setStartDate(new Date(timestamp));
                 }
                 if (event.containsEndDate()) {
                     long timestamp;
                     if (null != firstRecurrenceId) {
                         long duration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
-                        timestamp = firstRecurrenceId.getValue() + duration;
+                        timestamp = firstRecurrenceId.getValue().getTimestamp() + duration;
                     } else {
                         timestamp = event.getEndDate().getTimestamp();
                     }

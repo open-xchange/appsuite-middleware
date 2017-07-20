@@ -370,7 +370,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
 
             @Override
             public void set(CalendarFreeSlot object, Long value) {
-                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value.longValue()));
+                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(new DateTime(value.longValue())));
             }
 
             @Override
@@ -381,7 +381,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             @Override
             public Long get(CalendarFreeSlot object) {
                 RecurrenceId value = object.getRecurrenceId();
-                return null == value ? null : L(value.getValue());
+                return null == value ? null : L(value.getValue().getTimestamp());
             }
 
             @Override

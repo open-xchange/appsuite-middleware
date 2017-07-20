@@ -280,7 +280,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Long value) {
-                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value.longValue()));
+                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(new DateTime(value.longValue())));
             }
 
             @Override
@@ -291,7 +291,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public Long get(Event event) {
                 RecurrenceId value = event.getRecurrenceId();
-                return null == value ? null : L(value.getValue());
+                return null == value ? null : L(value.getValue().getTimestamp());
             }
 
             @Override
@@ -892,7 +892,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         List<String> splitted = Strings.splitAndTrim(timestamps, ",");
         SortedSet<RecurrenceId> dates = new TreeSet<RecurrenceId>();
         for (String timestamp : splitted) {
-            dates.add(new DefaultRecurrenceId(Long.parseLong(timestamp)));
+            dates.add(new DefaultRecurrenceId(new DateTime(Long.parseLong(timestamp))));
         }
         return dates;
     }

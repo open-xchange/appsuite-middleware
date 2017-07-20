@@ -18,6 +18,7 @@ Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.session,
  com.openexchange.tools.id,
  com.openexchange.tx,
+ org.dmfs.rfc5545,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

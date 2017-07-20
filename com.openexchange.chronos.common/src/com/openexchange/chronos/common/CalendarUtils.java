@@ -134,9 +134,9 @@ public class CalendarUtils {
      * @param value The value to check
      * @return <code>true</code> if the recurrence id's value matches the timestamp value, <code>false</code>, otherwise
      */
-    public static boolean matches(RecurrenceId recurrenceId, long value) {
-        return null != recurrenceId && recurrenceId.getValue() == value;
-    }
+    //    public static boolean matches(RecurrenceId recurrenceId, long value) {
+    //        return null != recurrenceId && recurrenceId.getValue() == value;
+    //    }
 
     /**
      * Looks up a specific recurrence identifier in a collection based on its timestamp value.
@@ -146,16 +146,16 @@ public class CalendarUtils {
      * @return The matching recurrence identifier, or <code>null</code> if not found
      * @see CalendarUtils#matches(RecurrenceId, long)
      */
-    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, long value) {
-        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
-            for (RecurrenceId recurrenceId : recurrenceIds) {
-                if (matches(recurrenceId, value)) {
-                    return recurrenceId;
-                }
-            }
-        }
-        return null;
-    }
+    //    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, long value) {
+    //        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
+    //            for (RecurrenceId recurrenceId : recurrenceIds) {
+    //                if (matches(recurrenceId, value)) {
+    //                    return recurrenceId;
+    //                }
+    //            }
+    //        }
+    //        return null;
+    //    }
 
     /**
      * Gets a value indicating whether a recurrence id with a specific timestamp value is present in a collection of recurrence
@@ -166,9 +166,9 @@ public class CalendarUtils {
      * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
      * @see CalendarUtils#matches(RecurrenceId, long)
      */
-    public static boolean contains(Collection<RecurrenceId> recurrendeIds, long value) {
-        return null != find(recurrendeIds, value);
-    }
+    //    public static boolean contains(Collection<RecurrenceId> recurrendeIds, long value) {
+    //        return null != find(recurrendeIds, value);
+    //    }
 
     /**
      * Gets a value indicating whether a specific recurrence id is present in a collection of recurrence identifiers, based on its value.
@@ -178,8 +178,8 @@ public class CalendarUtils {
      * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
      * @see CalendarUtils#matches(RecurrenceId, long)
      */
-    public static boolean contains(Collection<RecurrenceId> recurrendeIds, RecurrenceId recurrenceId) {
-        return null != find(recurrendeIds, recurrenceId.getValue());
+    public static boolean contains(Collection<RecurrenceId> recurrenceIds, RecurrenceId recurrenceId) {
+        return null != recurrenceIds && recurrenceIds.contains(recurrenceId);
     }
 
     /**
@@ -1054,7 +1054,7 @@ public class CalendarUtils {
                     if (null == recurrenceId2) {
                         return 1;
                     }
-                    return Long.compare(recurrenceId1.getValue(), recurrenceId2.getValue());
+                    return recurrenceId1.compareTo(recurrenceId2);
                 }
             });
         }
@@ -1155,10 +1155,11 @@ public class CalendarUtils {
      */
     public static DateTime calculateStart(Event seriesMaster, RecurrenceId recurrenceId) {
         //TODO check
+        //        return recurrenceId.getValue();
         if (seriesMaster.getStartDate().isAllDay()) {
-            return new DateTime(recurrenceId.getValue()).toAllDay();
+            return new DateTime(recurrenceId.getValue().getTimestamp()).toAllDay();
         }
-        return new DateTime(seriesMaster.getStartDate().getTimeZone(), recurrenceId.getValue());
+        return new DateTime(seriesMaster.getStartDate().getTimeZone(), recurrenceId.getValue().getTimestamp());
     }
 
     /**
@@ -1173,7 +1174,7 @@ public class CalendarUtils {
         long startMillis = seriesMaster.getStartDate().getTimestamp();
         long endMillis = seriesMaster.getEndDate().getTimestamp();
         long duration = endMillis - startMillis;
-        long occurrenceEnd = recurrenceId.getValue() + duration;
+        long occurrenceEnd = recurrenceId.getValue().getTimestamp() + duration;
         if (seriesMaster.getEndDate().isAllDay()) {
             return new DateTime(occurrenceEnd).toAllDay();
         }

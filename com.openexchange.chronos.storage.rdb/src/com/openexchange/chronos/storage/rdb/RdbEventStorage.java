@@ -530,7 +530,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, accountId);
             stmt.setInt(3, asInt(seriesId));
-            stmt.setLong(4, recurrenceId.getValue());
+            stmt.setLong(4, recurrenceId.getValue().getTimestamp());
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
             }
@@ -734,7 +734,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 return Long.MAX_VALUE; // never ending series
             }
             long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
-            rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue() + eventDuration);
+            rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
         }
         if (isFloating(event)) {
             /*

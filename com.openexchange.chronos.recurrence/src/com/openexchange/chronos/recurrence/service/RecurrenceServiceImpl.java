@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
@@ -184,11 +185,11 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         if (false == iterator.hasNext()) {
             return null;
         }
-        long millis;
+        DateTime dateTime;
         do {
-            millis = iterator.nextMillis();
+            dateTime = iterator.nextDateTime();
         } while (iterator.hasNext());
-        return new DefaultRecurrenceId(millis);
+        return new DefaultRecurrenceId(dateTime);
     }
 
 }

@@ -861,7 +861,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         List<String> splitted = Strings.splitAndTrim(timestamps, ",");
         SortedSet<RecurrenceId> dates = new TreeSet<RecurrenceId>();
         for (String timestamp : splitted) {
-            dates.add(new DefaultRecurrenceId(Long.parseLong(timestamp)));
+            dates.add(new DefaultRecurrenceId(new DateTime(Long.parseLong(timestamp))));
         }
         return dates;
     }
@@ -872,9 +872,9 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         }
         StringBuilder stringBuilder = new StringBuilder(15 * dates.size());
         Iterator<RecurrenceId> iterator = dates.iterator();
-        stringBuilder.append(iterator.next().getValue());
+        stringBuilder.append(iterator.next().getValue().getTimestamp());
         while (iterator.hasNext()) {
-            stringBuilder.append(',').append(iterator.next().getValue());
+            stringBuilder.append(',').append(iterator.next().getValue().getTimestamp());
         }
         return stringBuilder.toString();
     }

@@ -136,6 +136,22 @@ public class RecurrenceUtils {
         } else {
             start = new DateTime(seriesStart);
         }
+        return getRecurrenceIterator(rule, start, forwardToOccurrence);
+    }
+
+    /**
+     * Initializes a new recurrence iterator for a specific recurrence rule, optionally advancing to the first occurrence. The latter
+     * option ensures that the first date delivered by the iterator matches the start-date of the first occurrence.
+     *
+     * @param rule The recurrence rule
+     * @param seriesStart The series start date, usually the date of the first occurrence
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
+     *            does not fall into the pattern, <code>false</code> otherwise
+     * @return The recurrence rule iterator
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceRule rule, DateTime seriesStart, boolean forwardToOccurrence) throws OXException {
+        DateTime start = seriesStart;
         try {
             if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
                 /*
@@ -149,9 +165,10 @@ public class RecurrenceUtils {
                     }
                     for (RecurrenceRuleIterator iterator = rule.iterator(start); null == firstOccurrence && iterator.hasNext(); iterator.nextMillis()) {
                         // TODO: max_recurrences guard?
-                        long millis = iterator.peekMillis();
-                        if (millis > seriesStart) {
-                            firstOccurrence = iterator.peekDateTime();
+
+                        DateTime peekedDateTime = iterator.peekDateTime();
+                        if (peekedDateTime.after(seriesStart)) {
+                            firstOccurrence = peekedDateTime;
                         }
                     }
                     if (null != firstOccurrence) {

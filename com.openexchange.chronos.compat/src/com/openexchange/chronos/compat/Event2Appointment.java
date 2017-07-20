@@ -311,11 +311,11 @@ public class Event2Appointment {
     public static int getRecurrencePosition(RecurrenceService recurrenceService, RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         while (iterator.hasNext()) {
-            long nextMillis = iterator.next().getValue();
-            if (nextMillis == recurrenceId.getValue()) {
+            RecurrenceId next = iterator.next();
+            if (next.equals(recurrenceId)) {
                 return iterator.getPosition();
             }
-            if (nextMillis > recurrenceId.getValue()) {
+            if (next.getValue().after(recurrenceId.getValue())) {
                 break;
             }
         }
@@ -333,7 +333,7 @@ public class Event2Appointment {
         if (PositionAwareRecurrenceId.class.isInstance(recurrenceId)) {
             return ((PositionAwareRecurrenceId) recurrenceId).getRecurrenceDatePosition();
         }
-        return CalendarUtils.truncateTime(new Date(recurrenceId.getValue()), TimeZones.UTC);
+        return CalendarUtils.truncateTime(new Date(recurrenceId.getValue().getTimestamp()), TimeZones.UTC);
     }
 
 

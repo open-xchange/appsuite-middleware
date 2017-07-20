@@ -49,24 +49,24 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECURRENCE_MASTER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import org.dmfs.rfc5545.DateTime;
 import java.util.Set;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -161,9 +161,10 @@ public abstract class ChronosAction implements AJAXActionService {
     protected CompositeEventID parseIdParameter(AJAXRequestData requestData) throws OXException {
         String value = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
         Long recurrenceId = parseRecurrenceIdParameter(requestData);
+        //TODO: recurrence id as datetime string
         try {
             if (recurrenceId != null) {
-                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(recurrenceId));
+                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(new DateTime(recurrenceId)));
             } else {
                 return CompositeEventID.parse(value);
             }

@@ -129,7 +129,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             event = anonymizeIfNeeded(session, event);
             if (null != eventID.getRecurrenceID()) {
                 if (isSeriesMaster(event)) {
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(eventID.getRecurrenceID().getValue()), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(eventID.getRecurrenceID().getValue().getTimestamp()), null);
                     if (false == iterator.hasNext()) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
                     }

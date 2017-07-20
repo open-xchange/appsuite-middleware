@@ -47,66 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.compat;
+package com.openexchange.chronos.common;
 
-import java.util.Date;
-import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.common.DataAwareRecurrenceId;
-import com.openexchange.chronos.service.RecurrenceData;
+import java.util.Comparator;
+import java.util.TimeZone;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link PositionAwareRecurrenceId}
+ * {@link RecurrenceIdComparator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class PositionAwareRecurrenceId extends DataAwareRecurrenceId {
+public class RecurrenceIdComparator implements Comparator<RecurrenceId> {
 
-    private final int recurrencePosition;
-    private final Date recurrenceDatePosition;
+    /** A default comparator using the <code>UTC</code> timezone when comparing <i>floating</i> recurrence identifiers */
+    public static RecurrenceIdComparator DEFAULT_COMPARATOR = new RecurrenceIdComparator();
+
+    private final TimeZone timeZone;
 
     /**
-     * Initializes a new {@link PositionAwareRecurrenceId}.
+     * Initializes a new {@link RecurrenceIdComparator}.
      *
-     * @param recurrenceData The underlying recurrence data of the corresponding series
-     * @param value The recurrence-id value
-     * @param recurrencePosition The legacy, 1-based recurrence position
-     * @param recurrenceDatePosition The legacy recurrence date position
+     * @param timeZone The timezone to consider for <i>floating</i> recurrence ids, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
      */
-    public PositionAwareRecurrenceId(RecurrenceData recurrenceData, DateTime value, int recurrencePosition, Date recurrenceDatePosition) {
-        super(recurrenceData, value);
-        this.recurrencePosition = recurrencePosition;
-        this.recurrenceDatePosition = recurrenceDatePosition;
+    public RecurrenceIdComparator(TimeZone timeZone) {
+        super();
+        this.timeZone = timeZone;
     }
 
     /**
-     * Gets the formerly used recurrence position, i.e. the 1-based, sequential position in the series where the original occurrence
-     * would have been.
-     *
-     * @return The recurrence position
+     * Initializes a new {@link RecurrenceIdComparator}.
+     * <p>/
+     * <i>Floating</i> recurrence ids are compared from an UTC timezone perspective.
      */
-    public int getRecurrencePosition() {
-        return recurrencePosition;
-    }
-
-    /**
-     * Gets the formerly used recurrence date position, i.e. the date where the original occurrence would have been, as UTC date with
-     * truncated time fraction.
-     *
-     * @return The legacy recurrence date position
-     */
-    public Date getRecurrenceDatePosition() {
-        return recurrenceDatePosition;
+    public RecurrenceIdComparator() {
+        this(TimeZones.UTC);
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+    public int compare(RecurrenceId recurrenceId1, RecurrenceId recurrenceId2) {
+        if (null == recurrenceId1) {
+            return null == recurrenceId2 ? 0 : -1;
+        }
+        if (null == recurrenceId2) {
+            return 1;
+        }
+        return CalendarUtils.compare(recurrenceId1.getValue(), recurrenceId2.getValue(), timeZone);
     }
 
 }

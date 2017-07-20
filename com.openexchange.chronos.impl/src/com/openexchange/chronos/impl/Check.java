@@ -442,7 +442,7 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(seriesMaster, new Date(recurrenceID.getValue()), null);
+        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(seriesMaster, new Date(recurrenceID.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }

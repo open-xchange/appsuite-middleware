@@ -51,7 +51,6 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Property;
@@ -77,15 +76,12 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<VEvent, Event> {
 	@Override
     protected DateTime getValue(Event object) {
         com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
-        if (null == value) {
-            return null;
-        }
-        return CalendarUtils.isAllDay(object) ? new DateTime(value.getValue()).toAllDay() : new DateTime(value.getValue());
+        return null == value ? null : value.getValue();
 	}
 
 	@Override
     protected void setValue(Event object, DateTime value) {
-        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value.getTimestamp()) : null);
+        object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
 	}
 
 	@Override
