@@ -1579,6 +1579,16 @@ do
   ox_remove_property ${property} ${pfile}
 done
 
+# SoftwareChange_Request-4249
+set -e
+TMPFILE=$(mktemp)
+/opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
+if [ -e $TMPFILE ]; then
+  cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+  rm -f $TMPFILE
+fi
+set +e
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
