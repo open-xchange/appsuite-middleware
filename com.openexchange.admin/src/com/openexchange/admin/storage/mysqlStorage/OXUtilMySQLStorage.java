@@ -1354,13 +1354,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 int entityCount = candidate.numberOfEntities;
 
                 // Get user count information
-                FilestoreCount count = Filestore2UserUtil.getUserCount(candidate.id, this.cache);
-                if (null != count) {
-                    entityCount += count.getCount();
+                int userCount = Filestore2UserUtil.getUserCountFor(candidate.id, this.cache);
+                if (userCount > 0) {
+                    entityCount += userCount;
                 }
 
                 if (entityCount < candidate.maxNumberOfEntities) {
-                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
+                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(userCount, 0L);
 
                     // Get filestore
                     Filestore filestore = getFilestore(candidate.id, loadRealUsage, null, userFilestoreUsage, con);
