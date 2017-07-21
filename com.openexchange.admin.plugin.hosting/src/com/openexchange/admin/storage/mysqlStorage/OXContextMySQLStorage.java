@@ -3038,7 +3038,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ResultSet rs = null;
         try {
             // Determine non-referenced ones (contained in 'contexts_per_dbschema' but not referenced within 'context_server2db_pool' associations)
-            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname, db_pool.url, db_pool.driver, db_pool.login, db_pool.password FROM contexts_per_dbschema JOIN db_pool ON contexts_per_dbschema.db_pool_id=db_pool.db_pool_id LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname, db_pool.url, db_pool.driver, db_pool.login, db_pool.password FROM contexts_per_dbschema JOIN db_pool ON contexts_per_dbschema.db_pool_id=db_pool.db_pool_id LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname COLLATE utf8_unicode_ci = context_server2db_pool.db_schema COLLATE utf8_unicode_ci WHERE context_server2db_pool.write_db_pool_id IS NULL");
             rs = stmt.executeQuery();
             if (rs.next()) {
                 List<Database> schemas = new LinkedList<Database>();
