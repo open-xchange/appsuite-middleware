@@ -67,7 +67,7 @@ import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
-import com.openexchange.passwordchange.history.tracker.DatabasePasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.impl.DatabasePasswordChangeTracker;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
