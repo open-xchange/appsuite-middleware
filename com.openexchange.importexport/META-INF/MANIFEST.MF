@@ -78,6 +78,7 @@ Import-Package: com.fasterxml.jackson.core,
  gnu.trove.procedure,
  org.apache.commons.io,
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.json,
  org.osgi.framework,
  org.slf4j

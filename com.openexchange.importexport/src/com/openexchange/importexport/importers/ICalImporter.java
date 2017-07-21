@@ -929,7 +929,7 @@ public class ICalImporter extends AbstractImporter {
                     if (null == recurrenceId2) {
                         return 1;
                     }
-                    return Long.compare(recurrenceId1.getValue(), recurrenceId2.getValue());
+                    return Long.compare(recurrenceId1.getValue().getTimestamp(), recurrenceId2.getValue().getTimestamp());
                 }
             });
         }
