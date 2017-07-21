@@ -100,8 +100,6 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil;
-import com.openexchange.admin.storage.utils.Filestore2UserUtil.FilestoreCount;
-import com.openexchange.admin.storage.utils.Filestore2UserUtil.FilestoreCountCollection;
 import com.openexchange.admin.storage.utils.Filestore2UserUtil.UserAndContext;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
@@ -1636,9 +1634,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         boolean loadRealUsage = false;
 
         if (forContext) {
-            // Determine file storage user/context counts
-            FilestoreCountCollection filestoreUserCounts = Filestore2UserUtil.getUserCounts(configDbCon);
-            
             int retryCount = 0;
             while (true) {
                 PreparedStatement stmt = null;
@@ -1670,13 +1665,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             int entityCount = candidate.numberOfEntities;
 
                             // Get user count information
-                            FilestoreCount count = filestoreUserCounts.get(candidate.id);
-                            if (null != count) {
-                                entityCount += count.getCount();
+                            int count = Filestore2UserUtil.getUserCountFor(candidate.id, this.cache);
+                            if (count > 0) {
+                                entityCount += count;
                             }
 
                             if (entityCount < candidate.maxNumberOfEntities) {
-                                FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
+                                FilestoreUsage userFilestoreUsage = new FilestoreUsage(count <= 0 ? 0 : count, 0L);
 
                                 // Create filestore instance from candidate
                                 Filestore filestore = new Filestore();
@@ -1783,13 +1778,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 int entityCount = candidate.numberOfEntities;
 
                 // Get user count information
-                int userCount = Filestore2UserUtil.getUserCountFor(candidate.id, this.cache);
-                if (userCount > 0) {
-                    entityCount += userCount;
+                int count = Filestore2UserUtil.getUserCountFor(candidate.id, this.cache);
+                if (count > 0) {
+                    entityCount += count;
                 }
 
                 if (entityCount < candidate.maxNumberOfEntities) {
-                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(userCount, 0L);
+                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(count, 0L);
 
                     // Create filestore instance froim candidate
                     Filestore filestore = new Filestore();
@@ -1829,7 +1824,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     first = false;
                                 } else {
                                     current = getCurrentCountFor(filestore.getId().intValue(), con);
-                                    if (current + (null == count ? 0 : count.getCount()) >= candidate.maxNumberOfEntities) {
+                                    if (current + (count <= 0 ? 0 : count) >= candidate.maxNumberOfEntities) {
                                         // Exceeded... repeat with next candidate
                                         continue NextCandidate;
                                     }
