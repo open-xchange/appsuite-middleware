@@ -131,9 +131,9 @@ public class PasswordChangeHistoryREST {
                 break;
             }
             JSONObject data = new JSONObject();
-            data.append("lastModified", info.lastModified().toString());
-            data.append("modifiedBy", info.modifiedBy());
-            data.append("modifyOrigin", info.modifyOrigin());
+            data.append("created", info.getCreated().toString());
+            data.append("client", info.getClient());
+            data.append("ip", info.getIP());
             entries.add(i++, data);
         }
         json.append("PasswordChangeHistroy", entries);

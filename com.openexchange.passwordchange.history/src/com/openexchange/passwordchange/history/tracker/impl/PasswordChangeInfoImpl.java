@@ -47,62 +47,52 @@
  *
  */
 
-package com.openexchange.rest.passwordchange.history;
+package com.openexchange.passwordchange.history.tracker.impl;
 
-import static org.junit.Assert.assertFalse;
 import java.sql.Timestamp;
-import org.json.JSONObject;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
-import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
+import javax.xml.bind.annotation.XmlRootElement;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.impl.PasswordChangeInfoImpl;
-import com.openexchange.rest.AbstractRestTest;
-import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
 
 /**
- * {@link AbstractPasswordchangehistoryTest}
+ * {@link PasswordChangeInfoImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
+@XmlRootElement
+public class PasswordChangeInfoImpl implements PasswordChangeInfo {
 
-    protected static final String ARRAY_NAME = "PasswordChangeHistroy";
+    private Timestamp created;
+    private String client;
+    private String ip;
 
-    protected PasswordchangehistoryApi pwdhapi;
-    protected Long contextID;
-    protected Long userID;
-    protected Long limit = new Long(1);
-    protected Timestamp send;
+    /**
+     * Initializes a new {@link PasswordChangeInfoImpl}.
+     * 
+     * @param created The time when the password change was made
+     * @param client The client that did the change
+     * @param ip The optional IP of the client
+     */
+    public PasswordChangeInfoImpl(Timestamp created, String client, String ip) {
+        super();
+        this.created = created;
+        this.client = client;
+        this.ip = ip;
+    }
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        // API to operate on
-        pwdhapi = new PasswordchangehistoryApi(getRestClient());
-
-        // Do a password change
-        PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
-        send = new Timestamp(System.currentTimeMillis());
-        PasswordChangeUpdateResponse response = getAjaxClient().execute(request);
-        assertFalse("Errors in response!", response.hasError());
-        assertFalse("Warnings in response!", response.hasWarnings());
-
-        // Get context and user ID
-        contextID = Integer.toUnsignedLong(getAjaxClient().getValues().getContextId());
-        userID = Integer.toUnsignedLong(getAjaxClient().getValues().getUserId());
+    public Timestamp getCreated() {
+        return created;
     }
 
-    protected PasswordChangeInfo parse(JSONObject data) throws Exception {
-        final String ip = filter(data, "ip");
-        final String client = filter(data, "client");
-        final Timestamp created = Timestamp.valueOf(filter(data, "created"));
-
-        return new PasswordChangeInfoImpl(created, client, ip);
+    @Override
+    public String getClient() {
+        return client;
     }
 
-    private String filter(JSONObject data, String name) throws Exception {
-        return data.getString(name).replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\"", "");
+    @Override
+    public String getIP() {
+        return ip;
     }
+
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.tracker.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,6 +63,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.passwordchange.history.osgi.Services;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
 import com.openexchange.server.impl.DBPool;
 
 /**
@@ -115,26 +117,10 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
                 // Convert data
                 while (set.next()) {
                     final Timestamp created = set.getTimestamp(1);
-                    final String source = set.getString(2);
+                    final String client = set.getString(2);
                     final String ip = set.getString(3);
 
-                    retval.add(new PasswordChangeInfo() {
-
-                        @Override
-                        public String modifyOrigin() {
-                            return ip;
-                        }
-
-                        @Override
-                        public String modifiedBy() {
-                            return source;
-                        }
-
-                        @Override
-                        public Timestamp lastModified() {
-                            return created;
-                        }
-                    });
+                    retval.add(new PasswordChangeInfoImpl(created, client, ip));
                 }
             } catch (SQLException e) {
                 LOG.debug("Error while getting password history from DB.");
@@ -194,11 +180,11 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             stmt.setInt(1, contextID);
             stmt.setInt(2, sequence);
             stmt.setInt(3, userID);
-            stmt.setString(4, info.modifiedBy());
-            if (null == info.modifyOrigin()) {
+            stmt.setString(4, info.getClient());
+            if (null == info.getIP()) {
                 stmt.setNull(5, Types.VARCHAR);
             } else {
-                stmt.setString(5, info.modifyOrigin());
+                stmt.setString(5, info.getIP());
             }
             stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             stmt.execute();

@@ -69,20 +69,20 @@ public interface PasswordChangeInfo {
      * 
      * @return The {@link Timestamp}
      */
-    Timestamp lastModified();
+    Timestamp getCreated();
 
     /**
      * The client that did the last password change. See {@link #APPSUITE}, {@link #PROVISIONING} and {@link #UNKOWN}
      * 
      * @return The {@link Class}
      */
-    String modifiedBy();
+    String getClient();
 
     /**
      * Get the IP-address the changed request was sent from
      * 
      * @return The IP-adress or <code>null</code>
      */
-    String modifyOrigin();
+    String getIP();
 
 }

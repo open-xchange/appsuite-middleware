@@ -58,6 +58,7 @@ import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.impl.PasswordChangeInfoImpl;
 
 /**
  * {@link PasswordChangeUtility}
@@ -78,30 +79,13 @@ public final class PasswordChangeUtility {
      * @param contextID The context of the user
      * @param userID The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
-     * @param source The calling resource. See {@link PasswordChangeInfo#APPSUITE}, {@link PasswordChangeInfo#PROVISIONING} or {@link PasswordChangeInfo#UNKOWN}
+     * @param client The calling resource. See {@link PasswordChangeInfo#APPSUITE}, {@link PasswordChangeInfo#PROVISIONING} or {@link PasswordChangeInfo#UNKOWN}
      */
-    public static void recordChange(int contextID, int userID, final String ipAddress, final String source) {
+    public static void recordChange(int contextID, int userID, final String ipAddress, final String client) {
         try {
             PasswordChangeTracker tracker = loadTracker(contextID, userID);
-            final Timestamp current = new Timestamp(System.currentTimeMillis());
-            PasswordChangeInfo info = new PasswordChangeInfo() {
-
-                @Override
-                public Timestamp lastModified() {
-                    return current;
-                }
-
-                @Override
-                public String modifiedBy() {
-                    return source;
-                }
-
-                @Override
-                public String modifyOrigin() {
-                    return ipAddress;
-                }
-
-            };
+            final Timestamp created = new Timestamp(System.currentTimeMillis());
+            PasswordChangeInfo info = new PasswordChangeInfoImpl(created, client, ipAddress);
             tracker.trackPasswordChange(userID, contextID, info);
         } catch (Exception e) {
             // IF this happens some property won't be there ..
