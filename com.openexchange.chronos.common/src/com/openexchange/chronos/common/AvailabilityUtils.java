@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,29 +49,28 @@
 
 package com.openexchange.chronos.common;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
+import com.openexchange.chronos.CalendarAvailability;
 
 /**
- * {@link UnitTests}
+ * {@link AvailabilityUtils}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RecurTest.class,
-    AvailabilityUtilsTest.class
-})
-public final class UnitTests {
+public final class AvailabilityUtils {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Checks if the specified availability A intersects with the specified availability B.
+     * Two checks are performed internally:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param a The {@link CalendarAvailability} A
+     * @param b The {@link CalendarAvailability} B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
      */
-    public UnitTests() {
-        super();
+    public static boolean intersect(CalendarAvailability a, CalendarAvailability b) {
+        return (a.getStartTime().before(b.getEndTime()) && a.getEndTime().after(b.getStartTime()));
     }
-
 }
