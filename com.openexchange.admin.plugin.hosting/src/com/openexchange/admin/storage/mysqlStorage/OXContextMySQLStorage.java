@@ -3129,7 +3129,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ResultSet rs = null;
         try {
             // Drop non-existing ones held in count table
-            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname FROM contexts_per_dbschema LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname=context_server2db_pool.db_schema WHERE context_server2db_pool.write_db_pool_id IS NULL");
+            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname FROM contexts_per_dbschema LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname COLLATE utf8_unicode_ci = context_server2db_pool.db_schema COLLATE utf8_unicode_ci WHERE context_server2db_pool.write_db_pool_id IS NULL");
             rs = stmt.executeQuery();
             if (rs.next()) {
                 class DbAndSchema {
