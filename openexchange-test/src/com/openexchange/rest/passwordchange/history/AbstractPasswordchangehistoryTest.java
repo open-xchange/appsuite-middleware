@@ -74,7 +74,6 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
     protected Long userID;
     protected Long limit = new Long(1);
     protected Timestamp send;
-    protected PasswordchangehistoryApi pwdhapi;
 
     @Override
     public void setUp() throws Exception {
