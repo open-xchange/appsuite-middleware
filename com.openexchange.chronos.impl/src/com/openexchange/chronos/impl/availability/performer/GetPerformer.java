@@ -52,14 +52,17 @@ package com.openexchange.chronos.impl.availability.performer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
@@ -185,7 +188,7 @@ public class GetPerformer extends AbstractPerformer {
      * Retrieves the {@link AvailableTime} slots for the current user
      * 
      * @return The {@link AvailableTime} slots for the current user
-     * @throws OXException 
+     * @throws OXException
      */
     public AvailableTime getAvailableTime() throws OXException {
         AvailableTime availableTime = new AvailableTime();
@@ -193,11 +196,30 @@ public class GetPerformer extends AbstractPerformer {
 
         List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(session.getUserId());
         BusyType busyType = BusyType.BUSY_TENTATIVE;
+        List<CalendarFreeSlot> flattenSlots = new ArrayList<>();
         for (CalendarAvailability calendarAvailability : calendarAvailabilities) {
             busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
-            
+            flattenSlots.addAll(calendarAvailability.getCalendarFreeSlots());
         }
-        
+
+        Iterator<CalendarFreeSlot> iteratorA = flattenSlots.iterator();
+        int index = 0;
+        while (iteratorA.hasNext()) {
+            CalendarFreeSlot a = iteratorA.next();
+
+            List<CalendarFreeSlot> lookAheadList = flattenSlots.subList(++index, flattenSlots.size());
+            Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
+            while (iteratorB.hasNext()) {
+                CalendarFreeSlot b = iteratorB.next();
+                if (AvailabilityUtils.intersect(a, b) && !AvailabilityUtils.contained(b, a)) {
+                    a = AvailabilityUtils.merge(a, b);
+                    iteratorB.remove();
+                }
+            }
+            availableTime.add(AvailabilityUtils.convert(a));
+        }
+
+        availableTime.setBusyType(busyType);
         return availableTime;
     }
 }

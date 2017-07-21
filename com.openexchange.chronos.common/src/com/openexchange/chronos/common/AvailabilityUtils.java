@@ -61,6 +61,14 @@ import com.openexchange.chronos.CalendarFreeSlot;
  */
 public final class AvailabilityUtils {
 
+    public static boolean contained(CalendarFreeSlot a, CalendarFreeSlot b) {
+        return contained(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
+    }
+
+    public static boolean contained(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        return startA.after(startB) && endA.before(endB);
+    }
+
     /**
      * Checks if the specified availability A intersects with the specified availability B.
      * Two checks are performed internally:
@@ -106,7 +114,7 @@ public final class AvailabilityUtils {
      * @param endB The ending date B
      * @return <code>true</code> if they intersect; <code>false</code> otherwise
      */
-    private static boolean intersect(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+    public static boolean intersect(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
         return startA.before(endB) && endA.after(startB);
     }
 
@@ -121,6 +129,20 @@ public final class AvailabilityUtils {
         AvailableTimeSlot ats = new AvailableTimeSlot();
         ats.setFrom(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
         ats.setUntil(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
+        return ats;
+    }
+
+    public static CalendarFreeSlot merge(CalendarFreeSlot a, CalendarFreeSlot b) {
+        CalendarFreeSlot ats = new CalendarFreeSlot();
+        ats.setStartTime(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
+        ats.setEndTime(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
+        return ats;
+    }
+
+    public static AvailableTimeSlot convert(CalendarFreeSlot freeSlot) {
+        AvailableTimeSlot ats = new AvailableTimeSlot();
+        ats.setFrom(freeSlot.getStartTime());
+        ats.setUntil(freeSlot.getEndTime());
         return ats;
     }
 }
