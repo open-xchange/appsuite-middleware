@@ -108,7 +108,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
-                "recurrence BIGINT(20) DEFAULT NULL," +
+                "recurrence VARCHAR(32) DEFAULT NULL," +
                 "deleteExceptions TEXT DEFAULT NULL," +
                 "changeExceptions TEXT DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
@@ -155,7 +155,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
-                "recurrence BIGINT(20) DEFAULT NULL," +
+                "recurrence VARCHAR(32) DEFAULT NULL," +
                 "deleteExceptions TEXT DEFAULT NULL," +
                 "changeExceptions TEXT DEFAULT NULL," +
                 "created BIGINT(20) NOT NULL," +
