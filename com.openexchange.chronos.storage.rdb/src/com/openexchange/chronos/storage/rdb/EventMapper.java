@@ -57,15 +57,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -88,7 +85,6 @@ import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.PointMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Enums;
-import com.openexchange.java.Strings;
 
 /**
  * {@link EventMapper}
@@ -276,11 +272,11 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceRule();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new BigIntMapping<Event>("recurrence", "Recurrence ID") {
+        mappings.put(EventField.RECURRENCE_ID, new VarCharMapping<Event>("recurrence", "Recurrence ID") {
 
             @Override
-            public void set(Event event, Long value) {
-                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(new DateTime(value.longValue())));
+            public void set(Event event, String value) {
+                event.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
@@ -289,9 +285,9 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public Long get(Event event) {
+            public String get(Event event) {
                 RecurrenceId value = event.getRecurrenceId();
-                return null == value ? null : L(value.getValue().getTimestamp());
+                return null == value ? null : value.toString();
             }
 
             @Override
@@ -299,12 +295,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new VarCharMapping<Event>("deleteExceptions", "Delete exceptions") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setDeleteExceptionDates(deserializeExceptionDates(value));
-            }
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("deleteExceptions", "Delete exceptions") {
 
             @Override
             public boolean isSet(Event event) {
@@ -312,21 +303,21 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public String get(Event event) {
-                return serializeExceptionDates(event.getDeleteExceptionDates());
-            }
-
-            @Override
             public void remove(Event event) {
                 event.removeDeleteExceptionDates();
             }
-        });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new VarCharMapping<Event>("changeExceptions", "Change exceptions") {
 
             @Override
-            public void set(Event event, String value) {
-                event.setChangeExceptionDates(deserializeExceptionDates(value));
+            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+                return event.getDeleteExceptionDates();
             }
+
+            @Override
+            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+                event.setDeleteExceptionDates(value);
+            }
+        });
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("changeExceptions", "Change exceptions") {
 
             @Override
             public boolean isSet(Event event) {
@@ -334,13 +325,18 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public String get(Event event) {
-                return serializeExceptionDates(event.getChangeExceptionDates());
+            public void remove(Event event) {
+                event.removeChangeExceptionDates();
             }
 
             @Override
-            public void remove(Event event) {
-                event.removeChangeExceptionDates();
+            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
+                return event.getChangeExceptionDates();
+            }
+
+            @Override
+            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
+                event.setChangeExceptionDates(value);
             }
         });
         mappings.put(EventField.CREATED, new BigIntMapping<Event>("created", "Created") {
@@ -740,13 +736,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeDescription();
             }
         });
-        mappings.put(EventField.CATEGORIES, new VarCharMapping<Event>("categories", "Categories") {
-
-            @Override
-            public void set(Event event, String value) {
-                String[] splitted = Strings.splitByCommaNotInQuotes(value);
-                event.setCategories(null != splitted ? Arrays.asList(splitted) : null);
-            }
+        mappings.put(EventField.CATEGORIES, new VarCharListMapping<Event>("categories", "Categories") {
 
             @Override
             public boolean isSet(Event event) {
@@ -754,17 +744,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             }
 
             @Override
-            public String get(Event event) {
-                List<String> value = event.getCategories();
-                if (null == value || 0 == value.size()) {
-                    return null;
-                }
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(value.get(0));
-                for (int i = 1; i < value.size(); i++) {
-                    stringBuilder.append(',').append(value.get(i));
-                }
-                return stringBuilder.toString();
+            public void set(Event event, List<String> value) throws OXException {
+                event.setCategories(value);
+            }
+
+            @Override
+            public List<String> get(Event event) {
+                return event.getCategories();
             }
 
             @Override
@@ -884,30 +870,5 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         });
         return mappings;
 	}
-
-    private static SortedSet<RecurrenceId> deserializeExceptionDates(String timestamps) throws NumberFormatException {
-        if (null == timestamps) {
-            return null;
-        }
-        List<String> splitted = Strings.splitAndTrim(timestamps, ",");
-        SortedSet<RecurrenceId> dates = new TreeSet<RecurrenceId>();
-        for (String timestamp : splitted) {
-            dates.add(new DefaultRecurrenceId(new DateTime(Long.parseLong(timestamp))));
-        }
-        return dates;
-    }
-
-    private static String serializeExceptionDates(SortedSet<RecurrenceId> dates) {
-        if (null == dates || 0 == dates.size()) {
-            return null;
-        }
-        StringBuilder stringBuilder = new StringBuilder(15 * dates.size());
-        Iterator<RecurrenceId> iterator = dates.iterator();
-        stringBuilder.append(iterator.next().getValue());
-        while (iterator.hasNext()) {
-            stringBuilder.append(',').append(iterator.next().getValue());
-        }
-        return stringBuilder.toString();
-    }
 
 }

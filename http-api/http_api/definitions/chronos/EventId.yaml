@@ -6,6 +6,5 @@ properties:
     type: string
     description: The identifier of the event.
   recurrenceId:
-    type: integer
-    format: int64
+    type: string
     description: The recurrence id of this recurrence.

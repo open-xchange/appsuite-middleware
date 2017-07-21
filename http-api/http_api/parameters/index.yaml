@@ -322,8 +322,7 @@ QueryParamChronosID:
 QueryParamChronosRecurrenceID:
   name: recurrenceId
   in: query
-  type: integer
-  format: int64
+  type: string
   description: The recurrence identifier.
   required: false
 QueryParamChronosFields:
