@@ -83,10 +83,8 @@ public abstract class VarCharListMapping<O> extends DefaultDbMapping<List<String
             return 1;
         }
         List<String> value = get(object);
-        if (null == value) {
+        if (null == value || value.isEmpty()) {
             statement.setNull(parameterIndex, getSqlType());
-        } else if (value.isEmpty()) {
-            statement.setString(parameterIndex, "");
         } else {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(value.get(0));
@@ -101,6 +99,10 @@ public abstract class VarCharListMapping<O> extends DefaultDbMapping<List<String
 
     @Override
     public List<String> get(ResultSet resultSet, String columnLabel) throws SQLException {
+        String value = resultSet.getString(columnLabel);
+        if (null == value || value.isEmpty()) {
+            return null;
+        }
         //TODO unescape
         String[] splitted = Strings.splitByComma(resultSet.getString(columnLabel));
         return null != splitted ? Arrays.asList(splitted) : null;
