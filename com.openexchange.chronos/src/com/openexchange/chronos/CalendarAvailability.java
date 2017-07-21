@@ -92,7 +92,7 @@ public class CalendarAvailability implements FieldAware {
     private String url;
     private List<String> comments;
 
-    private long duration; //FIXME: as integer or another type?
+    private int duration;
 
     private ExtendedProperties extendedProperties;
     private List<String> categories;
@@ -269,7 +269,7 @@ public class CalendarAvailability implements FieldAware {
      * Removes the prioriry
      */
     public void removePriority() {
-        priority = -1;
+        priority = 0;
         fields.remove(AvailabilityField.priority);
     }
 
@@ -547,7 +547,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @return The duration
      */
-    public long getDuration() {
+    public int getDuration() {
         return duration;
     }
 
@@ -556,7 +556,7 @@ public class CalendarAvailability implements FieldAware {
      *
      * @param duration The duration to set
      */
-    public void setDuration(long duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
         fields.add(AvailabilityField.duration);
     }
