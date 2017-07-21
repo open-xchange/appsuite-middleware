@@ -134,7 +134,7 @@ public class RecurrenceUtils {
         } else if (null != timeZoneID) {
             start = new DateTime(TimeZone.getTimeZone(timeZoneID), seriesStart);
         } else {
-            start = new DateTime(seriesStart);
+            start = new DateTime(null, seriesStart);
         }
         return getRecurrenceIterator(rule, start, forwardToOccurrence);
     }
