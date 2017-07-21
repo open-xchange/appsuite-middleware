@@ -494,7 +494,7 @@ public class DriveConfig implements Initialization {
         }
         try {
             excludedDirectoriesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedDirectoriesPattern",
-                "^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                "^/\\.drive$|^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         } catch (PatternSyntaxException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedDirectoriesPattern");
         }
@@ -566,12 +566,12 @@ public class DriveConfig implements Initialization {
         maxDirectories = configService.getIntProperty("com.openexchange.drive.maxDirectories", 65535);
         maxFilesPerDirectory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDirectory", 65535);
         String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.enabledServices", "com.openexchange.infostore"));
-        enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
+        enabledServices = new HashSet<>(Arrays.asList(enabledServicesValue));
         String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.excludedFolders"));
         if (null == exclduedFoldersValue || 0 == exclduedFoldersValue.length) {
             excludedFolders = Collections.emptySet();
         } else {
-            excludedFolders = new HashSet<String>(Arrays.asList(exclduedFoldersValue));
+            excludedFolders = new HashSet<>(Arrays.asList(exclduedFoldersValue));
         }
         /*
          * direct link templates
@@ -608,8 +608,8 @@ public class DriveConfig implements Initialization {
         /*
          * version restrictions
          */
-        softMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
-        hardMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
+        softMinimumVersions = new EnumMap<>(DriveClientType.class);
+        hardMinimumVersions = new EnumMap<>(DriveClientType.class);
         softMinimumVersions.put(DriveClientType.WINDOWS,
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.softMinimum", "0")));
         hardMinimumVersions.put(DriveClientType.WINDOWS,
