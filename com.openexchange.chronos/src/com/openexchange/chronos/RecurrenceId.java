@@ -62,15 +62,23 @@ import org.dmfs.rfc5545.DateTime;
 public interface RecurrenceId extends Comparable<RecurrenceId> {
 
     /**
-     * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series. The actual interpretation depends
-     * on the value type of the start-date and all-day-flag of the event series.
+     * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series.
+     * <p/>
+     * The returned date-time is either in <code>UTC</code> format or a <i>floating</i> date or date-time.
      *
-     * @return The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @return The recurrence-id value
      */
-    //    long getValue();
-
     DateTime getValue();
 
+    /**
+     * Compares this recurrence id to another one, taking a concrete timezone into consideration for <i>floating</i> values.
+     *
+     * @param other The recurrence id to compare with
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
+     * @return A negative integer, zero, or a positive integer as this recurrence id is less than, equal to, or greater than the other
+     *         recurrence id
+     */
     int compareTo(RecurrenceId other, TimeZone timeZone);
 
 }

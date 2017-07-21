@@ -65,16 +65,34 @@ public class DefaultRecurrenceId implements RecurrenceId {
     protected final DateTime value;
 
     /**
-     * Initializes a new {@link DefaultRecurrenceId}.
+     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time. If the date-time is neither <i>floating</i> nor in
+     * <code>UTC</code> format, the value's timezone is shifted to <code>UTC</code> implicitly.
      *
      * @param value The recurrence-id value
+     * @throws NullPointerException if the passed argument is <code>null</code>
      */
     public DefaultRecurrenceId(DateTime value) {
         super();
         if (null == value) {
             throw new NullPointerException("value");
         }
-        this.value = value;
+        if (null != value.getTimeZone() && false == DateTime.UTC.equals(value.getTimeZone())) {
+            this.value = value.shiftTimeZone(DateTime.UTC);
+        } else {
+            this.value = value;
+        }
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string, either in <code>UTC</code> format (with trailing
+     * <code>Z</code>), or as <i>floating</i> date or date-time.
+     *
+     * @param value The recurrence-id value as RFC 5545 date-time string
+     * @throws NullPointerException if the passed argument is <code>null</code>
+     * @throws IllegalArgumentException if the passed argument is not a valid date-time string
+     */
+    public DefaultRecurrenceId(String value) {
+        this(DateTime.parse(value));
     }
 
     @Override
