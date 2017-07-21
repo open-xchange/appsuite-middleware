@@ -195,10 +195,10 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(java.lang.String, com.openexchange.chronos.CalendarFreeSlot)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
-    public void insertCalendarFreeSlot(String calendarAvailabilityId, CalendarFreeSlot freeSlot) throws OXException {
+    public void insertCalendarFreeSlot(CalendarFreeSlot freeSlot) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {

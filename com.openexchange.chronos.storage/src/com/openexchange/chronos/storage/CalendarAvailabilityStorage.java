@@ -102,13 +102,12 @@ public interface CalendarAvailabilityStorage {
     void insertCalendarAvailabilities(List<CalendarAvailability> calendarAvailabilities) throws OXException;
 
     /**
-     * Inserts the specified {@link CalendarFreeSlot} for the specified calendar availability to the storage
+     * Inserts the specified {@link CalendarFreeSlot}
      * 
-     * @param calendarAvailabilityId the {@link CalendarAvailability} identifier
      * @param freeSlot The {@link CalendarFreeSlot} to insert
      * @throws OXException if the object cannot be inserted to the storage or any other error is occurred
      */
-    void insertCalendarFreeSlot(String calendarAvailabilityId, CalendarFreeSlot freeSlot) throws OXException;
+    void insertCalendarFreeSlot(CalendarFreeSlot freeSlot) throws OXException;
 
     /**
      * Loads from the storage the {@link CalendarAvailability} with the specified identifier
