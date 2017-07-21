@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
@@ -95,7 +96,16 @@ public interface CalendarAvailabilityService {
      * @throws OXException if an error is occurred
      */
     List<CalendarAvailability> getAvailability(CalendarSession session, Date from, Date until) throws OXException;
-    
+
+    /**
+     * Gets the {@link AvailableTime} for the specified user
+     * 
+     * @param session The groupware session
+     * @return The {@link AvailableTime}
+     * @throws OXException if an error is occurred
+     */
+    AvailableTime getAvailableTime(CalendarSession session) throws OXException;
+
     /**
      * Gets the {@link CalendarAvailability} information for the specified {@link CalendarUser}s in the specified
      * interval.

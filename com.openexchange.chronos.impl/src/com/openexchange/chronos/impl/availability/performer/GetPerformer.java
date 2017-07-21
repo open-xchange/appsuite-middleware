@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AvailableTime;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -177,5 +179,25 @@ public class GetPerformer extends AbstractPerformer {
             Collections.put(map, type, map.get(type));
         }
         return map;
+    }
+
+    /**
+     * Retrieves the {@link AvailableTime} slots for the current user
+     * 
+     * @return The {@link AvailableTime} slots for the current user
+     * @throws OXException 
+     */
+    public AvailableTime getAvailableTime() throws OXException {
+        AvailableTime availableTime = new AvailableTime();
+        availableTime.setUserId(session.getUserId());
+
+        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(session.getUserId());
+        BusyType busyType = BusyType.BUSY_TENTATIVE;
+        for (CalendarAvailability calendarAvailability : calendarAvailabilities) {
+            busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
+            
+        }
+        
+        return availableTime;
     }
 }
