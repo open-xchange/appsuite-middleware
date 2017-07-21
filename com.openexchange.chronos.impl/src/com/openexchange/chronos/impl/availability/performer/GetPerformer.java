@@ -134,16 +134,7 @@ public class GetPerformer extends AbstractPerformer {
         for (Attendee a : attendees) {
             reverseLookup.put(a.getEntity(), a);
         }
-        // Fetch
-        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(new ArrayList<>(reverseLookup.keySet()), from, until);
-        // Build the return map
-        Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
-        for (CalendarAvailability availability : availabilities) {
-            Attendee attendee = reverseLookup.get(availability.getCalendarUser());
-            Collections.put(map, attendee, map.get(attendee));
-        }
-
-        return map;
+        return loadAvailability(reverseLookup, from, until);
     }
 
     /**
@@ -166,15 +157,25 @@ public class GetPerformer extends AbstractPerformer {
             }
         }
 
-        // Fetch
-        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(filtered, from, until);
-        // Build the return map
-        Map<CalendarUser, List<CalendarAvailability>> map = new HashMap<>();
-        for (CalendarAvailability availability : availabilities) {
-            CalendarUser user = reverseLookup.get(availability.getCalendarUser());
-            Collections.put(map, user, map.get(user));
-        }
+        return loadAvailability(reverseLookup, from, until);
+    }
 
+    /**
+     * Retrieves the {@link CalendarAvailability} blocks for the specified users
+     * 
+     * @param reverseLookup The reverse lookup map for the entities
+     * @param from The starting point of the interval
+     * @param until The ending point of the interval
+     * @return A {@link Map} of {@link CalendarAvailability} blocks for the specified users in the specified interval
+     * @throws OXException if an error is occurred
+     */
+    private <T extends CalendarUser> Map<T, List<CalendarAvailability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
+        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(new ArrayList<>(reverseLookup.keySet()), from, until);
+        Map<T, List<CalendarAvailability>> map = new HashMap<>();
+        for (CalendarAvailability availability : availabilities) {
+            T type = reverseLookup.get(availability.getCalendarUser());
+            Collections.put(map, type, map.get(type));
+        }
         return map;
     }
 }
