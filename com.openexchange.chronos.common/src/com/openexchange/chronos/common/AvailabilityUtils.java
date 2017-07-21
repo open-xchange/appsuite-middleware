@@ -49,7 +49,10 @@
 
 package com.openexchange.chronos.common;
 
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.CalendarFreeSlot;
 
 /**
  * {@link AvailabilityUtils}
@@ -71,6 +74,53 @@ public final class AvailabilityUtils {
      * @return <code>true</code> if they intersect; <code>false</code> otherwise
      */
     public static boolean intersect(CalendarAvailability a, CalendarAvailability b) {
-        return (a.getStartTime().before(b.getEndTime()) && a.getEndTime().after(b.getStartTime()));
+        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
+    }
+
+    /**
+     * Checks if the specified free slot A intersects with the specified free slot B.
+     * Two checks are performed internally:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param a The {@link CalendarAvailability} A
+     * @param b The {@link CalendarAvailability} B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    public static boolean intersect(CalendarFreeSlot a, CalendarFreeSlot b) {
+        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
+    }
+
+    /**
+     * Two checks are performed:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param startA The starting date A
+     * @param endA The ending date A
+     * @param startB The starting date B
+     * @param endB The ending date B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    private static boolean intersect(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        return startA.before(endB) && endA.after(startB);
+    }
+
+    /**
+     * Merge the stard and end times of the specified {@link CalendarFreeSlot}s
+     * 
+     * @param a The {@link CalendarFreeSlot} A
+     * @param b The {@link CalendarFreeSlot} B
+     * @return An {@link AvailableTimeSlot} with the merged start and end times of the specified {@link CalendarFreeSlot}
+     */
+    public static AvailableTimeSlot mergeFreeSlots(CalendarFreeSlot a, CalendarFreeSlot b) {
+        AvailableTimeSlot ats = new AvailableTimeSlot();
+        ats.setFrom(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
+        ats.setUntil(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
+        return ats;
     }
 }
