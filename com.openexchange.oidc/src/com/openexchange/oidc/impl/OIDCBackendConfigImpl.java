@@ -27,4 +27,19 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
         return leanConfigurationService.getProperty(OIDCBackendProperty.authorizationEndpoint);
     }
 
+    @Override
+    public String getTokenEndpoint() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.tokenEndpoint);
+    }
+
+    @Override
+    public String getClientSecret() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.clientSecret);
+    }
+
+    @Override
+    public String getPublicRSAKeys() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.publicRSAKeys);
+    }
+
 }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.http;
 
 import java.io.IOException;
@@ -77,6 +78,7 @@ public class InitService extends OIDCServlet {
     private final OIDCConfig config;
 
     private static final ArrayList<String> acceptedFlows = new ArrayList<String>() {
+
         private static final long serialVersionUID = -2423863714624255114L;
         {
             add("login");
@@ -93,19 +95,28 @@ public class InitService extends OIDCServlet {
     @Override
     protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
         String flow = httpRequest.getParameter("flow");
+        String action = httpRequest.getParameter("action");
         if (!validateFlow(flow)) {
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         try {
-            String redirectURI = getRedirectURI(flow, httpRequest);
-            buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
+            if (flow.equals("login") && action != null && action.equals("code_return")) {
+                provider.authenticateUser(httpRequest);
+            } else {
+
+                String redirectURI = getRedirectURI(flow, httpRequest);
+                buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
+            }
         } catch (Exception e) {
-            LOG.error(e.getCause().getMessage());        }
+            LOG.error(e.getCause().getMessage());
+        }
+
     }
 
     private String getRedirectURI(String flow, HttpServletRequest httpRequest) throws OXException {
         String redirectUri = "";
+
         if (flow.equals("login")) {
             redirectUri = provider.getLoginRedirectRequest(httpRequest);
         }

@@ -48,6 +48,8 @@
  */
 package com.openexchange.oidc;
 
+import java.net.URL;
+
 /**
  * {@link OIDCBackendConfig}
  *
@@ -66,4 +68,10 @@ public interface OIDCBackendConfig {
     String getRedirectURI();
     
     String getAuthorizationEndpoint();
+
+    String getTokenEndpoint();
+
+    String getClientSecret();
+
+    String getPublicRSAKeys();
 }

@@ -48,19 +48,39 @@
  */
 package com.openexchange.oidc.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.oauth2.sdk.AccessTokenResponse;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
@@ -72,6 +92,9 @@ import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
+import com.openexchange.oidc.tools.OIDCValidator;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -85,12 +108,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
+    private final OIDCValidator oidcValidator;
     
     
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, OIDCValidator oidcValidator) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
+        this.oidcValidator = oidcValidator;
     }
     
     @Override
@@ -162,5 +187,100 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
 
         return hostname;
+    }
+
+    @Override
+    public String authenticateUser(HttpServletRequest httpRequest) throws OXException{
+        String redirectionString = "";
+        TokenRequest tokenReq;
+        try {
+            tokenReq = createTokenRequest(httpRequest);
+            TokenResponse tokenResponse = getTokenResponse(tokenReq);
+            if(validTokenResponse(tokenResponse)) {
+                redirectionString = loginUserAndRedirect();
+            }
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (OXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return redirectionString;
+    }
+    
+    private String loginUserAndRedirect() {
+        return null;
+    }
+
+    private boolean validTokenResponse(TokenResponse tokenResponse) throws OXException {
+        AccessTokenResponse accessTokenResponse = (AccessTokenResponse) tokenResponse;
+        Tokens tokens = accessTokenResponse.getTokens();
+        AccessToken accessToken = tokens.getAccessToken();
+        return oidcValidator.validateIdToken(accessToken);
+    }
+    
+    private JSONObject getProviderRSAJWK(InputStream is) throws java.text.ParseException {
+        // Read all data from stream
+        StringBuilder sb = new StringBuilder();
+        try (Scanner scanner = new Scanner(is);) {
+          while (scanner.hasNext()) {
+            sb.append(scanner.next());
+          }
+        }
+
+        // Parse the data as json
+        String jsonString = sb.toString();
+        JSONObject json = JSONObjectUtils.parse(jsonString);
+
+        // Find the RSA signing key
+        JSONArray keyList = (JSONArray) json.get("keys");
+        for (Object key : keyList) {
+          JSONObject k = (JSONObject) key;
+          if (k.get("use").equals("sig") && k.get("kty").equals("RSA")) {
+            return k;
+          }
+        }
+        return null;
+      }
+
+    private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
+        // Construct the code grant from the code obtained from the authz endpoint
+        // and the original callback URI used at the authz endpoint
+        AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
+        // TODO QS-VS: URI für den callback vom idp konfigurieren
+        URI callback = new URI(backend.getBackendConfig().getRedirectURI());
+        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
+    
+        // The credentials to authenticate the client at the token endpoint
+        ClientID clientID = new ClientID(backend.getBackendConfig().getClientID());
+        Secret clientSecret = new Secret(backend.getBackendConfig().getClientSecret());
+        ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
+    
+         // The token endpoint
+        URI tokenEndpoint = new URI(backend.getBackendConfig().getTokenEndpoint());
+    
+         // Make the token request
+        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+        return tokenRequest;
+    }
+    
+    private TokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException {
+        HTTPResponse httpResponse = tokenReq.toHTTPRequest().send();
+        TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
+        
+        if (tokenResponse instanceof TokenErrorResponse) {
+            ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
+            //TODO QS-VS: Fehler werfen
+        }
+        
+        return tokenResponse;
     }
 }

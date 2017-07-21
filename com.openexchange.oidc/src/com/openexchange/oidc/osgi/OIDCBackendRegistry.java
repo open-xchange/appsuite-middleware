@@ -71,6 +71,8 @@ import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.oidc.state.CoreStateManagement;
+import com.openexchange.oidc.tools.OIDCCoreValidator;
+import com.openexchange.oidc.tools.OIDCValidatorImpl;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -113,7 +115,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)));
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)), new OIDCCoreValidator(oidcBackend));
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 registerServlet(servlets, httpService, getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, services, config), "init");
