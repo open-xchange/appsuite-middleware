@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.common;
 
-import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.RecurrenceData;
 
@@ -62,23 +62,17 @@ import com.openexchange.chronos.service.RecurrenceData;
 public class DefaultRecurrenceData implements RecurrenceData {
 
     private final String rrule;
-    private final boolean allDay;
-    private final String timeZoneID;
-    private final long seriesStart;
+    private final DateTime seriesStart;
 
     /**
      * Initializes a new {@link DefaultRecurrenceData}.
      *
      * @param rrule The underlying recurrence rule
-     * @param allDay <code>true</code> if the recurrence is <i>all-day</i>, <code>false</code>, otherwise
-     * @param timeZoneID The timezone identifier, or <code>null</code> for <i>all-day</i> or <i>floating</i> event series
-     * @param seriesStart The series start date, usually the date of the first occurrence, as milliseconds since epoch
+     * @param seriesStart The series start date, usually the date of the first occurrence
      */
-    public DefaultRecurrenceData(String rrule, boolean allDay, String timeZoneID, long seriesStart) {
+    public DefaultRecurrenceData(String rrule, DateTime seriesStart) {
         super();
         this.rrule = rrule;
-        this.allDay = allDay;
-        this.timeZoneID = timeZoneID;
         this.seriesStart = seriesStart;
     }
 
@@ -88,7 +82,7 @@ public class DefaultRecurrenceData implements RecurrenceData {
      * @param seriesMaster The series master event
      */
     public DefaultRecurrenceData(Event seriesMaster) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate().isAllDay(), isFloating(seriesMaster) ? null : seriesMaster.getStartDate().getTimeZone().getID(), seriesMaster.getStartDate().getTimestamp());
+        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate());
     }
 
     @Override
@@ -97,23 +91,13 @@ public class DefaultRecurrenceData implements RecurrenceData {
     }
 
     @Override
-    public boolean isAllDay() {
-        return allDay;
-    }
-
-    @Override
-    public String getTimeZoneID() {
-        return timeZoneID;
-    }
-
-    @Override
-    public long getSeriesStart() {
+    public DateTime getSeriesStart() {
         return seriesStart;
     }
 
     @Override
     public String toString() {
-        return "DefaultRecurrenceData [rrule=" + rrule + ", allDay=" + allDay + ", timeZoneID=" + timeZoneID + ", seriesStart=" + seriesStart + "]";
+        return "DefaultRecurrenceData [rrule=" + rrule + ", seriesStart=" + seriesStart + "]";
     }
 
 }

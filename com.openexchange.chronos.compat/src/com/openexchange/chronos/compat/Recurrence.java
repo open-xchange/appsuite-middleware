@@ -50,7 +50,6 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
@@ -136,12 +135,12 @@ public class Recurrence {
         /*
          * take over common attributes
          */
-        TimeZone timeZone = optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC);
+        TimeZone timeZone = recurrenceData.getSeriesStart().isFloating() ? TimeZones.UTC : recurrenceData.getSeriesStart().getTimeZone();
         Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart());
         RecurrenceRule rrule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         SeriesPattern pattern = new SeriesPattern();
         pattern.setInterval(I(rrule.getInterval()));
-        pattern.setSeriesStart(L(recurrenceData.getSeriesStart()));
+        pattern.setSeriesStart(L(recurrenceData.getSeriesStart().getTimestamp()));
         if (null != rrule.getCount()) {
             pattern.setOccurrences(rrule.getCount());
             pattern.setSeriesEnd(L(getUntilForUnlimited(recurrenceService, recurrenceData).getTime()));
@@ -226,11 +225,10 @@ public class Recurrence {
          * consider DATE-TIME value type - determine start date of first occurrence outside range
          */
         DateTime nextOccurrenceStart = null;
-        if (until.getTimestamp() > recurrenceData.getSeriesStart()) {
+        if (until.after(recurrenceData.getSeriesStart())) {
             try {
                 rrule.setUntil(null);
-                DefaultRecurrenceData unlimitedRecurrenceData = new DefaultRecurrenceData(
-                    rrule.toString(), recurrenceData.isAllDay(), recurrenceData.getTimeZoneID(), recurrenceData.getSeriesStart());
+                DefaultRecurrenceData unlimitedRecurrenceData = new DefaultRecurrenceData(rrule.toString(), recurrenceData.getSeriesStart());
                 RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(unlimitedRecurrenceData);
                 while (iterator.hasNext()) {
                     DateTime occurrenceStart = iterator.next().getValue();
@@ -249,7 +247,7 @@ public class Recurrence {
         /*
          * check if the client-defined UNTIL is at least one day prior next occurrence (as observed in the timezone)
          */
-        DateTime localUntil = null != recurrenceData.getTimeZoneID() ? new DateTime(optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC), until.getTimestamp()) : until;
+        DateTime localUntil = recurrenceData.getSeriesStart().isFloating() ? until : new DateTime(recurrenceData.getSeriesStart().getTimeZone(), until.getTimestamp());
         if (null == nextOccurrenceStart || nextOccurrenceStart.getYear() > localUntil.getYear() ||
             nextOccurrenceStart.getMonth() > localUntil.getMonth() || nextOccurrenceStart.getDayOfMonth() > localUntil.getDayOfMonth()) {
             /*
@@ -437,18 +435,10 @@ public class Recurrence {
      */
     private static Date getUntilForUnlimited(RecurrenceService recurrenceService, RecurrenceData recurrenceData) throws OXException {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
-        long millis = recurrenceData.getSeriesStart();
-        for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue().getTimestamp(), i++)
+        DateTime dateTime = recurrenceData.getSeriesStart();
+        for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); dateTime = iterator.next().getValue(), i++)
             ;
-        DateTime localUntil;
-        if (recurrenceData.isAllDay()) {
-            localUntil = new DateTime(TimeZones.UTC, millis).toAllDay();
-        } else if (null != recurrenceData.getTimeZoneID()) {
-            localUntil = new DateTime(optTimeZone(recurrenceData.getTimeZoneID(), TimeZones.UTC), millis);
-        } else {
-            localUntil = new DateTime(millis);
-        }
-        return initCalendar(TimeZones.UTC, localUntil.getYear(), localUntil.getMonth(), localUntil.getDayOfMonth()).getTime();
+        return initCalendar(TimeZones.UTC, dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth()).getTime();
     }
 
     /**

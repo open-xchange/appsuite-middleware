@@ -194,7 +194,7 @@ public class Compat {
                 /*
                  * expand recurrence master start- and enddate to cover the whole series period
                  */
-                TimeZone timeZone = optTimeZone(recurrenceData.getTimeZoneID());
+                TimeZone timeZone = recurrenceData.getSeriesStart().getTimeZone();
                 Period seriesPeriod = getImplicitSeriesPeriod(Services.getService(RecurrenceService.class), event);
                 if (seriesPeriod.isAllDay()) {
                     eventData.setStartDate(new DateTime(seriesPeriod.getStartDate().getTime()).toAllDay());

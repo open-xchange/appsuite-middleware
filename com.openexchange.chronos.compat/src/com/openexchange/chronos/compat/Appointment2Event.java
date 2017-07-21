@@ -249,7 +249,8 @@ public class Appointment2Event {
             return null;
         }
         String recurrenceRule = Recurrence.getRecurrenceRule(pattern, timeZone, fulltime);
-        return new DefaultRecurrenceData(recurrenceRule, fulltime, timeZone.getID(), pattern.getSeriesStart().longValue());
+        long timestamp = pattern.getSeriesStart().longValue();
+        return new DefaultRecurrenceData(recurrenceRule, fulltime ? new DateTime(timestamp) : new DateTime(timeZone, timestamp));
     }
 
     /**

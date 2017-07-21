@@ -608,8 +608,9 @@ public abstract class EventConverter {
                     firstRecurrenceId = iterator.next();
                 }
                 if (event.containsStartDate()) {
-                    appointment.setFullTime(recurrenceData.isAllDay());
-                    appointment.setTimezone(recurrenceData.getTimeZoneID());
+                    DateTime seriesStart = recurrenceData.getSeriesStart();
+                    appointment.setFullTime(seriesStart.isAllDay());
+                    appointment.setTimezone(seriesStart.isFloating() ? null : seriesStart.getTimeZone().getID());
                     long timestamp = null != firstRecurrenceId ? firstRecurrenceId.getValue().getTimestamp() : event.getStartDate().getTimestamp();
                     appointment.setStartDate(new Date(timestamp));
                 }
@@ -889,9 +890,10 @@ public abstract class EventConverter {
         RecurrenceData originalRecurrenceData = null != originalEventHolder ? originalEventHolder.getRecurrenceData() : null;
         SeriesPattern pattern = new SeriesPattern();
         if (null != originalRecurrenceData) {
-            fulltime = originalRecurrenceData.isAllDay();
-            pattern.setSeriesStart(Long.valueOf(originalRecurrenceData.getSeriesStart()));
-            timeZone = optTimeZone(originalRecurrenceData.getTimeZoneID(), TimeZones.UTC);
+            DateTime seriesStart = originalRecurrenceData.getSeriesStart();
+            fulltime = seriesStart.isAllDay();
+            pattern.setSeriesStart(Long.valueOf(seriesStart.getTimestamp()));
+            timeZone = null != seriesStart.getTimeZone() ? seriesStart.getTimeZone() : TimeZones.UTC;
         }
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {
@@ -1019,28 +1021,6 @@ public abstract class EventConverter {
     /**
      * Loads the recurrence data for an event.
      *
-     * @param eventID The identifier of the event to get the recurrence data for
-     * @return The recurrence data, or <code>null</code> if not set
-     */
-    protected RecurrenceData loadRecurrenceDwata(EventID eventID) throws OXException {
-        EventField [] recurrenceFields = {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
-        };
-        Event event = getEvent(eventID, recurrenceFields);
-        if (false == event.getId().equals(event.getSeriesId())) {
-            if (null == event.getSeriesId()) {
-                // no recurrence (yet)
-                DateTime startDate = event.getStartDate();
-                return new DefaultRecurrenceData(null, startDate.isAllDay(), startDate.getTimeZone().getID(), startDate.getTimestamp());
-            }
-            event = getEvent(new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
-        }
-        return new DefaultRecurrenceData(event);
-    }
-
-    /**
-     * Loads the recurrence data for an event.
-     *
      * @param event The event to get the recurrence data for
      * @return The recurrence data, or <code>null</code> if not set
      */
@@ -1051,8 +1031,7 @@ public abstract class EventConverter {
         if (false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
-                DateTime startDate = event.getStartDate();
-                return new DefaultRecurrenceData(null, startDate.isAllDay(), startDate.getTimeZone().getID(), startDate.getTimestamp());
+                return new DefaultRecurrenceData(null, event.getStartDate());
             }
             event = getEvent(new EventID(event.getFolderId(), event.getSeriesId()), recurrenceFields);
         }

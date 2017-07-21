@@ -79,17 +79,7 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
     }
 
     @Override
-    public boolean isAllDay() {
-        return recurrenceData.isAllDay();
-    }
-
-    @Override
-    public String getTimeZoneID() {
-        return recurrenceData.getTimeZoneID();
-    }
-
-    @Override
-    public long getSeriesStart() {
+    public DateTime getSeriesStart() {
         return recurrenceData.getSeriesStart();
     }
 

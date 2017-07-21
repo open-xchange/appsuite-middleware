@@ -125,7 +125,7 @@ public class OriginalEventHolder {
             } else if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 DateTime startDate = event.getStartDate();
-                originalRecurrenceData = new DefaultRecurrenceData(null, startDate.isAllDay(), startDate.getTimeZone().getID(), startDate.getTimestamp());
+                originalRecurrenceData = new DefaultRecurrenceData(null, startDate);
             } else {
                 // recurrence data from fetched series master
                 EventID masterEventId = new EventID(event.getFolderId(), event.getSeriesId());

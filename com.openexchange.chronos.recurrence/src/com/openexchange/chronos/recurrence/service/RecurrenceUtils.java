@@ -52,7 +52,6 @@ package com.openexchange.chronos.recurrence.service;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -96,7 +95,7 @@ public class RecurrenceUtils {
      */
     public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
         RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
-        return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), recurrenceData.getTimeZoneID(), recurrenceData.isAllDay(), forwardToOccurrence);
+        return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), forwardToOccurrence);
     }
 
     /**
@@ -112,31 +111,6 @@ public class RecurrenceUtils {
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceRule);
         }
-    }
-
-    /**
-     * Initializes a new recurrence iterator for a specific recurrence rule, optionally advancing to the first occurrence. The latter
-     * option ensures that the first date delivered by the iterator matches the start-date of the first occurrence.
-     *
-     * @param rule The recurrence rule
-     * @param seriesStart The series start date, usually the date of the first occurrence
-     * @param timeZoneID The timezone identifier applicable for the recurrence
-     * @param allDay <code>true</code> if the recurrence is <i>all-day</i>, <code>false</code>, otherwise
-     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
-     *            does not fall into the pattern, <code>false</code> otherwise
-     * @return The recurrence rule iterator
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    private static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceRule rule, long seriesStart, String timeZoneID, boolean allDay, boolean forwardToOccurrence) throws OXException {
-        DateTime start;
-        if (allDay) {
-            start = new DateTime(TimeZones.UTC, seriesStart).toAllDay();
-        } else if (null != timeZoneID) {
-            start = new DateTime(TimeZone.getTimeZone(timeZoneID), seriesStart);
-        } else {
-            start = new DateTime(null, seriesStart);
-        }
-        return getRecurrenceIterator(rule, start, forwardToOccurrence);
     }
 
     /**

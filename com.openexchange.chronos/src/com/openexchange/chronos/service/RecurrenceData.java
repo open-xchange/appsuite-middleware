@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.service;
 
+import org.dmfs.rfc5545.DateTime;
+
 /**
  * {@link RecurrenceData}
  *
@@ -69,20 +71,20 @@ public interface RecurrenceData {
      *
      * @return <code>true</code> if the recurrence is <i>all-day</i>, <code>false</code>, otherwise
      */
-    boolean isAllDay();
+    //    boolean isAllDay();
 
     /**
      * Gets the timezone identifier applicable for the recurrence.
      *
      * @return The timezone identifier, or <code>null</code> for <i>all-day</i> or <i>floating</i> event series
      */
-    String getTimeZoneID();
+    //    String getTimeZoneID();
 
     /**
      * Gets the series start date, usually the date of the first occurrence.
      *
-     * @return The start date (in milliseconds since epoch)
+     * @return The start date
      */
-    long getSeriesStart();
+    DateTime getSeriesStart();
 
 }
