@@ -51,11 +51,8 @@ package com.openexchange.chronos.storage;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
@@ -123,25 +120,15 @@ public interface CalendarAvailabilityStorage {
     CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException;
 
     /**
-     * Loads the {@link CalendarAvailability} information for the specified {@link Attendee}s in the specified interval.
+     * Loads the {@link CalendarAvailability} information for the users with the specified identifiers in the specified interval.
      * 
-     * @param attendees The {@link List} of {@link Attendee}s
+     * @param userIds The {@link List} of user identifiers
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return A {@link Map} with the {@link CalendarAvailability} for each {@link Attendee}
+     * @return A {@link List} with the {@link CalendarAvailability} for each user
      * @throws OXException if the items cannot be retrieved
      */
-    List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException;
-
-    /**
-     * 
-     * @param users
-     * @param from
-     * @param until
-     * @return
-     * @throws OXException
-     */
-    List<CalendarAvailability> loadUserCalendarAvailability(List<CalendarUser> users, Date from, Date until) throws OXException;
+    List<CalendarAvailability> loadUserCalendarAvailability(List<Integer> userIds, Date from, Date until) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user

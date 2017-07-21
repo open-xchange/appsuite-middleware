@@ -78,18 +78,48 @@ public class GetPerformer extends AbstractPerformer {
         super(storage, session);
     }
 
+    /**
+     * Retrievs the {@link CalendarAvailability} with the specified identifier
+     * 
+     * @param calendarAvailabilityId The {@link CalendarAvailability}'s identifier
+     * @return The {@link CalendarAvailability}
+     * @throws OXException if the {@link CalendarAvailability} cannot be retrieved
+     */
     public CalendarAvailability perform(String calendarAvailabilityId) throws OXException {
         return storage.loadCalendarAvailability(calendarAvailabilityId);
     }
 
+    /**
+     * Retrieves a {@link List} with all {@link CalendarAvailability} blocks of the current user
+     * 
+     * @return a {@link List} with all {@link CalendarAvailability} blocks of the current user
+     * @throws OXException if the list cannot be retrieved
+     */
     public List<CalendarAvailability> perform() throws OXException {
         return storage.loadCalendarAvailabilities(session.getUserId());
     }
 
+    /**
+     * Retrieves a {@link List} with {@link CalendarAvailability} blocks in the specified range
+     * 
+     * @param from The starting point in the interval
+     * @param until The ending point in the interval
+     * @return a {@link List} with {@link CalendarAvailability} blocks in the specified range
+     * @throws OXException if an error occurrs
+     */
     public List<CalendarAvailability> performInRange(Date from, Date until) throws OXException {
         return storage.loadCalenarAvailabilityInRange(session.getUserId(), from, until);
     }
 
+    /**
+     * Retrieves a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * 
+     * @param attendees the {@link List} of {@link Attendee}s to fetch the availability for
+     * @param from The starting point in the interval
+     * @param until The ending poing in the interval
+     * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * @throws OXException if an error is occurred
+     */
     public Map<Attendee, List<CalendarAvailability>> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Prepare the attendees
         attendees = session.getEntityResolver().prepare(attendees);
@@ -100,13 +130,12 @@ public class GetPerformer extends AbstractPerformer {
         }
 
         // Create a reverse lookup index
-
         Map<Integer, Attendee> reverseLookup = new HashMap<>();
         for (Attendee a : attendees) {
             reverseLookup.put(a.getEntity(), a);
         }
         // Fetch
-        List<CalendarAvailability> availabilities = storage.loadAttendeeCalendarAvailability(attendees, from, until);
+        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(new ArrayList<>(reverseLookup.keySet()), from, until);
         // Build the return map
         Map<Attendee, List<CalendarAvailability>> map = new HashMap<>();
         for (CalendarAvailability availability : availabilities) {
@@ -117,14 +146,23 @@ public class GetPerformer extends AbstractPerformer {
         return map;
     }
 
+    /**
+     * Retrieves a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link CalendarUser}s in the specified interval
+     * 
+     * @param attendees the {@link List} of {@link CalendarUser}s to fetch the availability for
+     * @param from The starting point in the interval
+     * @param until The ending poing in the interval
+     * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link CalendarUser}s in the specified interval
+     * @throws OXException if an error is occurred
+     */
     public Map<CalendarUser, List<CalendarAvailability>> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
         // Create a reverse lookup index and filter internal users
         Map<Integer, CalendarUser> reverseLookup = new HashMap<>();
-        List<CalendarUser> filtered = new ArrayList<>();
+        List<Integer> filtered = new ArrayList<>();
         for (CalendarUser u : users) {
             if (CalendarUtils.isInternal(u, CalendarUserType.INDIVIDUAL)) {
                 reverseLookup.put(u.getEntity(), u);
-                filtered.add(u);
+                filtered.add(u.getEntity());
             }
         }
 

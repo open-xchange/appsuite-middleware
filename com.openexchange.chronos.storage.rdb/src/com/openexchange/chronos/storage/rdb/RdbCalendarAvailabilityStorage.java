@@ -55,10 +55,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.AvailabilityField;
@@ -218,31 +216,20 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAttendeeCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public List<CalendarAvailability> loadAttendeeCalendarAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public List<CalendarAvailability> loadUserCalendarAvailability(List<Integer> userIds, Date from, Date until) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
-            connection = dbProvider.getWriteConnection(context);
-            return loadCalendarAvailability(connection, attendees, from, until);
+            connection = dbProvider.getReadConnection(context);
+            return loadCalendarAvailability(connection, userIds, from, until);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             release(connection, updated);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
-     */
-    @Override
-    public List<CalendarAvailability> loadUserCalendarAvailability(List<CalendarUser> users, Date from, Date until) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     /*
@@ -567,32 +554,31 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * Loads all {@link CalendarAvailability} blocks for the users with the specified identifiers in the specified interval
      * 
      * @param connection The read-only {@link Connection} to the storage
-     * @param attendees The {@link List} of {@link Attendee}s
+     * @param userIds The {@link List} of user identifiers
      * @param from The starting point of the interval
      * @param until The ending point of the interval
-     * @return A {@link List} with the {@link CalendarAvailability} blocks of the specified {@link Attendee}s
+     * @return A {@link List} with the {@link CalendarAvailability} blocks of the specified users
      * @throws OXException if an error is occurred
      */
-    private List<CalendarAvailability> loadCalendarAvailability(Connection connection, List<Attendee> attendees, Date from, Date until) throws SQLException, OXException {
+    private List<CalendarAvailability> loadCalendarAvailability(Connection connection, List<Integer> userIds, Date from, Date until) throws SQLException, OXException {
         // 1) Fetch all calendar availability items within the interval
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT DISTINCT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "c."));
-        sb.append(" FROM ").append(CA_TABLE_NAME).append(" AS c");
-        sb.append(" LEFT JOIN calendar_attendee AS a ON c.cid=a.cid AND c.user=a.entity");
-        sb.append(" WHERE c.cid=?");
-        sb.append(" AND a.entity IN (").append(CalendarAvailabilityMapper.getParameters(attendees.size())).append(")");
-        sb.append(" AND c.start >= ? AND c.end <= ?;");
+        sb.append("SELECT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "c."));
+        sb.append(" FROM ").append(CA_TABLE_NAME);
+        sb.append(" WHERE cid=?");
+        sb.append(" AND user IN (").append(CalendarAvailabilityMapper.getParameters(userIds.size())).append(")");
+        sb.append(" AND start >= ? AND end <= ?;");
 
         List<CalendarAvailability> availabilities = null;
         int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
-            for (Attendee attendee : attendees) {
-                stmt.setInt(parameterIndex++, attendee.getEntity());
+            for (Integer id : userIds) {
+                stmt.setInt(parameterIndex++, id);
             }
             stmt.setLong(parameterIndex++, from.getTime());
             stmt.setLong(parameterIndex++, until.getTime());
