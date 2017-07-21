@@ -307,9 +307,63 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         assertNotNull(eventResponse.getData());
         assertEquals(event.getId(), eventResponse.getData().getId());
         assertNotEquals(event.getRecurrenceId(), eventResponse.getData().getRecurrenceId());
-        Long expectedRecurrenceId = Long.valueOf((getTime(event.getStartDate()).getTime()+TimeUnit.DAYS.toMillis(2)));
-        assertEquals(expectedRecurrenceId, eventResponse.getData().getRecurrenceId());
+        DateTimeData expectedRecurrenceId = getZuluDateTime(getTime(event.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        assertEquals(expectedRecurrenceId.getValue(), eventResponse.getData().getRecurrenceId());
 
+
+        // Get updates
+        ChronosUpdatesResponse updatesResponse = api.getUpdates(session, folderId, date.getTime(), null, null, null, null, null, true, true);
+        assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
+        assertNotNull(updatesResponse.getData());
+        assertEquals(3, updatesResponse.getData().getNewAndModified().size());
+        for (int x = 0; x < updatesResponse.getData().getNewAndModified().size(); x++) {
+            assertEquals(event.getId(), updatesResponse.getData().getNewAndModified().get(x).getId());
+        }
+
+    }
+
+    @Test
+    public void testFloatingSeries() throws Exception {
+        Date date = new Date();
+        DateTimeData today = getZuluDateTime(date.getTime());
+        DateTimeData nextWeek = getZuluDateTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+
+        // Create a series event
+        EventData eventToCreate = createSeriesEvent("testFloatingSeries");
+        eventToCreate.setStartDate(getDateTime(null, System.currentTimeMillis()));
+        eventToCreate.setEndDate(getDateTime(null, System.currentTimeMillis() + 5000));
+
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, eventToCreate, false, false);
+        assertNull(createEvent.getError(), createEvent.getError());
+        assertNotNull(createEvent.getData());
+        EventData event = createEvent.getData().getCreated().get(0);
+        EventId eventId = new EventId();
+        eventId.setId(event.getId());
+        rememberEventId(eventId);
+
+        // Get series master
+        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertNotNull(eventResponse.getData());
+        EventUtil.compare(event, eventResponse.getData(), true);
+
+        // Get all events
+        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getValue(), nextWeek.getValue(), null, null, null, true, true);
+        assertNull(eventsResponse.getError(), eventsResponse.getError());
+        assertNotNull(eventsResponse.getData());
+        assertEquals(3, eventsResponse.getData().size());
+        for (int x = 0; x < eventsResponse.getData().size(); x++) {
+            assertEquals(event.getId(), eventsResponse.getData().get(x).getId());
+        }
+
+        // Get series occurence
+        eventResponse = api.getEvent(session, event.getId(), eventsResponse.getData().get(2).getRecurrenceId(), null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertNotNull(eventResponse.getData());
+        assertEquals(event.getId(), eventResponse.getData().getId());
+        assertNotEquals(event.getRecurrenceId(), eventResponse.getData().getRecurrenceId());
+        DateTimeData expectedRecurrenceId = getDateTime(null, getTime(event.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        assertEquals(expectedRecurrenceId.getValue(), eventResponse.getData().getRecurrenceId());
 
         // Get updates
         ChronosUpdatesResponse updatesResponse = api.getUpdates(session, folderId, date.getTime(), null, null, null, null, null, true, true);
