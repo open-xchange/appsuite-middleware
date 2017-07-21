@@ -160,11 +160,10 @@ public abstract class ChronosAction implements AJAXActionService {
 
     protected CompositeEventID parseIdParameter(AJAXRequestData requestData) throws OXException {
         String value = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
-        Long recurrenceId = parseRecurrenceIdParameter(requestData);
-        //TODO: recurrence id as datetime string
+        String recurrenceId = parseRecurrenceIdParameter(requestData);
         try {
             if (recurrenceId != null) {
-                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(new DateTime(recurrenceId)));
+                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(recurrenceId));
             } else {
                 return CompositeEventID.parse(value);
             }
@@ -173,13 +172,8 @@ public abstract class ChronosAction implements AJAXActionService {
         }
     }
 
-    private Long parseRecurrenceIdParameter(AJAXRequestData requestData) throws OXException {
-        String value = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
-        try {
-            return value != null ? Long.valueOf(value) : null;
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, CalendarParameters.PARAMETER_RECURRENCE_ID, value);
-        }
+    private String parseRecurrenceIdParameter(AJAXRequestData requestData) throws OXException {
+        return requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
     }
 
     /**

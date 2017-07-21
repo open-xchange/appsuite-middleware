@@ -50,9 +50,7 @@
 package com.openexchange.chronos.json.converter;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -98,7 +96,6 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
-import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
@@ -658,9 +655,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new LongMapping<Event>(ChronosJsonFields.RECURRENCE_ID, ColumnIDs.RECURRENCE_ID) {
-
-            //TODO: recurrence id as datetime string
+        mappings.put(EventField.RECURRENCE_ID, new StringMapping<Event>(ChronosJsonFields.RECURRENCE_ID, ColumnIDs.RECURRENCE_ID) {
 
             @Override
             public boolean isSet(Event object) {
@@ -668,14 +663,14 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Long value) throws OXException {
-                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(new DateTime(l(value))));
+            public void set(Event object, String value) throws OXException {
+                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
-            public Long get(Event object) {
+            public String get(Event object) {
                 RecurrenceId value = object.getRecurrenceId();
-                return null == value ? null : L(value.getValue().getTimestamp());
+                return null == value ? null : value.getValue().toString();
             }
 
             @Override
@@ -683,9 +678,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<Long, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, ColumnIDs.CHANGE_EXCEPTION_DATES) {
-
-            //TODO: recurrence ids as datetime strings
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, ColumnIDs.CHANGE_EXCEPTION_DATES) {
 
             @Override
             public boolean isSet(Event object) {
@@ -693,27 +686,27 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, List<Long> value) throws OXException {
+            public void set(Event object, List<String> value) throws OXException {
                 if (null == value) {
                     object.setChangeExceptionDates(null);
                 } else {
                     SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
-                    for (Long timestamp : value) {
-                        recurrenceIds.add(new DefaultRecurrenceId(new DateTime(l(timestamp))));
+                    for (String dateTimeString : value) {
+                        recurrenceIds.add(new DefaultRecurrenceId(dateTimeString));
                     }
                     object.setChangeExceptionDates(recurrenceIds);
                 }
             }
 
             @Override
-            public List<Long> get(Event object) {
+            public List<String> get(Event object) {
                 SortedSet<RecurrenceId> recurrenceIds = object.getChangeExceptionDates();
                 if (null == recurrenceIds) {
                     return null;
                 }
-                List<Long> value = new ArrayList<Long>(recurrenceIds.size());
+                List<String> value = new ArrayList<String>(recurrenceIds.size());
                 for (RecurrenceId recurrenceId : recurrenceIds) {
-                    value.add(L(recurrenceId.getValue().getTimestamp()));
+                    value.add(recurrenceId.getValue().toString());
                 }
                 return value;
             }
@@ -724,13 +717,11 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Long deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
-                return L(array.getLong(index));
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                return array.getString(index);
             }
         });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new ListMapping<Long, Event>(ChronosJsonFields.DELETE_EXCEPTION_DATES, ColumnIDs.DELETE_EXCEPTION_DATES) {
-
-            //TODO: recurrence ids as datetime strings
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.DELETE_EXCEPTION_DATES, ColumnIDs.DELETE_EXCEPTION_DATES) {
 
             @Override
             public boolean isSet(Event object) {
@@ -738,27 +729,27 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, List<Long> value) throws OXException {
+            public void set(Event object, List<String> value) throws OXException {
                 if (null == value) {
                     object.setDeleteExceptionDates(null);
                 } else {
                     SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
-                    for (Long timestamp : value) {
-                        recurrenceIds.add(new DefaultRecurrenceId(new DateTime(timestamp)));
+                    for (String dateTimeString : value) {
+                        recurrenceIds.add(new DefaultRecurrenceId(dateTimeString));
                     }
                     object.setDeleteExceptionDates(recurrenceIds);
                 }
             }
 
             @Override
-            public List<Long> get(Event object) {
+            public List<String> get(Event object) {
                 SortedSet<RecurrenceId> recurrenceIds = object.getDeleteExceptionDates();
                 if (null == recurrenceIds) {
                     return null;
                 }
-                List<Long> value = new ArrayList<Long>(recurrenceIds.size());
+                List<String> value = new ArrayList<String>(recurrenceIds.size());
                 for (RecurrenceId recurrenceId : recurrenceIds) {
-                    value.add(L(recurrenceId.getValue().getTimestamp()));
+                    value.add(recurrenceId.getValue().toString());
                 }
                 return value;
             }
@@ -769,8 +760,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            protected Long deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
-                return L(array.getLong(index));
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                return array.getString(index);
             }
         });
         mappings.put(EventField.STATUS, new StringMapping<Event>(ChronosJsonFields.STATUS, ColumnIDs.STATUS) {
