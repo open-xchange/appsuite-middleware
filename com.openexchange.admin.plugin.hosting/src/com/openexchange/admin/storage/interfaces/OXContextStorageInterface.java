@@ -163,6 +163,15 @@ public abstract class OXContextStorageInterface {
     public abstract void changeStorageData(final Context ctx) throws StorageException;
 
     /**
+     * Gets the login mappings for specified context.
+     *
+     * @param ctx The context for which to load the mappings
+     * @return The available login mappings
+     * @throws StorageException If login mappings cannot be returned
+     */
+    public abstract Set<String> getLoginMappings(Context ctx) throws StorageException;
+
+    /**
      * @param ctx
      * @return a context object
      * @throws StorageException

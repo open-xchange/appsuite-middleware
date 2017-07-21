@@ -527,6 +527,50 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
+    @Override
+    public Set<String> getLoginMappings(Context ctx) throws StorageException {
+        Connection configCon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            configCon = cache.getConnectionForConfigDB();
+            prep = configCon.prepareStatement("SELECT login_info FROM login2context WHERE cid=?");
+            prep.setInt(1, ctx.getId().intValue());
+            rs = prep.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptySet();
+            }
+
+            Set<String> loginMappings = new HashSet<String>(4);
+            String idAsString = ctx.getIdAsString();
+            do {
+                String loginMapping = rs.getString(1);
+                // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+                // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                // SEE #11094 FOR DETAILS!
+                if (null != loginMapping && !idAsString.equals(loginMapping)) {
+                    loginMappings.add(loginMapping);
+                }
+            } while (rs.next());
+            return loginMappings;
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(prep);
+            if (null != configCon) {
+                try {
+                    cache.pushConnectionForConfigDB(configCon);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
+
     /**
      * @throws StorageException
      * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#getData(com.openexchange.admin.rmi.dataobjects.Context)
