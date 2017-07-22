@@ -49,6 +49,9 @@
 
 package com.openexchange.search.internal.operands;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.java.Strings;
 import com.openexchange.search.Operand;
 
 /**
@@ -60,7 +63,26 @@ import com.openexchange.search.Operand;
 public class AttachmentOperand implements Operand<String> {
 
     public enum AttachmentOperandType {
-        NAME
+        NAME;
+
+        private static final Map<String, AttachmentOperandType> typesByName = new HashMap<String, AttachmentOperandType>();
+        static {
+            for (AttachmentOperandType type : values()) {
+                typesByName.put(type.name().toLowerCase(), type);
+            }
+        }
+
+        /**
+         * Gets an {@link AttachmentOperandType} by its name.
+         * @return The type or <code>null</code>, if the name is invalid.
+         */
+        public static AttachmentOperandType getByName(String name) {
+            if (Strings.isEmpty(name)) {
+                return null;
+            }
+
+            return typesByName.get(name.toLowerCase());
+        }
     }
 
     private final AttachmentOperandType type;
