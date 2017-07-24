@@ -415,7 +415,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         int iOptNumberOfSchemasToKeep = null != optNumberOfSchemasToKeep ? optNumberOfSchemasToKeep.intValue() : 0;
-        oxutil.deleteDatabaseSchema(existing, iOptNumberOfSchemasToKeep);
+        return oxutil.deleteDatabaseSchema(existing, iOptNumberOfSchemasToKeep);
     }
 
     @Override
