@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -59,7 +62,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveAliasInUserAttributesTable}
@@ -90,10 +92,10 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(conn);
+                rollback(conn);
             }
-            DBUtils.autocommit(conn);
-            DBUtils.closeSQLStuff(stmt);
+            autocommit(conn);
+            closeSQLStuff(stmt);
             Database.backNoTimeout(ctxId, true, conn);
         }
     }
@@ -105,6 +107,6 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND);
+        return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BLOCKING);
     }
 }

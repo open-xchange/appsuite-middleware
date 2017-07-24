@@ -66,6 +66,19 @@ public class ConversionWarning extends OXException {
      */
     private static final long serialVersionUID = -7593693106963732974L;
 
+    /**
+     * Creates a conversion warning in case number of elements has been truncated
+     *
+     * @param The item's index position
+     * @param limit The configured limit
+     * @return The conversion warning
+     */
+    public static ConversionWarning truncatedConversionWarningFor(int index, int limit) {
+        return new ConversionWarning(index, Code.TRUNCATED_ITEMS, Integer.valueOf(limit));
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
     private final int index;
 
     /**
@@ -220,6 +233,10 @@ public class ConversionWarning extends OXException {
          * The conversion yields some objects which could not be stored due to missing folder for %1$s
          */
         NO_FOLDER_FOR_TASKS("The conversion yields some objects which could not be stored due to missing folder for tasks.", CATEGORY_WARNING, 23, ConversionWarningMessage.NO_FOLDER_FOR_TASKS),
+        /**
+         * The object could not be stored due to a configured limit of %1$s
+         */
+        TRUNCATED_ITEMS("The object could not be stored due to a configured limit of %1$s", CATEGORY_WARNING, 24, ConversionWarningMessage.TRUNCATED_ITEMS)
 
         ;
 

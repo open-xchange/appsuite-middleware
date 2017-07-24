@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,6 +77,7 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.AbstractFeedbackType;
 import com.openexchange.userfeedback.ExportResultConverter;
@@ -225,8 +227,13 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
     @Override
     public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con) throws OXException {
+        return getFeedbacks(feedbackMetaData, con, Collections.<String, String> emptyMap());
+    }
+
+    @Override
+    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> feedbackMetaData, Connection con, Map<String, String> configuration) throws OXException {
         if (feedbackMetaData.size() == 0) {
-            return createExportObject(Collections.<Feedback> emptyList());
+            return createExportObject(Collections.<Feedback> emptyList(), Collections.<String, String> emptyMap());
         }
 
         ResultSet rs = null;
@@ -252,7 +259,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
                 }
             }
             SortedSet<Feedback> sorted = sort(feedbacks.values());
-            return createExportObject(sorted);
+            return createExportObject(sorted, configuration);
         } catch (final SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -286,7 +293,11 @@ public class StarRatingV1 extends AbstractFeedbackType {
      */
     private void enrichContent(AsciiReader asciiReader, Feedback current) throws JSONException {
         JSONObject content = new JSONObject(asciiReader);
-        content.put("date", new Date(current.getDate())); // add date to content for easy export
+
+        SimpleDateFormat sdfmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdfmt.setTimeZone(TimeZones.UTC);
+        content.put("date", sdfmt.format(new Date(current.getDate())));
+
         String userContextTupel = current.getCtxId() + ":" + current.getUserId();
         String hashedTupel = Hashing.md5().hashString(userContextTupel, StandardCharsets.UTF_8).toString();
         content.put("user", hashedTupel);
@@ -295,8 +306,8 @@ public class StarRatingV1 extends AbstractFeedbackType {
         current.setContent(content);
     }
 
-    private ExportResultConverter createExportObject(Collection<Feedback> feedbacks) {
-        ExportResultConverter converter = new StarRatingV1ExportResultConverter(feedbacks);
+    private ExportResultConverter createExportObject(Collection<Feedback> feedbacks, Map<String, String> configuration) {
+        ExportResultConverter converter = new StarRatingV1ExportResultConverter(feedbacks, configuration);
         return converter;
     }
 
