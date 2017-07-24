@@ -145,7 +145,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
                     position++;
                     continue;
                 }
-                if (null != start && nextMillis + eventDuration > start.getTimeInMillis() ||
+                if (null != start && nextMillis + eventDuration >= start.getTimeInMillis() ||
                     null != startPosition && position + 1 >= startPosition.intValue()) {
                     break;
                 } else {
