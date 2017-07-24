@@ -90,8 +90,8 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
         assertFalse("Warnings in response!", response.hasWarnings());
 
         // Get context and user ID
-        contextID = Integer.toUnsignedLong(getAjaxClient().getValues().getContextId());
-        userID = Integer.toUnsignedLong(getAjaxClient().getValues().getUserId());
+        contextID = new Long(getAjaxClient().getValues().getContextId());
+        userID = new Long(getAjaxClient().getValues().getUserId());
     }
 
     protected PasswordChangeInfo parse(JSONObject data) throws Exception {
