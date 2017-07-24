@@ -128,49 +128,6 @@ public class CalendarUtils {
     private static final ConcurrentMap<String, TimeZone> KNOWN_TIMEZONES = new ConcurrentHashMap<String, TimeZone>();
 
     /**
-     * Gets a value indicating whether a recurrence id's value matches a specific timestamp value.
-     *
-     * @param recurrenceId The recurrence identifier to check
-     * @param value The value to check
-     * @return <code>true</code> if the recurrence id's value matches the timestamp value, <code>false</code>, otherwise
-     */
-    //    public static boolean matches(RecurrenceId recurrenceId, long value) {
-    //        return null != recurrenceId && recurrenceId.getValue() == value;
-    //    }
-
-    /**
-     * Looks up a specific recurrence identifier in a collection based on its timestamp value.
-     *
-     * @param recurrenceIds The recurrence id's to search
-     * @param value The timestamp value to lookup
-     * @return The matching recurrence identifier, or <code>null</code> if not found
-     * @see CalendarUtils#matches(RecurrenceId, long)
-     */
-    //    public static RecurrenceId find(Collection<RecurrenceId> recurrenceIds, long value) {
-    //        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
-    //            for (RecurrenceId recurrenceId : recurrenceIds) {
-    //                if (matches(recurrenceId, value)) {
-    //                    return recurrenceId;
-    //                }
-    //            }
-    //        }
-    //        return null;
-    //    }
-
-    /**
-     * Gets a value indicating whether a recurrence id with a specific timestamp value is present in a collection of recurrence
-     * identifiers, utilizing the {@link CalendarUtils#matches(RecurrenceId, long) routine.
-     *
-     * @param recurrenceIds The recurrence id's to search
-     * @param value The timestamp value to lookup
-     * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(RecurrenceId, long)
-     */
-    //    public static boolean contains(Collection<RecurrenceId> recurrendeIds, long value) {
-    //        return null != find(recurrendeIds, value);
-    //    }
-
-    /**
      * Gets a value indicating whether a specific recurrence id is present in a collection of recurrence identifiers, based on its value.
      *
      * @param recurrenceIds The recurrence id's to search

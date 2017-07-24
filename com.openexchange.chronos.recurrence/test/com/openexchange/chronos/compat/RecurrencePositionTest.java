@@ -137,7 +137,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = calendar.getTime();
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -159,7 +159,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, event.getStartDate().getTimestamp());
         calendar.add(Calendar.WEEK_OF_YEAR, 8);
         Date datePosition = calendar.getTime();
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -170,7 +170,7 @@ public class RecurrencePositionTest {
         /*
          * prepare event series
          */
-        Event event = getAllDayEventSeries("FREQ=DAILY", "tomorrow at 00:00:00", "tomorrow at 01:00:00");
+        Event event = getEventSeries("FREQ=DAILY", timeZone, "tomorrow at 00:00:00", "tomorrow at 01:00:00");
         DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
         /*
          * check recurrence position conversion
@@ -181,7 +181,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -203,7 +203,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -225,7 +225,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -247,7 +247,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
@@ -269,7 +269,7 @@ public class RecurrencePositionTest {
         /*
          * check recurrence date position conversion
          */
-        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate());
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, event.getStartDate().getTimestamp());
         calendar.add(Calendar.DATE, 17);
         Date datePosition = CalendarUtils.truncateTime(calendar.getTime(), TimeZones.UTC);
         recurrenceID = Appointment2Event.getRecurrenceID(recurrenceService, recurrenceData, datePosition);
