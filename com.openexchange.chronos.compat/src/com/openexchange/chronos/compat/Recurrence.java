@@ -136,11 +136,11 @@ public class Recurrence {
          * take over common attributes
          */
         TimeZone timeZone = recurrenceData.getSeriesStart().isFloating() ? TimeZones.UTC : recurrenceData.getSeriesStart().getTimeZone();
-        Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart());
+        Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart().getTimestamp());
         RecurrenceRule rrule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
         SeriesPattern pattern = new SeriesPattern();
         pattern.setInterval(I(rrule.getInterval()));
-        pattern.setSeriesStart(L(recurrenceData.getSeriesStart().getTimestamp()));
+        pattern.setSeriesStart(L(seriesStartCalendar.getTimeInMillis()));
         if (null != rrule.getCount()) {
             pattern.setOccurrences(rrule.getCount());
             pattern.setSeriesEnd(L(getUntilForUnlimited(recurrenceService, recurrenceData).getTime()));

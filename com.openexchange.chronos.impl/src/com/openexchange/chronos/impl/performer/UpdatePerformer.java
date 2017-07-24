@@ -77,9 +77,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -98,7 +96,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -381,18 +378,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * recurrence rule changed, build list of possible exception dates matching the new rule
              */
-            LinkedList<RecurrenceId> exceptionDates = new LinkedList<RecurrenceId>();
+            SortedSet<RecurrenceId> exceptionDates = new TreeSet<RecurrenceId>();
             if (null != originalEvent.getDeleteExceptionDates()) {
                 exceptionDates.addAll(originalEvent.getDeleteExceptionDates());
             }
             if (null != originalEvent.getChangeExceptionDates()) {
                 exceptionDates.addAll(originalEvent.getChangeExceptionDates());
             }
-            Collections.sort(exceptionDates, new RecurrenceIdComparator());
-            Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.getLast().getValue());
+            Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.last().getValue().getTimestamp());
             untilCalendar.add(Calendar.DATE, 1);
             List<RecurrenceId> possibleExceptionDates = asList(session.getRecurrenceService().iterateRecurrenceIds(
-                eventUpdate.getUpdate(), new Date(exceptionDates.getFirst().getValue().getTimestamp()), untilCalendar.getTime()));
+                eventUpdate.getUpdate(), new Date(exceptionDates.first().getValue().getTimestamp()), untilCalendar.getTime()));
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */

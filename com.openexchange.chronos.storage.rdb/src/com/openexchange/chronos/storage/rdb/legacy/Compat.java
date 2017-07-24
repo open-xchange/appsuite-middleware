@@ -50,10 +50,8 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
@@ -428,8 +426,9 @@ public class Compat {
         /*
          * remember time fraction of actual start- and end-date
          */
-        TimeZone timeZone = isFloating(seriesMaster) ? TimeZones.UTC : optTimeZone(seriesMaster.getStartDate().getTimeZone().getID(), TimeZones.UTC);
-        Calendar calendar = initCalendar(timeZone, seriesMaster.getStartDate());
+        DateTime seriesStart = seriesMaster.getStartDate();
+        TimeZone timeZone = seriesStart.isFloating() ? TimeZones.UTC : seriesStart.getTimeZone();
+        Calendar calendar = initCalendar(timeZone, seriesStart.getTimestamp());
         int startHour = calendar.get(Calendar.HOUR_OF_DAY);
         int startMinute = calendar.get(Calendar.MINUTE);
         int startSecond = calendar.get(Calendar.SECOND);
