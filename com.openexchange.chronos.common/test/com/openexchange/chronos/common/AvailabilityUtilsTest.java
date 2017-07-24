@@ -78,8 +78,8 @@ public class AvailabilityUtilsTest {
      */
     @Before
     public void beforeClass() {
-        base.setStartTime(new DateTime(2017, 11, 17));
-        base.setEndTime(new DateTime(2017, 12, 17));
+        base.setStartTime(new DateTime(2017, 10, 17));
+        base.setEndTime(new DateTime(2017, 11, 17));
     }
 
     /**
@@ -88,8 +88,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testIntervalContained() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2017, 11, 18));
-        b.setEndTime(new DateTime(2017, 11, 19));
+        b.setStartTime(new DateTime(2017, 10, 18));
+        b.setEndTime(new DateTime(2017, 10, 19));
 
         assertTrue(AvailabilityUtils.intersect(base, b));
         assertTrue(AvailabilityUtils.intersect(b, base));
@@ -101,8 +101,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testIntervalBefore() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2016, 1, 1));
-        b.setEndTime(new DateTime(2016, 2, 1));
+        b.setStartTime(new DateTime(2016, 0, 1));
+        b.setEndTime(new DateTime(2016, 1, 1));
 
         assertFalse(AvailabilityUtils.intersect(base, b));
         assertFalse(AvailabilityUtils.intersect(b, base));
@@ -114,8 +114,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testIntervalAfter() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2018, 1, 1));
-        b.setEndTime(new DateTime(2018, 2, 1));
+        b.setStartTime(new DateTime(2018, 0, 1));
+        b.setEndTime(new DateTime(2018, 1, 1));
 
         assertFalse(AvailabilityUtils.intersect(base, b));
         assertFalse(AvailabilityUtils.intersect(b, base));
@@ -127,8 +127,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testIntervalIntersectsStart() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2017, 11, 10));
-        b.setEndTime(new DateTime(2017, 11, 20));
+        b.setStartTime(new DateTime(2017, 10, 10));
+        b.setEndTime(new DateTime(2017, 10, 20));
 
         assertTrue(AvailabilityUtils.intersect(base, b));
         assertTrue(AvailabilityUtils.intersect(b, base));
@@ -140,8 +140,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testIntervalIntersectsEnd() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2017, 12, 10));
-        b.setEndTime(new DateTime(2017, 12, 20));
+        b.setStartTime(new DateTime(2017, 11, 10));
+        b.setEndTime(new DateTime(2017, 11, 20));
 
         assertTrue(AvailabilityUtils.intersect(base, b));
         assertTrue(AvailabilityUtils.intersect(b, base));
@@ -153,8 +153,8 @@ public class AvailabilityUtilsTest {
     @Test
     public void testContained() {
         CalendarAvailability b = new CalendarAvailability();
-        b.setStartTime(new DateTime(2017, 12, 5));
-        b.setEndTime(new DateTime(2017, 12, 8));
+        b.setStartTime(new DateTime(2017, 11, 5));
+        b.setEndTime(new DateTime(2017, 11, 8));
 
         assertTrue(AvailabilityUtils.contained(b.getStartTime(), b.getEndTime(), base.getStartTime(), base.getEndTime()));
         assertFalse(AvailabilityUtils.contained(base.getStartTime(), base.getEndTime(), b.getStartTime(), b.getEndTime()));
