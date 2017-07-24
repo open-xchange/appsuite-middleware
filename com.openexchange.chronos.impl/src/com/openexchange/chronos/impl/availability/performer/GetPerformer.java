@@ -218,8 +218,15 @@ public class GetPerformer extends AbstractPerformer {
     private void combine(List<CalendarFreeSlot> freeSlots, AvailableTime availableTime) {
         Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
         int index = 0;
+        // Keeps track of the removed objects
+        List<CalendarFreeSlot> removed = new ArrayList<>();
         while (iteratorA.hasNext()) {
             CalendarFreeSlot a = iteratorA.next();
+            if (removed.contains(a)) {
+                iteratorA.remove();
+                removed.remove(a);
+                continue;
+            }
 
             List<CalendarFreeSlot> lookAheadList = freeSlots.subList(++index, freeSlots.size());
             Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
@@ -227,13 +234,13 @@ public class GetPerformer extends AbstractPerformer {
                 CalendarFreeSlot b = iteratorB.next();
                 // If it is completely contained then skip it
                 if (AvailabilityUtils.contained(b, a)) {
-                    iteratorB.remove();
+                    removed.add(b);
                     continue;
                 }
                 // If it in intersects, then merge
                 if (AvailabilityUtils.intersect(b, a)) {
                     a = AvailabilityUtils.merge(b, a);
-                    iteratorB.remove();
+                    removed.add(b);
                 }
             }
             availableTime.add(AvailabilityUtils.convert(a));
