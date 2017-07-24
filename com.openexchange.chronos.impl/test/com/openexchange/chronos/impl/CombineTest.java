@@ -274,7 +274,7 @@ public class CombineTest {
         freeSlots.add(createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(createCalendarFreeSlot("Contained in February", new DateTime(2017, 1, 10), new DateTime(2017, 1, 12)));
         freeSlots.add(createCalendarFreeSlot("Overlaps with February", new DateTime(2017, 1, 20), new DateTime(2017, 2, 10)));
-        availabilities.add(createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots));
+        availabilities.add(createCalendarAvailability(BusyType.BUSY, freeSlots));
 
         freeSlots = new ArrayList<>(2);
         freeSlots.add(createCalendarFreeSlot("Overlaps with February/March", new DateTime(2017, 1, 27), new DateTime(2017, 2, 30)));
@@ -292,6 +292,7 @@ public class CombineTest {
 
         // Asserts
         assertEquals("The amount of available time slots does not match", 2, availableTime.size());
+        assertEquals("The busy type does not match", BusyType.BUSY, availableTime.getBusyType());
 
         AvailableTimeSlot ats = availableTime.get(0);
         assertEquals("The 'from' of the time slot does not match", new DateTime(2016, 10, 17), ats.getFrom());
