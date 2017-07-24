@@ -230,7 +230,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(request.getSession());
         appointmentwriter.setSession(session);
 
-        if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
+        if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0 && 
+            false == Boolean.FALSE.equals(request.getRequest(). <Boolean>getProperty("com.openexchange.calendar.resolveOccurrences"))) {
             // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls extractRecurringInformation()
             // appointmentobject.calculateRecurrence();
             final RecurringResultsInterface recuResults = recColl.calculateRecurring(

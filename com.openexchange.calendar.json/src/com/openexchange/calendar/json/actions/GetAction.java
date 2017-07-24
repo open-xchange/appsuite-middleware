@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
@@ -126,8 +127,10 @@ public final class GetAction extends ChronosAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        int recurrencePosition = request.optInt(CalendarFields.RECURRENCE_POSITION);
+        EventID eventID = getEventConverter(session).getEventID(folderId, objectId, recurrencePosition);
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
-        Event event = session.getCalendarService().getEvent(session, folderId, new EventID(folderId, objectId));
+        Event event = session.getCalendarService().getEvent(session, folderId, eventID);
         Appointment appointment = getEventConverter(session).getAppointment(event);
         return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
     }

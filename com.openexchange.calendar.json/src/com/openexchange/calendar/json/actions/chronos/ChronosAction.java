@@ -203,14 +203,18 @@ public abstract class ChronosAction extends AppointmentAction {
             } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
-        } else {
-            try {
-                return perform(calendarSession, request);
-            } catch (OXException e) {
-                throw EventConverter.wrapCalendarException(e);
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
+        }
+        /*
+         * mark request to avoid duplicate attempts to resolve occurrences of event series at
+         * com.openexchange.calendar.json.converters.AppointmentResultConverter
+         */
+        request.getRequest().setProperty("com.openexchange.calendar.resolveOccurrences", Boolean.FALSE);
+        try {
+            return perform(calendarSession, request);
+        } catch (OXException e) {
+            throw EventConverter.wrapCalendarException(e);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
