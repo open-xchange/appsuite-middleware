@@ -73,5 +73,7 @@ public interface OIDCBackendConfig {
 
     String getClientSecret();
 
-    String getPublicRSAKeys();
+    String getJwkSet();
+
+    String getJWSAlgortihm();
 }

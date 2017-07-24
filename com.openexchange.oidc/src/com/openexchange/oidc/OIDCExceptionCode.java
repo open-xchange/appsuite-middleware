@@ -64,7 +64,11 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     MISSING_BACKEND_CONFIGURATION("Unable to find a configuration for the given OpenID Backend: %1$s", Category.CATEGORY_CONFIGURATION, 1),
     INVALID_BACKEND_PATH("Path contains invalid characters: $1$s", Category.CATEGORY_CONFIGURATION, 2),
     CORRUPTED_URI("A provided URI is corrupted: $1$s, $2$s", Category.CATEGORY_CONFIGURATION, 3),
-    UNABLE_TO_CREATE_AUTHENTICATION_REQUEST("Unable to create the authentication request, please check the provided backend configuration of backend: $1$s", Category.CATEGORY_ERROR, 4);
+    UNABLE_TO_CREATE_AUTHENTICATION_REQUEST("Unable to create the authentication request, please check the provided backend configuration of backend: $1$s", Category.CATEGORY_ERROR, 4),
+    UNABLE_TO_PARSE_JWS_ALGORITHM("Unable to parse the given JWS algorithm parameter: $1$s", Category.CATEGORY_CONFIGURATION, 5), 
+    UNABLE_TO_GET_JWKSET_WITH_URL("Unable to load JWKSet from the given URL: $1$s", Category.CATEGORY_CONFIGURATION, 6), 
+    IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 7),
+    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors", Category.CATEGORY_ERROR, 8);
 
     private final String message;
     private final String displayMessage;

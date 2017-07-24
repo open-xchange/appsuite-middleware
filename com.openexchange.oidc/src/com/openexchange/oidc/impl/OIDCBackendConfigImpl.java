@@ -38,8 +38,13 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     }
 
     @Override
-    public String getPublicRSAKeys() {
+    public String getJwkSet() {
         return leanConfigurationService.getProperty(OIDCBackendProperty.publicRSAKeys);
+    }
+
+    @Override
+    public String getJWSAlgortihm() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
     }
 
 }

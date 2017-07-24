@@ -1,69 +1,54 @@
+
 package com.openexchange.oidc.tools;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.ParseException;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.JWSKeySelector;
-import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.exception.OXException;
-import com.openexchange.oidc.spi.OIDCBackend;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;;
+import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.oidc.spi.OIDCBackend;;
 
-public abstract class OIDCValidatorImpl implements OIDCValidator{
-    
+public abstract class OIDCValidatorImpl implements OIDCValidator {
+
     private OIDCBackend backend;
-    
-    
+
     public OIDCValidatorImpl(OIDCBackend backend) {
         super();
         this.backend = backend;
     }
 
     @Override
-    public boolean validateIdToken(AccessToken accessToken) throws OXException {
-        JWTClaimsSet tokenClaims = getTokenClaims(accessToken.getValue());
-        return validateClaims(tokenClaims);
+    public boolean validateIdToken(JWT idToken, String nonce) throws OXException {
+        JWKSet jwkSet = backend.getJwkSet();
+        JWSAlgorithm expectedJWSAlg = backend.getJWSAlgorithm();
+
+        IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(""), new ClientID(this.backend.getBackendConfig().getClientID()), expectedJWSAlg, jwkSet);
+        try {
+            idTokenValidator.validate(idToken, new Nonce(nonce));
+        } catch (BadJOSEException e) {
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
+        } catch (JOSEException e) {
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
+        }
+        return true;
     }
-    
-    public boolean validateClaims(JWTClaimsSet tokenClaims) {
-        // TODO Auto-generated method stub
+
+    protected boolean validateClaims(JWTClaimsSet tokenClaims, String nonce) {
         return false;
     }
 
-    public JWTClaimsSet getTokenClaims(String accessTokenString) {
-        JWTClaimsSet claimsSet = null;
-        ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-        try {
-            JWKSource<SecurityContext> keySource = new RemoteJWKSet<>(new URL(this.backend.getBackendConfig().getPublicRSAKeys()));
-            //TODO QS-VS: Algorithm from config?
-            JWSAlgorithm expectedJWSAlg = JWSAlgorithm.RS256;
-            JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(expectedJWSAlg, keySource);
-            jwtProcessor.setJWSKeySelector(keySelector);
-            SecurityContext ctx = null; // optional context parameter, not required here
-            claimsSet = jwtProcessor.process(accessTokenString, ctx);
-        } catch (MalformedURLException e) {
-            //TODO QS-VS: Exception
-            e.printStackTrace();
-        } catch (ParseException e) {
-          //TODO QS-VS: Exception
-            e.printStackTrace();
-        } catch (BadJOSEException e) {
-          //TODO QS-VS: Exception
-            e.printStackTrace();
-        } catch (JOSEException e) {
-          //TODO QS-VS: Exception
-            e.printStackTrace();
-        }
-        return claimsSet;
-    }
-
+    // TODO QS-VS: IDToken validieren
+    // Access und refresh muss nicht validiert werden
+    // Oauth Tokens müssen mit in die Session, sind allerdings optional
+    // IDToken muss ebenfalls an die Session gehangen werden
 }

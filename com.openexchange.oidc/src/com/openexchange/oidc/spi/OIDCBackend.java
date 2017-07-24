@@ -49,6 +49,16 @@
 
 package com.openexchange.oidc.spi;
 
+import java.net.MalformedURLException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 
@@ -82,5 +92,16 @@ public interface OIDCBackend {
      * @return The exception handler
      */
     OIDCExceptionHandler getExceptionHandler();
+
+    HTTPRequest getHttpRequest(HTTPRequest httpRequest);
+
+    ClientAuthentication getClientAuthentication();
+
+    TokenRequest getTokenRequest(TokenRequest tokenRequest);
+
+    // TODO QS-VS: Andere Exception werfen
+    JWKSet getJwkSet() throws OXException;
+
+    JWSAlgorithm getJWSAlgorithm() throws OXException;
 
 }

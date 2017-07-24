@@ -60,9 +60,7 @@ import com.openexchange.config.lean.Property;
 public enum OIDCProperty implements Property {
     enabled(OIDCProperty.PREFIX, false),
     startDefaultBackend(OIDCProperty.PREFIX, false),
-    
     scope(OIDCProperty.PREFIX,"openid"),
-    
     responseType(OIDCProperty.PREFIX, "code");
     
 

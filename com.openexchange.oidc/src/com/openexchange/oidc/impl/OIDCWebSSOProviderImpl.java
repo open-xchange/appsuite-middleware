@@ -73,6 +73,7 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -80,6 +81,7 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -195,7 +197,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         TokenRequest tokenReq;
         try {
             tokenReq = createTokenRequest(httpRequest);
-            TokenResponse tokenResponse = getTokenResponse(tokenReq);
+            OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
             if(validTokenResponse(tokenResponse)) {
                 redirectionString = loginUserAndRedirect();
             }
@@ -220,11 +222,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return null;
     }
 
-    private boolean validTokenResponse(TokenResponse tokenResponse) throws OXException {
-        AccessTokenResponse accessTokenResponse = (AccessTokenResponse) tokenResponse;
-        Tokens tokens = accessTokenResponse.getTokens();
-        AccessToken accessToken = tokens.getAccessToken();
-        return oidcValidator.validateIdToken(accessToken);
+    private boolean validTokenResponse(OIDCTokenResponse tokenResponse) throws OXException {
+        return oidcValidator.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), null);
     }
     
     private JSONObject getProviderRSAJWK(InputStream is) throws java.text.ParseException {
@@ -260,20 +259,19 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
         // The credentials to authenticate the client at the token endpoint
-        ClientID clientID = new ClientID(backend.getBackendConfig().getClientID());
-        Secret clientSecret = new Secret(backend.getBackendConfig().getClientSecret());
-        ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
+        ClientAuthentication clientAuth = backend.getClientAuthentication();
     
          // The token endpoint
         URI tokenEndpoint = new URI(backend.getBackendConfig().getTokenEndpoint());
     
          // Make the token request
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
-        return tokenRequest;
+        return backend.getTokenRequest(tokenRequest);
     }
     
-    private TokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException {
-        HTTPResponse httpResponse = tokenReq.toHTTPRequest().send();
+    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException {
+        HTTPRequest httpRequest = backend.getHttpRequest(tokenReq.toHTTPRequest());
+        HTTPResponse httpResponse = httpRequest.send();
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
         
         if (tokenResponse instanceof TokenErrorResponse) {
@@ -281,6 +279,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             //TODO QS-VS: Fehler werfen
         }
         
-        return tokenResponse;
+        return (OIDCTokenResponse) tokenResponse;
     }
 }

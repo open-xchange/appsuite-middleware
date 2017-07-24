@@ -48,7 +48,6 @@
  */
 package com.openexchange.oidc.spi;
 
-
 /**
  * The implementation of the core OpenID backend.
  *
@@ -56,5 +55,4 @@ package com.openexchange.oidc.spi;
  * @since v7.10.0
  */
 public class OIDCCoreBackend extends AbstractOIDCBackend{
-
 }

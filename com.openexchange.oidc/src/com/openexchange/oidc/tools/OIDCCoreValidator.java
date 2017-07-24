@@ -7,5 +7,4 @@ public class OIDCCoreValidator extends OIDCValidatorImpl{
     public OIDCCoreValidator(OIDCBackend backend) {
         super(backend);
     }
-
 }
