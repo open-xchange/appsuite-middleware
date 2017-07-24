@@ -1727,7 +1727,7 @@ public class MimeMessageFiller {
                             }
                             for (int i = size; null == tmp && i-- > 0;) {
                                 MailPart part = mail.getEnclosedMailPart(i);
-                                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
+                                if ((part instanceof ComposedMailPart) && ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
                                     String contentId = part.getContentId();
                                     if (null != contentId && contentId.startsWith(prefix, 0)) {
                                         tmp = new ReferencedPartImageProvider(part);
