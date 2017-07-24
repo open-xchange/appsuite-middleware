@@ -200,6 +200,7 @@ public class CombineTest {
 
         // Asserts
         assertEquals("The amount of available time slots does not match", 2, availableTime.size());
+        assertEquals("The busy type does not match", BusyType.BUSY_UNAVAILABLE, availableTime.getBusyType());
 
         // Assert the merged slot
         AvailableTimeSlot ats = availableTime.get(0);
@@ -226,6 +227,7 @@ public class CombineTest {
 
         // Asserts
         assertEquals("The amount of available time slots does not match", 2, availableTime.size());
+        assertEquals("The busy type does not match", BusyType.BUSY_UNAVAILABLE, availableTime.getBusyType());
 
         AvailableTimeSlot ats = availableTime.get(1);
         assertEquals("The 'from' of the time slot does not match", new DateTime(2017, 1, 1), ats.getFrom());
