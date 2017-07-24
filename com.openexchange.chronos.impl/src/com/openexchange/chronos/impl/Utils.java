@@ -70,7 +70,6 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -80,15 +79,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.AlarmMapper;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -712,111 +708,6 @@ public class Utils {
      */
     public static List<UserizedFolder> getVisibleFolders(CalendarSession session) throws OXException {
         return getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
-    }
-
-    /**
-     * Initializes a new attachment collection update based on the supplied original and updated attachment lists.
-     *
-     * @param originalAttachments The original attachments
-     * @param updatedAttachments The updated attachments
-     * @return The collection update
-     */
-    public static SimpleCollectionUpdate<Attachment> getAttachmentUpdates(List<Attachment> originalAttachments, List<Attachment> updatedAttachments) {
-        return new AbstractSimpleCollectionUpdate<Attachment>(originalAttachments, updatedAttachments) {
-
-            @Override
-            protected boolean matches(Attachment item1, Attachment item2) {
-                if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
-                    return item1.getManagedId() == item2.getManagedId();
-                }
-                return false;
-            }
-        };
-    }
-
-    /**
-     * Initializes a new exception date collection update based on the supplied original and updated exception date lists.
-     *
-     * @param originalDates The original dates
-     * @param updatedDates The updated dates
-     * @return The collection update
-     */
-    public static SimpleCollectionUpdate<RecurrenceId> getExceptionDateUpdates(Collection<RecurrenceId> originalDates, Collection<RecurrenceId> updatedDates) {
-        return new AbstractSimpleCollectionUpdate<RecurrenceId>(originalDates, updatedDates) {
-
-            @Override
-            protected boolean matches(RecurrenceId item1, RecurrenceId item2) {
-                if (null != item1 && null != item2) {
-                    return item1.getValue() == item2.getValue();
-                }
-                return false;
-            }
-        };
-    }
-
-    /**
-     * Initializes a new alarm collection update based on the supplied original and updated alarm lists.
-     *
-     * @param originalAlarms The original alarms
-     * @param updatedAlarms The updated alarms
-     * @return The collection update
-     */
-    public static AbstractCollectionUpdate<Alarm, AlarmField> getAlarmUpdates(List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
-        /*
-         * special handling to detect change of single reminder (as used in legacy storage)
-         */
-        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 1 == updatedAlarms.size()) {
-            Alarm originalAlarm = originalAlarms.get(0);
-            Alarm updatedAlarm = updatedAlarms.get(0);
-            Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
-                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
-            if (differentFields.isEmpty()) {
-                return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
-
-                    @Override
-                    protected boolean matches(Alarm alarm1, Alarm alarm2) {
-                        return true;
-                    }
-                };
-            }
-        }
-        /*
-         * default collection update, otherwise
-         */
-        return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
-
-            @Override
-            protected boolean matches(Alarm alarm1, Alarm alarm2) {
-                if (null == alarm1) {
-                    return null == alarm2;
-                } else if (null != alarm2) {
-                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
-                        return true;
-                    }
-                    if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        };
-    }
-
-    /**
-     * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
-     *
-     * @param originalAttendees The original attendees
-     * @param updatedAttendees The updated attendees
-     * @return The collection update
-     */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees) {
-
-            @Override
-            protected boolean matches(Attendee item1, Attendee item2) {
-                return CalendarUtils.matches(item1, item2);
-            }
-        };
     }
 
     /**

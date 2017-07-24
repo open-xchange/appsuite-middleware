@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 

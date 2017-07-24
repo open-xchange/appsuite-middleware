@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.filterByMembership;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getAttendeeUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
@@ -67,6 +68,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -248,7 +250,7 @@ public class AttendeeHelper {
     private void processUpdatedEvent(List<Attendee> updatedAttendees) throws OXException {
         session.getEntityResolver().prefetch(updatedAttendees);
         updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
-        AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = Utils.getAttendeeUpdates(originalAttendees, updatedAttendees);
+        AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = getAttendeeUpdates(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees

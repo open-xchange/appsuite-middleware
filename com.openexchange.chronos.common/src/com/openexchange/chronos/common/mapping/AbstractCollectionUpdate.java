@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common.mapping;
 
 import java.util.ArrayList;
 import java.util.Collections;

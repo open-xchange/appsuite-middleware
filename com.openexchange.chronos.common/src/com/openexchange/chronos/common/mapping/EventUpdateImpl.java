@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common.mapping;
 
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
@@ -57,7 +57,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
@@ -90,11 +90,11 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
 
     private EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
         super(originalEvent, updatedEvent, updatedFields);
-        alarmUpdates = Utils.getAlarmUpdates(
+        alarmUpdates = CalendarUtils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        attendeeUpdates = Utils.getAttendeeUpdates(
+        attendeeUpdates = CalendarUtils.getAttendeeUpdates(
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
-        attachmentUpdates = Utils.getAttachmentUpdates(
+        attachmentUpdates = CalendarUtils.getAttachmentUpdates(
             null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }
 

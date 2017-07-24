@@ -54,6 +54,8 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
@@ -98,6 +100,7 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -105,7 +108,6 @@ import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.CreateResultImpl;
-import com.openexchange.chronos.impl.DefaultItemUpdate;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -512,7 +514,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
             Event originalUserEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
             originalUserEvent = Utils.applyExceptionDates(storage, originalUserEvent, calendarUserId);
-            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalUserEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.DELETE_EXCEPTION_DATES);
             }
@@ -617,7 +619,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     private boolean updateAlarms(Event event, int calendarUserId, List<Alarm> updatedAlarms) throws OXException {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUserId);
-        CollectionUpdate<Alarm, AlarmField> alarmUpdates = Utils.getAlarmUpdates(originalAlarms, updatedAlarms);
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;
         }
@@ -789,7 +791,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     if (null != eventUpdate.getDeleteExceptionDates()) {
                         Check.recurrenceIdsExist(session.getRecurrenceService(), originalEvent, eventUpdate.getDeleteExceptionDates());
-                        SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = Utils.getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
+                        SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), eventUpdate.getDeleteExceptionDates());
                         if (0 < exceptionDateUpdates.getRemovedItems().size()) {
                             throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                         }
