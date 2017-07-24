@@ -84,7 +84,7 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Retrievs the {@link CalendarAvailability} with the specified identifier
+     * Retrieves the {@link CalendarAvailability} with the specified identifier
      * 
      * @param calendarAvailabilityId The {@link CalendarAvailability}'s identifier
      * @return The {@link CalendarAvailability}
@@ -110,7 +110,7 @@ public class GetPerformer extends AbstractPerformer {
      * @param from The starting point in the interval
      * @param until The ending point in the interval
      * @return a {@link List} with {@link CalendarAvailability} blocks in the specified range
-     * @throws OXException if an error occurrs
+     * @throws OXException if an error occurs
      */
     public List<CalendarAvailability> performInRange(Date from, Date until) throws OXException {
         return storage.loadCalenarAvailabilityInRange(session.getUserId(), from, until);
@@ -211,8 +211,14 @@ public class GetPerformer extends AbstractPerformer {
             Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
             while (iteratorB.hasNext()) {
                 CalendarFreeSlot b = iteratorB.next();
-                if (AvailabilityUtils.intersect(a, b) && !AvailabilityUtils.contained(b, a)) {
-                    a = AvailabilityUtils.merge(a, b);
+                // If it is completely contained then skip it
+                if (AvailabilityUtils.contained(b, a)) {
+                    iteratorB.remove();
+                    continue;
+                }
+                // If it in intersects, then merge
+                if (AvailabilityUtils.intersect(b, a)) {
+                    a = AvailabilityUtils.merge(b, a);
                     iteratorB.remove();
                 }
             }
