@@ -210,7 +210,8 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
 
             @Override
             public String get(CalendarAvailability object) {
-                return object.getBusyType().getValue();
+                BusyType busyType = object.getBusyType();
+                return busyType == null ? BusyType.BUSY_UNAVAILABLE.getValue() : busyType.getValue();
             }
 
             @Override
