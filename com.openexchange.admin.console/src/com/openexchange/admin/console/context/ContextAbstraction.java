@@ -134,7 +134,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     private static final String SCHEMA_OPT_DESC = "The schema name, where the context will be created. This bypasses any weight balancing. Must not be set, if \"schema-strategy\" is set.";
     private static final String SCHEMA_OPT = "schema";
 
-    private static final String SCHEMA_STRATEGY_OPT_DESC = "The schema select strategy. \"automatic\" for automatic selection (default), \"in-memory\" for in memory selection. Must not be set, if \"schema\" option is set.";
+    private static final String SCHEMA_STRATEGY_OPT_DESC = "The schema select strategy. \"automatic\" for automatic selection (default). Deprecated: \"in-memory\" is no more supported and falls-back to \"automatic\". Must not be set, if \"schema\" option is set.";
     private static final String SCHEMA_STRATEGY_OPT = "schema-strategy";
 
     public final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
