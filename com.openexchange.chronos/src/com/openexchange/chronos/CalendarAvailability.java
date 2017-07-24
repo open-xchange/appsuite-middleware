@@ -63,7 +63,7 @@ import com.openexchange.chronos.service.CalendarAvailabilityField;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarAvailability implements FieldAware {
+public class CalendarAvailability implements FieldAware, Comparable<CalendarAvailability> {
 
     private String id;
 
@@ -736,5 +736,21 @@ public class CalendarAvailability implements FieldAware {
         StringBuilder builder = new StringBuilder();
         builder.append("CalendarAvailability [uid=").append(getUid()).append(", busyType=").append(busyType).append(", startTime=").append(startTime).append(", endTime=").append(endTime).append(", description=").append(description).append("]");
         return builder.toString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(CalendarAvailability o) {
+        if (getPriority() > o.getPriority()) {
+            return 1;
+        } else if (getPriority() < o.getPriority()) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 }

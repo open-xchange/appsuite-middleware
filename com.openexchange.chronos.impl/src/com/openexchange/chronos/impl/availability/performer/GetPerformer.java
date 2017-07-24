@@ -188,13 +188,15 @@ public class GetPerformer extends AbstractPerformer {
      * Retrieves the {@link AvailableTime} slots for the current user
      * 
      * @return The {@link AvailableTime} slots for the current user
-     * @throws OXException
      */
     public AvailableTime getAvailableTime() throws OXException {
         AvailableTime availableTime = new AvailableTime();
         availableTime.setUserId(session.getUserId());
 
         List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(session.getUserId());
+        // Sort by priority (see: https://tools.ietf.org/html/rfc7953#section-4 RFC 7953, section 4</a>
+        java.util.Collections.sort(calendarAvailabilities);
+
         BusyType busyType = BusyType.BUSY_TENTATIVE;
         List<CalendarFreeSlot> flattenSlots = new ArrayList<>();
         for (CalendarAvailability calendarAvailability : calendarAvailabilities) {
