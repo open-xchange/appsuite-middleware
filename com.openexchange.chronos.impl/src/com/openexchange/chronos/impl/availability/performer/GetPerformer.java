@@ -201,13 +201,27 @@ public class GetPerformer extends AbstractPerformer {
             busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
             flattenSlots.addAll(calendarAvailability.getCalendarFreeSlots());
         }
+        availableTime.setBusyType(busyType);
 
-        Iterator<CalendarFreeSlot> iteratorA = flattenSlots.iterator();
+        // Combine
+        combine(flattenSlots, availableTime);
+
+        return availableTime;
+    }
+
+    /**
+     * Combines the specified {@link CalendarFreeSlot}s to a single {@link AvailableTime}
+     * 
+     * @param freeSlots The {@link CalendarFreeSlot}s to combine
+     * @param availableTime The {@link AvailableTime} to combine to
+     */
+    private void combine(List<CalendarFreeSlot> freeSlots, AvailableTime availableTime) {
+        Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
         int index = 0;
         while (iteratorA.hasNext()) {
             CalendarFreeSlot a = iteratorA.next();
 
-            List<CalendarFreeSlot> lookAheadList = flattenSlots.subList(++index, flattenSlots.size());
+            List<CalendarFreeSlot> lookAheadList = freeSlots.subList(++index, freeSlots.size());
             Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
             while (iteratorB.hasNext()) {
                 CalendarFreeSlot b = iteratorB.next();
@@ -224,8 +238,5 @@ public class GetPerformer extends AbstractPerformer {
             }
             availableTime.add(AvailabilityUtils.convert(a));
         }
-
-        availableTime.setBusyType(busyType);
-        return availableTime;
     }
 }
