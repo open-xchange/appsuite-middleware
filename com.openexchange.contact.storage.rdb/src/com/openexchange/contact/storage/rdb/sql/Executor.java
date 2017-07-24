@@ -597,7 +597,13 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+            boolean withUseCount = false;
+            for(ContactField field: fields){
+                if(ContactField.USE_COUNT.equals(field)){
+                    withUseCount=true;
+                }
+            }
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, withUseCount);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
