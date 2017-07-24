@@ -63,6 +63,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
@@ -79,9 +80,6 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
 
     private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=?;";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?;";
-    private static final String GET_SEQUENCE_ID = "SELECT id FROM sequence_password_history WHERE cid=?;";
-
-    private static final String UPDATE_SEQUENCE_ID = "UPDATE sequence_password_history SET id=? WHERE cid=?;";
 
     private static final String CLEAR_FOR_ID = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
     private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
@@ -145,28 +143,26 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
         try {
             context = Services.getService(ContextService.class, true).getContext(contextID);
             con = DBPool.pickupWriteable(context);
-            // First get current sequence number
-            stmt = con.prepareStatement(GET_SEQUENCE_ID);
-            stmt.setInt(1, contextID);
-            stmt.execute();
-            ResultSet set = stmt.getResultSet();
-            int sequence;
-            if (set.next()) {
-                // Entry exist
-                sequence = set.getInt(1);
-                Databases.closeSQLStuff(stmt);
 
-                // Increment and update
-                sequence++;
-                stmt = con.prepareStatement(UPDATE_SEQUENCE_ID);
-                stmt.setInt(1, sequence);
-                stmt.setInt(2, contextID);
-                stmt.execute();
-                Databases.closeSQLStuff(stmt);
+            int sequence = -1;
+            boolean rollback = true;
+            try {
+                con.setAutoCommit(false);
+                sequence = IDGenerator.getId(contextID, com.openexchange.groupware.Types.PASSWORD_CHANGE, con);
+                con.commit();
+                rollback = false;
+            } catch (SQLException e) {
+                // Table or entry for this context does not exist
+                LOG.error("Error while getting ID for password change history. Error: {}", e.getMessage());
+            } finally {
+                if (rollback) {
+                    LOG.debug("Can't save password change,");
+                    Databases.rollback(con);
+                }
+            }
 
-            } else {
-                // Create entry for this context
-                Databases.closeSQLStuff(stmt);
+            if (sequence <= 0) {
+                // Write new table entry
                 sequence = 1;
 
                 stmt = con.prepareStatement(CREATE_SEQUENCE);
@@ -190,8 +186,10 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             }
             stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             stmt.execute();
+            
+            con.commit();
         } catch (Exception e) {
-            LOG.warn("Could not save password history.");
+            LOG.warn("Could not save password history. Error: {}", e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             DBPool.closeWriterSilent(context, con);
