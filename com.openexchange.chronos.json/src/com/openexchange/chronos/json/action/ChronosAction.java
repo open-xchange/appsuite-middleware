@@ -150,7 +150,19 @@ public abstract class ChronosAction implements AJAXActionService {
     }
 
     protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData) throws OXException {
-        String value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+       return parseFolderParameter(requestData, true);
+    }
+
+    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData, boolean required) throws OXException {
+        String value;
+        if(required){
+            value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+        } else {
+            value = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        }
+        if(value==null){
+            return null;
+        }
         try {
             return CompositeFolderID.parse(value);
         } catch (IllegalArgumentException e) {
@@ -172,7 +184,7 @@ public abstract class ChronosAction implements AJAXActionService {
         }
     }
 
-    private String parseRecurrenceIdParameter(AJAXRequestData requestData) throws OXException {
+    private String parseRecurrenceIdParameter(AJAXRequestData requestData) {
         return requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
     }
 

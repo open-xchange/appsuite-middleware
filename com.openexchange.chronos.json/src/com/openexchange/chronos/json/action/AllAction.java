@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -98,7 +99,13 @@ public class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        List<Event> events = calendarAccess.getEventsInFolder(parseFolderParameter(requestData));
+        CompositeFolderID folder = parseFolderParameter(requestData, false);
+        List<Event> events;
+        if(folder==null){
+            events = calendarAccess.getEventsOfUser();
+        } else {
+            events = calendarAccess.getEventsInFolder(folder);
+        }
         long timeStamp=0;
         for(Event event: events){
             if(event.getLastModified().getTime()>timeStamp){

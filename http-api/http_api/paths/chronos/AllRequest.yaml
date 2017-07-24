@@ -6,7 +6,11 @@
     summary: Gets all events in folder.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosFolder"
+      - in: query
+        name: folder
+        type: string
+        description: ID of the folder who contains the events. If not set, all events of the default account will be queried.
+        required: false
       - in: query
         name: rangeStart
         type: string
