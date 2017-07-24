@@ -65,6 +65,7 @@ import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerReg
 import com.openexchange.passwordchange.history.rest.osgi.Services;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.SortType;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 
@@ -91,7 +92,7 @@ public class PasswordChangeHistoryREST {
     @Path(LIST)
     @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject listHistory(@QueryParam("limit") int limit, @QueryParam("contextID") int contextID, @QueryParam("userID") int userID) throws Exception {
+    public JSONObject listHistory(@QueryParam("limit") int limit, @QueryParam("contextID") int contextID, @QueryParam("userID") int userID, @QueryParam("order") String order) throws Exception {
 
         // Get services
         PasswordChangeTrackerRegistry registry = Services.getService(PasswordChangeTrackerRegistry.class, true);
@@ -114,11 +115,10 @@ public class PasswordChangeHistoryREST {
         if (null == pwdtracker) {
             return new JSONObject().put("Error:", "{No tracker for the requested user found.}");
         }
-        List<PasswordChangeInfo> history = pwdtracker.listPasswordChanges(userID, contextID);
+        List<PasswordChangeInfo> history = pwdtracker.listPasswordChanges(userID, contextID, getType(order));
 
         // Check data
-        int size = history.size();
-        if (size == 0) {
+        if (history.size() == 0) {
             return new JSONObject().put("Error", "{No history available.}");
         }
 
@@ -131,13 +131,30 @@ public class PasswordChangeHistoryREST {
                 break;
             }
             JSONObject data = new JSONObject();
-            data.append("created", info.getCreated().toString());
-            data.append("client", info.getClient());
-            data.append("ip", info.getIP());
+            data.put("created", info.getCreated().toString());
+            data.put("client", info.getClient());
+            data.put("ip", info.getIP());
             entries.add(i++, data);
         }
-        json.append("PasswordChangeHistroy", entries);
+        json.put("PasswordChangeHistroy", entries);
         return json;
     }
 
+    /**
+     * Get the type fitting to the given string. Default is {@link #NONE}
+     * 
+     * @param type The type as String
+     * @return A {@link SortType}
+     */
+    private SortType getType(String type) {
+        for (SortType sType : SortType.values()) {
+            String[] altNames = sType.getAltNames();
+            for (String name : altNames) {
+                if (name.equals(type)) {
+                    return sType;
+                }
+            }
+        }
+        return SortType.NONE;
+    }
 }

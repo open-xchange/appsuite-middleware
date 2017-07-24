@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.passwordchange.history.osgi.Services;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.SortType;
 import com.openexchange.server.impl.DBPool;
 
 /**
@@ -116,9 +118,9 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             try {
                 // Convert data
                 while (set.next()) {
-                    final Timestamp created = set.getTimestamp(1);
-                    final String client = set.getString(2);
-                    final String ip = set.getString(3);
+                    Timestamp created = set.getTimestamp(1);
+                    String client = set.getString(2);
+                    String ip = set.getString(3);
 
                     retval.add(new PasswordChangeInfoImpl(created, client, ip));
                 }
@@ -267,5 +269,59 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             Databases.closeSQLStuff(stmt);
             DBPool.closeWriterSilent(context, con);
         }
+    }
+
+    @Override
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type) {
+
+        List<PasswordChangeInfo> retval = listPasswordChanges(userID, contextID);
+
+        switch (type) {
+            case NEWEST:
+                Collections.sort(retval, new Comparator<PasswordChangeInfo>() {
+
+                    @Override
+                    public int compare(PasswordChangeInfo o1, PasswordChangeInfo o2) {
+                        // Compare by Timestamps
+                        if (o1.getCreated().before(o2.getCreated())) {
+                            /*
+                             * Before o2, assume it is greater to get o1 sorted behind o2
+                             * "2017-07-04 17:55:29.0" > "2017-07-04 17:57:22.0"
+                             * {"2017-07-04 17:57:22.0", "2017-07-04 17:55:29.0"}
+                             */
+                            return 1;
+                        } else if (o1.getCreated().after(o2.getCreated())) {
+                            return -1;
+                        }
+                        return 0;
+                    }
+                });
+                break;
+            case OLDEST:
+                Collections.sort(retval, new Comparator<PasswordChangeInfo>() {
+
+                    @Override
+                    public int compare(PasswordChangeInfo o1, PasswordChangeInfo o2) {
+                        // Compare by Timestamps
+                        if (o1.getCreated().before(o2.getCreated())) {
+                            /*
+                             * Before o2, assume it is less to get o1 sorted before o2
+                             * "2017-07-04 17:55:29.0" < "2017-07-04 17:57:22.0"
+                             * {"2017-07-04 17:55:29.0", "2017-07-04 17:57:22.0"}
+                             */
+                            return -1;
+                        } else if (o1.getCreated().after(o2.getCreated())) {
+                            return 1;
+                        }
+                        return 0;
+                    }
+                });
+                break;
+            case NONE:
+            default:
+                // Nothing to do
+                break;
+        }
+        return retval;
     }
 }
