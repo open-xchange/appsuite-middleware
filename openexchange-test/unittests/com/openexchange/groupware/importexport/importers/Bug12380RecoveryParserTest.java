@@ -95,7 +95,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null).getImportedObjects();
 
         assertEquals("Expected appointment to be split into two", 2, parsed.size());
         CalendarDataObject app1 = parsed.get(0);
@@ -125,7 +125,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null).getImportedObjects();
 
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
 
@@ -142,7 +142,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
 
         parser.setAppointments(Arrays.asList(appointment));
 
-        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null);
+        List<CalendarDataObject> parsed = bugParser.parseAppointments((String)null, null, null, null, null).getImportedObjects();
 
         assertEquals("Expected appointment to be left as one", 1, parsed.size());
     }

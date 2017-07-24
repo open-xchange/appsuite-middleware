@@ -186,7 +186,7 @@ public abstract class AbstractICalParserTest extends TestCase {
     }
 
     protected List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() );
+        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>() ).getImportedObjects();
     }
 
 
@@ -201,7 +201,7 @@ public abstract class AbstractICalParserTest extends TestCase {
 
     //multiple tasks
     protected List<Task> parseTasks(final String icalText,  final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>());
+        return parser.parseTasks(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>() , new ArrayList<ConversionWarning>()).getImportedObjects();
     }
 
     protected List<Task> parseTasks(final String icalText) throws ConversionError {
@@ -233,7 +233,7 @@ public abstract class AbstractICalParserTest extends TestCase {
     protected void assertWarningWhenParsingAppointment(final String icalText, final String warning) throws ConversionError {
         final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        final List<CalendarDataObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        final List<CalendarDataObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
 
         assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
         assertEquals(1, warnings.size());
@@ -251,7 +251,7 @@ public abstract class AbstractICalParserTest extends TestCase {
     protected void assertNothingHappensWhenParsingAppointment(final String icalText) throws ConversionError {
         final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
         final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        List<CalendarDataObject> parsed = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
+        List<CalendarDataObject> parsed = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
         assertTrue(null == parsed || 0 == parsed.size());
         assertEquals(0, errors.size());
         assertEquals(0, warnings.size());

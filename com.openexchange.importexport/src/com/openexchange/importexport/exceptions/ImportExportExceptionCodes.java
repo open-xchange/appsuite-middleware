@@ -178,6 +178,14 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     /** The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s */
     CONTACT_TOO_SIMILAR("The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s", CATEGORY_CONFLICT, 1319, ImportExportExceptionMessages.CONTACT_TOO_SIMILAR),
 
+    /** Could not create a proper name for the export file. */
+    COULD_NOT_CREATE_FILE_NAME("Could not create a proper name for the export file.", Category.CATEGORY_ERROR, 1320, ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME),
+
+    /** Not all of the objects could be imported due to a configured limitation of %1$s */
+    TRUNCATED_RESULTS("Not all of the objects could be imported due to a configured limitation of %1$s", CATEGORY_WARNING, 1321, ImportExportExceptionMessages.TRUNCATED_RESULTS_MSG),
+
+    /** %1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s */
+    WARNINGS_AND_TRUNCATED_RESULTS("%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s", CATEGORY_WARNING, 1322, ImportExportExceptionMessages.WARNINGS_AND_TRUNCATED_RESULTS_MSG),
     ;
 
     private String message;

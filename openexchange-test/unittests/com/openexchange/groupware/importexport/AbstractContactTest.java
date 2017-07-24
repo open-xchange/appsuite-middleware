@@ -421,7 +421,7 @@ public class AbstractContactTest {
 
     protected List<ImportResult> importStuff(final String csv, final String encoding) throws OXException, UnsupportedEncodingException{
         final InputStream is = new ByteArrayInputStream( csv.getBytes(encoding) );
-        return imp.importData(sessObj, defaultFormat, is, _folders(), null);
+        return imp.importData(sessObj, defaultFormat, is, _folders(), null).getImportResults();
     }
 
     protected boolean existsEntry(final int entryNumber) throws OXException {
@@ -478,7 +478,7 @@ public class AbstractContactTest {
 
         assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
-        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
+        final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null).getImportResults();
         assertEquals("Correct number of results?", Integer.valueOf(expectedErrors.length), Integer.valueOf(results.size())); //ugly, but necessary to bridge JUnit 3 and 4
 
         for(int i = 0; i < expectedErrors.length; i++){

@@ -50,7 +50,6 @@
 package com.openexchange.data.conversion.ical;
 
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -72,23 +71,23 @@ public class SimICalParser implements ICalParser{
 
 
     @Override
-    public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
+    public ParseResult<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        return DefaultParseResult.parseResultFor(appointments);
     }
 
     @Override
-    public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return appointments;
+    public ParseResult<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        return DefaultParseResult.parseResultFor(appointments);
     }
 
     @Override
-    public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
+    public ParseResult<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        return DefaultParseResult.parseResultFor(tasks);
     }
 
     @Override
-    public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        return tasks;
+    public ParseResult<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
+        return DefaultParseResult.parseResultFor(tasks);
     }
 
     public void setAppointments(final List<CalendarDataObject> appointments) {
@@ -105,19 +104,19 @@ public class SimICalParser implements ICalParser{
     }
 
 	@Override
-	public List<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
+	public ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return DefaultParseResult.emptyParseResult();
 	}
 
 	@Override
-	public List<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return Collections.emptyList();
+	public ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+		return DefaultParseResult.emptyParseResult();
 	}
 
 	@Override
 	public void setLimit(int amount) {
 		// Nothing to do
-		
+
 	}
 
 }

@@ -133,7 +133,7 @@ public abstract class ICalDataHandler implements DataHandler {
                     if (confirm == null) {
                         confirm = new Confirm(CalendarDataObject.ACCEPT, null);
                     } else {
-                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);                        
+                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
                     }
                     appointment.setObjectID(objectId);
                     appointment.setIgnoreConflicts(true);
@@ -253,7 +253,7 @@ public abstract class ICalDataHandler implements DataHandler {
     protected List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
         final InputStream inputStream = inputStreamCopy.getInputStream();
         try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
+            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }
@@ -262,7 +262,7 @@ public abstract class ICalDataHandler implements DataHandler {
     protected List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
         final InputStream inputStream = inputStreamCopy.getInputStream();
         try {
-            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
+            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
             Streams.close(inputStream);
         }

@@ -3524,6 +3524,20 @@ msgid ""
 "%2$s in folder %3$s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
+msgid "Could not create a proper name for the export file."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
+msgid "Not all of the objects could be imported due to a configured limitation"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
+msgid ""
+"%1$sd warnings when importing file and not all of the objects could be "
+"imported due to a configured limitation"
+msgstr ""
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -4719,6 +4733,22 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:100
 msgid "Invalid mail address for external participant: %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:102
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for appointments."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
+msgid ""
+"The conversion yields some objects which could not be stored due to missing "
+"folder for tasks."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
+msgid "The object could not be stored due to a configured limitation"
 msgstr ""
 
 #. You do not have a valid session. Please login again.

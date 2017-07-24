@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.Participant;
 
 public class Bug7470Test extends AbstractICalImportTest {
   //FIXME this one is still broken
-    
+
     //workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7470Test.class);
@@ -119,7 +119,7 @@ public class Bug7470Test extends AbstractICalImportTest {
 			"END:VCALENDAR";
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null).getImportResults();
 		assertEquals("One import?" , 1 , results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Shouldn't have error" , null, res.getException());

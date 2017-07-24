@@ -199,7 +199,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         .append("END:VCALENDAR\r\n")
                     .toString();
                     String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
-                    List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                    List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
                     if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
                         throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
                     }
@@ -793,7 +793,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 body = Streams.newByteArrayInputStream(iCal);
             }
             return factory.getIcalParser().parseAppointments(
-                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
         } finally {
             Streams.close(body);
         }
