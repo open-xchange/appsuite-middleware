@@ -57,9 +57,9 @@ package com.openexchange.chronos;
  */
 public enum BusyType {
 
-    BUSY("BUSY"),
-    BUSY_UNAVAILABLE("BUSY-UNAVAILABLE"),
     BUSY_TENTATIVE("BUSY-TENTATIVE"),
+    BUSY_UNAVAILABLE("BUSY-UNAVAILABLE"),
+    BUSY("BUSY"),
     ;
 
     private final String value;
