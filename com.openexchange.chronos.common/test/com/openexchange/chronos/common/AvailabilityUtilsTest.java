@@ -63,6 +63,7 @@ import com.openexchange.chronos.CalendarAvailability;
  */
 public class AvailabilityUtilsTest {
 
+    /** Base Interval: 17/11/2017 - 17/12/2017 */
     CalendarAvailability base = new CalendarAvailability();
 
     /**
@@ -144,5 +145,18 @@ public class AvailabilityUtilsTest {
 
         assertTrue(AvailabilityUtils.intersect(base, b));
         assertTrue(AvailabilityUtils.intersect(b, base));
+    }
+
+    /**
+     * Tests that the interval B is completely contained in the base interval
+     */
+    @Test
+    public void testContained() {
+        CalendarAvailability b = new CalendarAvailability();
+        b.setStartTime(new DateTime(2017, 12, 5));
+        b.setEndTime(new DateTime(2017, 12, 8));
+
+        assertTrue(AvailabilityUtils.contained(b.getStartTime(), b.getEndTime(), base.getStartTime(), base.getEndTime()));
+        assertFalse(AvailabilityUtils.contained(base.getStartTime(), base.getEndTime(), b.getStartTime(), b.getEndTime()));
     }
 }

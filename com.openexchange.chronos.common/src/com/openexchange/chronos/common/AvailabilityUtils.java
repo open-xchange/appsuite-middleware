@@ -119,7 +119,7 @@ public final class AvailabilityUtils {
     }
 
     /**
-     * Merge the stard and end times of the specified {@link CalendarFreeSlot}s
+     * Merge the start and end times of the specified {@link CalendarFreeSlot}s
      * 
      * @param a The {@link CalendarFreeSlot} A
      * @param b The {@link CalendarFreeSlot} B
