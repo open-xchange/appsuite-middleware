@@ -139,7 +139,9 @@ public class CreateSchemas extends DatabaseAbstraction {
 
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(successtext, null, e, parser);
+            System.err.println("Database schemas could not be created");
+            printServerException(e, parser);
+            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         }
 
     }
