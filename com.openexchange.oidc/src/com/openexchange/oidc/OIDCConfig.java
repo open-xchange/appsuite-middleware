@@ -70,18 +70,4 @@ public interface OIDCConfig {
      */
     Boolean startDefaultBackend();
     
-    /**
-     * Get the default scope of this feature.
-     * 
-     * @return The scope or an empty string. Never <code>null</code>.
-     */
-    String getScope();
-    
-    /**
-     * Get the default response type of this feature
-     * 
-     * @return The response type. Never <code>null</code>.
-     */
-    String getResponseType();
-    
 }

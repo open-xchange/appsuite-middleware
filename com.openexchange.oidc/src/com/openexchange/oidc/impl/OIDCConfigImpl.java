@@ -81,14 +81,4 @@ public class OIDCConfigImpl implements OIDCConfig{
     public Boolean startDefaultBackend() {
         return leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
     }
-    
-    @Override
-    public String getScope() {
-        return leanConfigurationService.getProperty(OIDCProperty.scope);
-    }
-
-    @Override
-    public String getResponseType() {
-        return leanConfigurationService.getProperty(OIDCProperty.responseType);
-    }
 }

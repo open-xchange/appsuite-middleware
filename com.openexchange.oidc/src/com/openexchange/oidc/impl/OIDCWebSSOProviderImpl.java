@@ -143,8 +143,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             AuthenticationRequest request = new AuthenticationRequest(
                 new URI(authorizationEndpoint),
-                new ResponseType(backend.getOIDCConfig().getResponseType()),
-                Scope.parse(backend.getOIDCConfig().getScope()),
+                new ResponseType(backend.getBackendConfig().getResponseType()),
+                Scope.parse(backend.getBackendConfig().getScope()),
                 new ClientID(backend.getBackendConfig().getClientID()),
                 new URI(redirectURI),
                 state,
@@ -226,35 +226,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return oidcValidator.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), null);
     }
     
-    private JSONObject getProviderRSAJWK(InputStream is) throws java.text.ParseException {
-        // Read all data from stream
-        StringBuilder sb = new StringBuilder();
-        try (Scanner scanner = new Scanner(is);) {
-          while (scanner.hasNext()) {
-            sb.append(scanner.next());
-          }
-        }
-
-        // Parse the data as json
-        String jsonString = sb.toString();
-        JSONObject json = JSONObjectUtils.parse(jsonString);
-
-        // Find the RSA signing key
-        JSONArray keyList = (JSONArray) json.get("keys");
-        for (Object key : keyList) {
-          JSONObject k = (JSONObject) key;
-          if (k.get("use").equals("sig") && k.get("kty").equals("RSA")) {
-            return k;
-          }
-        }
-        return null;
-      }
-
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
         // Construct the code grant from the code obtained from the authz endpoint
         // and the original callback URI used at the authz endpoint
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        // TODO QS-VS: URI für den callback vom idp konfigurieren
         URI callback = new URI(backend.getBackendConfig().getRedirectURI());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     

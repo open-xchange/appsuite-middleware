@@ -46,5 +46,15 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public String getJWSAlgortihm() {
         return leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
     }
+    
+    @Override
+    public String getScope() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.scope);
+    }
+
+    @Override
+    public String getResponseType() {
+        return leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
+    }
 
 }

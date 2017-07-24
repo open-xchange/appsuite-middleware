@@ -5,11 +5,8 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.Nonce;
@@ -47,7 +44,7 @@ public abstract class OIDCValidatorImpl implements OIDCValidator {
         return false;
     }
 
-    // TODO QS-VS: IDToken validieren
+    // TODO QS-VS: WICHTIG
     // Access und refresh muss nicht validiert werden
     // Oauth Tokens müssen mit in die Session, sind allerdings optional
     // IDToken muss ebenfalls an die Session gehangen werden
