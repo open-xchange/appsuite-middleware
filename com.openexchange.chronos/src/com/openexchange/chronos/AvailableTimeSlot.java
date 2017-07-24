@@ -104,4 +104,15 @@ public class AvailableTimeSlot {
         this.until = until;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AvailableTimeSlot [\n\tfrom=").append(from).append(", \n\tuntil=").append(until).append("\n]");
+        return builder.toString();
+    }
 }

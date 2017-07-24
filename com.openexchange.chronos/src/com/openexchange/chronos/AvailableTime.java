@@ -105,4 +105,16 @@ public class AvailableTime extends ArrayList<AvailableTimeSlot> {
     public void setBusyType(BusyType busyType) {
         this.busyType = busyType;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AvailableTime [userId=").append(userId).append(", busyType=").append(busyType).append(", \ntoString()=").append(super.toString()).append("]");
+        return builder.toString();
+    }
 }
