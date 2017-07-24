@@ -60,9 +60,9 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class DeleteEmptySchema extends DatabaseAbstraction {
+public class DeleteEmptySchemas extends DatabaseAbstraction {
 
-    public DeleteEmptySchema(final String[] args2) {
+    public DeleteEmptySchemas(final String[] args2) {
         final AdminParser parser = new AdminParser("deleteemptyschema");
         setOptions(parser);
 
@@ -79,8 +79,7 @@ public class DeleteEmptySchema extends DatabaseAbstraction {
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
             parseAndSetSchema(parser, db);
-
-            successtext = nameOrIdSet(this.dbid, this.dbname, "database schema");
+            parseAndSetSchemasToKeep(parser);
 
             oxutil.deleteSchema(db, auth);
 
@@ -99,15 +98,16 @@ public class DeleteEmptySchema extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new DeleteEmptySchema(args);
+        new DeleteEmptySchemas(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setDatabaseIDOption(parser);
-        setDatabaseNameOption(parser, NeededQuadState.eitheror);
+        setDatabaseIDOption(parser, NeededQuadState.notneeded, "The optional ID of a certain database host. If missing all database hosts are considered");
+        setDatabaseNameOption(parser, NeededQuadState.notneeded, "The optional name of a certain database host (as alternative for \"" + OPT_NAME_DATABASE_ID_LONG + "\" option). If missing all database hosts are considered");
 
-        setDatabaseSchemaOption(parser, true);
+        setDatabaseSchemaOption(parser, false);
+        setSchemasToKeepOption(parser);
     }
 }

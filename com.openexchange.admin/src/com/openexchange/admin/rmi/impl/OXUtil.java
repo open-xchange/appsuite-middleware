@@ -392,37 +392,30 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public void deleteSchema(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public int deleteSchemas(Database db, Integer optNumberOfSchemasToKeep, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        try {
-            doNullCheck(db);
-        } catch (final InvalidDataException e1) {
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
-        }
-
-        if (null == db.getScheme()) {
-            throw new InvalidDataException("Schema not specified");
+        
+        if (null != db) {
+            try {
+                setIdOrGetIDFromNameAndIdObject(null, db);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchDatabaseException(e);
+            }
         }
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db.toString());
+        Database existing = null == db ? null : tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
 
-        try {
-            setIdOrGetIDFromNameAndIdObject(null, db);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchDatabaseException(e);
+        if (null != db && null != db.getScheme()) {
+            if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
+                throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+            }
+            existing.setScheme(db.getScheme());
         }
 
-        Database existing = tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
-
-        if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
-            throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
-        }
-
-        existing.setScheme(db.getScheme());
-        oxutil.deleteDatabaseSchema(existing);
+        int iOptNumberOfSchemasToKeep = null != optNumberOfSchemasToKeep ? optNumberOfSchemasToKeep.intValue() : 0;
+        oxutil.deleteDatabaseSchema(existing, iOptNumberOfSchemasToKeep);
     }
 
     @Override

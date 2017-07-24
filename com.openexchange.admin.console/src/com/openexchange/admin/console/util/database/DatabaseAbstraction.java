@@ -122,6 +122,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_LONG = "userdb-schema-count";
 
+    protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG = "schemas-to-keep";
+
     protected final static String OPT_NAME_SCHEMA_LONG = "schema";
 
     protected CLIOption databaseIdOption = null;
@@ -155,6 +157,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected CLIOption createSchemasOption = null;
 
     protected CLIOption numberOfSchemasOption = null;
+    
+    protected CLIOption schemasToKeepOption = null;
 
     // Needed for right error output
     protected String dbid = null;
@@ -162,6 +166,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected Boolean createSchemas;
     protected Integer numberOfSchemas;
+    
+    protected Integer schemasToKeep;
 
     protected void parseAndSetCreateAndNumberOfSchemas(final AdminParser parser) throws InvalidDataException {
         String tmp = (String) parser.getOptionValue(this.createSchemasOption);
@@ -200,6 +206,19 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
                 numberOfSchemas = Integer.valueOf(tmp.trim());
             } catch (NumberFormatException e) {
                 throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option. Should be a number.", e);
+            }
+        }
+    }
+    
+    protected void parseAndSetSchemasToKeep(final AdminParser parser) throws InvalidDataException {
+        String tmp = (String) parser.getOptionValue(this.schemasToKeepOption);
+        if (Strings.isEmpty(tmp)) {
+            schemasToKeep = Integer.valueOf(0);
+        } else {
+            try {
+                schemasToKeep = Integer.valueOf(tmp.trim());
+            } catch (NumberFormatException e) {
+                throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG + "\" option. Should be a number.", e);
             }
         }
     }
@@ -332,15 +351,17 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected void setNumberOfSchemasOption(final AdminParser parser) {
         this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
     }
-
+    
+    protected void setSchemasToKeepOption(final AdminParser parser) {
+        this.schemasToKeepOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG, "(Optionally) Specifies the number of empty schemas that are supposed to be kept (per database host). If missing, all empty schemas are attempted to be deleted. Ineffective if \"" + OPT_NAME_SCHEMA_LONG + "\" option is specified", true, false);
+    }
+    
     protected void setDatabaseIDOption(final AdminParser parser) {
-        this.databaseIdOption = setShortLongOpt(
-            parser,
-            OPT_NAME_DATABASE_ID_SHORT,
-            OPT_NAME_DATABASE_ID_LONG,
-            "The id of the database.",
-            true,
-            NeededQuadState.eitheror);
+        setDatabaseIDOption(parser, NeededQuadState.eitheror, "The id of the database.");
+    }
+
+    protected void setDatabaseIDOption(final AdminParser parser, NeededQuadState state, String description) {
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, description, true, state);
     }
 
     protected void setDatabaseSchemaOption(final AdminParser parser) {
@@ -529,13 +550,11 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     }
 
     protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required) {
-        this.databaseNameOption = setShortLongOpt(
-            parser,
-            OPT_NAME_DBNAME_SHORT,
-            OPT_NAME_DBNAME_LONG,
-            "Name of the database",
-            true,
-            required);
+        setDatabaseNameOption(parser, required, "Name of the database");
+    }
+
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required, String description) {
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT, OPT_NAME_DBNAME_LONG, description, true, required);
     }
 
     @Override

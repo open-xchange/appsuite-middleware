@@ -399,9 +399,11 @@ public abstract class OXUtilStorageInterface {
      * Deletes specified empty schema from given database host.
      *
      * @param db A database host and schema
+     * @param optNumberOfSchemasToKeep Specifies the number of schemas to keep (per database); if not specified all empty schemas are supposed to be deleted
+     * @return The number of empty chmeas that were deleted
      * @throws StorageException If schema cannot be deleted
      */
-    public abstract void deleteDatabaseSchema(Database db) throws StorageException;
+    public abstract int deleteDatabaseSchema(Database db, int optNumberOfSchemasToKeep) throws StorageException;
 
     /**
      * Creates a new database from scratch on the given database host. Is used

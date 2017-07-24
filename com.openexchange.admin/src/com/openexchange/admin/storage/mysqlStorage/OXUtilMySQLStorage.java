@@ -1056,13 +1056,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public void deleteDatabaseSchema(Database db) throws StorageException {
-        if (null == db.getId()) {
-            throw new StorageException("ID not set in given Database instance");
+    public int deleteDatabaseSchema(Database db, int optNumberOfSchemasToKeep) throws StorageException {
+        if (null != db) {
+            
         }
-        if (null == db.getScheme()) {
-            throw new StorageException("Schema not set in given Database instance");
-        }
+        
+        
 
         Connection con = null;
         boolean rollback = false;
