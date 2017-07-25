@@ -415,6 +415,7 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
      * @param requestPacket The request package
      */
     protected void handleHandshakeException(HandshakeException e, ProtocolHandler handler, HttpRequestPacket requestPacket) {
+        LOGGER.debug("Failed to establish Web Socket connection", e);
         FilterChainContext ctx = handler.getFilterChainContext();
         HttpResponsePacket response = requestPacket.getResponse();
         response.setProtocol(Protocol.HTTP_1_1);
