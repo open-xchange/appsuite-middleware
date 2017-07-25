@@ -47,26 +47,25 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.snippet;
 
+import com.openexchange.exception.OXException;
 
 /**
- * A {@link Quota} can denote a number of items or a size of items.
+ * {@link QuotaAwareSnippetManagement}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum QuotaType {
+public interface QuotaAwareSnippetManagement {
 
     /**
-     * The quota for number of items.
+     * Retrieves the current usage.
+     *
+     * @param shared A flag indicating whether shared or not shared snippets should be calculated.
+     * @return The usage in bytes
+     * @throws OXException if the usage can't be retrieved
      */
-    AMOUNT,
-    /**
-     * The quota for size of items.
-     */
-    SIZE,
-    /**
-     * A custom quota in case {@link QuotaType#AMOUNT} and {@link QuotaType#SIZE} are not sufficient.
-     */
-    CUSTOM
+    public long getUsage(boolean shared) throws OXException;
+
 }

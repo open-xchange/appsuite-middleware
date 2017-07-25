@@ -47,26 +47,37 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.snippet.mime.groupware;
 
+import com.openexchange.java.Strings;
 
 /**
- * A {@link Quota} can denote a number of items or a size of items.
+ * {@link QuotaMode}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum QuotaType {
+public enum QuotaMode {
 
-    /**
-     * The quota for number of items.
-     */
-    AMOUNT,
-    /**
-     * The quota for size of items.
-     */
-    SIZE,
-    /**
-     * A custom quota in case {@link QuotaType#AMOUNT} and {@link QuotaType#SIZE} are not sufficient.
-     */
-    CUSTOM
+    CONTEXT("context"),
+    INDEPENDENT("independent");
+
+    private final String name;
+
+    QuotaMode(String name){
+       this.name=name;
+    }
+
+    public static QuotaMode getModeByName(String name){
+        if(Strings.isEmpty(name)){
+            return CONTEXT;
+        }
+        for(QuotaMode mode: QuotaMode.values()){
+            if(mode.name.equalsIgnoreCase(name) || mode.name().equalsIgnoreCase(name)){
+                return mode;
+            }
+        }
+        return CONTEXT;
+    }
+
 }

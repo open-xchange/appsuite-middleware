@@ -78,6 +78,11 @@ public class Quota {
      */
     public static final Quota UNLIMITED_SIZE = new Quota(QuotaType.SIZE, UNLIMITED, 0);
 
+    /**
+     * Represents an unlimited quota of type {@link QuotaType#CUSTOM}.
+     */
+    public static final Quota UNLIMITED_CUSTOM = new Quota(QuotaType.CUSTOM, UNLIMITED, 0);
+
     private final QuotaType type;
 
     private final long usage;

@@ -47,26 +47,61 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.snippet.mime.groupware;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.snippet.mime.Services;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * A {@link Quota} can denote a number of items or a size of items.
+ * {@link SnippetSizeColumnUpdateTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum QuotaType {
+public class SnippetSizeColumnUpdateTask implements UpdateTaskV2 {
 
-    /**
-     * The quota for number of items.
-     */
-    AMOUNT,
-    /**
-     * The quota for size of items.
-     */
-    SIZE,
-    /**
-     * A custom quota in case {@link QuotaType#AMOUNT} and {@link QuotaType#SIZE} are not sufficient.
-     */
-    CUSTOM
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        int contextID = params.getContextId();
+        Connection connnection = dbService.getForUpdateTask(contextID);
+        Column sizeColumn = new Column("size", "int(10) unsigned DEFAULT NULL");
+        try {
+            connnection.setAutoCommit(false);
+            Tools.checkAndAddColumns(connnection, "snippet", sizeColumn);
+            connnection.commit();
+        } catch (SQLException e) {
+            Databases.rollback(connnection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            Databases.rollback(connnection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.autocommit(connnection);
+            dbService.backForUpdateTask(connnection);
+        }
+
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[]{"com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask"};
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes();
+    }
+
 }
