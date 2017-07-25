@@ -50,17 +50,24 @@ package com.openexchange.oidc.spi;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -105,8 +112,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
     public ClientAuthentication getClientAuthentication() {
-        ClientID clientID = new ClientID(getBackendConfig().getClientID());
-        Secret clientSecret = new Secret(getBackendConfig().getClientSecret());
+        ClientID clientID = new ClientID(this.getBackendConfig().getClientID());
+        Secret clientSecret = new Secret(this.getBackendConfig().getClientSecret());
         return new ClientSecretBasic(clientID, clientSecret);
     }
     
@@ -132,7 +139,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         JWSAlgorithm algorithm = JWSAlgorithm.RS256;
         String algorithmString = this.getBackendConfig().getJWSAlgortihm();
         if (algorithmString != null && !algorithmString.isEmpty()) {
-            algorithm = getAlgorithmFromString(algorithmString);
+            algorithm = this.getAlgorithmFromString(algorithmString);
         }
         return algorithm;
     }
@@ -143,5 +150,26 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_JWS_ALGORITHM.create(algorithmString);
         }
         return algorithm;
+    }
+    
+    @Override
+    public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder) {
+        return requestBuilder.build();
+    }
+    
+    @Override
+    public boolean validateIdToken(JWT idToken, String nonce) throws OXException {
+        JWKSet jwkSet = this.getJwkSet();
+        JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
+
+        IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(""), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, jwkSet);
+        try {
+            idTokenValidator.validate(idToken, new Nonce(nonce));
+        } catch (BadJOSEException e) {
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
+        } catch (JOSEException e) {
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
+        }
+        return true;
     }
 }

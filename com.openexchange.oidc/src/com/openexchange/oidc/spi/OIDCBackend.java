@@ -51,9 +51,12 @@ package com.openexchange.oidc.spi;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
@@ -98,5 +101,9 @@ public interface OIDCBackend {
     JWKSet getJwkSet() throws OXException;
 
     JWSAlgorithm getJWSAlgorithm() throws OXException;
+
+    AuthorizationRequest getAuthorisationRequest(Builder requestBuilder);
+    
+    public boolean validateIdToken(JWT idToken, String nonce) throws OXException;
 
 }

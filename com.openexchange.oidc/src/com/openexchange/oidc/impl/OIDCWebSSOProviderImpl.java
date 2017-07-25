@@ -49,17 +49,13 @@
 package com.openexchange.oidc.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -71,15 +67,11 @@ import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
-import com.nimbusds.oauth2.sdk.token.Tokens;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
@@ -94,9 +86,6 @@ import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
-import com.openexchange.oidc.tools.OIDCValidator;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -110,14 +99,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
-    private final OIDCValidator oidcValidator;
     
     
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, OIDCValidator oidcValidator) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
-        this.oidcValidator = oidcValidator;
     }
     
     @Override
@@ -132,7 +119,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         
         addRequestToStateManager(httpRequest, state, nonce);
-        
         return requestString;
     }
     
@@ -141,15 +127,20 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String authorizationEndpoint = backend.getBackendConfig().getAuthorizationEndpoint();
         String redirectURI = backend.getBackendConfig().getRedirectURI();
         try {
-            AuthenticationRequest request = new AuthenticationRequest(
-                new URI(authorizationEndpoint),
-                new ResponseType(backend.getBackendConfig().getResponseType()),
-                Scope.parse(backend.getBackendConfig().getScope()),
-                new ClientID(backend.getBackendConfig().getClientID()),
-                new URI(redirectURI),
-                state,
-                nonce);
-            requestString = request.toURI().toString();
+            Builder requestBuilder = new Builder(new ResponseType(backend.getBackendConfig().getResponseType()), Scope.parse(backend.getBackendConfig().getScope()), new ClientID(backend.getBackendConfig().getClientID()), new URI(redirectURI));
+            requestBuilder.nonce(nonce);
+            requestBuilder.state(state);
+            requestBuilder.endpointURI(new URI(authorizationEndpoint));
+            //TODO QS-VS: remove
+//            AuthenticationRequest request = new AuthenticationRequest(
+//                new URI(authorizationEndpoint),
+//                new ResponseType(backend.getBackendConfig().getResponseType()),
+//                Scope.parse(backend.getBackendConfig().getScope()),
+//                new ClientID(backend.getBackendConfig().getClientID()),
+//                new URI(redirectURI),
+//                state,
+//                nonce);
+            requestString = backend.getAuthorisationRequest(requestBuilder).toURI().toString();
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.CORRUPTED_URI.create(e, authorizationEndpoint, redirectURI);
         }
@@ -223,7 +214,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private boolean validTokenResponse(OIDCTokenResponse tokenResponse) throws OXException {
-        return oidcValidator.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), null);
+        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), null);
     }
     
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
