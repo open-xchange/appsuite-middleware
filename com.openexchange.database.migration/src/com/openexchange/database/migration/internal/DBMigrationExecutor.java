@@ -250,7 +250,7 @@ public class DBMigrationExecutor implements Runnable {
                 LOG.warn("", e);
             }
             if (null != connection) {
-                connectionProvider.back(connection);
+                connectionProvider.backAfterReading(connection);
             }
         }
         return true;
