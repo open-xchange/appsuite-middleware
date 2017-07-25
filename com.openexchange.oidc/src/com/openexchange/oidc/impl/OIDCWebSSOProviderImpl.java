@@ -113,7 +113,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         State state = new State();
         Nonce nonce = new Nonce();
         
-        String requestString = getRequestString(state, nonce);
+        String requestString = getRequestString(state, nonce, httpRequest);
         
         if (requestString.isEmpty()) {
             throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
@@ -123,7 +123,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return requestString;
     }
     
-    private String getRequestString(State state, Nonce nonce) throws OXException {
+    private String getRequestString(State state, Nonce nonce, HttpServletRequest httpRequest) throws OXException {
         String requestString = "";
         OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
         String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
@@ -142,7 +142,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 //                new URI(redirectURI),
 //                state,
 //                nonce);
-            requestString = this.backend.getAuthorisationRequest(requestBuilder).toURI().toString();
+            requestString = this.backend.getAuthorisationRequest(requestBuilder, httpRequest).toURI().toString();
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.CORRUPTED_URI.create(e, authorizationEndpoint, redirectURI);
         }

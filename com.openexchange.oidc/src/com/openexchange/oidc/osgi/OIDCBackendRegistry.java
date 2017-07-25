@@ -66,6 +66,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
+import com.openexchange.oidc.http.AuthenticationService;
 import com.openexchange.oidc.http.InitService;
 import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
@@ -117,6 +118,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, this.services, config), "init");
+                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
                 
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
@@ -130,14 +132,14 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                         pop.unregister();
                     }
                 }
-                backends.remove(oidcBackend);
-                context.ungetService(reference);
+                this.backends.remove(oidcBackend);
+                this.context.ungetService(reference);
             } finally {
                 if (!servlets.isEmpty()) {
-                    backendServlets.putIfAbsent(oidcBackend, servlets);
+                    this.backendServlets.putIfAbsent(oidcBackend, servlets);
                 }
                 if (!serviceRegistrations.isEmpty()) {
-                    backendServiceRegistrations.putIfAbsent(oidcBackend, serviceRegistrations);
+                    this.backendServiceRegistrations.putIfAbsent(oidcBackend, serviceRegistrations);
                 }
 
             }

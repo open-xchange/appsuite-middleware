@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.spi;
 
+import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
@@ -102,7 +103,7 @@ public interface OIDCBackend {
 
     JWSAlgorithm getJWSAlgorithm() throws OXException;
 
-    AuthorizationRequest getAuthorisationRequest(Builder requestBuilder);
+    AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest);
     
     public boolean validateIdToken(JWT idToken, String nonce) throws OXException;
 

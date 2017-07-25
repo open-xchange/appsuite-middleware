@@ -50,6 +50,7 @@ package com.openexchange.oidc.spi;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -153,7 +154,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
     
     @Override
-    public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder) {
+    public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest) {
         return requestBuilder.build();
     }
     

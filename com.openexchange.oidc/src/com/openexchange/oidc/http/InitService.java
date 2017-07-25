@@ -95,25 +95,20 @@ public class InitService extends OIDCServlet {
     @Override
     protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
         String flow = httpRequest.getParameter("flow");
-        String action = httpRequest.getParameter("action");
         if (!validateFlow(flow)) {
             httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (flow.equals("login") && action != null && action.equals("code_return")) {
-            try {
-                provider.authenticateUser(httpRequest);
-                String redirectURI = getRedirectURI(flow, httpRequest);
-                buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
-            } catch (OXException e) {
-                //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
-            }
+        try {
+            String redirectURI = this.getRedirectURI(flow, httpRequest);
+            buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
+        } catch (OXException e) {
+            //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
         }
     }
 
     private String getRedirectURI(String flow, HttpServletRequest httpRequest) throws OXException {
         String redirectUri = "";
-
         if (flow.equals("login")) {
             redirectUri = provider.getLoginRedirectRequest(httpRequest);
         }
