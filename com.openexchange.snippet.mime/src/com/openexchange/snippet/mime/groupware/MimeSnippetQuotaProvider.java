@@ -63,6 +63,8 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.QuotaAwareSnippetManagement;
+import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.Services;
 
@@ -76,6 +78,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
 
     private static final String MODULE_ID = "mime_snippet";
     private static final String PROP_NAME = "com.openexchange.snippet.quota.limit";
+    private static final String USER_LIMIT_PROPERTY = "com.openexchange.snippet.filestore.quota.perUserLimit";
 
     private final AtomicReference<SnippetService> snippetServiceRef;
 
@@ -115,6 +118,21 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
+    private Quota getSizeQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
+        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, USER_LIMIT_PROPERTY, viewFactory, 5242880);
+        if (limit <= Quota.UNLIMITED) {
+            return Quota.UNLIMITED_SIZE;
+        }
+
+        SnippetManagement management = snippetServiceRef.get().getManagement(session);
+        long usage = 0;
+        if(management instanceof QuotaAwareSnippetManagement){
+            usage = ((QuotaAwareSnippetManagement) management).getUsage();
+        }
+
+        return new Quota(QuotaType.SIZE, limit, usage);
+    }
+
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
         if (!accountID.equals("0")) {
@@ -127,7 +145,8 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         }
 
         Quota amountQuota = getAmountQuota(session, viewFactory);
-        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota);
+        Quota sizeQuota = getSizeQuota(session, viewFactory);
+        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota).addQuota(sizeQuota);
     }
 
     @Override

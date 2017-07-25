@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
-import com.openexchange.snippet.SnippetImageDataSource;
+import com.openexchange.snippet.utils.SnippetImageDataSource;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

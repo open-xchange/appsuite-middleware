@@ -187,6 +187,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.mime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.socketio"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.startup.impl"/>

@@ -50,13 +50,13 @@
 package com.openexchange.snippet.mime;
 
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
-import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.io.ByteArrayOutputStream;
+import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +67,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -87,8 +88,12 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
@@ -98,10 +103,15 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -111,26 +121,54 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
-import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
+import com.openexchange.snippet.QuotaAwareSnippetManagement;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetUtils;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 
 /**
  * {@link MimeSnippetManagement}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeSnippetManagement implements SnippetManagement {
+public final class MimeSnippetManagement implements QuotaAwareSnippetManagement {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
+    private static final String QUOTA_MODE_PROPERTY = "com.openexchange.snippet.filestore.quota.mode";
+
+    private static volatile QuotaMode MODE;
+
+    /**
+     * Retrieves the configured {@link QuotaMode}
+     *
+     * @return The {@link QuotaMode}
+     */
+    static QuotaMode getMode() {
+        QuotaMode tmp = MODE;
+        if (null == tmp) {
+            synchronized (MimeSnippetManagement.class) {
+                tmp = MODE;
+                if (null == tmp) {
+                    ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        return QuotaMode.CONTEXT;
+                    }
+
+                    tmp = QuotaMode.getModeByName(configurationService.getProperty(QUOTA_MODE_PROPERTY, QuotaMode.CONTEXT.getName()));
+                    MODE = tmp;
+                    LOGGER.info("Using '" + tmp.getName() + "' as the filestore quota mode for snippets.");
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * The file storage reference type identifier: <b><code>1</code></b>.
@@ -163,8 +201,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return getService(IDGeneratorService.class);
     }
 
-    private static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
+    private static FileStorage getFileStorage(int contextId) throws OXException {
+        if (QuotaMode.CONTEXT.equals(MODE)) {
+            return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
+        }
+
+        URI uri = FileStorages.getQuotaFileStorageService().getFileStorageUriFor(-1, contextId);
+        return FileStorages.getFileStorageService().getFileStorage(uri);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +267,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             do {
                 ids.add(rs.getString(1));
             } while (rs.next());
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
             if (ids.isEmpty()) {
@@ -239,14 +282,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
                         throw e;
                     }
 
-                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, userId, contextId, e);
+                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }
             }
             return list;
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -269,7 +312,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -295,7 +338,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             do {
                 ids.add(rs.getString(1));
             } while (rs.next());
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
             if (ids.isEmpty()) {
@@ -315,7 +358,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -368,13 +411,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 module = rs.getString(4);
                 type = rs.getString(5);
                 shared = rs.getInt(6) > 0;
-                closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
             }
-            MimeMessage mimeMessage = createMimeMessage(identifier, file);
-            com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
-            return createSnippet(identifier, creator, displayName, module, type, shared, mimeMessage);
+            Pair<MimeMessage, Long> messageAndSize = createMimeMessage(identifier, file);
+            com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(messageAndSize.getFirst());
+            return createSnippet(identifier, creator, displayName, module, type, shared, messageAndSize.getFirst());
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
@@ -384,7 +427,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -417,27 +460,57 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return snippet;
     }
 
-    private MimeMessage createMimeMessage(String identifier, final String file) throws MessagingException, OXException {
-        MimeMessage mimeMessage;
-        {
-            InputStream in = null;
-            try {
-                QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
-                in = fileStorage.getFile(file);
-                mimeMessage = new MimeMessage(getDefaultSession(), in);
-            } catch (OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
-            } finally {
-                Streams.close(in);
+    private Pair<MimeMessage, Long> createMimeMessage(String identifier, String file) throws OXException {
+        InputStream in = null;
+        try {
+            FileStorage fileStorage = getFileStorage(session.getContextId());
+            in = fileStorage.getFile(file);
+            return newMimeMessage(in);
+        } catch (OXException e) {
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
             }
+            throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+        } finally {
+            Streams.close(in);
         }
-        return mimeMessage;
     }
 
-    private static void parsePart(MimePart part, DefaultSnippet snippet) throws OXException, MessagingException, IOException {
+    private static Pair<MimeMessage, Long> newMimeMessage(InputStream is) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = null;
+        boolean closeSink = false;
+        try {
+            sink = new ThresholdFileHolder();
+            closeSink = true;
+
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            Long size = Long.valueOf(sink.getLength());
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null);
+            }
+            closeSink = false;
+            return new Pair<MimeMessage, Long>(tmp, size);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
+            }
+        }
+    }
+
+    private static void parsePart(MimePart part, DefaultSnippet snippet) throws OXException, MessagingException {
         String header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         if (contentType.startsWith("text/javascript")) {
@@ -499,11 +572,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
             }
         }
-
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
+        boolean backAfterRead=false;
         try {
             final MimeMessage mimeMessage = new MimeMessage(getDefaultSession());
             mimeMessage.setHeader(Property.CREATED_BY.getPropName(), Integer.toString(userId));
@@ -561,22 +634,32 @@ public final class MimeSnippetManagement implements SnippetManagement {
             mimeMessage.removeHeader("Message-ID");
             mimeMessage.removeHeader("MIME-Version");
             // Save MIME content to file storage
-            QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+            FileStorage fileStorage = getFileStorage(session.getContextId());
             String file;
+            long size = -1L;
             {
-                InputStream mimeStream = null;
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 try {
-                    mimeStream = MimeMessageUtility.getStreamFromPart(mimeMessage);
-                    file = fileStorage.saveNewFile(mimeStream);
+                    mimeMessage.writeTo(fileHolder.asOutputStream());
+                    size = fileHolder.getLength();
+                    if (QuotaMode.DEDICATED.equals(getMode()) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                            Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                            if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
+                                backAfterRead = true;
+                                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
+                            }
+                    }
+                    file = fileStorage.saveNewFile(fileHolder.getClosingStream());
                 } finally {
-                    Streams.close(mimeStream);
+                    fileHolder.close();
                 }
             }
             // Store in DB, too
-            String newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
+            String newId = null;
             boolean error = true;
             try {
-                stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
+                newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
+                stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ", ?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setString(3, newId);
@@ -594,6 +677,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 stmt.setInt(8, snippet.isShared() ? 1 : 0);
                 stmt.setLong(9, System.currentTimeMillis());
                 stmt.setString(10, file);
+                if (size > 0) {
+                    stmt.setLong(11, size);
+                } else {
+                    stmt.setNull(11, Types.INTEGER);
+                }
                 stmt.executeUpdate();
                 error = false;
             } finally {
@@ -614,9 +702,17 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
+            Databases.closeSQLStuff(stmt);
+            if(backAfterRead){
+                databaseService.backWritableAfterReading(contextId, con);
+            }else {
+                databaseService.backWritable(contextId, con);
+            }
         }
+    }
+
+    private int toMB(long bytes){
+        return (int) Math.floor(bytes / 1048576);
     }
 
     @Override
@@ -624,9 +720,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
         if (null == identifier) {
             return null;
         }
+        AccountQuota quota = getQuota();
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
-        final QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+        final FileStorage fileStorage = getFileStorage(session.getContextId());
         boolean error = true;
         String oldFile = null;
         String newFile = null;
@@ -636,12 +733,13 @@ public final class MimeSnippetManagement implements SnippetManagement {
             final String module;
             final String type;
             final boolean shared;
+            final long oldSize;
             {
                 final Connection con = databaseService.getReadOnly(contextId);
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT refId, displayName, module, type, shared FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                    stmt = con.prepareStatement("SELECT refId, displayName, module, type, shared, size FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
                     stmt.setString(++pos, identifier);
@@ -657,8 +755,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     module = rs.getString(3);
                     type = rs.getString(4);
                     shared = rs.getInt(5) > 0;
+                    oldSize = rs.getLong(6);
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     databaseService.backReadOnly(contextId, con);
                 }
             }
@@ -879,17 +978,27 @@ public final class MimeSnippetManagement implements SnippetManagement {
             updateMessage.removeHeader("Message-ID");
             updateMessage.removeHeader("MIME-Version");
 
-            // ... and write to byte array
-            byte[] byteArray;
-            {
-                final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
-                updateMessage.writeTo(outputStream);
-                byteArray = outputStream.toByteArray();
+            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            long size = 0;
+            try {
+                updateMessage.writeTo(fileHolder.asOutputStream());
+                size = fileHolder.getLength();
+                if (QuotaMode.DEDICATED.equals(getMode()) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                    long difference = size - oldSize;
+                    if (difference > 0) {
+                        Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(difference)) {
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
+                        }
+                    }
+                }
+
+                // Create file carrying new MIME data
+                newFile = fileStorage.saveNewFile(fileHolder.getClosingStream());
+            } finally {
+                fileHolder.close();
             }
 
-            // Create file carrying new MIME data
-            newFile = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray), byteArray.length);
-            byteArray = null; // Drop immediately
             {
                 Connection con = databaseService.getWritable(contextId);
                 PreparedStatement stmt = null;
@@ -905,7 +1014,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     final String dummyId = "--" + identifier;
                     con.setAutoCommit(false); // BEGIN
                     rollback = true;
-                    stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ")");
+                    stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ", ?)");
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
                     stmt.setInt(++pos, userId);
@@ -924,15 +1033,20 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setInt(++pos, properties.contains(Property.SHARED) ? (snippet.isShared() ? 1 : 0) : (shared ? 1 : 0));
                     stmt.setLong(++pos, System.currentTimeMillis());
                     stmt.setString(++pos, newFile);
+                    if (size > 0) {
+                        stmt.setLong(++pos, size);
+                    } else {
+                        stmt.setNull(++pos, Types.INTEGER);
+                    }
                     stmt.executeUpdate();
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
                     pos = 0;
                     stmt.setLong(++pos, contextId);
                     stmt.setLong(++pos, userId);
                     stmt.setString(++pos, identifier);
                     stmt.executeUpdate();
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement("UPDATE snippet SET id=? WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
                     pos = 0;
                     stmt.setString(++pos, identifier);
@@ -944,10 +1058,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     rollback = false;
                 } finally {
                     if (rollback) {
-                        DBUtils.rollback(con);
+                        Databases.rollback(con);
                     }
-                    closeSQLStuff(stmt);
-                    DBUtils.autocommit(con);
+                    Databases.closeSQLStuff(stmt);
+                    Databases.autocommit(con);
                     databaseService.backWritable(contextId, con);
                 }
             }
@@ -1002,7 +1116,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return set;
     }
 
-    private static void deleteSafe(String file, QuotaFileStorage fileStorage) {
+    private static void deleteSafe(String file, FileStorage fileStorage) {
         if (null == file) {
             return;
         }
@@ -1100,12 +1214,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
                 }
                 file = rs.getString(1);
-                closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
             }
 
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final FileStorage fileStorage = getFileStorage(contextId);
             deleteSafe(file, fileStorage);
             stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
             int pos = 0;
@@ -1118,7 +1232,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (RuntimeException e) {
             throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -1171,4 +1285,89 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return new ContentType(ct).getSubType();
     }
+
+    @Override
+    public long getUsage() throws OXException {
+        DatabaseService databaseService = getDatabaseService();
+
+        Map<String, String> reload = null;
+        long currentUsage = 0;
+        {
+            Connection con = databaseService.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND refType=" + FS_TYPE);
+                int pos = 0;
+                stmt.setInt(++pos, contextId);
+                stmt.setInt(++pos, userId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
+                }
+
+                do {
+                    long size = rs.getLong(2); // If the value is SQL NULL, the value returned is 0
+                    if (rs.wasNull()) {
+                        if (reload == null) {
+                            reload = new HashMap<>();
+                        }
+                        String snippetId = rs.getString(1);
+                        String fileStoreLocation = rs.getString(3);
+                        reload.put(snippetId, fileStoreLocation);
+                    } else {
+                        currentUsage += size;
+                    }
+                } while (rs.next());
+            } catch (final SQLException e) {
+                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(contextId, con);
+            }
+        }
+
+        // Check if there are entries, which are required to be reloaded
+        if (null != reload) {
+            QuotaFileStorage quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
+
+            Connection writeCon = databaseService.getWritable(contextId);
+            boolean onlyRead = true;
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("UPDATE snippet SET size=? WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+
+                for (Map.Entry<String, String> entry : reload.entrySet()) {
+                    String id = entry.getKey();
+                    String fileId = entry.getValue();
+
+                    // Get current file size from file-storage & add to batch statement
+                    long fileSize = quotaFileStorage.getFileSize(fileId);
+                    stmt.setLong(1, fileSize);
+                    stmt.setString(4, id);
+                    stmt.addBatch();
+                    onlyRead = false;
+
+                    // Add to current usage as well
+                    currentUsage += fileSize;
+                }
+
+                stmt.executeBatch();
+            } catch (final SQLException e) {
+                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (onlyRead) {
+                    databaseService.backWritableAfterReading(contextId, writeCon);
+                } else {
+                    databaseService.backWritable(contextId, writeCon);
+                }
+            }
+        }
+
+        return currentUsage;
+    }
+
 }

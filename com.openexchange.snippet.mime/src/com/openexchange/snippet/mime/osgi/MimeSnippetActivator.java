@@ -67,12 +67,14 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
 import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
 import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
 import com.openexchange.snippet.mime.groupware.MimeSnippetQuotaProvider;
+import com.openexchange.snippet.mime.groupware.SnippetSizeColumnUpdateTask;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
  * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.
@@ -123,6 +125,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
              */
             final MimeSnippetCreateTableTask createTableTask = new MimeSnippetCreateTableTask();
             registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(new SnippetSizeColumnUpdateTask()));
             registerService(CreateTableService.class, createTableTask);
             registerService(DeleteListener.class, new MimeSnippetDeleteListener());
             /*
@@ -134,6 +137,10 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registerService(SnippetService.class, snippetService, properties);
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
+            registerService(QuotaAwareSnippetService.class, snippetService, properties);
 
             quotaProvider.setSnippetService(snippetService);
             registerService(QuotaProvider.class, quotaProvider);

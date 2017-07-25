@@ -76,11 +76,11 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.DefaultSnippet;
-import com.openexchange.snippet.SnippetProcessor;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetRequest;
+import com.openexchange.snippet.DefaultSnippet;
+import com.openexchange.snippet.utils.SnippetProcessor;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
