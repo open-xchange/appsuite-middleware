@@ -20,7 +20,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       system integration specific infrastructure
+Summary:       System integration specific infrastructure
 Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
 %if 0%{?suse_version} && 0%{?suse_version} <= 1210
