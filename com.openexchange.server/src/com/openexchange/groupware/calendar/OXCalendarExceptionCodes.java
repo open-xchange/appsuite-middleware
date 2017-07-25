@@ -509,6 +509,10 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Unknown recurrence type: %1$d
      */
     UNKNOWN_RECURRENCE_TYPE(OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_TYPE_MSG, 109, Category.CATEGORY_USER_INPUT),
+    /**
+     * The calendar is currently under maintenance. Please try again later.
+     */
+    CALENDAR_MAINTENANCE(OXCalendarExceptionMessage.CALENDAR_MAINTENANCE_MSG, OXCalendarExceptionMessage.CALENDAR_MAINTENANCE_MSG, 112, Category.CATEGORY_SERVICE_DOWN),
 
     ;
 

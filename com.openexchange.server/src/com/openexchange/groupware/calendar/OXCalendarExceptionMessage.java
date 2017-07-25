@@ -212,4 +212,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String RECURRING_FOLDER_MOVE_MSG = "Moving a recurring appointment to another folder is not supported.";
 
+    /**
+     * The calendar is currently under maintenance. Please try again later.
+     */
+    public static final String CALENDAR_MAINTENANCE_MSG = "The calendar is currently under maintenance. Please try again later.";
+
 }
