@@ -40,7 +40,7 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
     }
 
     public AuthenticationRequestInfo getDelegate() {
-        return delegate;
+        return this.delegate;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         DefaultAuthenticationRequestInfo authenticationInfo = new DefaultAuthenticationRequestInfo(new State(reader.readUTF(STATE)), 
-            reader.readUTF(DOMAINNAME), reader.readUTF(DEEPLINK), new Nonce(reader.readUTF(NONCE)), getMapFromArray(reader.readUTFArray(UI_CLIENT_INFORMATION)), reader.readUTF(UI_CLIENT_ID));
+            reader.readUTF(DOMAINNAME), reader.readUTF(DEEPLINK), new Nonce(reader.readUTF(NONCE)), this.getMapFromArray(reader.readUTFArray(UI_CLIENT_INFORMATION)), reader.readUTF(UI_CLIENT_ID));
         setDelegate(authenticationInfo);
     }
 

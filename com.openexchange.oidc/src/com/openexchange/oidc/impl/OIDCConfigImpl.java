@@ -74,11 +74,11 @@ public class OIDCConfigImpl implements OIDCConfig{
 
     @Override
     public Boolean isEnabled() {
-        return leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
+        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
     }
     
     @Override
     public Boolean startDefaultBackend() {
-        return leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
+        return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);
     }
 }

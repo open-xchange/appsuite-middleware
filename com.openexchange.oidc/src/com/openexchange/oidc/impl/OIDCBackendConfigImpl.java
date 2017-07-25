@@ -14,47 +14,47 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
 
     @Override
     public String getClientID() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.clientId);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.clientId);
     }
 
     @Override
     public String getRedirectURI() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.redirectURI);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURI);
     }
 
     @Override
     public String getAuthorizationEndpoint() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.authorizationEndpoint);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.authorizationEndpoint);
     }
 
     @Override
     public String getTokenEndpoint() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.tokenEndpoint);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.tokenEndpoint);
     }
 
     @Override
     public String getClientSecret() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.clientSecret);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.clientSecret);
     }
 
     @Override
     public String getJwkSet() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.publicRSAKeys);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.publicRSAKeys);
     }
 
     @Override
     public String getJWSAlgortihm() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
     }
     
     @Override
     public String getScope() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.scope);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.scope);
     }
 
     @Override
     public String getResponseType() {
-        return leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
     }
 
 }

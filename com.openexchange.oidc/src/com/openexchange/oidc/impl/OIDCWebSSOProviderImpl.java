@@ -79,6 +79,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.osgi.Services;
@@ -118,16 +119,17 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
         }
         
-        addRequestToStateManager(httpRequest, state, nonce);
+        this.addRequestToStateManager(httpRequest, state, nonce);
         return requestString;
     }
     
     private String getRequestString(State state, Nonce nonce) throws OXException {
         String requestString = "";
-        String authorizationEndpoint = backend.getBackendConfig().getAuthorizationEndpoint();
-        String redirectURI = backend.getBackendConfig().getRedirectURI();
+        OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
+        String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
+        String redirectURI = backendConfig.getRedirectURI();
         try {
-            Builder requestBuilder = new Builder(new ResponseType(backend.getBackendConfig().getResponseType()), Scope.parse(backend.getBackendConfig().getScope()), new ClientID(backend.getBackendConfig().getClientID()), new URI(redirectURI));
+            Builder requestBuilder = new Builder(new ResponseType(backendConfig.getResponseType()), Scope.parse(backendConfig.getScope()), new ClientID(backendConfig.getClientID()), new URI(redirectURI));
             requestBuilder.nonce(nonce);
             requestBuilder.state(state);
             requestBuilder.endpointURI(new URI(authorizationEndpoint));
@@ -140,7 +142,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 //                new URI(redirectURI),
 //                state,
 //                nonce);
-            requestString = backend.getAuthorisationRequest(requestBuilder).toURI().toString();
+            requestString = this.backend.getAuthorisationRequest(requestBuilder).toURI().toString();
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.CORRUPTED_URI.create(e, authorizationEndpoint, redirectURI);
         }
@@ -149,12 +151,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     
     private void addRequestToStateManager(HttpServletRequest httpRequest, State state, Nonce nonce) {
         String deepLink = httpRequest.getParameter("deep_link");
-        String uiClientID = getUiClient(httpRequest);
-        String hostname = getDomainName(Services.getService(HostnameService.class), httpRequest);
+        String uiClientID = this.getUiClient(httpRequest);
+        String hostname = this.getDomainName(Services.getService(HostnameService.class), httpRequest);
         Map<String, String> additionalClientInformation = new HashMap<>();
         
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation, uiClientID);
-        stateManagement.addAuthenticationRequest(authenticationRequestInfo);
+        this.stateManagement.addAuthenticationRequest(authenticationRequestInfo);
     }
     
     private String getUiClient(HttpServletRequest httpRequest) {
@@ -189,8 +191,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
-            if(validTokenResponse(tokenResponse)) {
-                redirectionString = loginUserAndRedirect();
+            if(this.validTokenResponse(tokenResponse)) {
+                redirectionString = this.loginUserAndRedirect();
             }
         } catch (URISyntaxException e) {
             // TODO Auto-generated catch block
@@ -218,25 +220,21 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
     
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
-        // Construct the code grant from the code obtained from the authz endpoint
-        // and the original callback URI used at the authz endpoint
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        URI callback = new URI(backend.getBackendConfig().getRedirectURI());
+        URI callback = new URI(this.backend.getBackendConfig().getRedirectURI());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
-        // The credentials to authenticate the client at the token endpoint
-        ClientAuthentication clientAuth = backend.getClientAuthentication();
+        ClientAuthentication clientAuth = this.backend.getClientAuthentication();
     
-         // The token endpoint
-        URI tokenEndpoint = new URI(backend.getBackendConfig().getTokenEndpoint());
+        URI tokenEndpoint = new URI(this.backend.getBackendConfig().getTokenEndpoint());
     
-         // Make the token request
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
-        return backend.getTokenRequest(tokenRequest);
+        return this.backend.getTokenRequest(tokenRequest);
     }
     
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException {
-        HTTPRequest httpRequest = backend.getHttpRequest(tokenReq.toHTTPRequest());
+        HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
+        // TODO QS-VS: ISt die send Methode sicher genug?
         HTTPResponse httpResponse = httpRequest.send();
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
         

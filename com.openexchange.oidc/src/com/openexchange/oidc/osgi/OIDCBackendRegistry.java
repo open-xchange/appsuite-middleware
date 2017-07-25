@@ -98,9 +98,9 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     
     @Override
     public OIDCBackend addingService(ServiceReference<OIDCBackend> reference) {
-        final OIDCBackend oidcBackend = context.getService(reference);
+        final OIDCBackend oidcBackend = this.context.getService(reference);
         final Stack<String> servlets = new Stack<>();
-        HttpService httpService = services.getService(HttpService.class);
+        HttpService httpService = this.services.getService(HttpService.class);
         final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
         if (backends.addIfAbsent(oidcBackend)) {
@@ -113,10 +113,10 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(services.getService(HazelcastInstance.class)));
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)));
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
-                registerServlet(servlets, httpService, getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, services, config), "init");
+                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, this.services, config), "init");
                 
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
@@ -147,7 +147,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     
     private String getPrefix(final OIDCBackend oidcBackend) {
         StringBuilder prefixBuilder = new StringBuilder();
-        prefixBuilder.append(services.getService(DispatcherPrefixService.class).getPrefix());
+        prefixBuilder.append(this.services.getService(DispatcherPrefixService.class).getPrefix());
         prefixBuilder.append("oidc/");
         String path = oidcBackend.getPath();
         if (!Strings.isEmpty(path)) {

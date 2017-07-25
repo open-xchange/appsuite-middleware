@@ -172,4 +172,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
         return true;
     }
+    
+    //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist
 }
