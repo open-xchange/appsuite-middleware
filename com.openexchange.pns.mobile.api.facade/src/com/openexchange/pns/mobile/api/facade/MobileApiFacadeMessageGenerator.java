@@ -50,13 +50,16 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
+
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
+
 import javapns.json.JSONException;
 import javapns.notification.PushNotificationPayload;
 
@@ -132,32 +135,38 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String subject = MessageDataUtil.getSubject(messageData);
                 String displayName = MessageDataUtil.getDisplayName(messageData);
                 String senderAddress = MessageDataUtil.getSender(messageData);
-                String sender = displayName.length() != 0 ? displayName : senderAddress;
+                String sender = displayName.length() == 0 ? senderAddress : displayName;
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
+                
+                if (false == Strings.isEmpty(subject)) {
+                    // Non-silent push
+                    StringBuilder sb = new StringBuilder(sender);
+                    sb.append("\n");
+                    sb.append(subject);
+                    payload.addAlert(sb.toString());
+                    
+                    MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
 
-                StringBuffer sb = new StringBuffer(sender);
-                sb.append("\n");
-                sb.append(subject);
+                    if (config.isApnBadgeEnabled() && unread >= 0) {
+                        payload.addBadge(unread);
+                    }
 
-                payload.addAlert(sb.toString());
-
-                MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
-                if (config.isApnBadgeEnabled() && unread > -1) {
-                    payload.addBadge(unread);
+                    if (config.isApnSoundEnabled()) {
+                        payload.addSound(config.getApnSoundFile());
+                    }
                 }
 
-                if (config.isApnSoundEnabled()) {
-                    payload.addSound(config.getApnSoundFile());
+                if (path.length() > 0) {
+                    payload.addCustomDictionary("cid", path);
                 }
 
-                payload.addCustomDictionary("cid", path);
                 return new Message<PushNotificationPayload>() {
 
                     @Override
                     public PushNotificationPayload getMessage() {
                         return payload;
-                    };
+                    }
                 };
             } catch (JSONException e) {
                 throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
