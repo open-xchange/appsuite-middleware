@@ -506,10 +506,11 @@ public class DriveUtils {
              * MIN_FOLDER_ID = 20
              * SYSTEM_USER_INFOSTORE_FOLDER_ID = 10
              * SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = 15
+             * VIRTUAL_LIST_INFOSTORE_FOLDER_ID = 14
              */
             try {
                 int numericalID = Integer.parseInt(folderID);
-                if (numericalID < 20 && numericalID != 10 && numericalID != 15) {
+                if (numericalID < 20 && numericalID != 10 && numericalID != 15 && numericalID != 14) {
                     return false;
                 }
             } catch (NumberFormatException e) {
