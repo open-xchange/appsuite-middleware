@@ -83,6 +83,7 @@ import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
@@ -130,6 +131,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.lock.LockService;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1751,6 +1753,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, OXException, OXException {
+        checkNotReadOnly(so);
         return insertAppointment0(cdao, writecon, so, true);
     }
 
@@ -1778,6 +1781,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, OXException, OXException {
+        checkNotReadOnly(so);
         checkQuota(so, writecon);
 
         int i = 1;
@@ -2722,6 +2726,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
+        checkNotReadOnly(so);
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
 
@@ -4091,6 +4096,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+        checkNotReadOnly(so);
         checkConfirmPermission(folderId, uid, so, ctx, false);
         Connection writecon = null;
         PreparedStatement pu = null;
@@ -4187,6 +4193,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      */
     @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+        checkNotReadOnly(so);
         checkConfirmPermission(folderId, -1, so, ctx, true);
 
         final String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; // this is a
@@ -4287,6 +4294,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+        checkNotReadOnly(session);
         int changes;
         PreparedStatement pst = null;
         int amount = 0;
@@ -4804,11 +4812,13 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
+        checkNotReadOnly(so);
         deleteAppointment(uid, cdao, writecon, so, ctx, inFolder, clientLastModified, true);
     }
 
     @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean checkPermissions) throws SQLException, OXException {
+        checkNotReadOnly(so);
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
         PreparedStatement prep = null;
@@ -4937,6 +4947,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public boolean deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
+        checkNotReadOnly(so);
         boolean modified = false;
 
         while (rs.next()) {
@@ -5914,6 +5925,29 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         CalendarMySQL.SERVICES_REF.set(serviceLookup);
+    }
+
+    /**
+     * Checks that the calendar data in the context is not configured to be in an <i>read-only</i> mode or not.
+     * <p/>
+     * If so, an appropriate exception is thrown.
+     *
+     * @param session The session of the user trying to write calendar data
+     * @throws {@link OXCalendarExceptionCodes#CALENDAR_MAINTENANCE}
+     */
+    private void checkNotReadOnly(Session session) throws OXException {
+        ConfigViewFactory configViewFactory = null;
+        ServiceLookup serviceLookup = SERVICES_REF.get();
+        if (null != serviceLookup) {
+            configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
+        }
+        if (null == configViewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+        if (false == configView.opt("com.openexchange.chronos.useLegacyStorage", Boolean.class, Boolean.TRUE).booleanValue()) {
+            throw OXCalendarExceptionCodes.CALENDAR_MAINTENANCE.create();
+        }
     }
 
     private static final class PrgDatesMember implements Comparable<PrgDatesMember> {
