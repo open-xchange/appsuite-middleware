@@ -190,10 +190,38 @@ public class GetPerformer extends AbstractPerformer {
      * @return The {@link AvailableTime} slots for the current user
      */
     public AvailableTime getAvailableTime() throws OXException {
-        AvailableTime availableTime = new AvailableTime();
-        availableTime.setUserId(session.getUserId());
+        int userId = session.getUserId();
+        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        return getAvailableTime(userId, calendarAvailabilities);
+    }
 
-        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(session.getUserId());
+    /**
+     * Retrieves the {@link AvailableTime} for the specified {@link Attendee}s in the specified time interval
+     * 
+     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link AvailableTime} for
+     * @param from The start point in the time interval
+     * @param until The end point in the time interval
+     * @return A {@link Map} with {@link AvailableTime} slots for the {@link Attendee}s
+     * @throws OXException if an error is occurred
+     */
+    public Map<Attendee, AvailableTime> getAvailableTime(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, AvailableTime> availableTimes = new HashMap<>();
+        Map<Attendee, List<CalendarAvailability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        for (Attendee attendee : attendees) {
+            List<CalendarAvailability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            availableTimes.put(attendee, getAvailableTime(attendee.getEntity(), calendarAvailabilities));
+        }
+        return availableTimes;
+    }
+
+    /**
+     * Retrieves the {@link AvailableTime} slots for the specified user
+     * 
+     * @param userId The user identifier
+     * @return The {@link AvailableTime} slots for the current user
+     * @throws OXException if an error is occurred
+     */
+    private AvailableTime getAvailableTime(int userId, List<CalendarAvailability> calendarAvailabilities) throws OXException {
         // Sort by priority (see: https://tools.ietf.org/html/rfc7953#section-4 RFC 7953, section 4</a>
         java.util.Collections.sort(calendarAvailabilities);
 
@@ -203,6 +231,9 @@ public class GetPerformer extends AbstractPerformer {
             busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
             flattenSlots.addAll(calendarAvailability.getCalendarFreeSlots());
         }
+
+        AvailableTime availableTime = new AvailableTime();
+        availableTime.setUserId(userId);
         availableTime.setBusyType(busyType);
 
         // Combine
