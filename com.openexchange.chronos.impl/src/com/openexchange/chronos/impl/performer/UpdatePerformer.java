@@ -164,10 +164,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * update event or event occurrence
          */
-        if (isSeriesMaster(originalEvent) && (recurrenceId != null || (updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()))) {
-            updateEvent(originalEvent, updatedEvent, recurrenceId != null ? recurrenceId : updatedEvent.getRecurrenceId());
+        if (null == recurrenceId && updatedEvent.containsRecurrenceId()) {
+            recurrenceId = updatedEvent.getRecurrenceId();
+        }
+        if (isSeriesMaster(originalEvent) && null != recurrenceId) {
+            updateEvent(originalEvent, updatedEvent, recurrenceId);
         } else {
-            if(updateEvent(originalEvent, updatedEvent)){
+            if (updateEvent(originalEvent, updatedEvent)) {
                 result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
             }
         }

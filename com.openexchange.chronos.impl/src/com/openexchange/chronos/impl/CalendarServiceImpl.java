@@ -194,7 +194,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetPerformer(session, storage).perform(getFolder(session, folderID), eventId);
+                return new GetPerformer(session, storage).perform(getFolder(session, folderID), eventId.getObjectID(), eventId.getRecurrenceID());
             }
         }.executeQuery();
     }

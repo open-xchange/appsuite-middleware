@@ -49,25 +49,26 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.chronos.impl.Utils.loadAdditionalEventData;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import java.util.Collections;
-import java.util.List;
+import java.util.Date;
+import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -93,38 +94,55 @@ public class GetPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to get read the event in
+     * @param folder The parent folder to read the event in
      * @param eventId The identifier of the event to get
+     * @param recurrenceId The recurrence identifier of the occurrence to get, or <code>null</code> if no specific occurrence is targeted
      * @return The loaded event
-     * @throws OXException if the event couldn't be loaded.
      */
-    public Event perform(UserizedFolder folder, EventID eventId) throws OXException {
-        if (eventId.getRecurrenceID() == null) {
-            EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-            Event event = storage.getEventStorage().loadEvent(eventId.getObjectID(), fields);
-            if (null == event) {
-                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
-            }
-            if (session.getUserId() != event.getCreatedBy()) {
-                requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            } else {
-                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            }
-            Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), Collections.singletonList(event), fields);
-            Check.eventIsInFolder(event, folder);
-            event.setFolderId(folder.getID());
-            if (isSeriesMaster(event)) {
-                event = applyExceptionDates(storage, event, getCalendarUserId(folder));
-            }
-            return anonymizeIfNeeded(session, event);
+    public Event perform(UserizedFolder folder, String eventId, RecurrenceId recurrenceId) throws OXException {
+        /*
+         * load event data & check permissions
+         */
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        Event event = storage.getEventStorage().loadEvent(eventId, fields);
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+        }
+        if (session.getUserId() != event.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         } else {
-            List<Event> results = new ListPerformer(session, storage).perform(Collections.singletonList(eventId));
-            if(results.size()==1){
-                return results.get(0);
-            } else {
-                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        }
+        event = loadAdditionalEventData(storage, getCalendarUserId(folder), event, fields);
+        event.setFolderId(Check.eventIsInFolder(event, folder));
+        if (isSeriesMaster(event)) {
+            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
+        }
+        /*
+         * retrieve targeted event occurrence if specified (either existing change exception or resolved occurrence)
+         */
+        if (null != recurrenceId) {
+            if (isSeriesMaster(event)) {
+                if (contains(event.getChangeExceptionDates(), recurrenceId)) {
+                    Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
+                    if (null != exceptionEvent) {
+                        exceptionEvent = loadAdditionalEventData(storage, getCalendarUserId(folder), exceptionEvent, fields);
+                        exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
+                        event = exceptionEvent;
+                    }
+                } else {
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
+                    event = iterator.hasNext() ? iterator.next() : null;
+                }
+            }
+            if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
             }
         }
+        /*
+         * return event, anonymized as needed
+         */
+        return anonymizeIfNeeded(session, event);
     }
 
 }

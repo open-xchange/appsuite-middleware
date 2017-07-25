@@ -199,12 +199,14 @@ public class Check {
      *
      * @param event The event to check
      * @param folder The folder where the event should appear in
+     * @return The identifier of the passed folder, after it was checked that it is a valid parent folder of the event
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
      */
-    public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
+    public static String eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
         if (false == Utils.isInFolder(event, folder)) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getID(), event.getId());
         }
+        return folder.getID();
     }
 
     /**
