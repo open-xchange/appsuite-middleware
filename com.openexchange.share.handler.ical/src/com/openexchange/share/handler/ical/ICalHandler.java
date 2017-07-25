@@ -276,7 +276,7 @@ public class ICalHandler extends HttpAuthShareHandler {
             .set(CalendarParameters.PARAMETER_ORDER_BY, EventField.START_DATE)
             .set(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.ASC)
             .set(CalendarParameters.PARAMETER_FIELDS, EVENT_FIELDS)
-            .set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE)
+            .set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE)
             .set(CalendarParameters.PARAMETER_RANGE_START, getIntervalStart())
             .set(CalendarParameters.PARAMETER_RANGE_END, getIntervalEnd())
         ;

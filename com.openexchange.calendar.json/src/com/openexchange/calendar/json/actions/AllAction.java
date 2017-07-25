@@ -355,8 +355,8 @@ public final class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        if (false == session.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
+        if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
         }
         List<Event> events;
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);

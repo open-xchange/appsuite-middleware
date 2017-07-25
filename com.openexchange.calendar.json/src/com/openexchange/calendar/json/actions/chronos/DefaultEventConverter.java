@@ -109,18 +109,18 @@ public class DefaultEventConverter extends EventConverter {
     @Override
     protected Event getEvent(EventID eventID, EventField... fields) throws OXException {
         EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        Boolean oldRecurrenceMaster = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
+        Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
         Date oldRangeStart = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date oldRangeEnd = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         try {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
             session.set(CalendarParameters.PARAMETER_RANGE_START, null);
             session.set(CalendarParameters.PARAMETER_RANGE_END, null);
             return session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID);
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaster);
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
             session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
         }

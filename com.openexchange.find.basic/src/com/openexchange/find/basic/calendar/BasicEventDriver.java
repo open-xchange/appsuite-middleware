@@ -108,7 +108,7 @@ public class BasicEventDriver extends BasicCalendarDriver {
         List<OXException> warnings = new ArrayList<OXException>();
         int limit = getHardResultLimit();
         CalendarSession calendarSession = Services.requireService(CalendarService.class).init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+        calendarSession.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         calendarSession.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, limit + 1);
         if (null != searchRequest.getOptions().getTimeZone()) {
             calendarSession.set(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.getTimeZone(searchRequest.getOptions().getTimeZone()));

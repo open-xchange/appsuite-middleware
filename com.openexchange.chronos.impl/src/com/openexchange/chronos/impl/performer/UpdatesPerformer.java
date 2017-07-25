@@ -173,12 +173,12 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             Utils.loadAdditionalEventData(storage, true, getCalendarUserId(folder), events, fields);
-            Boolean oldRecurrenceMaserParameter = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
+            Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
-                session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
                 deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
             } finally {
-                session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaserParameter);
+                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
         }
         return getResult(newAndModifiedEvents, deletedEvents);

@@ -76,10 +76,12 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Configures if only the "master" event of a series should be returned, or if recurring events should be resolved into their
+     * Configures if only the <i>master</i> event of a series should be returned, or if recurring events should be resolved into their
      * individual instances.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.6.5">RFC 4791, section 9.6.5</a>
      */
-    static final String PARAMETER_RECURRENCE_MASTER = "recurrence_master";
+    static final String PARAMETER_EXPAND_OCCURRENCES = "expand";
 
     /**
      * {@link Date}

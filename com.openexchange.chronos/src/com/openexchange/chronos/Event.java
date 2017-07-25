@@ -1278,7 +1278,25 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event [id=" + getId() + ", summary=" + getSummary() + ", startDate=" + getStartDate() + ", endDate=" + getEndDate() + "]";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Event [id=").append(getId());
+        stringBuilder.append(", seriedId=").append(getSeriesId());
+        stringBuilder.append(", recurrenceId=").append(getRecurrenceId());
+        stringBuilder.append(", folderId=").append(getFolderId());
+        stringBuilder.append(", calendarUser=").append(getCalendarUser());
+        DateTime startDate = getStartDate();
+        stringBuilder.append(", startDate=").append(startDate);
+        if (null != startDate && null != startDate.getTimeZone()) {
+            stringBuilder.append(" (").append(startDate.getTimeZone().getID()).append(')');
+        }
+        DateTime endDate = getEndDate();
+        stringBuilder.append(", endDate=").append(endDate);
+        if (null != endDate && null != endDate.getTimeZone()) {
+            stringBuilder.append(" (").append(endDate.getTimeZone().getID()).append(')');
+        }
+        stringBuilder.append(", summary=").append(getSummary());
+        stringBuilder.append(']');
+        return stringBuilder.toString();
     }
 
 }

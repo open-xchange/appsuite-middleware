@@ -169,14 +169,14 @@ public class Utils {
 
     /**
      * Gets a value indicating whether a recurring event series should be resolved to individual occurrences or not, based on the value
-     * of {@link CalendarParameters#PARAMETER_RECURRENCE_MASTER} in the supplied parameters.
+     * of {@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES} in the supplied parameters.
      *
      * @param parameters The calendar parameters to evaluate
      * @return <code>true</code> if individual occurrences should be resolved, <code>false</code>, otherwise
-     * @see CalendarParameters#PARAMETER_RECURRENCE_MASTER
+     * @see CalendarParameters#PARAMETER_EXPAND_OCCURRENCES
      */
     public static boolean isResolveOccurrences(CalendarParameters parameters) {
-        return false == parameters.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class, Boolean.FALSE).booleanValue();
+        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.TRUE).booleanValue();
     }
 
     /**

@@ -417,7 +417,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 case AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS:
                     return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
                 case AJAXServlet.PARAMETER_RECURRENCE_MASTER:
-                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(value));
+                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(false == Boolean.parseBoolean(value)));
                 case AJAXServlet.PARAMETER_TIMEZONE:
                     return new AbstractMap.SimpleEntry<String, TimeZone>(CalendarParameters.PARAMETER_TIMEZONE, getTimeZone(value));
                 case AJAXServlet.PARAMETER_COLUMNS:

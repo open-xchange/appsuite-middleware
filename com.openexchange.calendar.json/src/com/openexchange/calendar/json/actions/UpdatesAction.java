@@ -270,7 +270,6 @@ public final class UpdatesAction extends ChronosAction {
         AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_TIMESTAMP
     );
 
-    //    {action=updates, columns=1, start=1475043687797, end=1538122887797, showPrivate=true, recurrence_master=true, timestamp=1317198087797, ignore=deleted, sort=201, order=asc, timezone=UTC, session=f95184c1c11d4826b0ec25c86c6970d8}
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
         AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
         AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, AJAXServlet.PARAMETER_RECURRENCE_MASTER,
@@ -289,8 +288,8 @@ public final class UpdatesAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        if (false == session.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
-            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
+        if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
         }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);

@@ -49,15 +49,15 @@
 
 package com.openexchange.chronos.freebusy.json;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RECURRENCE_MASTER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,9 +65,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import org.dmfs.rfc5545.DateTime;
 import java.util.Set;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -79,6 +79,7 @@ import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -196,13 +197,13 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
     private static Entry<String, ?> parseParameter(String parameter, String value) throws IllegalArgumentException {
         switch (parameter) {
             case "rangeStart":
-                DateTime startTime = DateTime.parse(TimeZone.getTimeZone("UTC"), value);
+                DateTime startTime = DateTime.parse(TimeZones.UTC, value);
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(startTime.getTimestamp()));
             case "rangeEnd":
-                DateTime endTime = DateTime.parse(TimeZone.getTimeZone("UTC"), value);
+                DateTime endTime = DateTime.parse(TimeZones.UTC, value);
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(endTime.getTimestamp()));
             case "expand":
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_RECURRENCE_MASTER, Boolean.valueOf(false == Boolean.parseBoolean(value)));
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(value));
             case PARAMETER_IGNORE_CONFLICTS:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
             case PARAMETER_TIMESTAMP:
@@ -214,7 +215,7 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
             case PARAMETER_FIELDS:
                 return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
             case PARAMETER_INCLUDE_PRIVATE:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.parseBoolean(value));
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
             default:
                 throw new IllegalArgumentException("unknown paramter: " + parameter);
         }

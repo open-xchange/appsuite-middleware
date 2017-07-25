@@ -147,7 +147,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
@@ -168,7 +168,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @return The events
@@ -184,7 +184,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
@@ -205,7 +205,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @param updatedSince The timestamp since when the updates should be retrieved

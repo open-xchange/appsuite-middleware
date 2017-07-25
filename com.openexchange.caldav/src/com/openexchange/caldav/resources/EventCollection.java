@@ -171,7 +171,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             try {
                 calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
                 calendarSession.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
-                calendarSession.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+                calendarSession.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
                 calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
             } catch (OXException e) {
                 throw protocolException(getUrl(), e);

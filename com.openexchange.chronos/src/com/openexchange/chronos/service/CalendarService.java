@@ -128,7 +128,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -150,7 +150,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -216,7 +216,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
@@ -234,7 +234,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -251,7 +251,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
@@ -271,7 +271,7 @@ public interface CalendarService {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_RECURRENCE_MASTER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * </ul>
      *
      * @param session The calendar session
