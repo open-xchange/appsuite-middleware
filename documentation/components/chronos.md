@@ -356,10 +356,24 @@ All warnings that occurred during the migration will get logged with level ``INF
 - com.openexchange.chronos.storage.rdb.legacy.RdbAttendeeStorage.isIgnoreOrphanedUserAttendees
 
 
+## Last-Modified / Created
 
+In the legacy stack, the properties that store the creation- and last-modification time of an event were handled by the server implicitly each time the entry was written in the database, so that they're actually *read-only* for clients. Similarly, the entity identifiers of the acting user were stored along as created- and modified-by. Additionally, the last-modified property was also used to prevent so-called *lost updates*, in a way that clients were only allowed to update or delete an event where the last-modified timestamp matches the one of the version last read by this client. Also, the last-modified property was used to compute resource ETags and to drive the ``sync-collection`` report in CalDAV.
 
+While letting the server assign those timestamps based on the current time automatically is feasible for events being initially created on that system, it is problematic whenever data is imported from an external source - e.g. a subscribed external calendar feed, or a manually imported iCalendar file. Also, the created- and modified-by properties would be rather misleading in such scenarios. Therefore, the new calendar implementation will handle those properties in the following way:
 
- 
+- The properties ``created-by`` and ``modified-by`` are no longer mandatory (i.e. may be ``NULL``ed if not applicable)
+- If set, the properties ``created-by`` and ``modified-by`` still refer to internal calendar users
+- The properties ``last-modified`` and ``created`` are no longer mandatory (i.e. may be ``NULL``ed if not applicable)
+- If set, the properties ``created`` and ``last-modified`` do not necessarily store the server timestamp the event was (last) written, and may contain values from an external source
+- For synchronization purposes, an additional synthetic property ``timestamp`` is introduced, which is set to the current server timestamp whenever the event is written
+
+For backwards compatibility, the new ``timestamp`` property is used to drive the ``last-modified`` property in the legacy HTTP API. Additionally, due to the ``NOT NULL`` column definitions, the respective values in the legacy storage are derived from the acting calendar user and the timestamp property as needed. 
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545#section-3.8.7
+- http://oxpedia.org/index.php?title=HTTP_API#Date_and_time
+- https://bugzilla.mozilla.org/show_bug.cgi?id=303663#c2
 
 
 
