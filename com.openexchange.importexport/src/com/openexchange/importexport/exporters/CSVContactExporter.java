@@ -84,6 +84,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> batch export
  */
 public class CSVContactExporter implements Exporter {
 
@@ -343,38 +344,6 @@ public class CSVContactExporter implements Exporter {
                         throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
                     }            
                 }                
-            writer.flush();
-            return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
-        } catch (IOException e) {
-            throw ImportExportExceptionCodes.IOEXCEPTION.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public SizedInputStream exportSingleData(final ServerSession sessObj, final Format format, final String folder, final String objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        if (!canExport(sessObj, format, folder, optionalParams)) {
-            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
-        }
-        final int folderId = getFolderId(folder);
-        ContactField[] fields;
-        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
-            fields = DEFAULT_FIELDS_ARRAY;
-        } else {
-            EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
-            fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
-        }
-        final Contact conObj;
-        try {
-            conObj = ImportExportServices.getContactService().getContact(sessObj, Integer.toString(folderId), objectId, fields);
-        } catch (final OXException e) {
-            throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
-        }
-
-        try {
-            ThresholdFileHolder sink = new ThresholdFileHolder();
-            OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
-            writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            writer.write(convertToLine(convertToList(conObj, fields)));
             writer.flush();
             return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
         } catch (IOException e) {

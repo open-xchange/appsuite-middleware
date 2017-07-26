@@ -58,7 +58,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -93,6 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> batch export
  */
 public class VCardExporter implements Exporter {
 
@@ -245,12 +245,6 @@ public class VCardExporter implements Exporter {
 
     @Override
     public SizedInputStream exportBatchData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
-    }
-
-    @Override
-    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        Map<String, List<String>> batchIds = Collections.singletonMap(folderID, Collections.singletonList(objectID));
         return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
     }
 

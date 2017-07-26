@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  * Defines a class able to export a certain type of OX folder as a certain format
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - exportFileName
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - export file name, batch data
  * @see com.openexchange.groupware.Types
  */
 public interface Exporter {
@@ -92,18 +92,6 @@ public interface Exporter {
 	 * @throws OXException
 	 */
 	SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
-	/**
-     * @param session: The session object to be able to check permissions.
-     * @param format: Format the returned InputStream should be in.
-     * @param folderID: Folder that should be exported. Note: A folder can only contain data of one type.
-     * @param objectID: Id of an entry in that folder that is to be exported.
-     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-     * @param optionalParams Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return InputStream in requested format.
-     * @throws OXException
-     */
-    SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
     
     /**
     *
