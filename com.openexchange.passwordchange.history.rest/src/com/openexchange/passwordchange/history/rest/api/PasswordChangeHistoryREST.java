@@ -50,24 +50,26 @@
 package com.openexchange.passwordchange.history.rest.api;
 
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
-import com.openexchange.passwordchange.history.rest.osgi.Services;
+import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
+import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.tracker.SortType;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link PasswordChangeHistoryREST}
@@ -75,28 +77,30 @@ import com.openexchange.rest.services.annotation.RoleAllowed;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@Path("passwordchange/history/v1")
+@Path("admin/v1/contexts/{context-id}/users/{user-id}")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class PasswordChangeHistoryREST {
 
-    private static final String LIST = "/list";
+    private static final String PATH = "/passwd-changes";
+    private final ServiceLookup service;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
      */
-    public PasswordChangeHistoryREST() {
+    public PasswordChangeHistoryREST(ServiceLookup service) {
         super();
+        this.service = service;
     }
 
     @GET
-    @Path(LIST)
+    @Path(PATH)
     @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject listHistory(@QueryParam("limit") int limit, @QueryParam("contextID") int contextID, @QueryParam("userID") int userID, @QueryParam("order") String order) throws Exception {
+    public JSONObject listHistory(@PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) throws Exception {
 
         // Get services
-        PasswordChangeTrackerRegistry registry = Services.getService(PasswordChangeTrackerRegistry.class, true);
-        ConfigViewFactory config = Services.getService(ConfigViewFactory.class, true);
+        PasswordHistoryHandler handler = service.getService(PasswordHistoryHandler.class); // TODO NPE
+        ConfigViewFactory config = service.getService(ConfigViewFactory.class); // TODO NPE
         ConfigView view = config.getView(userID, contextID);
 
         /*
@@ -104,18 +108,12 @@ public class PasswordChangeHistoryREST {
          * Note: PasswordChangeHistory does not need to be enabled to return the data
          * So we just check if there is a service configured that can provide the data
          */
-        String symbolicName = view.get("com.openexchange.passwordchange.tracker", String.class);
-        if (null == symbolicName || symbolicName.isEmpty()) {
-            return new JSONObject().put("Error: ", "No tracker for the requested user configured.");
+        String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
+        if (null == symbolicName || symbolicName.isEmpty() || false == symbolicName.equals(handler.getSymbolicName())) {
+            return new JSONObject().put("Error: ", "No handler for the requested user configured.");
         }
 
-        // Get tracker & data
-        Map<String, PasswordChangeTracker> trackers = registry.getTrackers();
-        PasswordChangeTracker pwdtracker = trackers.get(symbolicName);
-        if (null == pwdtracker) {
-            return new JSONObject().put("Error:", "{No tracker for the requested user found.}");
-        }
-        List<PasswordChangeInfo> history = pwdtracker.listPasswordChanges(userID, contextID, getType(order));
+        List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
 
         // Check data
         if (history.size() == 0) {
@@ -131,9 +129,10 @@ public class PasswordChangeHistoryREST {
                 break;
             }
             JSONObject data = new JSONObject();
-            data.put("created", info.getCreated().toString());
-            data.put("client", info.getClient());
-            data.put("ip", info.getIP());
+            data.put("date", info.getCreated());
+            data.put("client_id", info.getClient());
+            putOptionalReadable(data, info.getClient());
+            data.put("client_address", info.getIP());
             entries.add(i++, data);
         }
         json.put("PasswordChangeHistroy", entries);
@@ -141,20 +140,37 @@ public class PasswordChangeHistoryREST {
     }
 
     /**
-     * Get the type fitting to the given string. Default is {@link #NONE}
+     * Check if client is "well known" and convert into readable if so
+     * 
+     * @param data The {@link JSONObject} to put the data in
+     * @param convertee The identifier that might be known
+     * @throws JSONException
+     */
+    private void putOptionalReadable(JSONObject data, String convertee) throws JSONException {
+        for (PasswordChangeClients client : PasswordChangeClients.values()) {
+            if (client.matches(convertee)) {
+                data.put("client_name", client.getDisplayName());
+                return;
+            }
+        }
+    }
+
+    /**
+     * Get the type fitting to the given string. Default(Defined in MW-809) is {@link #NEWEST}
      * 
      * @param type The type as String
      * @return A {@link SortType}
      */
     private SortType getType(String type) {
+        if (null == type) {
+            return SortType.NEWEST;
+        }
         for (SortType sType : SortType.values()) {
-            String[] altNames = sType.getAltNames();
-            for (String name : altNames) {
-                if (name.equals(type)) {
-                    return sType;
-                }
+            String name = sType.getTypeName();
+            if (name.equals(type)) {
+                return sType;
             }
         }
-        return SortType.NONE;
+        return SortType.NEWEST;
     }
 }

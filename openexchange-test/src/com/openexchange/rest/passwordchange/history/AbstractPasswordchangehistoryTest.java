@@ -50,7 +50,6 @@
 package com.openexchange.rest.passwordchange.history;
 
 import static org.junit.Assert.assertFalse;
-import java.sql.Timestamp;
 import org.json.JSONObject;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
@@ -73,7 +72,7 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
     protected Long contextID;
     protected Long userID;
     protected Long limit = new Long(1);
-    protected Timestamp send;
+    protected long send;
 
     @Override
     public void setUp() throws Exception {
@@ -84,7 +83,7 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
 
         // Do a password change
         PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
-        send = new Timestamp(System.currentTimeMillis());
+        send = System.currentTimeMillis();
         PasswordChangeUpdateResponse response = getAjaxClient().execute(request);
         assertFalse("Errors in response!", response.hasError());
         assertFalse("Warnings in response!", response.hasWarnings());
@@ -97,7 +96,7 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
     protected PasswordChangeInfo parse(JSONObject data) throws Exception {
         final String ip = filter(data, "ip");
         final String client = filter(data, "client");
-        final Timestamp created = Timestamp.valueOf(filter(data, "created"));
+        final Long created = Long.valueOf(filter(data, "created"));
 
         return new PasswordChangeInfoImpl(created, client, ip);
     }

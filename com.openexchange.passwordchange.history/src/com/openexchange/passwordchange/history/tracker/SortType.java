@@ -58,30 +58,30 @@ package com.openexchange.passwordchange.history.tracker;
 public enum SortType {
 
     /** Sort by newest entries first. */
-    NEWEST("new", "newest", "NEW", "NEWEST"),
+    NEWEST("newest"),
 
     /** Sort by oldest entries first */
-    OLDEST("old", "oldest", "OLD", "OLDEST"),
+    OLDEST("oldest"),
 
     /** Default. Does nothing */
-    NONE;
+    NONE("");
 
-    private String[] strings;
+    private String type;
 
     /**
      * Initializes a new {@link SortType}.
      */
-    private SortType(String... strings) {
-        this.strings = strings;
+    private SortType(String type) {
+        this.type = type;
     }
 
     /**
-     * Get alternative names for the {@link SortType}
+     * Get name for the {@link SortType}
      * 
-     * @return The names as String[]
+     * @return The name
      */
-    public String[] getAltNames() {
-        return strings;
+    public String getTypeName() {
+        return type;
     }
 
 }

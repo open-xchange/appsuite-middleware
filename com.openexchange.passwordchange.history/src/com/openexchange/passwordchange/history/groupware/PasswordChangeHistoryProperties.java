@@ -47,56 +47,62 @@
  *
  */
 
-package com.openexchange.passwordchange.history.events;
+package com.openexchange.passwordchange.history.groupware;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link PasswordChangeEventListener} Listens to password change event created in {@link com.openexchange.passwordchange.BasicPasswordChangeService#perform(com.openexchange.passwordchange.PasswordChangeEvent)} (in propagate)
+ * {@link PasswordChangeHistoryProperties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeEventListener implements EventHandler {
-
-    private static final String TOPIC = "com/openexchange/passwordchange";
-    private final ServiceLookup service;
-    private final PasswordChangeHandlerRegistry registry;
+public enum PasswordChangeHistoryProperties implements Property {
 
     /**
-     * Initializes a new {@link PasswordChangeEventListener}.
+     * The property that indicates if a password change should be recorded into a history.
+     * If set to <code>true</code> a history is saved.
+     * If set to <code>false</code> no history is saved.
+     * 
+     * Default is <code>false</code>.
      */
-    public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
-        super();
-        this.service = service;
-        this.registry = registry;
-    }
+    enable(false),
 
     /**
-     * Gets the topic of interest.
-     *
-     * @return The topic
+     * The handler that takes care of creating the history.
+     * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
+     * 
+     * Default is "DB" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
      */
-    public String getTopic() {
-        return TOPIC;
+    handler("DB"),
+
+    /** 
+     * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
+     * for a specific user.
+     *  
+     * Default is <code>10</code>. 
+     */
+    limit(10)
+
+    ;
+
+    private static final String PREFIX = "com.openexchange.passwordchange.history.";
+    private final Object defaultValue;
+
+    private PasswordChangeHistoryProperties(Object defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     @Override
-    public void handleEvent(Event event) {
-        if (false == TOPIC.equals(event.getTopic())) {
-            return;
-        }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
-        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+    public String getFQPropertyName() {
+        return PREFIX + this.name();
+    }
 
-        // Process tracking
-        PasswordChangeUtility.recordChange(service, registry, contextID, userID, ipAdderess, session.getClient());
+    @Override
+    public <T> T getDefaultValue(Class<T> clazz) {
+        if (defaultValue.getClass().isAssignableFrom(clazz)) {
+            return clazz.cast(defaultValue);
+        }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
     }
 }

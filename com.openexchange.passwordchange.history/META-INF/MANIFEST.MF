@@ -23,6 +23,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.threadpool,
  com.openexchange.tools.sql,
  com.openexchange.tools.update,
  com.openexchange.user,
@@ -32,5 +33,6 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.passwordchange.history.osgi.PasswordChangeHistoryActivator
-Export-Package: com.openexchange.passwordchange.history.registry,
+Export-Package: com.openexchange.passwordchange.history.groupware,
+ com.openexchange.passwordchange.history.registry,
  com.openexchange.passwordchange.history.tracker

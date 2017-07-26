@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordchange.history.tracker;
 
-import java.sql.Timestamp;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 
 /**
@@ -60,21 +59,17 @@ import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
  */
 public interface PasswordChangeInfo {
 
-    static final String APPSUITE = "App Suite UI";
-    static final String PROVISIONING = "Provisioning";
-    static final String UNKOWN = "Unknown";
-
     /**
-     * Get the {@link Timestamp} when the password got changed on
+     * Get the value of the date when the password got changed on
      * 
-     * @return The {@link Timestamp}
+     * @return The value as <code>long</code>
      */
-    Timestamp getCreated();
+    long getCreated();
 
     /**
-     * The client that did the last password change. See {@link #APPSUITE}, {@link #PROVISIONING} and {@link #UNKOWN}
+     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
      * 
-     * @return The {@link Class}
+     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
      */
     String getClient();
 
