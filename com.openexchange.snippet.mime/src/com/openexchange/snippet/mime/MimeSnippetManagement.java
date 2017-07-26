@@ -1385,4 +1385,8 @@ public final class MimeSnippetManagement implements SnippetManagement, QuotaAwar
             Databases.closeSQLStuff(stmt);
         }
     }
+
+    static QuotaMode getMode(){
+        return MODE;
+    }
 }

@@ -49,61 +49,62 @@
 
 package com.openexchange.snippet.mime;
 
+import static com.openexchange.snippet.mime.Services.getService;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.session.Session;
-import com.openexchange.snippet.QuotaAwareSnippetService;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.ReferenceType;
+import com.openexchange.snippet.SnippetExceptionCodes;
 
 /**
- * {@link MimeSnippetService} - The "filestore" using snippet service.
- * <p>
- * <b>&nbsp;&nbsp;How SnippetService selection works</b>
- * <hr>
- * <p>
- * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining
- * "MimeSnippetService.neededCapabilities()" method in "SnippetAction.getSnippetService()".
- * <p>
- * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of
- * 10. Thus MimeSnippetService is preferred provided that "filestore" capability is indicated by CapabilityService.
- * <p>
- * If missing, RdbSnippetService is selected.
+ * {@link MimeSnippetFileAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class MimeSnippetService implements QuotaAwareSnippetService {
+public class MimeSnippetFileAccess {
 
-    private final QuotaProvider quotaProvider;
+    private static final int FS_TYPE = ReferenceType.FILE_STORAGE.getType();
 
-    /**
-     * Initializes a new {@link MimeSnippetService}.
-     */
-    public MimeSnippetService(QuotaProvider quotaProvider) {
-        super();
-        this.quotaProvider = quotaProvider;
+    private static DatabaseService getDatabaseService() {
+        return getService(DatabaseService.class);
     }
 
-    @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session, quotaProvider);
+    public static List<String> getFiles(Integer contextId) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder sql;
+            sql = new StringBuilder("SELECT refId FROM snippet WHERE cid=? AND refType=").append(FS_TYPE);
+            stmt = con.prepareStatement(sql.toString());
+            int pos = 0;
+            stmt.setInt(++pos, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            List<String> result = new ArrayList<>(rs.getFetchSize());
+            do {
+                result.add(rs.getString(1));
+            } while (rs.next());
+
+            return result;
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
-    @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
-    }
-
-    @Override
-    public List<String> getFilesToIgnore(Integer contextId) throws OXException {
-        return MimeSnippetFileAccess.getFiles(contextId);
-    }
-
-    @Override
-    public boolean ignoreQuota() {
-       return QuotaMode.INDEPENDENT.equals(MimeSnippetManagement.getMode());
-    }
 
 }

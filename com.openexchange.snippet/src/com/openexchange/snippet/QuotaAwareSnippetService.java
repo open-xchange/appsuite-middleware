@@ -47,63 +47,34 @@
  *
  */
 
-package com.openexchange.snippet.mime;
+package com.openexchange.snippet;
 
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.session.Session;
-import com.openexchange.snippet.QuotaAwareSnippetService;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
 
 /**
- * {@link MimeSnippetService} - The "filestore" using snippet service.
- * <p>
- * <b>&nbsp;&nbsp;How SnippetService selection works</b>
- * <hr>
- * <p>
- * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining
- * "MimeSnippetService.neededCapabilities()" method in "SnippetAction.getSnippetService()".
- * <p>
- * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of
- * 10. Thus MimeSnippetService is preferred provided that "filestore" capability is indicated by CapabilityService.
- * <p>
- * If missing, RdbSnippetService is selected.
+ * {@link QuotaAwareSnippetService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class MimeSnippetService implements QuotaAwareSnippetService {
-
-    private final QuotaProvider quotaProvider;
+public interface QuotaAwareSnippetService extends SnippetService {
 
     /**
-     * Initializes a new {@link MimeSnippetService}.
+     * Retrieves a list of filestore files which should be ignored during usage calculation.
+     *
+     * @param contextId The context id
+     * @return A list of file ids
+     * @throws OXException
      */
-    public MimeSnippetService(QuotaProvider quotaProvider) {
-        super();
-        this.quotaProvider = quotaProvider;
-    }
+    public List<String> getFilesToIgnore(Integer contextId) throws OXException;
 
-    @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session, quotaProvider);
-    }
 
-    @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
-    }
-
-    @Override
-    public List<String> getFilesToIgnore(Integer contextId) throws OXException {
-        return MimeSnippetFileAccess.getFiles(contextId);
-    }
-
-    @Override
-    public boolean ignoreQuota() {
-       return QuotaMode.INDEPENDENT.equals(MimeSnippetManagement.getMode());
-    }
+    /**
+     * Returns a boolean indicating whether snippet files should be ignored for usage calculation. See {@link QuotaAwareSnippetService#getFilesToIgnore(Integer)} for more informations.
+     *
+     * @return <code>true</code> if snippet files should be ignore, <code>false</false> otherwise.
+     */
+    public boolean ignoreQuota();
 
 }

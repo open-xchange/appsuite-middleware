@@ -47,63 +47,36 @@
  *
  */
 
-package com.openexchange.snippet.mime;
+package com.openexchange.admin.rmi.dataobjects;
 
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.session.Session;
-import com.openexchange.snippet.QuotaAwareSnippetService;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
 
 /**
- * {@link MimeSnippetService} - The "filestore" using snippet service.
- * <p>
- * <b>&nbsp;&nbsp;How SnippetService selection works</b>
- * <hr>
- * <p>
- * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining
- * "MimeSnippetService.neededCapabilities()" method in "SnippetAction.getSnippetService()".
- * <p>
- * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of
- * 10. Thus MimeSnippetService is preferred provided that "filestore" capability is indicated by CapabilityService.
- * <p>
- * If missing, RdbSnippetService is selected.
+ * {@link RecalculationScope} defines scopes for filestore usage recalculation.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class MimeSnippetService implements QuotaAwareSnippetService {
-
-    private final QuotaProvider quotaProvider;
+public enum RecalculationScope {
 
     /**
-     * Initializes a new {@link MimeSnippetService}.
+     * Recalculates all filestores.
      */
-    public MimeSnippetService(QuotaProvider quotaProvider) {
-        super();
-        this.quotaProvider = quotaProvider;
-    }
+    ALL,
+    /**
+     * Recalculates only context filestores.
+     */
+    CONTEXT,
+    /**
+     * Recalculates only user filestores.
+     */
+    USER;
 
-    @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session, quotaProvider);
-    }
 
-    @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
-    }
-
-    @Override
-    public List<String> getFilesToIgnore(Integer contextId) throws OXException {
-        return MimeSnippetFileAccess.getFiles(contextId);
-    }
-
-    @Override
-    public boolean ignoreQuota() {
-       return QuotaMode.INDEPENDENT.equals(MimeSnippetManagement.getMode());
+    public static RecalculationScope getScopeByName(String name) throws IllegalArgumentException{
+        if(name==null || name.length()==0){
+            return null;
+        }
+        return RecalculationScope.valueOf(name.toUpperCase());
     }
 
 }

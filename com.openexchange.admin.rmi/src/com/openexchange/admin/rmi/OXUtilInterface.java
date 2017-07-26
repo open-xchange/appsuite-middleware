@@ -49,17 +49,21 @@
 
 package com.openexchange.admin.rmi;
 
+import java.net.URI;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.exception.OXException;
 
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
@@ -573,4 +577,27 @@ public interface OXUtilInterface extends Remote {
      * @throws InvalidCredentialsException
      */
     public Database createSchema(final Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException;
+
+    /**
+     * Recalculates the filestore usage for the given context. If the userId is given, then the personal filestore of this user is recalculated.
+     *
+     * @param contextId The id of the context
+     * @param userId The optional id of the user
+     * @return A URI to the filestore which has been recalculated
+     * @throws InvalidCredentialsException In case the credentials are wrong
+     * @throws OXException In case the usage couldn't be recalculated
+     * @throws RemoteException
+     */
+    public URI recalculateFilestoreUsage(Integer contextId, Integer userId) throws InvalidCredentialsException, OXException, RemoteException;
+
+    /**
+     * Recalculates the filestore usage for a given scope or for all filestores in case the scope is null.
+     *
+     * @param scope The scope.
+     * @return A list of URIs to the recalculated filestores
+     * @throws InvalidCredentialsException In case the credentials are wrong
+     * @throws RemoteException
+     * @throws OXException In case the usage couldn't be recalculated
+     */
+    public List<URI> recalculateFilestoreUsage(RecalculationScope scope) throws InvalidCredentialsException, RemoteException, OXException;
 }

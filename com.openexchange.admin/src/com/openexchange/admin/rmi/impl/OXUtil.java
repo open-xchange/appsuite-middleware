@@ -54,13 +54,17 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -68,8 +72,20 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.snippet.QuotaAwareSnippetService;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.user.UserService;
 
 /**
  * Implementation class for the RMI interface for util
@@ -683,6 +699,78 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         basicauth.doAuthentication(auth);
         return oxutil.createSchema(optDBId);
+    }
+
+    @Override
+    public URI recalculateFilestoreUsage(Integer contextId, Integer userId) throws OXException {
+        QuotaFileStorage quotaFileStorage = null;
+        if(userId==null){
+            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.administrative());
+        } else {
+            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(userId, contextId, Info.administrative());
+        }
+
+        /*
+         * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
+         * these files affect the contexts quota or not.
+         */
+        boolean quotaAware = false;
+        ConfigurationService configurationService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+        if (configurationService != null) {
+            quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
+        }
+
+        Set<String> filesToIgnore = new TreeSet<String>();
+        if (!quotaAware) {
+            ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+            Set<String> refIds = metadataStore.loadRefIds(contextId);
+            filesToIgnore.addAll(refIds);
+        }
+
+        /*
+         * Depending on the configuration snippets doesn't count towards the usage too.
+         */
+        SnippetService service = AdminServiceRegistry.getInstance().getService(SnippetService.class);
+        if (service instanceof QuotaAwareSnippetService) {
+            if (((QuotaAwareSnippetService) service).ignoreQuota()) {
+                filesToIgnore.addAll(((QuotaAwareSnippetService) service).getFilesToIgnore(contextId));
+            }
+        }
+
+        quotaFileStorage.recalculateUsage(filesToIgnore);
+        return quotaFileStorage.getUri();
+
+    }
+
+    @Override
+    public List<URI> recalculateFilestoreUsage(RecalculationScope scope) throws OXException {
+
+        ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class);
+        UserService userService = AdminServiceRegistry.getInstance().getService(UserService.class);
+        List<Integer> allContextIds = service.getAllContextIds();
+        List<URI> result = new ArrayList<>();
+        for(Integer id: allContextIds){
+            if(scope==null || RecalculationScope.ALL.equals(scope)){
+                Context ctx = service.getContext(id);
+                int[] users = userService.listAllUser(ctx, false, false);
+                for(int user: users){
+                    result.add(recalculateFilestoreUsage(id, user));
+                }
+                result.add(recalculateFilestoreUsage(id, null));
+            } else {
+                if(RecalculationScope.USER.equals(scope)){
+                    Context ctx = service.getContext(id);
+                    int[] users = userService.listAllUser(ctx, false, false);
+                    for(int user: users){
+                        result.add(recalculateFilestoreUsage(id, user));
+                    }
+                } else {
+                    result.add(recalculateFilestoreUsage(id, null));
+                }
+            }
+        }
+        return result;
+
     }
 
 }

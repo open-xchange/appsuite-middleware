@@ -104,6 +104,7 @@ import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -162,6 +163,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
         track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
+        track(SnippetService.class, new RegistryServiceTrackerCustomizer<SnippetService>(context, AdminServiceRegistry.getInstance(), SnippetService.class));
         // Plugin interfaces
         {
             final int defaultRanking = 100;
