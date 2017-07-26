@@ -14,7 +14,5 @@
     responses:
       200:
         description: |
-          A JSON object containing an array with calendar accounts. In case of errors the responsible fields in the
+          A JSON object describing the calendar accounts. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/EventsResponse"

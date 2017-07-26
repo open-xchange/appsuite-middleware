@@ -22,5 +22,3 @@
         description: |
           A JSON object containing the configuration of requested calendar account. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/EventsResponse"
