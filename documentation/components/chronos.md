@@ -38,6 +38,7 @@ A precise calendar date and time consisting of day, year, month, date, hour, min
 ### References / further reading
 - https://tools.ietf.org/html/rfc5545
 - https://devguide-calconnect.rhcloud.com/Handling-Dates-and-Times
+- https://tools.ietf.org/html/rfc4791#section-7.3
 
 
 ## Relation of Organizer / Principal / Folder-Owner / Creator
@@ -263,4 +264,102 @@ When being converted back to a plain e-mail address string (as used for external
 - https://tools.ietf.org/html/rfc5545#section-3.3.3
 - com.openexchange.chronos.common.CalendarUtils.extractEMailAddress(String)
 - com.openexchange.chronos.impl.Check.requireValidEMail(T)
+
+
+## Provider/Account Framework
+
+Besides the default, internal calendar, there may be further calendar sources that should be integrated into a user's calendar module. For example, calendar feeds from external sources, or a virtual calendar containing the upcoming birthdays found in the user's address book. Therefore, a new layer is introduced that provides access to all available calendar *accounts* from different *providers* of a user using the same API.
+
+### Calendar Providers and Accounts
+
+A calendar provider implements the functionality to access the calendar data of a specific calendar source. Calendar access is always bound to a specific account of a user within the calendar provider, i.e. each calendar provider provides a number of accounts for different users. A user may have a fixed number of accounts (e.g. exactly one) within a concrete provider, or there can be multiple accounts for the user. 
+
+### ...
+
+
+## Group-scheduled Events
+
+In iCalendar, there is a strict separation between simple events without further attendees in a user's calendar, and so-called *group-scheduled* events. Group-scheduled events are *meetings* with a defined organizer and one or more attendees, while not group-scheduled ones are *published* events, or events in a single user's calendar only. 
+
+### Legacy: Implicit Participant
+
+In the legacy implementation, appointments were always stored with at least the calendar user being a participant. This has the side effect of the actual parent folder information always being stored along with the participants, and not within the appointment itself (except for the fixed parent folder identifier for appointments in public folders). Doing so, lookups based on the parent folder could be performed by matching against the attendee's folders for private and shared folders. 
+
+Furthermore, since also simple, not group-scheduled appointments were stored with the calendar user as participant, the list of "all appointments of a certain user" could be built up in a very effective way. This also aided free/busy lookups and conflict checks, respectively.    
+
+However, based on RFC 5545, this is handling was **wrong** (the CalDAV layer already tried to work around this difference with some patches to remove this implicit attendee during export, and re-apply it during import again).   
+
+### Chronos: No implicit Participant 
+
+In the new Chronos stack, we're going to be standards-compliant here, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
+
+### References / further reading
+- https://bugs.horde.org/ticket/10697
+
+
+## Migration of legacy data
+
+### Upgrade Process
+
+When upgrading the server, several new database tables are created and existing calendar data is migrated. This process is required since the existing structures cannot be extended properly to support the new data model. 
+
+For table creation, the update task ``com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask`` is registered; the actual migration is performed within the task ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask``. Depending on the amount of existing calendar data, the migration might take some time - in the magnitude of 1 second per 1K rows in ``prg_dates``. So as usual, the upgrade should be scheduled accordingly. To have a more verbose progress logging of the migration, the log level for ``com.openexchange.chronos.storage.rdb.migration`` should be increased to ``ALL``. 
+
+When the migration of calendar data is finished successfully, the contexts are marked with two special properties that render the calendar storage in a special mode where any changes that are persisted in the new tables are also *replayed* to the legacy tables: ``config/com.openexchange.chronos.useLegacyStorage=false`` and ``config/com.openexchange.chronos.replayToLegacyStorage=true``. This is done to still provide a downgrade option to the previous version of the groupware server in case such a disaster recovery should ever be required. Additionally, this ensures that during a *rolling upgrade* scenario, where all groupware nodes are updated one after each other, up-to-date calendar data can also be read from nodes that are still running the previous version of the server. However, write access to calendar data from not yet upgraded groupware nodes is actively prevented, which ensure that no stale data is produced in the legacy database tables during the upgrade phase. 
+
+In case the migration task fails unexpectedly, the legacy data will still be used (due to the absence of the marker properties), so that the calendaring system is still in a working state, with a reduced functionality. A subsequent migration attempt can then be performed using the ``runupdate`` commandline utility.    
+
+The aforementioned properties will get removed with another upgrade in the future automatically, along with purging the no longer needed legacy database tables. Of course, it is also possible to do this manually by removing the config-cascade property ``com.openexchange.chronos.replayToLegacyStorage`` for the respective context, e.g. by utilitzing the ``changecontext`` utility with ``--remove-config com.openexchange.chronos.replayToLegacyStorage`` argument.
+
+
+### Malformed Data
+
+When reading legacy calendar during the migration, a couple of problems might arise due to malformed or erroneously stored calendar data. Usually, these are minor problems, and appropriate workarounds are available to transfer the data into a usable state again. Whenever this happens, a warning is produced that is decorated with a classification of the problem severity (*trivial*, *minor*, *normal*, *major*, *critical*, *blocker*). 
+
+The following list gives an overview about typical problems and the applied workarounds:
+
+1. *Preserving orphaned user attendee Attendee [cuType=INDIVIDUAL, partStat=NEEDS-ACTION, uri=..., entity=...]*
+   
+   *Trivial* problem severity. The legacy database table that holds entries for each participating internal user (``prg_dates_members``) contains a reference to a specific entity, but the database table that holds the associated permission (``prg_date_rights``) for this entity is missing, i.e. neither the user was added individually as participant, nor a group participant exists where the user is an actual member of. This might happen when there used to be a group that listed the user participant as member, but either the group has been deleted in the meantime, or the user has been removed from the group's member list.
+   
+   As general workaround, such orphaned attendees that do not have an associated entry in ``prg_date_rights`` are added as independent individual attendees of the event automatically when being loaded from the legacy storage. 
+
+2. *Auto-correcting stored calendar user type for Attendee [cuType=RESOURCE, partStat=null, uri=null, entity=...] to "..."]*
+
+   *Trivial* problem severity. There used to be times where it was possible that internal user attendees could be invited to events as resource attendees. Doing so, there's no corresponding entry for the user in the legacy ``prg_dates_members`` table.
+   
+   This is detected by checking the actual existence of internal resource entities, and optionally auto-correcting the actual calendar user type if a matching internal user can be looked up for the entity identifier. 
+
+3. *Skipping non-existent Attendee [cuType=..., partStat=null, uri=null, entity=...]*
+
+   *Minor* problem severity. The legacy database tables contain references to an internal group- or resource-attendee that does no longer exist in the system. Since no appropriate external representation exists due to the lack of a calendar address URI, such attendees are skipped.
+
+4. *Skipping invalid recurrence date position "..."*
+
+   *Minor* problem severity. The recurrence identifier for change- or delete exceptions in event series has to be derived from the legacy recurrence date position, which is the date (without time) where the original occurrence would have started, and is slightly different from the definition of ``RECURRENCE-ID`` in iCalendar. When converting the values, it is ensured that only valid recurrence identifiers are taken over, however, there may be some errorneous values stored, which have to be excluded.
+   
+5. *Falling back to external attendee representation for non-existent user Attendee [cuType=INDIVIDUAL, partStat=null, uri=null, entity=...]*
+
+   *Minor* problem severity. The legacy database tables contain references to an internal user-attendee that does no longer exist in the system. Since an appropriate external representation (using the stored e-mail address of the calendar user), such attendees are preserved and converted to external individual attendees.
+
+6. *Ignoring invalid legacy series pattern "..."*
+        
+   *Major* problem severity. Recurrence information of event series used to be stored in a proprietary format in the legacy database and is converted to a standards-compliant ``RRULE`` when being loaded. Usually, all possible series pattern can be transferred without problems. However if for any reason the conversion fails, the recurrence information needs to be removed from the event.
+   
+7. *Ignoring invalid legacy ReminderData [reminderMinutes=..., nextTriggerTime=...] for user ...*
+
+   *Minor* problem severity. The legacy reminder information cannot be converted to a valid alarm, and is skipped implicitly.
+
+All warnings that occurred during the migration will get logged with level ``INFO`` for each context.
+
+### References / further reading
+- com.openexchange.chronos.storage.rdb.legacy.RdbAttendeeStorage.isIgnoreOrphanedUserAttendees
+
+
+
+
+
+ 
+
+
 
