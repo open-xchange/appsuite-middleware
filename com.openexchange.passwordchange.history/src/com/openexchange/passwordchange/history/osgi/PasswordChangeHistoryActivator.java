@@ -59,15 +59,17 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.history.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
-import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistry;
-import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryImpl;
-import com.openexchange.passwordchange.history.tracker.impl.DatabasePasswordChangeTracker;
+import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
@@ -90,29 +92,29 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ContextService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ThreadPoolService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting PasswordChangeHistory bundle");
 
-        // Register the different services for this bundle
-        Services.set(this);
-
         // Register a password change registry  
-        PasswordChangeTrackerRegistry registry = new PasswordChangeTrackerRegistryImpl();
-        registry.register("DB", new DatabasePasswordChangeTracker());
-        registerService(PasswordChangeTrackerRegistry.class, registry);
+        PasswordChangeHandlerRegistry registry = new PasswordChangeHandlerRegistry(context);
+        PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
+        registry.register("DB", defaultHandler);
+        track(PasswordHistoryHandler.class, registry);
+        openTrackers();
+        registerService(PasswordHistoryHandler.class, defaultHandler);
 
         // Register event for password change
-        PasswordChangeEventListener handler = new PasswordChangeEventListener();
+        PasswordChangeEventListener handler = new PasswordChangeEventListener(this, registry);
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(EventConstants.EVENT_TOPIC, handler.getTopic());
         registerService(EventHandler.class, handler, properties);
 
         // Register interceptor
-        registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor());
+        registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor(this, registry));
 
         // Register UpdateTask
         registerService(CreateTableService.class, new PasswordChangeHistoryCreateTableTask());
@@ -125,7 +127,5 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
                 return tasks;
             }
         });
-
-        LOG.info("Finished starting PasswordChangeHistory bundle");
     }
 }

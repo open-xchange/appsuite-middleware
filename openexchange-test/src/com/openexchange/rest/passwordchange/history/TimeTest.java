@@ -84,8 +84,8 @@ public class TimeTest extends AbstractPasswordchangehistoryTest {
             System.out.println(i);
             System.out.println(info.getCreated());
             System.out.println(send);
-            System.out.println(send.getTime() - info.getCreated().getTime());
-            if ((send.getTime() - info.getCreated().getTime()) < 1000) {
+            System.out.println(send - info.getCreated());
+            if ((send - info.getCreated()) < 1000) {
                 // Check other criteria. This may fail if a password change made by another test was within the last second
                 assertEquals("Was not changed by this test!", "App Suite UI", info.getClient());
                 assertEquals("Was not changed by this test!", "127.0.0.1", info.getIP());

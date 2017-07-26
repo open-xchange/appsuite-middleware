@@ -47,46 +47,62 @@
  *
  */
 
-package com.openexchange.passwordchange.history.registry;
-
-import java.util.Map;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+package com.openexchange.passwordchange.history.groupware;
 
 /**
- * {@link PasswordChangeTrackerRegistry}
+ * {@link PasswordChangeClients}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeTrackerRegistry {
+public enum PasswordChangeClients {
+
+    APP_SUITE("app_suite", "Open Xchange App Suite UI", "open-xchange-appsuite", "appsuite", "app_suite"),
+
+    PROVISIONING("provisioning", "Open Xchange Provisioning", "provisioning"),
+
+    UNKNOWN("unknown", "Unknown client")
+
+    ;
+
+    private final String identifier;
+    private final String displayName;
+    private final String[] matchers;
 
     /**
-     * Register a {@link PasswordChangeTracker} under a symbolic name.
-     * 
-     * @param symbolicName The name under the service is searched. Symbolic name will be used in configuration. See "com.openexchange.passwordchange.tracker"
-     * @param tracker The actual tracker instance that does the tracking of password change history
+     * Initializes a new {@link PasswordChangeClients}.
      */
-    void register(String symbolicName, PasswordChangeTracker tracker);
+    private PasswordChangeClients(String identifier, String displayName, String... matchers) {
+        this.identifier = identifier;
+        this.displayName = displayName;
+        this.matchers = matchers;
+    }
 
     /**
-     * Unregisters a {@link PasswordChangeTracker}
+     * Get the name the database uses to save the data
      * 
-     * @param symbolicName The name to search the tracker for
+     * @return The identifier
      */
-    void unregister(String symbolicName);
+    public String getIdentifier() {
+        return identifier;
+    }
 
     /**
-     * Returns all available trackers with their symbolic names
+     * Get a more human readable version of the identifier
      * 
-     * @return {@link Map} with symbolic names and actual trackers
+     * @return
      */
-    Map<String, PasswordChangeTracker> getTrackers();
+    public String getDisplayName() {
+        return displayName;
+    }
 
-    /**
-     * Get the tracker fitting to the symbolic name
-     * 
-     * @param symbolicName to search a tracker for
-     * @return The actaul tracker or <code>null</code>
-     */
-    PasswordChangeTracker getTracker(String symbolicName);
+    public boolean matches(String toMatch) {
+        for (String matcher : matchers) {
+            if (matcher.equalsIgnoreCase(toMatch) || matcher.contains(toMatch)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

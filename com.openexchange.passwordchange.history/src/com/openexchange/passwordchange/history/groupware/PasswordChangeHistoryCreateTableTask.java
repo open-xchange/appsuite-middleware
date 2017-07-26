@@ -72,28 +72,18 @@ import com.openexchange.tools.update.Tools;
 public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryCreateTableTask.class);
-    private static final String SEQUENCE_NAME = "sequence_password_history";
     private static final String HISTORY_NAME = "user_password_history";
-
-    private static String getSequenceTable() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE sequence_password_history (");
-        sb.append("cid INT4 UNSIGNED NOT NULL,");
-        sb.append("id INT4 UNSIGNED NOT NULL,");
-        sb.append("PRIMARY KEY (cid));");
-        return sb.toString();
-    }
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE user_password_history (");
-        sb.append("cid INT4 UNSIGNED NOT NULL,");
-        sb.append("id INT4 UNSIGNED NOT NULL,");
-        sb.append("uid INT4 UNSIGNED NOT NULL,");
-        sb.append("created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
+        sb.append("id INT UNSIGNED NOT NULL AUTO_INCREMENT,");
+        sb.append("cid INT UNSIGNED NOT NULL,");
+        sb.append("uid INT UNSIGNED NOT NULL,");
+        sb.append("created LONG NOT NULL,");
         sb.append("source VARCHAR(256) NULL DEFAULT NULL,");
-        sb.append("ip VARCHAR(256) NULL DEFAULT NULL,");
-        sb.append("PRIMARY KEY (cid, id));");
+        sb.append("ip VARCHAR(45) NULL DEFAULT NULL,");
+        sb.append("PRIMARY KEY (id));");
         return sb.toString();
     }
 
@@ -128,13 +118,12 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { SEQUENCE_NAME, HISTORY_NAME };
+        return new String[] { HISTORY_NAME };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         final int contextID = params.getContextId();
-        createTable(SEQUENCE_NAME, getSequenceTable(), contextID);
         createTable(HISTORY_NAME, getHistoryTable(), contextID);
         LOG.info("UpdateTask 'PasswordChangeHistoryCreateTableTask' successfully performed!");
     }
@@ -151,6 +140,6 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSequenceTable(), getHistoryTable() };
+        return new String[] { getHistoryTable() };
     }
 }

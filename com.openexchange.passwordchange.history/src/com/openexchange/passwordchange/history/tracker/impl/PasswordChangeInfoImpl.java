@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordchange.history.tracker.impl;
 
-import java.sql.Timestamp;
 import javax.xml.bind.annotation.XmlRootElement;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 
@@ -62,7 +61,7 @@ import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 @XmlRootElement
 public class PasswordChangeInfoImpl implements PasswordChangeInfo {
 
-    private Timestamp created;
+    private long created;
     private String client;
     private String ip;
 
@@ -73,7 +72,7 @@ public class PasswordChangeInfoImpl implements PasswordChangeInfo {
      * @param client The client that did the change
      * @param ip The optional IP of the client
      */
-    public PasswordChangeInfoImpl(Timestamp created, String client, String ip) {
+    public PasswordChangeInfoImpl(long created, String client, String ip) {
         super();
         this.created = created;
         this.client = client;
@@ -81,7 +80,7 @@ public class PasswordChangeInfoImpl implements PasswordChangeInfo {
     }
 
     @Override
-    public Timestamp getCreated() {
+    public long getCreated() {
         return created;
     }
 

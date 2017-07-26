@@ -50,13 +50,14 @@
 package com.openexchange.passwordchange.history.events;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
+import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
 /**
@@ -69,14 +70,17 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
 
-    ExecutorService executor;
+    ServiceLookup service;
+    PasswordChangeHandlerRegistry registry;
 
     /**
      * Initializes a new {@link PasswordChangeInterceptor}.
+     * @param registry 
      */
-    public PasswordChangeInterceptor() {
+    public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
         super();
-        this.executor = Executors.newCachedThreadPool();
+        this.service = service;
+        this.registry = registry;
     }
 
     @Override
@@ -91,11 +95,11 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
             final int contextID = context.getContextId();
             final int userID = user.getId();
             // so password was changed..
-            executor.submit(new Runnable() {
+            service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
                 @Override
                 public void run() {
-                    PasswordChangeUtility.recordChange(contextID, userID, null, PasswordChangeInfo.PROVISIONING);
+                    PasswordChangeUtility.recordChange(service, registry, contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
                 }
             });
         }
@@ -106,12 +110,12 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         final int contextID = context.getContextId();
         final int userID = user.getId();
         // Clear DB after deletion of user
-        executor.submit(new Runnable() {
+        service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    PasswordChangeUtility.clearFor(contextID, userID, 0);
+                    PasswordChangeUtility.clearFor(service, registry, contextID, userID, 0);
                 } catch (Exception e) {
                     // In case view can not be loaded
                     LOG.error("Could not delete password chage history for {} in context {}. Reason: ", String.valueOf(userID), String.valueOf(contextID), e.getMessage());

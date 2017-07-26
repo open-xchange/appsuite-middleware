@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.exeption;
+package com.openexchange.passwordchange.exception;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -67,9 +67,9 @@ public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode
 
     DISABLED("Password change histroy for user %s in context %s is disabled", MESSAGE, Category.CATEGORY_PERMISSION_DENIED, 101),
 
-    MISSING_CONFIGURATION("Tracker for user %s in context %s is not configured. Therefor no history is created.", MESSAGE, Category.CATEGORY_CONFIGURATION, 102),
+    MISSING_CONFIGURATION("Handler for user %s in context %s is not configured. Therefor no history is created.", MESSAGE, Category.CATEGORY_CONFIGURATION, 102),
 
-    MISSING_TRACKER("The tracker %s was not found in the register.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 103)
+    MISSING_TRACKER("The handler %s was not found in the register.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 103)
 
     ;
 

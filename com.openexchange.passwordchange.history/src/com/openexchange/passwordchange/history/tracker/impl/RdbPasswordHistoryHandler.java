@@ -56,56 +56,63 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.passwordchange.history.osgi.Services;
+import com.openexchange.exception.OXException;
+import com.openexchange.passwordchange.exception.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeTracker;
+import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.tracker.SortType;
-import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DatabasePasswordChangeTracker}
+ * {@link RdbPasswordHistoryHandler}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
+public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=?;";
+    private static final String GET_DATA_ASC = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY id ASC;";
+    private static final String GET_DATA_DESC = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY id DESC;";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?;";
 
     private static final String CLEAR_FOR_ID = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
     private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
 
-    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, id, uid, source, ip, created) VALUES (?,?,?,?,?,?);";
-    private static final String CREATE_SEQUENCE = "INSERT INTO sequence_password_history (cid, id) VALUES (?,?);";
+    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?);";
 
-    private static final String LIMIT = "com.openexchange.passwordchange.limit";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbPasswordHistoryHandler.class);
+    private static final String SYMBOLIC_NAME = "DB";
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabasePasswordChangeTracker.class);
+    private final ServiceLookup service;
 
-    public DatabasePasswordChangeTracker() {
+    public RdbPasswordHistoryHandler(ServiceLookup service) {
         super();
+        this.service = service;
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
+    public String getSymbolicName() {
+        return SYMBOLIC_NAME;
+    }
+
+    @Override
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type) {
         List<PasswordChangeInfo> retval = new LinkedList<>();
         Connection con = null;
-        Context context = null;
         PreparedStatement stmt = null;
+        DatabaseService dbService = null;
         try {
             // Get data
-            context = Services.getService(ContextService.class, true).getContext(contextID);
-            con = DBPool.pickupWriteable(context);
-            stmt = con.prepareStatement(GET_DATA);
+            dbService = getService(DatabaseService.class);
+            con = dbService.getReadOnly(contextID);
+            stmt = con.prepareStatement(getData(type));
             stmt.setInt(1, contextID);
             stmt.setInt(2, userID);
             stmt.execute();
@@ -116,7 +123,7 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             try {
                 // Convert data
                 while (set.next()) {
-                    Timestamp created = set.getTimestamp(1);
+                    long created = set.getLong(1);
                     String client = set.getString(2);
                     String ip = set.getString(3);
 
@@ -126,88 +133,83 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
                 LOG.debug("Error while getting password history from DB.");
             }
         } catch (Exception e) {
-            LOG.warn("Could not get password history.");
+            LOG.warn("Could not get password history. Cause: {}\nMessage: {} ", e.getCause(), e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            DBPool.closeWriterSilent(context, con);
+            if (null != dbService) {
+                dbService.backReadOnly(contextID, con);
+            }
         }
         return retval;
 
     }
 
+    /**
+     * Converts the SortType into fitting SQL command
+     * 
+     * @return The SQL command
+     */
+    private String getData(SortType type) {
+        switch (type) {
+            case NEWEST:
+                return GET_DATA_DESC;
+            case OLDEST:
+                return GET_DATA_ASC;
+            case NONE:
+            default:
+                return GET_DATA;
+        }
+    }
+
     @Override
     public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) {
         Connection con = null;
-        Context context = null;
         PreparedStatement stmt = null;
+        DatabaseService dbService = null;
         try {
-            context = Services.getService(ContextService.class, true).getContext(contextID);
-            con = DBPool.pickupWriteable(context);
-
-            int sequence = -1;
-            boolean rollback = true;
-            try {
-                con.setAutoCommit(false);
-                sequence = IDGenerator.getId(contextID, com.openexchange.groupware.Types.PASSWORD_CHANGE, con);
-                con.commit();
-                rollback = false;
-            } catch (SQLException e) {
-                // Table or entry for this context does not exist
-                LOG.error("Error while getting ID for password change history. Error: {}", e.getMessage());
-            } finally {
-                if (rollback) {
-                    LOG.debug("Can't save password change,");
-                    Databases.rollback(con);
-                }
-            }
-
-            if (sequence <= 0) {
-                // Write new table entry
-                sequence = 1;
-
-                stmt = con.prepareStatement(CREATE_SEQUENCE);
-                stmt.setInt(1, contextID);
-                stmt.setInt(2, sequence);
-                stmt.execute();
-
-                Databases.closeSQLStuff(stmt);
-            }
+            // Get writable connection
+            dbService = getService(DatabaseService.class);
+            con = dbService.getWritable(contextID);
 
             // Write info
             stmt = con.prepareStatement(INSERT_DATA);
             stmt.setInt(1, contextID);
-            stmt.setInt(2, sequence);
-            stmt.setInt(3, userID);
-            stmt.setString(4, info.getClient());
+            stmt.setInt(2, userID);
+            stmt.setString(3, info.getClient());
             if (null == info.getIP()) {
-                stmt.setNull(5, Types.VARCHAR);
+                stmt.setNull(4, Types.VARCHAR);
             } else {
-                stmt.setString(5, info.getIP());
+                stmt.setString(4, info.getIP());
             }
-            stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            stmt.setLong(5, System.currentTimeMillis());
             stmt.execute();
-            
-            con.commit();
         } catch (Exception e) {
             LOG.warn("Could not save password history. Error: {}", e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            DBPool.closeWriterSilent(context, con);
+            if (null != dbService) {
+                dbService.backWritable(contextID, con);
+            }
         }
 
         // Clean up data too
         try {
-            final ConfigViewFactory casscade = Services.getService(ConfigViewFactory.class);
+            final ConfigViewFactory casscade = getService(ConfigViewFactory.class);
             if (null == casscade) {
                 LOG.warn("Could not get config to delete password history.");
             } else {
-                int limit = 10;
+                Integer limit = null;
                 try {
-                    limit = casscade.getView(userID, contextID).get(LIMIT, Integer.class);
+                    limit = casscade.getView(userID, contextID).get(PasswordChangeHistoryProperties.limit.getFQPropertyName(), Integer.class);
                 } catch (Exception e) {
                     // Nothing configured. Go with standard value
+                    LOG.debug("Error while getting c.o.passwordchange.history.limit for user {}", userID);
                 }
-                clear(userID, contextID, limit);
+                if (null == limit) {
+                    limit = PasswordChangeHistoryProperties.limit.getDefaultValue(Integer.class);
+                }
+
+                clear(userID, contextID, limit.intValue());
             }
         } catch (Exception e) {
             LOG.warn("Could not clear password change history for " + userID + " in context " + contextID);
@@ -217,11 +219,12 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
     @Override
     public void clear(int userID, int contextID, int limit) {
         Connection con = null;
-        Context context = null;
         PreparedStatement stmt = null;
+        DatabaseService dbService = null;
         try {
-            context = Services.getService(ContextService.class, true).getContext(contextID);
-            con = DBPool.pickupWriteable(context);
+            // Get writable connection
+            dbService = getService(DatabaseService.class);
+            con = dbService.getWritable(contextID);
             if (limit <= 0) {
                 stmt = con.prepareStatement(CLEAR_FOR_USER);
                 stmt.setInt(1, contextID);
@@ -265,60 +268,16 @@ public class DatabasePasswordChangeTracker implements PasswordChangeTracker {
             LOG.warn("Could not delete password histroy.");
         } finally {
             Databases.closeSQLStuff(stmt);
-            DBPool.closeWriterSilent(context, con);
+            if (null != dbService) {
+                dbService.backWritable(contextID, con);
+            }
         }
     }
 
-    @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type) {
-
-        List<PasswordChangeInfo> retval = listPasswordChanges(userID, contextID);
-
-        switch (type) {
-            case NEWEST:
-                Collections.sort(retval, new Comparator<PasswordChangeInfo>() {
-
-                    @Override
-                    public int compare(PasswordChangeInfo o1, PasswordChangeInfo o2) {
-                        // Compare by Timestamps
-                        if (o1.getCreated().before(o2.getCreated())) {
-                            /*
-                             * Before o2, assume it is greater to get o1 sorted behind o2
-                             * "2017-07-04 17:55:29.0" > "2017-07-04 17:57:22.0"
-                             * {"2017-07-04 17:57:22.0", "2017-07-04 17:55:29.0"}
-                             */
-                            return 1;
-                        } else if (o1.getCreated().after(o2.getCreated())) {
-                            return -1;
-                        }
-                        return 0;
-                    }
-                });
-                break;
-            case OLDEST:
-                Collections.sort(retval, new Comparator<PasswordChangeInfo>() {
-
-                    @Override
-                    public int compare(PasswordChangeInfo o1, PasswordChangeInfo o2) {
-                        // Compare by Timestamps
-                        if (o1.getCreated().before(o2.getCreated())) {
-                            /*
-                             * Before o2, assume it is less to get o1 sorted before o2
-                             * "2017-07-04 17:55:29.0" < "2017-07-04 17:57:22.0"
-                             * {"2017-07-04 17:55:29.0", "2017-07-04 17:57:22.0"}
-                             */
-                            return -1;
-                        } else if (o1.getCreated().after(o2.getCreated())) {
-                            return 1;
-                        }
-                        return 0;
-                    }
-                });
-                break;
-            case NONE:
-            default:
-                // Nothing to do
-                break;
+    private <T extends Object> T getService(Class<? extends T> clazz) throws OXException {
+        T retval = service.getService(clazz);
+        if (null == retval) {
+            throw PasswordChangeHistoryException.MISSING_SERVICE.create(clazz.getSimpleName());
         }
         return retval;
     }
