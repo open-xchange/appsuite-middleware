@@ -52,8 +52,6 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -629,34 +627,22 @@ public final class MimeSnippetManagement implements SnippetManagement, QuotaAwar
             String file;
             Long size=null;
             {
-                InputStream mimeStream = null;
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 try {
-                    mimeStream = MimeMessageUtility.getStreamFromPart(mimeMessage);
-                    byte[] buff = new byte[mimeStream.available()>0 ? mimeStream.available() : 8192];
-                    int bytesRead = 0;
-                    ByteArrayOutputStream bao = new ByteArrayOutputStream();
-
-                    while((bytesRead = mimeStream.read(buff)) != -1) {
-                       bao.write(buff, 0, bytesRead);
-                    }
-
-                    byte[] data = bao.toByteArray();
-                    size = Long.valueOf(data.length);
-                    ByteArrayInputStream bin = new ByteArrayInputStream(data);
-
+                    mimeMessage.writeTo(fileHolder.asOutputStream());
+                    size = fileHolder.getLength();
                     if (QuotaMode.INDEPENDENT.equals(MODE)) {
-                        QuotaType quotaType = snippet.isShared() ? QuotaType.CUSTOM : QuotaType.SIZE;
-                        if (null != quota && quota.hasQuota(quotaType)) {
-                            Quota sizeQuota = quota.getQuota(quotaType);
+                        if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                            Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                             if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
                                 backAfterRead = true;
                                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(toMB(sizeQuota.getLimit()));
                             }
                         }
                     }
-                    file = fileStorage.saveNewFile(bin);
+                    file = fileStorage.saveNewFile(fileHolder.getClosingStream());
                 } finally {
-                    Streams.close(mimeStream);
+                    fileHolder.close();
                 }
             }
             // Store in DB, too
@@ -681,7 +667,7 @@ public final class MimeSnippetManagement implements SnippetManagement, QuotaAwar
                 stmt.setInt(8, snippet.isShared() ? 1 : 0);
                 stmt.setLong(9, System.currentTimeMillis());
                 stmt.setString(10, file);
-                if(size!=null){
+                if(size!=null && size>0){
                     stmt.setLong(11, size);
                 } else {
                     stmt.setNull(11, Types.INTEGER);
@@ -982,30 +968,27 @@ public final class MimeSnippetManagement implements SnippetManagement, QuotaAwar
             updateMessage.removeHeader("Message-ID");
             updateMessage.removeHeader("MIME-Version");
 
-            // ... and write to byte array
-            byte[] byteArray;
-            {
-                final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
-                updateMessage.writeTo(outputStream);
-                byteArray = outputStream.toByteArray();
-            }
-
-            long size = byteArray.length;
-            long difference = size - oldSize;
-            if (difference>0 && QuotaMode.INDEPENDENT.equals(MODE)) {
-                QuotaType quotaType = snippet.isShared() ? QuotaType.CUSTOM : QuotaType.SIZE;
-                if (null != quota && quota.hasQuota(quotaType)) {
-                    Quota sizeQuota = quota.getQuota(quotaType);
-                    if (sizeQuota.isExceeded() || sizeQuota.willExceed(difference)) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(toMB(sizeQuota.getLimit()));
+            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            long size = 0;
+            try {
+                updateMessage.writeTo(fileHolder.asOutputStream());
+                size = fileHolder.getLength();
+                long difference = size - oldSize;
+                if (difference > 0 && QuotaMode.INDEPENDENT.equals(MODE)) {
+                    if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                        Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(difference)) {
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(toMB(sizeQuota.getLimit()));
+                        }
                     }
                 }
+
+                // Create file carrying new MIME data
+                newFile = fileStorage.saveNewFile(fileHolder.getClosingStream());
+            } finally {
+                fileHolder.close();
             }
 
-            // Create file carrying new MIME data
-            newFile = fileStorage.saveNewFile(Streams.newByteArrayInputStream(byteArray));
-
-            byteArray = null; // Drop immediately
             {
                 Connection con = databaseService.getWritable(contextId);
                 PreparedStatement stmt = null;

@@ -64,9 +64,5 @@ public enum QuotaType {
     /**
      * The quota for size of items.
      */
-    SIZE,
-    /**
-     * A custom quota in case {@link QuotaType#AMOUNT} and {@link QuotaType#SIZE} are not sufficient.
-     */
-    CUSTOM
+    SIZE
 }

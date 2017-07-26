@@ -79,8 +79,6 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
     private static final String MODULE_ID = "mime_snippet";
     private static final String PROP_NAME = "com.openexchange.snippet.quota.limit";
     private static final String USER_LIMIT_PROPERTY = "com.openexchange.snippet.filestore.quota.perUserLimit";
-    private static final String SHARE_LIMIT_PROPERTY = "com.openexchange.snippet.filestore.quota.shareLimit";
-
 
     private final AtomicReference<SnippetService> snippetServiceRef;
 
@@ -135,22 +133,6 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         return new Quota(QuotaType.SIZE, limit, usage);
     }
 
-    private Quota getShareSizeQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
-        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, SHARE_LIMIT_PROPERTY, viewFactory, 5242880);
-        if (limit <= Quota.UNLIMITED) {
-            return Quota.UNLIMITED_CUSTOM;
-        }
-
-        SnippetManagement management = snippetServiceRef.get().getManagement(session);
-        long usage = 0;
-        if(management instanceof QuotaAwareSnippetManagement){
-            usage = ((QuotaAwareSnippetManagement) management).getUsage(true);
-        }
-
-        return new Quota(QuotaType.CUSTOM, limit, usage);
-    }
-
-
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
         if (!accountID.equals("0")) {
@@ -164,8 +146,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
 
         Quota amountQuota = getAmountQuota(session, viewFactory);
         Quota sizeQuota = getSizeQuota(session, viewFactory);
-        Quota shareQuota = getShareSizeQuota(session, viewFactory);
-        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota).addQuota(sizeQuota).addQuota(shareQuota);
+        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota).addQuota(sizeQuota);
     }
 
     @Override
