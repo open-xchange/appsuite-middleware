@@ -97,7 +97,7 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
         String sessionId = testClient2.getSession().getId();
-        RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest(sessionId);
+        RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest();
         RemoveAllOtherSessionsResponse response = testClient2.execute(request);
 
         Assert.assertFalse(response.hasError());
@@ -121,7 +121,7 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
             blackListed = new AJAXClient(testUser2, BLACKLISTED_CLIENT);
 
             String sessionId = testClient2.getSession().getId();
-            RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest(sessionId);
+            RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest();
             RemoveAllOtherSessionsResponse response = testClient2.execute(request);
 
             Assert.assertFalse(response.hasError());
