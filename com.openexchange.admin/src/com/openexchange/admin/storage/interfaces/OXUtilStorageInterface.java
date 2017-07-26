@@ -55,6 +55,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -396,14 +397,14 @@ public abstract class OXUtilStorageInterface {
     public abstract List<String> createDatabaseSchemas(Database db, int optNumberOfSchemas) throws StorageException;
 
     /**
-     * Deletes specified empty schema from given database host.
+     * Deletes empty schemas from given database host.
      *
-     * @param db A database host and schema
+     * @param db An optional database host; possibly also specifying a certain schema
      * @param optNumberOfSchemasToKeep Specifies the number of schemas to keep (per database); if not specified all empty schemas are supposed to be deleted
-     * @return The number of empty chmeas that were deleted
+     * @return The empty schemas that were deleted (grouped by database host association)
      * @throws StorageException If schema cannot be deleted
      */
-    public abstract int deleteDatabaseSchema(Database db, int optNumberOfSchemasToKeep) throws StorageException;
+    public abstract Map<Integer, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException;
 
     /**
      * Creates a new database from scratch on the given database host. Is used

@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -70,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 
 /**
  * Implementation class for the RMI interface for util
@@ -392,9 +394,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public int deleteSchemas(Database db, Integer optNumberOfSchemasToKeep, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public int deleteEmptySchemas(Database db, Integer optNumberOfSchemasToKeep, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        
+
         if (null != db) {
             try {
                 setIdOrGetIDFromNameAndIdObject(null, db);
@@ -408,14 +410,24 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         Database existing = null == db ? null : tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
 
         if (null != db && null != db.getScheme()) {
+            existing.setScheme(db.getScheme());
+
+            if (false == OXUtilMySQLStorageCommon.existsDatabase(existing)) {
+                throw new StorageException("Schema \"" + db.getScheme() + "\" does not exist in database " + db.getId());
+            }
+
             if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
                 throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
             }
-            existing.setScheme(db.getScheme());
         }
 
         int iOptNumberOfSchemasToKeep = null != optNumberOfSchemasToKeep ? optNumberOfSchemasToKeep.intValue() : 0;
-        return oxutil.deleteDatabaseSchema(existing, iOptNumberOfSchemasToKeep);
+        Map<Integer, List<String>> deletedSchemas = oxutil.deleteEmptyDatabaseSchemas(existing, iOptNumberOfSchemasToKeep);
+        int numDeleted = 0;
+        for (List<String> schemas : deletedSchemas.values()) {
+            numDeleted += schemas.size();
+        }
+        return numDeleted;
     }
 
     @Override

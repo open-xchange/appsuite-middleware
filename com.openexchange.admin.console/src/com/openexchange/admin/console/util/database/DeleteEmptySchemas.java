@@ -80,20 +80,25 @@ public class DeleteEmptySchemas extends DatabaseAbstraction {
             parseAndSetDatabasename(parser, db);
             parseAndSetSchema(parser, db);
             parseAndSetSchemasToKeep(parser);
-            
-            if (dbid == null && dbname == null) {
+
+
+            boolean noDbGiven = dbid == null && dbname == null;
+            if (noDbGiven) {
                 // Neither database ID nor name
                 if (db.getScheme() != null) {
                     System.err.println("Either \"" + OPT_NAME_DATABASE_ID_LONG + "\" or \"" + OPT_NAME_DBNAME_LONG + "\" needs to be specified when setting \"" + OPT_NAME_SCHEMA_LONG + "\" option");
                     sysexit(SYSEXIT_INVALID_DATA);
                 }
-                
+
                 db = null;
             }
-            
-            int numberOfDeletedSchemas = oxutil.deleteSchemas(db, schemasToKeep, auth);
-            System.out.println("Successfully deleted " + numberOfDeletedSchemas + " empty schemas");
 
+            int numberOfDeletedSchemas = oxutil.deleteEmptySchemas(db, schemasToKeep, auth);
+            if (noDbGiven) {
+                System.out.println("Successfully deleted " + numberOfDeletedSchemas + " empty schemas");
+            } else {
+                System.out.println("Successfully deleted " + numberOfDeletedSchemas + " empty schemas from database " + (null == dbid ? dbname : dbid));
+            }
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

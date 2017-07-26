@@ -66,7 +66,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,7 +76,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -1058,58 +1056,66 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public int deleteDatabaseSchema(Database db, int optNumberOfSchemasToKeep) throws StorageException {
+    public Map<Integer, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException {
         // Determine list of empty schemas to delete
+        int numberOfSchemasToKeep = optNumberOfSchemasToKeep;
         boolean schemaSpecified = false;
         Map<Integer, List<Database>> databaseAndSchemasList;
         if (null == db) {
-            databaseAndSchemasList = getEmptySchemasFromDatabases(db);
+            databaseAndSchemasList = getEmptySchemasFromAllDatabases();
         } else {
             int poolId = db.getId().intValue();
             if (null == db.getScheme()) {
-                databaseAndSchemasList = getEmptySchemasFromDatabases(db);
+                databaseAndSchemasList = getEmptySchemasFromDatabase(db);
             } else {
-                databaseAndSchemasList = OXUtilMySQLStorage.<Integer, List<Database>> singletonHashMap(Integer.valueOf(poolId), singletonArrayList(new Database(poolId, db.getScheme())));
+                // Both database (host) and schema specified
                 schemaSpecified = true;
+                numberOfSchemasToKeep = 0;
+                databaseAndSchemasList = OXUtilMySQLStorage.<Integer, List<Database>> singletonHashMap(Integer.valueOf(poolId), singletonArrayList(new Database(poolId, db.getScheme())));
             }
         }
-        
-        // Reserve for deletion
-        int newCount = Integer.MAX_VALUE; // Should be greater than CONTEXTS_PER_SCHEMA            
+
+        // Mark for deletion
+        int newCount = Integer.MAX_VALUE; // Should be greater than CONTEXTS_PER_SCHEMA
         {
             Connection con = null;
             try {
                 con = cache.getWriteConnectionForConfigDBNoTimeout();
-                
+
                 for (Iterator<List<Database>> iter = databaseAndSchemasList.values().iterator(); iter.hasNext();) {
                     List<Database> emptySchemas = iter.next();
-                    
-                    if (optNumberOfSchemasToKeep > 0) {
-                        int mayBeDeleted = emptySchemas.size() - optNumberOfSchemasToKeep;
-                        if (mayBeDeleted <= 0) {
-                            // Not enough empty schemas
-                            emptySchemas = Collections.emptyList();
-                        } else {
-                            // Remain only the ones that may be deleted
-                            int toKeep = optNumberOfSchemasToKeep;
-                            for (Iterator<Database> dbIter = emptySchemas.iterator(); toKeep-- > 0 && dbIter.hasNext();) {
+
+                    // Check how many empty schemas are allowed to be deleted for current database host
+                    int numOfSchemasToDelete = numberOfSchemasToKeep > 0 ? emptySchemas.size() - numberOfSchemasToKeep : emptySchemas.size();
+                    if (numOfSchemasToDelete <= 0) {
+                        // No schema is allowed to be deleted from current database host
+                        iter.remove();
+                    } else {
+                        // Only keep the ones in 'emptySchemas' list that are allowed to be deleted and could be successfully marked
+                        for (Iterator<Database> dbIter = emptySchemas.iterator(); dbIter.hasNext();) {
+                            Database emptySchema = dbIter.next();
+                            if (numOfSchemasToDelete > 0) {
+                                if (tryUpdateDBSchemaCounter(0, newCount, emptySchema, con)) {
+                                    // Successfully marked for deletion
+                                    LOG.debug("Schema \"{}\" of database {} successfully marked for deletion", emptySchema.getScheme(), emptySchema.getId());
+                                    numOfSchemasToDelete--;
+                                } else {
+                                    if (schemaSpecified) {
+                                        throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+                                    }
+
+                                    // Schema in-use in the meantime
+                                    dbIter.remove();
+                                }
+                            } else {
+                                // Schema must not be deleted anymore
                                 dbIter.remove();
                             }
                         }
-                    }
-                    
-                    for (Iterator<Database> dbIter = emptySchemas.iterator(); dbIter.hasNext();) {
-                        Database emptySchema = dbIter.next();
-                        if (false == tryUpdateDBSchemaCounter(0, newCount, emptySchema, con)) {
-                            if (schemaSpecified) {
-                                throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
-                            }
-                            dbIter.remove();
+
+                        if (emptySchemas.isEmpty()) {
+                            iter.remove();
                         }
-                    }
-                    
-                    if (emptySchemas.isEmpty()) {
-                        iter.remove();
                     }
                 }
             } catch (PoolException pe) {
@@ -1128,48 +1134,53 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
         }
-        
+
         // Delete reserved ones
-        int numdeleted = 0;
+        Map<Integer, List<String>> deletedSchemas = new LinkedHashMap<>(databaseAndSchemasList.size());
         for (Map.Entry<Integer, List<Database>> databaseAndSchemas : databaseAndSchemasList.entrySet()) {
             int poolId = databaseAndSchemas.getKey().intValue();
-            
+
             Connection con = null;
             boolean rollback = false;
             try {
                 con = cache.getWriteConnectionForConfigDBNoTimeout();
-                
+
                 con.setAutoCommit(false);
                 rollback = true;
-                
+
                 // Acquire lock
                 cache.getPool().lock(con, poolId);
-                
+
                 List<Database> schemas = databaseAndSchemas.getValue();
                 for (Iterator<Database> dbIter = schemas.iterator(); dbIter.hasNext();) {
                     Database schema = dbIter.next();
                     if (newCount != readDBSchemaCounter(schema, con)) {
-                        // Got in use in the meantime
+                        // Schema in-use in the meantime
                         if (schemaSpecified) {
                             throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
                         }
                         dbIter.remove();
                     }
                 }
-                
-                // Delete the empty schemas from database host
-                for (Database schema : schemas) {
-                    try {
-                        OXUtilMySQLStorageCommon.deleteDatabase(schema, con);
-                        LOG.info("Deleted empty schema \"{}\" of database {}", schema.getScheme(), schema.getId());
-                        numdeleted++;
-                    } catch (StorageException e) {
-                        LOG.error("Failed to delete empty schema \"{}\" of database {}", schema.getScheme(), schema.getId(), e);
-                    } catch (RuntimeException e) {
-                        LOG.error("Failed to delete empty schema \"{}\" of database {}", schema.getScheme(), schema.getId(), e);
+
+                // Delete the empty schemas from database host (if any)
+                int numSchemas = schemas.size();
+                if (numSchemas > 0) {
+                    List<String> deleted = new ArrayList<>(numSchemas);
+                    for (Database schema : schemas) {
+                        try {
+                            OXUtilMySQLStorageCommon.deleteDatabase(schema, con);
+                            LOG.info("Deleted empty schema \"{}\" from database {}", schema.getScheme(), schema.getId());
+                            deleted.add(schema.getScheme());
+                        } catch (StorageException e) {
+                            LOG.error("Failed to delete empty schema \"{}\" of database {}", schema.getScheme(), schema.getId(), e);
+                        } catch (RuntimeException e) {
+                            LOG.error("Failed to delete empty schema \"{}\" of database {}", schema.getScheme(), schema.getId(), e);
+                        }
                     }
+                    deletedSchemas.put(Integer.valueOf(poolId), deleted);
                 }
-                
+
                 con.commit();
                 rollback = false;
             } catch (PoolException pe) {
@@ -1191,8 +1202,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
         }
-        
-        return numdeleted;
+
+        return deletedSchemas;
     }
 
     private static <K, V> HashMap<K, V> singletonHashMap(K key, V value) {
@@ -1200,20 +1211,28 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         hashMap.put(key, value);
         return hashMap;
     }
-    
+
     private static <E> ArrayList<E> singletonArrayList(E element) {
         ArrayList<E> al = new ArrayList<>(1);
         al.add(element);
         return al;
     }
 
-    private Map<Integer, List<Database>> getEmptySchemasFromDatabases(Database optDatabase) throws StorageException {
+    private Map<Integer, List<Database>> getEmptySchemasFromAllDatabases() throws StorageException {
+        return determineEmptySchemas(null);
+    }
+
+    private Map<Integer, List<Database>> getEmptySchemasFromDatabase(Database database) throws StorageException {
+        return determineEmptySchemas(database);
+    }
+
+    private Map<Integer, List<Database>> determineEmptySchemas(Database optDatabase) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            
+
             if (null != optDatabase) {
                 int poolId = optDatabase.getId().intValue();
                 stmt = con.prepareStatement("SELECT schemaname FROM contexts_per_dbschema WHERE db_pool_id=? AND count=0");
@@ -1223,32 +1242,45 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     // No empty schemas on given database host
                     return singletonHashMap(optDatabase.getId(), Collections.<Database> emptyList());
                 }
-                
+
+                OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+                Database mainDb = tool.loadDatabaseById(poolId);
+
                 List<Database> emptySchemas = new LinkedList<>();
                 do {
-                    emptySchemas.add(new Database(poolId, rs.getString(1)));
+                    String schema = rs.getString(1);
+                    emptySchemas.add(new Database(mainDb, schema));
                 } while (rs.next());
                 return singletonHashMap(optDatabase.getId(), emptySchemas);
             }
-            
+
             stmt = con.prepareStatement("SELECT c.write_db_pool_id, s.schemaname FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id WHERE count=0");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No empty schemas at all
                 return Collections.emptyMap();
             }
-            
+
+            OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            Map<Integer, Database> mainDbCache = new HashMap<>();
+
             Map<Integer, List<Database>> db2schemas = new LinkedHashMap<>();
             do {
                 Integer poolId = Integer.valueOf(rs.getInt(1));
                 String schema = rs.getString(2);
-                if (null != schema) {                    
+                if (null != schema) {
+                    Database mainDb = mainDbCache.get(poolId);
+                    if (null == mainDb) {
+                        mainDb = tool.loadDatabaseById(poolId.intValue());
+                        mainDbCache.put(poolId, mainDb);
+                    }
+
                     List<Database> emptySchemas = db2schemas.get(poolId);
                     if (null == emptySchemas) {
                         emptySchemas = new LinkedList<>();
                         db2schemas.put(poolId, emptySchemas);
                     }
-                    emptySchemas.add(new Database(poolId.intValue(), schema));
+                    emptySchemas.add(new Database(mainDb, schema));
                 }
             } while (rs.next());
             return db2schemas;
@@ -1260,7 +1292,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             throw new StorageException(ecp);
         } finally {
             closeSQLStuff(rs, stmt);
-            
+
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
@@ -1374,6 +1406,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 String schemaName = db.getName() + '_' + schemaUnique;
                 db.setScheme(schemaName);
                 OXUtilMySQLStorageCommon.createDatabase(db, con);
+                LOG.info("Created empty schema \"{}\" in database {}", schemaName, db.getId());
                 schemasToRemove.add(schemaName);
             }
 
@@ -1387,6 +1420,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 for (String schemaName : schemasToRemove) {
                     db.setScheme(schemaName);
                     OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+                    LOG.info("Error during schema creation. Deleted previously created schema \"{}\" from database {}", schemaName, db.getId());
                 }
             }
         }
@@ -1582,6 +1616,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     String schemaName = db.getName() + '_' + schemaUnique;
                     db.setScheme(schemaName);
                     OXUtilMySQLStorageCommon.createDatabase(db, con);
+                    LOG.info("Created empty schema \"{}\" in database {}", schemaName, db.getId());
                     schemasToRemove.add(schemaName);
                 }
 
@@ -1602,6 +1637,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 for (String schemaName : schemasToRemove) {
                     db.setScheme(schemaName);
                     OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+                    LOG.info("Error during schema creation. Deleted previously created schema \"{}\" from database {}", schemaName, db.getId());
                 }
             }
         }
