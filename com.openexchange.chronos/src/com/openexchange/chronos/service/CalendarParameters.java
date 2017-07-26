@@ -122,6 +122,11 @@ public interface CalendarParameters {
      * {@link TimeZone}
      * <p/>
      * Provides a (possibly overridden) timezone used on a per-request basis.
+     * <p/>
+     * The timezone is used to resolve <i>floating</i> date-times to concrete timestamps when determining if an event intersects with a
+     * given range.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.8">RFC 4791, section 9.8</a>
      */
     static final String PARAMETER_TIMEZONE = "timezone";
 
