@@ -112,7 +112,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     private String peerId;
     private Future<?> task;
-    private Future<?> connectionGuard;
+    private Future<?> connectionOverwatch;
     private Future<Socket> connectorTask;
     private volatile Socket socket;
     private int reconnectionDelay;
@@ -262,7 +262,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         if (connectorTask != null) {
             connectorTask.cancel(true);
         }
-        connectionGuard.cancel(true);
+        connectionOverwatch.cancel(true);
         REF.set(null);
         super.stop();
     }
@@ -348,7 +348,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             encoder.init(oos);
             logInfo("Dispatching events...");
             while (true) {
-                if (connectionGuard.isDone()) {
+                if (connectionOverwatch.isDone()) {
                     throw new IOException("Remote peer " + peerId + " closed the connection.");
                 }
                 event = queue.take();
@@ -515,7 +515,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         logInfo("Connection established to " + peerId + ".");
         connectorTask = null;
         // Guard the input stream
-        connectionGuard = getContext().getExecutorService().submit(new ConnectionGuard(s.getInputStream()));
+        connectionOverwatch = getContext().getExecutorService().submit(new ConnectionOverwatch(s.getInputStream()));
         return s;
     }
 
@@ -767,18 +767,18 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     //////////////////////// NESTED CLASSES ////////////////////////////
     
     /**
-     * {@link ConnectionGuard}
+     * {@link ConnectionOverwatch}
      */
-    private class ConnectionGuard implements Runnable {
+    private class ConnectionOverwatch implements Runnable {
 
         private final InputStream inputStream;
 
         /**
-         * Initialises a new {@link ConnectionGuard}.
+         * Initialises a new {@link ConnectionOverwatch}.
          * 
          * @param inputStream The {@link InputStream} to guard
          */
-        public ConnectionGuard(InputStream inputStream) {
+        public ConnectionOverwatch(InputStream inputStream) {
             super();
             this.inputStream = inputStream;
         }
