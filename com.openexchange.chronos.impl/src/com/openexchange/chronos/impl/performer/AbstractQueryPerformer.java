@@ -105,7 +105,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Date updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -125,7 +125,7 @@ public abstract class AbstractQueryPerformer {
             }
         }
         if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
+            searchTerm.addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, updatedSince));
         }
         /*
          * perform search & userize the results

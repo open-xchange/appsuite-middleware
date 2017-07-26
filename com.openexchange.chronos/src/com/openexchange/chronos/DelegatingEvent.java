@@ -160,6 +160,26 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public long getTimestamp() {
+        return delegate.getTimestamp();
+    }
+
+    @Override
+    public void setTimestamp(long value) {
+        delegate.setTimestamp(value);
+    }
+
+    @Override
+    public void removeTimestamp() {
+        delegate.removeTimestamp();
+    }
+
+    @Override
+    public boolean containsTimestamp() {
+        return delegate.containsTimestamp();
+    }
+
+    @Override
     public Date getCreated() {
         return delegate.getCreated();
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -260,7 +259,7 @@ public interface CalendarService {
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, String folderID, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(CalendarSession session, String folderID, long updatedSince) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
@@ -278,7 +277,7 @@ public interface CalendarService {
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsOfUser(CalendarSession session, long updatedSince) throws OXException;
 
     /**
      * Creates a new event.

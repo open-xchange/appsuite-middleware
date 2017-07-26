@@ -85,6 +85,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -120,8 +121,7 @@ public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
-        EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
 
@@ -129,7 +129,7 @@ public class Utils {
     public static final EventField[] NON_CLASSIFIED_FIELDS = {
         EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID,
-        EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
+        EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP,
         EventField.UID, EventField.FILENAME
     };
@@ -698,6 +698,22 @@ public class Utils {
             list.add(itrerator.next());
         }
         return list;
+    }
+
+    /**
+     * Gets the maximum timestamp in a list of timestamped results.
+     *
+     * @param results The results to determine the maximum timestamp for
+     * @return The maximum timestamp, or <code>0</code> if the supplied list is <code>null</code> or empty
+     */
+    public static long getMaximumTimestamp(List<? extends TimestampedResult> results) {
+        long timestamp = 0L;
+        if (null != results) {
+            for (TimestampedResult result : results) {
+                timestamp = Math.max(timestamp, result.getTimestamp());
+            }
+        }
+        return timestamp;
     }
 
     /**

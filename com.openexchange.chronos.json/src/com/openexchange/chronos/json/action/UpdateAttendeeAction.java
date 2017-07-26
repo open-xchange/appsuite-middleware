@@ -52,6 +52,7 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -183,9 +184,9 @@ public class UpdateAttendeeAction extends ChronosAction {
 
             }
             if (results != null) {
-                return new AJAXRequestResult(results, results.get(results.size() - 1).getTimestamp(), MultipleCalendarResultConverter.INPUT_FORMAT);
+                return new AJAXRequestResult(results, new Date(results.get(results.size() - 1).getTimestamp()), MultipleCalendarResultConverter.INPUT_FORMAT);
             } else {
-                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, updateAttendeeResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
+                AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
                 if (warnings != null) {
                     ajaxRequestResult.addWarnings(warnings);
                 }

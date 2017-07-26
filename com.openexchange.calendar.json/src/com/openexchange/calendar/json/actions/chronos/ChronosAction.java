@@ -228,17 +228,17 @@ public abstract class ChronosAction extends AppointmentAction {
     protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
     protected static AJAXRequestResult getAppointmentResultWithTimestamp(EventConverter converter, List<Event> events) throws OXException {
-        Date timestamp = new Date(0L);
+        long timestamp = 0L;
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (Event event : events) {
             appointments.add(converter.getAppointment(event));
-            timestamp = getLatestModified(timestamp, event);
+            timestamp = getLatestTimestamp(timestamp, event);
         }
-        return new AJAXRequestResult(appointments, timestamp, "appointment");
+        return new AJAXRequestResult(appointments, new Date(timestamp), "appointment");
     }
 
     protected static AJAXRequestResult getAppointmentResultWithTimestamp(EventConverter converter, List<Event> events, List<EventID> requestedIDs) throws OXException {
-        Date timestamp = new Date(0L);
+        long timestamp = 0L;
         if (requestedIDs.size() != events.size()) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(new IllegalStateException("requestedIDs.size() != events.size()"), Autoboxing.I(50933));
         }
@@ -250,9 +250,9 @@ public abstract class ChronosAction extends AppointmentAction {
                 continue;
             }
             appointments.add(converter.getAppointment(event));
-            timestamp = getLatestModified(timestamp, event);
+            timestamp = getLatestTimestamp(timestamp, event);
         }
-        return new AJAXRequestResult(appointments, timestamp, "appointment");
+        return new AJAXRequestResult(appointments, new Date(timestamp), "appointment");
     }
 
     protected static AJAXRequestResult getAppointmentConflictResult(EventConverter converter, List<EventConflict> conflicts) throws OXException, JSONException {
@@ -286,21 +286,21 @@ public abstract class ChronosAction extends AppointmentAction {
         return new AJAXRequestResult(new JSONObject().put("conflicts", jsonArray), null, "json");
     }
 
-    protected static Date getLatestModified(Date lastModified, Event event) {
-        return getLatestModified(lastModified, event.getLastModified());
+    protected static long getLatestTimestamp(long timestamp, Event event) {
+        return getLatestTimestamp(timestamp, event.getTimestamp());
     }
 
-    protected static Date getLatestModified(Date lastModified1, Date lastModified2) {
-        return null != lastModified2 && lastModified2.after(lastModified1) ? lastModified2 : lastModified1;
+    protected static long getLatestTimestamp(long lastModified1, long lastModified2) {
+        return Math.max(lastModified1, lastModified2);
     }
 
     protected static AJAXRequestResult getAppointmentDeltaResultWithTimestamp(EventConverter converter, List<Event> newAndModifiedEvents, List<Event> deletedEvents) throws OXException {
-        Date timestamp = new Date(0L);
+        long timestamp = 0L;
         CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
         if (null != newAndModifiedEvents) {
             for (Event event : newAndModifiedEvents) {
                 delta.addNewOrModified(converter.getAppointment(event));
-                timestamp = getLatestModified(timestamp, event);
+                timestamp = getLatestTimestamp(timestamp, event);
             }
         }
         if (null != deletedEvents) {
@@ -308,10 +308,10 @@ public abstract class ChronosAction extends AppointmentAction {
                 Appointment appointment = converter.getAppointment(event);
                 appointment.setMarker(Marker.ID_ONLY);
                 delta.addDeleted(appointment);
-                timestamp = getLatestModified(timestamp, event);
+                timestamp = getLatestTimestamp(timestamp, event);
             }
         }
-        return new AJAXRequestResult(delta, timestamp, "appointment");
+        return new AJAXRequestResult(delta, new Date(timestamp), "appointment");
     }
 
     protected List<EventID> parseRequestedIDs(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {

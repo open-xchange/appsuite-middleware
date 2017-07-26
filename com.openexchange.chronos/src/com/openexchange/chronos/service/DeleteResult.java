@@ -57,7 +57,7 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface DeleteResult {
+public interface DeleteResult extends TimestampedResult {
 
     /**
      * Gets the deleted event.

@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -449,6 +450,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeCalendarUser();
+            }
+        });
+        mappings.put(EventField.TIMESTAMP, new BigIntMapping<Event>("timestamp", "Timestamp") {
+
+            @Override
+            public void set(Event event, Long value) {
+                event.setTimestamp(null == value ? 0L : l(value));
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsTimestamp();
+            }
+
+            @Override
+            public Long get(Event event) {
+                return L(event.getTimestamp());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeTimestamp();
             }
         });
         mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>("sequence", "Sequence") {

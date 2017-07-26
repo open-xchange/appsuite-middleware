@@ -153,7 +153,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         checkFolderId(folderId);
         return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }

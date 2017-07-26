@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.composition;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -192,7 +191,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsInFolder(CompositeFolderID folderID, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(CompositeFolderID folderID, long updatedSince) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
@@ -211,7 +210,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsOfUser(Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException;
 
     /**
      * Gets a specific event.

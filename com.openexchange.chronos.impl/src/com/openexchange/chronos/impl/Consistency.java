@@ -111,6 +111,7 @@ public class Consistency {
     public static void setModified(Date lastModified, Event event, int modifiedBy) {
         event.setLastModified(lastModified);
         event.setModifiedBy(modifiedBy);
+        event.setTimestamp(lastModified.getTime());
     }
 
     public static void setCreated(Date created, Event event, int createdBy) {

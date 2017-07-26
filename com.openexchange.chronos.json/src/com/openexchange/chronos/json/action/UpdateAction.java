@@ -52,6 +52,7 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,7 +110,7 @@ public class UpdateAction extends ChronosAction {
         }
         try {
             CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event);
-            return new AJAXRequestResult(calendarResult, calendarResult.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
+            return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             if (isConflict(e)) {
                 return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);

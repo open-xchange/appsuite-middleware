@@ -55,6 +55,6 @@ package com.openexchange.chronos.service;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends EventUpdate {
+public interface UpdateResult extends EventUpdate, TimestampedResult {
 
 }

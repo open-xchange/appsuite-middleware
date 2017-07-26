@@ -70,7 +70,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link SingleFolderCachingCalendarAccess}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -84,7 +84,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
 
     /**
      * Initializes a new {@link SingleFolderCachingCalendarAccess}.
-     * 
+     *
      * @param session
      * @param account The calendar account
      * @param parameters The calendar parameters
@@ -155,7 +155,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         checkFolderId(folderId);
         return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }

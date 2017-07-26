@@ -116,35 +116,35 @@ public class CopyTombstoneDataTask extends MigrationTask {
         /*
          * construct search term & probe total number of event tombstones to migrate
          */
-        SearchTerm<?> searchTerm = getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, minLastModified);
+        SearchTerm<?> searchTerm = getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, minLastModified);
         long tombstoneCount = sourceStorage.getEventStorage().countEventTombstones(searchTerm);
         setProgress(copiedEventTombstones, tombstoneCount);
         if (0 >= tombstoneCount) {
-            LOG.info("No event tombstones with last modified > {} found in source storage for context {}, nothing to do.", L(minLastModified.getTime()), I(contextId));
+            LOG.info("No event tombstones with timestamp > {} found in source storage for context {}, nothing to do.", L(minLastModified.getTime()), I(contextId));
             return;
         }
         /*
          * copy tombstone data in batches & update progress
          */
-        Date lastLastModified = minLastModified;
+        long lastTimestamp = minLastModified.getTime();
         do {
-            lastLastModified = copyTombstoneData(lastLastModified, config.getBatchSize());
+            lastTimestamp = copyTombstoneData(lastTimestamp, config.getBatchSize());
             setProgress(copiedEventTombstones, tombstoneCount);
-        } while (null != lastLastModified);
+        } while (0 < lastTimestamp);
         LOG.info("Successfully copied {} event tombstones and {} attendee tombstones in context {}.", L(copiedEventTombstones), L(copiedAttendeeTombstones), I(contextId));
     }
 
-    private Date copyTombstoneData(Date lastLastModified, int length) throws OXException {
+    private long copyTombstoneData(long lastTimestamp, int length) throws OXException {
         /*
          * read from source storage: event tombstones, corresponding attendees
          */
-        LOG.trace("Loading next chunk of {} event tombstones, with last modified > {}...", I(length), L(lastLastModified.getTime()));
-        SingleSearchTerm searchTerm = getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, lastLastModified);
-        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.LAST_MODIFIED, Order.ASC)).setLimits(0, length);
+        LOG.trace("Loading next chunk of {} event tombstones, with timestamp > {}...", I(length), L(lastTimestamp));
+        SingleSearchTerm searchTerm = getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, lastTimestamp);
+        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, Order.ASC)).setLimits(0, length);
         List<Event> events = sourceStorage.getEventStorage().searchEventTombstones(searchTerm, searchOptions, EventField.values());
         if (null == events || 0 == events.size()) {
-            LOG.trace("No further event tombstones with last modified > {} found.", L(lastLastModified.getTime()));
-            return null;
+            LOG.trace("No further event tombstones with timestamp > {} found.", L(lastTimestamp));
+            return -1L;
         }
         LOG.trace("Successfully loaded {} event tombstones, searching corresponding attendee tombstones...", I(events.size()));
         Map<String, List<Attendee>> attendees = sourceStorage.getAttendeeStorage().loadAttendeeTombstones(getObjectIDs(events));
@@ -158,9 +158,9 @@ public class CopyTombstoneDataTask extends MigrationTask {
         destinationStorage.getAttendeeStorage().insertAttendeeTombstones(attendees);
         copiedEventTombstones += events.size();
         copiedAttendeeTombstones += attendeeCount;
-        Date nextLastModified = events.get(events.size() - 1).getLastModified();
-        LOG.trace("Successfully copied {} event tombstones and {} attendee tombstones; next last modified evaluated to {}.", I(events.size()), I(attendeeCount), L(nextLastModified.getTime()));
-        return nextLastModified;
+        long nextTimestamp = events.get(events.size() - 1).getTimestamp();
+        LOG.trace("Successfully copied {} event tombstones and {} attendee tombstones; next timestamp evaluated to {}.", I(events.size()), I(attendeeCount), L(nextTimestamp));
+        return nextTimestamp;
     }
 
     private Date getMinTombstoneLastModified() {

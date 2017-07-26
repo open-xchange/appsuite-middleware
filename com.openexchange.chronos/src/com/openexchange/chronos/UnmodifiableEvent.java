@@ -112,6 +112,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
+    public void setTimestamp(long value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeTimestamp() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setCreated(Date value) {
         throw new UnsupportedOperationException();
     }

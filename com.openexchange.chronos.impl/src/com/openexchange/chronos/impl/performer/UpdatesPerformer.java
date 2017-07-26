@@ -60,7 +60,7 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Date;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
@@ -100,10 +100,10 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param since The date since when the updates should be collected
+     * @param timestamp The timestamp since when the updates should be collected
      * @return The update result holding the new, modified and deleted events as requested
      */
-    public UpdatesResult perform(Date since) throws OXException {
+    public UpdatesResult perform(long timestamp) throws OXException {
         /*
          * search for events the current session's user attends
          */
@@ -120,7 +120,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          * ... modified after supplied date
          */
         searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since))
+            .addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(timestamp)))
             .addSearchTerm(searchTerm);
         /*
          * perform search & userize the results for the current session's user
@@ -146,17 +146,17 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
      * Performs the operation.
      *
      * @param folder The parent folder to get the event from
-     * @param since The date since when the updates should be collected
+     * @param since The timestamp since when the updates should be collected
      * @return The update result holding the new, modified and deleted events as requested
      */
-    public UpdatesResult perform(UserizedFolder folder, Date since) throws OXException {
+    public UpdatesResult perform(UserizedFolder folder, long since) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(folder))
-            .addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, since)
+            .addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(since))
         );
         /*
          * perform search & userize the results based on the requested folder

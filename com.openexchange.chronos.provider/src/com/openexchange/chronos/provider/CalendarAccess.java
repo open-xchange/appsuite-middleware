@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -165,6 +164,6 @@ public interface CalendarAccess {
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +147,7 @@ public class DeleteAction extends ChronosAction {
                     throw ex;
                 }
             }
-            return new AJAXRequestResult(deleteEvent, deleteEvent.getTimestamp(), CalendarResultConverter.INPUT_FORMAT);
+            return new AJAXRequestResult(deleteEvent, new Date(deleteEvent.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }

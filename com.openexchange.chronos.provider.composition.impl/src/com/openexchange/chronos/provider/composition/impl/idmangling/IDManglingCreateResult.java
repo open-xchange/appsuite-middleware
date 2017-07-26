@@ -80,4 +80,9 @@ public class IDManglingCreateResult implements CreateResult {
         return new IDManglingEvent(delegate.getCreatedEvent(), accountId);
     }
 
+    @Override
+    public long getTimestamp() {
+        return delegate.getTimestamp();
+    }
+
 }

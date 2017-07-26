@@ -230,13 +230,13 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(CompositeFolderID folderID, Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(CompositeFolderID folderID, long updatedSince) throws OXException {
         UpdatesResult updatesResult = getAccess(folderID).getUpdatedEventsInFolder(folderID.getFolderId(), updatedSince);
         return withUniqueIDs(updatesResult, folderID);
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsOfUser(Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         UpdatesResult updatesResult = getGroupwareAccess(DEFAULT_ACCOUNT).getUpdatedEventsOfUser(updatedSince);
         return withUniqueIDs(updatesResult, DEFAULT_ACCOUNT.getAccountId());
     }

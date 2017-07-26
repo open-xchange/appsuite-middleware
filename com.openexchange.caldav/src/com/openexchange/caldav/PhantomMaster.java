@@ -87,13 +87,18 @@ public class PhantomMaster extends Event {
             setModifiedBy(occurrence.getModifiedBy());
             SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
             Date lastModified = occurrence.getLastModified();
+            long timestamp = occurrence.getTimestamp();
             for (Event event : detachedOccurrences) {
                 lastModified = Tools.getLatestModified(lastModified, event);
                 if (null != event.getRecurrenceId()) {
                     changeExceptionDates.add(event.getRecurrenceId());
                 }
+                if (timestamp < event.getTimestamp()) {
+                    timestamp = event.getTimestamp();
+                }
             }
             setLastModified(lastModified);
+            setTimestamp(timestamp);
             setChangeExceptionDates(changeExceptionDates);
         }
     }

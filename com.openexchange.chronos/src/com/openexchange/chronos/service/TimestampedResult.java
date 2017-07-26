@@ -49,29 +49,20 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-
 /**
- * {@link UpdatesResult}
+ * {@link TimestampedResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdatesResult extends TimestampedResult {
+public interface TimestampedResult {
 
     /**
-     * Gets a list of events that have been created or updated since the supplied client timestamp.
+     * Gets the updated server timestamp (as used as initial or updated timestamp of the persisted data in storage), which is usually
+     * also returned to clients.
      *
-     * @return A list of new and modified events, or an empty list if there were none, or <code>null</code> if not evaluated
+     * @return The timestamp
      */
-    List<Event> getNewAndModifiedEvents();
-
-    /**
-     * Gets a list of events that have been deleted since the supplied client timestamp.
-     *
-     * @return A list of deleted events, or an empty list if there were none, or <code>null</code> if not evaluated
-     */
-    List<Event> getDeletedEvents();
+    long getTimestamp();
 
 }

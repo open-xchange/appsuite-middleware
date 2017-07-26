@@ -123,7 +123,7 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
         CalendarSession calendarSession = requireService(CalendarService.class).init(event.getSession());
         CalendarResult result = calendarSession.getCalendarService().touchEvent(calendarSession, eventID);
         if (0 < result.getUpdates().size()) {
-            return result.getUpdates().get(0).getUpdate().getLastModified().getTime();
+            return result.getUpdates().get(0).getUpdate().getTimestamp();
         }
         return -1;
     }

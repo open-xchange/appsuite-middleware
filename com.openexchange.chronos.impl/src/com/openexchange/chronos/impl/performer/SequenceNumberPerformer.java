@@ -53,7 +53,6 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -91,19 +90,19 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
      */
     public long perform(UserizedFolder folder) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        Date lastModified = folder.getLastModifiedUTC();
+        long timestamp = folder.getLastModifiedUTC().getTime();
         SearchTerm<?> searchTerm = getFolderIdTerm(folder);
-        SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.LAST_MODIFIED, SortOrder.Order.DESC)).setLimits(0, 1);
-        EventField[] fields = { EventField.LAST_MODIFIED };
+        SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
+        EventField[] fields = { EventField.TIMESTAMP };
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
-        if (0 < events.size() && events.get(0).getLastModified().after(lastModified)) {
-            lastModified = events.get(0).getLastModified();
+        if (0 < events.size() && timestamp < events.get(0).getTimestamp()) {
+            timestamp = events.get(0).getTimestamp();
         }
         List<Event> deletedEvents = storage.getEventStorage().searchEventTombstones(searchTerm, sortOptions, fields);
-        if (0 < deletedEvents.size() && deletedEvents.get(0).getLastModified().after(lastModified)) {
-            lastModified = deletedEvents.get(0).getLastModified();
+        if (0 < deletedEvents.size() && timestamp < deletedEvents.get(0).getTimestamp()) {
+            timestamp = deletedEvents.get(0).getTimestamp();
         }
-        return lastModified.getTime();
+        return timestamp;
     }
 
 }

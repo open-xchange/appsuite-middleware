@@ -295,7 +295,7 @@ public final class UpdatesAction extends ChronosAction {
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         UpdatesResult result;
         if (null != folderId) {
-            result = session.getCalendarService().getUpdatedEventsInFolder(session, folderId, since);
+            result = session.getCalendarService().getUpdatedEventsInFolder(session, folderId, since.getTime());
         } else {
             if (false == session.contains(CalendarParameters.PARAMETER_RANGE_START)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);
@@ -303,7 +303,7 @@ public final class UpdatesAction extends ChronosAction {
             if (false == session.contains(CalendarParameters.PARAMETER_RANGE_END)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_END);
             }
-            result = session.getCalendarService().getUpdatedEventsOfUser(session, since);
+            result = session.getCalendarService().getUpdatedEventsOfUser(session, since.getTime());
         }
         AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(getEventConverter(session), result.getNewAndModifiedEvents(), result.getDeletedEvents());
         if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {

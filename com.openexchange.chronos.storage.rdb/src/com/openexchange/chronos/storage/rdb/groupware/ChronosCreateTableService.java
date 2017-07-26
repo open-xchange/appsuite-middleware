@@ -107,22 +107,21 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
-                "rrule VARCHAR(255) DEFAULT NULL," +
-                "recurrence VARCHAR(32) DEFAULT NULL," +
-                "deleteExceptions TEXT DEFAULT NULL," +
-                "changeExceptions TEXT DEFAULT NULL," +
-                "created BIGINT(20) NOT NULL," +
-                "createdBy INT4 UNSIGNED NOT NULL," +
-                "modified BIGINT(20) NOT NULL," +
-                "modifiedBy INT4 UNSIGNED NOT NULL," +
-                "sequence INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT(20) NOT NULL," +
+                "created BIGINT(20)," +
+                "createdBy INT4 UNSIGNED," +
+                "modified BIGINT(20)," +
+                "modifiedBy INT4 UNSIGNED," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
-                "rangeFrom BIGINT(20) NOT NULL," +
-                "rangeUntil BIGINT(20) NOT NULL," +
+                "rrule VARCHAR(255) DEFAULT NULL," +
+                "recurrence VARCHAR(32) DEFAULT NULL," +
+                "deleteExceptions TEXT DEFAULT NULL," +
+                "changeExceptions TEXT DEFAULT NULL," +
+                "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
                 "status VARCHAR(64) DEFAULT NULL," +
@@ -134,12 +133,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "rangeFrom BIGINT(20) NOT NULL," +
+                "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY rangeFrom (cid,account,rangeFrom)," +
                 "KEY rangeUntil (cid,account,rangeUntil)," +
-                "KEY modified (cid,account,modified)," +
+                "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
@@ -154,22 +155,21 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
-                "rrule VARCHAR(255) DEFAULT NULL," +
-                "recurrence VARCHAR(32) DEFAULT NULL," +
-                "deleteExceptions TEXT DEFAULT NULL," +
-                "changeExceptions TEXT DEFAULT NULL," +
-                "created BIGINT(20) NOT NULL," +
-                "createdBy INT4 UNSIGNED NOT NULL," +
-                "modified BIGINT(20) NOT NULL," +
-                "modifiedBy INT4 UNSIGNED NOT NULL," +
-                "sequence INT4 UNSIGNED DEFAULT NULL," +
+                "timestamp BIGINT(20) NOT NULL," +
+                "created BIGINT(20)," +
+                "createdBy INT4 UNSIGNED," +
+                "modified BIGINT(20)," +
+                "modifiedBy INT4 UNSIGNED," +
                 "start datetime DEFAULT NULL," +
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
-                "rangeFrom BIGINT(20) NOT NULL," +
-                "rangeUntil BIGINT(20) NOT NULL," +
+                "rrule VARCHAR(255) DEFAULT NULL," +
+                "recurrence VARCHAR(32) DEFAULT NULL," +
+                "deleteExceptions TEXT DEFAULT NULL," +
+                "changeExceptions TEXT DEFAULT NULL," +
+                "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
                 "status VARCHAR(64) DEFAULT NULL," +
@@ -181,12 +181,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "rangeFrom BIGINT(20) NOT NULL," +
+                "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY rangeFrom (cid,account,rangeFrom)," +
                 "KEY rangeUntil (cid,account,rangeUntil)," +
-                "KEY modified (cid,account,modified)," +
+                "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +

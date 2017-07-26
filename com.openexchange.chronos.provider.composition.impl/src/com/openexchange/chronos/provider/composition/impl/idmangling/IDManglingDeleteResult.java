@@ -80,4 +80,9 @@ public class IDManglingDeleteResult implements DeleteResult {
         return new IDManglingEvent(delegate.getDeletedEvent(), accountId);
     }
 
+    @Override
+    public long getTimestamp() {
+        return delegate.getTimestamp();
+    }
+
 }

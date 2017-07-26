@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.CompositeID;
@@ -104,7 +103,7 @@ public class IDManglingCalendarResult implements CalendarResult {
     }
 
     @Override
-    public Date getTimestamp() {
+    public long getTimestamp() {
         return delegate.getTimestamp();
     }
 

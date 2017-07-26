@@ -132,7 +132,7 @@ public final class GetAction extends ChronosAction {
         session.set(RECURRENCE_MASTER, Boolean.TRUE);
         Event event = session.getCalendarService().getEvent(session, folderId, eventID);
         Appointment appointment = getEventConverter(session).getAppointment(event);
-        return new AJAXRequestResult(appointment, event.getLastModified(), "appointment");
+        return new AJAXRequestResult(appointment, new Date(event.getTimestamp()), "appointment");
     }
 
 }

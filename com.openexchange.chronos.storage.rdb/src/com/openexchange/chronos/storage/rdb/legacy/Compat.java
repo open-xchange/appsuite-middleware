@@ -161,8 +161,15 @@ public class Compat {
                 event.setCalendarUser(0);
             }
         }
+        /*
+         * take over last-modified from timestamp
+         */
+        if (event.containsTimestamp()) {
+            event.setLastModified(new Date(event.getTimestamp()));
+        }
         return event;
     }
+
 
     /**
      * Adjusts certain properties of an event prior inserting it into the database.
@@ -172,7 +179,33 @@ public class Compat {
      * @param event The event to adjust
      * @return The adjusted event data to store
      */
-    public static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+    public static Event adjustPriorInsert(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        Event eventData = adjustPriorSave(eventStorage, connection, event);
+        /*
+         * derive created- / modified-by from calendar user if required
+         */
+        if (false == eventData.containsCreatedBy()) {
+            eventData.setCreatedBy(eventData.getCalendarUser());
+        }
+        if (false == eventData.containsModifiedBy()) {
+            eventData.setModifiedBy(eventData.getCalendarUser());
+        }
+        return eventData;
+    }
+
+    /**
+     * Adjusts certain properties of an event prior updating it in the database.
+     *
+     * @param eventStorage The associated event storage
+     * @param connection The connection to use
+     * @param event The event to adjust
+     * @return The adjusted event data to store
+     */
+    public static Event adjustPriorUpdate(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        return adjustPriorSave(eventStorage, connection, event);
+    }
+
+    private static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
         /*
          * prepare event data for insert
          */

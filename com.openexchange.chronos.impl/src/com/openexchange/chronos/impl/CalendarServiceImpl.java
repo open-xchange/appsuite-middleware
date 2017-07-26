@@ -51,7 +51,6 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Attendee;
@@ -233,7 +232,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final String folderID, final Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final String folderID, final long updatedSince) throws OXException {
         return new AbstractCalendarStorageOperation<UpdatesResult>(session) {
 
             @Override
@@ -244,7 +243,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsOfUser(CalendarSession session, final Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsOfUser(CalendarSession session, final long updatedSince) throws OXException {
         return new AbstractCalendarStorageOperation<UpdatesResult>(session) {
 
             @Override

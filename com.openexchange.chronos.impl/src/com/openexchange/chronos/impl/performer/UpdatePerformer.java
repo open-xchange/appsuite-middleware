@@ -132,7 +132,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /** Event fields that are always skipped when applying updated event data */
     private static final EventField[] SKIPPED_FIELDS = {
-        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
+        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.SEQUENCE,
         EventField.ALARMS, EventField.ATTENDEES, EventField.ATTACHMENTS
     };
 
@@ -817,6 +817,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 case LAST_MODIFIED:
                     // ignore implicitly
                     eventUpdate.removeLastModified();
+                    break;
+                case TIMESTAMP:
+                    // ignore implicitly
+                    eventUpdate.removeTimestamp();
                     break;
                 case MODIFIED_BY:
                     // ignore implicitly

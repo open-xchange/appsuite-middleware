@@ -188,7 +188,7 @@ public class Tools {
     }
 
     public static Date getLatestModified(Date lastModified, Event event) {
-        return getLatestModified(lastModified, event.getLastModified());
+        return getLatestModified(lastModified, new Date(event.getTimestamp()));
     }
 
     /**

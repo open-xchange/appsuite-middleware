@@ -57,7 +57,7 @@ import java.util.List;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarResult extends TimestampAwareResult {
+public interface CalendarResult extends TimestampedResult {
 
     /**
      * Gets the underlying calendar session.

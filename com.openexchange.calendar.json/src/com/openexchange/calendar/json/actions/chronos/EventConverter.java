@@ -190,7 +190,7 @@ public abstract class EventConverter {
                 return EventField.MODIFIED_BY;
             case Appointment.LAST_MODIFIED:
             case Appointment.LAST_MODIFIED_UTC:
-                return EventField.LAST_MODIFIED;
+                return EventField.TIMESTAMP;
             case CalendarObject.TITLE:
                 return EventField.SUMMARY;
             case Appointment.SHOWN_AS:
@@ -404,7 +404,7 @@ public abstract class EventConverter {
             event.setCreated(appointment.getCreationDate());
         }
         if (appointment.containsLastModified()) {
-            event.setLastModified(appointment.getLastModified());
+            event.setTimestamp(null != appointment.getLastModified() ? appointment.getLastModified().getTime() : 0L);
         }
         //        event.setFolderId(appointment.getParentFolderID());
         //        event.setPublicFolderId(appointment.getParentFolderID());
@@ -557,8 +557,8 @@ public abstract class EventConverter {
         if (event.containsCreated()) {
             appointment.setCreationDate(event.getCreated());
         }
-        if (event.containsLastModified()) {
-            appointment.setLastModified(event.getLastModified());
+        if (event.containsTimestamp()) {
+            appointment.setLastModified(new Date(event.getTimestamp()));
         }
         if (event.containsFolderId()) {
             appointment.setParentFolderID(asInt(event.getFolderId()));

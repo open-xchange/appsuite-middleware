@@ -77,4 +77,9 @@ public class CreateResultImpl implements CreateResult {
         return createdEvent;
     }
 
+    @Override
+    public long getTimestamp() {
+        return createdEvent.getTimestamp();
+    }
+
 }

@@ -189,12 +189,12 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         return getCalendarService().getUpdatedEventsInFolder(session, folderId, updatedSince);
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsOfUser(Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         return getCalendarService().getUpdatedEventsOfUser(session, updatedSince);
     }
 

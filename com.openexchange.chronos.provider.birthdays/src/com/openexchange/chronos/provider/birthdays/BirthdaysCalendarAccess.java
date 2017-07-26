@@ -201,7 +201,7 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, Date updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         if (false == folder.getId().equals(folderId)) {
             throw OXException.notFound(folderId);
         }
@@ -211,7 +211,7 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
         notTerm.addSearchTerm(isNullTerm);
         SingleSearchTerm lastModifiedTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         lastModifiedTerm.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
-        lastModifiedTerm.addOperand(new ConstantOperand<Date>(updatedSince));
+        lastModifiedTerm.addOperand(new ConstantOperand<Date>(new Date(updatedSince)));
         CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
         andTerm.addSearchTerm(notTerm);
         andTerm.addSearchTerm(lastModifiedTerm);

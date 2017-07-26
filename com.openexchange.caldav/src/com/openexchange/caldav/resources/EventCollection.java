@@ -115,7 +115,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     /** Fields that are always retrieved when requesting event lists from the service */
     private static final EventField[] BASIC_FIELDS = new EventField[] {
         EventField.UID, EventField.FILENAME, EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID,
-        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.CLASSIFICATION,
+        EventField.CREATED, EventField.CREATED_BY, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.CLASSIFICATION,
         EventField.START_DATE, EventField.END_DATE,
         EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     };
@@ -204,8 +204,8 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             lastModified = Tools.getLatestModified(minDateTime.getMinDateTime(), folder);
             try {
                 CalendarSession calendarSession = getCalendarSession();
-                calendarSession.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.LAST_MODIFIED });
-                UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, lastModified);
+                calendarSession.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.TIMESTAMP });
+                UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, lastModified.getTime());
                 /*
                  * new and modified objects
                  */
@@ -358,7 +358,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
          */
         CalendarSession calendarSession = getCalendarSession();
         calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-        UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, since);
+        UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, since.getTime());
         /*
          * determine sync-status & overall last-modified
          */

@@ -191,9 +191,9 @@ public final class UpdateAction extends ChronosAction {
                 if (0 < result.getUpdates().size()) {
                     resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
                 }
-                return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+                return new AJAXRequestResult(resultObject, new Date(result.getTimestamp()), "json");
             }
-            session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+            session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
             eventID = new EventID(asString(appointment.getParentFolderID()), eventID.getObjectID(), eventID.getRecurrenceID());
         }
         /*
@@ -215,7 +215,7 @@ public final class UpdateAction extends ChronosAction {
         } else if (0 < result.getUpdates().size()) {
             resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
         }
-        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+        return new AJAXRequestResult(resultObject, new Date(result.getTimestamp()), "json");
     }
 
 }

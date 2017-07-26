@@ -78,6 +78,10 @@ public enum EventField {
      */
     SEQUENCE,
     /**
+     * The timestamp of the event.
+     */
+    TIMESTAMP,
+    /**
      * The creation date of the event.
      */
     CREATED,

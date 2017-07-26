@@ -50,14 +50,12 @@
 package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.util.Date;
-
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DtStamp;
 import net.fortuna.ical4j.model.property.UtcProperty;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
 
 /**
  * {@link DtStampMapping}
@@ -76,12 +74,12 @@ public class DtStampMapping extends ICalUtcMapping<VEvent, Event> {
 
 	@Override
 	protected Date getValue(Event object) {
-		return object.getLastModified();
+        return new Date(object.getTimestamp());
 	}
 
 	@Override
 	protected void setValue(Event object, Date value) {
-		object.setLastModified(value);
+        object.setTimestamp(null == value ? 0L : value.getTime());
 	}
 
 	@Override

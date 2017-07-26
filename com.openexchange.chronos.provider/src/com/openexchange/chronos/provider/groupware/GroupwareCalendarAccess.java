@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.groupware;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -151,7 +150,7 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsOfUser(Date updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException;
 
     /**
      * Creates a new event.

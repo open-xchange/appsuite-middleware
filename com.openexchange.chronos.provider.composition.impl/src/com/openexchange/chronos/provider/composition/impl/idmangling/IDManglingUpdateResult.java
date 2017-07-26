@@ -121,4 +121,9 @@ public class IDManglingUpdateResult implements UpdateResult {
         return delegate.containsAnyChangeOf(fields);
     }
 
+    @Override
+    public long getTimestamp() {
+        return delegate.getTimestamp();
+    }
+
 }

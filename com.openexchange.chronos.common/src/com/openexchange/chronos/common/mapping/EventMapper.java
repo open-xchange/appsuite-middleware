@@ -50,7 +50,9 @@
 package com.openexchange.chronos.common.mapping;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
@@ -324,6 +326,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeSequence();
+            }
+        });
+        mappings.put(EventField.TIMESTAMP, new DefaultMapping<Long, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsTimestamp();
+            }
+
+            @Override
+            public void set(Event object, Long value) throws OXException {
+                object.setTimestamp(null == value ? 0 : l(value));
+            }
+
+            @Override
+            public Long get(Event object) {
+                return L(object.getTimestamp());
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeTimestamp();
             }
         });
         mappings.put(EventField.CREATED, new DefaultMapping<Date, Event>() {

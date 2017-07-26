@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -165,7 +164,7 @@ public class IDMangling {
             }
 
 			@Override
-			public Date getTimestamp() {
+            public long getTimestamp() {
 				return updatesResult.getTimestamp();
 			}
         };

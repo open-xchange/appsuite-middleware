@@ -102,7 +102,7 @@ public abstract class AbstractUpdatePerformer {
     /** The event fields that are preserved for reference in <i>tombstone</i> events */
     private static final EventField[] EVENT_TOMBSTONE_FIELDS = {
         EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
-        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID, EventField.LAST_MODIFIED,
+        EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID, EventField.TIMESTAMP,
         EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.FOLDER_ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE,
         EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP, EventField.UID, EventField.FILENAME, EventField.SEQUENCE
     };
@@ -133,7 +133,7 @@ public abstract class AbstractUpdatePerformer {
         this.session = session;
         this.timestamp = new Date();
         this.storage = storage;
-        this.result = new CalendarResultImpl(session, calendarUserId, folder.getID()).applyTimestamp(timestamp);
+        this.result = new CalendarResultImpl(session, calendarUserId, folder.getID());
     }
 
     /**

@@ -161,7 +161,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     protected Date getLastModified(Event object) {
-        return null != object ? object.getLastModified() : null;
+        return null != object ? new Date(object.getTimestamp()) : null;
     }
 
     @Override
@@ -298,7 +298,7 @@ public class EventResource extends DAVObjectResource<Event> {
                     timestamp = object.getCreated();
                 } else {
                     entityID = object.getModifiedBy();
-                    timestamp = object.getLastModified();
+                    timestamp = new Date(object.getTimestamp());
                 }
                 try {
                     User user = factory.getService(UserService.class).getUser(entityID, factory.getContext());
@@ -420,7 +420,7 @@ public class EventResource extends DAVObjectResource<Event> {
             eventIDs = Collections.singletonList(new EventID(event.getFolderId(), event.getId()));
         }
         CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(event.getLastModified().getTime()));
+        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(event.getTimestamp()));
 
         for(EventID id: eventIDs){
             calendarSession.getCalendarService().deleteEvent(calendarSession, id);
@@ -433,7 +433,7 @@ public class EventResource extends DAVObjectResource<Event> {
         }
         CalendarSession calendarSession = getCalendarSession();
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(object.getLastModified().getTime()));
+        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(object.getTimestamp()));
         caldavImport = EventPatches.Incoming.applyAll(this, caldavImport);
         if (null != caldavImport.getEvent() && false == Tools.isPhantomMaster(object)) {
             /*
@@ -444,7 +444,7 @@ public class EventResource extends DAVObjectResource<Event> {
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         /*
@@ -456,7 +456,7 @@ public class EventResource extends DAVObjectResource<Event> {
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
     }
@@ -480,7 +480,7 @@ public class EventResource extends DAVObjectResource<Event> {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
         }
         Event createdEvent = result.getCreations().get(0).getCreatedEvent();
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
         calendarSession.getEntityResolver().trackAttendeeUsage(result);
         /*
          * create exceptions
@@ -492,7 +492,7 @@ public class EventResource extends DAVObjectResource<Event> {
                 LOG.warn("{}: No exception created.", getUrl());
                 throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         return createdEvent;

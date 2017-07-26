@@ -166,12 +166,12 @@ public final class DeleteAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
-        Date timestamp = new Date(0L);
+        long timestamp = 0L;
         for (EventID id : requestedIDs) {
             CalendarResult result = session.getCalendarService().deleteEvent(session, id);
-            timestamp = getLatestModified(timestamp, result.getTimestamp());
+            timestamp = getLatestTimestamp(timestamp, result.getTimestamp());
         }
-        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+        return new AJAXRequestResult(new JSONArray(0), new Date(timestamp), "json");
     }
 
 }

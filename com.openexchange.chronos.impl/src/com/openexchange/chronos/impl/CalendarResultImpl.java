@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -72,7 +71,6 @@ public class CalendarResultImpl implements CalendarResult {
     protected final int calendarUserId;
     protected final String folderID;
 
-    protected Date timestamp;
     protected List<CreateResult> creations;
     protected List<UpdateResult> updates;
     protected List<DeleteResult> deletions;
@@ -97,27 +95,9 @@ public class CalendarResultImpl implements CalendarResult {
      * @param result The result to merge
      */
     public void merge(CalendarResult result) {
-        applyTimestamp(result.getTimestamp());
         addDeletions(result.getDeletions());
         addCreations(result.getCreations());
         addUpdates(result.getUpdates());
-    }
-
-    /**
-     * Applies an updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually
-     * also returned to clients.
-     * <p/>
-     * The timestamp is taken over into the result in case no previous timestamp was set, or the passed timestamp is <i>after</i> the
-     * previously set one.
-     *
-     * @param timestamp The timestamp to apply
-     * @return A self reference
-     */
-    public CalendarResultImpl applyTimestamp(Date timestamp) {
-        if (null == this.timestamp || null != timestamp && timestamp.after(this.timestamp)) {
-            this.timestamp = timestamp;
-        }
-        return this;
     }
 
     /**
@@ -223,8 +203,8 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     @Override
-    public Date getTimestamp() {
-        return timestamp;
+    public long getTimestamp() {
+        return Math.max(Utils.getMaximumTimestamp(creations), Math.max(Utils.getMaximumTimestamp(deletions), Utils.getMaximumTimestamp(updates)));
     }
 
     @Override

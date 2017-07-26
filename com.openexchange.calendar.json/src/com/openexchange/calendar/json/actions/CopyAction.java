@@ -170,7 +170,7 @@ public final class CopyAction extends ChronosAction {
         CalendarResult result = session.getCalendarService().createEvent(session, targetFolderID, event);
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
             String id = result.getCreations().get(0).getCreatedEvent().getId();
-            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), new Date(result.getTimestamp()), "json");
         }
         return null; //TODO: conflicts
     }

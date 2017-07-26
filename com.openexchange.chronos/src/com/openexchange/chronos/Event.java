@@ -66,14 +66,15 @@ public class Event {
 
     private String id;
     private String folderId;
+    private int calendarUser;
     private String uid;
     private String filename;
+    private long timestamp;
 
     private Date created;
     private int createdBy;
     private Date lastModified;
     private int modifiedBy;
-    private int calendarUser;
     private int sequence;
 
     private String summary;
@@ -302,6 +303,42 @@ public class Event {
      */
     public boolean containsSequence() {
         return isSet(EventField.SEQUENCE);
+    }
+
+    /**
+     * Gets the timestamp of the event.
+     *
+     * @return The timestamp
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Sets the timestamp of the event.
+     *
+     * @param value The timestamp to set
+     */
+    public void setTimestamp(long value) {
+        timestamp = value;
+        setFields.add(EventField.TIMESTAMP);
+    }
+
+    /**
+     * Removes the timestamp of the event.
+     */
+    public void removeTimestamp() {
+        timestamp = 0L;
+        setFields.remove(EventField.TIMESTAMP);
+    }
+
+    /**
+     * Gets a value indicating whether the timestamp of the event has been set or not.
+     *
+     * @return <code>true</code> if the timestamp is set, <code>false</code>, otherwise
+     */
+    public boolean containsTimestamp() {
+        return isSet(EventField.TIMESTAMP);
     }
 
     /**

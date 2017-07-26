@@ -78,4 +78,9 @@ public class DeleteResultImpl implements DeleteResult {
         return deletedEvent;
     }
 
+    @Override
+    public long getTimestamp() {
+        return deletedEvent.getTimestamp();
+    }
+
 }

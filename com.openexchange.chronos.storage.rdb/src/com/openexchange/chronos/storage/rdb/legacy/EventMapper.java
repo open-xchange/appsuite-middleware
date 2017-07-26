@@ -273,6 +273,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeSequence();
             }
         });
+        mappings.put(EventField.TIMESTAMP, new BigIntMapping<Event>("changing_date", "Timestamp") {
+
+            @Override
+            public void set(Event event, Long value) {
+                event.setTimestamp(null == value ? 0 : value.longValue());
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsTimestamp();
+            }
+
+            @Override
+            public Long get(Event event) {
+                return L(event.getTimestamp());
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeTimestamp();
+            }
+        });
         mappings.put(EventField.CREATED, new DateMapping<Event>("creating_date", "Created") {
 
             @Override
@@ -315,29 +337,6 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeCreatedBy();
-            }
-        });
-        mappings.put(EventField.LAST_MODIFIED, new BigIntMapping<Event>("changing_date", "Last modified") {
-
-            @Override
-            public void set(Event event, Long value) {
-                event.setLastModified(null == value ? null : new Date(value.longValue()));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsLastModified();
-            }
-
-            @Override
-            public Long get(Event event) {
-                Date value = event.getLastModified();
-                return null == value ? null : L(value.getTime());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeLastModified();
             }
         });
         mappings.put(EventField.MODIFIED_BY, new IntegerMapping<Event>("changed_from", "Modified by") {

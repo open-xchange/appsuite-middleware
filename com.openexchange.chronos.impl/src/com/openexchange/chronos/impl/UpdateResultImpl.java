@@ -73,4 +73,9 @@ public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
         super(originalEvent, updatedEvent, true, (EventField[]) null);
     }
 
+    @Override
+    public long getTimestamp() {
+        return updatedItem.getTimestamp();
+    }
+
 }

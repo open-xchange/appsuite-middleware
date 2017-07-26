@@ -369,7 +369,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
             .append("(cid,").append(MAPPER.getColumns(mappedFields)).append(") ").append("VALUES (?,").append(MAPPER.getParameters(mappedFields)).append(");")
         .toString();
-        Event eventData = Compat.adjustPriorSave(this, connection, event);
+        Event eventData = Compat.adjustPriorInsert(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -384,7 +384,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
-        Event eventData = Compat.adjustPriorSave(this, connection, event);
+        Event eventData = Compat.adjustPriorUpdate(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, eventData, assignedfields);

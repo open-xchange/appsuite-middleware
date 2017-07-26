@@ -191,7 +191,7 @@ public final class NewAction extends ChronosAction {
         if (0 < result.getCreations().size()) {
             resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
         }
-        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
+        return new AJAXRequestResult(resultObject, new Date(result.getTimestamp()), "json");
     }
 
 }
