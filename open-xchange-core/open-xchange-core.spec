@@ -27,7 +27,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
-Requires:      open-xchange-system
+Requires(pre): open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
@@ -183,7 +183,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -Dant.java.version.override=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
@@ -1604,7 +1604,10 @@ exit 0
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
-%dir /opt/open-xchange/etc/
+%dir /opt/open-xchange/etc
+%dir /opt/open-xchange/etc/contextSets
+%dir /opt/open-xchange/etc/meta
+%dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
@@ -1619,6 +1622,7 @@ exit 0
 %dir /opt/open-xchange/etc/hazelcast/
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
+%dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
