@@ -130,7 +130,6 @@ import com.openexchange.snippet.QuotaAwareSnippetManagement;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
-import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.mime.groupware.QuotaMode;
 
@@ -139,7 +138,7 @@ import com.openexchange.snippet.mime.groupware.QuotaMode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeSnippetManagement implements SnippetManagement, QuotaAwareSnippetManagement {
+public final class MimeSnippetManagement implements QuotaAwareSnippetManagement {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
     private static final String QUOTA_MODE_PROPERTY = "com.openexchange.snippet.filestore.quota.mode";

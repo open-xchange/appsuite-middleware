@@ -52,20 +52,21 @@ package com.openexchange.snippet;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link QuotaAwareSnippetManagement}
+ * {@link QuotaAwareSnippetManagement} - Extends {@link SnippetManagement} by the functionality to query the current quota usage<br>
+ * (thus assuming that there are quota limits available for used storage)
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface QuotaAwareSnippetManagement {
+public interface QuotaAwareSnippetManagement extends SnippetManagement {
 
     /**
-     * Retrieves the current usage.
+     * Retrieves the current storage usage.
      *
      * @param shared A flag indicating whether shared or not shared snippets should be calculated.
-     * @return The usage in bytes
+     * @return The storage usage in bytes
      * @throws OXException if the usage can't be retrieved
      */
-    public long getUsage(boolean shared) throws OXException;
+    long getUsage(boolean shared) throws OXException;
 
 }
