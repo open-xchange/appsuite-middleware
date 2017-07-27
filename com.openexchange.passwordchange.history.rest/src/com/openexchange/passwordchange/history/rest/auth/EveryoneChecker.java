@@ -47,42 +47,45 @@
  *
  */
 
-package com.openexchange.passwordchange.history.rest.osgi;
+package com.openexchange.passwordchange.history.rest.auth;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.exception.OXException;
 
 /**
- * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link EveryoneChecker} - Check if everyone is allowed
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeRestActivator extends HousekeepingActivator {
+public class EveryoneChecker implements AuthChecker {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
+    private final boolean masterAccountOverride;
+    private final boolean masterAuthenticationDisabled;
+    private final boolean contextAuthenticationDisabled;
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * 
+     * Initializes a new {@link EveryoneChecker}.
+     * 
+     * @param masterAccountOverride "MASTER_ACCOUNT_OVERRIDE" value
+     * @param masterAuthenticationDisabled "MASTER_AUTHENTICATION_DISABLED" value
+     * @param contextAuthenticationDisabled "CONTEXT_AUTHENTICATION_DISABLED" value
      */
-    public PasswordChangeRestActivator() {
+    public EveryoneChecker(boolean masterAccountOverride, boolean masterAuthenticationDisabled, boolean contextAuthenticationDisabled) {
         super();
+
+        this.masterAccountOverride = masterAccountOverride;
+        this.masterAuthenticationDisabled = masterAuthenticationDisabled;
+        this.contextAuthenticationDisabled = contextAuthenticationDisabled;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordHistoryHandler.class, ConfigurationService.class };
+    public boolean checkAccess() throws OXException {
+        // Ccheck if everyone is allowed
+        if (contextAuthenticationDisabled || (masterAccountOverride && masterAuthenticationDisabled)) {
+            return true;
+        }
+        return false;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting PasswordChangeRest bundle");
-
-        // Register the different services for this bundle
-        registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
-    }
 }

@@ -47,42 +47,30 @@
  *
  */
 
-package com.openexchange.passwordchange.history.rest.osgi;
+package com.openexchange.passwordchange.history.rest.auth;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.exception.OXException;
 
 /**
- * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link ContextAdminChecker}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeRestActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
+public class ContextAdminChecker implements AuthChecker {
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * Initializes a new {@link ContextAdminChecker}.
      */
-    public PasswordChangeRestActivator() {
+    public ContextAdminChecker() {
         super();
+
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordHistoryHandler.class, ConfigurationService.class };
+    public boolean checkAccess() throws OXException {
+        // TODO Auto-generated method stub
+        return false;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting PasswordChangeRest bundle");
-
-        // Register the different services for this bundle
-        registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
-    }
 }

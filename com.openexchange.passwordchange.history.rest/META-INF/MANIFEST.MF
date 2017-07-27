@@ -6,7 +6,9 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Description: The Open-Xchange password change history REST API
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.openexchange.auth,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.exception,
  com.openexchange.osgi,
@@ -17,6 +19,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.tools.servlet.http,
  com.openexchange.user,
  javax.ws.rs;version="2.0.1",
  javax.ws.rs.core;version="2.0.1",
