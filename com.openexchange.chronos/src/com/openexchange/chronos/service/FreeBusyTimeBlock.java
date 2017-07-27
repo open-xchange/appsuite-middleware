@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,59 +49,55 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import com.openexchange.chronos.BusyType;
+import com.openexchange.chronos.FreeBusyTime;
 
 /**
- * {@link FreeBusyResult}
+ * {@link FreeBusyTimeBlock}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FreeBusyResult {
+public class FreeBusyTimeBlock extends ArrayList<FreeBusyTime> {
 
-    private List<OXException> warnings;
-    private List<FreeBusyTimeBlock> freeBusyTimes;
+    private static final long serialVersionUID = 6137703417014122714L;
+
+    private BusyType busyType = BusyType.BUSY_UNAVAILABLE;
 
     /**
-     * Initialises a new {@link FreeBusyResult}.
+     * Initialises a new {@link FreeBusyTimeBlock}.
      */
-    public FreeBusyResult() {
+    public FreeBusyTimeBlock() {
         super();
     }
 
     /**
-     * Gets the warnings
+     * Gets the busyType
      *
-     * @return The warnings
+     * @return The busyType
      */
-    public List<OXException> getWarnings() {
-        return warnings;
+    public BusyType getBusyType() {
+        return busyType;
     }
 
     /**
-     * Sets the warnings
+     * Sets the busyType
      *
-     * @param warnings The warnings to set
+     * @param busyType The busyType to set
      */
-    public void setWarnings(List<OXException> warnings) {
-        this.warnings = warnings;
+    public void setBusyType(BusyType busyType) {
+        this.busyType = busyType;
     }
 
-    /**
-     * Gets the freeBusyTimes
-     *
-     * @return The freeBusyTimes
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
      */
-    public List<FreeBusyTimeBlock> getFreeBusyTimes() {
-        return freeBusyTimes;
-    }
-
-    /**
-     * Sets the freeBusyTimes
-     *
-     * @param freeBusyTimes The freeBusyTimes to set
-     */
-    public void setAvailableTimes(List<FreeBusyTimeBlock> freeBusyTimes) {
-        this.freeBusyTimes = freeBusyTimes;
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AvailableTime [busyType=").append(busyType).append(", \ntoString()=").append(super.toString()).append("]");
+        return builder.toString();
     }
 }

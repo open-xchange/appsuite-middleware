@@ -88,6 +88,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.FreeBusyTimeBlock;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -102,17 +103,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /** The event fields returned in free/busy queries by default */
-    private static final EventField[] FREEBUSY_FIELDS = {
-        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
-        EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE,
-        EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+    private static final EventField[] FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
-    private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = {
-        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.CLASSIFICATION,
-        EventField.START_DATE, EventField.END_DATE,
-        EventField.TRANSP, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+    private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
 
     /**
@@ -215,12 +210,12 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
+     * Calculates the free/busy time ranges from the user defined availability and the free/busy operation
      * 
-     * @param attendees
-     * @param from
-     * @param until
-     * @return
-     * @throws OXException
+     * @param attendees The attendees to calculate the free/busy information for
+     * @param from The start time of the interval
+     * @param until The end time of the interval
+     * @return A {@link Map} with a {@link FreeBusyResult} per {@link Attendee}
      */
     public Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Get the free busy data for the attendees
@@ -237,7 +232,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 AvailableTimeSlot ats = iterator.next();
                 Date start = new Date(CalendarUtils.getDateInTimeZone(ats.getFrom(), timeZone));
                 Date end = new Date(CalendarUtils.getDateInTimeZone(ats.getUntil(), timeZone));
-                
+
                 if (end.after(from) && start.before(until)) {
                     if (start.before(from)) {
                         ats.setFrom(new DateTime(from.getTime()));
@@ -252,6 +247,45 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         }
 
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
+        for (Attendee attendee : attendees) {
+            AvailableTime availableTime = availableTimes.get(attendee);
+            if (availableTime == null) {
+                // TODO: collect and set warnings
+                List<OXException> warnings = new ArrayList<>();
+                FreeBusyResult result = new FreeBusyResult();
+                result.setWarnings(warnings);
+                continue;
+            }
+
+            List<FreeBusyTimeBlock> freeBusyTimes = new ArrayList<>();
+            FreeBusyTimeBlock freeBusyTimeBlock = new FreeBusyTimeBlock();
+            // Set the busy time for that particular block 
+            freeBusyTimeBlock.setBusyType(availableTime.getBusyType());
+
+            // Add the already existing free/busy blocks
+            List<FreeBusyTime> freeBusyTimesList = freeBusyPerAttendee.get(attendee);
+            freeBusyTimeBlock.addAll(freeBusyTimesList); //TODO: maybe fix any overlapping FreeBusyTime and AvailableTimes
+
+            // For each available time slot create an equivalent free busy time
+            for (AvailableTimeSlot availableTimeSlot : availableTime) {
+                FreeBusyTime freeBusyTime = new FreeBusyTime();
+                freeBusyTime.setStartTime(new Date(availableTimeSlot.getFrom().getTimestamp()));
+                freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
+
+                // Add to the fb block
+                freeBusyTimeBlock.add(freeBusyTime);
+                // Add to the fb time for the attendee
+                freeBusyTimes.add(freeBusyTimeBlock);
+            }
+
+            // Create result
+            FreeBusyResult result = new FreeBusyResult();
+            result.setAvailableTimes(freeBusyTimes);
+
+            // Set result for attendee
+            results.put(attendee, result);
+        }
+
         return results;
     }
 
