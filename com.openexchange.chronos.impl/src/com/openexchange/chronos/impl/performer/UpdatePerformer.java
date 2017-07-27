@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
-import static com.openexchange.chronos.common.CalendarUtils.getAlarmUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
@@ -97,6 +96,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -622,7 +622,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     private boolean updateAlarms(Event event, int calendarUserId, List<Alarm> updatedAlarms) throws OXException {
         List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, calendarUserId);
-        CollectionUpdate<Alarm, AlarmField> alarmUpdates = getAlarmUpdates(originalAlarms, updatedAlarms);
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;
         }

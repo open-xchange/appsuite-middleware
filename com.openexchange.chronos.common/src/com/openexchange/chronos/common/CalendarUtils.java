@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,7 +72,6 @@ import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -89,7 +87,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
-import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -1206,54 +1203,6 @@ public class CalendarUtils {
             protected boolean matches(RecurrenceId item1, RecurrenceId item2) {
                 if (null != item1 && null != item2) {
                     return item1.equals(item2.getValue());
-                }
-                return false;
-            }
-        };
-    }
-
-    /**
-     * Initializes a new alarm collection update based on the supplied original and updated alarm lists.
-     *
-     * @param originalAlarms The original alarms
-     * @param updatedAlarms The updated alarms
-     * @return The collection update
-     */
-    public static AbstractCollectionUpdate<Alarm, AlarmField> getAlarmUpdates(List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
-        /*
-         * special handling to detect change of single reminder (as used in legacy storage)
-         */
-        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 1 == updatedAlarms.size()) {
-            Alarm originalAlarm = originalAlarms.get(0);
-            Alarm updatedAlarm = updatedAlarms.get(0);
-            Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
-                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
-            if (differentFields.isEmpty()) {
-                return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
-
-                    @Override
-                    protected boolean matches(Alarm alarm1, Alarm alarm2) {
-                        return true;
-                    }
-                };
-            }
-        }
-        /*
-         * default collection update, otherwise
-         */
-        return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
-
-            @Override
-            protected boolean matches(Alarm alarm1, Alarm alarm2) {
-                if (null == alarm1) {
-                    return null == alarm2;
-                } else if (null != alarm2) {
-                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
-                        return true;
-                    }
-                    if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {
-                        return true;
-                    }
                 }
                 return false;
             }

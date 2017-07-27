@@ -52,9 +52,11 @@ package com.openexchange.chronos.common;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +69,12 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
+import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
+import com.openexchange.chronos.common.mapping.AlarmMapper;
+import com.openexchange.chronos.common.mapping.DefaultCollectionUpdate;
+import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 
@@ -527,6 +535,66 @@ public class AlarmUtils extends CalendarUtils {
             return find(allAlarms, alarm.getRelatedTo().getValue());
         }
         return null;
+    }
+
+    /**
+     * Initializes a new alarm collection update based on the supplied original and updated alarm lists.
+     *
+     * @param originalAlarms The original alarms
+     * @param updatedAlarms The updated alarms
+     * @return The collection update
+     */
+    public static CollectionUpdate<Alarm, AlarmField> getAlarmUpdates(final List<Alarm> originalAlarms, final List<Alarm> updatedAlarms) throws OXException {
+        /*
+         * special handling to detect change of single reminder (as used in legacy storage)
+         */
+        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 1 == updatedAlarms.size()) {
+            Alarm originalAlarm = originalAlarms.get(0);
+            Alarm updatedAlarm = updatedAlarms.get(0);
+            Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
+                originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
+            if (differentFields.isEmpty()) {
+                DefaultItemUpdate<Alarm, AlarmField> itemUpdate = new DefaultItemUpdate<>(AlarmMapper.getInstance(), originalAlarm, updatedAlarm);
+                return new DefaultCollectionUpdate<Alarm, AlarmField>(null, null, Collections.<ItemUpdate<Alarm, AlarmField>> singletonList(itemUpdate));
+            }
+        }
+        /*
+         * special handling to detect 'snooze' of single reminder (as used in legacy storage)
+         */
+        if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 2 == updatedAlarms.size()) {
+            Alarm originalAlarm = originalAlarms.get(0);
+            Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(updatedAlarms.get(0), updatedAlarms);
+            if (null == snoozedAlarm) {
+                snoozedAlarm = AlarmUtils.getSnoozedAlarm(updatedAlarms.get(1), updatedAlarms);
+            }
+            if (null != snoozedAlarm) {
+                Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
+                    originalAlarm, snoozedAlarm, true, AlarmField.ACKNOWLEDGED, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
+                if (differentFields.isEmpty()) {
+                    return new DefaultCollectionUpdate<Alarm, AlarmField>(updatedAlarms, originalAlarms, null);
+                }
+            }
+        }
+        /*
+         * default collection update, otherwise
+         */
+        return new AbstractCollectionUpdate<Alarm, AlarmField>(AlarmMapper.getInstance(), originalAlarms, updatedAlarms) {
+
+            @Override
+            protected boolean matches(Alarm alarm1, Alarm alarm2) {
+                if (null == alarm1) {
+                    return null == alarm2;
+                } else if (null != alarm2) {
+                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
+                        return true;
+                    }
+                    if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
 
     /**

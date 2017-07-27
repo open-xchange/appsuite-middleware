@@ -57,6 +57,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -90,7 +91,7 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
 
     private EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
         super(originalEvent, updatedEvent, updatedFields);
-        alarmUpdates = CalendarUtils.getAlarmUpdates(
+        alarmUpdates = AlarmUtils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         attendeeUpdates = CalendarUtils.getAttendeeUpdates(
             null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
