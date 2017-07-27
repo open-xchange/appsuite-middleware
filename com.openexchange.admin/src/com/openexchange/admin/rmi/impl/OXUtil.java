@@ -83,8 +83,7 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.snippet.QuotaAwareSnippetService;
-import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.quota.QuotaAwareSnippetService;
 import com.openexchange.user.UserService;
 
 /**
@@ -730,10 +729,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         /*
          * Depending on the configuration snippets doesn't count towards the usage too.
          */
-        SnippetService service = AdminServiceRegistry.getInstance().getService(SnippetService.class);
-        if (service instanceof QuotaAwareSnippetService) {
-            if (((QuotaAwareSnippetService) service).ignoreQuota()) {
-                filesToIgnore.addAll(((QuotaAwareSnippetService) service).getFilesToIgnore(contextId));
+        QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
+        if (service != null) {
+            if (service.ignoreQuota()) {
+                filesToIgnore.addAll(service.getFilesToIgnore(contextId));
             }
         }
 

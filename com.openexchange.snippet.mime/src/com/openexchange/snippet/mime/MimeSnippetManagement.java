@@ -142,20 +142,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
     private static final String QUOTA_MODE_PROPERTY = "com.openexchange.snippet.filestore.quota.mode";
-
-    private static final QuotaMode MODE;
-    static {
-        QuotaMode mode = QuotaMode.CONTEXT;
-        try {
-            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-            if (configurationService != null) {
-                mode = QuotaMode.getModeByName(configurationService.getProperty(QUOTA_MODE_PROPERTY, QuotaMode.CONTEXT.name()));
-            }
-        } finally {
-            MODE = mode;
-            LOGGER.info("Using '"+MODE.name()+"' as the filestore quota mode for snippets.");
-        }
-    }
+    private static volatile QuotaMode MODE;
 
     /**
      * The file storage reference type identifier: <b><code>1</code></b>.
@@ -630,12 +617,12 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                 try {
                     mimeMessage.writeTo(fileHolder.asOutputStream());
                     size = fileHolder.getLength();
-                    if (QuotaMode.DEDICATED.equals(MODE) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
-                        Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
-                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
-                            backAfterRead = true;
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
-                        }
+                    if (QuotaMode.DEDICATED.equals(getMode()) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                            Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                            if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
+                                backAfterRead = true;
+                                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
+                            }
                     }
                     file = fileStorage.saveNewFile(fileHolder.getClosingStream());
                 } finally {
@@ -971,7 +958,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
             try {
                 updateMessage.writeTo(fileHolder.asOutputStream());
                 size = fileHolder.getLength();
-                if (QuotaMode.DEDICATED.equals(MODE) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                if (QuotaMode.DEDICATED.equals(getMode()) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
                     long difference = size - oldSize;
                     if (difference > 0) {
                         Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
@@ -1021,7 +1008,11 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                     stmt.setInt(++pos, properties.contains(Property.SHARED) ? (snippet.isShared() ? 1 : 0) : (shared ? 1 : 0));
                     stmt.setLong(++pos, System.currentTimeMillis());
                     stmt.setString(++pos, newFile);
-                    stmt.setLong(++pos, size);
+                    if (size > 0) {
+                        stmt.setLong(++pos, size);
+                    } else {
+                        stmt.setNull(++pos, Types.INTEGER);
+                    }
                     stmt.executeUpdate();
                     Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
@@ -1271,18 +1262,14 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
     }
 
     @Override
-    public long getUsage(boolean shared) throws OXException {
+    public long getUsage() throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             final StringBuilder sql;
-            if(shared){
-                sql = new StringBuilder("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND shared!=0 AND refType=").append(FS_TYPE);
-            } else {
-                sql = new StringBuilder("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND shared=0 AND refType=").append(FS_TYPE);
-            }
+            sql = new StringBuilder("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
             stmt = con.prepareStatement(sql.toString());
             int pos = 0;
             stmt.setInt(++pos, contextId);
@@ -1367,7 +1354,20 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
         }
     }
 
-    static QuotaMode getMode(){
+    /**
+     * Retrieves the configured {@link QuotaMode}
+     *
+     * @return The {@link QuotaMode}
+     */
+    static QuotaMode getMode() {
+        if (MODE == null) {
+            MODE = QuotaMode.CONTEXT;
+            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+            if (configurationService != null) {
+                MODE = QuotaMode.getModeByName(configurationService.getProperty(QUOTA_MODE_PROPERTY, QuotaMode.CONTEXT.name()));
+            }
+            LOGGER.info("Using '" + MODE.name() + "' as the filestore quota mode for snippets.");
+        }
         return MODE;
     }
 }

@@ -127,7 +127,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         SnippetManagement management = snippetServiceRef.get().getManagement(session);
         long usage = 0;
         if(management instanceof QuotaAwareSnippetManagement){
-            usage = ((QuotaAwareSnippetManagement) management).getUsage(false);
+            usage = ((QuotaAwareSnippetManagement) management).getUsage();
         }
 
         return new Quota(QuotaType.SIZE, limit, usage);

@@ -63,10 +63,9 @@ public interface QuotaAwareSnippetManagement extends SnippetManagement {
     /**
      * Retrieves the current storage usage.
      *
-     * @param shared A flag indicating whether shared or not shared snippets should be calculated.
-     * @return The storage usage in bytes
+     * @return The usage in bytes
      * @throws OXException if the usage can't be retrieved
      */
-    long getUsage(boolean shared) throws OXException;
+    public long getUsage() throws OXException;
 
 }

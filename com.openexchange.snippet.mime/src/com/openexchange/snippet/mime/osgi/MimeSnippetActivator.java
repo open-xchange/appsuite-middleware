@@ -74,6 +74,7 @@ import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
 import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
 import com.openexchange.snippet.mime.groupware.MimeSnippetQuotaProvider;
 import com.openexchange.snippet.mime.groupware.SnippetSizeColumnUpdateTask;
+import com.openexchange.snippet.quota.QuotaAwareSnippetService;
 
 /**
  * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.
@@ -133,6 +134,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             MimeSnippetQuotaProvider quotaProvider = new MimeSnippetQuotaProvider();
             MimeSnippetService snippetService = new MimeSnippetService(quotaProvider);
 
+            registerService(QuotaAwareSnippetService.class, snippetService);
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registerService(SnippetService.class, snippetService, properties);
