@@ -50,7 +50,6 @@
 package com.openexchange.importexport.exporters;
 
 import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -76,6 +75,7 @@ import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -164,7 +164,7 @@ public class CSVContactExporter implements Exporter {
      * The possible contact fields as array
      */
     protected static final ContactField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS.toArray(new ContactField[DEFAULT_FIELDS.size()]);
-    
+
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {
         if (!format.equals(Format.CSV)) {
@@ -226,50 +226,23 @@ public class CSVContactExporter implements Exporter {
             throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
 
-        boolean inMemory = false;
-        if (inMemory) {
-            final StringBuilder ret = new StringBuilder(65536);
-            ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
-            try {
-                while (conIter.hasNext()) {
-                    Contact current;
-                    try {
-                        current = conIter.next();
-                        if (!exportDlists && current.getMarkAsDistribtuionlist()) {
-                            continue;
-                        }
-                        ret.append(convertToLine(convertToList(current, fields)));
-                    } catch (final SearchIteratorException e) {
-                        LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
-                    } catch (final OXException e) {
-                        LOG.error("Could not retrieve contact from folder {}, OXException was: ", folder, e);
-                    }
-
-                }
-            } catch (final OXException e) {
-                LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
-            }
-            final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
-            return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);
-        }
-
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
         try {
-            ThresholdFileHolder sink = new ThresholdFileHolder();
             OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
             writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
             try {
                 while (conIter.hasNext()) {
-                    Contact current;
                     try {
-                        current = conIter.next();
+                        Contact current = conIter.next();
                         if (!exportDlists && current.getMarkAsDistribtuionlist()) {
                             continue;
                         }
                         writer.write(convertToLine(convertToList(current, fields)));
-                    } catch (final SearchIteratorException e) {
+                    } catch (SearchIteratorException e) {
                         LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
-                    } catch (final OXException e) {
-                        LOG.error("Could not retrieve contact from folder {}, OXException was: ", folder, e);
+                    } catch (Exception e) {
+                        LOG.error("Could not retrieve contact from folder {}, Exception was: ", folder, e);
                     }
 
                 }
@@ -277,19 +250,25 @@ public class CSVContactExporter implements Exporter {
                 LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
             }
             writer.flush();
-            return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
+            SizedInputStream sizedInputStream = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
+            error = false;
+            return sizedInputStream;
         } catch (IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
         }
     }
-    
+
     @Override
     public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(sessObj, format, batchEntry.getKey(), optionalParams)) {
                 throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
             }
-        }     
+        }
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = DEFAULT_FIELDS_ARRAY;
@@ -302,52 +281,56 @@ public class CSVContactExporter implements Exporter {
             exportDlists = true;
         } else {
             exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
-        }        
+        }
         List<ContactField> fieldList = Arrays.asList(fields.clone());
         if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
             fieldList = new ArrayList<>(fieldList);
             fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
         }
-        try { 
-            ThresholdFileHolder sink = new ThresholdFileHolder();
-            OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
-            writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));        
-                for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-                    SearchIterator<Contact> conIter;
-                    List<String> contacts = batchEntry.getValue();
-                    String[] contactsId = new String[contacts.size()];
-                    contactsId = contacts.toArray(contactsId);
-                    try {                
-                        conIter = ImportExportServices.getContactService().getContacts(sessObj, batchEntry.getKey(), contactsId, fieldList.toArray(new ContactField[fieldList.size()]));
-                        try {
-                            while (conIter.hasNext()) {
-                                Contact current;
-                                try {
-                                    current = conIter.next();
-                                    if (!exportDlists && current.getMarkAsDistribtuionlist()) {
-                                        continue;
-                                    }
-                                    writer.write(convertToLine(convertToList(current, fields)));
-                                } catch (final SearchIteratorException e) {
-                                    LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
-                                } catch (final OXException e) {
-                                    LOG.error("Could not retrieve contact from folder {}, OXException was: ", batchEntry.getKey(), e);
-                                }
 
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
+            writer.write(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(fields)));
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                List<String> contacts = batchEntry.getValue();
+                try {
+                    SearchIterator<Contact> conIter = ImportExportServices.getContactService().getContacts(sessObj, batchEntry.getKey(), contacts.toArray(new String[contacts.size()]), fieldList.toArray(new ContactField[fieldList.size()]));
+                    try {
+                        while (conIter.hasNext()) {
+                            try {
+                                Contact current = conIter.next();
+                                if (!exportDlists && current.getMarkAsDistribtuionlist()) {
+                                    continue;
+                                }
+                                writer.write(convertToLine(convertToList(current, fields)));
+                            } catch (SearchIteratorException e) {
+                                LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
+                            } catch (Exception e) {
+                                LOG.error("Could not retrieve contact from folder {}, Exception was: ", batchEntry.getKey(), e);
                             }
-                        } catch (final OXException e) {
-                            LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
-                        } finally {
-                            SearchIterators.close(conIter);
+
                         }
                     } catch (final OXException e) {
-                        throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
-                    }            
-                }                
+                        LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", batchEntry.getKey(), e);
+                    } finally {
+                        SearchIterators.close(conIter);
+                    }
+                } catch (final OXException e) {
+                    throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
+                }
+            }
             writer.flush();
-            return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
+            SizedInputStream sizedInputStream = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.CSV);
+            error = false;
+            return sizedInputStream;
         } catch (IOException e) {
             throw ImportExportExceptionCodes.IOEXCEPTION.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
         }
     }
 
@@ -378,7 +361,7 @@ public class CSVContactExporter implements Exporter {
         bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
         return bob.toString();
     }
-    
+
     @Override
     public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
         return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);

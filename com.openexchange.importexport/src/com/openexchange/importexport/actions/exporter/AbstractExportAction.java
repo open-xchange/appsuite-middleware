@@ -87,7 +87,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
         Exporter exporter = getExporter();
 
         SizedInputStream sis;
-        
+
         if (doBatchExport(batchIds, exporter)) {
             sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
@@ -128,11 +128,12 @@ public abstract class AbstractExportAction implements AJAXActionService {
     }
 
     private String getExportFileName(ExportRequest req) throws OXException{
-        if (null == req.getBatchIds() || req.getBatchIds().isEmpty()) {
+        Map<String, List<String>> batchIds = req.getBatchIds();
+        if (null == batchIds || batchIds.isEmpty()) {
             return getExporter().getFolderExportFileName(req.getSession(), req.getFolder());
-        } else {
-            return getExporter().getBatchExportFileName(req.getSession(), req.getBatchIds());
         }
+
+        return getExporter().getBatchExportFileName(req.getSession(), batchIds);
     }
 
 }
