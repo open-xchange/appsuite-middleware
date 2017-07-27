@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-24 14:38+0000\n"
-"PO-Revision-Date: 2017-07-24 08:40+0000\n"
-"Last-Translator: marko <marko.toom@gmail.com>\n"
+"POT-Creation-Date: 2017-07-27 14:05+0000\n"
+"PO-Revision-Date: 2017-07-27 13:54+0000\n"
+"Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: et_EE\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1500885626.000000\n"
+"X-POOTLE-MTIME: 1501163646.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -3241,7 +3241,7 @@ msgstr "Seda HTML sisu ei saa turvaliselt kuvada"
 #. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
 msgid "This message can only be displayed as plain text"
-msgstr ""
+msgstr "Seda sõnumit saab kuvada ainult tavatekstina"
 
 #. *
 #. * No connection available to access mailbox
@@ -3508,6 +3508,7 @@ msgstr ""
 msgid ""
 "Update of folder failed. Owner is required to keep administrative rights."
 msgstr ""
+"Kausta uuendamine ebaõnnestus. Omanik peab säilitama administraatori õigused."
 
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
@@ -4170,12 +4171,12 @@ msgstr "Peate selgesõnaliselt volitama %1$s tellima %2$s"
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
 msgid "The scope %1$s is not supported by the provider or has been disabled"
-msgstr ""
+msgstr "Skoop %1$s ei ole teenusepakkuja poolt toetatud või on deaktiveeritud"
 
 #. Thrown in case OAuth for a certain provider access has been disabled for a user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
-msgstr ""
+msgstr "'%1$s' OAuth teenus ei ole teie jaoks seadistatud."
 
 #. *
 #. * New password too short.
@@ -5327,7 +5328,7 @@ msgstr "Kohtumistel peab olema vähemalt üks osaleja."
 msgid ""
 "You do not have the appropriate permissions to read appointments in that "
 "folder."
-msgstr ""
+msgstr "Puuduvad õigused selles kaustas kohtumiste vaatamiseks."
 
 #. *
 #. * End date must not be before start date.
@@ -5767,7 +5768,7 @@ msgstr "Muster \"%1$s\" on otsingu käigus tähelepanuta jäetud."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
 msgid "Invalid number of properties for distribution list."
-msgstr ""
+msgstr "Vale kombinatsioon postiloendi seadistustes."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -7268,7 +7269,7 @@ msgstr "Vigane CSV fail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
 msgid "Error at row %1$s: %2$s"
-msgstr ""
+msgstr "Viga real %1$s: %2$s"
 
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
@@ -8727,6 +8728,8 @@ msgid ""
 "Lost connection to mail server. Probably your request took too long. Please "
 "try again later."
 msgstr ""
+"Ühendus e-posti serveriga katkes. Tõenäoliselt võttis päringu sooritamine "
+"serveris praegu liiga kaua aega. Palun proovige hiljem uuesti."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s. Probably your request took too long.
@@ -8736,6 +8739,8 @@ msgid ""
 "Connection closed to mail server %2$s. Probably your request took too long. "
 "Please try again later."
 msgstr ""
+"Ühendus e-posti serveriga %2$s katkesati. Tõenäoliselt võttis päringu "
+"sooritamine serveris praegu liiga kaua aega. Palun proovige hiljem uuesti."
 
 #. *
 #. * Mail(s) could not be found in the given folder.
@@ -8830,7 +8835,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server. Please try again later."
-msgstr ""
+msgstr "Ühendus e-posti serveriga katkes. Palun proovige hiljem uuesti."
 
 #. *
 #. * Connection closed to mail server %1$s.
@@ -8838,6 +8843,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
+"Ühendus e-posti serveriga %1$s katkestati. Palun proovige hiljem uuesti."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
@@ -8847,6 +8853,8 @@ msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect. Please try again later."
 msgstr ""
+"Ühendusest e-posti serverisse %1$s keelduti või on ühendus aegunud. Palun "
+"proovige hiljem uuesti."
 
 #. *
 #. * The connection to remote server %1$s timed out while awaiting the response.
@@ -8855,7 +8863,7 @@ msgstr ""
 msgid ""
 "The connection to remote server %1$s timed out while awaiting the response. "
 "Please try again later."
-msgstr ""
+msgstr "Ühendus e-posti serverisse %1$s aegus. Palun proovige hiljem uuesti."
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
@@ -8864,6 +8872,8 @@ msgstr ""
 msgid ""
 "Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
+"Ühendus e-posti serverisse %1$s katkestati ootamatult. Palun proovige hiljem "
+"uuesti."
 
 #. *
 #. * The allowed quota on mail server exceeded.
@@ -8923,6 +8933,8 @@ msgid ""
 "Timeout while trying to send to the following recipient: %1$s. Please try "
 "again later."
 msgstr ""
+"Toiming aegus, kui prooviti saata järgmisele saajale: %1$s. Palun proovige "
+"hiljem uuesti."
 
 #. The message advertising that everything is fine with checked account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
@@ -10622,12 +10634,12 @@ msgstr "Teie poolt antud tagasisidel tüübiga 'skoor' on määratud vale tüüp
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
 msgid "The provided feedback does not contain required key '%s'."
-msgstr ""
+msgstr "Teie poolt antud tagasiside ei sisalda nõutud võtit '%s'."
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
 msgid "The provided feedback for key '%s' cannot be parsed."
-msgstr ""
+msgstr "Teie poolt antud tagasisidet võtmega '%s' ei saa töödelda. "
 
 #. The value given in the property %1$s is no integer value
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
