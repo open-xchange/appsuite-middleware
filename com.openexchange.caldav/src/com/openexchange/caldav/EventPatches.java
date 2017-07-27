@@ -308,7 +308,7 @@ public class EventPatches {
                             originalOccurrence = resource.getCalendarSession().getUtilities().copyEvent(originalOccurrence, (EventField[]) null);
                             originalOccurrence = EventPatches.Outgoing.applyAll(resource, originalOccurrence);
                             EventUpdate eventUpdate = resource.getCalendarSession().getUtilities().compare(
-                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);
+                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);
                             if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(2);
                                 snoozedAlarm.setUid(originalAlarm.getUid());
