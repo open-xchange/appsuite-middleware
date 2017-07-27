@@ -1289,95 +1289,86 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
 
     @Override
     public long getUsage() throws OXException {
-        final DatabaseService databaseService = getDatabaseService();
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            final StringBuilder sql;
-            sql = new StringBuilder("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
-            stmt = con.prepareStatement(sql.toString());
-            int pos = 0;
-            stmt.setInt(++pos, contextId);
-            stmt.setInt(++pos, userId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return 0;
-            }
-            final Map<String, Long> fileSizes = new HashMap<>(rs.getFetchSize());
-            boolean recalculate=false;
-            Map<String, String> reload = null;
-            do {
-                fileSizes.put(rs.getString(1), rs.getLong(2));
-                if(rs.wasNull()){
-                    recalculate=true;
-                    if(reload==null){
-                        reload= new HashMap<>();
-                    }
-                    reload.put(rs.getString(1), rs.getString(3));
-                }
-            } while (rs.next());
+        DatabaseService databaseService = getDatabaseService();
 
-            if(recalculate){
-                QuotaFileStorage quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
-                final Connection writeCon = databaseService.getWritable(contextId);
-                boolean onlyRead=true;
-                try {
-                    for (String id : reload.keySet()) {
-                        String fileId = reload.get(id);
-                        long fileSize = quotaFileStorage.getFileSize(fileId);
-                        updateFileSize(id, fileSize, writeCon);
-                        onlyRead=false;
-                        fileSizes.put(id, fileSize);
-                    }
-                } finally {
-                    if(onlyRead){
-                        databaseService.backWritableAfterReading(contextId, con);
+        Map<String, String> reload = null;
+        long currentUsage = 0;
+        {
+            Connection con = databaseService.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND refType=" + FS_TYPE);
+                int pos = 0;
+                stmt.setInt(++pos, contextId);
+                stmt.setInt(++pos, userId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
+                }
+
+                do {
+                    long size = rs.getLong(2); // If the value is SQL NULL, the value returned is 0
+                    if (rs.wasNull()) {
+                        if (reload == null) {
+                            reload = new HashMap<>();
+                        }
+                        String snippetId = rs.getString(1);
+                        String fileStoreLocation = rs.getString(3);
+                        reload.put(snippetId, fileStoreLocation);
                     } else {
-                        databaseService.backWritable(contextId, con);
+                        currentUsage += size;
                     }
+                } while (rs.next());
+            } catch (final SQLException e) {
+                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(contextId, con);
+            }
+        }
+
+        // Check if there are entries, which are required to be reloaded
+        if (null != reload) {
+            QuotaFileStorage quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
+
+            Connection writeCon = databaseService.getWritable(contextId);
+            boolean onlyRead = true;
+            PreparedStatement stmt = null;
+            try {
+                stmt = writeCon.prepareStatement("UPDATE snippet SET size=? WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+
+                for (Map.Entry<String, String> entry : reload.entrySet()) {
+                    String id = entry.getKey();
+                    String fileId = entry.getValue();
+
+                    // Get current file size from file-storage & add to batch statement
+                    long fileSize = quotaFileStorage.getFileSize(fileId);
+                    stmt.setLong(1, fileSize);
+                    stmt.setString(4, id);
+                    stmt.addBatch();
+                    onlyRead = false;
+
+                    // Add to current usage as well
+                    currentUsage += fileSize;
+                }
+
+                stmt.executeBatch();
+            } catch (final SQLException e) {
+                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (onlyRead) {
+                    databaseService.backWritableAfterReading(contextId, writeCon);
+                } else {
+                    databaseService.backWritable(contextId, writeCon);
                 }
             }
-
-            long result = 0;
-            for(Long val: fileSizes.values()){
-                result += val;
-            }
-            return result;
-
-
-        } catch (final SQLException e) {
-            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
         }
-    }
 
-    /**
-     * Updates the size column of the snippet
-     *
-     * @param id The id of the snippet
-     * @param size The size of the snippet
-     * @param writeCon A writable connection
-     * @throws OXException
-     */
-    private void updateFileSize(String id, long size, Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            final StringBuilder sql = new StringBuilder("UPDATE snippet SET size=? WHERE cid=? AND user=? AND id=? AND refType=").append(FS_TYPE);
-            stmt = writeCon.prepareStatement(sql.toString());
-            int pos = 0;
-            stmt.setLong(++pos, size);
-            stmt.setInt(++pos, contextId);
-            stmt.setInt(++pos, userId);
-            stmt.setString(++pos, id);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        return currentUsage;
     }
 
 }
