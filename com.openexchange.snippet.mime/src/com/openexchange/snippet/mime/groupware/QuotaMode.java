@@ -74,6 +74,15 @@ public enum QuotaMode {
     }
 
     /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * Gets the quota mode for specified name.
      *
      * @param name The name to look-up

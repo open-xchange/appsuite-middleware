@@ -142,7 +142,33 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
     private static final String QUOTA_MODE_PROPERTY = "com.openexchange.snippet.filestore.quota.mode";
+
     private static volatile QuotaMode MODE;
+
+    /**
+     * Retrieves the configured {@link QuotaMode}
+     *
+     * @return The {@link QuotaMode}
+     */
+    static QuotaMode getMode() {
+        QuotaMode tmp = MODE;
+        if (null == tmp) {
+            synchronized (tmp) {
+                tmp = MODE;
+                if (null == tmp) {
+                    ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        return QuotaMode.CONTEXT;
+                    }
+
+                    tmp = QuotaMode.getModeByName(configurationService.getProperty(QUOTA_MODE_PROPERTY, QuotaMode.CONTEXT.getName()));
+                    MODE = tmp;
+                    LOGGER.info("Using '" + tmp.getName() + "' as the filestore quota mode for snippets.");
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * The file storage reference type identifier: <b><code>1</code></b>.
@@ -1354,20 +1380,4 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
         }
     }
 
-    /**
-     * Retrieves the configured {@link QuotaMode}
-     *
-     * @return The {@link QuotaMode}
-     */
-    static QuotaMode getMode() {
-        if (MODE == null) {
-            MODE = QuotaMode.CONTEXT;
-            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-            if (configurationService != null) {
-                MODE = QuotaMode.getModeByName(configurationService.getProperty(QUOTA_MODE_PROPERTY, QuotaMode.CONTEXT.name()));
-            }
-            LOGGER.info("Using '" + MODE.name() + "' as the filestore quota mode for snippets.");
-        }
-        return MODE;
-    }
 }
