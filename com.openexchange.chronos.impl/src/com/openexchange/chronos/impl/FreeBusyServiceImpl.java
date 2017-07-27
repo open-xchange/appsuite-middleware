@@ -60,6 +60,7 @@ import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -119,6 +120,22 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             @Override
             protected Map<Attendee, List<FreeBusyTime>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new FreeBusyPerformer(session, storage).performMerged(attendees, from, until);
+            }
+        }.executeQuery();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.FreeBusyService#calculateFreeBusyTime(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
+     */
+    @Override
+    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
+        return new AbstractCalendarStorageOperation<Map<Attendee, FreeBusyResult>>(session) {
+
+            @Override
+            protected Map<Attendee, FreeBusyResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new FreeBusyPerformer(session, storage).performCalculateFreeBusyTime(attendees, from, until);
             }
         }.executeQuery();
     }

@@ -67,7 +67,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AvailableTime;
+import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -81,7 +84,10 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -206,6 +212,47 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             freeBusyDataPerAttendee.put(entry.getKey(), mergeFreeBusy(entry.getValue(), from, until, Utils.getTimeZone(session)));
         }
         return freeBusyDataPerAttendee;
+    }
+
+    /**
+     * 
+     * @param attendees
+     * @param from
+     * @param until
+     * @return
+     * @throws OXException
+     */
+    public Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
+        // Get the free busy data for the attendees
+        Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee = performMerged(attendees, from, until);
+
+        // Get the available time for the attendees
+        CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
+        Map<Attendee, AvailableTime> availableTimes = availabilityService.getAvailableTime(session, attendees, from, until);
+
+        TimeZone timeZone = Utils.getTimeZone(session);
+        // Adjust the intervals
+        for (AvailableTime availableTime : availableTimes.values()) {
+            for (Iterator<AvailableTimeSlot> iterator = availableTime.iterator(); iterator.hasNext();) {
+                AvailableTimeSlot ats = iterator.next();
+                Date start = new Date(CalendarUtils.getDateInTimeZone(ats.getFrom(), timeZone));
+                Date end = new Date(CalendarUtils.getDateInTimeZone(ats.getUntil(), timeZone));
+                
+                if (end.after(from) && start.before(until)) {
+                    if (start.before(from)) {
+                        ats.setFrom(new DateTime(from.getTime()));
+                    }
+                    if (end.after(until)) {
+                        ats.setUntil(new DateTime(until.getTime()));
+                    }
+                } else {
+                    iterator.remove();
+                }
+            }
+        }
+
+        Map<Attendee, FreeBusyResult> results = new HashMap<>();
+        return results;
     }
 
     /**

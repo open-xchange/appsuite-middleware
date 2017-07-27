@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
@@ -109,4 +110,16 @@ public interface FreeBusyService {
      */
     List<EventConflict> checkForConflicts(CalendarSession session, Event event, List<Attendee> attendees) throws OXException;
 
+    /**
+     * Calculates the free-busy time information for the specified {@link Attendee}s regarding the
+     * {@link CalendarAvailability}
+     * 
+     * @param session The calendar session
+     * @param attendees The {@link Attendee}s to calculate the free busy time for
+     * @param from The start of the time interval
+     * @param until The end of the time interval
+     * @return A {@link Map} with the calculated free/busy times
+     * @throws OXException if an error is occurred
+     */
+    Map<Attendee, FreeBusyResult> calculateFreeBusyTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 }
