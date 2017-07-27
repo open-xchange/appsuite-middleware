@@ -952,6 +952,9 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         } else if (schemaSelectStrategy.getStrategy() != null) {
             if (schemaSelectStrategy.getStrategy().equals("automatic")) {
                 return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
+            } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
+                // Fall-back to "automatic"
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
             } else {
                 throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible value: \"automatic\"");
             }

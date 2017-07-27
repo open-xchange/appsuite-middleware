@@ -53,11 +53,11 @@ import java.io.Serializable;
 
 /**
  * Defines a strategy where to create contexts.
- * The default strategy should be automatic where the server decides on the current schema load, which willl be determined on every call.
+ * The default strategy should be automatic where the server decides on the current schema load, which will be determined on every call.
  * In memory just loads the schema load once and handles/updates the information in memory. This might be more error-prone, but is also more efficient.
  * If a schema is provided, the context will be created in this schema regardless of it's load.
  *
- * Only one strategy can be configured. Setting one strategy automaticalle disables the other strategies.
+ * Only one strategy can be configured. Setting one strategy automatically disables the other strategies.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0

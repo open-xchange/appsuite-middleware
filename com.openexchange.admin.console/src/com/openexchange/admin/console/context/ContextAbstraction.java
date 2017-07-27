@@ -563,6 +563,9 @@ public abstract class ContextAbstraction extends UserAbstraction {
             String strategyName = nextLine[strategyId];
             if (strategyName.equals("automatic")) {
                 return SchemaSelectStrategy.automatic();
+            } else if (schemaStrategy.equals("in-memory")) {
+                // Fall-back to "automatic"
+                return SchemaSelectStrategy.automatic();
             } else {
                 throw new InvalidDataException(SCHEMA_NAME_ERROR);
             }
