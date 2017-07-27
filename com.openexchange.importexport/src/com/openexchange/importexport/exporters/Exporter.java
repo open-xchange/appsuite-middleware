@@ -71,51 +71,51 @@ public interface Exporter {
      */
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	/**
-	 *
-	 * @param session: The session object to be able to check permissions.
-	 * @param format: Format the exported data is supposed to be in
-	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return true, if the given folders can be exported in the given format; false otherwise
-	 */
-	boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException;
-
-	/**
-	 *
-	 * @param session: The session object to be able to check permissions.
-	 * @param format: Format the returned InputStream should be in.
-	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
-	 * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-	 * @return InputStream in requested format.
-	 * @throws OXException
-	 */
-	SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
     /**
-    *
-    * @param session: The session object to be able to check permissions.
-    * @param format: Format the returned InputStream should be in.
-    * @param batchIds: Ids of multiple entries in different folders
-    * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
-    * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-    * @return InputStream in requested format.
-    * @throws OXException
-    */
-   SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
-	/**
-	 * Creates a proper export file name based on the folder to export
-	 *
-	 * @param session: The session object to be able to check permissions.
-	 * @param folder: The folder to name the export file after.
-	 * @return String the name of the export file.
-	 * @throws OXException
-	 */
-	String getFolderExportFileName(ServerSession session, String folder) throws OXException;
-	
-	/**
+     *
+     * @param session: The session object to be able to check permissions.
+     * @param format: Format the exported data is supposed to be in
+     * @param folder: Folder that should be exported. Note: A folder can only contain data of one type
+     * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+     * @return true, if the given folders can be exported in the given format; false otherwise
+     */
+    boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException;
+
+    /**
+     *
+     * @param session: The session object to be able to check permissions.
+     * @param format: Format the returned InputStream should be in.
+     * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
+     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+     * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+     * @return InputStream in requested format.
+     * @throws OXException
+     */
+    SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+
+    /**
+     *
+     * @param session: The session object to be able to check permissions.
+     * @param format: Format the returned InputStream should be in.
+     * @param batchIds: Ids of multiple entries in different folders
+     * @param fieldsToBeExported: A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
+     * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+     * @return InputStream in requested format.
+     * @throws OXException
+     */
+    SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+
+    /**
+     * Creates a proper export file name based on the folder to export
+     *
+     * @param session: The session object to be able to check permissions.
+     * @param folder: The folder to name the export file after.
+     * @return String the name of the export file.
+     * @throws OXException
+     */
+    String getFolderExportFileName(ServerSession session, String folder) throws OXException;
+
+    /**
      * Creates a proper export file name based on the batch of ids to export
      *
      * @param session: The session object to be able to check permissions.
