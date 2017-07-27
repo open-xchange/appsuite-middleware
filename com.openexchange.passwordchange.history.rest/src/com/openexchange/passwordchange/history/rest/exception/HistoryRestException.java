@@ -47,42 +47,94 @@
  *
  */
 
-package com.openexchange.passwordchange.history.rest.osgi;
+package com.openexchange.passwordchange.history.rest.exception;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link HistoryRestException}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeRestActivator extends HousekeepingActivator {
+public enum HistoryRestException implements DisplayableOXExceptionCode {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
+
+    MISSING_SERVICE("The service %s could not be loaded.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 101), 
+    
+    NO_ACCESS("You don't have access to this interface", MESSAGE, Category.CATEGORY_PERMISSION_DENIED, 102),
+    
+
+    ;
+
+    private static final String PREFIX = "HRE";
+
+    private final String message;
+
+    private final String displayMessage;
+
+    private final Category category;
+
+    private final int number;
+
+    private HistoryRestException(final String message, String displayMessage, final Category category, final int number) {
+        this.message = message;
+        this.displayMessage = displayMessage;
+        this.category = category;
+        this.number = number;
+    }
+
+    @Override
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(e);
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
      */
-    public PasswordChangeRestActivator() {
-        super();
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordHistoryHandler.class, ConfigurationService.class };
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting PasswordChangeRest bundle");
-
-        // Register the different services for this bundle
-        registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
-    }
 }

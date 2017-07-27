@@ -49,27 +49,40 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.rest.auth.AuthChecker;
+import com.openexchange.passwordchange.history.rest.auth.ContextAdminChecker;
+import com.openexchange.passwordchange.history.rest.auth.EveryoneChecker;
+import com.openexchange.passwordchange.history.rest.auth.ResellerAndMasterAdminChecker;
+import com.openexchange.passwordchange.history.rest.exception.HistoryRestException;
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.tracker.SortType;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 /**
  * {@link PasswordChangeHistoryREST}
@@ -77,30 +90,47 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@Path("admin/v1/contexts/{context-id}/users/{user-id}")
+@Path("admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class PasswordChangeHistoryREST {
 
     private static final String PATH = "/passwd-changes";
     private final ServiceLookup service;
+    private Set<AuthChecker> checker;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
+     * 
+     * @throws Exception
      */
-    public PasswordChangeHistoryREST(ServiceLookup service) {
+    public PasswordChangeHistoryREST(ServiceLookup service) throws OXException {
         super();
         this.service = service;
+
+        ConfigurationService configService = getService(ConfigurationService.class);
+
+        boolean masterAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
+        boolean masterAuthenticationDisabled = configService.getBoolProperty("MASTER_AUTHENTICATION_DISABLED", false);
+        boolean contextAuthenticationDisabled = configService.getBoolProperty("CONTEXT_AUTHENTICATION_DISABLED", false);
+
+        checker = new HashSet<>();
+        checker.add(new ContextAdminChecker());
+        checker.add(new EveryoneChecker(masterAccountOverride, masterAuthenticationDisabled, contextAuthenticationDisabled));
+        checker.add(new ResellerAndMasterAdminChecker(masterAccountOverride));
+
     }
 
     @GET
-    @Path(PATH)
+//    @Path(PATH)
     @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject listHistory(@PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) throws Exception {
+    public JSONObject listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) throws Exception {
+
+        checkAccess();
 
         // Get services
-        PasswordHistoryHandler handler = service.getService(PasswordHistoryHandler.class); // TODO NPE
-        ConfigViewFactory config = service.getService(ConfigViewFactory.class); // TODO NPE
+        PasswordHistoryHandler handler = getService(PasswordHistoryHandler.class);
+        ConfigViewFactory config = getService(ConfigViewFactory.class);
         ConfigView view = config.getView(userID, contextID);
 
         /*
@@ -137,6 +167,36 @@ public class PasswordChangeHistoryREST {
         }
         json.put("PasswordChangeHistroy", entries);
         return json;
+    }
+
+    /**
+     * Get a specific service and throws {@link HistoryRestException#MISSING_SERVICE} if it can't be loaded
+     * 
+     * @param clazz The service to load
+     * @return The service instance
+     */
+    private <T> T getService(Class<? extends T> clazz) throws OXException {
+        T retval = service.getService(clazz);
+        if (null == retval) {
+            throw HistoryRestException.MISSING_SERVICE.create(clazz.getSimpleName());
+        }
+        return retval;
+    }
+
+    /**
+     * Check if access should be granted
+     */
+    private void checkAccess() throws OXException {
+        for (AuthChecker c : checker) {
+            if (c.checkAccess()) {
+                return;
+            }
+        }
+        throw HistoryRestException.NO_ACCESS.create();
+    }
+
+    protected com.openexchange.auth.Credentials getCredentials(final Credentials creds) {
+        return new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword());
     }
 
     /**

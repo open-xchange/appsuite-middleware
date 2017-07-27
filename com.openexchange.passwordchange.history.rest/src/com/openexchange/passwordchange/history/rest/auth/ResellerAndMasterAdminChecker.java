@@ -47,42 +47,33 @@
  *
  */
 
-package com.openexchange.passwordchange.history.rest.osgi;
+package com.openexchange.passwordchange.history.rest.auth;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.exception.OXException;
 
 /**
- * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link ResellerAndMasterAdminChecker}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeRestActivator extends HousekeepingActivator {
+public class ResellerAndMasterAdminChecker implements AuthChecker {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
+    private final boolean masterAccountOverride;
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * Initializes a new {@link ResellerAndMasterAdminChecker}.
      */
-    public PasswordChangeRestActivator() {
+    public ResellerAndMasterAdminChecker(boolean masterAccountOverride) {
         super();
+        this.masterAccountOverride = masterAccountOverride;
+
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordHistoryHandler.class, ConfigurationService.class };
+    public boolean checkAccess() throws OXException {
+        // TODO
+        return masterAccountOverride;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting PasswordChangeRest bundle");
-
-        // Register the different services for this bundle
-        registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
-    }
 }
