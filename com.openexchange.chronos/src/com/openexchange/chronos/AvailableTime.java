@@ -52,7 +52,7 @@ package com.openexchange.chronos;
 import java.util.ArrayList;
 
 /**
- * {@link AvailableTime} - Defines an available time slot
+ * {@link AvailableTime} - Defines an available time block with overlaid {@link AvailableTimeSlot}s
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

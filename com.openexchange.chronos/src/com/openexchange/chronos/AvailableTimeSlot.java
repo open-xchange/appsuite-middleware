@@ -52,7 +52,7 @@ package com.openexchange.chronos;
 import org.dmfs.rfc5545.DateTime;
 
 /**
- * {@link AvailableTimeSlot}
+ * {@link AvailableTimeSlot} - Defines an available time slot within an {@link AvailableTime} block
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

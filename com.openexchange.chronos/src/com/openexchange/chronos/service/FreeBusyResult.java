@@ -101,7 +101,7 @@ public class FreeBusyResult {
      *
      * @param freeBusyTimes The freeBusyTimes to set
      */
-    public void setAvailableTimes(List<FreeBusyTimeBlock> freeBusyTimes) {
+    public void setFreeBusyTimes(List<FreeBusyTimeBlock> freeBusyTimes) {
         this.freeBusyTimes = freeBusyTimes;
     }
 }
