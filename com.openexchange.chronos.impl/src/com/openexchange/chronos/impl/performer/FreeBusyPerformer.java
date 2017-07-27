@@ -271,6 +271,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 FreeBusyTime freeBusyTime = new FreeBusyTime();
                 freeBusyTime.setStartTime(new Date(availableTimeSlot.getFrom().getTimestamp()));
                 freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
+                freeBusyTime.setFbType(FbType.FREE);
 
                 // Add to the fb block
                 freeBusyTimeBlock.add(freeBusyTime);
@@ -280,7 +281,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
-            result.setAvailableTimes(freeBusyTimes);
+            result.setFreeBusyTimes(freeBusyTimes);
 
             // Set result for attendee
             results.put(attendee, result);
