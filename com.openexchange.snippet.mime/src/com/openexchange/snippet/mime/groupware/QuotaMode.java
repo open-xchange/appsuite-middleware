@@ -52,28 +52,39 @@ package com.openexchange.snippet.mime.groupware;
 import com.openexchange.java.Strings;
 
 /**
- * {@link QuotaMode}
+ * {@link QuotaMode} - The quota mode for MIME-backed snippets.
+ * <p>
+ * {@link #CONTEXT} quota mode is the default.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public enum QuotaMode {
 
+    /** MIME-backed snippets do contribute to the quota of the context-associated file storage (default) */
     CONTEXT("context"),
-    INDEPENDENT("independent");
+    /** MIME-backed snippets do use a dedicated quota and thus do <b><i>not</i></b> contribute to the quota of the context-associated file storage */
+    DEDICATED("dedicated");
 
     private final String name;
 
-    QuotaMode(String name){
-       this.name=name;
+    private QuotaMode(String name) {
+        this.name = name;
     }
 
-    public static QuotaMode getModeByName(String name){
-        if(Strings.isEmpty(name)){
+    /**
+     * Gets the quota mode for specified name.
+     *
+     * @param name The name to look-up
+     * @return The name-associated quota mode <i>or</i> {@link #CONTEXT} if name is unknown/invalid
+     */
+    public static QuotaMode getModeByName(String name) {
+        if (Strings.isEmpty(name)) {
             return CONTEXT;
         }
-        for(QuotaMode mode: QuotaMode.values()){
-            if(mode.name.equalsIgnoreCase(name) || mode.name().equalsIgnoreCase(name)){
+        for (QuotaMode mode : QuotaMode.values()) {
+            if (mode.name.equalsIgnoreCase(name)) {
                 return mode;
             }
         }

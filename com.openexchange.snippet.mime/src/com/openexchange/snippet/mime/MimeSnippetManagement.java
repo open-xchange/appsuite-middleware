@@ -142,8 +142,8 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
     private static final String QUOTA_MODE_PROPERTY = "com.openexchange.snippet.filestore.quota.mode";
-    private static final QuotaMode MODE;
 
+    private static final QuotaMode MODE;
     static {
         QuotaMode mode = QuotaMode.CONTEXT;
         try {
@@ -189,12 +189,12 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
     }
 
     private static FileStorage getFileStorage(int contextId) throws OXException {
-        if(QuotaMode.CONTEXT.equals(MODE)){
+        if (QuotaMode.CONTEXT.equals(MODE)) {
             return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
-        } else {
-            URI uri = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general()).getUri();
-            return FileStorages.getFileStorageService().getFileStorage(uri);
         }
+
+        URI uri = FileStorages.getQuotaFileStorageService().getFileStorageUriFor(-1, contextId);
+        return FileStorages.getFileStorageService().getFileStorage(uri);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                         throw e;
                     }
 
-                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, userId, contextId, e);
+                    LOGGER.warn("Missing file for snippet {} for user {} in context {}. Maybe file storage is (temporary) not available.", id, Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }
             }
             return list;
@@ -624,19 +624,17 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
             // Save MIME content to file storage
             FileStorage fileStorage = getFileStorage(session.getContextId());
             String file;
-            Long size=null;
+            long size = -1L;
             {
                 ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 try {
                     mimeMessage.writeTo(fileHolder.asOutputStream());
                     size = fileHolder.getLength();
-                    if (QuotaMode.INDEPENDENT.equals(MODE)) {
-                        if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
-                            Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
-                            if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
-                                backAfterRead = true;
-                                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(toMB(sizeQuota.getLimit()));
-                            }
+                    if (QuotaMode.DEDICATED.equals(MODE) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                        Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
+                            backAfterRead = true;
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
                         }
                     }
                     file = fileStorage.saveNewFile(fileHolder.getClosingStream());
@@ -645,9 +643,10 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                 }
             }
             // Store in DB, too
-            String newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
+            String newId = null;
             boolean error = true;
             try {
+                newId = Integer.toString(getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId));
                 stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ", ?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
@@ -666,7 +665,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                 stmt.setInt(8, snippet.isShared() ? 1 : 0);
                 stmt.setLong(9, System.currentTimeMillis());
                 stmt.setString(10, file);
-                if(size!=null && size>0){
+                if (size > 0) {
                     stmt.setLong(11, size);
                 } else {
                     stmt.setNull(11, Types.INTEGER);
@@ -972,12 +971,12 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
             try {
                 updateMessage.writeTo(fileHolder.asOutputStream());
                 size = fileHolder.getLength();
-                long difference = size - oldSize;
-                if (difference > 0 && QuotaMode.INDEPENDENT.equals(MODE)) {
-                    if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                if (QuotaMode.DEDICATED.equals(MODE) && null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                    long difference = size - oldSize;
+                    if (difference > 0) {
                         Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                         if (sizeQuota.isExceeded() || sizeQuota.willExceed(difference)) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(toMB(sizeQuota.getLimit()));
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
                         }
                     }
                 }

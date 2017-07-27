@@ -103,7 +103,7 @@ public final class MimeSnippetService implements QuotaAwareSnippetService {
 
     @Override
     public boolean ignoreQuota() {
-       return QuotaMode.INDEPENDENT.equals(MimeSnippetManagement.getMode());
+       return QuotaMode.DEDICATED.equals(MimeSnippetManagement.getMode());
     }
 
 }
