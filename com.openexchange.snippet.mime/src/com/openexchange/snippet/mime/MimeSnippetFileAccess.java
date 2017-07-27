@@ -92,7 +92,7 @@ public class MimeSnippetFileAccess {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            List<String> result = new ArrayList<>(rs.getFetchSize());
+            List<String> result = new ArrayList<>();
             do {
                 result.add(rs.getString(1));
             } while (rs.next());
