@@ -820,8 +820,8 @@ public class ICalImporter extends AbstractImporter {
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
                 CalendarResult result = session.getCalendarService().createEvent(session, folderId, importedEvent);
-                importResult.setDate(result.getTimestamp());
-                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+                importResult.setDate(new Date(result.getTimestamp()));
+                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
                 if (result.getCreations().isEmpty()) {
                     importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
                 } else {
@@ -853,8 +853,8 @@ public class ICalImporter extends AbstractImporter {
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
                 CalendarResult result = session.getCalendarService().updateEvent(session, masterEventID, importedException);
-                importResult.setDate(result.getTimestamp());
-                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp().getTime()));
+                importResult.setDate(new Date(result.getTimestamp()));
+                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
                 if (result.getCreations().isEmpty()) {
                     importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedException));
                 } else {
