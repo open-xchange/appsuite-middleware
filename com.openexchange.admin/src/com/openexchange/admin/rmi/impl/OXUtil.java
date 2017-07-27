@@ -422,7 +422,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         int iOptNumberOfSchemasToKeep = null != optNumberOfSchemasToKeep ? optNumberOfSchemasToKeep.intValue() : 0;
-        Map<Integer, List<String>> deletedSchemas = oxutil.deleteEmptyDatabaseSchemas(existing, iOptNumberOfSchemasToKeep);
+        Map<Database, List<String>> deletedSchemas = oxutil.deleteEmptyDatabaseSchemas(existing, iOptNumberOfSchemasToKeep);
         int numDeleted = 0;
         for (List<String> schemas : deletedSchemas.values()) {
             numDeleted += schemas.size();

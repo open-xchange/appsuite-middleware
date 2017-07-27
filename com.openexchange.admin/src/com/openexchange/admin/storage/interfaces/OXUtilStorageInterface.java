@@ -404,7 +404,7 @@ public abstract class OXUtilStorageInterface {
      * @return The empty schemas that were deleted (grouped by database host association)
      * @throws StorageException If schema cannot be deleted
      */
-    public abstract Map<Integer, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException;
+    public abstract Map<Database, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException;
 
     /**
      * Creates a new database from scratch on the given database host. Is used
@@ -472,6 +472,16 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract Database[] searchForDatabaseSchema(final String search_pattern, boolean onlyEmptySchemas) throws StorageException;
+
+    /**
+     * Counts schemas per database host matching search_pattern
+     *
+     * @param search_pattern A pattern to search for
+     * @param onlyEmptySchemas Whether only empty database schemas are supposed to be counted
+     * @return The schema counts per database host
+     * @throws StorageException
+     */
+    public abstract Map<Database, Integer> countDatabaseSchema(final String search_pattern, boolean onlyEmptySchemas) throws StorageException;
 
     /**
      * Searchs for server matching given search_pattern

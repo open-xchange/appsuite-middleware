@@ -1056,7 +1056,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Map<Integer, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException {
+    public Map<Database, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException {
         // Determine list of empty schemas to delete
         int numberOfSchemasToKeep = optNumberOfSchemasToKeep;
         boolean schemaSpecified = false;
@@ -1136,7 +1136,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
 
         // Delete reserved ones
-        Map<Integer, List<String>> deletedSchemas = new LinkedHashMap<>(databaseAndSchemasList.size());
+        Map<Database, List<String>> deletedSchemas = new LinkedHashMap<>(databaseAndSchemasList.size());
         for (Map.Entry<Integer, List<Database>> databaseAndSchemas : databaseAndSchemasList.entrySet()) {
             int poolId = databaseAndSchemas.getKey().intValue();
 
@@ -1167,7 +1167,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 int numSchemas = schemas.size();
                 if (numSchemas > 0) {
                     List<String> deleted = new ArrayList<>(numSchemas);
+                    Database dbHost = null;
                     for (Database schema : schemas) {
+                        if (null == dbHost) {
+                            dbHost = new Database(schema);
+                            dbHost.setScheme(null);
+                        }
                         try {
                             OXUtilMySQLStorageCommon.deleteDatabase(schema, con);
                             LOG.info("Deleted empty schema \"{}\" from database {}", schema.getScheme(), schema.getId());
@@ -1178,7 +1183,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             LOG.error("Failed to delete empty schema \"{}\" of database {}", schema.getScheme(), schema.getId(), e);
                         }
                     }
-                    deletedSchemas.put(Integer.valueOf(poolId), deleted);
+                    deletedSchemas.put(dbHost, deleted);
                 }
 
                 con.commit();
@@ -2252,6 +2257,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             }
         }
+    }
+
+    @Override
+    public Map<Database, Integer> countDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
