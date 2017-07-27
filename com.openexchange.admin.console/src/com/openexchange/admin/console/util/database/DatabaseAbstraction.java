@@ -124,6 +124,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG = "schemas-to-keep";
 
+    protected final static String OPT_NAME_ONLY_EMPTY_SCHEMAS_LONG = "only-empty-schemas";
+
     protected final static String OPT_NAME_SCHEMA_LONG = "schema";
 
     protected CLIOption databaseIdOption = null;
@@ -157,8 +159,10 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected CLIOption createSchemasOption = null;
 
     protected CLIOption numberOfSchemasOption = null;
-    
+
     protected CLIOption schemasToKeepOption = null;
+
+    protected CLIOption onlyEmptySchemasOption = null;
 
     // Needed for right error output
     protected String dbid = null;
@@ -166,19 +170,21 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected Boolean createSchemas;
     protected Integer numberOfSchemas;
-    
+
     protected Integer schemasToKeep;
 
+    protected Boolean onlyEmptySchemas;
+
     protected void parseAndSetCreateAndNumberOfSchemas(final AdminParser parser) throws InvalidDataException {
-        String tmp = (String) parser.getOptionValue(this.createSchemasOption);
-        if (Strings.isEmpty(tmp)) {
+        if (null == parser.getOptionValue(this.createSchemasOption)) {
             createSchemas = Boolean.FALSE;
             numberOfSchemas = Integer.valueOf(0);
             return;
         }
-        createSchemas = Boolean.valueOf(tmp.trim());
 
-        tmp = (String) parser.getOptionValue(this.numberOfSchemasOption);
+        createSchemas = Boolean.TRUE;
+
+        String tmp = (String) parser.getOptionValue(this.numberOfSchemasOption);
         if (createSchemas.booleanValue()) {
             if (Strings.isEmpty(tmp)) {
                 numberOfSchemas = Integer.valueOf(0);
@@ -209,7 +215,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             }
         }
     }
-    
+
     protected void parseAndSetSchemasToKeep(final AdminParser parser) throws InvalidDataException {
         String tmp = (String) parser.getOptionValue(this.schemasToKeepOption);
         if (Strings.isEmpty(tmp)) {
@@ -220,6 +226,14 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             } catch (NumberFormatException e) {
                 throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG + "\" option. Should be a number.", e);
             }
+        }
+    }
+
+    protected void parseAndSetOnlyEmptySchemas(final AdminParser parser) throws InvalidDataException {
+        if (null != parser.getOptionValue(this.onlyEmptySchemasOption)) {
+            onlyEmptySchemas = Boolean.TRUE;
+        } else {
+            onlyEmptySchemas = Boolean.FALSE;
         }
     }
 
@@ -344,18 +358,22 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     }
 
     protected void setCreateAndNumberOfSchemasOption(final AdminParser parser) {
-        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created. Accepts: true/false", true, false);
+        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created. Accepts: true/false", false, false);
         this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
     }
 
     protected void setNumberOfSchemasOption(final AdminParser parser) {
         this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
     }
-    
+
     protected void setSchemasToKeepOption(final AdminParser parser) {
         this.schemasToKeepOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG, "(Optionally) Specifies the number of empty schemas that are supposed to be kept (per database host). If missing, all empty schemas are attempted to be deleted. Ineffective if \"" + OPT_NAME_SCHEMA_LONG + "\" option is specified", true, false);
     }
-    
+
+    protected void setOnlyEmptySchemas(final AdminParser parser) {
+        this.onlyEmptySchemasOption = setLongOpt(parser, OPT_NAME_ONLY_EMPTY_SCHEMAS_LONG, "(Optionally) Specifies to list only empty schemas (per database host). If missing, all empty schemas are considered", false, false);
+    }
+
     protected void setDatabaseIDOption(final AdminParser parser) {
         setDatabaseIDOption(parser, NeededQuadState.eitheror, "The id of the database.");
     }

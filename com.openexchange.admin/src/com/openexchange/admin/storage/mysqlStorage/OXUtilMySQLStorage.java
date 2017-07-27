@@ -2187,7 +2187,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database[] searchForDatabaseSchema(String search_pattern) throws StorageException {
+    public Database[] searchForDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -2195,7 +2195,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getReadConnectionForConfigDB();
 
             String my_search_pattern = search_pattern.replace('*', '%');
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
+            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);

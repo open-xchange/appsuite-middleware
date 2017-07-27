@@ -73,6 +73,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
 
         try {
             parser.ownparse(args2);
+            parseAndSetOnlyEmptySchemas(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
@@ -83,12 +84,16 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
             if (parser.getOptionValue(this.searchOption) != null) {
                 searchpattern = (String)parser.getOptionValue(this.searchOption);
             }
-            final Database[] databases = oxutil.listDatabaseSchema(searchpattern, auth);
+            final Database[] databases = oxutil.listDatabaseSchema(searchpattern, onlyEmptySchemas, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(databases);
             } else {
-                sysoutOutput(databases);
+                if (null == databases || databases.length == 0) {
+                    System.out.println("No such database schemas found");
+                } else {
+                    sysoutOutput(databases);
+                }
             }
 
             sysexit(0);
@@ -135,6 +140,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setSearchOption(parser);
         setCSVOutputOption(parser);
+        setOnlyEmptySchemas(parser);
     }
 
     /**
@@ -185,7 +191,7 @@ public class ListDatabaseSchema extends DatabaseAbstraction {
 
     @Override
     protected final String getObjectName() {
-        return "databases";
+        return "database schemas";
     }
 
 }

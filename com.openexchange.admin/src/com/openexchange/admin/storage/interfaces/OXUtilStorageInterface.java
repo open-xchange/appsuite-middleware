@@ -467,10 +467,11 @@ public abstract class OXUtilStorageInterface {
      *
      * @param search_pattern
      *            a pattern to search for
+     * @param onlyEmptySchemas Whether only empty database schemas are supposed to be considered
      * @return a database array with schema information
      * @throws StorageException
      */
-    public abstract Database[] searchForDatabaseSchema(final String search_pattern) throws StorageException;
+    public abstract Database[] searchForDatabaseSchema(final String search_pattern, boolean onlyEmptySchemas) throws StorageException;
 
     /**
      * Searchs for server matching given search_pattern

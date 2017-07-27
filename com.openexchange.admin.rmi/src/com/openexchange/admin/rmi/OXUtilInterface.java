@@ -402,6 +402,7 @@ public interface OXUtilInterface extends Remote {
      * @return Containing the database schemas found by the search.
      * @param search_pattern
      *            Search pattern e.g "*" "*my*".
+     * @param onlyEmptySchemas Whether only empty schemas are supposed to be considered
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -413,7 +414,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public Database[] listDatabaseSchema(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Database[] listDatabaseSchema(final String search_pattern, final Boolean onlyEmptySchemas, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Convenience method for listing all databases registered in the system.
@@ -436,6 +437,7 @@ public interface OXUtilInterface extends Remote {
      * Convenience method for listing all database schemas registered in the system.
      *
      * @return Containing the database schemas found by the search.
+     * @param onlyEmptySchemas Whether only empty schemas are supposed to be considered
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -447,7 +449,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public Database[] listAllDatabaseSchema(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Database[] listAllDatabaseSchema(final Boolean onlyEmptySchemas, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Checks databases by schema consistency.
