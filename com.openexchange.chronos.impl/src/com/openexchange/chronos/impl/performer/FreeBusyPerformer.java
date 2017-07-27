@@ -79,6 +79,7 @@ import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
@@ -246,6 +247,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
         }
 
+        // Iterate over all available times for all attendeees
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
             AvailableTime availableTime = availableTimes.get(attendee);
@@ -262,10 +264,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Set the busy time for that particular block 
             freeBusyTimeBlock.setBusyType(availableTime.getBusyType());
 
-            // Add the already existing free/busy blocks
-            List<FreeBusyTime> freeBusyTimesList = freeBusyPerAttendee.get(attendee);
-            freeBusyTimeBlock.addAll(freeBusyTimesList); //TODO: maybe fix any overlapping FreeBusyTime and AvailableTimes
-
             // For each available time slot create an equivalent free busy time
             for (AvailableTimeSlot availableTimeSlot : availableTime) {
                 FreeBusyTime freeBusyTime = new FreeBusyTime();
@@ -278,6 +276,51 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 // Add to the fb time for the attendee
                 freeBusyTimes.add(freeBusyTimeBlock);
             }
+
+            // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
+            // in regard to the mergedFreeBusyTimes
+            List<FreeBusyTime> freeBusyTimesList = freeBusyPerAttendee.get(attendee);
+            List<FreeBusyTime> auxiliaryList = new ArrayList<>();
+            for (FreeBusyTime freeBusyTime : freeBusyTimesList) {
+                Iterator<FreeBusyTime> iterator = freeBusyTimeBlock.iterator();
+                while (iterator.hasNext()) {
+                    FreeBusyTime nextItem = iterator.next();
+                    if (AvailabilityUtils.contained(nextItem.getStartTime(), nextItem.getEndTime(), freeBusyTime.getStartTime(), freeBusyTime.getEndTime())) {
+                        // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block 
+                        iterator.remove();
+                    } else if (AvailabilityUtils.preceedsAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        // If the freeBusyTime of the event preceeds and intersects with the freeBusyTime block of the availability 
+                        // then adjust the start time of the freeBusyTime block of the availability
+                        nextItem.setStartTime(freeBusyTime.getEndTime());
+                    } else if (AvailabilityUtils.succeedsAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        // If the freeBusyTime of the event preceeds and intersects with the freeBusyTime block of the availability 
+                        // then adjust the end time of the freeBusyTime block of the availability
+                        nextItem.setEndTime(freeBusyTime.getStartTime());
+                    } else if (AvailabilityUtils.contained(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
+                        // then split the freeBusyTime block of the availability and remove it from the list
+                        FreeBusyTime intervalA = new FreeBusyTime();
+                        intervalA.setFbType(FbType.FREE);
+                        intervalA.setStartTime(nextItem.getStartTime());
+                        intervalA.setEndTime(freeBusyTime.getStartTime());
+
+                        FreeBusyTime intervalB = new FreeBusyTime();
+                        intervalB.setFbType(FbType.FREE);
+                        intervalB.setStartTime(freeBusyTime.getEndTime());
+                        intervalA.setEndTime(freeBusyTime.getEndTime());
+
+                        auxiliaryList.add(intervalA);
+                        auxiliaryList.add(intervalB);
+
+                        // Remove
+                        iterator.remove();
+                    }
+                }
+                auxiliaryList.add(freeBusyTime);
+            }
+
+            // Add all freeBusyTime blocks
+            freeBusyTimesList.addAll(auxiliaryList);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();

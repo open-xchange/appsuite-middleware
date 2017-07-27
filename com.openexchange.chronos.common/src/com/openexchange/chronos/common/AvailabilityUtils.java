@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.Date;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.CalendarAvailability;
@@ -61,12 +62,81 @@ import com.openexchange.chronos.CalendarFreeSlot;
  */
 public final class AvailabilityUtils {
 
+    /**
+     * Checks if the {@link Date} interval of the specified {@link CalendarFreeSlot} A is completely contained
+     * with in the {@link Date} interval of the specified {@link CalendarFreeSlot} B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the {@link Date} interval of the specified {@link CalendarFreeSlot} A is completely contained
+     *         with in the {@link Date} interval of the specified {@link CalendarFreeSlot} B; <code>false</code> otherwise
+     */
     public static boolean contained(CalendarFreeSlot a, CalendarFreeSlot b) {
         return contained(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
+    /**
+     * Checks if the specified {@link DateTime} interval A is completely contained with in the specified {@link DateTime} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link DateTime} interval A is completely
+     *         contained with in the specified {@link DateTime} interval B; <code>false</code> otherwise
+     */
     public static boolean contained(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
         return startA.after(startB) && endA.before(endB);
+    }
+
+    /**
+     * Checks if the specified {@link Date} interval A is completely contained with in the specified {@link Date} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link Date} interval A is completely
+     *         contained with in the specified {@link Date} interval B; <code>false</code> otherwise
+     */
+    public static boolean contained(Date startA, Date endA, Date startB, Date endB) {
+        return startA.after(startB) && endA.before(endB);
+    }
+
+    /**
+     * Checks if the specified {@link Date} interval A preceeeds and intersects with the specified {@link Date} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link Date} interval A preceeeds and intersects
+     *         with the specified {@link Date} interval B; <code>false</code> otherwise
+     */
+    public static boolean preceedsAndIntersects(Date startA, Date endA, Date startB, Date endB) {
+        if (!intersect(startA, endA, startB, endB)) {
+            return false;
+        }
+        return startA.before(startB) && endA.after(startB);
+    }
+
+    /**
+     * Checks if the specified {@link Date} interval A succeeds and intersects with the specified {@link Date} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link Date} interval A succeeds and intersects
+     *         with the specified {@link Date} interval B; <code>false</code> otherwise
+     */
+    public static boolean succeedsAndIntersects(Date startA, Date endA, Date startB, Date endB) {
+        if (!intersect(startA, endA, startB, endB)) {
+            return false;
+        }
+        return startA.before(endB) && endA.after(endB);
     }
 
     /**
@@ -119,6 +189,23 @@ public final class AvailabilityUtils {
     }
 
     /**
+     * Two checks are performed:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param startA The starting date A
+     * @param endA The ending date A
+     * @param startB The starting date B
+     * @param endB The ending date B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    public static boolean intersect(Date startA, Date endA, Date startB, Date endB) {
+        return startA.before(endB) && endA.after(startB);
+    }
+
+    /**
      * Merge the start and end times of the specified {@link CalendarFreeSlot}s
      * 
      * @param a The {@link CalendarFreeSlot} A
@@ -132,6 +219,13 @@ public final class AvailabilityUtils {
         return ats;
     }
 
+    /**
+     * Merges the specified {@link CalendarFreeSlot}s
+     * 
+     * @param a The {@link CalendarFreeSlot} A
+     * @param b The {@link CalendarFreeSlot} B
+     * @return a new merged {@link CalendarFreeSlot} instance
+     */
     public static CalendarFreeSlot merge(CalendarFreeSlot a, CalendarFreeSlot b) {
         CalendarFreeSlot ats = new CalendarFreeSlot();
         ats.setStartTime(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
@@ -139,6 +233,12 @@ public final class AvailabilityUtils {
         return ats;
     }
 
+    /**
+     * Converts the specified {@link CalendarFreeSlot} to an {@link AvailableTimeSlot}
+     * 
+     * @param freeSlot The {@link CalendarFreeSlot} to convert
+     * @return The converted {@link AvailableTimeSlot}
+     */
     public static AvailableTimeSlot convert(CalendarFreeSlot freeSlot) {
         AvailableTimeSlot ats = new AvailableTimeSlot();
         ats.setFrom(freeSlot.getStartTime());
