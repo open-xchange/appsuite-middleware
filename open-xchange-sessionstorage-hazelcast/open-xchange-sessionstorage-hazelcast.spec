@@ -2,6 +2,7 @@
 
 Name:          open-xchange-sessionstorage-hazelcast
 BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else

@@ -22,7 +22,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Config files for the Open-Xchange Mobile UI
-Autoreqprov:   no
+Autoreqprov:    no
+Requires(pre):  open-xchange-system
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description
@@ -69,6 +70,8 @@ fi
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange
+%dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/etc/meta
 %config(noreplace) /opt/open-xchange/etc/settings/*

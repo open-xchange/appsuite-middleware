@@ -8,22 +8,23 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 %endif
 %if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
+BuildRequires:  java-1_8_0-openjdk-devel
 %else
-BuildRequires: java-1.8.0-openjdk-devel
+BuildRequires:  java-1.8.0-openjdk-devel
 %endif
-Version:	@OXVERSION@
-%define        ox_release 3
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+Version:        @OXVERSION@
+%define         ox_release 3
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Enables the default themes in the UI
-Autoreqprov:   no
-Requires:	open-xchange-core
-Provides:	open-xchange-theme-default
+Autoreqprov:    no
+Requires(pre):  open-xchange-system
+Requires:       open-xchange-core
+Provides:       open-xchange-theme-default
 
 %description
 Contains configuration files transfered through preferences interface to the UI. Tells the UI the installed themes.
@@ -54,6 +55,8 @@ fi
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange
+%dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/settings/*
 

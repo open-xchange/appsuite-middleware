@@ -24,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange Cassandra Service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Provides:      open-xchange-cassandra
 
 %description
 This package provides connectivity to a Cassandra cluster via a Cassandra Service

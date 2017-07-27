@@ -519,165 +519,198 @@ done
 
 %files ca-es
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ca_ES*
 
 %files cs-cz
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*cs_CZ*
 
 %files da-dk
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*da_DK*
 
 %files de-ch
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*de_CH*
 
 %files de-de
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*de_DE*
 
 %files el-gr
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*el_GR*
 
 %files en-us
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 
 %files es-es
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_ES*
 
 %files es-mx
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*es_MX*
 
 %files et-ee
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*et_EE*
 
 %files eu-es
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*eu_ES*
 
 %files fi-fi
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fi_FI*
 
 %files fr-ca
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_CA*
 
 %files fr-fr
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*fr_FR*
 
 %files he-he
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*he_HE*
 
 %files hu-hu
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*hu_HU*
 
 %files it-it
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*it_IT*
 
 %files ja-jp
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ja_JP*
 
 %files ko-ko
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ko_KO*
 
 %files lv-lv
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*lv_LV*
 
 %files nb-no
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*nb_NO*
 
 %files nl-nl
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*nl_NL*
 
 %files pl-pl
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*pl_PL*
 
 %files pt-br
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*pt_BR*
 
 %files pt-pt
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*pt_PT*
 
 %files ro-ro
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ro_RO*
 
 %files ru-ru
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*ru_RU*
 
 %files sk-sk
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sk_SK*
 
 %files sv-se
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sv_SE*
 
 %files tr-tr
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*tr_TR*
 
 %files zh-cn
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_CN*
 
 %files zh-tw
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*zh_TW*
 
 %files en-gb
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*en_GB*
 

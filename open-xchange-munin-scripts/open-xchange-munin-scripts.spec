@@ -24,6 +24,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
 Requires:      munin-node, perl-JSON, perl-libwww-perl
+Requires(pre): open-xchange-system
 Provides:      open-xchange-munin-scripts-jolokia = %{version}
 Obsoletes:     open-xchange-munin-scripts-jolokia < %{version}
 
