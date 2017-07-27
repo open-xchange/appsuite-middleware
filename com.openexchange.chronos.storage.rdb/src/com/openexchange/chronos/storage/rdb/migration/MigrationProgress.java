@@ -61,28 +61,28 @@ public class MigrationProgress {
 
     private final ProgressState delegate;
 
-    private int currentTask;
+    private int currentContext;
 
     /**
      * Initializes a new {@link MigrationProgress}.
      *
      * @param delegate The parent update task progress state to use
-     * @param totalTasks The total number of migration tasks to expect
+     * @param contextCount The total number of contexts to migrate
      */
-    public MigrationProgress(ProgressState delegate, int totalTasks) {
+    public MigrationProgress(ProgressState delegate, int contextCount) {
         super();
         this.delegate = delegate;
-        delegate.setTotal(totalTasks * 100);
+        delegate.setTotal(contextCount * 100);
     }
 
-    void nextTask() {
-        currentTask++;
-        delegate.setState(currentTask * 100);
+    void nextContext() {
+        currentContext++;
+        delegate.setState(currentContext * 100);
     }
 
-    void setTaskProgress(long current, long total) {
-        int taskProgress = 0 >= total ? 0 : (int) (current * 100 / total);
-        delegate.setState(currentTask * 100 + taskProgress);
+    void setContextProgress(long current, long total) {
+        int contextProgress = 0 >= total ? 0 : (int) (current * 100 / total);
+        delegate.setState(currentContext * 100 + contextProgress);
     }
 
 }

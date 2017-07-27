@@ -56,19 +56,14 @@ import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -85,7 +80,6 @@ import com.openexchange.server.ServiceLookup;
 public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChronosStorageMigrationTask.class);
-    private static final int TASKS_PER_CONTEXT = 3;
 
     private final ServiceLookup services;
 
@@ -113,22 +107,31 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         MigrationConfig config = new MigrationConfig(services);
         DatabaseService dbService = services.getService(DatabaseService.class);
+        ContextService contextService = services.getService(ContextService.class);
         int[] contextIds = dbService.getContextsInSameSchema(params.getContextId());
-        MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length * TASKS_PER_CONTEXT);
+        MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length * 2);
         Connection connection = dbService.getForUpdateTask(params.getContextId());
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            DBProvider dbProvider = new SimpleDBProvider(connection, connection);
-            for (int i = 0; i < contextIds.length; i++) {
-                migrate(progress, config, contextIds[i], dbProvider);
+            /*
+             * migrate calendar data for all contexts
+             */
+            for (int contextId : contextIds) {
+                new CalendarDataMigration(progress, config, contextService.loadContext(contextId), optEntityResolver(services, contextId), connection).perform();
             }
             if (config.isUncommitted()) {
                 LOG.warn("Skipping commit phase as migration is configured in 'uncommited' mode.");
-            } else {
-                connection.commit();
-                committed = true;
+                return;
             }
+            /*
+             * mark contexts to switch to new storage & commit
+             */
+            for (int contextId : contextIds) {
+                markContextMigrated(contextService, contextId);
+            }
+            connection.commit();
+            committed = true;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -143,42 +146,35 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private void migrate(MigrationProgress progress, MigrationConfig config, int contextId, DBProvider dbProvider) throws OXException {
-        /*
-         * initialize source- & destination storage & perform context migration
-         */
-        Context context = services.getService(ContextService.class).loadContext(contextId);
-        EntityResolver entityResolver = optEntityResolver(services, contextId);
-        CalendarStorage sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(
-            context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        CalendarStorage destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(
-            context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        migrate(progress, config, contextId, sourceStorage, destinationStorage);
-    }
-
-    private void migrate(MigrationProgress progress, MigrationConfig config, int contextId, CalendarStorage sourceStorage, CalendarStorage destinationStorage) throws OXException {
+    /**
+     * Marks a context to use the new calendar storage after a successful data migration.
+     *
+     * @param contextService A reference to the context service
+     * @param contextId The identifier of the context to mark
+     */
+    private void markContextMigrated(ContextService contextService, int contextId) throws OXException {
         HashMap<String, String> contextAttributes = new HashMap<String, String>();
         contextAttributes.put("config/com.openexchange.chronos.useLegacyStorage", "false");
         contextAttributes.put("config/com.openexchange.chronos.replayToLegacyStorage", "true");
-        /*
-         * prepare & perform migration tasks
-         */
-        List<MigrationTask> tasks = Arrays.<MigrationTask>asList(
-            new CopyCalendarDataTask(progress, config, contextId, sourceStorage, destinationStorage),
-            new CopyTombstoneDataTask(progress, config, contextId, sourceStorage, destinationStorage),
-            new MarkContextTask(progress, config, contextId, sourceStorage, destinationStorage, contextAttributes)
-        );
-        perform(tasks);
+        markContext(contextService, contextId, contextAttributes);
     }
 
-    private void perform(List<MigrationTask> tasks) throws OXException {
-        for (MigrationTask migrationTask : tasks) {
-            try {
-                migrationTask.call();
-            } catch (Exception e) {
-                throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
+    /**
+     * Applies one or more config properties for a specific context.
+     *
+     * @param contextService A reference to the context service
+     * @param contextId The identifier of the context to mark
+     * @param attributesToSet The attributes to set
+     */
+    private void markContext(ContextService contextService, int contextId, Map<String, String> attributesToSet) throws OXException {
+        for (Entry<String, String> entry : attributesToSet.entrySet()) {
+            String name = entry.getKey();
+            String value = entry.getValue();
+            LOG.trace("About to set attribute \"{}\" to \"{}\" in context {}...", name, value, I(contextId));
+            contextService.setAttribute(entry.getKey(), entry.getValue(), contextId);
+            LOG.trace("Successfully set attribute \"{}\" to \"{}\" in context {}.", name, value, I(contextId));
         }
+        LOG.info("Successfully set {} attributes in context {}.", I(attributesToSet.size()), I(contextId));
     }
 
     private static EntityResolver optEntityResolver(ServiceLookup services, int contextId) {
