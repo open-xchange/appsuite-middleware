@@ -96,7 +96,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     public RdbAttendeeStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
         this.accountId = accountId;
-        this.entityProcessor = new EntityProcessor(entityResolver);
+        this.entityProcessor = new EntityProcessor(context.getContextId(), entityResolver);
     }
 
     @Override

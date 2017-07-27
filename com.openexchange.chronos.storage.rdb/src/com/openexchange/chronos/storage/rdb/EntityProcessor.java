@@ -87,14 +87,17 @@ import com.openexchange.java.Reference;
 public class EntityProcessor {
 
     private final EntityResolver entityResolver;
+    private final int contextId;
 
     /**
      * Initializes a new {@link EntityProcessor}.
      *
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
+     * @param contextId The context identifier
+     * @param entityResolver The entity resolver to use
      */
-    public EntityProcessor(EntityResolver entityResolver) {
+    public EntityProcessor(int contextId, EntityResolver entityResolver) {
         super();
+        this.contextId = contextId;
         this.entityResolver = entityResolver;
     }
 
@@ -114,9 +117,6 @@ public class EntityProcessor {
      * @return The (possibly adjusted) event reference
      */
     public Event adjustPriorSave(Event event) throws OXException {
-        if (null == entityResolver) {
-            return event;
-        }
         if (event.containsOrganizer() && null != event.getOrganizer()) {
             /*
              * encode organizer
@@ -181,9 +181,6 @@ public class EntityProcessor {
      * @return The (possibly adjusted) event reference
      */
     public Event adjustAfterLoad(Event event) throws OXException {
-        if (null == entityResolver) {
-            return event;
-        }
         if (null != event.getOrganizer()) {
             /*
              * decode organizer
@@ -223,7 +220,7 @@ public class EntityProcessor {
         String uri;
         String cn;
         if (0 < organizer.getEntity()) {
-            uri = ResourceId.forUser(entityResolver.getContextID(), organizer.getEntity());
+            uri = ResourceId.forUser(contextId, organizer.getEntity());
             if (null == sentBy) {
                 /*
                  * no parameters needed, use uri as-is
@@ -241,7 +238,7 @@ public class EntityProcessor {
         VObjectParameters parameters = new VObjectParameters();
         if (null != sentBy) {
             if (0 < sentBy.getEntity()) {
-                parameters.put("SENT-BY", ResourceId.forUser(entityResolver.getContextID(), organizer.getSentBy().getEntity()));
+                parameters.put("SENT-BY", ResourceId.forUser(contextId, organizer.getSentBy().getEntity()));
             } else {
                 parameters.put("SENT-BY", organizer.getSentBy().getUri());
             }
@@ -253,13 +250,34 @@ public class EntityProcessor {
         return writeVObjectProperty(property);
     }
 
+    private <T extends CalendarUser> T parseResourceId(T calendarUser, String value, boolean fallbackToUri) throws OXException {
+        ResourceId resourceId = ResourceId.parse(value);
+        if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
+            if (null != entityResolver) {
+                entityResolver.applyEntityData(calendarUser, resourceId.getEntity());
+            } else {
+                calendarUser.setEntity(resourceId.getEntity());
+                calendarUser.setUri(resourceId.getURI());
+            }
+            return calendarUser;
+        }
+        if (fallbackToUri) {
+            calendarUser.setUri(value);
+            if (null != entityResolver) {
+                entityResolver.applyEntityData(calendarUser, CalendarUserType.INDIVIDUAL);
+            }
+            return calendarUser;
+        }
+        return null;
+    }
+
     private Organizer decode(String value) throws OXException {
         /*
          * attempt to parse internal organizer directly
          */
-        ResourceId resourceId = ResourceId.parse(value);
-        if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
-            return entityResolver.applyEntityData(new Organizer(), resourceId.getEntity());
+        Organizer organizer = parseResourceId(new Organizer(), value, false);
+        if (null != organizer) {
+            return organizer;
         }
         /*
          * parse as vobject, otherwise
@@ -268,28 +286,13 @@ public class EntityProcessor {
         if (null == property) {
             return null;
         }
-        Organizer organizer = new Organizer();
-        resourceId = ResourceId.parse(property.getValue());
-        if (null != resourceId && CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
-            organizer = entityResolver.applyEntityData(organizer, resourceId.getEntity());
-        } else {
-            organizer.setUri(property.getValue());
-            organizer = entityResolver.applyEntityData(organizer, CalendarUserType.INDIVIDUAL);
-        }
+        organizer = parseResourceId(new Organizer(), property.getValue(), true);
         VObjectParameters parameters = property.getParameters();
         if (null != parameters) {
             for (Entry<String, List<String>> parameter : parameters) {
                 String firstValue = parameter.getValue().get(0);
                 if ("SENT-BY".equals(parameter.getKey())) {
-                    CalendarUser sentBy = new CalendarUser();
-                    ResourceId sentByResourceId = ResourceId.parse(firstValue);
-                    if (null != sentByResourceId && CalendarUserType.INDIVIDUAL.equals(sentByResourceId.getCalendarUserType())) {
-                        sentBy = entityResolver.applyEntityData(sentBy, sentByResourceId.getEntity());
-                    } else {
-                        sentBy.setUri(firstValue);
-                        sentBy = entityResolver.applyEntityData(sentBy, CalendarUserType.INDIVIDUAL);
-                    }
-                    organizer.setSentBy(sentBy);
+                    organizer.setSentBy(parseResourceId(new CalendarUser(), firstValue, true));
                 }
                 if ("CN".equals(parameter.getKey())) {
                     organizer.setCn(firstValue);
