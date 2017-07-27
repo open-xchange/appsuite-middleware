@@ -15,6 +15,7 @@ var customFileName = false;
 var scriptName = path.basename(process.argv[1]);
 var scriptUsage = "Usage: $>node " + scriptName + " <BASE_FOLDER> [<NAME_OF_JSONFILE>]";
 var scriptExample = "Example: $>node " + scriptName + " http_api/";
+var swagger = require('swagger-tools').specs.v2;
 
 // check if mandatory command line arguments are missing
 if(process.argv.length < 3) {
@@ -109,6 +110,48 @@ try {
 				else
 					console.log(jsonFileName + " written successfully!");
 				
+				var jsonPath = path.join(process.cwd(), baseFolder, jsonFileName);
+
+				console.log("Validating json definition at '" + jsonPath + "' ...")
+				var swaggerDefinition = require(jsonPath);//'./http_api/my.json');
+				swagger.validate(swaggerDefinition, function (err, result) {
+				  if (err) {
+				    throw err;
+				  }
+
+				  if (typeof result !== 'undefined') {
+				    if (result.errors.length > 0) {
+				      console.log('The Swagger document is invalid...');
+
+				      console.log('');
+
+				      console.log('Errors');
+				      console.log('------');
+
+				      result.errors.forEach(function (err) {
+				        console.log('#/' + err.path.join('/') + ': ' + err.message);
+				      });
+
+				      console.log('');
+				    }
+
+				    if (result.warnings.length > 0) {
+				      console.log('Warnings');
+				      console.log('--------');
+
+				      result.warnings.forEach(function (warn) {
+				        console.log('#/' + warn.path.join('/') + ': ' + warn.message);
+				      });
+				    }
+
+				    if (result.errors.length > 0) {
+				      process.exit(1);
+				    }
+				  } else {
+				    console.log('Swagger document is valid');
+				  }
+				});
+
 				drawInfo();
 			});
 		})
