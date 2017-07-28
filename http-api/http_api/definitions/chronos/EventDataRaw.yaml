@@ -11,6 +11,9 @@ created:
 uid:
   type: string
   description: the universal identifier.
+description:
+  type: string
+  description: The description.
 attendees:
   type: array
   description: The attendees of the event.

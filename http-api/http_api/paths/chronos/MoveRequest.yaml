@@ -8,7 +8,6 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
@@ -18,6 +17,11 @@
         type: integer
         format: int64
         description: Timestamp of the last update of the event.
+        required: true
+      - in: query
+        name: targetFolder
+        type: string
+        description: ID of the target folder.
         required: true
     responses:
       200:
