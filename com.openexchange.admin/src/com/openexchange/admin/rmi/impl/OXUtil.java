@@ -516,6 +516,27 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
+    public Map<Database, Integer> countDatabaseSchema(final String search_pattern, Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug(search_pattern);
+
+        if (search_pattern.length() == 0) {
+            throw new InvalidDataException("Invalid search pattern");
+        }
+
+        boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
+        return oxutil.countDatabaseSchema(search_pattern, bOnlyEmptySchemas);
+    }
+
+    @Override
     public Database[] listDatabaseSchema(String search_pattern, Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {

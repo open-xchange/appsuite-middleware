@@ -2261,8 +2261,102 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Map<Database, Integer> countDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
-        // TODO Auto-generated method stub
-        return null;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            String my_search_pattern = search_pattern.replace('*', '%');
+
+            if (onlyEmptySchemas) {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?) AND s.count=0");
+            } else {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
+            }
+            pstmt.setString(1, my_search_pattern);
+            pstmt.setString(2, my_search_pattern);
+            pstmt.setString(3, my_search_pattern);
+            rs = pstmt.executeQuery();
+
+            if (false == rs.next()) {
+                return Collections.emptyMap();
+            }
+
+            class Counter {
+                int count = 0;
+
+                Counter(int initial) {
+                    super();
+                    this.count = initial;
+                }
+
+                void increment() {
+                    count++;
+                }
+
+                Integer getCount() {
+                    return I(count);
+                }
+            }
+
+            Map<Integer, Database> id2db = new HashMap<>(); // Ensures that there is only one Database instance associated with a counter
+            Map<Database, Counter> counters = new LinkedHashMap<>();
+            do {
+                String schemaName = rs.getString("s.schemaname");
+                if (null != schemaName && false == rs.wasNull()) {
+                    int id = rs.getInt("d.db_pool_id");
+                    Database db = id2db.get(I(id));
+                    if (null == db) {
+                        db = new Database();
+                        int nrcontexts = rs.getInt("p.count");
+                        db.setClusterWeight(I(rs.getInt("c.weight")));
+                        db.setName(rs.getString("d.name"));
+                        db.setDriver(rs.getString("d.driver"));
+                        db.setId(I(id));
+                        db.setLogin(rs.getString("d.login"));
+                        db.setMaster(Boolean.TRUE);
+                        db.setMasterId(I(0));
+                        db.setMaxUnits(I(rs.getInt("c.max_units")));
+                        db.setPassword(rs.getString("d.password"));
+                        db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
+                        db.setPoolInitial(I(rs.getInt("d.initial")));
+                        db.setPoolMax(I(rs.getInt("d.max")));
+                        db.setUrl(rs.getString("d.url"));
+                        db.setCurrentUnits(I(nrcontexts));
+                        id2db.put(I(id), db);
+                    }
+
+                    Counter counter = counters.get(db);
+                    if (null == counter) {
+                        counter = new Counter(0);
+                        counters.put(db, counter);
+                    }
+                    counter.increment();
+                }
+            } while (rs.next());
+
+            Map<Database, Integer> retval = new LinkedHashMap<>();
+            for (Map.Entry<Database, Counter> countEntry : counters.entrySet()) {
+                retval.put(countEntry.getKey(), countEntry.getValue().getCount());
+            }
+            return retval;
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } finally {
+            closeSQLStuff(rs, pstmt);
+
+            if (con != null) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
     }
 
     @Override

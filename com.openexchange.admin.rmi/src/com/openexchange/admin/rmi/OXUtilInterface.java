@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -415,6 +416,17 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public Database[] listDatabaseSchema(final String search_pattern, final Boolean onlyEmptySchemas, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Counts schemas per database host matching search_pattern
+     *
+     * @param search_pattern A pattern to search for
+     * @param onlyEmptySchemas Whether only empty database schemas are supposed to be counted
+     * @param auth Credentials for authenticating against server.
+     * @return The schema counts per database host
+     * @throws StorageException
+     */
+    public Map<Database, Integer> countDatabaseSchema(String search_pattern, Boolean onlyEmptySchemas, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Convenience method for listing all databases registered in the system.
