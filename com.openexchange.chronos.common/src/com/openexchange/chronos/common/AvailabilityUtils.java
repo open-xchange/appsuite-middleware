@@ -115,7 +115,7 @@ public final class AvailabilityUtils {
      * @return <code>true</code> if the specified {@link Date} interval A preceeeds and intersects
      *         with the specified {@link Date} interval B; <code>false</code> otherwise
      */
-    public static boolean preceedsAndIntersects(Date startA, Date endA, Date startB, Date endB) {
+    public static boolean precedesAndIntersects(Date startA, Date endA, Date startB, Date endB) {
         if (!intersect(startA, endA, startB, endB)) {
             return false;
         }

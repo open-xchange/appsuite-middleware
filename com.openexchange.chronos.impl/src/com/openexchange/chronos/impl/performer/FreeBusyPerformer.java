@@ -247,7 +247,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
         }
 
-        // Iterate over all available times for all attendeees
+        // Iterate over all available times for all attendees
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
             AvailableTime availableTime = availableTimes.get(attendee);
@@ -288,12 +288,12 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     if (AvailabilityUtils.contained(nextItem.getStartTime(), nextItem.getEndTime(), freeBusyTime.getStartTime(), freeBusyTime.getEndTime())) {
                         // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block 
                         iterator.remove();
-                    } else if (AvailabilityUtils.preceedsAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
-                        // If the freeBusyTime of the event preceeds and intersects with the freeBusyTime block of the availability 
+                    } else if (AvailabilityUtils.precedesAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
                         // then adjust the start time of the freeBusyTime block of the availability
                         nextItem.setStartTime(freeBusyTime.getEndTime());
                     } else if (AvailabilityUtils.succeedsAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
-                        // If the freeBusyTime of the event preceeds and intersects with the freeBusyTime block of the availability 
+                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
                         // then adjust the end time of the freeBusyTime block of the availability
                         nextItem.setEndTime(freeBusyTime.getStartTime());
                     } else if (AvailabilityUtils.contained(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
