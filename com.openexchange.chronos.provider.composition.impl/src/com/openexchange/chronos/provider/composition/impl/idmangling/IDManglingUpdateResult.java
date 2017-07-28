@@ -102,13 +102,13 @@ public class IDManglingUpdateResult implements UpdateResult {
     @Override
     public Event getOriginal() {
         Event original = delegate.getOriginal();
-        return null == original ? null : new IDManglingEvent(original, accountId);
+        return null == original ? null : IDMangling.withUniqueID(original, accountId);
     }
 
     @Override
     public Event getUpdate() {
         Event update = delegate.getUpdate();
-        return null == update ? null : new IDManglingEvent(update, accountId);
+        return null == update ? null : IDMangling.withUniqueID(update, accountId);
     }
 
     @Override

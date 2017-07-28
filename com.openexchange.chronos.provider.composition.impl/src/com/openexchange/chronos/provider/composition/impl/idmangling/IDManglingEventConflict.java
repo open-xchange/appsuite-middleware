@@ -63,11 +63,11 @@ import com.openexchange.chronos.service.EventConflict;
 public class IDManglingEventConflict implements EventConflict {
 
     private final EventConflict DELEGATE;
-    private final IDManglingEvent EVENT;
+    private final Event EVENT;
     /**
      * Initializes a new {@link IDManglingEventConflict}.
      */
-    public IDManglingEventConflict(EventConflict eventConflict, IDManglingEvent event) {
+    public IDManglingEventConflict(EventConflict eventConflict, Event event) {
         super();
         this.DELEGATE = eventConflict;
         this.EVENT = event;

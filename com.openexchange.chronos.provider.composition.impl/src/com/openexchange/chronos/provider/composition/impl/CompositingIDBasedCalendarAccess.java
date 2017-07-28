@@ -86,7 +86,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
-import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEvent;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -615,7 +614,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
                     result = new ArrayList<>(eventConflicts.size());
                 }
                 for (EventConflict conflict : eventConflicts) {
-                    result.add(new IDManglingEventConflict(conflict, new IDManglingEvent(conflict.getConflictingEvent(), account.getAccountId())));
+                    result.add(new IDManglingEventConflict(conflict, IDMangling.withUniqueID(conflict.getConflictingEvent(), account.getAccountId())));
                 }
             }
         }

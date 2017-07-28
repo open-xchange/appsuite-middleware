@@ -77,7 +77,7 @@ public class IDManglingDeleteResult implements DeleteResult {
 
     @Override
     public Event getDeletedEvent() {
-        return new IDManglingEvent(delegate.getDeletedEvent(), accountId);
+        return IDMangling.withUniqueID(delegate.getDeletedEvent(), accountId);
     }
 
     @Override

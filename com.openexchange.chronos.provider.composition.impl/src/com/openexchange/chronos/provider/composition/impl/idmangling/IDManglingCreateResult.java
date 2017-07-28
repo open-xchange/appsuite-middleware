@@ -77,7 +77,7 @@ public class IDManglingCreateResult implements CreateResult {
 
     @Override
     public Event getCreatedEvent() {
-        return new IDManglingEvent(delegate.getCreatedEvent(), accountId);
+        return IDMangling.withUniqueID(delegate.getCreatedEvent(), accountId);
     }
 
     @Override

@@ -135,7 +135,10 @@ public class IDMangling {
     }
 
     public static Event withUniqueID(Event event, int accountId) {
-        return new IDManglingEvent(event, accountId);
+        String newId = getUniqueId(accountId, event.getFolderId(), event.getId());
+        String newSeriesId = getUniqueId(accountId, event.getFolderId(), event.getSeriesId());
+        String newFolderId = getUniqueFolderId(accountId, event.getFolderId());
+        return new IDManglingEvent(event, newId, newFolderId, newSeriesId);
     }
 
     public static Event withUniqueID(Event event, CompositeID compositeID) {
@@ -202,7 +205,7 @@ public class IDMangling {
     }
 
     /**
-     * Gets the relative representation of a specific unqiue folder identifier.
+     * Gets the relative representation of a specific unique folder identifier.
      * <p/>
      * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
      *
@@ -214,6 +217,21 @@ public class IDMangling {
             return uniqueFolderId;
         }
         return CompositeFolderID.parse(uniqueFolderId).getFolderId();
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative event or series identifier.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeId The relative event or series identifier
+     * @param relativeFolderId The relative parent folder identifier
+     * @return The unique event or series identifier
+     */
+    private static String getUniqueId(int accountId, String relativeFolderId, String relativeId) {
+        if (null == relativeId) {
+            return relativeId;
+        }
+        return new CompositeEventID(accountId, relativeFolderId, relativeFolderId).toUniqueID();
     }
 
 }

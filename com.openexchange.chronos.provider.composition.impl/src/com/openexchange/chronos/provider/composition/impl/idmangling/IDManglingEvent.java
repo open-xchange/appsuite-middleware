@@ -51,8 +51,6 @@ package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 
 /**
  * {@link IDManglingEvent}
@@ -65,20 +63,6 @@ public class IDManglingEvent extends DelegatingEvent {
     private final String newId;
     private final String newFolderId;
     private final String newSeriesId;
-
-    /**
-     * Initializes a new {@link IDManglingEvent}.
-     *
-     * @param delegate The event delegate
-     * @param accountId The identifier of the calendar account the event originates in
-     */
-    public IDManglingEvent(Event delegate, int accountId) {
-        this(delegate,
-            null != delegate.getId() ? new CompositeEventID(accountId, delegate.getFolderId(), delegate.getId()).toUniqueID() : null,
-            null != delegate.getFolderId() ? new CompositeFolderID(accountId, delegate.getFolderId()).toUniqueID() : null,
-            null != delegate.getSeriesId() ? new CompositeEventID(accountId, delegate.getFolderId(), delegate.getSeriesId()).toUniqueID() : null
-        );
-    }
 
     /**
      * Initializes a new {@link IDManglingEvent}.
