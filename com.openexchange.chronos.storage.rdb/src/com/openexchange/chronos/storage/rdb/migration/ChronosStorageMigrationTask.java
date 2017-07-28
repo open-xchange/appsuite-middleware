@@ -109,16 +109,17 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
         DatabaseService dbService = services.getService(DatabaseService.class);
         ContextService contextService = services.getService(ContextService.class);
         int[] contextIds = dbService.getContextsInSameSchema(params.getContextId());
-        MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length * 2);
+        MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length);
         Connection connection = dbService.getForUpdateTask(params.getContextId());
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
             /*
-             * migrate calendar data for all contexts
+             * migrate calendar data for all contexts & increment progress
              */
             for (int contextId : contextIds) {
                 new CalendarDataMigration(progress, config, contextService.loadContext(contextId), optEntityResolver(services, contextId), connection).perform();
+                progress.nextContext();
             }
             if (config.isUncommitted()) {
                 LOG.warn("Skipping commit phase as migration is configured in 'uncommited' mode.");
