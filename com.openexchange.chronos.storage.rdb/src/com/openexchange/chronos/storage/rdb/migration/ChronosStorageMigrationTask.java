@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -118,7 +116,7 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
              * migrate calendar data for all contexts & increment progress
              */
             for (int contextId : contextIds) {
-                new CalendarDataMigration(progress, config, contextService.loadContext(contextId), optEntityResolver(services, contextId), connection).perform();
+                new CalendarDataMigration(progress, config, contextService.loadContext(contextId), connection).perform();
                 progress.nextContext();
             }
             if (config.isUncommitted()) {
@@ -176,18 +174,6 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
             LOG.trace("Successfully set attribute \"{}\" to \"{}\" in context {}.", name, value, I(contextId));
         }
         LOG.info("Successfully set {} attributes in context {}.", I(attributesToSet.size()), I(contextId));
-    }
-
-    private static EntityResolver optEntityResolver(ServiceLookup services, int contextId) {
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        if (null != calendarUtilities) {
-            try {
-                return calendarUtilities.getEntityResolver(contextId);
-            } catch (OXException e) {
-                LOG.warn("Error getting entity resolver for context {}: {}", I(contextId), e.getMessage(), e);
-            }
-        }
-        return null;
     }
 
 }

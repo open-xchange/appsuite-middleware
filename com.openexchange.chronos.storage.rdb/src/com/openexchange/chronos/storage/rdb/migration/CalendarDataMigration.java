@@ -121,36 +121,20 @@ public class CalendarDataMigration {
      * @param progress The migration progress callback, or <code>null</code> if not used
      * @param config The migration config to use
      * @param context The context being migrated
-     * @param entityResolver The entity resolver to use
      * @param connection The database connection
      */
-    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, EntityResolver entityResolver, Connection connection) {
+    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, Connection connection) {
         super();
         this.progress = progress;
         this.config = config;
         this.contextId = context.getContextId();
         this.connection = connection;
         DBProvider dbProvider = new SimpleDBProvider(connection, connection);
-        this.sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(
+        EntityResolver entityResolver = config.optEntityResolver(contextId);
+        sourceStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(
             context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        this.destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(
+        destinationStorage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(
             context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-    }
-
-    /**
-     * Updates the migration progress with the current number of copied events and event tombstones and generates a log message if
-     * applicable.
-     */
-    private void updateProgress() {
-        long current = copiedEvents + copiedEventTombstones;
-        if (null != progress) {
-            progress.setContextProgress(current, totalEventsToCopy);
-        }
-        long currentTimeMillis = System.currentTimeMillis();
-        if (0 < lastLogTime && currentTimeMillis - lastLogTime > TimeUnit.SECONDS.toMillis(10L)) {
-            LOG.info("Calendar migration task finished {}% for context {}.", I((int) (current * 100 / totalEventsToCopy)), I(contextId));
-        }
-        lastLogTime = currentTimeMillis;
     }
 
     /**
@@ -311,6 +295,22 @@ public class CalendarDataMigration {
         return nextTimestamp;
     }
 
+    /**
+     * Updates the migration progress with the current number of copied events and event tombstones and generates a log message if
+     * applicable.
+     */
+    private void updateProgress() {
+        long current = copiedEvents + copiedEventTombstones;
+        if (null != progress) {
+            progress.setContextProgress(current, totalEventsToCopy);
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        if (0 < lastLogTime && currentTimeMillis - lastLogTime > TimeUnit.SECONDS.toMillis(10L)) {
+            LOG.info("Calendar migration task finished {}% for context {}.", I((int) (current * 100 / totalEventsToCopy)), I(contextId));
+        }
+        lastLogTime = currentTimeMillis;
+    }
+
     private Date getMinTombstoneLastModified() {
         int months = config.getMaxTombstoneAgeInMonths();
         if (0 >= months) {
@@ -345,12 +345,12 @@ public class CalendarDataMigration {
                     if (config.isSevere(warning)) {
                         try (StringWriter stringWriter = new StringWriter(); PrintWriter printWriter = new PrintWriter(stringWriter)) {
                             warning.printStackTrace(printWriter);
-                            stringBuilder.append(stringWriter.toString()).append(System.lineSeparator());
+                            stringBuilder.append("* ").append(stringWriter.toString()).append(System.lineSeparator());
                         } catch (IOException e) {
                             // ignore
                         }
                     } else {
-                        stringBuilder.append(warning.getLogMessage()).append(System.lineSeparator());
+                        stringBuilder.append("* ").append(warning.getMessage()).append(System.lineSeparator());
                     }
                 }
             }

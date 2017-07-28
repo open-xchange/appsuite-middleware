@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.storage.rdb.migration;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import java.util.TreeSet;
 import com.openexchange.chronos.exception.ProblemSeverity;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
@@ -88,6 +91,25 @@ public class MigrationConfig {
             configService.getProperty("com.openexchange.chronos.migration.severityThreshold"), ProblemSeverity.MAJOR);
         allowedProblemSeverities = getAllowedProblemSeverities(severityThreshold);
         uncommitted = configService.getBoolProperty("com.openexchange.chronos.migration.uncommitted", false);
+    }
+
+    /**
+     * Optionally gets an entity resolver for the supplied context.
+     *
+     * @param contextId The identifier of the context to get the entity resolver for
+     * @return The entity resolver, or <code>null</code> if not available
+     */
+    public EntityResolver optEntityResolver(int contextId) {
+        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
+        if (null != calendarUtilities) {
+            try {
+                return calendarUtilities.getEntityResolver(contextId);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(MigrationConfig.class).warn(
+                    "Error getting entity resolver for context {}: {}", I(contextId), e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
     public int getBatchSize() {
