@@ -50,15 +50,18 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -90,6 +93,9 @@ public class RdbCalendarStorage implements CalendarStorage {
     public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super();
         this.accountId = accountId;
+        if (null == entityResolver) {
+            entityResolver = optEntityResolver(context.getContextId());
+        }
         eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
@@ -141,6 +147,25 @@ public class RdbCalendarStorage implements CalendarStorage {
             warnings.putAll(attachmentStorage.getAndFlushWarnings());
         }
         return warnings;
+    }
+
+    /**
+     * Optionally gets an entity resolver for the supplied context.
+     *
+     * @param contextId The identifier of the context to get the entity resolver for
+     * @return The entity resolver, or <code>null</code> if not available
+     */
+    private EntityResolver optEntityResolver(int contextId) {
+        CalendarUtilities calendarUtilities = Services.getOptionalService(CalendarUtilities.class);
+        if (null != calendarUtilities) {
+            try {
+                return calendarUtilities.getEntityResolver(contextId);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(RdbCalendarStorage.class).warn(
+                    "Error getting entity resolver for context {}: {}", I(contextId), e.getMessage(), e);
+            }
+        }
+        return null;
     }
 
 }
