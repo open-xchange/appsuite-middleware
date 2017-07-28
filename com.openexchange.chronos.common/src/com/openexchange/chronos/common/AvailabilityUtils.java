@@ -54,6 +54,8 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.FbType;
+import com.openexchange.chronos.FreeBusyTime;
 
 /**
  * {@link AvailabilityUtils}
@@ -244,5 +246,20 @@ public final class AvailabilityUtils {
         ats.setFrom(freeSlot.getStartTime());
         ats.setUntil(freeSlot.getEndTime());
         return ats;
+    }
+
+    /**
+     * Converts the specified {@link AvailableTimeSlot} to a {@link FreeBusyTime} object
+     * and sets the {@link FbType} to {@link FbType#FREE}.
+     * 
+     * @param availableTimeSlot The {@link AvailableTimeSlot} to convert
+     * @return The converted {@link FreeBusyTime} object
+     */
+    public static FreeBusyTime convert(AvailableTimeSlot availableTimeSlot) {
+        FreeBusyTime freeBusyTime = new FreeBusyTime();
+        freeBusyTime.setStartTime(new Date(availableTimeSlot.getFrom().getTimestamp()));
+        freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
+        freeBusyTime.setFbType(FbType.FREE);
+        return freeBusyTime;
     }
 }

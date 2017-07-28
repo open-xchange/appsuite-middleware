@@ -266,11 +266,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // For each available time slot create an equivalent free busy time
             for (AvailableTimeSlot availableTimeSlot : availableTime) {
-                FreeBusyTime freeBusyTime = new FreeBusyTime();
-                freeBusyTime.setStartTime(new Date(availableTimeSlot.getFrom().getTimestamp()));
-                freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
-                freeBusyTime.setFbType(FbType.FREE);
-
+                FreeBusyTime freeBusyTime = AvailabilityUtils.convert(availableTimeSlot);
                 // Add to the fb block
                 freeBusyTimeBlock.add(freeBusyTime);
                 // Add to the fb time for the attendee
@@ -299,19 +295,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     } else if (AvailabilityUtils.contained(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
                         // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
                         // then split the freeBusyTime block of the availability and remove it from the list
-                        FreeBusyTime intervalA = new FreeBusyTime();
-                        intervalA.setFbType(FbType.FREE);
-                        intervalA.setStartTime(nextItem.getStartTime());
-                        intervalA.setEndTime(freeBusyTime.getStartTime());
-
-                        FreeBusyTime intervalB = new FreeBusyTime();
-                        intervalB.setFbType(FbType.FREE);
-                        intervalB.setStartTime(freeBusyTime.getEndTime());
-                        intervalA.setEndTime(freeBusyTime.getEndTime());
-
-                        auxiliaryList.add(intervalA);
-                        auxiliaryList.add(intervalB);
-
+                        splitFreeBusyTime(auxiliaryList, freeBusyTime, nextItem);
                         // Remove
                         iterator.remove();
                     }
@@ -331,6 +315,45 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         }
 
         return results;
+    }
+
+    /**
+     * Given that the {@link Event}'s free busy time block is fully contained
+     * with in the availability's block, it splits the specified {@link FreeBusyTime}
+     * in two intervals:
+     * 
+     * <p><b>Interval A</b>
+     * <ul>
+     * <li>Start time: The start time of the availability's block</li>
+     * <li>End time: The start time of the event's block</li>
+     * </ul>
+     * </p>
+     * 
+     * <p>
+     * <b>Interval B</b>
+     * <ul>
+     * <li>Start time: The end time of the event's block</li>
+     * <li>End time: The end time of the availability's block</li>
+     * </ul>
+     * </p>
+     * 
+     * @param auxiliaryList The auxiliary {@link List} to add the new intervals
+     * @param freeBusyTime The {@link Event}'s {@link FreeBusyTime} block
+     * @param toSplit The availability's {@link FreeBusyTime} block to split
+     */
+    private void splitFreeBusyTime(List<FreeBusyTime> auxiliaryList, FreeBusyTime freeBusyTime, FreeBusyTime toSplit) {
+        FreeBusyTime intervalA = new FreeBusyTime();
+        intervalA.setFbType(FbType.FREE);
+        intervalA.setStartTime(toSplit.getStartTime());
+        intervalA.setEndTime(freeBusyTime.getStartTime());
+
+        FreeBusyTime intervalB = new FreeBusyTime();
+        intervalB.setFbType(FbType.FREE);
+        intervalB.setStartTime(freeBusyTime.getEndTime());
+        intervalA.setEndTime(toSplit.getEndTime());
+
+        auxiliaryList.add(intervalA);
+        auxiliaryList.add(intervalB);
     }
 
     /**
