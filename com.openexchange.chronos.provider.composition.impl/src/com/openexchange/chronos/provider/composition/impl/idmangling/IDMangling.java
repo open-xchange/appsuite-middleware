@@ -50,7 +50,11 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.CompositeEventID;
@@ -67,6 +71,15 @@ import com.openexchange.chronos.service.UpdatesResult;
  * @since v7.10.0
  */
 public class IDMangling {
+
+    /** A set of fixed root folder identifiers excluded from ID mangling */
+    private static final Set<String> ROOT_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        null, // no parent
+        "0",  // com.openexchange.folderstorage.FolderStorage.ROOT_ID
+        "1",  // com.openexchange.folderstorage.FolderStorage.PRIVATE_ID
+        "2",  // com.openexchange.folderstorage.FolderStorage.PUBLIC_ID
+        "3"   // com.openexchange.folderstorage.FolderStorage.SHARED_ID
+    )));
 
     /**
      * Initializes a new {@link IDMangling}.
@@ -95,22 +108,20 @@ public class IDMangling {
     }
 
     public static CalendarFolder withUniqueID(CalendarFolder folder, int accountId) {
-        String newId = null == folder.getId() ? null :
-            new CompositeFolderID(accountId, folder.getId()).toUniqueID();
+        String newId = getUniqueFolderId(accountId, folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
-            String newParentId = null == groupwareFolder.getParentId() ? null :
-                new CompositeFolderID(accountId, groupwareFolder.getParentId()).toUniqueID();
+            String newParentId = getUniqueFolderId(accountId, groupwareFolder.getParentId());
             return new IDManglingGroupwareFolder(groupwareFolder, newId, newParentId);
         }
         return new IDManglingFolder(folder, newId);
     }
 
     public static CalendarFolder withRelativeID(CalendarFolder folder) {
-        String newId = null == folder.getId() ? null : CompositeFolderID.parse(folder.getId()).getFolderId();
+        String newId = getRelativeFolderId(folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
-            String newParentId = null == groupwareFolder.getParentId() ? null : CompositeFolderID.parse(groupwareFolder.getParentId()).getFolderId();
+            String newParentId = getRelativeFolderId(groupwareFolder.getParentId());
             return new IDManglingGroupwareFolder(groupwareFolder, newId, newParentId);
         }
         return new IDManglingFolder(folder, newId);
@@ -118,7 +129,7 @@ public class IDMangling {
 
     public static Event withRelativeID(Event event) {
         String newId = null == event.getId() ? null : CompositeEventID.parse(event.getId()).getEventId();
-        String newFolderId = null == event.getFolderId() ? null : CompositeFolderID.parse(event.getFolderId()).getFolderId();
+        String newFolderId = getRelativeFolderId(event.getFolderId());
         String newSeriesId = null == event.getSeriesId() ? null : CompositeEventID.parse(event.getSeriesId()).getEventId();
         return new IDManglingEvent(event, newId, newFolderId, newSeriesId);
     }
@@ -172,6 +183,37 @@ public class IDMangling {
 
     public static EventID getRelativeID(CompositeEventID compositeEventID) {
         return new EventID(compositeEventID.getFolderId(), compositeEventID.getEventId(), compositeEventID.getRecurrenceId());
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative folder identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeFolderId The relative folder identifier
+     * @return The unique folder identifier
+     */
+    private static String getUniqueFolderId(int accountId, String relativeFolderId) {
+        if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
+            return relativeFolderId;
+        }
+        return new CompositeFolderID(accountId, relativeFolderId).toUniqueID();
+    }
+
+    /**
+     * Gets the relative representation of a specific unqiue folder identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
+     *
+     * @param uniqueFolderId The unique folder identifier
+     * @return The unique folder identifier
+     */
+    private static String getRelativeFolderId(String uniqueFolderId) {
+        if (ROOT_FOLDER_IDS.contains(uniqueFolderId)) {
+            return uniqueFolderId;
+        }
+        return CompositeFolderID.parse(uniqueFolderId).getFolderId();
     }
 
 }
