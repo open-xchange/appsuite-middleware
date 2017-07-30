@@ -65,13 +65,15 @@ import com.openexchange.exception.Detail;
 public class CalendarExceptionDetailParser extends OXExceptionDetailParser{
 
     private static final String ID = "id";
+    private static final String FOLDER_ID = "folderId";
     private static final String ERROR = "error";
 
     @Override
     public JSONObject toJSON(Detail detail, Locale locale) throws JSONException {
         JSONObject json = new JSONObject();
         CalendarExceptionDetail calDetail = (CalendarExceptionDetail) detail;
-        json.put(ID, calDetail.getEventId().toUniqueID());
+        json.put(FOLDER_ID, calDetail.getEventId().getFolderID());
+        json.put(ID, calDetail.getEventId().getObjectID());
         json.put(ERROR, super.toJSON(detail, locale));
         return json;
     }

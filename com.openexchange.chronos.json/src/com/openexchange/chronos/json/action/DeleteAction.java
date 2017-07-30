@@ -62,13 +62,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.exception.CalendarExceptionDetail;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -84,6 +83,7 @@ public class DeleteAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
 
+    private static final String FOLDER_ID_FIELD = "folderId";
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";
 
@@ -110,21 +110,15 @@ public class DeleteAction extends ChronosAction {
         }
         JSONArray ids = (JSONArray) data;
         try {
-            List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.length());
+            List<EventID> eventIDs = new ArrayList<>(ids.length());
             for (int x = 0; x < ids.length(); x++) {
                 JSONObject jsonObject = ids.getJSONObject(x);
-                String id = jsonObject.getString(ID_FIELD);
-                if (jsonObject.has(RECURENCE_ID_FIELD)) {
-                    String recurrenceId = jsonObject.getString(RECURENCE_ID_FIELD);
-                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(recurrenceId)));
-                } else {
-                    compositeEventIDs.add(CompositeEventID.parse(id));
-                }
+                eventIDs.add(getEventID(jsonObject.getString(FOLDER_ID_FIELD), jsonObject.getString(ID_FIELD), jsonObject.optString(RECURENCE_ID_FIELD, null)));
             }
 
-            Map<CompositeEventID, OXException> errors = null;
+            Map<EventID, OXException> errors = null;
             CalendarResult deleteEvent = null;
-            for (CompositeEventID id : compositeEventIDs) {
+            for (EventID id : eventIDs) {
                 try {
                     deleteEvent = calendarAccess.deleteEvent(id);
                 } catch (OXException e) {
@@ -137,11 +131,11 @@ public class DeleteAction extends ChronosAction {
 
             if (errors != null && !errors.isEmpty()) {
                 if (errors.size() == 1) {
-                    CompositeEventID errorId = errors.keySet().iterator().next();
+                    EventID errorId = errors.keySet().iterator().next();
                     throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));
                 } else {
                     OXException ex = CalendarExceptionCodes.ERROR_DELETING_EVENTS.create();
-                    for (CompositeEventID id : errors.keySet()) {
+                    for (EventID id : errors.keySet()) {
                         ex.addDetail(new CalendarExceptionDetail(errors.get(id), id));
                     }
                     throw ex;

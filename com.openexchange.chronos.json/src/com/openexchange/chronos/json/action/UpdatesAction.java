@@ -57,6 +57,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIME
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -98,8 +99,9 @@ public class UpdatesAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
         Long timestamp = (Long) parseParameter(requestData, PARAMETER_TIMESTAMP, true).getValue();
-        UpdatesResult updatesResult = calendarAccess.getUpdatedEventsInFolder(parseFolderParameter(requestData), timestamp.longValue());
+        UpdatesResult updatesResult = calendarAccess.getUpdatedEventsInFolder(folderId, timestamp.longValue());
         return new AJAXRequestResult(updatesResult, new Date(updatesResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
     }
 

@@ -70,11 +70,11 @@ import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.json.converter.ListItemMapping;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
@@ -139,10 +139,10 @@ public class UpdateAttendeeAction extends ChronosAction {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
             }
 
-            CompositeEventID compositeEventID = parseIdParameter(requestData);
+            EventID eventID = parseIdParameter(requestData);
             CalendarResult updateAttendeeResult;
             try {
-                updateAttendeeResult = calendarAccess.updateAttendee(compositeEventID, attendee);
+                updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee);
             } catch (OXException e) {
                 if (isConflict(e)) {
                     return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
@@ -171,7 +171,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                     }
                     try {
 
-                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(compositeEventID, toUpdate);
+                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(eventID, toUpdate);
                         results = new ArrayList<>(2);
                         results.add(updateAttendeeResult);
                         results.add(updateAlarmResult);

@@ -56,6 +56,7 @@ import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -94,19 +95,19 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     /**
      * Gets a specific calendar folder.
      *
-     * @param folderID The composite identifier of the folder to get the events from
+     * @param folderId The fully qualified identifier of the folder to get the events from
      * @return The calendar folder
      */
-    CalendarFolder getFolder(CompositeFolderID folderID) throws OXException;
+    CalendarFolder getFolder(String folderId) throws OXException;
 
     /**
      * Create a new calendar folder.
      *
-     * @param parentFolderID The composite identifier of the parent folder
+     * @param parentFolderId The fully qualified identifier of the parent folder
      * @param folder The calendar folder to create
-     * @return The identifier of the newly created folder
+     * @return The fully qualified identifier of the newly created folder
      */
-    CompositeFolderID createFolder(CompositeFolderID parentFolderID, CalendarFolder folder) throws OXException;
+    String createFolder(String parentFolderId, CalendarFolder folder) throws OXException;
 
     /**
      * Updates a calendar folder.
@@ -116,11 +117,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param folderID The composite identifier of the folder to update
+     * @param folderId The fully qualified identifier of the folder to update
      * @param folder The updated calendar folder data
-     * @return The (possibly changed) identifier of the updated folder
+     * @return The (possibly changed) fully qualified identifier of the updated folder
      */
-    CompositeFolderID updateFolder(CompositeFolderID folderID, CalendarFolder folder) throws OXException;
+    String updateFolder(String folderId, CalendarFolder folder) throws OXException;
 
     /**
      * Deletes a calendar folder.
@@ -130,9 +131,9 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param folderID The composite identifier of the folder to delete
+     * @param folderId The fully qualified identifier of the folder to delete
      */
-    void deleteFolder(CompositeFolderID folderID) throws OXException;
+    void deleteFolder(String folderId) throws OXException;
 
     //
 
@@ -150,10 +151,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
-     * @param folderID The composite identifier of the folder to get the events from
+     * @param folderId The fully qualified identifier of the folder to get the events from
      * @return The events
      */
-    List<Event> getEventsInFolder(CompositeFolderID folderID) throws OXException;
+    List<Event> getEventsInFolder(String folderId) throws OXException;
 
     /**
      * Gets all events of the session's user.
@@ -187,11 +188,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
-     * @param folderID The composite identifier of the folder to get the updated events from
+     * @param folderId The fully qualified identifier of the folder to get the updated events from
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      */
-    UpdatesResult getUpdatedEventsInFolder(CompositeFolderID folderID, long updatedSince) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
@@ -220,10 +221,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
      * </ul>
      *
-     * @param eventID The composite identifier of the event to get
+     * @param eventID The identifier of the event to get
      * @return The event
      */
-    Event getEvent(CompositeEventID eventID) throws OXException;
+    Event getEvent(EventID eventID) throws OXException;
 
     /**
      * Gets a list of events.
@@ -233,10 +234,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
      * </ul>
      *
-     * @param eventIDs A list of the composite identifiers of the events to get
+     * @param eventIDs A list of the identifiers of the events to get
      * @return The events
      */
-    List<Event> getEvents(List<CompositeEventID> eventIDs) throws OXException;
+    List<Event> getEvents(List<EventID> eventIDs) throws OXException;
 
     /**
      * Gets all change exceptions of a recurring event series.
@@ -246,10 +247,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
      * </ul>
      *
-     * @param seriesID The identifier of the series to get the change exceptions for
+     * @param folderId The fully qualified identifier of the parent folder of the event series to get the change exceptions for
+     * @param seriesId The identifier of the series to get the change exceptions for
      * @return The change exceptions, or an empty list if there are none
      */
-    List<Event> getChangeExceptions(CompositeEventID seriesID) throws OXException;
+    List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException;
 
     /**
      * Creates a new event.
@@ -260,11 +262,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * </ul>
      *
-     * @param folderID The composite identifier of the folder to create the event in
+     * @param folderId The fully qualified identifier of the parent folder to create the event in
      * @param event The event data to create
      * @return The create result
      */
-    CalendarResult createEvent(CompositeFolderID folderID, Event event) throws OXException;
+    CalendarResult createEvent(String folderId, Event event) throws OXException;
 
     /**
      * Updates an existing event.
@@ -276,11 +278,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventID The composite identifier of the event to update
+     * @param eventID The identifier of the event to update
      * @param event The event data to update
      * @return The update result
      */
-    CalendarResult updateEvent(CompositeEventID eventID, Event event) throws OXException;
+    CalendarResult updateEvent(EventID eventID, Event event) throws OXException;
 
     /**
      * Moves an existing event into another folder.
@@ -292,11 +294,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventID The composite identifier of the event to move
-     * @param folderID The identifier of the folder to move the event to
+     * @param eventID The identifier of the event to move
+     * @param targetFolderId The fully qualified identifier of the destination folder to move the event into
      * @return The move result
      */
-    CalendarResult moveEvent(CompositeEventID eventID, CompositeFolderID folderID) throws OXException;
+    CalendarResult moveEvent(EventID eventID, String targetFolderId) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.
@@ -306,11 +308,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventID The composite identifier of the event to get
+     * @param eventID The identifier of the event to get
      * @param attendee The attendee to update
      * @return The update result
      */
-    CalendarResult updateAttendee(CompositeEventID eventID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException;
 
     /**
      * Deletes an existing event.
@@ -320,9 +322,9 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
-     * @param eventID The composite identifier of the event to delete
+     * @param eventID The identifier of the event to delete
      * @return The delete result
      */
-    CalendarResult deleteEvent(CompositeEventID eventID) throws OXException;
+    CalendarResult deleteEvent(EventID eventID) throws OXException;
 
 }

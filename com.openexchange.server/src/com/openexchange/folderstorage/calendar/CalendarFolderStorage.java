@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.CompositeFolderID;
-import com.openexchange.chronos.provider.composition.CompositeID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -234,10 +233,9 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void createFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        CompositeFolderID parentFolderID = CompositeFolderID.parse(folder.getParentID());
         GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder);
-        CompositeFolderID folderID = calendarAccess.createFolder(parentFolderID, folderToCreate);
-        folder.setID(folderID.toUniqueID());
+        String folderID = calendarAccess.createFolder(folder.getParentID(), folderToCreate);
+        folder.setID(folderID);
     }
 
     @Override
@@ -248,12 +246,11 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        CompositeFolderID folderID = CompositeFolderID.parse(folderId);
         Date timeStamp = storageParameters.getTimeStamp();
         if (null != timeStamp) {
             calendarAccess.set(CalendarParameters.PARAMETER_TIMESTAMP, timeStamp);
         }
-        calendarAccess.deleteFolder(folderID);
+        calendarAccess.deleteFolder(folderId);
     }
 
     @Override
@@ -318,10 +315,9 @@ public class CalendarFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        CompositeFolderID folderID = CompositeFolderID.parse(folderId);
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        CalendarFolder calendarFolder = calendarAccess.getFolder(folderID);
-        return getStorageFolder(treeId, getQualifiedAccountID(folderID), getDefaultContentType(), calendarFolder);
+        CalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
+        return getStorageFolder(treeId, getQualifiedAccountID(folderId), getDefaultContentType(), calendarFolder);
     }
 
     @Override
@@ -364,7 +360,6 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        CompositeFolderID folderID = CompositeFolderID.parse(folder.getID());
         Date timeStamp = storageParameters.getTimeStamp();
         if (null != timeStamp) {
             calendarAccess.set(CalendarParameters.PARAMETER_TIMESTAMP, timeStamp);
@@ -373,11 +368,11 @@ public class CalendarFolderStorage implements FolderStorage {
          * update folder
          */
         GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
-        CompositeFolderID updatedFolderID = calendarAccess.updateFolder(folderID, folderToUpdate);
+        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate);
         /*
          * take over updated identifiers in passed folder reference
          */
-        folder.setID(updatedFolderID.toUniqueID());
+        folder.setID(updatedFolderID);
         folder.setParentID(folderToUpdate.getParentId());
         folder.setLastModified(folderToUpdate.getLastModified());
     }
@@ -409,12 +404,13 @@ public class CalendarFolderStorage implements FolderStorage {
     }
 
     /**
-     * Gets a qualified, unique identifier for the calendar account referenced by the supplied composite event- or folder identifier.
+     * Gets a qualified, unique identifier for the calendar account referenced by the supplied composite folder identifier.
      *
-     * @param compositeID The composite identifier to get the account identifier for
+     * @param uniqueID The unique identifier to get the account identifier for
      * @return The qualified account identifier
      */
-    private static String getQualifiedAccountID(CompositeID compositeID) {
+    private static String getQualifiedAccountID(String uniqueID) {
+        CompositeFolderID compositeID = CompositeFolderID.parse(uniqueID);
         return IDMangler.mangle(CompositeFolderID.CAL_PREFIX, String.valueOf(compositeID.getAccountId()));
     }
 

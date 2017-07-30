@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
@@ -94,7 +95,7 @@ public class NewAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
+        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
         Object data = requestData.getData();
         if(data==null || !(data instanceof JSONObject)){
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
@@ -108,7 +109,7 @@ public class NewAction extends ChronosAction {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
         try {
-            CalendarResult calendarResult = calendarAccess.createEvent(parseFolderParameter(requestData), event);
+            CalendarResult calendarResult = calendarAccess.createEvent(folderId, event);
             if (calendarResult.getCreations().size() != 1) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to create new event");
             }

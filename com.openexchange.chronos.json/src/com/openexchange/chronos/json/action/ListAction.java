@@ -60,10 +60,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.converter.EventResultConverter;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -80,6 +79,7 @@ public class ListAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_FIELDS);
 
+    private static final String FOLDER_ID_FIELD = "folderId";
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";
 
@@ -105,18 +105,12 @@ public class ListAction extends ChronosAction {
         }
         JSONArray ids = (JSONArray) data;
         try {
-            List<CompositeEventID> compositeEventIDs = new ArrayList<>(ids.length());
+            List<EventID> eventIDs = new ArrayList<>(ids.length());
             for (int x = 0; x < ids.length(); x++) {
                 JSONObject jsonObject = ids.getJSONObject(x);
-                String id = jsonObject.getString(ID_FIELD);
-                if (jsonObject.has(RECURENCE_ID_FIELD)) {
-                    String recurrenceId = jsonObject.getString(RECURENCE_ID_FIELD);
-                    compositeEventIDs.add(new CompositeEventID(CompositeEventID.parse(id), new DefaultRecurrenceId(recurrenceId)));
-                } else {
-                    compositeEventIDs.add(CompositeEventID.parse(id));
-                }
+                eventIDs.add(getEventID(jsonObject.getString(FOLDER_ID_FIELD), jsonObject.getString(ID_FIELD), jsonObject.optString(RECURENCE_ID_FIELD, null)));
             }
-            List<Event> events = calendarAccess.getEvents(compositeEventIDs);
+            List<Event> events = calendarAccess.getEvents(eventIDs);
             return new AJAXRequestResult(events, EventResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);

@@ -49,19 +49,19 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -99,13 +99,8 @@ public class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        CompositeFolderID folder = parseFolderParameter(requestData, false);
-        List<Event> events;
-        if(folder==null){
-            events = calendarAccess.getEventsOfUser();
-        } else {
-            events = calendarAccess.getEventsInFolder(folder);
-        }
+        String folderId = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        List<Event> events = null != folderId ? calendarAccess.getEventsInFolder(folderId) : calendarAccess.getEventsOfUser();
         long timeStamp=0;
         for(Event event: events){
             if(event.getLastModified().getTime()>timeStamp){

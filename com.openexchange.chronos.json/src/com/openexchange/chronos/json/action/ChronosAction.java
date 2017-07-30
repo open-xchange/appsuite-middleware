@@ -71,13 +71,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -149,43 +149,42 @@ public abstract class ChronosAction implements AJAXActionService {
         return com.openexchange.osgi.Tools.requireService(clazz, services);
     }
 
-    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData) throws OXException {
-       return parseFolderParameter(requestData, true);
+    //    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData) throws OXException {
+    //       return parseFolderParameter(requestData, true);
+    //    }
+    //
+    //    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData, boolean required) throws OXException {
+    //        String value;
+    //        if(required){
+    //            value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+    //        } else {
+    //            value = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+    //        }
+    //        if(value==null){
+    //            return null;
+    //        }
+    //        try {
+    //            return CompositeFolderID.parse(value);
+    //        } catch (IllegalArgumentException e) {
+    //            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
+    //        }
+    //    }
+
+    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) {
+        RecurrenceId recurrenceId = null != optRecurrenceId ? new DefaultRecurrenceId(optRecurrenceId) : null;
+        return new EventID(folderId, objectId, recurrenceId);
     }
 
-    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData, boolean required) throws OXException {
-        String value;
-        if(required){
-            value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        } else {
-            value = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        }
-        if(value==null){
-            return null;
-        }
-        try {
-            return CompositeFolderID.parse(value);
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
-        }
+    protected EventID parseIdParameter(AJAXRequestData requestData) throws OXException {
+        String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
+        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String optRecurrenceId = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
+        return getEventID(folderId, objectId, optRecurrenceId);
     }
 
-    protected CompositeEventID parseIdParameter(AJAXRequestData requestData) throws OXException {
-        String value = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
-        String recurrenceId = parseRecurrenceIdParameter(requestData);
-        try {
-            if (recurrenceId != null) {
-                return new CompositeEventID(CompositeEventID.parse(value), new DefaultRecurrenceId(recurrenceId));
-            } else {
-                return CompositeEventID.parse(value);
-            }
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_ID, value);
-        }
-    }
-
-    private String parseRecurrenceIdParameter(AJAXRequestData requestData) {
-        return requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
+    protected RecurrenceId parseRecurrenceIdParameter(AJAXRequestData requestData) {
+        String value = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
+        return null != value ? new DefaultRecurrenceId(value) : null;
     }
 
     /**

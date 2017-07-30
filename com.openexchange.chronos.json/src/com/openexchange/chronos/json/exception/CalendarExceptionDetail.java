@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.json.exception;
 
-import com.openexchange.chronos.provider.composition.CompositeEventID;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionDetail;
 
@@ -62,7 +62,7 @@ import com.openexchange.exception.OXExceptionDetail;
  */
 public class CalendarExceptionDetail extends OXExceptionDetail {
 
-    private final CompositeEventID eventId;
+    private final EventID eventId;
 
     /**
      * Initializes a new {@link CalendarExceptionDetail}.
@@ -78,7 +78,7 @@ public class CalendarExceptionDetail extends OXExceptionDetail {
      * @param exception
      * @param eventId
      */
-    public CalendarExceptionDetail(OXException exception, CompositeEventID eventId) {
+    public CalendarExceptionDetail(OXException exception, EventID eventId) {
         super(exception);
         this.eventId = eventId;
     }
@@ -88,7 +88,7 @@ public class CalendarExceptionDetail extends OXExceptionDetail {
      *
      * @return The eventId
      */
-    public CompositeEventID getEventId() {
+    public EventID getEventId() {
         return eventId;
     }
 

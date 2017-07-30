@@ -197,7 +197,7 @@ public class IDMangling {
      * @param relativeFolderId The relative folder identifier
      * @return The unique folder identifier
      */
-    private static String getUniqueFolderId(int accountId, String relativeFolderId) {
+    public static String getUniqueFolderId(int accountId, String relativeFolderId) {
         if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
             return relativeFolderId;
         }
@@ -212,7 +212,7 @@ public class IDMangling {
      * @param uniqueFolderId The unique folder identifier
      * @return The unique folder identifier
      */
-    private static String getRelativeFolderId(String uniqueFolderId) {
+    public static String getRelativeFolderId(String uniqueFolderId) {
         if (ROOT_FOLDER_IDS.contains(uniqueFolderId)) {
             return uniqueFolderId;
         }
@@ -227,11 +227,41 @@ public class IDMangling {
      * @param relativeFolderId The relative parent folder identifier
      * @return The unique event or series identifier
      */
-    private static String getUniqueId(int accountId, String relativeFolderId, String relativeId) {
+    public static String getUniqueId(int accountId, String relativeFolderId, String relativeId) {
         if (null == relativeId) {
             return relativeId;
         }
         return new CompositeEventID(accountId, relativeFolderId, relativeFolderId).toUniqueID();
+    }
+
+    /**
+     * Gets the relative representation of a specific unique event or series identifier.
+     *
+     * @param uniqueId The unique event or series identifier
+     * @return The relative event or series identifier
+     */
+    public static String getRelativeId(String uniqueId) {
+        if (null == uniqueId) {
+            return uniqueId;
+        }
+        return CompositeEventID.parse(uniqueId).getEventId();
+    }
+
+    /**
+     * Gets the relative representation of a specific unique full event identifier.
+     *
+     * @param uniqueId The unique full event identifier
+     * @return The relative full event identifier
+     */
+    public static EventID getRelativeId(EventID uniqueEventID) {
+        if (null == uniqueEventID) {
+            return uniqueEventID;
+        }
+        return new EventID(
+            getRelativeFolderId(uniqueEventID.getFolderID()),
+            getRelativeId(uniqueEventID.getObjectID()),
+            uniqueEventID.getRecurrenceID()
+        );
     }
 
 }
