@@ -75,24 +75,31 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10
  */
 public class ExportFileNameCreator {
-    
+
+    /**
+     * Prevent instantiation.
+     */
+    private ExportFileNameCreator() {
+        super();
+    }
+
     /**
      * The default file name for a vcard and csv export, when using batch data
      */
-    private static final String CONTACTS_NAME = "Contacts";  
-    
+    private static final String CONTACTS_NAME = "Contacts";
+
     /**
      * The default file name for an ical appointment export, when using batch data
      */
     private static final String ICAL_APPOINTMENT_NAME = "Appointment";
-    
+
     /**
      * The default file name for an ical task export, when using batch data
      */
     private static final String ICAL_TASKS_NAME = "Tasks";
-    
+
     /**
-     * @param session, the session object 
+     * @param session, the session object
      * @param folder, the folder to create the file name with
      * @return String, the file name
      * @throws OXException
@@ -108,15 +115,15 @@ public class ExportFileNameCreator {
         }
         sb.append(".");
         return sb.toString();
-    }    
-    
+    }
+
     /**
-     * @param session, the session object 
+     * @param session, the session object
      * @param batchIds, the batchIds to create the file name with
      * @return String, the file name
      * @throws OXException
-     * @throws SQLException 
-     * @throws NumberFormatException 
+     * @throws SQLException
+     * @throws NumberFormatException
      */
     public static String createBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds) throws OXException, NumberFormatException {
         StringBuilder sb = new StringBuilder();
@@ -128,34 +135,34 @@ public class ExportFileNameCreator {
                 sb.append(createBatchExportFileName(session, folderId, null));
             } else {
                 //exactly one contact to export, file name equals contact name
-                String batchId = batchIds.get(folderId).get(0);                
+                String batchId = batchIds.get(folderId).get(0);
                 sb.append(createBatchExportFileName(session, folderId, batchId));
-            }            
+            }
         } else {
             //batch of contact ids from different folders, file name is set to a default
             String folderId = batchIds.keySet().iterator().next();
             FolderService folderService = ImportExportServices.getFolderService();
             FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folderId), session.getContextId());
             if (FolderObject.CONTACT == folderObj.getModule()) {
-                sb.append(getLocalizedFileName(session, CONTACTS_NAME));                
+                sb.append(getLocalizedFileName(session, CONTACTS_NAME));
             } else if (FolderObject.CALENDAR == folderObj.getModule()) {
                 sb.append(getLocalizedFileName(session, ICAL_APPOINTMENT_NAME));
             } else if (FolderObject.TASK == folderObj.getModule()) {
                 sb.append(getLocalizedFileName(session, ICAL_TASKS_NAME));
             }
             sb.append(".");
-        }        
+        }
         return sb.toString();
-    }  
-    
+    }
+
     /**
      * @param session, the session object
      * @param folder, the folderId to create the file name with
      * @param batchId, the batchId to create the file name with
      * @return String, the file name
      * @throws OXException
-     * @throws SQLException 
-     * @throws NumberFormatException 
+     * @throws SQLException
+     * @throws NumberFormatException
      */
     private static String createBatchExportFileName(ServerSession session, String folder, String batchId) throws OXException, NumberFormatException {
         StringBuilder sb = new StringBuilder();
@@ -170,21 +177,22 @@ public class ExportFileNameCreator {
                 } else if (FolderObject.CALENDAR == folderObj.getModule()) {
                     AppointmentSQLInterface appointmentSql = ImportExportServices.getAppointmentFactoryService().createAppointmentSql(session);
                     Appointment appointmentObj = appointmentSql.getObjectById(Integer.parseInt(batchId), Integer.parseInt(folder));
-                    if (Strings.isEmpty(appointmentObj.getTitle())) {
+                    String title = appointmentObj.getTitle();
+                    if (Strings.isEmpty(title)) {
                         sb.append(getLocalizedFileName(session, ICAL_APPOINTMENT_NAME));
                     } else {
-                        sb.append(appointmentObj.getTitle());
+                        sb.append(title);
                     }
-                    appointmentObj.getTitle();
                 } else if (FolderObject.TASK == folderObj.getModule()) {
                     TasksSQLInterface tasksSql = new TasksSQLImpl(session);
                     Task taskObj = tasksSql.getTaskById(Integer.parseInt(batchId), Integer.parseInt(folder));
-                    if (Strings.isEmpty(taskObj.getTitle())) {
+                    String title = taskObj.getTitle();
+                    if (Strings.isEmpty(title)) {
                         sb.append(getLocalizedFileName(session, ICAL_TASKS_NAME));
                     } else {
-                        sb.append(taskObj.getTitle());
+                        sb.append(title);
                     }
-                }           
+                }
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.COULD_NOT_CREATE_FILE_NAME.create(e);
             } catch (SQLException e) {
@@ -193,17 +201,17 @@ public class ExportFileNameCreator {
         }
         sb.append(".");
         return sb.toString();
-    }    
-    
+    }
+
     /**
-     * @param session, the session object 
+     * @param session, the session object
      * @param fileName, the file name of the module
      * @return String, the localized file name
      */
     private static String getLocalizedFileName(ServerSession session, String fileName) {
         return StringHelper.valueOf(session.getUser().getLocale()).getString(fileName);
-    }      
-    
+    }
+
     /**
      * @param session, the session object
      * @param folder, the folderId
@@ -216,11 +224,12 @@ public class ExportFileNameCreator {
         ContactService contactService = ImportExportServices.getContactService();
         Contact contactObj = contactService.getContact(session, folder, batchId, null);
         if (contactObj.containsMarkAsDistributionlist()) {
-            if (!Strings.isEmpty(contactObj.getDisplayName())) {
-                sb.append(contactObj.getDisplayName());
-            } else {
+            String displayName = contactObj.getDisplayName();
+            if (Strings.isEmpty(displayName)) {
                 sb.append(getLocalizedFileName(session, CONTACTS_NAME));
-            }                        
+            } else {
+                sb.append(displayName);
+            }
         } else {
             if (Strings.isEmpty(contactObj.getGivenName()) && Strings.isEmpty(contactObj.getSurName())) {
                 sb.append(getLocalizedFileName(session, CONTACTS_NAME));

@@ -418,7 +418,10 @@ public class ICalExporter implements Exporter {
         SearchIterator<Task> searchIterator = tasksSql.getModifiedTasksInFolder(folderID, fields, DATE_ZERO);
         try {
             while (searchIterator.hasNext()) {
-                emitter.writeTask(iCalSession, searchIterator.next(), session.getContext(), errors, warnings);
+                Task task = searchIterator.next();
+                if (null != task) {
+                    emitter.writeTask(iCalSession, task, session.getContext(), errors, warnings);
+                }
             }
         } finally {
             SearchIterators.close(searchIterator);
