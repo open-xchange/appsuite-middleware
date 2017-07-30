@@ -358,7 +358,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     }
 
     protected void setCreateAndNumberOfSchemasOption(final AdminParser parser) {
-        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created. Accepts: true/false", false, false);
+        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created", false, false);
         this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
     }
 
