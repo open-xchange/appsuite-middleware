@@ -220,8 +220,10 @@ public class GetPerformer extends AbstractPerformer {
                     availability.setStartTime(calendarAvailability.getEndTime());
                 } else if (AvailabilityUtils.succeedsAndIntersects(calendarAvailability, availability)) {
                     availability.setEndTime(calendarAvailability.getStartTime());
-                } else if (AvailabilityUtils.contained(calendarAvailability, availability) || AvailabilityUtils.contained(availability, calendarAvailability)) {
+                } else if (AvailabilityUtils.contained(calendarAvailability, availability)) {
                     adjustSlots(calendarAvailability, availability);
+                } else if (AvailabilityUtils.contained(availability, calendarAvailability)) {
+                    adjustSlots(availability, calendarAvailability);
                 }
             }
             availableTime.add(calendarAvailability);
