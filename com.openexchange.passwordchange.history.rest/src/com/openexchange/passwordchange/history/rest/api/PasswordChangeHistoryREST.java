@@ -64,7 +64,6 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -93,8 +92,7 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
 @Path("admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes")
 @RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class PasswordChangeHistoryREST {
-
-    private static final String PATH = "/passwd-changes";
+    
     private final ServiceLookup service;
     private Set<AuthChecker> checker;
 
