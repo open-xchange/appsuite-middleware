@@ -1,7 +1,11 @@
 type: object
 required:
 - id
+- folderId
 properties:
+  folderId:
+    type: string
+    description: The identifier of the folder.
   id:
     type: string
     description: The identifier of the event.
