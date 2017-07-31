@@ -153,7 +153,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
     static QuotaMode getMode() {
         QuotaMode tmp = MODE;
         if (null == tmp) {
-            synchronized (tmp) {
+            synchronized (MimeSnippetManagement.class) {
                 tmp = MODE;
                 if (null == tmp) {
                     ConfigurationService configurationService = Services.getService(ConfigurationService.class);
