@@ -62,7 +62,7 @@ import com.openexchange.chronos.service.FreeSlotField;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarFreeSlot implements FieldAware {
+public class CalendarFreeSlot implements FieldAware, Cloneable {
 
     private String id;
 
@@ -584,5 +584,70 @@ public class CalendarFreeSlot implements FieldAware {
     @Override
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public CalendarFreeSlot clone() throws CloneNotSupportedException {
+        CalendarFreeSlot clone = (CalendarFreeSlot) super.clone();
+        if (contains(FreeSlotField.calendarAvailabilityId)) {
+            clone.setCalendarAvailabilityId(calendarAvailabilityId);
+        }
+        if (contains(FreeSlotField.categories)) {
+            clone.setCategories(categories);
+        }
+        if (contains(FreeSlotField.comment)) {
+            clone.setComments(comments);
+        }
+        if (contains(FreeSlotField.created)) {
+            clone.setCreated(created);
+        }
+        if (contains(FreeSlotField.description)) {
+            clone.setDescription(description);
+        }
+        if (contains(FreeSlotField.dtend)) {
+            clone.setEndTime(endTime);
+        }
+        if (contains(FreeSlotField.dtstamp)) {
+            clone.setCreationTimestamp(creationTimestamp);
+        }
+        if (contains(FreeSlotField.dtstart)) {
+            clone.setStartTime(startTime);
+        }
+        if (contains(FreeSlotField.duration)) {
+            clone.setDuration(duration);
+        }
+        if (contains(FreeSlotField.extendedProperties)) {
+            clone.setExtendedProperties(extendedProperties);
+        }
+        if (contains(FreeSlotField.id)) {
+            clone.setId(id);
+        }
+        if (contains(FreeSlotField.lastModified)) {
+            clone.setLastModified(lastModified);
+        }
+        if (contains(FreeSlotField.location)) {
+            clone.setLocation(location);
+        }
+        if (contains(FreeSlotField.recurid)) {
+            clone.setRecurrenceId(recurrenceId);
+        }
+        if (contains(FreeSlotField.rrule)) {
+            clone.setRecurrenceRule(recurrenceRule);
+        }
+        if (contains(FreeSlotField.summary)) {
+            clone.setSummary(summary);
+        }
+        if (contains(FreeSlotField.uid)) {
+            clone.setUid(uid);
+        }
+        clone.setCalendarUser(calendarUser);
+        clone.setCalendarAvailabilityId(calendarAvailabilityId);
+
+        return clone;
     }
 }
