@@ -431,7 +431,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 state.setBackgroundUpdatesRunning(true);
                 state.setBackgroundUpdatesRunningSince(task.getLastModified());
             } else {
-                state.addExecutedTask(task.getTaskName());
+                state.addExecutedTask(task.getTaskName(), task.isSuccessful());
             }
         }
     }
