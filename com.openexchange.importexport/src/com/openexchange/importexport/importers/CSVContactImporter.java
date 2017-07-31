@@ -425,7 +425,7 @@ public class CSVContactImporter extends AbstractImporter {
         df1.setTimeZone(utc);
 
         final SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
-        df2.setTimeZone(utc);
+        df2.setTimeZone(utc);        
         
         final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, session.getUser().getLocale());
         df3.setTimeZone(utc);        
