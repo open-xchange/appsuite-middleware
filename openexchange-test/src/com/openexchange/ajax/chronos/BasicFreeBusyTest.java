@@ -290,6 +290,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
            attendees.append(user.getUserId()).append(",");
         }
 
+        event.setId(null);
         CheckEventResponse freebusyHas = freeBusyApi.checkEvent(session, folderId, attendees.toString(), event);
         assertNull(freebusyHas.getErrorDesc(), freebusyHas.getError());
         assertNotNull(freebusyHas.getData());
@@ -309,6 +310,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
             }
 
             // Now the check should return 2 conflicts
+            event2.setId(null);
             CheckEventResponse freebusyHas2 = freeBusyApi.checkEvent(session, folderId, attendees2.toString(), event2);
             assertEquals(null, freebusyHas2.getError());
             assertNotNull(freebusyHas2.getData());
