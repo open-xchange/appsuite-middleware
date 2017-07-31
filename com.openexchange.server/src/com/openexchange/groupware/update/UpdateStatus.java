@@ -63,4 +63,12 @@ public interface UpdateStatus {
     boolean needsBlockingUpdates();
 
     boolean needsBackgroundUpdates();
+
+    /**
+     * Gets a value indicating whether a specific update task has been executed successfully on the associated database schema or not.
+     *
+     * @param taskName The name of the update task to check
+     * @return <code>true</code> if the update task was executed successfully, <code>false</code>, otherwise
+     */
+    boolean isExecutedSuccessfully(String taskName);
 }
