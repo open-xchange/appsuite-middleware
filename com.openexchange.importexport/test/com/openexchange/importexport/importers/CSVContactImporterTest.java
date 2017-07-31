@@ -212,7 +212,7 @@ public class CSVContactImporterTest {
      public void testConvertCsvToContact_importCorrect_nameSetCorrectlyBirthdayIgnored() throws OXException {
         ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher(null);
 
-        Contact contact = csvContactImporter.convertCsvToContact(fields, emptyEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted, null);
+        Contact contact = csvContactImporter.convertCsvToContact(fields, emptyEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted);
 
         Assert.assertEquals("Hans", contact.getGivenName());
         Assert.assertEquals("Wurst", contact.getSurName());
@@ -223,7 +223,7 @@ public class CSVContactImporterTest {
      public void testConvertCsvToContact_importCorrect_correctlySet() throws OXException {
         ContactSwitcher contactSwitcher = csvContactImporter.getContactSwitcher(null);
 
-        Contact contact = csvContactImporter.convertCsvToContact(fields, midEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted, null);
+        Contact contact = csvContactImporter.convertCsvToContact(fields, midEntry, contactSwitcher, lineNumber, result, atLeastOneFieldInserted);
 
         Assert.assertEquals("Hans", contact.getGivenName());
         Assert.assertEquals("Wurst", contact.getSurName());
