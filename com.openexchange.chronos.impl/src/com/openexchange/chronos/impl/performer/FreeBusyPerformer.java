@@ -69,7 +69,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.CalendarUserType;
@@ -329,40 +328,42 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
-            List<FreeBusyTime> freeBusyTimesList = freeBusyPerAttendee.get(attendee);
+            List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
             List<FreeBusyTime> auxiliaryList = new ArrayList<>();
-            for (FreeBusyTime freeBusyTime : freeBusyTimesList) {
+            for (FreeBusyTime eventFreeBusyTime : eventsFreeBusyTimes) {
                 Iterator<FreeBusyTime> iterator = freeBusyTimes.iterator();
                 while (iterator.hasNext()) {
-                    FreeBusyTime nextItem = iterator.next();
-                    if (AvailabilityUtils.contained(nextItem.getStartTime(), nextItem.getEndTime(), freeBusyTime.getStartTime(), freeBusyTime.getEndTime())) {
+                    FreeBusyTime availabilityFreeBusyTime = iterator.next();
+                    if (AvailabilityUtils.contained(availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime(), eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime())) {
                         // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block 
                         iterator.remove();
-                    } else if (AvailabilityUtils.precedesAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                    } else if (AvailabilityUtils.precedesAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
                         // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
                         // then adjust the start time of the freeBusyTime block of the availability
-                        nextItem.setStartTime(freeBusyTime.getEndTime());
-                    } else if (AvailabilityUtils.succeedsAndIntersects(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        availabilityFreeBusyTime.setStartTime(eventFreeBusyTime.getEndTime());
+                    } else if (AvailabilityUtils.succeedsAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
                         // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
                         // then adjust the end time of the freeBusyTime block of the availability
-                        nextItem.setEndTime(freeBusyTime.getStartTime());
-                    } else if (AvailabilityUtils.contained(freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), nextItem.getStartTime(), nextItem.getEndTime())) {
+                        availabilityFreeBusyTime.setEndTime(eventFreeBusyTime.getStartTime());
+                    } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
                         // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
                         // then split the freeBusyTime block of the availability and remove it from the list
-                        splitFreeBusyTime(auxiliaryList, freeBusyTime, nextItem);
+                        splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime);
                         // Remove
                         iterator.remove();
                     }
                 }
-                auxiliaryList.add(freeBusyTime);
+                auxiliaryList.add(eventFreeBusyTime);
             }
 
-            // Add all freeBusyTime blocks
-            freeBusyTimesList.addAll(auxiliaryList);
+            // Append all event freeBusyTime blocks
+            eventsFreeBusyTimes.addAll(auxiliaryList);
+            // Append all availability blocks
+            eventsFreeBusyTimes.addAll(freeBusyTimes);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
-            result.setFreeBusyTimes(freeBusyTimesList);
+            result.setFreeBusyTimes(eventsFreeBusyTimes);
 
             // Set result for attendee
             results.put(attendee, result);
