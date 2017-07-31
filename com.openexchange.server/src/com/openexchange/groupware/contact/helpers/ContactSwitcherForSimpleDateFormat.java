@@ -54,7 +54,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
