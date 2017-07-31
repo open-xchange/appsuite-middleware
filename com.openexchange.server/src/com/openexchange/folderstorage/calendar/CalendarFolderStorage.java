@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -410,8 +409,9 @@ public class CalendarFolderStorage implements FolderStorage {
      * @return The qualified account identifier
      */
     private static String getQualifiedAccountID(String uniqueID) {
-        CompositeFolderID compositeID = CompositeFolderID.parse(uniqueID);
-        return IDMangler.mangle(CompositeFolderID.CAL_PREFIX, String.valueOf(compositeID.getAccountId()));
+        //TODO: account id in calendar folders?
+        List<String> unmangled = IDMangler.unmangle(uniqueID);
+        return IDMangler.mangle(unmangled.get(0), unmangled.get(1));
     }
 
 }

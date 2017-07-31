@@ -60,28 +60,17 @@ import com.openexchange.chronos.Event;
  */
 public class IDManglingEvent extends DelegatingEvent {
 
-    private final String newId;
     private final String newFolderId;
-    private final String newSeriesId;
 
     /**
      * Initializes a new {@link IDManglingEvent}.
      *
      * @param delegate The event delegate
-     * @param newId The new identifier to take over
      * @param newFolderId The folder new identifier to take over
-     * @param newSeriesId The new series identifier to take over
      */
-    public IDManglingEvent(Event delegate, String newId, String newFolderId, String newSeriesId) {
+    public IDManglingEvent(Event delegate, String newFolderId) {
         super(delegate);
-        this.newId = newId;
         this.newFolderId = newFolderId;
-        this.newSeriesId = newSeriesId;
-    }
-
-    @Override
-    public void setId(String id) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -90,23 +79,8 @@ public class IDManglingEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setSeriesId(String seriesId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getId() {
-        return newId;
-    }
-
-    @Override
     public String getFolderId() {
         return newFolderId;
-    }
-
-    @Override
-    public String getSeriesId() {
-        return newSeriesId;
     }
 
 }

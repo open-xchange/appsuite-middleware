@@ -51,8 +51,6 @@ package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
-import com.openexchange.chronos.provider.composition.CompositeID;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
@@ -69,16 +67,6 @@ public class IDManglingCalendarResult implements CalendarResult {
 
     private final CalendarResult delegate;
     private final int accountId;
-
-    /**
-     * Initializes a new {@link IDManglingCalendarResult}.
-     *
-     * @param delegate The result delegate
-     * @param compositeID A composite identifier of the account the result originates in
-     */
-    public IDManglingCalendarResult(CalendarResult delegate, CompositeID compositeID) {
-        this(delegate, compositeID.getAccountId());
-    }
 
     /**
      * Initializes a new {@link IDManglingCalendarResult}.
@@ -109,7 +97,7 @@ public class IDManglingCalendarResult implements CalendarResult {
 
     @Override
     public String getFolderID() {
-        return new CompositeFolderID(accountId, delegate.getFolderID()).toUniqueID();
+        return IDMangling.getUniqueFolderId(accountId, delegate.getFolderID());
     }
 
     @Override

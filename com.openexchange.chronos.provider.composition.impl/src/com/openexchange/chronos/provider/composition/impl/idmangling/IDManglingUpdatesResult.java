@@ -47,69 +47,49 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition;
+package com.openexchange.chronos.provider.composition.impl.idmangling;
+
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.UpdatesResult;
 
 /**
- * {@link CompositeID}
+ * {@link IDManglingUpdatesResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class CompositeID {
+public class IDManglingUpdatesResult implements UpdatesResult {
 
-    protected final int accountId;
+    private final UpdatesResult delegate;
+    private final int accountId;
 
     /**
-     * Initializes a new {@link CompositeID}.
+     * Initializes a new {@link IDManglingUpdatesResult}.
      *
-     * @param accountId The account identifier
+     * @param delegate The result delegate
+     * @param accountId The identifier of the calendar account the result originates in
      */
-    protected CompositeID(int accountId) {
+    public IDManglingUpdatesResult(UpdatesResult delegate, int accountId) {
         super();
+        this.delegate = delegate;
         this.accountId = accountId;
     }
 
-    /**
-     * Gets the account identifier
-     *
-     * @return The account identifier
-     */
-    public int getAccountId() {
-        return accountId;
-    }
-
-    /**
-     * Gets the unified identifier.
-     *
-     * @return The unified identifier
-     */
-    public abstract String toUniqueID();
-
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + accountId;
-        return result;
+    public long getTimestamp() {
+        return delegate.getTimestamp();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        CompositeID other = (CompositeID) obj;
-        if (accountId != other.accountId)
-            return false;
-        return true;
+    public List<Event> getNewAndModifiedEvents() {
+        return withUniqueIDs(delegate.getNewAndModifiedEvents(), accountId);
     }
 
     @Override
-    public String toString() {
-        return toUniqueID();
+    public List<Event> getDeletedEvents() {
+        return withUniqueIDs(delegate.getDeletedEvents(), accountId);
     }
 
 }

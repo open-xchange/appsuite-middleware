@@ -57,12 +57,9 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.composition.CompositeEventID;
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
-import com.openexchange.chronos.provider.composition.CompositeID;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link IDMangling}
@@ -71,6 +68,9 @@ import com.openexchange.chronos.service.UpdatesResult;
  * @since v7.10.0
  */
 public class IDMangling {
+
+    /** The fixed prefix used to quickly identify calendar folder identifiers. */
+    private static final String CAL_PREFIX = "cal";
 
     /** A set of fixed root folder identifiers excluded from ID mangling */
     private static final Set<String> ROOT_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
@@ -82,20 +82,30 @@ public class IDMangling {
     )));
 
     /**
-     * Initializes a new {@link IDMangling}.
+     * Gets a calendar folder equipped with unique composite identifiers representing a calendar folder from a specific calendar account.
+     *
+     * @param folders The calendar folder from the account
+     * @param accountId The identifier of the account
+     * @return The calendar folder representation with unique identifiers
      */
-    private IDMangling() {
-        super();
+    public static CalendarFolder withUniqueID(CalendarFolder folder, int accountId) {
+        String newId = getUniqueFolderId(accountId, folder.getId());
+        if (GroupwareCalendarFolder.class.isInstance(folder)) {
+            GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
+            String newParentId = getUniqueFolderId(accountId, groupwareFolder.getParentId());
+            return new IDManglingGroupwareFolder(groupwareFolder, newId, newParentId);
+        }
+        return new IDManglingFolder(folder, newId);
     }
 
-    public static CalendarFolder withUniqueID(CalendarFolder folder, CompositeID compositeID) {
-        return withUniqueID(folder, compositeID.getAccountId());
-    }
-
-    public static List<CalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, CompositeID compositeID) {
-        return withUniqueID(folders, compositeID.getAccountId());
-    }
-
+    /**
+     * Gets a list of calendar folders equipped with unique composite identifiers representing the supplied list of calendar folders from
+     * a specific calendar account.
+     *
+     * @param folders The calendar folders from the account
+     * @param accountId The identifier of the account
+     * @return The calendar folder representations with unique identifiers
+     */
     public static List<CalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, int accountId) {
         if (null == folders) {
             return null;
@@ -107,16 +117,12 @@ public class IDMangling {
         return foldersWithUniqueIDs;
     }
 
-    public static CalendarFolder withUniqueID(CalendarFolder folder, int accountId) {
-        String newId = getUniqueFolderId(accountId, folder.getId());
-        if (GroupwareCalendarFolder.class.isInstance(folder)) {
-            GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
-            String newParentId = getUniqueFolderId(accountId, groupwareFolder.getParentId());
-            return new IDManglingGroupwareFolder(groupwareFolder, newId, newParentId);
-        }
-        return new IDManglingFolder(folder, newId);
-    }
-
+    /**
+     * Gets the account-relative representation for the supplied calendar folder with unique composite identifiers.
+     *
+     * @param folder The calendar folder
+     * @return The calendar folder representation with relative identifiers
+     */
     public static CalendarFolder withRelativeID(CalendarFolder folder) {
         String newId = getRelativeFolderId(folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
@@ -127,28 +133,26 @@ public class IDMangling {
         return new IDManglingFolder(folder, newId);
     }
 
-    public static Event withRelativeID(Event event) {
-        String newId = null == event.getId() ? null : CompositeEventID.parse(event.getId()).getEventId();
-        String newFolderId = getRelativeFolderId(event.getFolderId());
-        String newSeriesId = null == event.getSeriesId() ? null : CompositeEventID.parse(event.getSeriesId()).getEventId();
-        return new IDManglingEvent(event, newId, newFolderId, newSeriesId);
-    }
-
+    /**
+     * Gets an event equipped with unique composite identifiers representing an event from a specific calendar account.
+     *
+     * @param event The event from the account
+     * @param accountId The identifier of the account
+     * @return The event representation with unique identifiers
+     */
     public static Event withUniqueID(Event event, int accountId) {
-        String newId = getUniqueId(accountId, event.getFolderId(), event.getId());
-        String newSeriesId = getUniqueId(accountId, event.getFolderId(), event.getSeriesId());
         String newFolderId = getUniqueFolderId(accountId, event.getFolderId());
-        return new IDManglingEvent(event, newId, newFolderId, newSeriesId);
+        return new IDManglingEvent(event, newFolderId);
     }
 
-    public static Event withUniqueID(Event event, CompositeID compositeID) {
-        return withUniqueID(event, compositeID.getAccountId());
-    }
-
-    public static List<Event> withUniqueIDs(List<Event> events, CompositeID compositeID) {
-        return withUniqueIDs(events, compositeID.getAccountId());
-    }
-
+    /**
+     * Gets a list of events equipped with unique composite identifiers representing the supplied list of events from a specific
+     * calendar account.
+     *
+     * @param events The events from the account
+     * @param accountId The identifier of the account
+     * @return The event representations with unique identifiers
+     */
     public static List<Event> withUniqueIDs(List<Event> events, int accountId) {
         if (null == events) {
             return null;
@@ -160,32 +164,26 @@ public class IDMangling {
         return eventsWithUniqueIDs;
     }
 
-    public static UpdatesResult withUniqueIDs(UpdatesResult updatesResult, CompositeID compositeID) {
-        return withUniqueIDs(updatesResult, compositeID.getAccountId());
+    /**
+     * Gets the account-relative representation for the supplied event with unique composite identifiers.
+     *
+     * @param event The event
+     * @return The event representation with relative identifiers
+     */
+    public static Event withRelativeID(Event event) {
+        String newFolderId = getRelativeFolderId(event.getFolderId());
+        return new IDManglingEvent(event, newFolderId);
     }
 
-    public static UpdatesResult withUniqueIDs(final UpdatesResult updatesResult, final int accountId) {
-        return new UpdatesResult() {
-
-            @Override
-            public List<Event> getNewAndModifiedEvents() {
-                return withUniqueIDs(updatesResult.getNewAndModifiedEvents(), accountId);
-            }
-
-            @Override
-            public List<Event> getDeletedEvents() {
-                return withUniqueIDs(updatesResult.getDeletedEvents(), accountId);
-            }
-
-			@Override
-            public long getTimestamp() {
-				return updatesResult.getTimestamp();
-			}
-        };
-    }
-
-    public static EventID getRelativeID(CompositeEventID compositeEventID) {
-        return new EventID(compositeEventID.getFolderId(), compositeEventID.getEventId(), compositeEventID.getRecurrenceId());
+    /**
+     * Gets the account identifier of a specific unique composite folder identifier.
+     *
+     * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
+     * @return The extracted account identifier
+     * @throws IllegalArgumentException If the account identifier can't be extracted from the passed composite identifier
+     */
+    public static int getAccountId(String uniqueFolderId) throws IllegalArgumentException {
+        return Integer.parseInt(unmangleFolderId(uniqueFolderId).get(1));
     }
 
     /**
@@ -201,67 +199,73 @@ public class IDMangling {
         if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
             return relativeFolderId;
         }
-        return new CompositeFolderID(accountId, relativeFolderId).toUniqueID();
+        return mangleFolderId(accountId, relativeFolderId);
     }
 
     /**
-     * Gets the relative representation of a specific unique folder identifier.
+     * Gets the relative representation of a specific unique composite folder identifier.
      * <p/>
      * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
      *
-     * @param uniqueFolderId The unique folder identifier
-     * @return The unique folder identifier
+     * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
+     * @return The extracted relative folder identifier
+     * @throws IllegalArgumentException If passed identifier can't be unmangled to its relative representation
      */
-    public static String getRelativeFolderId(String uniqueFolderId) {
+    public static String getRelativeFolderId(String uniqueFolderId) throws IllegalArgumentException {
         if (ROOT_FOLDER_IDS.contains(uniqueFolderId)) {
             return uniqueFolderId;
         }
-        return CompositeFolderID.parse(uniqueFolderId).getFolderId();
+        return unmangleFolderId(uniqueFolderId).get(2);
     }
 
     /**
-     * Gets the fully qualified composite representation of a specific relative event or series identifier.
-     *
-     * @param accountId The identifier of the account the folder originates in
-     * @param relativeId The relative event or series identifier
-     * @param relativeFolderId The relative parent folder identifier
-     * @return The unique event or series identifier
-     */
-    public static String getUniqueId(int accountId, String relativeFolderId, String relativeId) {
-        if (null == relativeId) {
-            return relativeId;
-        }
-        return new CompositeEventID(accountId, relativeFolderId, relativeFolderId).toUniqueID();
-    }
-
-    /**
-     * Gets the relative representation of a specific unique event or series identifier.
-     *
-     * @param uniqueId The unique event or series identifier
-     * @return The relative event or series identifier
-     */
-    public static String getRelativeId(String uniqueId) {
-        if (null == uniqueId) {
-            return uniqueId;
-        }
-        return CompositeEventID.parse(uniqueId).getEventId();
-    }
-
-    /**
-     * Gets the relative representation of a specific unique full event identifier.
+     * Gets the relative representation of a specific unique full event identifier consisting of composite parts.
      *
      * @param uniqueId The unique full event identifier
      * @return The relative full event identifier
+     * @throws IllegalArgumentException If the composite parts of the passed identifier can't be unmangled to their relative representation
      */
-    public static EventID getRelativeId(EventID uniqueEventID) {
+    public static EventID getRelativeId(EventID uniqueEventID) throws IllegalArgumentException {
         if (null == uniqueEventID) {
             return uniqueEventID;
         }
-        return new EventID(
-            getRelativeFolderId(uniqueEventID.getFolderID()),
-            getRelativeId(uniqueEventID.getObjectID()),
-            uniqueEventID.getRecurrenceID()
-        );
+        return new EventID(getRelativeFolderId(uniqueEventID.getFolderID()), uniqueEventID.getObjectID(), uniqueEventID.getRecurrenceID());
+    }
+
+    /**
+     * <i>Mangles</i> the supplied relative folder identifier, together with its corresponding account information.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeFolderId The relative folder identifier
+     * @return The mangled folder identifier
+     */
+    private static String mangleFolderId(int accountId, String relativeFolderId) {
+        return IDMangler.mangle(CAL_PREFIX, String.valueOf(accountId), relativeFolderId);
+    }
+
+    /**
+     * <i>Unmangles</i> the supplied unique folder identifier into its distinct components.
+     *
+     * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
+     * @return The unmangled components of the folder identifier
+     * @throws IllegalArgumentException If passed identifier can't be unmangled into its distinct components
+     */
+    private static List<String> unmangleFolderId(String uniqueFolderId) {
+        if (null == uniqueFolderId || false == uniqueFolderId.startsWith(CAL_PREFIX)) {
+            throw new IllegalArgumentException(uniqueFolderId);
+        }
+        List<String> unmangled = IDMangler.unmangle(uniqueFolderId);
+        if (null == unmangled || 3 > unmangled.size() || false == CAL_PREFIX.equals(unmangled.get(0))) {
+            throw new IllegalArgumentException(uniqueFolderId);
+        }
+        return unmangled;
+    }
+
+    /**
+     * Initializes a new {@link IDMangling}.
+     */
+    private IDMangling() {
+        super();
     }
 
 }

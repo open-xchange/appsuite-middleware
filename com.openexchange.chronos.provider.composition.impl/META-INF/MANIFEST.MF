@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.chronos.provider.composition.impl
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.chronos,
+Import-Package: com.google.common.io;version="19.0.0",
+ com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,

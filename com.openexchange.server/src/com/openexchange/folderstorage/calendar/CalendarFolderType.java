@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.calendar;
 
-import com.openexchange.chronos.provider.composition.CompositeFolderID;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 
@@ -60,6 +59,8 @@ import com.openexchange.folderstorage.FolderType;
  * @since v7.10.0
  */
 public class CalendarFolderType implements FolderType {
+
+    private static final String CAL_PREFIX = "cal://";
 
     /**
      * Initializes a new {@link CalendarFolderType}.
@@ -86,13 +87,7 @@ public class CalendarFolderType implements FolderType {
         /*
          * Check if a real provider is defined
          */
-        try {
-            CompositeFolderID.parse(folderId);
-            return true;
-        } catch (IllegalArgumentException e) {
-            // no calendar folder
-            return false;
-        }
+        return folderId.startsWith(CAL_PREFIX);
     }
 
 }
