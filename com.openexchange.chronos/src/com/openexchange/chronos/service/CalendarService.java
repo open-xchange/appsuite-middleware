@@ -78,7 +78,7 @@ public interface CalendarService {
      * Initializes a new calendar session.
      *
      * @param session The underlying server session
-     * @param parameters Arbitrary calendar paramters to take over
+     * @param parameters Arbitrary calendar parameters to take over
      * @return A new calendar session
      */
     CalendarSession init(Session session, CalendarParameters parameters) throws OXException;
