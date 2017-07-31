@@ -745,10 +745,11 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      */
     @Override
     public int compareTo(CalendarAvailability o) {
+        //TODO: consider the '0' case
         if (getPriority() > o.getPriority()) {
-            return 1;
-        } else if (getPriority() < o.getPriority()) {
             return -1;
+        } else if (getPriority() < o.getPriority()) {
+            return 1;
         } else {
             return 0;
         }

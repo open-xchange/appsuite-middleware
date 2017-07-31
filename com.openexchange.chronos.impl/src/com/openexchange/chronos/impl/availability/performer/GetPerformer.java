@@ -185,6 +185,90 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
+     * Retrieves the the combined {@link AvailableTime} slots for the current user.
+     * 
+     * @return A {@link List} with the combined {@link CalendarAvailability} blocks for the user
+     * @throws OXException if an error is occurred
+     */
+    public List<CalendarAvailability> getCombinedAvailableTime() throws OXException {
+        int userId = session.getUserId();
+
+        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        java.util.Collections.sort(calendarAvailabilities);
+
+        List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
+        int index = 0;
+        for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
+            CalendarAvailability calendarAvailability = iteratorA.next();
+
+            List<CalendarAvailability> subList = calendarAvailabilities.subList(++index, calendarAvailabilities.size());
+            Iterator<CalendarAvailability> iterator = subList.iterator();
+            while (iterator.hasNext()) {
+                CalendarAvailability availability = iterator.next();
+                // No intersection, carry on
+                if (!AvailabilityUtils.intersect(calendarAvailability, availability)) {
+                    continue;
+                }
+
+                // Should never happen since the list is sorted
+                if (calendarAvailability.compareTo(availability) < 0) {
+                    continue;
+                }
+
+                // Higher or equal priority, adjust times
+                if (AvailabilityUtils.precedesAndIntersects(calendarAvailability, availability)) {
+                    availability.setStartTime(calendarAvailability.getEndTime());
+                } else if (AvailabilityUtils.succeedsAndIntersects(calendarAvailability, availability)) {
+                    availability.setEndTime(calendarAvailability.getStartTime());
+                } else if (AvailabilityUtils.contained(calendarAvailability, availability) || AvailabilityUtils.contained(availability, calendarAvailability)) {
+                    adjustSlots(calendarAvailability, availability);
+                }
+            }
+            availableTime.add(calendarAvailability);
+        }
+        return availableTime;
+    }
+
+    /**
+     * 
+     * @param a
+     * @param b
+     */
+    private void adjustSlots(CalendarAvailability a, CalendarAvailability b) {
+        List<CalendarFreeSlot> toAdd = new ArrayList<>();
+        for (CalendarFreeSlot calendarFreeSlotA : a.getCalendarFreeSlots()) {
+            for (Iterator<CalendarFreeSlot> iterator = b.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                CalendarFreeSlot calendarFreeSlotB = iterator.next();
+                if (AvailabilityUtils.precedesAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
+                    calendarFreeSlotB.setStartTime(calendarFreeSlotA.getEndTime());
+                } else if (AvailabilityUtils.succeedsAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
+                    calendarFreeSlotB.setEndTime(calendarFreeSlotA.getStartTime());
+                } else if (AvailabilityUtils.contained(calendarFreeSlotA, calendarFreeSlotB)) {
+                    // split
+                    try {
+                        CalendarFreeSlot pre = calendarFreeSlotB.clone();
+                        pre.setEndTime(calendarFreeSlotA.getStartTime());
+                        toAdd.add(pre);
+
+                        CalendarFreeSlot post = calendarFreeSlotB.clone();
+                        post.setStartTime(calendarFreeSlotA.getEndTime());
+                        toAdd.add(post);
+
+                        iterator.remove();
+                    } catch (CloneNotSupportedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                } else if (AvailabilityUtils.contained(calendarFreeSlotB, calendarFreeSlotA)) {
+                    iterator.remove();
+                }
+            }
+            // Add any splits
+            b.getCalendarFreeSlots().addAll(toAdd);
+        }
+    }
+
+    /**
      * Retrieves the {@link AvailableTime} slots for the current user
      * 
      * @return The {@link AvailableTime} slots for the current user
