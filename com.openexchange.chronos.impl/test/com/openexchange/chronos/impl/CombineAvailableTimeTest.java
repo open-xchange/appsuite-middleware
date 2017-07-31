@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CombineAvailableTimeTest {
+public class CombineAvailableTimeTest extends AbstractCombineTest {
 
     private CalendarAvailabilityStorage storage;
     private CalendarSession session;
@@ -303,37 +303,5 @@ public class CombineAvailableTimeTest {
         ats = availableTime.get(1);
         assertEquals("The 'from' of the time slot does not match", new DateTime(2017, 1, 1), ats.getFrom());
         assertEquals("The 'until' of the time slot does not match", new DateTime(2017, 2, 30), ats.getUntil());
-    }
-
-    ////////////////////////////////////////// HELPERS ////////////////////////////////////////////
-
-    /**
-     * Creates a {@link CalendarFreeSlot} with the specified summary within the specified interval
-     * 
-     * @param summary The summary
-     * @param from The starting point in the interval
-     * @param until The ending point in the interval
-     * @return The {@link CalendarFreeSlot}
-     */
-    private CalendarFreeSlot createCalendarFreeSlot(String summary, DateTime from, DateTime until) {
-        CalendarFreeSlot cfs = new CalendarFreeSlot();
-        cfs.setSummary(summary);
-        cfs.setStartTime(from);
-        cfs.setEndTime(until);
-        return cfs;
-    }
-
-    /**
-     * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
-     * 
-     * @param busyType The {@link BusyType} of the availability
-     * @param freeSlots The free slots
-     * @return The {@link CalendarAvailability}
-     */
-    private CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots) {
-        CalendarAvailability ca = new CalendarAvailability();
-        ca.setBusyType(busyType);
-        ca.setCalendarFreeSlots(freeSlots);
-        return ca;
     }
 }
