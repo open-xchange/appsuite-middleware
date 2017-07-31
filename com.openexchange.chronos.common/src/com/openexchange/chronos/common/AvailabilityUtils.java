@@ -52,6 +52,7 @@ package com.openexchange.chronos.common;
 import java.util.Date;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AvailableTimeSlot;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.FbType;
@@ -362,5 +363,18 @@ public final class AvailabilityUtils {
         freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
         freeBusyTime.setFbType(FbType.FREE);
         return freeBusyTime;
+    }
+
+    public static FbType convertFreeBusyType(BusyType busyType) {
+        switch (busyType) {
+            case BUSY:
+                return FbType.BUSY;
+            case BUSY_TENTATIVE:
+                return FbType.BUSY_TENTATIVE;
+            case BUSY_UNAVAILABLE:
+                return FbType.BUSY_UNAVAILABLE;
+            default:
+                return FbType.BUSY;
+        }
     }
 }

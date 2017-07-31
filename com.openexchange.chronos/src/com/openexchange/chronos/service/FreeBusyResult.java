@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,7 +61,7 @@ import com.openexchange.exception.OXException;
 public class FreeBusyResult {
 
     private List<OXException> warnings;
-    private List<FreeBusyTimeBlock> freeBusyTimes;
+    private List<FreeBusyTime> freeBusyTimes;
 
     /**
      * Initialises a new {@link FreeBusyResult}.
@@ -92,7 +93,7 @@ public class FreeBusyResult {
      *
      * @return The freeBusyTimes
      */
-    public List<FreeBusyTimeBlock> getFreeBusyTimes() {
+    public List<FreeBusyTime> getFreeBusyTimes() {
         return freeBusyTimes;
     }
 
@@ -101,7 +102,7 @@ public class FreeBusyResult {
      *
      * @param freeBusyTimes The freeBusyTimes to set
      */
-    public void setFreeBusyTimes(List<FreeBusyTimeBlock> freeBusyTimes) {
+    public void setFreeBusyTimes(List<FreeBusyTime> freeBusyTimes) {
         this.freeBusyTimes = freeBusyTimes;
     }
 }
