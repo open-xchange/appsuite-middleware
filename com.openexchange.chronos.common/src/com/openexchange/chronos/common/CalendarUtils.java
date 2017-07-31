@@ -179,6 +179,45 @@ public class CalendarUtils {
     }
 
     /**
+     * Finds a specific event identified by its object-identifier in a collection.
+     *
+     * @param events The events to search in
+     * @param objectID The object identifier of the event to search
+     * @return The event, or <code>null</code> if not found
+     */
+    public static Event find(Collection<Event> events, String objectID) {
+        if (null != events) {
+            for (Event event : events) {
+                if (objectID.equals(event.getId())) {
+                    return event;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection.
+     *
+     * @param events The events to search in
+     * @param objectID The object identifier of the event to search
+     * @param recurrenceID The rcurrence identifier of the event to search
+     * @return The event, or <code>null</code> if not found
+     */
+    public static Event find(Collection<Event> events, String objectID, RecurrenceId recurrenceID) {
+        if (null != events) {
+            for (Event event : events) {
+                if (objectID.equals(event.getId())) {
+                    if (null == recurrenceID || recurrenceID.equals(event.getRecurrenceId())) {
+                        return event;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets a value indicating whether one calendar user matches another, by comparing the entity identifier for internal calendar users,
      * or trying to match the calendar user's URI for external ones.
      *
@@ -529,25 +568,25 @@ public class CalendarUtils {
      * the table below is satisfied:
      * <pre>
      * +---------------------------------------------------------------+
-     * | VEVENT has the DTEND property?                                |
-     * |   +-----------------------------------------------------------+
-     * |   |   VEVENT has the DURATION property?                       |
-     * |   |   +-------------------------------------------------------+
-     * |   |   |   DURATION property value is greater than 0 seconds?  |
-     * |   |   |   +---------------------------------------------------+
-     * |   |   |   |   DTSTART property is a DATE-TIME value?          |
-     * |   |   |   |   +-----------------------------------------------+
-     * |   |   |   |   | Condition to evaluate                         |
+     * | VEVENT has the DTEND property? |
+     * | +-----------------------------------------------------------+
+     * | | VEVENT has the DURATION property? |
+     * | | +-------------------------------------------------------+
+     * | | | DURATION property value is greater than 0 seconds? |
+     * | | | +---------------------------------------------------+
+     * | | | | DTSTART property is a DATE-TIME value? |
+     * | | | | +-----------------------------------------------+
+     * | | | | | Condition to evaluate |
      * +---+---+---+---+-----------------------------------------------+
-     * | Y | N | N | * | (start <  DTEND AND end > DTSTART)            |
+     * | Y | N | N | * | (start < DTEND AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | Y | Y | * | (start <  DTSTART+DURATION AND end > DTSTART) |
-     * |   |   +---+---+-----------------------------------------------+
-     * |   |   | N | * | (start <= DTSTART AND end > DTSTART)          |
+     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART) |
+     * | | +---+---+-----------------------------------------------+
+     * | | | N | * | (start <= DTSTART AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART)          |
+     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | N | (start <  DTSTART+P1D AND end > DTSTART)      |
+     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART) |
      * +---+---+---+---+-----------------------------------------------+
      * </pre>
      *
@@ -928,8 +967,7 @@ public class CalendarUtils {
             try {
                 return new URI("mailto", CalendarUtils.extractEMailAddress(emailAddress), null).toASCIIString();
             } catch (URISyntaxException e) {
-                getLogger(CalendarUtils.class).debug(
-                    "Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
+                getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", passign value as-is as fallback.", emailAddress, e);
             }
         }
         return emailAddress;
@@ -1237,10 +1275,14 @@ public class CalendarUtils {
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
     public static AbstractCollectionUpdate<Event, EventField> getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, final EventField... fieldsToMatch) throws OXException {
-        return new AbstractCollectionUpdate<Event, EventField>(EventMapper.getInstance(), originalEvents, updatedEvents) {
+        return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
+    }
+
+    public static AbstractCollectionUpdate<Event, EventField> getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+        return new AbstractCollectionUpdate<Event, EventField>(EventMapper.getInstance(), originalEvents, updatedEvents, considerUnset, ignoredFields) {  // defines the fields to ignore while getting updates
 
             @Override
-            protected boolean matches(Event item1, Event item2) {
+            protected boolean matches(Event item1, Event item2) { // Defines if the events are equal
                 try {
                     return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
                 } catch (OXException e) {

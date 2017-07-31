@@ -49,15 +49,13 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
-import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
@@ -74,51 +72,35 @@ public class InitialInsertHandler extends AbstractHandler {
     }
 
     @Override
-    public ProcessingType getAssociatedType() {
-        return ProcessingType.INITIAL_INSERT;
-    }
-
-    @Override
-    public List<Event> execute(List<EventID> eventIDs) throws OXException {
-        List<Event> externalEvents = getAndPrepareExtEvents(eventIDs);
-
-        createEvents(externalEvents);
-
-        updateLastModified();
-        return searchEvents(eventIDs);
-    }
-
-    /**
-     * @param events
-     * @throws OXException
-     */
-    private void createEvents(List<Event> events) throws OXException {
-        Map<String, List<Event>> extEventsByUID = getEventsByUID(events, false);
-        for (Entry<String, List<Event>> event : extEventsByUID.entrySet()) {
-            create(event);
-        }
-    }
-
-    @Override
     public List<Event> execute(String folderId) throws OXException {
+        updateLastUpdated();
+
         List<Event> externalEvents = getAndPrepareExtEvents(folderId);
-
-        createEvents(externalEvents);
-
-        updateLastModified();
+        createAsync(externalEvents);
         return searchEvents(folderId);
     }
 
     @Override
+    public List<Event> execute(List<EventID> eventIds) throws OXException {
+        updateLastUpdated();
+
+        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
+
+        List<Event> events = Collections.emptyList();
+        for (String folderId : sortEventIDsPerFolderId.keySet()) {
+            events.addAll(getAndPrepareExtEvents(folderId));
+        }
+
+        createAsync(events);
+        return searchEvents(eventIds);
+    }
+
+    @Override
     public Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        Event externalEvent = this.cachedCalendarAccess.getEventExt(folderId, eventId, recurrenceId);
-        filterByRanges(java.util.Collections.singletonList(externalEvent));
+        updateLastUpdated();
 
-        externalEvent.setFolderId(folderId);
-
-        insertEvents(new Date(), externalEvent);
-
-        updateLastModified();
-        return searchEvent(folderId, eventId, recurrenceId);
+        List<Event> externalEvents = getAndPrepareExtEvents(folderId);
+        createAsync(externalEvents);
+        return searchEvent(eventId);
     }
 }

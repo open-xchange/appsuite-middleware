@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -219,7 +220,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
 
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException, OXException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        String sql = "SELECT id,provider,data FROM calendar_account WHERE cid=? AND user=?;";
+        String sql = "SELECT id,provider,modified,data FROM calendar_account WHERE cid=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
@@ -227,15 +228,16 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 while (resultSet.next()) {
                     int id = resultSet.getInt(1);
                     String providerId = resultSet.getString(2);
+                    long lastModified = resultSet.getLong(3);
                     Map<String, Object> data;
                     InputStream inputStream = null;
                     try {
-                        inputStream = resultSet.getBinaryStream(3);
+                        inputStream = resultSet.getBinaryStream(4);
                         data = deserializeMap(inputStream);
                     } finally {
                         Streams.close(inputStream);
                     }
-                    accounts.add(new DefaultCalendarAccount(providerId, id, user, data));
+                    accounts.add(new DefaultCalendarAccount(providerId, id, user, data, new Date(lastModified)));
                 }
             }
         }
@@ -243,7 +245,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     private static CalendarAccount selectAccount(Connection connection, int cid, int id) throws SQLException, OXException {
-        String sql = "SELECT provider,user,data FROM calendar_account WHERE cid=? AND id=?;";
+        String sql = "SELECT provider,user,modified,data FROM calendar_account WHERE cid=? AND id=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
@@ -251,15 +253,16 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 if (resultSet.next()) {
                     String providerId = resultSet.getString(1);
                     int userId = resultSet.getInt(2);
+                    long lastModified = resultSet.getLong(3);
                     Map<String, Object> data;
                     InputStream inputStream = null;
                     try {
-                        inputStream = resultSet.getBinaryStream(3);
+                        inputStream = resultSet.getBinaryStream(4);
                         data = deserializeMap(inputStream);
                     } finally {
                         Streams.close(inputStream);
                     }
-                    return new DefaultCalendarAccount(providerId, id, userId, data);
+                    return new DefaultCalendarAccount(providerId, id, userId, data, new Date(lastModified));
                 }
             }
         }

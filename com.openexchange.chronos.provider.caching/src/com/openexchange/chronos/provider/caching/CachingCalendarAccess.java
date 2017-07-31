@@ -56,6 +56,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandlerFactory;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -91,7 +92,6 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
         this.account = account;
     }
 
-    
     /**
      * Defines the refresh interval in minutes
      * 
@@ -100,59 +100,52 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     public abstract int getRefreshInterval();
 
     /**
-     * Defines if even alarms should be considered by the {@link CachingCalendarAccess}
-     * 
-     * @return <code>true</code> if alarms should be considered; otherwise <code>false</code>
-     */
-    public abstract boolean supportsAlarms();
-
-    @Override
-    public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        ProcessingType updateType = getType();
-
-        return CachingHandlerFactory.getInstance().get(updateType, this).execute(folderId, eventId, recurrenceId);
-    }
-
-    /**
-     * Returns the requested {@link Event} by querying the underlying calendar.
-     * 
-     * @param folderId The identifier of the folder representing the current user's calendar view
-     * @param eventId The identifier of the event to get
-     * @param recurrenceId The recurrence identifier of the event occurrence to get from an event series, or <code>null</code> to not get
-     *            a specific occurrence
-     * @return The event
-     */
-    public abstract Event getEventExt(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
-
-    @Override
-    public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        ProcessingType updateType = getType();
-
-        return CachingHandlerFactory.getInstance().get(updateType, this).execute(eventIDs);
-    }
-
-    /**
-     * Returns the requested list of {@link Event}s by querying the underlying calendar.
-     * 
-     * @param eventIDs A list of the identifiers of the events to get
-     * @return The events
-     */
-    public abstract List<Event> getEventsExt(List<EventID> eventIDs) throws OXException;
-
-    @Override
-    public final List<Event> getEventsInFolder(String folderId) throws OXException {
-        ProcessingType updateType = getType();
-
-        return CachingHandlerFactory.getInstance().get(updateType, this).execute(folderId);
-    }
-
-    /**
      * Returns the requested list of {@link Event}s by querying the underlying calendar.
      * 
      * @param folderId The identifier of the folder to get the events from
      * @return The events
      */
-    public abstract List<Event> getEventsInFolderExt(String folderId) throws OXException;
+    public abstract List<Event> getEvents(String folderId) throws OXException;
+
+    @Override
+    public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+        ProcessingType updateType = getType();
+
+        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
+        try {
+            return cachingHandler.requireUpToDate().execute(folderId, eventId, recurrenceId);
+        } catch (OXException e) {
+            cachingHandler.handleExceptions(e);
+            throw e;
+        }
+    }
+
+    @Override
+    public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
+        ProcessingType updateType = getType();
+
+        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
+        try {
+            return cachingHandler.requireUpToDate().execute(eventIDs);
+        } catch (OXException e) {
+            cachingHandler.handleExceptions(e);
+            throw e;
+        }
+    }
+
+    @Override
+    public final List<Event> getEventsInFolder(String folderId) throws OXException {
+        ProcessingType updateType = getType();
+
+        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
+        try {
+            return cachingHandler.requireUpToDate().execute(folderId);
+        } catch (OXException e) {
+            cachingHandler.handleExceptions(e);
+            throw e;
+        }
+
+    }
 
     public ServerSession getSession() {
         return session;

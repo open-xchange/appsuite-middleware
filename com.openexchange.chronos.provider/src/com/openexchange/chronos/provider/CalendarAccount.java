@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -88,4 +89,10 @@ public interface CalendarAccount extends Serializable{
      */
     Map<String, Object> getConfiguration();
 
+    /**
+     * Gets the last modification timestamp of the calendar account.
+     *
+     * @return The last modification timestamp
+     */
+    Date getLastModified();
 }

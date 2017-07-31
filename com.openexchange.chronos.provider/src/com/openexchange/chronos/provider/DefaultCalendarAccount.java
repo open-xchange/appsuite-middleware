@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -62,6 +63,7 @@ public class DefaultCalendarAccount implements CalendarAccount {
     private final String providerId;
     private final int accountId;
     private final int userId;
+    private final Date lastModified;
     private final Map<String, Object> configuration;
 
     /**
@@ -71,13 +73,15 @@ public class DefaultCalendarAccount implements CalendarAccount {
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param configuration The account's configuration data
+     * @param lastModified The last modification date
      */
-    public DefaultCalendarAccount(String providerId, int accountId, int userId, Map<String, Object> configuration) {
+    public DefaultCalendarAccount(String providerId, int accountId, int userId, Map<String, Object> configuration, Date lastModified) {
         super();
         this.providerId = providerId;
         this.accountId = accountId;
         this.userId = userId;
         this.configuration = configuration;
+        this.lastModified = lastModified;
     }
 
     @Override
@@ -100,4 +104,8 @@ public class DefaultCalendarAccount implements CalendarAccount {
         return configuration;
     }
 
+    @Override
+    public Date getLastModified() {
+        return lastModified;
+    }
 }

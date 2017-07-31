@@ -63,6 +63,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -216,8 +217,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
     @Override
     protected EnumMap<EventField, ? extends Mapping<? extends Object, Event>> getMappings() {
-        EnumMap<EventField, Mapping<? extends Object, Event>> mappings = new
-            EnumMap<EventField, Mapping<? extends Object, Event>>(EventField.class);
+        EnumMap<EventField, Mapping<? extends Object, Event>> mappings = new EnumMap<EventField, Mapping<? extends Object, Event>>(EventField.class);
         mappings.put(EventField.ID, new DefaultMapping<String, Event>() {
 
             @Override
@@ -892,6 +892,16 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.ATTENDEES, new DefaultMapping<List<Attendee>, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                try {
+                    return CalendarUtils.getAttendeeUpdates(event1.getAttendees(), event2.getAttendees()).isEmpty();
+                } catch (OXException e) {
+                    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare attendees from event with id {} and id {}.", event1.getId(), event2.getId(), e);
+                }
+                return false;
+            }
 
             @Override
             public void copy(Event from, Event to) throws OXException {

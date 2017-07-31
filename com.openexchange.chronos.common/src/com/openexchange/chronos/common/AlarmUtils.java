@@ -275,7 +275,7 @@ public class AlarmUtils extends CalendarUtils {
      * @param uid The unique identifier of the alarm to lookup
      * @return The matching alarm, or <code>null</code> if not found
      */
-    public static Alarm find(Collection<Alarm> alarms, String uid) {
+    public static Alarm findAlarm(Collection<Alarm> alarms, String uid) {
         if (null == alarms) {
             return null;
         }
@@ -532,7 +532,7 @@ public class AlarmUtils extends CalendarUtils {
      */
     public static Alarm getSnoozedAlarm(Alarm alarm, List<Alarm> allAlarms) {
         if (null != alarm.getRelatedTo() && (null == alarm.getRelatedTo().getRelType() || "SNOOZE".equals(alarm.getRelatedTo().getRelType()))) {
-            return find(allAlarms, alarm.getRelatedTo().getValue());
+            return findAlarm(allAlarms, alarm.getRelatedTo().getValue());
         }
         return null;
     }

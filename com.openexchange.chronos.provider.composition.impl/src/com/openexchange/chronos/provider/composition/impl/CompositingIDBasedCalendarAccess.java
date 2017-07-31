@@ -115,7 +115,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositingIDBasedCalendarAccess.class);
 
     /** The default <i>internal</i> calendar provider account */
-    private static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap());
+    private static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
 
     private final ServiceLookup services;
     private final Session session;

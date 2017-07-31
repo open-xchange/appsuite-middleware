@@ -49,7 +49,10 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.EventID;
 
@@ -72,7 +75,7 @@ public class HandlerHelper {
 
     protected static EventID getEventIdForEvent(List<EventID> eventIDs, Event event) {
         for (EventID eventID : eventIDs) {
-            if (eventID.getObjectID() == event.getId() || eventID.getRecurrenceID() == event.getRecurrenceId()) {
+            if (eventID.getObjectID().equals(event.getId()) || eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
                 return eventID;
             }
         }
@@ -85,5 +88,21 @@ public class HandlerHelper {
                 event.setFolderId(folderId);
             }
         }
+    }
+
+    public static Map<String, List<EventID>> sortEventIDsPerFolderId(List<EventID> events) {
+        Map<String, List<EventID>> sortedList = new HashMap<String, List<EventID>>();
+
+        for (EventID event : events) {
+            if (sortedList.containsKey(event.getFolderID())) {
+                List<EventID> list = sortedList.get(event.getFolderID());
+                list.add(event);
+                continue;
+            }
+            List<EventID> newList = new ArrayList<>();
+            newList.add(event);
+            sortedList.put(event.getFolderID(), newList);
+        }
+        return sortedList;
     }
 }

@@ -50,7 +50,7 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.AlarmUtils.filter;
-import static com.openexchange.chronos.common.AlarmUtils.find;
+import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
@@ -402,7 +402,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             /*
              * prefer the 'snooze' alarm along with the related 'snoozed' one
              */
-            Alarm snoozedAlarm = find(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
+            Alarm snoozedAlarm = findAlarm(regularAlarms, snoozeAlarm.getRelatedTo().getValue());
             if (null != snoozedAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
                 if (null != nextTriggerTime) {

@@ -225,7 +225,7 @@ public class ICalUtils {
     }
 
     static List<Alarm> importAlarms(ComponentList alarmComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
-        if (null == alarmComponents) {
+        if (null == alarmComponents || alarmComponents.isEmpty()) {
             return null;
         }
         List<Alarm> alarms = new ArrayList<Alarm>(alarmComponents.size());

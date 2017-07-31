@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
@@ -70,22 +69,17 @@ public class DatabaseHandler extends AbstractHandler {
     }
 
     @Override
-    public ProcessingType getAssociatedType() {
-        return ProcessingType.READ_DB;
-    }
-
-    @Override
-    public List<Event> execute(List<EventID> eventIds) throws OXException {
-        return searchEvents(eventIds);
-    }
-
-    @Override
     public List<Event> execute(String folderId) throws OXException {
         return searchEvents(folderId);
     }
 
     @Override
     public Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        return searchEvent(folderId, eventId, recurrenceId);
+        return searchEvent(eventId);
+    }
+
+    @Override
+    public List<Event> execute(List<EventID> eventIds) throws OXException {
+        return searchEvents(eventIds);
     }
 }

@@ -59,7 +59,6 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -434,45 +433,6 @@ public class Utils {
      */
     public static User getUser(CalendarSession session, int userId) throws OXException {
         return Services.getService(UserService.class).getUser(userId, session.getContextId());
-    }
-
-    /**
-     * Finds a specific event identified by its object-identifier in a collection.
-     *
-     * @param events The events to search in
-     * @param objectID The object identifier of the event to search
-     * @return The event, or <code>null</code> if not found
-     */
-    public static Event find(Collection<Event> events, String objectID) {
-        if (null != events) {
-            for (Event event : events) {
-                if (objectID.equals(event.getId())) {
-                    return event;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection.
-     *
-     * @param events The events to search in
-     * @param objectID The object identifier of the event to search
-     * @param recurrenceID The rcurrence identifier of the event to search
-     * @return The event, or <code>null</code> if not found
-     */
-    public static Event find(Collection<Event> events, String objectID, RecurrenceId recurrenceID) {
-        if (null != events) {
-            for (Event event : events) {
-                if (objectID.equals(event.getId())) {
-                    if (null == recurrenceID || recurrenceID.equals(event.getRecurrenceId())) {
-                        return event;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     /**

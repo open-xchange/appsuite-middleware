@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -63,7 +62,6 @@ import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
@@ -106,24 +104,17 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return Collections.singletonList(folder);
     }
 
-    @Override
-    public Event getEventExt(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        checkFolderId(folderId);
-        Event event = getEvent(eventId, recurrenceId);
-        event.setFolderId(folderId);
-        return event;
-    }
-
-    protected abstract Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException;
-
-    protected abstract List<Event> getEvents() throws OXException;
+    abstract public List<Event> getEvents() throws OXException;
 
     @Override
-    public List<Event> getEventsExt(List<EventID> eventIDs) throws OXException {
-        List<Event> events = new ArrayList<Event>(eventIDs.size());
-        for (EventID eventID : eventIDs) {
-            checkFolderId(eventID.getFolderID());
-            events.add(getEvent(eventID.getObjectID(), eventID.getRecurrenceID()));
+    public final List<Event> getEvents(String folderId) throws OXException {
+        List<Event> events = new ArrayList<Event>();
+        checkFolderId(this.folder.getId());
+        for (Event event : getEvents()) {
+            if (CalendarUtils.isInRange(event, getFrom(), getUntil(), TimeZones.UTC)) {
+                event.setFolderId(this.folder.getId());
+                events.add(event);
+            }
         }
         return events;
     }
@@ -134,19 +125,6 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         List<Event> events = new ArrayList<Event>();
         for (Event event : getEvents()) {
             if (CalendarUtils.isSeriesException(event) && seriesId.equals(event.getSeriesId())) {
-                event.setFolderId(folderId);
-                events.add(event);
-            }
-        }
-        return events;
-    }
-
-    @Override
-    public List<Event> getEventsInFolderExt(String folderId) throws OXException {
-        checkFolderId(folderId);
-        List<Event> events = new ArrayList<Event>();
-        for (Event event : getEvents()) {
-            if (CalendarUtils.isInRange(event, getFrom(), getUntil(), TimeZones.UTC)) {
                 event.setFolderId(folderId);
                 events.add(event);
             }
