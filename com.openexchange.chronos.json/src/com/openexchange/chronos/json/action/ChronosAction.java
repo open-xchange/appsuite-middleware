@@ -74,6 +74,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -249,7 +250,11 @@ public abstract class ChronosAction implements AJAXActionService {
             case PARAMETER_TIMESTAMP:
                 return new AbstractMap.SimpleEntry<String, Long>(PARAMETER_TIMESTAMP, Long.parseLong(value));
             case PARAMETER_ORDER_BY:
-                return new AbstractMap.SimpleEntry<String, EventField>(PARAMETER_ORDER_BY, EventField.valueOf(value.toUpperCase()));
+                EventField mappedField = EventMapper.getInstance().getMappedField(value);
+                if (mappedField == null) {
+                    mappedField = EventField.valueOf(value.toUpperCase());
+                }
+                return new AbstractMap.SimpleEntry<String, EventField>(PARAMETER_ORDER_BY, mappedField);
             case PARAMETER_ORDER:
                 return new AbstractMap.SimpleEntry<String, SortOrder.Order>(PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
             case PARAMETER_FIELDS:
@@ -272,7 +277,11 @@ public abstract class ChronosAction implements AJAXActionService {
         EventField[] fields = new EventField[splitByColon.length];
         int x=0;
         for(String str: splitByColon){
-            fields[x++] = EventField.valueOf(str.toUpperCase());
+            EventField mappedField = EventMapper.getInstance().getMappedField(str);
+            if (mappedField == null) {
+                mappedField = EventField.valueOf(str.toUpperCase());
+            }
+            fields[x++] = mappedField;
         }
         return fields;
     }
