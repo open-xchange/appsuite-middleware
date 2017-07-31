@@ -68,20 +68,20 @@ import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CombineTest}
+ * {@link CombineAvailableTimeTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CombineTest {
+public class CombineAvailableTimeTest {
 
     private CalendarAvailabilityStorage storage;
     private CalendarSession session;
     private List<CalendarAvailability> availabilities;
 
     /**
-     * Initialises a new {@link CombineTest}.
+     * Initialises a new {@link CombineAvailableTimeTest}.
      */
-    public CombineTest() {
+    public CombineAvailableTimeTest() {
         super();
     }
 
