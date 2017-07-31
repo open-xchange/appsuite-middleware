@@ -49,8 +49,13 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.sql.grammar.Constant.*;
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.sql.grammar.Constant.ASTERISK;
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
+import static com.openexchange.tools.sql.DBUtils.getIN;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -83,7 +88,6 @@ import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
@@ -124,6 +128,8 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
@@ -131,7 +137,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.lock.LockService;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -5954,16 +5959,8 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws {@link OXCalendarExceptionCodes#CALENDAR_MAINTENANCE}
      */
     private void checkNotReadOnly(Session session) throws OXException {
-        ConfigViewFactory configViewFactory = null;
-        ServiceLookup serviceLookup = SERVICES_REF.get();
-        if (null != serviceLookup) {
-            configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
-        }
-        if (null == configViewFactory) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
-        }
-        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
-        if (false == configView.opt("com.openexchange.chronos.useLegacyStorage", Boolean.class, Boolean.TRUE).booleanValue()) {
+        UpdateStatus updateStatus = Updater.getInstance().getStatus(session.getContextId());
+        if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
             throw OXCalendarExceptionCodes.CALENDAR_MAINTENANCE.create();
         }
     }
