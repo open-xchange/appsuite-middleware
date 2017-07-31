@@ -147,7 +147,7 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
         ImportResult result = new ImportResult();
 
         assertTrue("The importer should consider itself", importer.checkFields(header));
-        return importer.convertCsvToContact(header, data, conSet, 1, result, atLeastOneFieldInserted, null);
+        return importer.convertCsvToContact(header, data, conSet, 1, result, atLeastOneFieldInserted);
     }
 
 }
