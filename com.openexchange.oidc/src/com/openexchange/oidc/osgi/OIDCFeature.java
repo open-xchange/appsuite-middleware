@@ -54,7 +54,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oidc.OIDCConfig;
+import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.server.ServiceLookup;
 
@@ -82,6 +84,7 @@ public class OIDCFeature extends DependentServiceStarter{
         if(config.isEnabled()) {
             LOG.info("Starting core OpenID Connect support... ");
             getOIDCBackends(services);
+            serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null));
         } else {
             LOG.info("OpenID Connect support is disabled by configuration. Skipping initialization...");
         }

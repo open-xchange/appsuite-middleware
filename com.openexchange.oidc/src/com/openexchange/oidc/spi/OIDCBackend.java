@@ -58,9 +58,11 @@ import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
+import com.openexchange.oidc.state.AuthenticationRequestInfo;
 
 /**
  * Determines all features an OpenID backend must have to function correctly.
@@ -105,6 +107,6 @@ public interface OIDCBackend {
 
     AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest);
     
-    public boolean validateIdToken(JWT idToken, String nonce) throws OXException;
+    public IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException;
 
 }

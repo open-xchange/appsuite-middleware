@@ -72,4 +72,10 @@ public class CoreStateManagement implements StateManagement {
         hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo));
     }
 
+    @Override
+    public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) {
+        PortableAuthenticationRequest portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
+        return portable.getDelegate();
+    }
+
 }

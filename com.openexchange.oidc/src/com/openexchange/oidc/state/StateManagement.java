@@ -66,5 +66,7 @@ public interface StateManagement {
      * @return
      */
     void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
+    
+    AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
 
 }

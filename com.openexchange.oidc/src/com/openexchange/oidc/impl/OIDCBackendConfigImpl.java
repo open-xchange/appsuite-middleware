@@ -18,8 +18,13 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     }
 
     @Override
-    public String getRedirectURI() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURI);
+    public String getRedirectURIInit() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIInit);
+    }
+    
+    @Override
+    public String getRedirectURIAuth() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIAuth);
     }
 
     @Override
@@ -39,7 +44,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
 
     @Override
     public String getJwkSet() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.publicRSAKeys);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwkSet);
     }
 
     @Override
@@ -50,6 +55,11 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     @Override
     public String getScope() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.scope);
+    }
+    
+    @Override
+    public String getIssuer() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.issuer);
     }
 
     @Override

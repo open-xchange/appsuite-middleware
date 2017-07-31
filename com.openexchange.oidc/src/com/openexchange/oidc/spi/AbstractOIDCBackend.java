@@ -48,8 +48,11 @@
  */
 package com.openexchange.oidc.spi;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -58,6 +61,7 @@ import com.nimbusds.jose.jwk.source.RemoteJWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -68,6 +72,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -77,6 +82,7 @@ import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
+import com.openexchange.oidc.state.AuthenticationRequestInfo;
 
 /**
  * Reference implementation of an OpenID backend.
@@ -127,9 +133,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public JWKSet getJwkSet() throws OXException {
          JWKSet jwkSet = null;
         try {
-            RemoteJWKSet<SecurityContext> remoteJWKSet = new RemoteJWKSet<>(new URL(this.getBackendConfig().getJwkSet()));
-            jwkSet = remoteJWKSet.getCachedJWKSet();
-        } catch (MalformedURLException e) {
+            jwkSet = JWKSet.load(new URL(this.getBackendConfig().getJwkSet()));
+        } catch (IOException | ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_GET_JWKSET_WITH_URL.create(e, this.getBackendConfig().getJwkSet());
         }
         return jwkSet;
@@ -159,19 +164,20 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
     
     @Override
-    public boolean validateIdToken(JWT idToken, String nonce) throws OXException {
+    public IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException {
+        IDTokenClaimsSet result = null;
         JWKSet jwkSet = this.getJwkSet();
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
 
-        IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(""), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, jwkSet);
+        IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, jwkSet);
         try {
-            idTokenValidator.validate(idToken, new Nonce(nonce));
+            result = idTokenValidator.validate(idToken, new Nonce(storedRequestInformation.getNonce()));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
         } catch (JOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
-        }
-        return true;
+        } 
+        return result;
     }
     
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist

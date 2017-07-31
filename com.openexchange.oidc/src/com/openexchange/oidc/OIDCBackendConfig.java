@@ -65,7 +65,9 @@ public interface OIDCBackendConfig {
      */
     String getClientID();
 
-    String getRedirectURI();
+    String getRedirectURIInit();
+    
+    String getRedirectURIAuth();
     
     String getAuthorizationEndpoint();
 
@@ -83,6 +85,8 @@ public interface OIDCBackendConfig {
      * @return The scope or an empty string. Never <code>null</code>.
      */
     String getScope();
+    
+    String getIssuer();
     
     /**
      * Get the default response type of this feature

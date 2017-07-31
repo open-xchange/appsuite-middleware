@@ -72,6 +72,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
@@ -127,13 +128,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String requestString = "";
         OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
         String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
-        String redirectURI = backendConfig.getRedirectURI();
+        String redirectURI = backendConfig.getRedirectURIAuth();
         try {
             Builder requestBuilder = new Builder(new ResponseType(backendConfig.getResponseType()), Scope.parse(backendConfig.getScope()), new ClientID(backendConfig.getClientID()), new URI(redirectURI));
             requestBuilder.nonce(nonce);
             requestBuilder.state(state);
             requestBuilder.endpointURI(new URI(authorizationEndpoint));
-            //TODO QS-VS: remove
+            //TODO QS-VS: remove if request is clean
 //            AuthenticationRequest request = new AuthenticationRequest(
 //                new URI(authorizationEndpoint),
 //                new ResponseType(backend.getBackendConfig().getResponseType()),
@@ -188,11 +189,21 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public String authenticateUser(HttpServletRequest httpRequest) throws OXException{
         String redirectionString = "";
         TokenRequest tokenReq;
+        
+        AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(httpRequest.getParameter("state"));
+        
+        if (storedRequestInformation == null) {
+            throw OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.create();
+        }
+        
         try {
             tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
-            if(this.validTokenResponse(tokenResponse)) {
-                redirectionString = this.loginUserAndRedirect();
+            IDTokenClaimsSet idTokenClaimsSet = this.validTokenResponse(tokenResponse, storedRequestInformation);
+            if(idTokenClaimsSet != null) {
+                redirectionString = this.loginUserAndRedirect(idTokenClaimsSet, storedRequestInformation);
+            } else {
+                throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
             }
         } catch (URISyntaxException e) {
             // TODO Auto-generated catch block
@@ -211,28 +222,29 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return redirectionString;
     }
     
-    private String loginUserAndRedirect() {
+    private String loginUserAndRedirect(IDTokenClaimsSet idTokenClaimsSet, AuthenticationRequestInfo storedRequestInformation) {
         return null;
     }
 
-    private boolean validTokenResponse(OIDCTokenResponse tokenResponse) throws OXException {
-        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), null);
+    private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
+        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation);
     }
     
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        URI callback = new URI(this.backend.getBackendConfig().getRedirectURI());
+        URI callback = new URI(this.backend.getBackendConfig().getRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
     
         URI tokenEndpoint = new URI(this.backend.getBackendConfig().getTokenEndpoint());
     
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+        //TODO QS-VS: Scope from property, why is this not working like documented??
+        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, new Scope("openid","email","profile"));
         return this.backend.getTokenRequest(tokenRequest);
     }
     
-    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException {
+    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException, OXException {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         // TODO QS-VS: ISt die send Methode sicher genug?
         HTTPResponse httpResponse = httpRequest.send();
@@ -240,7 +252,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         
         if (tokenResponse instanceof TokenErrorResponse) {
             ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
-            //TODO QS-VS: Fehler werfen
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(error.getCode() + ", " + error.getDescription());
         }
         
         return (OIDCTokenResponse) tokenResponse;

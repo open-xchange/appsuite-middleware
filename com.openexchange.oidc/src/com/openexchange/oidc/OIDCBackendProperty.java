@@ -59,13 +59,15 @@ import com.openexchange.config.lean.Property;
  */
 public enum OIDCBackendProperty implements Property {
     clientId(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    redirectURI(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    redirectURIInit(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    redirectURIAuth(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     authorizationEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     tokenEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     clientSecret(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    publicRSAKeys(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    jwkSet(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     jwsAlgorithm(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     scope(OIDCProperty.PREFIX,"openid"),
+    issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     responseType(OIDCProperty.PREFIX, "code");
     
     private final String fqn;
