@@ -9,9 +9,9 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFolder"
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - in: body
         name: body

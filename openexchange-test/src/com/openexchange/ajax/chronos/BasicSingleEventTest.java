@@ -116,7 +116,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         eventId.setId(event.getId());
         rememberEventId(eventId);
         EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
+        assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
     }
