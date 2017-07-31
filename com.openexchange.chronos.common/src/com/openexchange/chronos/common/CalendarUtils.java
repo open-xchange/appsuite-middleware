@@ -568,25 +568,25 @@ public class CalendarUtils {
      * the table below is satisfied:
      * <pre>
      * +---------------------------------------------------------------+
-     * | VEVENT has the DTEND property? |
-     * | +-----------------------------------------------------------+
-     * | | VEVENT has the DURATION property? |
-     * | | +-------------------------------------------------------+
-     * | | | DURATION property value is greater than 0 seconds? |
-     * | | | +---------------------------------------------------+
-     * | | | | DTSTART property is a DATE-TIME value? |
-     * | | | | +-----------------------------------------------+
-     * | | | | | Condition to evaluate |
+     * | VEVENT has the DTEND property?                                |
+     * |   +-----------------------------------------------------------+
+     * |   |   VEVENT has the DURATION property?                       |
+     * |   |   +-------------------------------------------------------+
+     * |   |   |   DURATION property value is greater than 0 seconds?  |
+     * |   |   |   +---------------------------------------------------+
+     * |   |   |   |   DTSTART property is a DATE-TIME value?          |
+     * |   |   |   |   +-----------------------------------------------+
+     * |   |   |   |   | Condition to evaluate                         |
      * +---+---+---+---+-----------------------------------------------+
-     * | Y | N | N | * | (start < DTEND AND end > DTSTART) |
+     * | Y | N | N | * | (start <  DTEND AND end > DTSTART)            |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | Y | Y | * | (start < DTSTART+DURATION AND end > DTSTART) |
-     * | | +---+---+-----------------------------------------------+
-     * | | | N | * | (start <= DTSTART AND end > DTSTART) |
+     * | N | Y | Y | * | (start <  DTSTART+DURATION AND end > DTSTART) |
+     * |   |   +---+---+-----------------------------------------------+
+     * |   |   | N | * | (start <= DTSTART AND end > DTSTART)          |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART) |
+     * | N | N | N | Y | (start <= DTSTART AND end > DTSTART)          |
      * +---+---+---+---+-----------------------------------------------+
-     * | N | N | N | N | (start < DTSTART+P1D AND end > DTSTART) |
+     * | N | N | N | N | (start <  DTSTART+P1D AND end > DTSTART)      |
      * +---+---+---+---+-----------------------------------------------+
      * </pre>
      *
