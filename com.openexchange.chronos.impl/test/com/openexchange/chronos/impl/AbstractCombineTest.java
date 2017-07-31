@@ -49,11 +49,18 @@
 
 package com.openexchange.chronos.impl;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import java.util.ArrayList;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
+import org.junit.Before;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractCombineTest}
@@ -61,6 +68,33 @@ import com.openexchange.chronos.CalendarFreeSlot;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 abstract class AbstractCombineTest {
+
+    protected CalendarAvailabilityStorage storage;
+    protected CalendarSession session;
+    protected List<CalendarAvailability> availabilities;
+
+    /**
+     * Initialises a new {@link AbstractCombineTest}.
+     */
+    public AbstractCombineTest() {
+        super();
+    }
+
+    /**
+     * Initialise mocks
+     */
+    @Before
+    public void init() throws OXException {
+        availabilities = new ArrayList<>();
+
+        // Mock the session
+        session = mock(CalendarSession.class);
+        when(session.getUserId()).thenReturn(1);
+
+        // Mock the storage
+        storage = mock(CalendarAvailabilityStorage.class);
+        when(storage.loadCalendarAvailabilities(1)).thenReturn(availabilities);
+    }
 
     /**
      * Creates a {@link CalendarFreeSlot} with the specified summary within the specified interval

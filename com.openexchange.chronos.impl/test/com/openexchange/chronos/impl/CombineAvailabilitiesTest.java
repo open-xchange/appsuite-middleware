@@ -50,19 +50,14 @@
 package com.openexchange.chronos.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
 /**
@@ -72,31 +67,11 @@ import com.openexchange.exception.OXException;
  */
 public class CombineAvailabilitiesTest extends AbstractCombineTest {
 
-    private CalendarAvailabilityStorage storage;
-    private CalendarSession session;
-    private List<CalendarAvailability> availabilities;
-
     /**
      * Initialises a new {@link CombineAvailabilitiesTest}.
      */
     public CombineAvailabilitiesTest() {
         super();
-    }
-
-    /**
-     * Initialise mocks
-     */
-    @Before
-    public void init() throws OXException {
-        availabilities = new ArrayList<>();
-
-        // Mock the session
-        session = mock(CalendarSession.class);
-        when(session.getUserId()).thenReturn(1);
-
-        // Mock the storage
-        storage = mock(CalendarAvailabilityStorage.class);
-        when(storage.loadCalendarAvailabilities(1)).thenReturn(availabilities);
     }
 
     /**
