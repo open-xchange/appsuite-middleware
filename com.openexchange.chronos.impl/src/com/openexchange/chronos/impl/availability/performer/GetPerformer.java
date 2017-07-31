@@ -192,8 +192,36 @@ public class GetPerformer extends AbstractPerformer {
      */
     public List<CalendarAvailability> getCombinedAvailableTime() throws OXException {
         int userId = session.getUserId();
-
         List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        return combine(calendarAvailabilities);
+    }
+
+    /**
+     * Retrieves the {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified time interval
+     * 
+     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link CalendarAvailability} blocks for
+     * @param from The start point in the time interval
+     * @param until The end point in the time interval
+     * @return A {@link Map} with {@link CalendarAvailability} slots for the {@link Attendee}s
+     * @throws OXException if an error is occurred
+     */
+    public Map<Attendee, List<CalendarAvailability>> getCombinedAvailableTimes(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, List<CalendarAvailability>> availableTimes = new HashMap<>();
+        Map<Attendee, List<CalendarAvailability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        for (Attendee attendee : attendees) {
+            List<CalendarAvailability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            availableTimes.put(attendee, combine(calendarAvailabilities));
+        }
+        return availableTimes;
+    }
+
+    /**
+     * Combines the specified {@link CalendarAvailability} blocks and handles any intersects, overlaps and contains
+     * 
+     * @param calendarAvailabilities The {@link List} of the {@link CalendarAvailability} blocks to combine
+     * @return The combined {@link CalendarAvailability} blocks
+     */
+    private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
         java.util.Collections.sort(calendarAvailabilities);
 
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
@@ -232,9 +260,10 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
+     * Adjusts the {@link CalendarFreeSlot}s of the specified {@link CalendarAvailability} blocks
      * 
-     * @param a
-     * @param b
+     * @param a The {@link CalendarAvailability} A
+     * @param b The {@link CalendarAvailability} B
      */
     private void adjustSlots(CalendarAvailability a, CalendarAvailability b) {
         List<CalendarFreeSlot> toAdd = new ArrayList<>();
