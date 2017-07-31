@@ -365,6 +365,12 @@ public final class AvailabilityUtils {
         return freeBusyTime;
     }
 
+    /**
+     * Converts the specified {@link BusyType} to its equivalent {@link FbType}
+     * 
+     * @param busyType The {@link BusyType} to convert
+     * @return The equivalent {@link FbType}
+     */
     public static FbType convertFreeBusyType(BusyType busyType) {
         switch (busyType) {
             case BUSY:
