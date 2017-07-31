@@ -58,6 +58,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
 
@@ -86,7 +87,13 @@ public class RdbEventStorage implements EventStorage {
 
     @Override
     public String nextId() throws OXException {
-        return delegate.nextId();
+        String nextLegacyId = legacyDelegate.nextId();
+        String nextId = delegate.nextId();
+        if (false == nextId.equals(nextLegacyId)) {
+            org.slf4j.LoggerFactory.getLogger(RdbStorage.class).warn(
+                "Sequential identifiers in legacy storage have diverged: \"{}\" in default vs. \"{}\" in legacy storage.");
+        }
+        return nextId;
     }
 
     @Override
