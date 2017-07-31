@@ -90,7 +90,7 @@ public enum HistoryRestException implements DisplayableOXExceptionCode {
 
     @Override
     public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(e);
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
