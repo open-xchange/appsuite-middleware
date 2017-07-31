@@ -48,16 +48,21 @@
  */
 package com.openexchange.admin.console.util.filestore;
 
-import java.net.URI;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 
@@ -68,26 +73,32 @@ import com.openexchange.cli.AbstractRmiCLI;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class RecalculateFilestoreUsage extends AbstractRmiCLI<List<URI>> {
+public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
     private static final String OPT_USER_SHORT = "u";
     private static final String OPT_USER_LONG = "userid";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
-    private static final String OPT_ALL_LONG = "all";
+    private static final String OPT_SCOPE_LONG = "scope";
 
     public static void main(final String args[]) {
-        List<URI> results = new RecalculateFilestoreUsage().execute(args);
-        // display results
-        System.out.println("The following filestores have been recalculated:");
-        for(URI uri:results){
-            System.out.println(uri.toASCIIString());
-        }
+        new RecalculateFilestoreUsage().execute(args);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private Credentials credentials;
+
+    /**
+     * Initializes a new {@link RecalculateFilestoreUsage}.
+     */
+    public RecalculateFilestoreUsage() {
+        super();
     }
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
+        credentials = new Credentials(login, password);
     }
 
     @Override
@@ -98,35 +109,98 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<List<URI>> {
         options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "The user ID for which the user file store usage shall be recalculated. "+
                                                                           "A value of 'all' recalculates the usages for all user file stores in "+
                                                                           "the given context."));
-        options.addOption("z", OPT_ALL_LONG, true,  "If all file store usages for the given scope shall be recalculated. "+
-                                                     "Scope can be either set to 'all', 'context' or 'user'. If set "+
-                                                     "to 'all', all usages of all context and user file stores are recalculated. "+
-                                                     "Otherwise only context or user file store usages are recalculated. "+
-                                                     "Cannot be used in conjunction with '-c' or '-u'.");
+
+        Option allOption = new Option(null, OPT_SCOPE_LONG, true, "If all file store usages for the given scope shall be recalculated. "+
+                                                                 "Scope can be either set to 'all', 'context' or 'user'. If set "+
+                                                                 "to 'all', all usages of all context and user file stores are recalculated. "+
+                                                                 "Otherwise only context or user file store usages are recalculated. "+
+                                                                 "Cannot be used in conjunction with '-c' or '-u'.");
+        allOption.setArgName("scope");
+        options.addOption(allOption);
     }
 
     @Override
-    protected List<URI> invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         try {
+            OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
-            boolean hasAllOption = false;
-            String contextId = cmd.getOptionValue(OPT_CONTEXT_SHORT);
-            String userId = cmd.getOptionValue(OPT_USER_SHORT);
-            if(cmd.hasOption(OPT_ALL_LONG)){
-                hasAllOption=true;
-            }
-            String scope = cmd.getOptionValue(OPT_ALL_LONG);
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-            if(hasAllOption){
-                return oxutil.recalculateFilestoreUsage(RecalculationScope.getScopeByName(scope));
+            boolean hasScopeOption = cmd.hasOption(OPT_SCOPE_LONG);
+            if (hasScopeOption) {
+                String scope = hasScopeOption ? cmd.getOptionValue(OPT_SCOPE_LONG) : null;
+                recalculateUsingScope(scope, oxutil);
             } else {
-                return Collections.singletonList(oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), Integer.valueOf(userId)));
+                recalculateDedicated(options, cmd, oxutil);
             }
-        } catch (final Exception e) {
-            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Failed to recalculate usage: " + e.getMessage());
             System.exit(-1);
         }
         return null;
+    }
+
+    private void recalculateDedicated(Options options, CommandLine cmd, OXUtilInterface oxutil) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
+        // Require 'context' option
+        if (false == cmd.hasOption(OPT_CONTEXT_LONG)) {
+            System.err.println("If \"" + OPT_SCOPE_LONG + "\" option is not set, the \"" + OPT_CONTEXT_LONG + "\" is required.");
+            System.exit(-1);
+        }
+        int contextId = parseInt(OPT_CONTEXT_LONG, 0, cmd, options);
+
+        // Check optional 'user' option
+        int userId = 0;
+        if (cmd.hasOption(OPT_USER_LONG)) {
+            userId = parseInt(OPT_USER_LONG, 0, cmd, options);
+        }
+
+        // Trigger recalculation
+        if (userId > 0) {
+            oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), Integer.valueOf(userId), credentials);
+            System.out.println("Filestore usage has been successfully recalculated for user " + userId + " in context " + contextId);
+        } else {
+            oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), null, credentials);
+            System.out.println("Filestore usage has been successfully recalculated for context " + contextId);
+        }
+    }
+
+    private void recalculateUsingScope(String scopeName, final OXUtilInterface oxutil) throws Exception {
+        // Create & execute task to recalculates usages for given scope
+        final RecalculationScope scope = RecalculationScope.getScopeByName(scopeName);
+        final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+        final Credentials credentials = this.credentials;
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    oxutil.recalculateFilestoreUsage(scope, credentials);
+                } catch (Exception e) {
+                    errorRef.set(e);
+                }
+            }
+        };
+        FutureTask<Void> ft = new FutureTask<Void>(runnable, null);
+        new Thread(ft, RecalculateFilestoreUsage.class.getSimpleName()).start();
+
+        // Await task termination
+        System.out.print("Recalculating usages of filestores");
+        int c = 34;
+        while (false == ft.isDone()) {
+            System.out.print(".");
+            if (c++ >= 76) {
+                c = 0;
+                System.out.println();
+            }
+            LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+        }
+        System.out.println();
+
+        // Check for error
+        Exception error = errorRef.get();
+        if (null != error) {
+            throw error;
+        }
+
+        System.out.println("Filestores' usages have been successfully recalculated");
     }
 
     @Override
@@ -136,13 +210,12 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<List<URI>> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (!cmd.hasOption(OPT_CONTEXT_SHORT) && !cmd.hasOption(OPT_ALL_LONG)) {
-            System.out.println("You must provide either a context identifier or the all parameter.");
+        if (!cmd.hasOption(OPT_CONTEXT_SHORT) && !cmd.hasOption(OPT_SCOPE_LONG)) {
+            System.out.println("You must provide either the \"" + OPT_CONTEXT_LONG + "\" or \"" + OPT_SCOPE_LONG + "\" option.");
             printHelp();
             System.exit(-1);
             return;
         }
-
     }
 
     @Override

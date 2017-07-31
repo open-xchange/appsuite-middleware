@@ -49,10 +49,8 @@
 
 package com.openexchange.admin.rmi;
 
-import java.net.URI;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.List;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -583,21 +581,22 @@ public interface OXUtilInterface extends Remote {
      *
      * @param contextId The id of the context
      * @param userId The optional id of the user
-     * @return A URI to the filestore which has been recalculated
+     * @param auth Credentials for authenticating against server.
      * @throws InvalidCredentialsException In case the credentials are wrong
      * @throws OXException In case the usage couldn't be recalculated
      * @throws RemoteException
+     * @throws InvalidDataException
      */
-    public URI recalculateFilestoreUsage(Integer contextId, Integer userId) throws InvalidCredentialsException, OXException, RemoteException;
+    public void recalculateFilestoreUsage(Integer contextId, Integer userId, Credentials auth) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException;
 
     /**
-     * Recalculates the filestore usage for a given scope or for all filestores in case the scope is null.
+     * Recalculates the filestore usage for a given scope or for all filestores in case the scope is <code>null</code>.
      *
-     * @param scope The scope.
-     * @return A list of URIs to the recalculated filestores
+     * @param scope The scope
+     * @param auth Credentials for authenticating against server.
      * @throws InvalidCredentialsException In case the credentials are wrong
      * @throws RemoteException
      * @throws OXException In case the usage couldn't be recalculated
      */
-    public List<URI> recalculateFilestoreUsage(RecalculationScope scope) throws InvalidCredentialsException, RemoteException, OXException;
+    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials auth) throws InvalidCredentialsException, StorageException, RemoteException;
 }

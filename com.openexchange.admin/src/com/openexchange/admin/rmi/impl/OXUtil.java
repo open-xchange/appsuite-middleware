@@ -54,7 +54,6 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -82,6 +81,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.StorageInfo;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.user.UserService;
@@ -701,76 +702,114 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public URI recalculateFilestoreUsage(Integer contextId, Integer userId) throws OXException {
+    public void recalculateFilestoreUsage(Integer contextId, Integer userId, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck(contextId);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+
+        basicauth.doAuthentication(auth);
+
+        doRecalculateFilestoreUsage(contextId, userId, true);
+    }
+
+    private void doRecalculateFilestoreUsage(Integer contextId, Integer userId, boolean errorOnMissingUserFilestore) throws StorageException {
         int iContextId = contextId.intValue();
         int iUserId = null == userId ? 0 : userId.intValue();
 
-        QuotaFileStorage quotaFileStorage = null;
-        if (iUserId > 0) {
-            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(iContextId, Info.administrative());
-        } else {
-            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(iUserId, iContextId, Info.administrative());
+        try {
+            QuotaFileStorage quotaFileStorage = null;
+            if (iUserId <= 0) {
+                quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(iContextId, Info.administrative());
+            } else {
+                QuotaFileStorageService quotaFileStorageService = FileStorages.getQuotaFileStorageService();
+                StorageInfo storageInfo = quotaFileStorageService.getFileStorageInfoFor(iUserId, iContextId);
+                if (storageInfo.getOwnerInfo().getOwnerId() != iUserId) {
+                    // There is no user-associated file storage
+                    if (errorOnMissingUserFilestore) {
+                        throw new StorageException("User " + iUserId + " in context " + iContextId + " has no individual file storage configured");
+                    }
+
+                    // Ignore...
+                    return;
+                }
+
+                quotaFileStorage = quotaFileStorageService.getQuotaFileStorage(iUserId, iContextId, Info.administrative());
+            }
+
+            Set<String> filesToIgnore = new TreeSet<String>();
+
+            /*
+             * The ResourceCache might store resources in the file storage. Depending on its configuration (preview.properties)
+             * these files affect the contexts quota or not.
+             */
+            {
+                boolean quotaAware = false;
+                ConfigurationService configurationService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+                if (configurationService != null) {
+                    quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
+                }
+
+                if (!quotaAware) {
+                    ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+                    Set<String> refIds = metadataStore.loadRefIds(iContextId);
+                    filesToIgnore.addAll(refIds);
+                }
+            }
+
+            /*
+             * Depending on the configuration snippets doesn't count towards the usage too.
+             */
+            {
+                QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
+                if (service != null && service.ignoreQuota()) {
+                    filesToIgnore.addAll(service.getFilesToIgnore(iContextId));
+                }
+            }
+
+            quotaFileStorage.recalculateUsage(filesToIgnore);
+        } catch (OXException e) {
+            throw new StorageException(e.getMessage(), e);
         }
-
-        /*
-         * The ResourceCache might store resources in the file storage. Depending on its configuration (preview.properties)
-         * these files affect the contexts quota or not.
-         */
-        boolean quotaAware = false;
-        ConfigurationService configurationService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-        if (configurationService != null) {
-            quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
-        }
-
-        Set<String> filesToIgnore = new TreeSet<String>();
-        if (!quotaAware) {
-            ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-            Set<String> refIds = metadataStore.loadRefIds(iContextId);
-            filesToIgnore.addAll(refIds);
-        }
-
-        /*
-         * Depending on the configuration snippets doesn't count towards the usage too.
-         */
-        QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
-        if (service != null && service.ignoreQuota()) {
-            filesToIgnore.addAll(service.getFilesToIgnore(iContextId));
-        }
-
-        quotaFileStorage.recalculateUsage(filesToIgnore);
-        return quotaFileStorage.getUri();
-
     }
 
     @Override
-    public List<URI> recalculateFilestoreUsage(RecalculationScope scope) throws OXException {
+    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
 
-        ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class);
-        UserService userService = AdminServiceRegistry.getInstance().getService(UserService.class);
-        List<Integer> allContextIds = service.getAllContextIds();
-        List<URI> result = new ArrayList<>();
-        for(Integer id: allContextIds){
-            if(scope==null || RecalculationScope.ALL.equals(scope)){
-                Context ctx = service.getContext(id);
-                int[] users = userService.listAllUser(ctx, false, false);
-                for(int user: users){
-                    result.add(recalculateFilestoreUsage(id, user));
-                }
-                result.add(recalculateFilestoreUsage(id, null));
-            } else {
-                if(RecalculationScope.USER.equals(scope)){
-                    Context ctx = service.getContext(id);
-                    int[] users = userService.listAllUser(ctx, false, false);
-                    for(int user: users){
-                        result.add(recalculateFilestoreUsage(id, user));
+        basicauth.doAuthentication(auth);
+
+        try {
+            ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
+            UserService userService = AdminServiceRegistry.getInstance().getService(UserService.class);
+
+            List<Integer> allContextIds = contextService.getAllContextIds();
+            for (Integer contextId : allContextIds) {
+                if (scope == null || RecalculationScope.ALL.equals(scope)) {
+                    Context ctx = contextService.getContext(contextId.intValue());
+                    int[] userIds = userService.listAllUser(ctx, false, false);
+                    for (int userId : userIds) {
+                        doRecalculateFilestoreUsage(contextId, Integer.valueOf(userId), false);
                     }
+                    doRecalculateFilestoreUsage(contextId, null, false);
                 } else {
-                    result.add(recalculateFilestoreUsage(id, null));
+                    if (RecalculationScope.USER.equals(scope)) {
+                        Context ctx = contextService.getContext(contextId.intValue());
+                        int[] userIds = userService.listAllUser(ctx, false, false);
+                        for (int userId : userIds) {
+                            doRecalculateFilestoreUsage(contextId, Integer.valueOf(userId), false);
+                        }
+                    } else {
+                        doRecalculateFilestoreUsage(contextId, null, false);
+                    }
                 }
             }
+        } catch (OXException e) {
+            throw new StorageException(e.getMessage(), e);
         }
-        return result;
-
     }
 
 }

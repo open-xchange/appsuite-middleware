@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-
 /**
  * {@link RecalculationScope} defines scopes for filestore usage recalculation.
  *
@@ -61,22 +60,74 @@ public enum RecalculationScope {
     /**
      * Recalculates all filestores.
      */
-    ALL,
+    ALL("all"),
     /**
      * Recalculates only context filestores.
      */
-    CONTEXT,
+    CONTEXT("context"),
     /**
      * Recalculates only user filestores.
      */
-    USER;
+    USER("user");
 
+    private final String id;
 
-    public static RecalculationScope getScopeByName(String name) throws IllegalArgumentException{
-        if(name==null || name.length()==0){
+    private RecalculationScope(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the scope associated with given name.
+     *
+     * @param name The name to look-up
+     * @return The associated scope or <code>null</code>
+     * @throws IllegalArgumentException
+     */
+    public static RecalculationScope getScopeByName(String name) throws IllegalArgumentException {
+        if (isEmpty(name)) {
             return null;
         }
-        return RecalculationScope.valueOf(name.toUpperCase());
+
+        String n = name.trim();
+        for (RecalculationScope scope : RecalculationScope.values()) {
+            if (scope.id.equalsIgnoreCase(n)) {
+                return scope;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isEmpty(String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static boolean isWhitespace(final char c) {
+        switch (c) {
+            case 9: // 'unicode: 0009
+            case 10: // 'unicode: 000A'
+            case 11: // 'unicode: 000B'
+            case 12: // 'unicode: 000C'
+            case 13: // 'unicode: 000D'
+            case 28: // 'unicode: 001C'
+            case 29: // 'unicode: 001D'
+            case 30: // 'unicode: 001E'
+            case 31: // 'unicode: 001F'
+            case ' ': // Space
+                // case Character.SPACE_SEPARATOR:
+                // case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
+        }
     }
 
 }
