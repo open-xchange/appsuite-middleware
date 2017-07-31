@@ -96,6 +96,7 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
+import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
@@ -297,6 +298,28 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeCreated();
+            }
+        });
+        mappings.put(EventField.TIMESTAMP, new LongMapping<Event>(ChronosJsonFields.TIMESTAMP, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsTimestamp();
+            }
+
+            @Override
+            public void set(Event object, Long value) throws OXException {
+                object.setTimestamp(value);
+            }
+
+            @Override
+            public Long get(Event object) {
+                return object.getTimestamp();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeTimestamp();
             }
         });
         mappings.put(EventField.CREATED_BY, new IntegerMapping<Event>(ChronosJsonFields.CREATED_BY, ColumnIDs.CREATED_BY) {

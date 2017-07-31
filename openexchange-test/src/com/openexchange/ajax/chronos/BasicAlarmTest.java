@@ -139,8 +139,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -157,8 +158,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -175,13 +177,13 @@ public class BasicAlarmTest extends AbstractChronosTest {
         alarm.setDescription("This is the display message!");
         updateData.setAlarms(Collections.singletonList(alarm));
 
-        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, eventResponse.getTimestamp(), true, null, false);
+        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, eventResponse.getTimestamp(), null, true, false);
         assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
         assertNotNull(updateEvent.getData());
         assertEquals(1, updateEvent.getData().getUpdated().size());
 
 
-        EventResponse eventResponse2 = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse2 = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
         assertNotNull(eventResponse2.getData());
         assertNotNull(eventResponse2.getData().getAlarms());
@@ -197,8 +199,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getErrorDesc());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -216,13 +219,13 @@ public class BasicAlarmTest extends AbstractChronosTest {
         alarm.setDescription("This is the display message!");
         updateData.setAlarms(Collections.singletonList(alarm));
 
-        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, eventResponse.getTimestamp(), true, null, false);
+        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, eventResponse.getTimestamp(), null, true, false);
         assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
         assertNotNull(updateEvent.getData());
         assertEquals(1, updateEvent.getData().getUpdated().size());
 
 
-        EventResponse eventResponse2 = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse2 = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
         assertNotNull(eventResponse2.getData());
         assertNotNull(eventResponse2.getData().getAlarms());
@@ -240,8 +243,9 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -262,12 +266,12 @@ public class BasicAlarmTest extends AbstractChronosTest {
             alarm.setDescription("This is the display message!");
             updateData.setAlarms(Collections.singletonList(alarm));
 
-            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, true, null, false);
+            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, null, true, false);
             assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
             assertNotNull(updateEvent.getData());
             assertEquals(1, updateEvent.getData().getUpdated().size());
 
-            EventResponse eventResponse2 = api.getEvent(session, event.getId(), null, null);
+            EventResponse eventResponse2 = api.getEvent(session, event.getId(), folderId, null, null);
             assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());
@@ -297,12 +301,12 @@ public class BasicAlarmTest extends AbstractChronosTest {
             alarm.setAttendees(attendees);
             updateData.setAlarms(Collections.singletonList(alarm));
 
-            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, true, null, false);
+            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, null, true, false);
             assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
             assertNotNull(updateEvent.getData());
             assertEquals(1, updateEvent.getData().getUpdated().size());
 
-            EventResponse eventResponse2 = api.getEvent(session, event.getId(), null, null);
+            EventResponse eventResponse2 = api.getEvent(session, event.getId(), folderId, null, null);
             assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());
@@ -330,12 +334,12 @@ public class BasicAlarmTest extends AbstractChronosTest {
             alarm.setAttachments(attachments);
             updateData.setAlarms(Collections.singletonList(alarm));
 
-            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, true, null, false);
+            ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), updateData, timestamp, null, true, false);
             assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
             assertNotNull(updateEvent.getData());
             assertEquals(1, updateEvent.getData().getUpdated().size());
 
-            EventResponse eventResponse2 = api.getEvent(session, event.getId(), null, null);
+            EventResponse eventResponse2 = api.getEvent(session, event.getId(), folderId, null, null);
             assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
             assertNotNull(eventResponse2.getData());
             assertNotNull(eventResponse2.getData().getAlarms());

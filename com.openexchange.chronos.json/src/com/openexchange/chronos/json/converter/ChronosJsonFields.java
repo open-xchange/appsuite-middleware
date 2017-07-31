@@ -80,6 +80,10 @@ public class ChronosJsonFields {
      */
     public static final String SEQUENCE = "sequence";
     /**
+     * The timestamp of the event. See {@link Event#getTimestamp()}
+     */
+    public static final String TIMESTAMP = "timestamp";
+    /**
      * The creation date of the event. See {@link Event#getCreated()}
      */
     public static final String CREATED = "created";

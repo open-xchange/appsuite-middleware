@@ -8,6 +8,11 @@ created:
   type: integer
   format: int64
   description: The creation time.
+timestamp:
+  type: integer
+  format: int64
+  description: The timestamp of the event.
+  readOnly: true
 uid:
   type: string
   description: the universal identifier.

@@ -117,8 +117,9 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -134,11 +135,12 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
 
         ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getError());
 
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNotNull(eventResponse.getError());
         assertEquals("CAL-4040", eventResponse.getCode());
 
@@ -158,9 +160,10 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
 
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getValue(), nextWeek.getValue(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -171,12 +174,13 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId occurence = new EventId();
         occurence.setId(eventId.getId());
+        occurence.setFolderId(folderId);
         occurence.setRecurrenceId(eventsResponse.getData().get(2).getRecurrenceId());
 
         ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(occurence));
         assertNull(deleteResponse.getError());
 
-        EventResponse eventResponse = api.getEvent(session, occurence.getId(), occurence.getRecurrenceId(), null);
+        EventResponse eventResponse = api.getEvent(session, occurence.getId(), folderId, occurence.getRecurrenceId(), null);
         assertNotNull(eventResponse.getError());
         assertEquals("CAL-4042", eventResponse.getCode());
 
@@ -199,11 +203,12 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
 
         event.setEndDate(addTimeToDateTimeData(event.getEndDate(), 5000));
 
-        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), event, System.currentTimeMillis(), true, null, false);
+        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), event, System.currentTimeMillis(), null, true, false);
         assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
@@ -229,9 +234,10 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId masterId = new EventId();
         masterId.setId(event.getId());
+        masterId.setFolderId(folderId);
         rememberEventId(masterId);
 
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getValue(), nextWeek.getValue(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -241,12 +247,13 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId occurence = new EventId();
         occurence.setId(masterId.getId());
+        occurence.setFolderId(folderId);
         occurence.setRecurrenceId(eventsResponse.getData().get(2).getRecurrenceId());
 
         EventData updatedData = new EventData();
         updatedData.setEndDate(addTimeToDateTimeData(eventsResponse.getData().get(2).getEndDate(), 5000));
 
-        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, occurence.getId(), updatedData,  eventsResponse.getTimestamp(), true, occurence.getRecurrenceId(), false);
+        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, occurence.getId(), updatedData, eventsResponse.getTimestamp(), occurence.getRecurrenceId(), true, false);
         assertNull(updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
@@ -284,16 +291,17 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
 
         // Get series master
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getValue(), nextWeek.getValue(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -302,7 +310,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         }
 
         // Get series occurence
-        eventResponse = api.getEvent(session, event.getId(), eventsResponse.getData().get(2).getRecurrenceId(), null);
+        eventResponse = api.getEvent(session, event.getId(), folderId, eventsResponse.getData().get(2).getRecurrenceId(), null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         assertEquals(event.getId(), eventResponse.getData().getId());
@@ -339,16 +347,17 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
+        eventId.setFolderId(folderId);
         rememberEventId(eventId);
 
         // Get series master
-        EventResponse eventResponse = api.getEvent(session, event.getId(), null, null);
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, folderId, today.getValue(), nextWeek.getValue(), null, null, null, true, true);
+        EventsResponse eventsResponse = api.getAllEvents(session, today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
         assertNull(eventsResponse.getError(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(3, eventsResponse.getData().size());
@@ -357,7 +366,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         }
 
         // Get series occurence
-        eventResponse = api.getEvent(session, event.getId(), eventsResponse.getData().get(2).getRecurrenceId(), null);
+        eventResponse = api.getEvent(session, event.getId(), folderId, eventsResponse.getData().get(2).getRecurrenceId(), null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         assertEquals(event.getId(), eventResponse.getData().getId());
