@@ -123,14 +123,14 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                 LOG.warn("Skipping commit phase as migration is configured in 'uncommited' mode.");
                 return;
             }
+            connection.commit();
+            committed = true;
             /*
              * mark contexts to switch to new storage & commit
              */
             for (int contextId : contextIds) {
                 markContextMigrated(contextService, contextId);
             }
-            connection.commit();
-            committed = true;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
