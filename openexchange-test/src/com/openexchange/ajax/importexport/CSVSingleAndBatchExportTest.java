@@ -81,8 +81,9 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         
         JSONArray array = new JSONArray();
         array.put(addRequestIds(folderID, secondId));
+        String body = array.toString();
         
-        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(-1, true, body));
         
         CSVParser parser = new CSVParser();
         List<List<String>> actual = parser.parse((String) exportResponse.getData());        
@@ -102,8 +103,9 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         
         JSONArray array = new JSONArray();        
         array.put(addRequestIds(folderID, distlistId));
+        String body = array.toString();
         
-        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(-1, true, body));
         
         CSVParser parser = new CSVParser();
         List<List<String>> actual = parser.parse((String) exportResponse.getData());        
@@ -129,9 +131,10 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         JSONArray array = new JSONArray();        
         array.put(addRequestIds(folderID, firstId));
         array.put(addRequestIds(folderID, secondId));
-        array.put(addRequestIds(folderID, thirdId));
+        array.put(addRequestIds(folderID, thirdId));        
+        String body = array.toString();
         
-        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(-1, true, body));
         
         CSVParser parser = new CSVParser();        
         List<List<String>> actual = parser.parse((String) exportResponse.getData());  
@@ -186,8 +189,9 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, secondId));
         array.put(addRequestIds(secondFolderID, thirdId));
         array.put(addRequestIds(secondFolderID, fourthId));
+        String body = array.toString();
         
-        CSVExportResponse exportResponse = getClient().execute(new CSVBatchExportRequest(-1, array, true));
+        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(-1, true, body));
         
         CSVParser parser = new CSVParser();
         List<List<String>> actual = parser.parse((String) exportResponse.getData());
@@ -203,26 +207,4 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         assertFileName(exportResponse.getHttpResponse(), "Contacts.csv");
     }
     
-    //---------------------------------------------------------------
-    
-    private class CSVBatchExportRequest extends CSVExportRequest {
-        
-        private final JSONArray jsonArray;
-        
-        @Override
-        public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-            return Method.PUT;
-        }
-
-        public CSVBatchExportRequest(int folderId, JSONArray jsonArray, Boolean exportDlists) {           
-            super(folderId, exportDlists);
-            this.jsonArray = jsonArray;
-        }
-
-        @Override
-        public Object getBody() {
-            return jsonArray;
-        }
-        
-    }
 }

@@ -219,7 +219,7 @@ public class CSVContactImporter extends AbstractImporter {
         {
             final int size = csv.size();
             intentions = new ArrayList<ImportIntention>(size);
-            final ContactSwitcher conSet = getContactSwitcher();
+            final ContactSwitcher conSet = getContactSwitcher(sessObj);
             for (int lineNumber = 1; lineNumber < size; lineNumber++) {
                 // ...and writing them
                 final List<String> row = csv.get(lineNumber);
@@ -311,7 +311,7 @@ public class CSVContactImporter extends AbstractImporter {
         result.setFolder(folder);
         try {
             final boolean[] atLeastOneFieldInserted = new boolean[] { false };
-            final Contact contactObj = convertCsvToContact(fields, entry, conSet, lineNumber, result, atLeastOneFieldInserted);
+            final Contact contactObj = convertCsvToContact(fields, entry, conSet, lineNumber, result, atLeastOneFieldInserted, session);
             if (!contactObj.canFormDisplayName()) {
                 result.setException(ImportExportExceptionCodes.NO_FIELD_FOR_NAMING_IN_LINE.create(I(lineNumber)));
                 result.setDate(new Date());
@@ -341,7 +341,7 @@ public class CSVContactImporter extends AbstractImporter {
         return CsvExceptionCodes.NESTED_ERROR.create(lineNumber, ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
-    public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
+    public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted, final ServerSession session) throws OXException {
         final Contact contactObj = new Contact();
         final Collection<OXException> warnings = new LinkedList<OXException>();
         final List<String> wrongFields = new LinkedList<String>();
@@ -380,7 +380,7 @@ public class CSVContactImporter extends AbstractImporter {
                 }
             } else {
                 if (currEntry.length() > 0) {
-                    currField.doSwitch(conSet, contactObj, currEntry);
+                    currField.doSwitch(conSet, contactObj, currEntry, session);
                     final Collection<OXException> warns = contactObj.getWarnings();
                     if (!warns.isEmpty()) {
                         warnings.add(ImportExportExceptionCodes.IGNORE_FIELD.create(warns.iterator().next(), fieldName, currEntry));
@@ -416,20 +416,20 @@ public class CSVContactImporter extends AbstractImporter {
         result.setEntryNumber(lineNumber);
     }
 
-    public ContactSwitcher getContactSwitcher() {
+    public ContactSwitcher getContactSwitcher(ServerSession session) {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
-
+        
         final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
 
-        final SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy");
-        df2.setTimeZone(utc);
-
-        final SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
-        df3.setTimeZone(utc);
-
+        final SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
+        df2.setTimeZone(utc);        
+        
+        final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, session.getUser().getLocale());
+        df3.setTimeZone(utc);        
+        
         dateSwitch.addDateFormat(df1);
         dateSwitch.addDateFormat(df2);
         dateSwitch.addDateFormat(df3);

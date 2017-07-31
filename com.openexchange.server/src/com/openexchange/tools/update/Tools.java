@@ -50,7 +50,7 @@
 package com.openexchange.tools.update;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;

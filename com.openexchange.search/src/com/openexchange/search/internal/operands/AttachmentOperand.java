@@ -49,6 +49,9 @@
 
 package com.openexchange.search.internal.operands;
 
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.java.Strings;
 import com.openexchange.search.Operand;
 
 /**
@@ -59,9 +62,35 @@ import com.openexchange.search.Operand;
  */
 public class AttachmentOperand implements Operand<String> {
 
-    public enum AttachmentOperandType {
-        NAME
+    public static enum AttachmentOperandType {
+        NAME("name");
+
+        private final String name;
+
+        private AttachmentOperandType(String name) {
+            this.name = name;
+        }
+
+        private static final Map<String, AttachmentOperandType> TYPES_BY_NAME;
+        static {
+            ImmutableMap.Builder<String, AttachmentOperandType> typesByName = ImmutableMap.builder();
+            for (AttachmentOperandType type : AttachmentOperandType.values()) {
+                typesByName.put(type.name, type);
+            }
+            TYPES_BY_NAME = typesByName.build();
+        }
+
+        /**
+         * Gets an {@link AttachmentOperandType} by its name.
+         *
+         * @return The type or <code>null</code>, if the name is invalid or unknown.
+         */
+        public static AttachmentOperandType getByName(String name) {
+            return Strings.isEmpty(name) ? null : TYPES_BY_NAME.get(Strings.asciiLowerCase(name).trim());
+        }
     }
+
+    // -----------------------------------------------------------------------------------------------
 
     private final AttachmentOperandType type;
 

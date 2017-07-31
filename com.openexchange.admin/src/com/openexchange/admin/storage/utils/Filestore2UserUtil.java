@@ -246,6 +246,62 @@ public class Filestore2UserUtil {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
+    
+    /**
+     * Gets the file store user count for specified file store.
+     *
+     * @param filestoreId The identifier of the file store
+     * @param cache The admin cache to use
+     * @return The sorted file store user counts
+     * @throws StorageException If file store user counts cannot be returned
+     */
+    public static FilestoreCount getUserCount(int filestoreId, AdminCacheExtended cache) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            // Check if processing
+            if (isNotTerminated(con)) {
+                throw new StorageException("Table \"filestore2user\" not yet initialized");
+            }
+
+            return getUserCount(filestoreId, con);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Pooling error", e);
+                }
+            }
+        }
+    }
+
+    private static FilestoreCount getUserCount(int filestoreId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user FROM filestore2user WHERE filestore_id=?");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return new FilestoreCount(filestoreId, 0);
+            }
+
+            FilestoreCount filestoreCount = new FilestoreCount(filestoreId, 0);
+            do {
+                filestoreCount.incrementCount();
+            } while (rs.next());
+            return filestoreCount;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
 
     /**
      * Gets the sorted (lowest first) file store user counts.

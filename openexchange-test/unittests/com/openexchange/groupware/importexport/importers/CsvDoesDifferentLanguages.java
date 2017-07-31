@@ -143,11 +143,11 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
         CSVContactImporter importer = new TestCSVContactImporter();
 
         boolean[] atLeastOneFieldInserted = new boolean[] { false };
-        ContactSwitcher conSet = importer.getContactSwitcher();
+        ContactSwitcher conSet = importer.getContactSwitcher(null);
         ImportResult result = new ImportResult();
 
         assertTrue("The importer should consider itself", importer.checkFields(header));
-        return importer.convertCsvToContact(header, data, conSet, 1, result, atLeastOneFieldInserted);
+        return importer.convertCsvToContact(header, data, conSet, 1, result, atLeastOneFieldInserted, null);
     }
 
 }

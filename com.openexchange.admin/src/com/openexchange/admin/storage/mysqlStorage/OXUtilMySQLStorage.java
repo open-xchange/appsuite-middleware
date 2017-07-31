@@ -1346,7 +1346,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             // Determine file storage user/context counts
-            FilestoreCountCollection filestoreUserCounts = getFilestoreUserCounts();
+            //FilestoreCountCollection filestoreUserCounts = getFilestoreUserCounts();
 
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
@@ -1354,13 +1354,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 int entityCount = candidate.numberOfEntities;
 
                 // Get user count information
-                FilestoreCount count = filestoreUserCounts.get(candidate.id);
-                if (null != count) {
-                    entityCount += count.getCount();
+                int userCount = Filestore2UserUtil.getUserCountFor(candidate.id, this.cache);
+                if (userCount > 0) {
+                    entityCount += userCount;
                 }
 
                 if (entityCount < candidate.maxNumberOfEntities) {
-                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
+                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(userCount, 0L);
 
                     // Get filestore
                     Filestore filestore = getFilestore(candidate.id, loadRealUsage, null, userFilestoreUsage, con);
@@ -2652,16 +2652,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
         return new FilestoreUsage(users.size(), used);
-    }
-
-    /**
-     * Gets the file storage user counts for given database pools
-     *
-     * @return The user counts
-     * @throws StorageException If operation fails
-     */
-    private FilestoreCountCollection getFilestoreUserCounts() throws StorageException {
-        return Filestore2UserUtil.getUserCounts(this.cache);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------

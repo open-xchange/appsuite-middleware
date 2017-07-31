@@ -54,6 +54,7 @@ import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -87,6 +88,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
@@ -98,10 +100,15 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -372,7 +379,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 rs = null;
                 stmt = null;
             }
-            MimeMessage mimeMessage = createMimeMessage(identifier, file);
+            Pair<MimeMessage, Long> messageAndSize = createMimeMessage(identifier, file);
+            MimeMessage mimeMessage = messageAndSize.getFirst();
             com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
             return createSnippet(identifier, creator, displayName, module, type, shared, mimeMessage);
         } catch (SQLException e) {
@@ -417,24 +425,54 @@ public final class MimeSnippetManagement implements SnippetManagement {
         return snippet;
     }
 
-    private MimeMessage createMimeMessage(String identifier, final String file) throws MessagingException, OXException {
-        MimeMessage mimeMessage;
-        {
-            InputStream in = null;
-            try {
-                QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
-                in = fileStorage.getFile(file);
-                mimeMessage = new MimeMessage(getDefaultSession(), in);
-            } catch (OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
-            } finally {
-                Streams.close(in);
+    private Pair<MimeMessage, Long> createMimeMessage(String identifier, String file) throws OXException {
+        InputStream in = null;
+        try {
+            QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+            in = fileStorage.getFile(file);
+            return newMimeMessage(in);
+        } catch (OXException e) {
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    private static Pair<MimeMessage, Long> newMimeMessage(InputStream is) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = null;
+        boolean closeSink = false;
+        try {
+            sink = new ThresholdFileHolder();
+            closeSink = true;
+
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            Long size = Long.valueOf(sink.getLength());
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null);
+            }
+            closeSink = false;
+            return new Pair<MimeMessage, Long>(tmp, size);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink && null != sink) {
+                sink.close();
             }
         }
-        return mimeMessage;
     }
 
     private static void parsePart(MimePart part, DefaultSnippet snippet) throws OXException, MessagingException, IOException {

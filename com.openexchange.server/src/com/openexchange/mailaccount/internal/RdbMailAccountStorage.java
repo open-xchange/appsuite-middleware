@@ -2944,17 +2944,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
             } else {
                 if (transportAccount.getTransportAuth().equals(TransportAuth.MAIL)) {
-                    String login = result.getString(10);
+                    String login = result.getString(11);
                     if (!result.wasNull()) {
                         transportAccount.setTransportLogin(login);
                     }
 
-                    String password = result.getString(11);
+                    String password = result.getString(12);
                     if (!result.wasNull()) {
                         transportAccount.setTransportPassword(password);
                     }
 
-                    int oauthId = result.getInt(12);
+                    int oauthId = result.getInt(13);
                     if (result.wasNull()) {
                         transportAccount.setTransportOAuthId(-1);
                     } else {
