@@ -61,8 +61,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.rdb.RdbSnippetManagement;
+import com.openexchange.snippet.ReferenceType;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

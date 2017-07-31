@@ -50,8 +50,8 @@
 package com.openexchange.snippet.mime;
 
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
-import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
+import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,17 +121,17 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
-import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.QuotaAwareSnippetManagement;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
-import com.openexchange.snippet.SnippetUtils;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 
 /**
  * {@link MimeSnippetManagement}

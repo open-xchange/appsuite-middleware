@@ -54,10 +54,9 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.groupware.QuotaMode;
-import com.openexchange.snippet.quota.QuotaAwareSnippetService;
+import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
  * {@link MimeSnippetService} - The "filestore" using snippet service.
@@ -75,7 +74,7 @@ import com.openexchange.snippet.quota.QuotaAwareSnippetService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeSnippetService implements SnippetService, QuotaAwareSnippetService {
+public final class MimeSnippetService implements QuotaAwareSnippetService {
 
     private final QuotaProvider quotaProvider;
 
@@ -98,7 +97,10 @@ public final class MimeSnippetService implements SnippetService, QuotaAwareSnipp
     }
 
     @Override
-    public List<String> getFilesToIgnore(Integer contextId) throws OXException {
+    public List<String> getFilesToIgnore(int contextId) throws OXException {
+        if (ignoreQuota()) {
+            return Collections.emptyList();
+        }
         return MimeSnippetFileAccess.getFiles(contextId);
     }
 

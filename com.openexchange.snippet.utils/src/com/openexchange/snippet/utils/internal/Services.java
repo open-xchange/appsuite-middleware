@@ -47,62 +47,72 @@
  *
  */
 
-package com.openexchange.snippet.osgi;
+package com.openexchange.snippet.utils.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.conversion.DataSource;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.html.HtmlService;
-import com.openexchange.image.ImageActionFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.snippet.SnippetImageDataSource;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.internal.Services;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SnippetActivator}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SnippetActivator extends HousekeepingActivator {
+public final class Services {
 
     /**
-     * Initializes a new {@link SnippetActivator}.
+     * Initializes a new {@link Services}.
      */
-    public SnippetActivator() {
+    private Services() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class, CapabilityService.class };
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
-        RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
-        rememberTracker(snippetServiceRegistry);
-        openTrackers();
-
-        {
-            SnippetImageDataSource signImageDataSource = SnippetImageDataSource.getInstance();
-            signImageDataSource.setServiceListing(snippetServiceRegistry);
-            Dictionary<String, Object> signImageProps = new Hashtable<String, Object>(1);
-            signImageProps.put("identifier", signImageDataSource.getRegistrationName());
-            registerService(DataSource.class, signImageDataSource, signImageProps);
-            ImageActionFactory.addMapping(signImageDataSource.getRegistrationName(), signImageDataSource.getAlias());
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.snippet\" not started?");
         }
+        return serviceLookup.getService(clazz);
     }
 
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

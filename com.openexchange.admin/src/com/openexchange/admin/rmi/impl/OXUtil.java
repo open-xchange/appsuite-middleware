@@ -83,7 +83,7 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.snippet.quota.QuotaAwareSnippetService;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.user.UserService;
 
 /**
@@ -702,15 +702,18 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public URI recalculateFilestoreUsage(Integer contextId, Integer userId) throws OXException {
+        int iContextId = contextId.intValue();
+        int iUserId = null == userId ? 0 : userId.intValue();
+
         QuotaFileStorage quotaFileStorage = null;
-        if(userId==null){
-            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.administrative());
+        if (iUserId > 0) {
+            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(iContextId, Info.administrative());
         } else {
-            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(userId, contextId, Info.administrative());
+            quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(iUserId, iContextId, Info.administrative());
         }
 
         /*
-         * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
+         * The ResourceCache might store resources in the file storage. Depending on its configuration (preview.properties)
          * these files affect the contexts quota or not.
          */
         boolean quotaAware = false;
@@ -722,7 +725,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         Set<String> filesToIgnore = new TreeSet<String>();
         if (!quotaAware) {
             ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-            Set<String> refIds = metadataStore.loadRefIds(contextId);
+            Set<String> refIds = metadataStore.loadRefIds(iContextId);
             filesToIgnore.addAll(refIds);
         }
 
@@ -730,10 +733,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
          * Depending on the configuration snippets doesn't count towards the usage too.
          */
         QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
-        if (service != null) {
-            if (service.ignoreQuota()) {
-                filesToIgnore.addAll(service.getFilesToIgnore(contextId));
-            }
+        if (service != null && service.ignoreQuota()) {
+            filesToIgnore.addAll(service.getFilesToIgnore(iContextId));
         }
 
         quotaFileStorage.recalculateUsage(filesToIgnore);

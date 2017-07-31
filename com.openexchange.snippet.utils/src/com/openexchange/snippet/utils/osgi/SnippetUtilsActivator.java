@@ -47,72 +47,63 @@
  *
  */
 
-package com.openexchange.snippet.internal;
+package com.openexchange.snippet.utils.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.conversion.DataSource;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.html.HtmlService;
+import com.openexchange.image.ImageActionFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.snippet.utils.SnippetImageDataSource;
+import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.utils.internal.Services;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link SnippetUtilsActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Services {
+public final class SnippetUtilsActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link SnippetUtilsActivator}.
      */
-    private Services() {
+    public SnippetUtilsActivator() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.snippet\" not started?");
+        RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
+        rememberTracker(snippetServiceRegistry);
+        openTrackers();
+
+        {
+            SnippetImageDataSource signImageDataSource = SnippetImageDataSource.getInstance();
+            signImageDataSource.setServiceListing(snippetServiceRegistry);
+            Dictionary<String, Object> signImageProps = new Hashtable<String, Object>(1);
+            signImageProps.put("identifier", signImageDataSource.getRegistrationName());
+            registerService(DataSource.class, signImageDataSource, signImageProps);
+            ImageActionFactory.addMapping(signImageDataSource.getRegistrationName(), signImageDataSource.getAlias());
         }
-        return serviceLookup.getService(clazz);
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

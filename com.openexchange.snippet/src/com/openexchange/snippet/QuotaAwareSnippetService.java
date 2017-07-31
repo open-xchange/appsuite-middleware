@@ -47,34 +47,35 @@
  *
  */
 
-package com.openexchange.snippet.quota;
+package com.openexchange.snippet;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link QuotaAwareSnippetService}
+ * {@link QuotaAwareSnippetService} - Extends {@link SnippetService} by methods to retrieves a list of file references as well as whether snippet files should be ignored for usage calculation.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface QuotaAwareSnippetService {
+public interface QuotaAwareSnippetService extends SnippetService {
 
     /**
-     * Retrieves a list of filestore files which should be ignored during usage calculation.
+     * Retrieves a list of file references which should be ignored during usage calculation.
      *
-     * @param contextId The context id
-     * @return A list of file ids
-     * @throws OXException
+     * @param contextId The context identifier
+     * @return A list of file references
+     * @throws OXException If file references cannot be returned
      */
-    public List<String> getFilesToIgnore(Integer contextId) throws OXException;
-
+    List<String> getFilesToIgnore(int contextId) throws OXException;
 
     /**
-     * Returns a boolean indicating whether snippet files should be ignored for usage calculation. See {@link QuotaAwareSnippetService#getFilesToIgnore(Integer)} for more informations.
+     * Checks whether snippet files should be ignored for usage calculation.
+     * <p>
+     * See {@link #getFilesToIgnore(Integer)} for more informations.
      *
      * @return <code>true</code> if snippet files should be ignore, <code>false</false> otherwise.
      */
-    public boolean ignoreQuota();
+    boolean ignoreQuota();
 
 }

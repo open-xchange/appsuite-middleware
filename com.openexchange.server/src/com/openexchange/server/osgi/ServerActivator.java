@@ -250,7 +250,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
-import com.openexchange.snippet.quota.QuotaAwareSnippetService;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
@@ -634,7 +634,7 @@ public final class ServerActivator extends HousekeepingActivator {
         /*
          * Track QuotaAwareSnippetService
          */
-        track(QuotaAwareSnippetService.class, new RegistryCustomizer<QuotaAwareSnippetService>(context, QuotaAwareSnippetService.class));
+        track(QuotaAwareSnippetService.class, new RankingAwareRegistryCustomizer<QuotaAwareSnippetService>(context, QuotaAwareSnippetService.class));
 
         /*
          * User Alias Service

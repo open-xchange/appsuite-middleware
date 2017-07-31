@@ -92,7 +92,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.snippet.quota.QuotaAwareSnippetService;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration to the environment by implementing the

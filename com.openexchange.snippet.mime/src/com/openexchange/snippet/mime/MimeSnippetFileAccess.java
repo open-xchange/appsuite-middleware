@@ -77,7 +77,14 @@ public class MimeSnippetFileAccess {
         return getService(DatabaseService.class);
     }
 
-    public static List<String> getFiles(Integer contextId) throws OXException {
+    /**
+     * Retrieves a list of snippets' file references for specified contest
+     *
+     * @param contextId The context identifier
+     * @return A list of file references
+     * @throws OXException If file references cannot be returned
+     */
+    public static List<String> getFiles(int contextId) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
