@@ -244,7 +244,7 @@ public class EntityProcessor {
             }
         }
         if (null != cn) {
-            parameters.put("CN", organizer.getCn());
+            parameters.put("CN", cn);
         }
         VObjectProperty property = new VObjectProperty(null, "X", parameters, uri);
         return writeVObjectProperty(property);
