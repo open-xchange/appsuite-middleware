@@ -63,7 +63,7 @@ import com.openexchange.chronos.service.CalendarAvailabilityField;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarAvailability implements FieldAware, Comparable<CalendarAvailability> {
+public class CalendarAvailability implements FieldAware, Comparable<CalendarAvailability>, Cloneable {
 
     private String id;
 
