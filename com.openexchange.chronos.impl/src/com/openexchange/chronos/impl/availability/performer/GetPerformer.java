@@ -288,7 +288,29 @@ public class GetPerformer extends AbstractPerformer {
                     List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
                     flattenList.addAll(availabilityA.getCalendarFreeSlots());
                     flattenList.addAll(availabilityB.getCalendarFreeSlots());
+                    List<CalendarFreeSlot> preIntersections = new ArrayList<>();
+                    List<CalendarFreeSlot> postIntersections = new ArrayList<>();
+                    try {
+                        CalendarAvailability pre = availabilityB.clone();
+                        pre.setEndTime(availabilityA.getStartTime());
+                        // TODO: Find any slots that intersect with the new end time
+                        // adjust and split them if necessary, then append the first split 
+                        // to the pre availability, and the last split to the preIntersections.
+
+                        CalendarAvailability post = availabilityB.clone();
+                        post.setStartTime(availabilityA.getEndTime());
+                        // TODO: Find any slots that intersect with the new start time
+                        // adjust and split them if necessary, then append the first split
+                        // to the postIntersections and the last split to the post availability.
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                     availabilityB.setCalendarFreeSlots(combineSlots(flattenList));
+                    // Add any splits from the intersections to the availability B
+                    availabilityB.getCalendarFreeSlots().addAll(preIntersections);
+                    availabilityB.getCalendarFreeSlots().addAll(postIntersections);
+                    
+                    // Remove the contained availability
                     iteratorA.remove();
                 } else if (AvailabilityUtils.precedesAndIntersects(availabilityA, availabilityB)) {
                     availabilityB.setStartTime(availabilityA.getEndTime());

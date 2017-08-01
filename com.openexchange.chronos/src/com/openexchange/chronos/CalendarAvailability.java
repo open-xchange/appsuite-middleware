@@ -725,6 +725,15 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public CalendarAvailability clone() throws CloneNotSupportedException {
+        //TODO: implement
+        return (CalendarAvailability) super.clone();
+    }
 
     /*
      * (non-Javadoc)
