@@ -264,6 +264,7 @@ public class GetPerformer extends AbstractPerformer {
         java.util.Collections.sort(calendarAvailabilities, priorityComparator);
 
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
+        List<CalendarAvailability> presAndPosts = new ArrayList<>();
         int index = 0;
         for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
             CalendarAvailability availabilityA = iteratorA.next();
@@ -296,12 +297,14 @@ public class GetPerformer extends AbstractPerformer {
                         // TODO: Find any slots that intersect with the new end time
                         // adjust and split them if necessary, then append the first split 
                         // to the pre availability, and the last split to the preIntersections.
+                        presAndPosts.add(pre);
 
                         CalendarAvailability post = availabilityB.clone();
                         post.setStartTime(availabilityA.getEndTime());
                         // TODO: Find any slots that intersect with the new start time
                         // adjust and split them if necessary, then append the first split
                         // to the postIntersections and the last split to the post availability.
+                        presAndPosts.add(post);
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
                     }
@@ -322,6 +325,9 @@ public class GetPerformer extends AbstractPerformer {
             }
             availableTime.add(availabilityA);
         }
+        
+        // Add any splits
+        availableTime.addAll(presAndPosts);
 
         // Sort by start date
         java.util.Collections.sort(availableTime, availabilityDateTimeComparator);
