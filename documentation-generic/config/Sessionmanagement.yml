@@ -15,7 +15,7 @@ properties:
     tags: ["Session", "Sessionmanagement"]
   - key: com.openexchange.session.management.clientBlacklist
     description: |
-      A comma-separated list of blacklisted clients. Those sessions will not be listed.
+      A comma-separated list of identifiers of blacklisted clients. Those sessions will not be listed.
     defaultValue: 
     version: 7.10.0
     reloadable: true
