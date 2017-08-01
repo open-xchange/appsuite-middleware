@@ -257,8 +257,10 @@ public class GetPerformer extends AbstractPerformer {
                 // Higher or equal priority, adjust times
                 if (AvailabilityUtils.precedesAndIntersects(calendarAvailability, availability)) {
                     availability.setStartTime(calendarAvailability.getEndTime());
+                    adjustSlots(calendarAvailability, availability);
                 } else if (AvailabilityUtils.succeedsAndIntersects(calendarAvailability, availability)) {
                     availability.setEndTime(calendarAvailability.getStartTime());
+                    adjustSlots(calendarAvailability, availability);
                 } else if (AvailabilityUtils.contained(calendarAvailability, availability)) {
                     adjustSlots(calendarAvailability, availability);
                 } else if (AvailabilityUtils.contained(availability, calendarAvailability)) {
@@ -294,11 +296,7 @@ public class GetPerformer extends AbstractPerformer {
         for (CalendarFreeSlot calendarFreeSlotA : a.getCalendarFreeSlots()) {
             for (Iterator<CalendarFreeSlot> iterator = b.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
                 CalendarFreeSlot calendarFreeSlotB = iterator.next();
-                if (AvailabilityUtils.precedesAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
-                    calendarFreeSlotB.setStartTime(calendarFreeSlotA.getEndTime());
-                } else if (AvailabilityUtils.succeedsAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
-                    calendarFreeSlotB.setEndTime(calendarFreeSlotA.getStartTime());
-                } else if (AvailabilityUtils.contained(calendarFreeSlotA, calendarFreeSlotB)) {
+                if (AvailabilityUtils.contained(calendarFreeSlotA, calendarFreeSlotB)) {
                     // split
                     try {
                         CalendarFreeSlot pre = calendarFreeSlotB.clone();
@@ -316,7 +314,11 @@ public class GetPerformer extends AbstractPerformer {
                     }
                 } else if (AvailabilityUtils.contained(calendarFreeSlotB, calendarFreeSlotA)) {
                     iterator.remove();
-                }
+                } else if (AvailabilityUtils.precedesAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
+                    calendarFreeSlotB.setStartTime(calendarFreeSlotA.getEndTime());
+                } else if (AvailabilityUtils.succeedsAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
+                    calendarFreeSlotB.setEndTime(calendarFreeSlotA.getStartTime());
+                }               
             }
             // Add any splits
             b.getCalendarFreeSlots().addAll(toAdd);
