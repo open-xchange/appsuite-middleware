@@ -343,7 +343,7 @@ public class GetPerformer extends AbstractPerformer {
                     availabilityB.getCalendarFreeSlots().addAll(postIntersections);
 
                     // Remove the contained availability
-                    iteratorA.remove();
+                    //iteratorA.remove();
                 } else if (AvailabilityUtils.precedesAndIntersects(availabilityA, availabilityB)) {
                     availabilityB.setStartTime(availabilityA.getEndTime());
                     adjustSlots(availabilityA, availabilityB);
