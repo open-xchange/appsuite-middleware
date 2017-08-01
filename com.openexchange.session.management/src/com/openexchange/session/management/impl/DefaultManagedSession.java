@@ -106,7 +106,7 @@ public class DefaultManagedSession implements ManagedSession {
             location = SessionManagementStrings.UNKNOWN_LOCATION;
         }
 
-        private long parseLoginTime(Session session) {
+        private static long parseLoginTime(Session session) {
             Object oLoginTime = session.getParameter(Session.PARAM_LOGIN_TIME);
             if (null == oLoginTime) {
                 return 0L;
