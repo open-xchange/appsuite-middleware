@@ -65,6 +65,8 @@ import com.openexchange.chronos.FreeBusyTime;
  */
 public final class AvailabilityUtils {
 
+    ////////////////////////////////////////// Calendar Availability ////////////////////////////////////////////////
+
     /**
      * Checks if the {@link DateTime} interval of the specified {@link CalendarAvailability} A precedes and intersects with the
      * {@link DateTime} interval of the specified {@link CalendarAvailability} interval B
@@ -105,6 +107,24 @@ public final class AvailabilityUtils {
     public static boolean contained(CalendarAvailability a, CalendarAvailability b) {
         return contained(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
+
+    /**
+     * Checks if the specified availability A intersects with the specified availability B.
+     * Two checks are performed internally:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param a The {@link CalendarAvailability} A
+     * @param b The {@link CalendarAvailability} B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    public static boolean intersect(CalendarAvailability a, CalendarAvailability b) {
+        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
+    }
+
+    /////////////////////////////////////////// Calendar Free Slot ////////////////////////////////////////////////////
 
     /**
      * Checks if the {@link DateTime} interval of the specified {@link CalendarFreeSlot} A precedes and intersects with the
@@ -148,6 +168,24 @@ public final class AvailabilityUtils {
     }
 
     /**
+     * Checks if the specified free slot A intersects with the specified free slot B.
+     * Two checks are performed internally:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param a The {@link CalendarAvailability} A
+     * @param b The {@link CalendarAvailability} B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    public static boolean intersect(CalendarFreeSlot a, CalendarFreeSlot b) {
+        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
+    }
+
+    /////////////////////////////////////////////// DateTime /////////////////////////////////////////////
+
+    /**
      * Checks if the specified {@link DateTime} interval A is completely contained with in the specified {@link DateTime} interval B
      * 
      * @param startA The start date of the interval A
@@ -158,38 +196,7 @@ public final class AvailabilityUtils {
      *         contained with in the specified {@link DateTime} interval B; <code>false</code> otherwise
      */
     public static boolean contained(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
-        return startA.after(startB) && endA.before(endB);
-    }
-
-    /**
-     * Checks if the specified {@link Date} interval A is completely contained with in the specified {@link Date} interval B
-     * 
-     * @param startA The start date of the interval A
-     * @param endA The end date of the interval A
-     * @param startB the start date of the interval B
-     * @param endB The end date of the interval B
-     * @return <code>true</code> if the specified {@link Date} interval A is completely
-     *         contained with in the specified {@link Date} interval B; <code>false</code> otherwise
-     */
-    public static boolean contained(Date startA, Date endA, Date startB, Date endB) {
-        return startA.after(startB) && endA.before(endB);
-    }
-
-    /**
-     * Checks if the specified {@link Date} interval A precedes and intersects with the specified {@link Date} interval B
-     * 
-     * @param startA The start date of the interval A
-     * @param endA The end date of the interval A
-     * @param startB the start date of the interval B
-     * @param endB The end date of the interval B
-     * @return <code>true</code> if the specified {@link Date} interval A precedes and intersects
-     *         with the specified {@link Date} interval B; <code>false</code> otherwise
-     */
-    public static boolean precedesAndIntersects(Date startA, Date endA, Date startB, Date endB) {
-        if (!intersect(startA, endA, startB, endB)) {
-            return false;
-        }
-        return startA.before(startB) && endA.after(startB);
+        return (startA.after(startB) || startA.equals(startB)) && (endA.before(endB) || endA.equals(endB));
     }
 
     /**
@@ -203,6 +210,73 @@ public final class AvailabilityUtils {
      *         with the specified {@link DateTime} interval B; <code>false</code> otherwise
      */
     public static boolean precedesAndIntersects(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        if (!intersect(startA, endA, startB, endB)) {
+            return false;
+        }
+        return startA.before(startB) && endA.after(startB);
+    }
+
+    /**
+     * Checks if the specified {@link DateTime} interval A succeeds and intersects with the specified {@link DateTime} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link DateTime} interval A succeeds and intersects
+     *         with the specified {@link DateTime} interval B; <code>false</code> otherwise
+     */
+    public static boolean succeedsAndIntersects(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        if (!intersect(startA, endA, startB, endB)) {
+            return false;
+        }
+        return startA.before(endB) && endA.after(endB);
+    }
+
+    /**
+     * Two checks are performed:
+     * <ul>
+     * <li>whether the starting point of A is before the ending point of B</li>
+     * <li>whether the ending point of A is after the starting point of B</li>
+     * </ul>
+     * 
+     * @param startA The starting date A
+     * @param endA The ending date A
+     * @param startB The starting date B
+     * @param endB The ending date B
+     * @return <code>true</code> if they intersect; <code>false</code> otherwise
+     */
+    public static boolean intersect(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        return startA.before(endB) && endA.after(startB);
+    }
+
+    ////////////////////////////////////////////////////// Date //////////////////////////////////////////////////
+
+    /**
+     * Checks if the specified {@link Date} interval A is completely contained with in the specified {@link Date} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link Date} interval A is completely
+     *         contained with in the specified {@link Date} interval B; <code>false</code> otherwise
+     */
+    public static boolean contained(Date startA, Date endA, Date startB, Date endB) {
+        return (startA.after(startB) || startA.equals(startB)) && (endA.before(endB) || endA.equals(endB));
+    }
+
+    /**
+     * Checks if the specified {@link Date} interval A precedes and intersects with the specified {@link Date} interval B
+     * 
+     * @param startA The start date of the interval A
+     * @param endA The end date of the interval A
+     * @param startB the start date of the interval B
+     * @param endB The end date of the interval B
+     * @return <code>true</code> if the specified {@link Date} interval A precedes and intersects
+     *         with the specified {@link Date} interval B; <code>false</code> otherwise
+     */
+    public static boolean precedesAndIntersects(Date startA, Date endA, Date startB, Date endB) {
         if (!intersect(startA, endA, startB, endB)) {
             return false;
         }
@@ -227,72 +301,6 @@ public final class AvailabilityUtils {
     }
 
     /**
-     * Checks if the specified {@link DateTime} interval A succeeds and intersects with the specified {@link DateTime} interval B
-     * 
-     * @param startA The start date of the interval A
-     * @param endA The end date of the interval A
-     * @param startB the start date of the interval B
-     * @param endB The end date of the interval B
-     * @return <code>true</code> if the specified {@link DateTime} interval A succeeds and intersects
-     *         with the specified {@link DateTime} interval B; <code>false</code> otherwise
-     */
-    public static boolean succeedsAndIntersects(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
-        if (!intersect(startA, endA, startB, endB)) {
-            return false;
-        }
-        return startA.before(endB) && endA.after(endB);
-    }
-
-    /**
-     * Checks if the specified availability A intersects with the specified availability B.
-     * Two checks are performed internally:
-     * <ul>
-     * <li>whether the starting point of A is before the ending point of B</li>
-     * <li>whether the ending point of A is after the starting point of B</li>
-     * </ul>
-     * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
-     * @return <code>true</code> if they intersect; <code>false</code> otherwise
-     */
-    public static boolean intersect(CalendarAvailability a, CalendarAvailability b) {
-        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
-    }
-
-    /**
-     * Checks if the specified free slot A intersects with the specified free slot B.
-     * Two checks are performed internally:
-     * <ul>
-     * <li>whether the starting point of A is before the ending point of B</li>
-     * <li>whether the ending point of A is after the starting point of B</li>
-     * </ul>
-     * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
-     * @return <code>true</code> if they intersect; <code>false</code> otherwise
-     */
-    public static boolean intersect(CalendarFreeSlot a, CalendarFreeSlot b) {
-        return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
-    }
-
-    /**
-     * Two checks are performed:
-     * <ul>
-     * <li>whether the starting point of A is before the ending point of B</li>
-     * <li>whether the ending point of A is after the starting point of B</li>
-     * </ul>
-     * 
-     * @param startA The starting date A
-     * @param endA The ending date A
-     * @param startB The starting date B
-     * @param endB The ending date B
-     * @return <code>true</code> if they intersect; <code>false</code> otherwise
-     */
-    public static boolean intersect(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
-        return startA.before(endB) && endA.after(startB);
-    }
-
-    /**
      * Two checks are performed:
      * <ul>
      * <li>whether the starting point of A is before the ending point of B</li>
@@ -308,6 +316,8 @@ public final class AvailabilityUtils {
     public static boolean intersect(Date startA, Date endA, Date startB, Date endB) {
         return startA.before(endB) && endA.after(startB);
     }
+
+    //////////////////////////////////// Merge /////////////////////////////////////////
 
     /**
      * Merge the start and end times of the specified {@link CalendarFreeSlot}s
@@ -336,6 +346,8 @@ public final class AvailabilityUtils {
         ats.setEndTime(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
         return ats;
     }
+
+    ////////////////////////////////////// Convert ///////////////////////////////////////
 
     /**
      * Converts the specified {@link CalendarFreeSlot} to an {@link AvailableTimeSlot}
