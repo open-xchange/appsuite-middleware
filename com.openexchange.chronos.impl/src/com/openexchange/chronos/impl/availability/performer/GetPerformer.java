@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -222,7 +223,22 @@ public class GetPerformer extends AbstractPerformer {
      * @return The combined {@link CalendarAvailability} blocks
      */
     private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
-        java.util.Collections.sort(calendarAvailabilities);
+        java.util.Collections.sort(calendarAvailabilities, new Comparator<CalendarAvailability>() {
+
+            /**
+             * We want elements with higher priority (in this context '1' > '9') to be on the top of the list
+             */
+            @Override
+            public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+                if (o1.getPriority() > o2.getPriority()) {
+                    return 1;
+                } else if (o1.getPriority() < o2.getPriority()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
 
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         int index = 0;
@@ -235,11 +251,6 @@ public class GetPerformer extends AbstractPerformer {
                 CalendarAvailability availability = iterator.next();
                 // No intersection, carry on
                 if (!AvailabilityUtils.intersect(calendarAvailability, availability)) {
-                    continue;
-                }
-
-                // Should never happen since the list is sorted
-                if (calendarAvailability.compareTo(availability) < 0) {
                     continue;
                 }
 
@@ -256,6 +267,19 @@ public class GetPerformer extends AbstractPerformer {
             }
             availableTime.add(calendarAvailability);
         }
+        java.util.Collections.sort(availableTime, new Comparator<CalendarAvailability>() {
+
+            @Override
+            public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+                if (o1.getStartTime().before(o2.getStartTime())) {
+                    return -1;
+                } else if (o1.getStartTime().after(o2.getStartTime())) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
         return availableTime;
     }
 
