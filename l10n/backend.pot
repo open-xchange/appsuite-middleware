@@ -1080,6 +1080,14 @@ msgstr ""
 msgid "Unable to add alarms: %s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
+msgid "Read all your events."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
+msgid "Create, modify and delete events."
+msgstr ""
+
 #. *
 #. * The name of the contact birthdays calendar provider.
 #.
