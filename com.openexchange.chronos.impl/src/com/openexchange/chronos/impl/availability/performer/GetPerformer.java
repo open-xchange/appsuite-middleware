@@ -266,16 +266,8 @@ public class GetPerformer extends AbstractPerformer {
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         List<CalendarAvailability> presAndPosts = new ArrayList<>();
         int index = 0;
-        // Keep track of removed objects
-        List<CalendarAvailability> removed = new ArrayList<>();
         for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
             CalendarAvailability availabilityA = iteratorA.next();
-            if (removed.contains(availabilityA)) {
-                iteratorA.remove();
-                removed.remove(availabilityA);
-                continue;
-            }
-            boolean toRemove = false;
             List<CalendarAvailability> subList = calendarAvailabilities.subList(++index, calendarAvailabilities.size());
             Iterator<CalendarAvailability> iteratorB = subList.iterator();
             while (iteratorB.hasNext()) {
@@ -314,8 +306,10 @@ public class GetPerformer extends AbstractPerformer {
                                     CalendarFreeSlot postSplit = cfs.clone();
                                     postSplit.setStartTime(availabilityB.getEndTime());
                                     preIntersections.add(postSplit);
-                                    continue; // There will only be one intersection
+                                } else {
+                                    cfs.setEndTime(availabilityB.getStartTime());
                                 }
+                                break; // There will only be one intersection
                             }
                         }
 
@@ -336,8 +330,10 @@ public class GetPerformer extends AbstractPerformer {
                                     CalendarFreeSlot postSplit = cfs.clone();
                                     postSplit.setStartTime(availabilityA.getEndTime());
                                     post.getCalendarFreeSlots().add(postSplit);
-                                    continue; // There will only be one intersection
+                                } else {
+                                    cfs.setStartTime(availabilityA.getEndTime());
                                 }
+                                break; // There will only be one intersection
                             }
                         }
                         presAndPosts.add(post);
@@ -350,7 +346,7 @@ public class GetPerformer extends AbstractPerformer {
                     availabilityB.getCalendarFreeSlots().addAll(postIntersections);
 
                     // Remove the contained availability
-                    toRemove = removed.add(availabilityA);
+                    iteratorB.remove();
                 } else if (AvailabilityUtils.precedesAndIntersects(availabilityA, availabilityB)) {
                     availabilityB.setStartTime(availabilityA.getEndTime());
                     adjustSlots(availabilityA, availabilityB);
@@ -359,9 +355,7 @@ public class GetPerformer extends AbstractPerformer {
                     adjustSlots(availabilityA, availabilityB);
                 }
             }
-            if (!toRemove) {
-                availableTime.add(availabilityA);
-            }
+            availableTime.add(availabilityA);
         }
 
         // Add any splits
@@ -484,6 +478,9 @@ public class GetPerformer extends AbstractPerformer {
      * @param freeSlots The {@link CalendarFreeSlot}s to combine
      */
     private List<CalendarFreeSlot> combineSlots(List<CalendarFreeSlot> freeSlots) {
+        // Sort by starting date
+        java.util.Collections.sort(freeSlots, freeSlotDateTimeComparator);
+
         List<CalendarFreeSlot> combined = new ArrayList<>(freeSlots.size());
         Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
         int index = 0;
