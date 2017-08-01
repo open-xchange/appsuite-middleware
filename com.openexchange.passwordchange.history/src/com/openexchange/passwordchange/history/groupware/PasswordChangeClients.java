@@ -49,7 +49,7 @@
 
 package com.openexchange.passwordchange.history.groupware;
 
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -60,25 +60,36 @@ import java.util.List;
  */
 public enum PasswordChangeClients {
 
+    /** Password changes transmitted through the App Suite UI */
     APP_SUITE("open-xchange-appsuite", "App Suite UI", "appsuite", "app_suite"),
 
+    /** Password changes made by the Provisioning Interface */
     PROVISIONING("provisioning-api", "Provisioning API", "provisioning"),
 
-    UNKNOWN("unknown", "Unknown client")
+    /** Generic placeholder for all unknown client providing a password change */
+    UNKNOWN("unknown", "Unknown client", "not known")
 
     ;
 
-    private final String identifier;
-    private final String displayName;
+    private final String       identifier;
+    private final String       displayName;
     private final List<String> matchers;
 
     /**
+     * 
      * Initializes a new {@link PasswordChangeClients}.
+     * 
+     * @param identifier The identifier written to a client
+     * @param displayName The human readable name of the client
+     * @param matchers The possible strings to match a client with
      */
     private PasswordChangeClients(String identifier, String displayName, String... matchers) {
         this.identifier = identifier;
         this.displayName = displayName;
-        this.matchers = Arrays.asList(matchers);
+        this.matchers = new LinkedList<>();
+        for (String matcher : matchers) {
+            this.matchers.add(matcher);
+        }
         this.matchers.add(identifier);
     }
 
@@ -108,5 +119,4 @@ public enum PasswordChangeClients {
         }
         return false;
     }
-
 }

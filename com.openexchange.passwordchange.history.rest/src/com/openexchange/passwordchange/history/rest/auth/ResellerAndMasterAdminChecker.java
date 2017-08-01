@@ -49,7 +49,15 @@
 
 package com.openexchange.passwordchange.history.rest.auth;
 
+import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Authorization;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResellerAndMasterAdminChecker}
@@ -60,20 +68,68 @@ import com.openexchange.exception.OXException;
 public class ResellerAndMasterAdminChecker implements AuthChecker {
 
     private final boolean masterAccountOverride;
+    private ServiceLookup service;
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerAndMasterAdminChecker.class);
 
     /**
      * Initializes a new {@link ResellerAndMasterAdminChecker}.
+     * 
+     * @param service To get configuration from
      */
-    public ResellerAndMasterAdminChecker(boolean masterAccountOverride) {
+    public ResellerAndMasterAdminChecker(ServiceLookup service) {
         super();
-        this.masterAccountOverride = masterAccountOverride;
+        this.service = service;
+        ConfigurationService configService = service.getService(ConfigurationService.class);
 
+        if (null == configService) {
+            this.masterAccountOverride = false;
+            LOG.warn("Configuration service could not be aquired. Using standard values for checking API access.");
+        } else {
+            this.masterAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
+        }
     }
 
     @Override
-    public boolean checkAccess() throws OXException {
-        // TODO
-        return masterAccountOverride;
+    public boolean checkAccess(ServerSession session, String auth) {
+        if (masterAccountOverride) {
+            // Decode auth and validate
+            if (Authorization.checkForBasicAuthorization(auth)) {
+                // Valid header
+                Credentials creds = Authorization.decode(auth);
+                if (Authorization.checkLogin(creds.getPassword())) {
+                    Authenticator authenticator = service.getService(Authenticator.class);
+                    if (null != authenticator) {
+                        // Authenticate the master administrator
+                        try {
+                            authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()));
+                            return true;
+                        } catch (OXException oxe) {
+                            // Try reseller administrator
+                            LOG.debug("Master admin could not be authenticated. Trying to authenticate reseller admin.");
+                            BasicAuthenticatorPluginInterface resellerAuth = service.getService(BasicAuthenticatorPluginInterface.class);
+                            if (null != resellerAuth) {
+                                try {
+                                    resellerAuth.doAuthentication(new com.openexchange.admin.rmi.dataobjects.Credentials(creds.getLogin(), creds.getPassword()));
+                                    return true;
+                                } catch (InvalidCredentialsException ice) {
+                                    // Fall through
+                                    LOG.debug("Reseller admin could not be authenticated.");
+                                } // No valid reseller administrator found
+                            } // No reseller Authenticator                             
+                        } // Not the master administrator
+                    } // No Authenticator service                    
+                } // Flawed password
+            } // No valid header
+        } // Not configured to access API
+        return false;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 23;
+        int result = 1;
+        result = prime * result + (masterAccountOverride ? 1327 : 1399);
+        return result;
+    }
 }

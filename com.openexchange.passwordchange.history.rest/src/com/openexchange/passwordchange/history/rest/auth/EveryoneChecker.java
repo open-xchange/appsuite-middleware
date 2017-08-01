@@ -49,7 +49,9 @@
 
 package com.openexchange.passwordchange.history.rest.auth;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EveryoneChecker} - Check if everyone is allowed
@@ -63,29 +65,46 @@ public class EveryoneChecker implements AuthChecker {
     private final boolean masterAuthenticationDisabled;
     private final boolean contextAuthenticationDisabled;
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EveryoneChecker.class);
+
     /**
-     * 
      * Initializes a new {@link EveryoneChecker}.
      * 
-     * @param masterAccountOverride "MASTER_ACCOUNT_OVERRIDE" value
-     * @param masterAuthenticationDisabled "MASTER_AUTHENTICATION_DISABLED" value
-     * @param contextAuthenticationDisabled "CONTEXT_AUTHENTICATION_DISABLED" value
+     * @param service To get configuration from
      */
-    public EveryoneChecker(boolean masterAccountOverride, boolean masterAuthenticationDisabled, boolean contextAuthenticationDisabled) {
+    public EveryoneChecker(ServiceLookup service) {
         super();
+        ConfigurationService configService = service.getService(ConfigurationService.class);
 
-        this.masterAccountOverride = masterAccountOverride;
-        this.masterAuthenticationDisabled = masterAuthenticationDisabled;
-        this.contextAuthenticationDisabled = contextAuthenticationDisabled;
+        if (null == configService) {
+            this.masterAccountOverride = false;
+            this.masterAuthenticationDisabled = false;
+            this.contextAuthenticationDisabled = false;
+            LOG.warn("Configuration service could not be aquired. Using standard values for checking API access.");
+        } else {
+            this.masterAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
+            this.masterAuthenticationDisabled = configService.getBoolProperty("MASTER_AUTHENTICATION_DISABLED", false);
+            this.contextAuthenticationDisabled = configService.getBoolProperty("CONTEXT_AUTHENTICATION_DISABLED", false);
+        }
     }
 
     @Override
-    public boolean checkAccess() throws OXException {
-        // Ccheck if everyone is allowed
+    public boolean checkAccess(ServerSession session, String auth) {
+        // Check if everyone is allowed to access the API
         if (contextAuthenticationDisabled || (masterAccountOverride && masterAuthenticationDisabled)) {
+            LOG.debug("Allow access for everyone!");
             return true;
         }
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 13;
+        int result = 1;
+        result = prime * result + (contextAuthenticationDisabled ? 1621 : 1669);
+        result = prime * result + (masterAccountOverride ? 1621 : 1669);
+        result = prime * result + (masterAuthenticationDisabled ? 1621 : 1669);
+        return result;
+    }
 }

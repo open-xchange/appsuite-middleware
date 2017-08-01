@@ -64,7 +64,9 @@ public enum SortType {
     OLDEST("oldest"),
 
     /** Default. Does nothing */
-    NONE("");
+    NONE("")
+    
+    ;
 
     private String type;
 
@@ -83,5 +85,4 @@ public enum SortType {
     public String getTypeName() {
         return type;
     }
-
 }
