@@ -55,6 +55,7 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -64,6 +65,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
+@OAuthModule
 public class ChronosFreeBusyActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
