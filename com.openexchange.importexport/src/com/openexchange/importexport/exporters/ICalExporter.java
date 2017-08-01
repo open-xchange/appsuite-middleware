@@ -200,6 +200,22 @@ public class ICalExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
+    
+    @Override
+    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }            
+            for (String objectId : batchEntry.getValue()) {
+                try {
+                    Integer.parseInt(objectId);                    
+                } catch (NumberFormatException e) {
+                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                }
+            }
+        }
+    }
 
     @Override
     public SizedInputStream exportFolderData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
@@ -212,6 +228,8 @@ public class ICalExporter implements Exporter {
     }
 
     private SizedInputStream doExportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        canExportBatch(session, format, batchIds, optionalParams);
+        
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         ICalEmitter emitter = ImportExportServices.getICalEmitter();
         List<ConversionError> errors = new LinkedList<ConversionError>();
@@ -227,13 +245,7 @@ public class ICalExporter implements Exporter {
                     for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
                         FolderObject folder = getFolder(session, batchEntry.getKey());
                         if (FolderObject.CALENDAR == folder.getModule()) {
-                            try {
-                                exportBatchAppointments(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
-                            } catch (NumberFormatException e) {
-                                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-                            } catch (SQLException e) {
-                                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-                            }
+                            exportBatchAppointments(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
                         } else if (FolderObject.TASK == folder.getModule()) {
                             exportBatchTasks(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
                         } else {
@@ -255,13 +267,7 @@ public class ICalExporter implements Exporter {
             for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
                 FolderObject folder = getFolder(session, batchEntry.getKey());
                 if (FolderObject.CALENDAR == folder.getModule()) {
-                    try {
-                        exportBatchAppointments(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
-                    } catch (NumberFormatException e) {
-                        throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-                    } catch (SQLException e) {
-                        throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-                    }
+                    exportBatchAppointments(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
                 } else if (FolderObject.TASK == folder.getModule()) {
                     exportBatchTasks(session, batchEntry.getKey(), batchEntry.getValue(), fieldsToBeExported, emitter, errors, warnings, iCalSession);
                 } else {
@@ -286,10 +292,14 @@ public class ICalExporter implements Exporter {
         }
     }
 
-    private void exportBatchAppointments(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException, NumberFormatException, SQLException {
+    private void exportBatchAppointments(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException {
         AppointmentSQLInterface appointmentSql = ImportExportServices.getAppointmentFactoryService().createAppointmentSql(session);
         for (String object : objectId) {
-            emitter.writeAppointment(iCalSession, appointmentSql.getObjectById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
+            try {
+                emitter.writeAppointment(iCalSession, appointmentSql.getObjectById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
+            } catch (SQLException e) {
+                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }         
         }
     }
 
@@ -340,7 +350,7 @@ public class ICalExporter implements Exporter {
      *                           to use the defaults
      * @param optOut The optional output stream
      * @return The exported appointments
-     * @throws OXException
+     * @throws OXException if appointment is unavailable
      */
     private static ThresholdFileHolder exportAppointments(ServerSession session, int folderID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
         ICalEmitter emitter = ImportExportServices.getICalEmitter();

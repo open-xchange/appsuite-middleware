@@ -191,6 +191,22 @@ public class CSVContactExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
+    
+    @Override
+    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }            
+            for (String objectId : batchEntry.getValue()) {
+                try {
+                    Integer.parseInt(objectId);                    
+                } catch (NumberFormatException e) {
+                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                }
+            }
+        }
+    }
 
     @Override
     public SizedInputStream exportFolderData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
@@ -264,11 +280,8 @@ public class CSVContactExporter implements Exporter {
 
     @Override
     public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-            if (!canExport(sessObj, format, batchEntry.getKey(), optionalParams)) {
-                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-            }
-        }
+        canExportBatch(sessObj, format, batchIds, optionalParams);
+        
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = DEFAULT_FIELDS_ARRAY;

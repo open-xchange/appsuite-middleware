@@ -237,6 +237,22 @@ public class VCardExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
+    
+    @Override
+    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }            
+            for (String objectId : batchEntry.getValue()) {
+                try {
+                    Integer.parseInt(objectId);                    
+                } catch (NumberFormatException e) {
+                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                }
+            }
+        }
+    }
 
     @Override
     public SizedInputStream exportFolderData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
@@ -249,6 +265,14 @@ public class VCardExporter implements Exporter {
     }
 
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
+      if (null != batchIds) {
+          canExportBatch(session, format, batchIds, optionalParams);
+      } else {
+          if (!canExport(session, format, folder, optionalParams)) {
+              throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
+          }
+      }
+        
       boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -262,7 +286,7 @@ public class VCardExporter implements Exporter {
                   } else if (null != batchIds) {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
                   } else {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=export."+ Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }
                   requestData.removeCachingHeader();
                   export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
