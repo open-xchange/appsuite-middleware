@@ -232,31 +232,33 @@ public class GetPerformer extends AbstractPerformer {
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         int index = 0;
         for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
-            CalendarAvailability calendarAvailability = iteratorA.next();
+            CalendarAvailability availabilityA = iteratorA.next();
 
             List<CalendarAvailability> subList = calendarAvailabilities.subList(++index, calendarAvailabilities.size());
-            Iterator<CalendarAvailability> iterator = subList.iterator();
-            while (iterator.hasNext()) {
-                CalendarAvailability availability = iterator.next();
+            Iterator<CalendarAvailability> iteratorB = subList.iterator();
+            while (iteratorB.hasNext()) {
+                CalendarAvailability availabilityB = iteratorB.next();
                 // No intersection, carry on
-                if (!AvailabilityUtils.intersect(calendarAvailability, availability)) {
+                if (!AvailabilityUtils.intersect(availabilityA, availabilityB)) {
                     continue;
                 }
 
                 // Higher or equal priority, adjust times
-                if (AvailabilityUtils.precedesAndIntersects(calendarAvailability, availability)) {
-                    availability.setStartTime(calendarAvailability.getEndTime());
-                    adjustSlots(calendarAvailability, availability);
-                } else if (AvailabilityUtils.succeedsAndIntersects(calendarAvailability, availability)) {
-                    availability.setEndTime(calendarAvailability.getStartTime());
-                    adjustSlots(calendarAvailability, availability);
-                } else if (AvailabilityUtils.contained(calendarAvailability, availability)) {
-                    adjustSlots(calendarAvailability, availability);
-                } else if (AvailabilityUtils.contained(availability, calendarAvailability)) {
-                    adjustSlots(availability, calendarAvailability);
+                if (AvailabilityUtils.contained(availabilityB, availabilityA)) {
+                    adjustSlots(availabilityB, availabilityA);
+                    iteratorB.remove();
+                } else if (AvailabilityUtils.contained(availabilityA, availabilityB)) {
+                    adjustSlots(availabilityA, availabilityB);
+                    iteratorB.remove();
+                } else if (AvailabilityUtils.precedesAndIntersects(availabilityA, availabilityB)) {
+                    availabilityB.setStartTime(availabilityA.getEndTime());
+                    adjustSlots(availabilityA, availabilityB);
+                } else if (AvailabilityUtils.succeedsAndIntersects(availabilityA, availabilityB)) {
+                    availabilityB.setEndTime(availabilityA.getStartTime());
+                    adjustSlots(availabilityA, availabilityB);
                 }
             }
-            availableTime.add(calendarAvailability);
+            availableTime.add(availabilityA);
         }
 
         // Sort by start date
@@ -272,31 +274,31 @@ public class GetPerformer extends AbstractPerformer {
      */
     private void adjustSlots(CalendarAvailability a, CalendarAvailability b) {
         List<CalendarFreeSlot> toAdd = new ArrayList<>();
-        for (CalendarFreeSlot calendarFreeSlotA : a.getCalendarFreeSlots()) {
-            for (Iterator<CalendarFreeSlot> iterator = b.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                CalendarFreeSlot calendarFreeSlotB = iterator.next();
-                if (AvailabilityUtils.contained(calendarFreeSlotA, calendarFreeSlotB)) {
+        for (CalendarFreeSlot freeSlotA : a.getCalendarFreeSlots()) {
+            for (Iterator<CalendarFreeSlot> iteratorB = b.getCalendarFreeSlots().iterator(); iteratorB.hasNext();) {
+                CalendarFreeSlot freeSlotB = iteratorB.next();
+                if (AvailabilityUtils.contained(freeSlotA, freeSlotB)) {
                     // split
                     try {
-                        CalendarFreeSlot pre = calendarFreeSlotB.clone();
-                        pre.setEndTime(calendarFreeSlotA.getStartTime());
+                        CalendarFreeSlot pre = freeSlotB.clone();
+                        pre.setEndTime(freeSlotA.getStartTime());
                         toAdd.add(pre);
 
-                        CalendarFreeSlot post = calendarFreeSlotB.clone();
-                        post.setStartTime(calendarFreeSlotA.getEndTime());
+                        CalendarFreeSlot post = freeSlotB.clone();
+                        post.setStartTime(freeSlotA.getEndTime());
                         toAdd.add(post);
 
-                        iterator.remove();
+                        iteratorB.remove();
                     } catch (CloneNotSupportedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                } else if (AvailabilityUtils.contained(calendarFreeSlotB, calendarFreeSlotA)) {
-                    iterator.remove();
-                } else if (AvailabilityUtils.precedesAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
-                    calendarFreeSlotB.setStartTime(calendarFreeSlotA.getEndTime());
-                } else if (AvailabilityUtils.succeedsAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
-                    calendarFreeSlotB.setEndTime(calendarFreeSlotA.getStartTime());
+                } else if (AvailabilityUtils.contained(freeSlotB, freeSlotA)) {
+                    iteratorB.remove();
+                } else if (AvailabilityUtils.precedesAndIntersects(freeSlotA, freeSlotB)) {
+                    freeSlotB.setStartTime(freeSlotA.getEndTime());
+                } else if (AvailabilityUtils.succeedsAndIntersects(freeSlotA, freeSlotB)) {
+                    freeSlotB.setEndTime(freeSlotA.getStartTime());
                 }
             }
             // Add any splits
