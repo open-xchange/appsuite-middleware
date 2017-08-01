@@ -180,6 +180,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         Locale locale = LocaleTools.getLocale(sLocale);
         if (null == locale) {
             LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
+            return null;
         }
 
         return tryBestFitFor(locale);

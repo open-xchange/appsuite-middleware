@@ -50,6 +50,9 @@
 package com.openexchange.importexport.importers;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,7 +62,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,17 +69,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.ical.ImportedComponent;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -108,9 +99,6 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * Imports ICal files. ICal files can be translated to either tasks or
@@ -257,16 +245,9 @@ public class ICalImporter extends AbstractImporter {
 		TruncationInfo truncationInfo = null;
 
 		if (appointmentFolderId != -1) {
-            if (ImportExportServices.LOOKUP.get().getService(CalendarService.class).init(session).getConfig().isUseLegacyStack()) {
-                truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
-                    appointmentInterface, parser, ctx, defaultTz, list, errors,
-                    warnings);
-		    } else {
-                //TODO: import events instead
-	            truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
-                    appointmentInterface, parser, ctx, defaultTz, list, errors,
-                    warnings);
-		    }
+			truncationInfo = importAppointment(session, is, optionalParams, appointmentFolderId,
+					appointmentInterface, parser, ctx, defaultTz, list, errors,
+					warnings);
 		}
 		if (taskFolderId != -1) {
 			truncationInfo = importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
@@ -365,76 +346,6 @@ public class ICalImporter extends AbstractImporter {
 		}
 		return truncationInfo;
 	}
-
-    /**
-     * Imports events from the iCalendar input stream into specific folder.
-     *
-     * @param session The session
-     * @param inputStream The input stream carrying the iCalendar data
-     * @param optionalParameters A map of optional parameters for the import
-     * @param folderId The identifier of the target folder for the import
-     * @return The import results
-     */
-    private List<ImportResult> importEvents(ServerSession session, InputStream inputStream, Map<String, String[]> optionalParameters, String folderId) throws OXException {
-        /*
-         * initialize import
-         */
-        CalendarService calendarService = ImportExportServices.LOOKUP.get().getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session);
-        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-        if (null != optionalParameters && optionalParameters.containsKey("suppressNotification")) {
-            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
-        }
-        ICalService iCalService = ImportExportServices.LOOKUP.get().getService(ICalService.class);
-        ICalParameters iCalParameters = iCalService.initParameters();
-        iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(session.getUser().getTimeZone()));
-        iCalParameters.set(ICalParameters.SANITIZE_INPUT, Boolean.TRUE);
-        /*
-         * perform the import
-         */
-        ImportedCalendar calendarImport;
-        try {
-            calendarImport = iCalService.importICal(inputStream, iCalParameters);
-        } catch (OXException e) {
-            if ("ICAL-0003".equals(e.getErrorCode())) {
-                // "No calendar data found", silently ignore, as expected by com.openexchange.ajax.importexport.Bug9209Test.test9209ICal()
-                return Collections.emptyList();
-            }
-            ImportResult result = new ImportResult();
-            result.setException(e);
-            return Collections.singletonList(result);
-        }
-        boolean ignoreUIDs = isIgnoreUIDs(optionalParameters);
-        List<ImportResult> importResults = new ArrayList<ImportResult>();
-        for (Map.Entry<String, List<Event>> entry : getEventsByUID(calendarImport.getEvents(), true).entrySet()) {
-            List<Event> events = sortSeriesMasterFirst(entry.getValue());
-            /*
-             * (re-) assign UID to imported event if required
-             */
-            String uid = entry.getKey();
-            if (null == uid || ignoreUIDs) {
-                uid = UUID.randomUUID().toString();
-                for (Event event : events) {
-                    event.setUid(uid);
-                }
-            }
-            /*
-             * create first event (master or non-recurring)
-             */
-            ImportResult result = createEvent(calendarSession, folderId, events.get(0));
-            importResults.add(result);
-            /*
-             * create further events as change exceptions
-             */
-            if (1 < events.size() && false == result.hasError()) {
-                EventID masterEventID = new EventID(folderId, result.getObjectId());
-                for (int i = 1; i < events.size(); i++) {
-                    importResults.add(createEventException(calendarSession, masterEventID, events.get(i)));
-                }
-            }
-        }
-        return importResults;
-    }
 
 	private TruncationInfo importAppointment(final ServerSession session,
 			final InputStream is, final Map<String, String[]> optionalParams,
@@ -600,7 +511,7 @@ public class ICalImporter extends AbstractImporter {
 		return truncationInfo;
 	}
 
-    private OXException makeMoreInformative(OXException e) {
+	private OXException makeMoreInformative(OXException e) {
 		if( e.getCategory() == Category.CATEGORY_TRUNCATED){
 			ProblematicAttribute[] problematics = e.getProblematics();
 			StringBuilder bob = new StringBuilder();
@@ -793,167 +704,6 @@ public class ICalImporter extends AbstractImporter {
             if (null != value && 0 < value.length) {
                 return Boolean.valueOf(value[0]).booleanValue();
             }
-        }
-        return false;
-    }
-
-    private static ImportResult prepareResult(Event importedEvent) {
-        ImportResult importResult = new ImportResult();
-        if (ImportedComponent.class.isInstance(importedEvent)) {
-            ImportedComponent component = (ImportedComponent) importedEvent;
-            importResult.setEntryNumber(component.getIndex());
-            List<OXException> importWarnings = component.getWarnings();
-            if (null != importWarnings && 0 < importWarnings.size()) {
-                List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>(importWarnings.size());
-                for (OXException importWarning : importWarnings) {
-                    conversionWarnings.add(new ConversionWarning(component.getIndex(), importWarning));
-                }
-                importResult.addWarnings(conversionWarnings);
-            }
-        }
-        return importResult;
-    }
-
-    private static ImportResult createEvent(CalendarSession session, String folderId, Event importedEvent) {
-        final int MAX_RETRIES = 5;
-        ImportResult importResult = prepareResult(importedEvent);
-        for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
-            try {
-                CalendarResult result = session.getCalendarService().createEvent(session, folderId, importedEvent);
-                importResult.setDate(new Date(result.getTimestamp()));
-                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
-                if (result.getCreations().isEmpty()) {
-                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
-                } else {
-                    importResult.setFolder(result.getCreations().get(0).getCreatedEvent().getFolderId());
-                    importResult.setObjectId(result.getCreations().get(0).getCreatedEvent().getId());
-                }
-            } catch (OXException e) {
-                if (retryCount < MAX_RETRIES && handle(session, e, importedEvent)) {
-                    // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
-                    importResult.addWarnings(Collections.singletonList(
-                        new ConversionWarning(importResult.getEntryNumber(), ConversionWarning.Code.TRUNCATION_WARNING, e.getMessage())));
-                    continue;
-                }
-                // "re-throw"
-                importResult.setException(e);
-            }
-            if (false == importResult.hasError() && null != importResult.getWarnings() && 0 < importResult.getWarnings().size()) {
-                importResult.setException(ImportExportExceptionCodes.WARNINGS.create(I(importResult.getWarnings().size())));
-            }
-            return importResult;
-        }
-        throw new AssertionError(); // should not get here
-    }
-
-    private static ImportResult createEventException(CalendarSession session, EventID masterEventID, Event importedException) {
-        final int MAX_RETRIES = 5;
-        ImportResult importResult = prepareResult(importedException);
-        for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
-            try {
-                CalendarResult result = session.getCalendarService().updateEvent(session, masterEventID, importedException);
-                importResult.setDate(new Date(result.getTimestamp()));
-                session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
-                if (result.getCreations().isEmpty()) {
-                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedException));
-                } else {
-                    importResult.setFolder(String.valueOf(result.getCreations().get(0).getCreatedEvent().getFolderId()));
-                    importResult.setObjectId(String.valueOf(result.getCreations().get(0).getCreatedEvent().getId()));
-                }
-            } catch (OXException e) {
-                if (retryCount < MAX_RETRIES && handle(session, e, importedException)) {
-                    // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
-                    importResult.addWarnings(Collections.singletonList(
-                        new ConversionWarning(importResult.getEntryNumber(), ConversionWarning.Code.TRUNCATION_WARNING, e.getMessage())));
-                    continue;
-                }
-                // "re-throw"
-                importResult.setException(e);
-            }
-            if (false == importResult.hasError() && null != importResult.getWarnings() && 0 < importResult.getWarnings().size()) {
-                importResult.setException(ImportExportExceptionCodes.WARNINGS.create(I(importResult.getWarnings().size())));
-            }
-            return importResult;
-        }
-        throw new AssertionError(); // should not get here
-    }
-
-    /**
-     * Maps a list of events based on their UID property, so that each event series including any change exceptions are grouped separately.
-     *
-     * @param events The events to map
-     * @param assignIfEmpty <code>true</code> to assign a new unique identifier in case it's missing from an event, <code>false</code>, otherwise
-     * @return The events, mapped by their unique identifier
-     */
-    private static Map<String, List<Event>> getEventsByUID(List<Event> events, boolean assignIfEmpty) {
-        if (null == events) {
-            return Collections.emptyMap();
-        }
-        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
-        for (Event event : events) {
-            String uid = event.getUid();
-            if (null == uid && assignIfEmpty) {
-                uid = UUID.randomUUID().toString();
-                event.setUid(uid);
-            }
-            List<Event> list = eventsByUID.get(uid);
-            if (null == list) {
-                list = new ArrayList<Event>();
-                eventsByUID.put(uid, list);
-            }
-            list.add(event);
-        }
-        return eventsByUID;
-    }
-
-    /**
-     * Sorts a list of events and change exceptions so that the <i>series master</i> event will be the first element in the list, and any
-     * change exceptions are sorted afterwards based on their recurrence identifier.
-     *
-     * @param events The events to sort
-     * @return The sorted events
-     */
-    private static List<Event> sortSeriesMasterFirst(List<Event> events) {
-        if (null != events && 1 < events.size()) {
-            Collections.sort(events, new Comparator<Event>() {
-
-                @Override
-                public int compare(Event event1, Event event2) {
-                    RecurrenceId recurrenceId1 = event1.getRecurrenceId();
-                    RecurrenceId recurrenceId2 = event2.getRecurrenceId();
-                    if (null == recurrenceId1) {
-                        return null == recurrenceId2 ? 0 : -1;
-                    }
-                    if (null == recurrenceId2) {
-                        return 1;
-                    }
-                    return Long.compare(recurrenceId1.getValue().getTimestamp(), recurrenceId2.getValue().getTimestamp());
-                }
-            });
-        }
-        return events;
-    }
-
-    /**
-     * Tries to handle data truncation and incorrect string errors automatically.
-     *
-     * @param session The calendar session
-     * @param e The exception to handle
-     * @param event The event being saved
-     * @return <code>true</code> if the excpetion could be handled and the operation should be tried again, <code>false</code>, otherwise
-     */
-    protected static boolean handle(CalendarSession session, OXException e, Event event) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-4227": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return session.getUtilities().handleIncorrectString(e, event);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return session.getUtilities().handleDataTruncation(e, event);
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
         }
         return false;
     }

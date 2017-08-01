@@ -54,12 +54,14 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
+import com.openexchange.java.Strings;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class VCardExportRequest extends AbstractExportRequest<VCardExportResponse> {
 
     private final boolean failOnError;
     private final Boolean exportDlists;
+    private final String body;
 
     public VCardExportRequest(int folderId, boolean failOnError) {
         this(folderId, null, failOnError);
@@ -69,6 +71,14 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         super(Action.VCard, folderId);
         this.failOnError = failOnError;
         this.exportDlists = exportDlists;
+        this.body = "";
+    }    
+    
+    public VCardExportRequest(int folderId, Boolean exportDlists, boolean failOnError, String body) {
+        super(Action.VCard, folderId);
+        this.failOnError = failOnError;
+        this.exportDlists = exportDlists;
+        this.body = body;
     }
 
     @Override
@@ -79,6 +89,9 @@ public class VCardExportRequest extends AbstractExportRequest<VCardExportRespons
         }
         if (this.getFolderId() < 0) {
             parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);
+        }
+        if (!Strings.isEmpty(body)) {
+            parameters = parametersToAdd(new Parameter("body", body), parameters);
         }
         return parameters;
     }

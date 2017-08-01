@@ -89,9 +89,10 @@ public class ExportRequest {
         super();
         this.setSession(session);
         this.setRequest(request);
+        String value = request.getParameter("body");
 
-        if (null != request.getData()) {
-            String ids = request.requireData().toString();
+        if (!Strings.isEmpty(value)) {
+            String ids = value;
             try{
                 batchIds = extractBatchArrayFromRequest(ids);
             } catch (JSONException e) {

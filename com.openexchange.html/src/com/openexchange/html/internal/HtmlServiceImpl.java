@@ -113,6 +113,7 @@ import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.emoji.EmojiRegistry;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
@@ -127,6 +128,7 @@ import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -167,6 +169,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Tika tika;
     private final String lineSeparator;
     private final HTMLEntityCodec htmlCodec;
+    private final DefaultWhitelist fullWhitelist;
+    private final DefaultWhitelist htmlOnlyWhitelist;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -188,6 +192,15 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
+
+        DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
+        fullWhitelist = builder.build();
+
+        builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        htmlOnlyWhitelist = builder.build();
     }
 
     @Override
@@ -484,6 +497,11 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(immune, input);
     }
 
+    @Override
+    public Whitelist getWhitelist(boolean withCss) {
+        return withCss ? fullWhitelist : htmlOnlyWhitelist;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -536,7 +554,7 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
-            boolean useJericho = HtmlServices.useJericho();
+            boolean useJericho = /*Jericho parser is not yet prepared for non-sanitizing*/ options.isSanitize() && HtmlServices.useJericho();
             if (useJericho) {
                 // Normalize the string
                 {

@@ -652,10 +652,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
 
-        PreparedStatement stmtupdateattribute = null;
-        PreparedStatement stmtinsertattribute = null;
-        PreparedStatement stmtdelattribute = null;
-
         boolean rollback = false;
 
         try {
@@ -810,63 +806,72 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Change storage data
             changeStorageDataImpl(usrdata, ctx, con);
 
-            // update user aliases
+            // Update user's E-Mail aliases
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-            final HashSet<String> alias = usrdata.getAliases();
-            if (null != alias) {
-                Set<String> storedAliases = new HashSet<>(aliasStorage.getAliases(contextId, userId));
-                for (final String elem : alias) {
-                    if (elem != null && elem.trim().length() > 0) {
-                        if (!containsAndRemove(elem, storedAliases)) {
-                            aliasStorage.createAlias(con, contextId, userId, elem);
+            {
+                Set<String> aliases = usrdata.getAliases();
+                if (null != aliases) {
+                    Set<String> storedAliases = new HashSet<>(aliasStorage.getAliases(contextId, userId));
+                    for (String alias : aliases) {
+                        if (false == Strings.isEmpty(alias)) {
+                            alias = alias.trim();
+                            if (!containsAndRemove(alias, storedAliases)) {
+                                aliasStorage.createAlias(con, contextId, userId, alias);
+                            }
                         }
                     }
+                    for (String storedAlias : storedAliases) {
+                        aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
+                    }
+                } else if (usrdata.isAliasesset()) {
+                    aliasStorage.deleteAliases(con, contextId, userId);
                 }
-                for (String storedAlias : storedAliases) {
-                    aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
-                }
-            } else if (usrdata.isAliasesset()) {
-                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if (usrdata.isUserAttributesset()) {
-
-                stmtupdateattribute = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid=? AND id=? AND name=?");
-                stmtupdateattribute.setInt(2, contextId);
-                stmtupdateattribute.setInt(3, userId);
-
-                stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name, uuid) VALUES (?, ?, ?, ?, ?)");
-                stmtinsertattribute.setInt(2, contextId);
-                stmtinsertattribute.setInt(3, userId);
-
-                stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmtdelattribute.setInt(1, contextId);
-                stmtdelattribute.setInt(2, userId);
-
-                for (final Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
-                    final String namespace = ns.getKey();
-                    for (final Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                        final String name = namespace + "/" + pair.getKey();
-                        final String value = pair.getValue();
-                        if (value != null) {
-                            stmtupdateattribute.setString(1, value);
-                            stmtupdateattribute.setString(4, name);
-
-                            final int changedRows = stmtupdateattribute.executeUpdate();
-                            if (changedRows == 0) {
-                                stmtinsertattribute.setString(1, value);
-                                stmtinsertattribute.setString(4, name);
-                                byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                                stmtinsertattribute.setBytes(5, uuidBinary);
+                PreparedStatement stmtinsertattribute = null;
+                PreparedStatement stmtdelattribute = null;
+                try {
+                    for (Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
+                        String namespace = ns.getKey();
+                        for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                            String name = namespace + "/" + pair.getKey();
+                            String value = pair.getValue();
+                            if (value == null) {
+                                if (null == stmtdelattribute) {
+                                    stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                                    stmtdelattribute.setInt(1, contextId);
+                                    stmtdelattribute.setInt(2, userId);
+                                }
+                                stmtdelattribute.setString(3, name);
+                                stmtdelattribute.addBatch();
+                            } else {
+                                if (null == stmtinsertattribute) {
+                                    stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
+                                    stmtinsertattribute.setInt(1, contextId);
+                                    stmtinsertattribute.setInt(2, userId);
+                                }
+                                stmtinsertattribute.setString(3, name);
+                                stmtinsertattribute.setString(4, value);
+                                stmtinsertattribute.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                                stmtinsertattribute.setString(6, value);
                                 stmtinsertattribute.executeUpdate();
+                                stmtinsertattribute.addBatch();
                             }
-                        } else {
-                            stmtdelattribute.setString(3, name);
-                            stmtdelattribute.executeUpdate();
                         }
                     }
-                }
 
+                    if (null != stmtdelattribute) {
+                        stmtdelattribute.executeBatch();
+                    }
+                    if (null != stmtinsertattribute) {
+                        stmtinsertattribute.executeBatch();
+                    }
+
+                } finally {
+                    Databases.closeSQLStuff(stmtinsertattribute);
+                    Databases.closeSQLStuff(stmtdelattribute);
+                }
             }
 
             // update prg_contacts ONLY if needed ( see
@@ -1378,10 +1383,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             closeSQLStuff(folder_update);
             closeSQLStuff(stmt);
-
-            Databases.closeSQLStuff(stmtupdateattribute);
-            Databases.closeSQLStuff(stmtinsertattribute);
-            Databases.closeSQLStuff(stmtdelattribute);
 
             if (con != null) {
                 try {

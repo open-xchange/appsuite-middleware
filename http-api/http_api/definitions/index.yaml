@@ -647,6 +647,6 @@ RemoveSessionBody:
   $ref: ./sessionmanagement/RemoveSessionBody.yaml
 RemoveAllOtherSessionsBody:
   $ref: ./sessionmanagement/RemoveAllOtherSessionsBody.yaml
-
-
-
+# Module: Export
+InfoItemExport:
+  $ref: ./export/InfoItemExport.yaml

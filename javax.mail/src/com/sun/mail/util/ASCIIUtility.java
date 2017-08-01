@@ -42,8 +42,8 @@ package com.sun.mail.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ASCIIUtility {
 
@@ -241,13 +241,18 @@ public class ASCIIUtility {
      * @return		the String
      */
     public static String toString(byte[] b, int start, int end) {
-	int size = end - start;
-	char[] theChars = new char[size];
+        int size = end - start;
+        try {
+            return new String(b, start, size, javax.mail.internet.MimeUtility.getDefaultJavaCharsetInstance());
+        } catch (Exception e) {
+            // Should not occur
+            char[] theChars = new char[size];
 
-	for (int i = 0, j = start; i < size; )
-	    theChars[i++] = (char)(b[j++]&0xff);
-	
-	return new String(theChars);
+            for (int i = 0, j = start; i < size;)
+                theChars[i++] = (char) (b[j++] & 0xff);
+
+            return new String(theChars);
+        }
     }
 
     /**

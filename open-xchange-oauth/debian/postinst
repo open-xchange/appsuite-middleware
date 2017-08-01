@@ -86,6 +86,14 @@ postFix() {
     # SoftwareChange_Request-3556
     ox_add_property com.openexchange.oauth.yahoo.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/yahoooauth.properties
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
+
+    # SoftwareChange_Request-4196
+    VALUE=$(ox_read_property com.openexchange.oauth.twitter /opt/open-xchange/etc/twitteroauth.properties)
+    if dpkg --compare-versions "7.10.0" gt-nl "$1"; then
+        if [ "true" == "$VALUE" ]; then
+            ox_set_property com.openexchange.oauth.twitter false /opt/open-xchange/etc/twitteroauth.properties
+        fi
+    fi
 }
 
 setConfigFilePermissions() {

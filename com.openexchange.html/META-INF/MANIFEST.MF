@@ -191,5 +191,6 @@ Import-Package: com.google.common.annotations,
  org.xml.sax.helpers,
  org.xmlpull.v1
 Export-Package: com.openexchange.html,
- com.openexchange.html.tools
+ com.openexchange.html.tools,
+ com.openexchange.html.whitelist
 Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator

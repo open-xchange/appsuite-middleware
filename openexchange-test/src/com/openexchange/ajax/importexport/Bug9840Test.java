@@ -85,7 +85,7 @@ public final class Bug9840Test extends AbstractAJAXSession {
         assertTrue("BYMONTH recurrence pattern not detected as error.", result.hasError());
         final OXException exception = result.getException();
         final Code code = Code.BYMONTH_NOT_SUPPORTED;
-        assertTrue(code.getNumber() == exception.getCode() || exception.getCode() == 4229);
+        assertEquals(code.getNumber(), exception.getCode());
         assertEquals(code.getCategory(), exception.getCategory());
     }
 

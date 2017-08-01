@@ -113,7 +113,7 @@ public class LoginNameRecorder implements LoginHandlerService, NonTransient {
      */
     private static String getStoredUserLogin(User user) {
         Map<String, String> attributes = user.getAttributes();
-        return attributes.get(LOGIN_ATTRIBUTE_NAME);
+        return null == attributes ? null : attributes.get(LOGIN_ATTRIBUTE_NAME);
     }
 
 }

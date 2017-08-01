@@ -485,7 +485,7 @@ public final class UploadUtility {
             if (null == forcedMimeType) {
                 String itemContentType = item.getContentType();
                 ContentType contentType = getContentTypeSafe(itemContentType);
-                if (null == contentId) {
+                if (null == contentId && contentType != null) {
                     contentId = contentType.getParameter("cid");
                     retval.setContentId(contentId);
                 }
