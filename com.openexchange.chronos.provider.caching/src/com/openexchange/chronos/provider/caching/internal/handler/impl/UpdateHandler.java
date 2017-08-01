@@ -61,13 +61,13 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
@@ -94,62 +94,62 @@ public class UpdateHandler extends AbstractHandler {
     public List<Event> execute(String folderId) throws OXException {
         updateLastUpdated();
 
-        AbstractCollectionUpdate<Event, EventField> diff = generateEventDiff(folderId);
+        EventUpdates diff = generateEventDiff(folderId);
         processDiff(diff);
 
         return searchEvents(folderId);
     }
 
-    private AbstractCollectionUpdate<Event, EventField> generateEventDiff(String folderId) throws OXException {
+    private EventUpdates generateEventDiff(String folderId) throws OXException {
         List<Event> extEventsInFolder = getAndPrepareExtEvents(folderId);
 
         List<Event> persistedEventsInFolder = searchEvents(folderId);
-        AbstractCollectionUpdate<Event, EventField> eventUpdates = CalendarUtils.getEventUpdates(persistedEventsInFolder, extEventsInFolder, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
+        EventUpdates eventUpdates = CalendarUtils.getEventUpdates(persistedEventsInFolder, extEventsInFolder, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
 
         return eventUpdates;
     }
 
-    private void processDiff(AbstractCollectionUpdate<Event, EventField> diff) throws OXException {
+    private void processDiff(EventUpdates diff) throws OXException {
         create(diff);
         delete(diff);
         update(diff);
     }
 
-    private void delete(AbstractCollectionUpdate<Event, EventField> eventsToDelete) throws OXException {
-        if (eventsToDelete.isEmpty()) {
+    private void delete(EventUpdates diff) throws OXException {
+        if (diff.isEmpty()) {
             return;
         }
 
         CalendarStorage calendarStorage = getCalendarStorage();
-        for (Event event : eventsToDelete.getRemovedItems()) {
+        for (Event event : diff.getRemovedItems()) {
             calendarStorage.getEventStorage().deleteEvent(event.getId());
             calendarStorage.getAttendeeStorage().deleteAttendees(event.getId());
             calendarStorage.getAlarmStorage().deleteAlarms(event.getId());
         }
     }
 
-    private void create(AbstractCollectionUpdate<Event, EventField> eventsToCreate) throws OXException {
-        if (eventsToCreate.isEmpty()) {
+    private void create(EventUpdates diff) throws OXException {
+        if (diff.isEmpty()) {
             return;
         }
-        createAsync(eventsToCreate.getAddedItems());
+        createAsync(diff.getAddedItems());
     }
 
-    private void update(AbstractCollectionUpdate<Event, EventField> eventsToUpdate) throws OXException {
-        if (eventsToUpdate.isEmpty()) {
+    private void update(EventUpdates diff) throws OXException {
+        if (diff.isEmpty()) {
             return;
         }
 
-        boolean containsUID = containsUid(eventsToUpdate.getUpdatedItems());
+        boolean containsUID = containsUid(diff.getUpdatedItems());
         if (!containsUID) {
-            //FIXME generate reproducible UID for upcoming refreshes 
-            delete(eventsToUpdate);
-            create(eventsToUpdate);
+            //FIXME generate reproducible UID for upcoming refreshes
+            delete(diff);
+            create(diff);
             return;
         }
         EventStorage eventStorage = getCalendarStorage().getEventStorage();
 
-        for (ItemUpdate<Event, EventField> eventUpdate : eventsToUpdate.getUpdatedItems()) {
+        for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
 
             Event persistedEvent = eventUpdate.getOriginal();
             Event updatedEvent = eventUpdate.getUpdate();
@@ -157,12 +157,12 @@ public class UpdateHandler extends AbstractHandler {
             updatedEvent.setId(persistedEvent.getId());
             eventStorage.updateEvent(updatedEvent);
 
-            AbstractCollectionUpdate<Attendee, AttendeeField> attendeeUpdates = CalendarUtils.getAttendeeUpdates(persistedEvent.getAttendees(), updatedEvent.getAttendees());
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {
                 updateAttendees(updatedEvent.getId(), attendeeUpdates);
             }
 
-            CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(persistedEvent.getAlarms(), updatedEvent.getAlarms());
+            CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
             if (!alarmUpdates.isEmpty()) {
                 updateAlarms(updatedEvent, alarmUpdates);
             }
@@ -182,7 +182,7 @@ public class UpdateHandler extends AbstractHandler {
                 }
                 alarmStorage.deleteAlarms(event.getId(), event.getCreatedBy(), ArrayUtils.toPrimitive(removedAlarms.toArray(new Integer[removedAlarms.size()])));
             }
-            List<ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+            List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
             if (!updatedItems.isEmpty()) {
                 List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
                 for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
@@ -196,7 +196,7 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    private void updateAttendees(String eventId, AbstractCollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+    private void updateAttendees(String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
         if (!attendeeUpdates.isEmpty()) {
             AttendeeStorage attendeeStorage = getCalendarStorage().getAttendeeStorage();
             if (!attendeeUpdates.getAddedItems().isEmpty()) {
@@ -212,7 +212,7 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    private boolean containsUid(List<ItemUpdate<Event, EventField>> list) {
+    private boolean containsUid(List<EventUpdate> list) {
         for (ItemUpdate<Event, EventField> event : list) {
             if (!event.getUpdate().containsUid()) {
                 return false;
@@ -233,7 +233,7 @@ public class UpdateHandler extends AbstractHandler {
 
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
         for (String folderId : sortEventIDsPerFolderId.keySet()) {
-            AbstractCollectionUpdate<Event, EventField> diff = generateEventDiff(folderId);
+            EventUpdates diff = generateEventDiff(folderId);
             processDiff(diff);
         }
         return searchEvents(eventIds);

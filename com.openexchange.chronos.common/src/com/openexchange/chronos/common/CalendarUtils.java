@@ -89,8 +89,10 @@ import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.common.mapping.EventUpdatesImpl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
@@ -1265,31 +1267,35 @@ public class CalendarUtils {
     }
 
     /**
-     * Initializes a new event collection update based on the supplied original and updated event lists.
+     * Initializes a new event updates collection based on the supplied original and updated event lists.
      * <p/>
      * Event matching is performed on one or more event fields.
      *
      * @param originalEvents The original events
      * @param updatedEvents The updated events
-     * @return The collection update
+     * @param fieldsToMatch The event fields to consider when checking events for equality
+     * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static AbstractCollectionUpdate<Event, EventField> getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, final EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) throws OXException {
         return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
     }
 
-    public static AbstractCollectionUpdate<Event, EventField> getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
-        return new AbstractCollectionUpdate<Event, EventField>(EventMapper.getInstance(), originalEvents, updatedEvents, considerUnset, ignoredFields) {  // defines the fields to ignore while getting updates
-
-            @Override
-            protected boolean matches(Event item1, Event item2) { // Defines if the events are equal
-                try {
-                    return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
-                } catch (OXException e) {
-                    throw new UnsupportedOperationException(e);
-                }
-            }
-        };
+    /**
+     * Initializes a new event updates collection based on the supplied original and updated event lists.
+     * <p/>
+     * Event matching is performed on one or more event fields.
+     *
+     * @param originalEvents The original events
+     * @param updatedEvents The updated events
+     * @param fieldsToMatch The event fields to consider when checking events for equality
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences between updated items
+     * @return The event updates
+     * @see EventMapper#equalsByFields(Event, Event, EventField...)
+     */
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+        return new EventUpdatesImpl(originalEvents, updatedEvents, considerUnset, ignoredFields, fieldsToMatch);
     }
 
 }

@@ -49,69 +49,81 @@
 
 package com.openexchange.chronos.common.mapping;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.AlarmUtils;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link EventUpdateImpl}
+ * {@link EventUpdatesImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implements EventUpdate {
+public class EventUpdatesImpl extends AbstractSimpleCollectionUpdate<Event> implements EventUpdates {
 
-    private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
-    private final CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
-    private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
+    private final EventField[] fieldsToMatch;
+    private final List<EventUpdate> updatedItems;
 
     /**
-     * Initializes a new {@link EventUpdateImpl}.
+     * Initializes a new event updates collection based on the supplied original and updated event lists.
+     * <p/>
+     * Event matching is performed on one or more event fields.
      *
-     * @param originalEvent The original event
-     * @param updatedEvent The updated event
+     * @param originalItems The original collection of events, or <code>null</code> if there is none
+     * @param newItems The new collection of events, or <code>null</code> if there is none
+     * @param fieldsToMatch The event fields to consider when checking events for equality
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
-     * @param ignoredFields Fields to ignore when determining the differences
-     * @return The event update providing the differences
+     * @param ignoredFields Fields to ignore when determining the differences between updated items
+     * @return The event updates
+     * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public EventUpdateImpl(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
-        this(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoredFields));
-    }
-
-    EventUpdateImpl(Event originalEvent, Event updatedEvent, Set<EventField> updatedFields) throws OXException {
-        super(originalEvent, updatedEvent, updatedFields);
-        alarmUpdates = AlarmUtils.getAlarmUpdates(
-            null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        attendeeUpdates = CalendarUtils.getAttendeeUpdates(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
-        attachmentUpdates = CalendarUtils.getAttachmentUpdates(
-            null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
-    }
-
-    @Override
-    public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
-        return attendeeUpdates;
-    }
-
-    @Override
-    public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
-        return alarmUpdates;
+    public EventUpdatesImpl(List<Event> originalItems, List<Event> newItems, boolean considerUnset, EventField[] ignoredFields, EventField... fieldsToMatch) throws OXException {
+        super(originalItems, newItems);
+        this.fieldsToMatch = fieldsToMatch;
+        if (null != originalItems && null != newItems) {
+            updatedItems = new ArrayList<EventUpdate>();
+            for (Event newItem : newItems) {
+                Event originalItem = find(originalItems, newItem);
+                if (null != originalItem) {
+                    Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalItem, newItem, considerUnset, ignoredFields);
+                    if (0 < differentFields.size()) {
+                        updatedItems.add(new EventUpdateImpl(originalItem, newItem, differentFields));
+                    }
+                }
+            }
+        } else {
+            updatedItems = Collections.emptyList();
+        }
     }
 
     @Override
-    public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
-        return attachmentUpdates;
+    public List<EventUpdate> getUpdatedItems() {
+        return updatedItems;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty() && updatedItems.isEmpty();
+    }
+
+    @Override
+    protected boolean matches(Event item1, Event item2) {
+        try {
+            return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
+        } catch (OXException e) {
+            throw new UnsupportedOperationException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "EventUpdates [" + removedItems.size() + " removed, " + addedItems.size() + " added, " + updatedItems.size() + " updated]";
     }
 
 }

@@ -50,21 +50,18 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 
 /**
- * {@link CollectionUpdate}
+ * {@link EventUpdates}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CollectionUpdate<O, E extends Enum<E>> extends SimpleCollectionUpdate<O> {
+public interface EventUpdates extends CollectionUpdate<Event, EventField> {
 
-    /**
-     * Gets the list of updated items.
-     *
-     * @return The updated items, or an empty list if there are none
-     */
-    List<? extends ItemUpdate<O, E>> getUpdatedItems();
+    @Override
+    List<EventUpdate> getUpdatedItems();
 
 }
-

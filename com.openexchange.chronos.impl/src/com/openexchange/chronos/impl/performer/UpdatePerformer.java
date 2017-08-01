@@ -637,7 +637,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * save updated alarms
          */
-        List<ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+        List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
         if (0 < updatedItems.size()) {
             List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
             for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
