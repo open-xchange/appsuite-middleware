@@ -59,23 +59,27 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.0
  */
 public enum SessionManagementProperty implements Property {
-    globalLookup(SessionManagementProperty.PREFIX, Boolean.TRUE),
-    clientBlacklist(SessionManagementProperty.PREFIX, ""),
+    /**
+     * <code>"com.openexchange.session.management.globalLookup"</code>
+     */
+    GLOBAL_LOOKUP("globalLookup", Boolean.TRUE),
+    /**
+     * <code>"com.openexchange.session.management.clientBlacklist"</code>
+     */
+    CLIENT_BLACKLIST("clientBlacklist", ""),
     ;
 
-    private static final String PREFIX = "com.openexchange.session.management.";
-
-    private final String prefix;
+    private final String fqn;
     private final Object defaultValue;
 
-    private SessionManagementProperty(String prefix, Object defaultValue) {
-        this.prefix = prefix;
+    private SessionManagementProperty(String name, Object defaultValue) {
+        this.fqn = "com.openexchange.session.management." + name;
         this.defaultValue = defaultValue;
     }
 
     @Override
     public String getFQPropertyName() {
-        return prefix + name();
+        return fqn;
     }
 
     @Override
