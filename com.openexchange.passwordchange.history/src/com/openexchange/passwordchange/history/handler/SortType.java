@@ -47,51 +47,42 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker.impl;
-
-import javax.xml.bind.annotation.XmlRootElement;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
+package com.openexchange.passwordchange.history.handler;
 
 /**
- * {@link PasswordChangeInfoImpl}
+ * {@link SortType} The types of different sorting for {@link PasswordChangeInfo}s
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@XmlRootElement
-public class PasswordChangeInfoImpl implements PasswordChangeInfo {
+public enum SortType {
 
-    private long created;
-    private String client;
-    private String ip;
+    /** Sort by newest entries first. */
+    NEWEST("newest"),
+
+    /** Sort by oldest entries first */
+    OLDEST("oldest"),
+
+    /** Default. Does nothing */
+    NONE("")
+    
+    ;
+
+    private String type;
 
     /**
-     * Initializes a new {@link PasswordChangeInfoImpl}.
-     * 
-     * @param created The time when the password change was made
-     * @param client The client that did the change
-     * @param ip The optional IP of the client
+     * Initializes a new {@link SortType}.
      */
-    public PasswordChangeInfoImpl(long created, String client, String ip) {
-        super();
-        this.created = created;
-        this.client = client;
-        this.ip = ip;
+    private SortType(String type) {
+        this.type = type;
     }
 
-    @Override
-    public long getCreated() {
-        return created;
+    /**
+     * Get name for the {@link SortType}
+     * 
+     * @return The name
+     */
+    public String getTypeName() {
+        return type;
     }
-
-    @Override
-    public String getClient() {
-        return client;
-    }
-
-    @Override
-    public String getIP() {
-        return ip;
-    }
-
 }

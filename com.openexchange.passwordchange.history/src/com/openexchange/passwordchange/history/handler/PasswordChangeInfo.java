@@ -47,53 +47,37 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.handler;
 
-import java.util.List;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 
 /**
- * {@link PasswordHistoryHandler} - Defines the operations need to be done to for a password change history
+ * {@link PasswordChangeInfo} - The information provided and written to the database considering the password change.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordHistoryHandler {
+public interface PasswordChangeInfo {
 
     /**
-     * The current data stored in the database
+     * Get the value of the date when the password got changed on
      * 
-     * @param userID The ID of the user to list the password changes for
-     * @param contextID The context ID of the user
-     * @param type The {@link SortType} to sort the list to
-     * @return {@link List} of all available password change events (~ the history)
+     * @return The value as <code>long</code>
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type);
+    long getCreated();
 
     /**
-     * Adds a new set of information to the database
+     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
      * 
-     * @param userID The ID of the user to track the password changes for
-     * @param contextID The context ID of the user
-     * @param info The {@link PasswordChangeInfo} to be added
+     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
      */
-    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info);
+    String getClient();
 
     /**
-     * Clears the PasswordChange informations for a specific user
+     * Get the IP-address the changed request was sent from
      * 
-     * @param userID The ID of the user to clear recorded password changes for
-     * @param contextID The context ID of the user
-     * @param limit The limit of entries to store in the DB. If current entries exceed the limitation the oldest
-     *            entries get deleted. If set to <code>0</code> all entries will be deleted
+     * @return The IP-adress or <code>null</code>
      */
-    void clear(int userID, int contextID, int limit);
+    String getIP();
 
-    /**
-     * Get the name the {@link PasswordHistoryHandler} should be registered to
-     * 
-     * @return The name of the implementation
-     */
-    String getSymbolicName();
 }

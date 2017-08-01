@@ -171,9 +171,6 @@ import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
-import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryASD;
-import com.openexchange.passwordchange.history.registry.PasswordChangeTrackerRegistryASD;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
@@ -1004,14 +1001,6 @@ public final class Init {
             });
             TestServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
             PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
-        }
-    }    
-
-    public static void startAndInjectPasswordChangeHistoryService() {
-        if (null == TestServiceRegistry.getInstance().getService(PasswordChangeTrackerRegistryASD.class)) {
-            PasswordChangeTrackerRegistryASD registry = new PasswordChangeTrackerRegistryImpl();
-            services.put(PasswordChangeTrackerRegistryASD.class, registry);
-            TestServiceRegistry.getInstance().addService(PasswordChangeTrackerRegistryASD.class, registry);
         }
     }
 

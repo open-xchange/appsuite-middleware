@@ -54,10 +54,10 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
 import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.tracker.impl.PasswordChangeInfoImpl;
 import com.openexchange.server.ServiceLookup;
 
 /**

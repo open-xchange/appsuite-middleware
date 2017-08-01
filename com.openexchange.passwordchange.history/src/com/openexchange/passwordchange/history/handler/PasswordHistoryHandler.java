@@ -47,42 +47,53 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.handler;
+
+import java.util.List;
+import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**
- * {@link SortType} The types of different sorting for {@link PasswordChangeInfo}s
+ * {@link PasswordHistoryHandler} - Defines the operations need to be done to for a password change history
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum SortType {
-
-    /** Sort by newest entries first. */
-    NEWEST("newest"),
-
-    /** Sort by oldest entries first */
-    OLDEST("oldest"),
-
-    /** Default. Does nothing */
-    NONE("")
-    
-    ;
-
-    private String type;
+public interface PasswordHistoryHandler {
 
     /**
-     * Initializes a new {@link SortType}.
-     */
-    private SortType(String type) {
-        this.type = type;
-    }
-
-    /**
-     * Get name for the {@link SortType}
+     * The current data stored in the database
      * 
-     * @return The name
+     * @param userID The ID of the user to list the password changes for
+     * @param contextID The context ID of the user
+     * @param type The {@link SortType} to sort the list to
+     * @return {@link List} of all available password change events (~ the history)
      */
-    public String getTypeName() {
-        return type;
-    }
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type);
+
+    /**
+     * Adds a new set of information to the database
+     * 
+     * @param userID The ID of the user to track the password changes for
+     * @param contextID The context ID of the user
+     * @param info The {@link PasswordChangeInfo} to be added
+     */
+    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info);
+
+    /**
+     * Clears the PasswordChange informations for a specific user
+     * 
+     * @param userID The ID of the user to clear recorded password changes for
+     * @param contextID The context ID of the user
+     * @param limit The limit of entries to store in the DB. If current entries exceed the limitation the oldest
+     *            entries get deleted. If set to <code>0</code> all entries will be deleted
+     */
+    void clear(int userID, int contextID, int limit);
+
+    /**
+     * Get the name the {@link PasswordHistoryHandler} should be registered to
+     * 
+     * @return The name of the implementation
+     */
+    String getSymbolicName();
 }
