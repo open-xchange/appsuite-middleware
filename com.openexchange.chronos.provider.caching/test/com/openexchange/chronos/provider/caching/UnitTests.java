@@ -47,59 +47,29 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal;
+package com.openexchange.chronos.provider.caching;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * 
- * {@link Services}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public final class Services {
+@RunWith(Suite.class)
+@SuiteClasses({ CachingCalendarAccessTest.class,
+})
+public class UnitTests {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link UnitTests}.
      */
-    private Services() {
+    public UnitTests() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance.");
-        }
-        return serviceLookup.getService(clazz);
-    }
 }

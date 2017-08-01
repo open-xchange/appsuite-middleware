@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class CachingCalendarAccess implements CalendarAccess {
 
-    private static final String LAST_UPDATE = "lastUpdate";
+    protected static final String LAST_UPDATE = "lastUpdate";
 
     private final ServerSession session;
     private final CalendarAccount account;

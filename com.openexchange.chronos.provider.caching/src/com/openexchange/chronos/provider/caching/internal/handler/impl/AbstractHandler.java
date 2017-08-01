@@ -96,7 +96,6 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractHandler}
@@ -223,9 +222,6 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     protected List<Event> readEventsInFolder(String folderId, String[] objectIDs, Date updatedSince) throws OXException {
-        /*
-         * construct search term
-         */
         SearchTerm<?> folderSearchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(folderSearchTerm);
         if (null != objectIDs) {
@@ -297,12 +293,11 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     protected CalendarAccount getAccount() throws OXException {
-        CalendarAccountStorageFactory storageFactory = Services.optService(CalendarAccountStorageFactory.class);
-        if (null == storageFactory) {
-            throw ServiceExceptionCode.absentService(CalendarAccountStorageFactory.class);
-        }
+        CalendarAccountStorageFactory storageFactory = Services.getService(CalendarAccountStorageFactory.class);
+        
         CalendarAccountStorage accountStorage = storageFactory.create(this.cachedCalendarAccess.getSession().getContext());
         CalendarAccount account = accountStorage.loadAccount(this.cachedCalendarAccess.getAccount().getAccountId());
+        
         if (null == account || account.getUserId() != this.cachedCalendarAccess.getSession().getUserId()) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(this.cachedCalendarAccess.getAccount().getAccountId()));
         }
@@ -338,9 +333,7 @@ public abstract class AbstractHandler implements CachingHandler {
         if (null == events || 0 == events.size()) {
             return events;
         }
-        /*
-         * read attendees, attachments & alarms for non-tombstone events
-         */
+
         if (null == fields || contains(fields, EventField.ATTENDEES) || contains(fields, EventField.ALARMS)) {
             String[] objectIDs = getObjectIDs(events);
             if (null == fields || contains(fields, EventField.ATTENDEES)) {
