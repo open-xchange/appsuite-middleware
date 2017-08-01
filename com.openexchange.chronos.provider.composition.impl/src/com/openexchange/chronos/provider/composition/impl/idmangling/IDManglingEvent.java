@@ -83,4 +83,9 @@ public class IDManglingEvent extends DelegatingEvent {
         return newFolderId;
     }
 
+    @Override
+    public String toString() {
+        return "IDManglingEvent [newFolderId=" + newFolderId + ", delegate=" + delegate + "]";
+    }
+    
 }

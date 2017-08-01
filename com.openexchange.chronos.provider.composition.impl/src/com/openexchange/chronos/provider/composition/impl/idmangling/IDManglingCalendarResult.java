@@ -139,4 +139,9 @@ public class IDManglingCalendarResult implements CalendarResult {
         return idManglingCreations;
     }
 
+    @Override
+    public String toString() {
+        return "IDManglingCalendarResult [accountId=" + accountId + ", delegate=" + delegate + "]";
+    }
+
 }

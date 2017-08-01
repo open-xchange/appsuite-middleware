@@ -63,8 +63,8 @@ import com.openexchange.chronos.provider.CalendarPermission;
  */
 public class IDManglingFolder implements CalendarFolder {
 
-    private final String newId;
-    private final CalendarFolder delegate;
+    protected final String newId;
+    protected final CalendarFolder delegate;
 
     /**
      * Initializes a new {@link IDManglingGroupwareFolder}.
@@ -111,6 +111,11 @@ public class IDManglingFolder implements CalendarFolder {
     @Override
     public Transp getTransparency() {
         return delegate.getTransparency();
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingFolder [newId=" + newId + ", delegate=" + delegate + "]";
     }
 
 }

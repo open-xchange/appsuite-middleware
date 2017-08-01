@@ -61,8 +61,8 @@ import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
  */
 public class IDManglingGroupwareFolder extends IDManglingFolder implements GroupwareCalendarFolder {
 
-    private final String newParentId;
-    private final GroupwareCalendarFolder delegate;
+    protected final String newParentId;
+    protected final GroupwareCalendarFolder delegate;
 
     /**
      * Initializes a new {@link IDManglingGroupwareFolder}.
@@ -105,6 +105,11 @@ public class IDManglingGroupwareFolder extends IDManglingFolder implements Group
     @Override
     public GroupwareFolderType getType() {
         return delegate.getType();
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingGroupwareFolder [newId=" + newId + ", newParentId=" + newParentId + ", delegate=" + delegate + "]";
     }
 
 }
