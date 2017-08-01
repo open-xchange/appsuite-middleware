@@ -158,9 +158,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
-     * <li>Unsupported folder [id %1$s, content type %2$s]</li>
+     * <li>Unsupported folder [folder %1$s, content type %2$s]</li>
      */
-    UNSUPPORTED_FOLDER("Unsupported folder [id %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
+    UNSUPPORTED_FOLDER("Unsupported folder [folder %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
     /**
      * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>

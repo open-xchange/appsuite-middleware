@@ -55,12 +55,18 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -82,6 +88,32 @@ public class IDMangling {
         "2",  // com.openexchange.folderstorage.FolderStorage.PUBLIC_ID
         "3"   // com.openexchange.folderstorage.FolderStorage.SHARED_ID
     )));
+
+    /** The pattern to lookup folder placeholders in calendar exception messages */
+    private static final Pattern FOLDER_ARGUMENT_PATTERN = Pattern.compile("(?:\\[|, )folder %(\\d)\\$s(?:\\]|,)");
+
+    /**
+     * Adjusts an exception raised by a specific calendar account so that any referenced identifiers appear in their unique composite
+     * representation.
+     *
+     * @param e The exception to adjust
+     * @param accountId The identifier of the account
+     * @return The possibly adjusted exception
+     */
+    public static OXException withUniqueIDs(OXException e, int accountId) {
+        if (false == e.isPrefix("CAL")) {
+            return e;
+        }
+        switch (e.getCode()) {
+            case 4091:
+            case 4092:
+                e = adjustEventConflicts(e, accountId);
+                break;
+            default:
+                break;
+        }
+        return adjustFolderArguments(e, accountId);
+    }
 
     /**
      * Gets a calendar folder equipped with unique composite identifiers representing a calendar folder from a specific calendar account.
@@ -268,6 +300,62 @@ public class IDMangling {
             throw new IllegalArgumentException(uniqueFolderId);
         }
         return unmangled;
+    }
+
+    /**
+     * Gets a conflict exception with adjusted problematic attributes so that any contained events details will indicate the unique
+     * composite identifiers from a specific calendar account.
+     *
+     * @param e The event conflict exception to adjust
+     * @param accountId The identifier of the account
+     * @return The event representations with unique identifiers, or the passed exception as-is in case there's nothing to adjust
+     */
+    private static OXException adjustEventConflicts(OXException e, int accountId) {
+        if (4091 != e.getCode() && 4091 != e.getCode()) {
+            return e;
+        }
+        List<EventConflict> eventConflicts = CalendarUtils.extractEventConflicts(e);
+        if (null == eventConflicts || 0 == eventConflicts.size()) {
+            return e;
+        }
+        OXException newException;
+        if (4091 == e.getCode()) {
+            newException = CalendarExceptionCodes.EVENT_CONFLICTS.create(e.getCause(), e.getLogArgs());
+        } else {
+            newException = CalendarExceptionCodes.HARD_EVENT_CONFLICTS.create(e.getCause(), e.getLogArgs());
+        }
+        for (EventConflict eventConflict : eventConflicts) {
+            newException.addProblematic(new IDManglingEventConflict(eventConflict, accountId));
+        }
+        return newException;
+    }
+
+    /**
+     * Adjusts the log arguments indicating a <code>folder</code> in an exception raised by a specific calendar account so that any
+     * referenced folder identifiers appear in their unique composite representation.
+     *
+     * @param e The calendar exception to adjust
+     * @param accountId The identifier of the account
+     * @return The possibly adjusted exception
+     */
+    private static OXException adjustFolderArguments(OXException e, int accountId) {
+        try {
+            OXExceptionCode exceptionCode = e.getExceptionCode();
+            Object[] logArgs = e.getLogArgs();
+            if (null != logArgs && 0 < logArgs.length && null != exceptionCode && null != exceptionCode.getMessage()) {
+                Matcher matcher = FOLDER_ARGUMENT_PATTERN.matcher(exceptionCode.getMessage());
+                while (matcher.find()) {
+                    int argumentIndex = Integer.parseInt(matcher.group(1));
+                    if (0 < argumentIndex && argumentIndex <= logArgs.length && String.class.isInstance(logArgs[argumentIndex - 1])) {
+                        logArgs[argumentIndex - 1] = getUniqueFolderId(accountId, (String) logArgs[argumentIndex - 1]);
+                    }
+                }
+            }
+            e.setLogMessage(exceptionCode.getMessage(), logArgs);
+        } catch (Exception x) {
+            LoggerFactory.getLogger(IDMangling.class).warn("Unexpected error while attempting to replace exceltpion log arguments for {}", e.getLogMessage(), x);
+        }
+        return e;
     }
 
     /**

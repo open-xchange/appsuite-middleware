@@ -62,30 +62,39 @@ import com.openexchange.chronos.service.EventConflict;
  */
 public class IDManglingEventConflict implements EventConflict {
 
-    private final EventConflict DELEGATE;
-    private final Event EVENT;
+    private final EventConflict delegate;
+    private final int accountId;
+
     /**
      * Initializes a new {@link IDManglingEventConflict}.
+     *
+     * @param delegate The conflict delegate
+     * @param accountId The identifier of the calendar account the conflict originates in
      */
-    public IDManglingEventConflict(EventConflict eventConflict, Event event) {
+    public IDManglingEventConflict(EventConflict delegate, int accountId) {
         super();
-        this.DELEGATE = eventConflict;
-        this.EVENT = event;
+        this.delegate = delegate;
+        this.accountId = accountId;
     }
 
     @Override
     public Event getConflictingEvent() {
-        return EVENT;
+        return IDMangling.withUniqueID(delegate.getConflictingEvent(), accountId);
     }
 
     @Override
     public List<Attendee> getConflictingAttendees() {
-        return DELEGATE.getConflictingAttendees();
+        return delegate.getConflictingAttendees();
     }
 
     @Override
     public boolean isHardConflict() {
-        return DELEGATE.isHardConflict();
+        return delegate.isHardConflict();
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingEventConflict [accountId=" + accountId + ", delegate=" + delegate + "]";
     }
 
 }
