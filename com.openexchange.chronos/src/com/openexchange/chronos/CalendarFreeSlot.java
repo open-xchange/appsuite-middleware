@@ -650,4 +650,19 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
 
         return clone;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CalendarFreeSlot [startTime=").append(startTime);
+        builder.append(", endTime=").append(endTime).append(", description=").append(description);
+        builder.append(", summary=").append(summary).append("]");
+        return builder.toString();
+    }
+
 }
