@@ -263,4 +263,59 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
         assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 8), freeSlotC.getStartTime());
         assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 15), freeSlotC.getEndTime());
     }
+    
+    /**
+     * Tests the combine logic for multiple availability blocks
+     * where the availability with the higher priority, completely contains
+     * the availability with the lower priority.
+     */
+    @Test
+    public void testMultipleAvailabilitiesWithFullContainAndHigherPriority() throws OXException {
+        // Create the free slots
+        List<CalendarFreeSlot> freeSlots = new ArrayList<>(2);
+        freeSlots.add(createCalendarFreeSlot("February A.1", new DateTime(2017, 1, 3), new DateTime(2017, 1, 5)));
+        freeSlots.add(createCalendarFreeSlot("February A.2", new DateTime(2017, 1, 10), new DateTime(2017, 1, 13)));
+        availabilities.add(createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 1, 1), new DateTime(2017, 1, 28), 2));
+
+        // Create the free slots
+        freeSlots = new ArrayList<>(4);
+        freeSlots.add(createCalendarFreeSlot("January", new DateTime(2017, 0, 3), new DateTime(2017, 0, 25)));
+        freeSlots.add(createCalendarFreeSlot("February B.1", new DateTime(2017, 1, 4), new DateTime(2017, 1, 5)));
+        freeSlots.add(createCalendarFreeSlot("February B.2", new DateTime(2017, 1, 8), new DateTime(2017, 1, 11)));
+        freeSlots.add(createCalendarFreeSlot("February B.3", new DateTime(2017, 1, 12), new DateTime(2017, 1, 15)));
+        availabilities.add(createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 0, 1), new DateTime(2017, 2, 31), 5));
+
+        // Execute
+        GetPerformer get = new GetPerformer(storage, session);
+        List<CalendarAvailability> availableTime = get.getCombinedAvailableTime();
+
+        // Asserts
+        assertEquals("The amount of availability blocks does not match", 3, availableTime.size());
+        CalendarAvailability calendarAvailabilityA = availableTime.get(0);
+        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 0, 1), calendarAvailabilityA.getStartTime());
+        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 1), calendarAvailabilityA.getEndTime());
+        assertEquals("The amount of free slots does not match", 1, calendarAvailabilityA.getCalendarFreeSlots().size());
+        
+        CalendarAvailability calendarAvailabilityB = availableTime.get(1);
+        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 1), calendarAvailabilityB.getStartTime());
+        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityB.getEndTime());
+        assertEquals("The amount of free slots does not match", 3, calendarAvailabilityB.getCalendarFreeSlots().size());
+        
+        CalendarAvailability calendarAvailabilityC = availableTime.get(2);
+        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityC.getStartTime());
+        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 2, 31), calendarAvailabilityC.getEndTime());
+        assertEquals("The amount of free slots does not match", 0, calendarAvailabilityC.getCalendarFreeSlots().size());
+
+        CalendarFreeSlot freeSlotA = calendarAvailabilityA.getCalendarFreeSlots().get(0);
+        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 0, 3), freeSlotA.getStartTime());
+        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 0, 25), freeSlotA.getEndTime());
+
+        CalendarFreeSlot freeSlotB = calendarAvailabilityA.getCalendarFreeSlots().get(1);
+        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 3), freeSlotB.getStartTime());
+        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 5), freeSlotB.getEndTime());
+
+        CalendarFreeSlot freeSlotC = calendarAvailabilityA.getCalendarFreeSlots().get(2);
+        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 8), freeSlotC.getStartTime());
+        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 15), freeSlotC.getEndTime());
+    }
 }
