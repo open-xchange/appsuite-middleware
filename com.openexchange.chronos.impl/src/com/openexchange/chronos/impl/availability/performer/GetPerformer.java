@@ -452,11 +452,14 @@ public class GetPerformer extends AbstractPerformer {
          */
         @Override
         public int compare(CalendarAvailability o1, CalendarAvailability o2) {
-            // TODO: consider the '0' case
+            // Use '10' for '0' as '0' has a lower priority than '9' 
+            int o1Priority = o1.getPriority() == 0 ? 10 : o1.getPriority();
+            int o2Priority = o2.getPriority() == 0 ? 10 : o2.getPriority();
+
             //We want elements with higher priority (in this context '1' > '9' > '0') to be on the top of the list
-            if (o1.getPriority() > o2.getPriority()) {
+            if (o1Priority > o2Priority) {
                 return 1;
-            } else if (o1.getPriority() < o2.getPriority()) {
+            } else if (o1Priority < o2Priority) {
                 return -1;
             } else {
                 return 0;
