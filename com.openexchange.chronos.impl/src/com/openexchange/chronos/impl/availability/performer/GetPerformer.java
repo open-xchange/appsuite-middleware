@@ -228,7 +228,7 @@ public class GetPerformer extends AbstractPerformer {
     private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
         // Sort by priority; higher priority will be on top
         java.util.Collections.sort(calendarAvailabilities, priorityComparator);
-        
+
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         int index = 0;
         for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
@@ -402,6 +402,10 @@ public class GetPerformer extends AbstractPerformer {
 
     ///////////////////////////////////////// Comparators //////////////////////////////////////
 
+    /**
+     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarAvailability} items
+     * by start date (ascending)
+     */
     private static class DateTimeComparator implements Comparator<CalendarAvailability> {
 
         /**
@@ -427,6 +431,11 @@ public class GetPerformer extends AbstractPerformer {
         }
     }
 
+    /**
+     * {@link PriorityComparator} - Priority comparator. Orders {@link CalendarAvailability} items
+     * by priority (descending). We want elements with higher priority (in this context '1' > '9' > '0')
+     * to be on the top of the list.
+     */
     private static class PriorityComparator implements Comparator<CalendarAvailability> {
 
         /**
