@@ -1,4 +1,4 @@
-/*-
+/*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,17 @@
  *
  */
 
-package com.openexchange.mailmapping.osgi;
+package com.openexchange.mailmapping;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.mailmapping.MailResolver;
-import com.openexchange.mailmapping.MailResolverService;
-import com.openexchange.mailmapping.impl.DefaultMailMappingService;
-import com.openexchange.mailmapping.impl.MailResolverServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link MailMappingActivator} - The activator for <i>com.openexchange.mailmapping</i>.
+ * {@link MailResolverService} - The mail resolver service, which knows how to resolve mail addresses to context and user identifier pairs.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.10.0
  */
-public class MailMappingActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link MailMappingActivator}.
-     */
-    public MailMappingActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, DatabaseService.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-        registerService(MailResolver.class, new DefaultMailMappingService(this), props);
-
-        MailResolverServiceImpl osgiMailMappingService = new MailResolverServiceImpl();
-        track(MailResolver.class, osgiMailMappingService);
-        openTrackers();
-
-        registerService(MailResolverService.class, osgiMailMappingService);
-    }
-
+@SingletonService
+public interface MailResolverService extends MultipleMailResolver {
+    // Empty interface
 }
