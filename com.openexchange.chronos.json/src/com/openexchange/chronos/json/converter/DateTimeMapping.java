@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.groupware.tools.mappings.json;
+package com.openexchange.chronos.json.converter;
 
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.session.Session;
 
 /**

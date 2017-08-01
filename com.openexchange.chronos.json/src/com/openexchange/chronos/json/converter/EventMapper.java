@@ -90,7 +90,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.DateTimeMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
