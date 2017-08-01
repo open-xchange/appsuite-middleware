@@ -49,7 +49,7 @@
 
 package com.openexchange.passwordchange.history.rest.auth;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AuthChecker}
@@ -62,8 +62,9 @@ public interface AuthChecker {
     /**
      * Check if login is allowed.
      * 
+     * @param auth The base64 decoded authentication string
+     * @param session The session representing the client to authenticate
      * @return <code>true</code> if access is allowed, otherwise <code>false</code>
-     * @throws OXException
      */
-    boolean checkAccess() throws OXException;
+    boolean checkAccess(ServerSession session, String auth);
 }

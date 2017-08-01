@@ -78,7 +78,7 @@ public final class PasswordChangeUtility {
      * @param contextID The context of the user
      * @param userID The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
-     * @param client The calling resource. See {@link PasswordChangeInfo#APPSUITE}, {@link PasswordChangeInfo#PROVISIONING} or {@link PasswordChangeInfo#UNKOWN}
+     * @param client The calling resource. E.g. {@link PasswordChangeInfo#PROVISIONING}
      */
     public static void recordChange(ServiceLookup service, PasswordChangeHandlerRegistry registry, int contextID, int userID, final String ipAddress, final String client) {
         try {
@@ -128,7 +128,7 @@ public final class PasswordChangeUtility {
             throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
         }
 
-        if (false == enabled) {
+        if (null == enabled || Boolean.FALSE == enabled) {
             throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
         }
 

@@ -49,7 +49,14 @@
 
 package com.openexchange.passwordchange.history.rest.auth;
 
+import com.openexchange.auth.Authenticator;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.http.Authorization;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ContextAdminChecker}
@@ -59,18 +66,64 @@ import com.openexchange.exception.OXException;
  */
 public class ContextAdminChecker implements AuthChecker {
 
-    /**
-     * Initializes a new {@link ContextAdminChecker}.
-     */
-    public ContextAdminChecker() {
-        super();
+    private ServiceLookup                 service;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextAdminChecker.class);
 
+    /**
+     * 
+     * Initializes a new {@link ContextAdminChecker}.
+     * 
+     * @param service To get configuration from
+     */
+    public ContextAdminChecker(ServiceLookup service) {
+        super();
+        this.service = service;
     }
 
     @Override
-    public boolean checkAccess() throws OXException {
-        // TODO Auto-generated method stub
+    public boolean checkAccess(ServerSession session, String auth) {
+        // Check for context
+        if (null == session.getContext()) {
+            // No context available. No access.
+            return false;
+        }
+
+        // Decode auth and validate
+        if (Authorization.checkForBasicAuthorization(auth)) {
+            // Valid header
+            Credentials creds = Authorization.decode(auth);
+            if (Authorization.checkLogin(creds.getPassword())) {
+                // Authenticate the context administrator
+                try {
+                    // Unfortunately the authenticator does also authenticate the master administrator ... So check if for context admin
+                    UserService userService = service.getService(UserService.class);
+                    if (null != userService) {
+                        // Might throw error in case no user can be found.
+                        User[] user = userService.searchUserByName(creds.getLogin(), session.getContext(), UserService.SEARCH_LOGIN_NAME);
+                        if (1 == user.length) {
+                            Authenticator authenticator = service.getService(Authenticator.class);
+                            if (null != authenticator) {
+                                if (session.getContext().getMailadmin() == user[0].getId()) {
+                                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), session.getContextId());
+                                    return true;
+                                } // Not the context administrator
+                            } // No Authenticator service 
+                        } // Too many users found
+                    } // No UserService
+                } catch (OXException e) {
+                    // Fall through
+                    LOG.debug("Other user than context admin trying to access the API!");
+                } // Error. Assume not the context administrator
+            } // Flawed password
+        } // No valid header
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 47;
+        int result = 1;
+        result = prime * result + ((service == null) ? 191 : 197);
+        return result;
+    }
 }

@@ -49,9 +49,10 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -64,7 +65,6 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -78,10 +78,9 @@ import com.openexchange.passwordchange.history.rest.exception.HistoryRestExcepti
 import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.tracker.SortType;
-import com.openexchange.rest.services.annotation.Role;
-import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link PasswordChangeHistoryREST}
@@ -90,11 +89,11 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
  * @since v7.10.0
  */
 @Path("admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes")
-@RoleAllowed(Role.BASIC_AUTHENTICATED)
+@PermitAll
 public class PasswordChangeHistoryREST {
-    
+
     private final ServiceLookup service;
-    private Set<AuthChecker> checker;
+    private Set<AuthChecker>    checker;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
@@ -105,26 +104,19 @@ public class PasswordChangeHistoryREST {
         super();
         this.service = service;
 
-        ConfigurationService configService = getService(ConfigurationService.class);
-
-        boolean masterAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
-        boolean masterAuthenticationDisabled = configService.getBoolProperty("MASTER_AUTHENTICATION_DISABLED", false);
-        boolean contextAuthenticationDisabled = configService.getBoolProperty("CONTEXT_AUTHENTICATION_DISABLED", false);
-
-        checker = new HashSet<>();
-        checker.add(new ContextAdminChecker());
-        checker.add(new EveryoneChecker(masterAccountOverride, masterAuthenticationDisabled, contextAuthenticationDisabled));
-        checker.add(new ResellerAndMasterAdminChecker(masterAccountOverride));
-
+        checker = new LinkedHashSet<>();
+        checker.add(new ResellerAndMasterAdminChecker(service));
+        checker.add(new ContextAdminChecker(service));
+        checker.add(new EveryoneChecker(service));
     }
 
     @GET
-//    @Path(PATH)
     @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) throws Exception {
-
-        checkAccess();
+        // Check access rights
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userID, contextID);
+        checkAccess(serverSession, auth);
 
         // Get services
         PasswordHistoryHandler handler = getService(PasswordHistoryHandler.class);
@@ -184,17 +176,13 @@ public class PasswordChangeHistoryREST {
     /**
      * Check if access should be granted
      */
-    private void checkAccess() throws OXException {
+    private void checkAccess(ServerSession session, String auth) throws OXException {
         for (AuthChecker c : checker) {
-            if (c.checkAccess()) {
+            if (c.checkAccess(session, auth)) {
                 return;
             }
         }
         throw HistoryRestException.NO_ACCESS.create();
-    }
-
-    protected com.openexchange.auth.Credentials getCredentials(final Credentials creds) {
-        return new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword());
     }
 
     /**
