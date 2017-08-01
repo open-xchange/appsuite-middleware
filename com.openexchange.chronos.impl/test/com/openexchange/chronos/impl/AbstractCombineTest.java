@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractCombineTest {
+public abstract class AbstractCombineTest {
 
     protected CalendarAvailabilityStorage storage;
     protected CalendarSession session;
@@ -139,6 +139,12 @@ abstract class AbstractCombineTest {
         CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots);
         ca.setStartTime(from);
         ca.setEndTime(until);
+        return ca;
+    }
+    
+    protected CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until, int priority) {
+        CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots, from, until);
+        ca.setPriority(priority);
         return ca;
     }
 }
