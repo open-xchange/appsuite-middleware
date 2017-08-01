@@ -47,52 +47,20 @@
  *
  */
 
-package com.openexchange.chronos.freebusy.json;
+package com.openexchange.chronos.json.oauth;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.Date;
-import java.util.Set;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.json.converter.FreeBusyConverter;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
-import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link HasAction}
+ *
+ * {@link OAuthScopeDescription}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
-public class HasAction extends AbstractFreeBusyAction {
+public final class OAuthScopeDescription implements LocalizableStrings {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
+    public static final String READ_ONLY = "Read all your events.";
 
-    /**
-     * Initializes a new {@link HasAction}.
-     *
-     * @param services A service lookup reference
-     */
-    protected HasAction(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
-        Date from = parseDate(requestData, "from");
-        Date until = parseDate(requestData, "until");
-        boolean[] hasEvents = freeBusyAccess.hasEventsBetween(from, until);
-        return new AJAXRequestResult(hasEvents, FreeBusyConverter.INPUT_FORMAT);
-    }
-
+    public static final String WRITABLE = "Create, modify and delete events.";
 }

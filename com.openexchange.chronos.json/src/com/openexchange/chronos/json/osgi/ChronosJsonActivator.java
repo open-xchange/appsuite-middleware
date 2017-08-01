@@ -53,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.ajax.requesthandler.DetailParser;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.freebusy.json.ChronosFreeBusyActionFactory;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.CalendarExceptionDetailParser;
@@ -61,8 +62,13 @@ import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -89,6 +95,23 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              */
             registerModule(new ChronosActionFactory(this), "chronos");
             registerModule(new ChronosFreeBusyActionFactory(this), "chronos/freebusy");
+            /*
+             * register oauth provider
+             */
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ChronosOAuthScope.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CALENDAR.getCapabilityName());
+                }
+            });
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ChronosOAuthScope.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CALENDAR.getCapabilityName());
+                }
+            });
             /*
              * register result converters
              */

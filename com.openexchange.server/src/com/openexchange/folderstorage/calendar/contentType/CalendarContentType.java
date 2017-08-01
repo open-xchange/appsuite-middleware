@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.calendar;
+package com.openexchange.folderstorage.calendar.contentType;
 
 import com.openexchange.folderstorage.ContentType;
 

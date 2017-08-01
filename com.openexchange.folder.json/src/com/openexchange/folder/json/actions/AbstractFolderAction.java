@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
@@ -376,6 +377,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 case AppointmentActionFactory.OAUTH_READ_SCOPE:
                     return CalendarContentType.getInstance();
 
+                case ChronosOAuthScope.OAUTH_READ_SCOPE:
+                    return com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
+
                 case TaskActionFactory.OAUTH_READ_SCOPE:
                     return TaskContentType.getInstance();
 
@@ -392,6 +396,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 case AppointmentActionFactory.OAUTH_WRITE_SCOPE:
                     return CalendarContentType.getInstance();
 
+                case ChronosOAuthScope.OAUTH_WRITE_SCOPE:
+                    return com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
+
                 case TaskActionFactory.OAUTH_WRITE_SCOPE:
                     return TaskContentType.getInstance();
 
@@ -405,6 +412,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 return ContactActionFactory.OAUTH_READ_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_READ_SCOPE;
+            } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
+                return ChronosOAuthScope.OAUTH_READ_SCOPE;
             } else if (contentType == TaskContentType.getInstance()) {
                 return TaskActionFactory.OAUTH_READ_SCOPE;
             }
@@ -417,6 +426,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 return ContactActionFactory.OAUTH_WRITE_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_WRITE_SCOPE;
+            } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
+                return ChronosOAuthScope.OAUTH_WRITE_SCOPE;
             } else if (contentType == TaskContentType.getInstance()) {
                 return TaskActionFactory.OAUTH_WRITE_SCOPE;
             }
