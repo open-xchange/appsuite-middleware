@@ -101,8 +101,8 @@ public class SessionManagementActivator extends HousekeepingActivator {
             @Override
             public Interests getInterests() {
                 return Reloadables.interestsForProperties(
-                    SessionManagementProperty.GLOBAL_LOOKUP.getFQPropertyName(),
-                    SessionManagementProperty.CLIENT_BLACKLIST.getFQPropertyName());
+                    SessionManagementProperty.globalLookup.getFQPropertyName(),
+                    SessionManagementProperty.clientBlacklist.getFQPropertyName());
             }
         });
     }

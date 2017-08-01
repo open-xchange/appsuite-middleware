@@ -65,6 +65,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -75,7 +76,6 @@ import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
-import com.openexchange.net.HostList;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
@@ -113,11 +113,11 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private final AtomicReference<HostList> blacklistedClients;
+    private final AtomicReference<Set<String>> blacklistedClients;
 
     private SessionManagementServiceImpl() {
         super();
-        blacklistedClients = new AtomicReference<HostList>(doGetBlacklistedClients());
+        blacklistedClients = new AtomicReference<Set<String>>(doGetBlacklistedClients());
     }
 
     /**
@@ -138,7 +138,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
-        HostList blackListedClients = getBlacklistedClients();
+        Set<String> blackListedClients = getBlacklistedClients();
 
         Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
@@ -238,21 +238,27 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         }
     }
 
-    private HostList getBlacklistedClients() {
+    private Set<String> getBlacklistedClients() {
         return blacklistedClients.get();
     }
 
-    private HostList doGetBlacklistedClients() {
+    private Set<String> doGetBlacklistedClients() {
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         if (null == configService) {
-            return HostList.EMPTY;
+            return Collections.emptySet();
         }
 
-        String value = configService.getProperty(SessionManagementProperty.CLIENT_BLACKLIST);
+        String value = configService.getProperty(SessionManagementProperty.clientBlacklist);
         if (Strings.isEmpty(value)) {
-            return HostList.EMPTY;
+            return Collections.emptySet();
         }
-        return HostList.valueOf(value);
+
+        String[] clients = Strings.splitByComma(value);
+        if (null == clients || clients.length == 0) {
+            return Collections.emptySet();
+        }
+
+        return ImmutableSet.copyOf(clients);
     }
 
     private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {
@@ -260,7 +266,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         if (null == configService) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
-        if (!configService.getBooleanProperty(SessionManagementProperty.GLOBAL_LOOKUP)) {
+        if (!configService.getBooleanProperty(SessionManagementProperty.globalLookup)) {
             return Collections.emptyList();
         }
         HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
