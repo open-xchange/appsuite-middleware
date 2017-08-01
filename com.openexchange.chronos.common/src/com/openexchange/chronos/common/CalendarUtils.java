@@ -89,7 +89,7 @@ import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdatesImpl;
+import com.openexchange.chronos.common.mapping.AbstractEventUpdates;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventUpdates;
@@ -1295,7 +1295,17 @@ public class CalendarUtils {
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
     public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
-        return new EventUpdatesImpl(originalEvents, updatedEvents, considerUnset, ignoredFields, fieldsToMatch);
+        return new AbstractEventUpdates(originalEvents, updatedEvents, considerUnset, ignoredFields) {
+
+            @Override
+            protected boolean matches(Event item1, Event item2) {
+                try {
+                    return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
+                } catch (OXException e) {
+                    throw new UnsupportedOperationException(e);
+                }
+            }
+        };
     }
 
 }

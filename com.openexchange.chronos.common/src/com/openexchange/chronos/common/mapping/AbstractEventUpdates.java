@@ -60,14 +60,13 @@ import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link EventUpdatesImpl}
+ * {@link AbstractEventUpdates}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventUpdatesImpl extends AbstractSimpleCollectionUpdate<Event> implements EventUpdates {
+public abstract class AbstractEventUpdates extends AbstractSimpleCollectionUpdate<Event> implements EventUpdates {
 
-    private final EventField[] fieldsToMatch;
     private final List<EventUpdate> updatedItems;
 
     /**
@@ -77,15 +76,13 @@ public class EventUpdatesImpl extends AbstractSimpleCollectionUpdate<Event> impl
      *
      * @param originalItems The original collection of events, or <code>null</code> if there is none
      * @param newItems The new collection of events, or <code>null</code> if there is none
-     * @param fieldsToMatch The event fields to consider when checking events for equality
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public EventUpdatesImpl(List<Event> originalItems, List<Event> newItems, boolean considerUnset, EventField[] ignoredFields, EventField... fieldsToMatch) throws OXException {
+    public AbstractEventUpdates(List<Event> originalItems, List<Event> newItems, boolean considerUnset, EventField[] ignoredFields) throws OXException {
         super(originalItems, newItems);
-        this.fieldsToMatch = fieldsToMatch;
         if (null != originalItems && null != newItems) {
             updatedItems = new ArrayList<EventUpdate>();
             for (Event newItem : newItems) {
@@ -110,15 +107,6 @@ public class EventUpdatesImpl extends AbstractSimpleCollectionUpdate<Event> impl
     @Override
     public boolean isEmpty() {
         return super.isEmpty() && updatedItems.isEmpty();
-    }
-
-    @Override
-    protected boolean matches(Event item1, Event item2) {
-        try {
-            return EventMapper.getInstance().equalsByFields(item1, item2, fieldsToMatch);
-        } catch (OXException e) {
-            throw new UnsupportedOperationException(e);
-        }
     }
 
     @Override
