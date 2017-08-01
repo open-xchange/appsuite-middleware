@@ -49,7 +49,6 @@
 
 package com.openexchange.session.management.impl;
 
-import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementStrings;
@@ -81,8 +80,6 @@ public class DefaultManagedSession implements ManagedSession {
      * Builds an instance of {@link DefaultManagedSession}.
      */
     public final static class Builder {
-
-        private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Builder.class);
 
         private String sessionId;
         private String ipAddress;
