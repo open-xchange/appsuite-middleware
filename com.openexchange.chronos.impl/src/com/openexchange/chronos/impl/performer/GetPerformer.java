@@ -56,7 +56,6 @@ import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFields;
-import static com.openexchange.chronos.impl.Utils.loadAdditionalEventData;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -113,7 +112,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
-        event = loadAdditionalEventData(storage, getCalendarUserId(folder), event, fields);
+        event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
         event.setFolderId(Check.eventIsInFolder(event, folder));
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, getCalendarUserId(folder));
@@ -126,7 +125,7 @@ public class GetPerformer extends AbstractQueryPerformer {
                 if (contains(event.getChangeExceptionDates(), recurrenceId)) {
                     Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
                     if (null != exceptionEvent) {
-                        exceptionEvent = loadAdditionalEventData(storage, getCalendarUserId(folder), exceptionEvent, fields);
+                        exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
                         exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
                         event = exceptionEvent;
                     }

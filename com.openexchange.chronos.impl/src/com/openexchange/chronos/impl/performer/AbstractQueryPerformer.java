@@ -133,10 +133,10 @@ public abstract class AbstractQueryPerformer {
         EventField[] fields = getFields(session);
         if (tombstones) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
-            return Utils.loadAdditionalEventData(storage, true, getCalendarUserId(folder), events, fields);
+            return storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
         } else {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-            return Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), events, fields);
+            return storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
         }
     }
 

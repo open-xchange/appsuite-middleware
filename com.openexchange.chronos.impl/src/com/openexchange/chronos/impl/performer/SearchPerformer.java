@@ -132,7 +132,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
         SearchOptions sortOptions = new SearchOptions(session);
         List<Event> events = new ArrayList<Event>();
         List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
-        for (Event event : Utils.loadAdditionalEventData(storage, false, -1, foundEvents, fields)) {
+        for (Event event : storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields)) {
             List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (1 == foldersForEvent.size()) {
                 events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));

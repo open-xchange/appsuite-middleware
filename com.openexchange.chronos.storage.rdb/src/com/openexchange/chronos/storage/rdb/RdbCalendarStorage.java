@@ -60,6 +60,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
@@ -80,6 +81,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
     private final com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage attachmentStorage;
+    private final RdbCalendarStorageUtilities storageUtilities;
 
     /**
      * Initializes a new {@link RdbCalendarStorage}.
@@ -100,6 +102,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
+        storageUtilities = new RdbCalendarStorageUtilities(this);
     }
 
     @Override
@@ -123,6 +126,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return attendeeStorage;
+    }
+
+    @Override
+    public CalendarStorageUtilities getUtilities() {
+        return storageUtilities;
     }
 
     @Override

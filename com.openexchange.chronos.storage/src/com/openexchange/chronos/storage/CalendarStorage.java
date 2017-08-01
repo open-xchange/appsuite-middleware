@@ -90,6 +90,13 @@ public interface CalendarStorage {
     AttendeeStorage getAttendeeStorage();
 
     /**
+     * Gets additional storage utilities.
+     *
+     * @return The storage utilities
+     */
+    CalendarStorageUtilities getUtilities();
+
+    /**
      * Gets any tracked warnings that occurred when processing the stored data.
      *
      * @return The warnings, mapped to the associated event identifier, or an empty map if there are none

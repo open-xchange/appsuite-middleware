@@ -265,7 +265,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 }
                 for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     if (calendarUserId == originalAttendee.getEntity()) {
-                        storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), getTombstone(originalAttendee));
+                        storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
                         storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
                         storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
                     } else {
@@ -323,7 +323,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * insert corresponding tombstone & also 'touch' parent event
          */
-        storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
+        storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
         touch(originalEvent.getId());
     }
 
@@ -332,7 +332,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
         attendeeUpdate.setFolderID(folderId);
         if (attendeeUpdate.getFolderID() != originalAttendee.getFolderID()) {
-            storage.getAttendeeStorage().insertAttendeeTombstone(eventID, getTombstone(originalAttendee));
+            storage.getAttendeeStorage().insertAttendeeTombstone(eventID, storage.getUtilities().getTombstone(originalAttendee));
             storage.getAttendeeStorage().updateAttendee(eventID, attendeeUpdate);
         }
     }
@@ -343,7 +343,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setFolderId(folderId);
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
-            storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }

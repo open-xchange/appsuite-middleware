@@ -127,7 +127,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         if (null == changeExceptions || 0 == changeExceptions.size()) {
             return Collections.emptyList();
         }
-        Utils.loadAdditionalEventData(storage, false, getCalendarUserId(folder), changeExceptions, fields);
+        changeExceptions = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), changeExceptions, fields);
         for (Iterator<Event> iterator = changeExceptions.iterator(); iterator.hasNext();) {
             if (false == Utils.isInFolder(iterator.next(), folder)) {
                 iterator.remove();

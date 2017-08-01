@@ -197,8 +197,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * store tombstone references in case of a move operation for the attendee
              */
-            storage.getEventStorage().insertEventTombstone(getTombstone(originalEvent, timestamp, calendarUserId));
-            storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), getTombstone(originalAttendee));
+            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
         }
         /*
          * update attendee & 'touch' the corresponding event
