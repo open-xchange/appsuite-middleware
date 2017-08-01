@@ -18,4 +18,5 @@ Import-Package: com.openexchange.config,
  com.openexchange.server,
  com.openexchange.user,
  org.osgi.framework
-Export-Package: com.openexchange.mailmapping
+Export-Package: com.openexchange.mailmapping,
+ com.openexchange.mailmapping.osgiservice
