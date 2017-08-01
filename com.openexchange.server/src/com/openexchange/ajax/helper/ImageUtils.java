@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -78,13 +77,14 @@ public class ImageUtils {
      * @return <code>true</code> if SVG data; otherwise <code>false</code>
      */
     public static boolean isSvg(byte[] bytes) {
-        byte[] pattern = new byte[] { '<', 's', 'v', 'g', ' ' };
+        byte[] pattern = new byte[] { '<', 's', 'v', 'g' };
         int pos = indexOf(bytes, pattern, 0, bytes.length);
-        if (pos >= 0) {
-            return true;
+        if (pos < 0) {
+            return false;
         }
 
-        return Strings.asciiLowerCase(new String(bytes, Charsets.ISO_8859_1)).indexOf("<svg ") >= 0;
+        pos += 4;
+        return pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff));
     }
 
     /**
