@@ -56,9 +56,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -123,7 +125,7 @@ public class IDMangling {
      * @param folder The calendar folder
      * @return The calendar folder representation with relative identifiers
      */
-    public static CalendarFolder withRelativeID(CalendarFolder folder) {
+    public static CalendarFolder withRelativeID(CalendarFolder folder) throws OXException {
         String newId = getRelativeFolderId(folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
@@ -170,7 +172,7 @@ public class IDMangling {
      * @param event The event
      * @return The event representation with relative identifiers
      */
-    public static Event withRelativeID(Event event) {
+    public static Event withRelativeID(Event event) throws OXException {
         String newFolderId = getRelativeFolderId(event.getFolderId());
         return new IDManglingEvent(event, newFolderId);
     }
@@ -180,10 +182,14 @@ public class IDMangling {
      *
      * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
      * @return The extracted account identifier
-     * @throws IllegalArgumentException If the account identifier can't be extracted from the passed composite identifier
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from the passed composite identifier
      */
-    public static int getAccountId(String uniqueFolderId) throws IllegalArgumentException {
-        return Integer.parseInt(unmangleFolderId(uniqueFolderId).get(1));
+    public static int getAccountId(String uniqueFolderId) throws OXException {
+        try {
+            return Integer.parseInt(unmangleFolderId(uniqueFolderId).get(1));
+        } catch (IllegalArgumentException e) {
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null);
+        }
     }
 
     /**
@@ -209,13 +215,17 @@ public class IDMangling {
      *
      * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
      * @return The extracted relative folder identifier
-     * @throws IllegalArgumentException If passed identifier can't be unmangled to its relative representation
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if passed identifier can't be unmangled to its relative representation
      */
-    public static String getRelativeFolderId(String uniqueFolderId) throws IllegalArgumentException {
+    public static String getRelativeFolderId(String uniqueFolderId) throws OXException {
         if (ROOT_FOLDER_IDS.contains(uniqueFolderId)) {
             return uniqueFolderId;
         }
-        return unmangleFolderId(uniqueFolderId).get(2);
+        try {
+            return unmangleFolderId(uniqueFolderId).get(2);
+        } catch (IllegalArgumentException e) {
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null);
+        }
     }
 
     /**
@@ -223,9 +233,8 @@ public class IDMangling {
      *
      * @param uniqueId The unique full event identifier
      * @return The relative full event identifier
-     * @throws IllegalArgumentException If the composite parts of the passed identifier can't be unmangled to their relative representation
      */
-    public static EventID getRelativeId(EventID uniqueEventID) throws IllegalArgumentException {
+    public static EventID getRelativeId(EventID uniqueEventID) throws OXException {
         if (null == uniqueEventID) {
             return uniqueEventID;
         }
