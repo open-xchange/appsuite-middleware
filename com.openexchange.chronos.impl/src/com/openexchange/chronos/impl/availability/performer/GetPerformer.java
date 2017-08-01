@@ -151,7 +151,7 @@ public class GetPerformer extends AbstractPerformer {
      * 
      * @param attendees the {@link List} of {@link CalendarUser}s to fetch the availability for
      * @param from The starting point in the interval
-     * @param until The ending poing in the interval
+     * @param until The ending point in the interval
      * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link CalendarUser}s in the specified interval
      * @throws OXException if an error is occurred
      */
