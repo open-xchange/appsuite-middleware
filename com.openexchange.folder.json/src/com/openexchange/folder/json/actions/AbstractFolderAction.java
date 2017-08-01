@@ -369,38 +369,37 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     static final class OAuthContentTypes {
 
-        static ContentType contentTypeForReadScope(String scope) {
+        static Set<ContentType> contentTypesForReadScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_READ_SCOPE:
-                    return ContactContentType.getInstance();
-
-                case AppointmentActionFactory.OAUTH_READ_SCOPE:
-                    return CalendarContentType.getInstance();
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
 
                 case ChronosOAuthScope.OAUTH_READ_SCOPE:
-                    return com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
-
+                    Set<ContentType> result = new HashSet<>(2);
+                    result.add(CalendarContentType.getInstance());
+                    result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
+                    return result;
                 case TaskActionFactory.OAUTH_READ_SCOPE:
-                    return TaskContentType.getInstance();
+                    return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
                     return null;
             }
         }
 
-        static ContentType contentTypeForWriteScope(String scope) {
+        static Set<ContentType> contentTypesForWriteScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_WRITE_SCOPE:
-                    return ContactContentType.getInstance();
-
-                case AppointmentActionFactory.OAUTH_WRITE_SCOPE:
-                    return CalendarContentType.getInstance();
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
 
                 case ChronosOAuthScope.OAUTH_WRITE_SCOPE:
-                    return com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
+                    Set<ContentType> result = new HashSet<>(2);
+                    result.add(CalendarContentType.getInstance());
+                    result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
+                    return result;
 
                 case TaskActionFactory.OAUTH_WRITE_SCOPE:
-                    return TaskContentType.getInstance();
+                    return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
                     return null;
@@ -503,9 +502,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         Set<ContentType> contentTypes = new HashSet<>();
         contentTypes.add(SystemContentType.getInstance());
         for (String scope : oauthAccess.getScope().get()) {
-            ContentType contentType = OAuthContentTypes.contentTypeForReadScope(scope);
-            if (contentType != null) {
-                contentTypes.add(contentType);
+            Set<ContentType> contentType = OAuthContentTypes.contentTypesForReadScope(scope);
+            if (contentType != null && !contentType.isEmpty()) {
+                contentTypes.addAll(contentType);
             }
         }
 

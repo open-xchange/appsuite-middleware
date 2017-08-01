@@ -58,7 +58,7 @@ package com.openexchange.chronos.json.oauth;
  */
 public final class ChronosOAuthScope {
 
-    public static final String OAUTH_READ_SCOPE = "read_calendar_v2";
+    public static final String OAUTH_READ_SCOPE = "read_calendar";
 
-    public static final String OAUTH_WRITE_SCOPE = "write_calendar_v2";
+    public static final String OAUTH_WRITE_SCOPE = "write_calendar";
 }
