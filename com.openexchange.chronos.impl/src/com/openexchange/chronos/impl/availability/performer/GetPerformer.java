@@ -294,16 +294,45 @@ public class GetPerformer extends AbstractPerformer {
                     try {
                         CalendarAvailability pre = availabilityB.clone();
                         pre.setEndTime(availabilityA.getStartTime());
-                        // TODO: Find any slots that intersect with the new end time
-                        // adjust and split them if necessary, then append the first split 
+                        // Find any slots that intersect with the new end time
+                        // adjust and split them if they are of equal priority, then append the first split 
                         // to the pre availability, and the last split to the preIntersections.
+                        for (CalendarFreeSlot cfs : availabilityB.getCalendarFreeSlots()) {
+                            if (AvailabilityUtils.intersect(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                                if (availabilityA.compareTo(availabilityB) == 0) {
+                                    CalendarFreeSlot preSplit = cfs.clone();
+                                    preSplit.setEndTime(availabilityA.getStartTime());
+                                    pre.getCalendarFreeSlots().add(preSplit);
+                                    
+                                    CalendarFreeSlot postSplit = cfs.clone();
+                                    postSplit.setStartTime(availabilityB.getEndTime());
+                                    preIntersections.add(postSplit);
+                                    continue; // There will only be one intersection
+                                }
+                            }
+                        }
+
                         presAndPosts.add(pre);
 
                         CalendarAvailability post = availabilityB.clone();
                         post.setStartTime(availabilityA.getEndTime());
-                        // TODO: Find any slots that intersect with the new start time
-                        // adjust and split them if necessary, then append the first split
+                        // Find any slots that intersect with the new start time
+                        // adjust and split them if they are of equal priority, then append the first split
                         // to the postIntersections and the last split to the post availability.
+                        for (CalendarFreeSlot cfs : availabilityB.getCalendarFreeSlots()) {
+                            if (AvailabilityUtils.intersect(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                                if (availabilityA.compareTo(availabilityB) == 0) {
+                                    CalendarFreeSlot preSplit = cfs.clone();
+                                    preSplit.setEndTime(availabilityB.getStartTime());
+                                    postIntersections.add(preSplit);
+                                    
+                                    CalendarFreeSlot postSplit = cfs.clone();
+                                    postSplit.setStartTime(availabilityA.getEndTime());
+                                    post.getCalendarFreeSlots().add(postSplit);
+                                    continue; // There will only be one intersection
+                                }
+                            }
+                        }
                         presAndPosts.add(post);
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
@@ -312,7 +341,7 @@ public class GetPerformer extends AbstractPerformer {
                     // Add any splits from the intersections to the availability B
                     availabilityB.getCalendarFreeSlots().addAll(preIntersections);
                     availabilityB.getCalendarFreeSlots().addAll(postIntersections);
-                    
+
                     // Remove the contained availability
                     iteratorA.remove();
                 } else if (AvailabilityUtils.precedesAndIntersects(availabilityA, availabilityB)) {
@@ -325,7 +354,7 @@ public class GetPerformer extends AbstractPerformer {
             }
             availableTime.add(availabilityA);
         }
-        
+
         // Add any splits
         availableTime.addAll(presAndPosts);
 
