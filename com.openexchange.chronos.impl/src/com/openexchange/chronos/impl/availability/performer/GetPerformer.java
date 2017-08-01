@@ -77,6 +77,9 @@ import com.openexchange.tools.arrays.Collections;
  */
 public class GetPerformer extends AbstractPerformer {
 
+    private static final Comparator<CalendarAvailability> dateTimeComparator = new DateTimeComparator();
+    private static final Comparator<CalendarAvailability> priorityComparator = new PriorityComparator();
+
     /**
      * Initialises a new {@link GetPerformer}.
      */
@@ -223,23 +226,9 @@ public class GetPerformer extends AbstractPerformer {
      * @return The combined {@link CalendarAvailability} blocks
      */
     private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
-        java.util.Collections.sort(calendarAvailabilities, new Comparator<CalendarAvailability>() {
-
-            /**
-             * We want elements with higher priority (in this context '1' > '9') to be on the top of the list
-             */
-            @Override
-            public int compare(CalendarAvailability o1, CalendarAvailability o2) {
-                if (o1.getPriority() > o2.getPriority()) {
-                    return 1;
-                } else if (o1.getPriority() < o2.getPriority()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-
+        // Sort by priority; higher priority will be on top
+        java.util.Collections.sort(calendarAvailabilities, priorityComparator);
+        
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         int index = 0;
         for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
@@ -269,19 +258,9 @@ public class GetPerformer extends AbstractPerformer {
             }
             availableTime.add(calendarAvailability);
         }
-        java.util.Collections.sort(availableTime, new Comparator<CalendarAvailability>() {
 
-            @Override
-            public int compare(CalendarAvailability o1, CalendarAvailability o2) {
-                if (o1.getStartTime().before(o2.getStartTime())) {
-                    return -1;
-                } else if (o1.getStartTime().after(o2.getStartTime())) {
-                    return 1;
-                }
-                return 0;
-            }
-
-        });
+        // Sort by start date
+        java.util.Collections.sort(availableTime, dateTimeComparator);
         return availableTime;
     }
 
@@ -318,7 +297,7 @@ public class GetPerformer extends AbstractPerformer {
                     calendarFreeSlotB.setStartTime(calendarFreeSlotA.getEndTime());
                 } else if (AvailabilityUtils.succeedsAndIntersects(calendarFreeSlotA, calendarFreeSlotB)) {
                     calendarFreeSlotB.setEndTime(calendarFreeSlotA.getStartTime());
-                }               
+                }
             }
             // Add any splits
             b.getCalendarFreeSlots().addAll(toAdd);
@@ -418,6 +397,61 @@ public class GetPerformer extends AbstractPerformer {
                 }
             }
             availableTime.add(AvailabilityUtils.convert(a));
+        }
+    }
+
+    ///////////////////////////////////////// Comparators //////////////////////////////////////
+
+    private static class DateTimeComparator implements Comparator<CalendarAvailability> {
+
+        /**
+         * Initialises a new {@link GetPerformer.DateTimeComparator}.
+         */
+        public DateTimeComparator() {
+            super();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+            if (o1.getStartTime().before(o2.getStartTime())) {
+                return -1;
+            } else if (o1.getStartTime().after(o2.getStartTime())) {
+                return 1;
+            }
+            return 0;
+        }
+    }
+
+    private static class PriorityComparator implements Comparator<CalendarAvailability> {
+
+        /**
+         * Initialises a new {@link GetPerformer.PriorityComparator}.
+         */
+        public PriorityComparator() {
+            super();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+            // TODO: consider the '0' case
+            //We want elements with higher priority (in this context '1' > '9' > '0') to be on the top of the list
+            if (o1.getPriority() > o2.getPriority()) {
+                return 1;
+            } else if (o1.getPriority() < o2.getPriority()) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
 }
