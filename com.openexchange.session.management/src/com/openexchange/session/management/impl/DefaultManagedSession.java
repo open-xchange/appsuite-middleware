@@ -100,10 +100,28 @@ public class DefaultManagedSession implements ManagedSession {
             this.ipAddress = session.getLocalIp();
             this.client = session.getClient();
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-            this.loginTime = Long.parseLong((String) session.getParameter(Session.PARAM_LOGIN_TIME));
+            this.loginTime = parseLoginTime(session);
             this.ctxId = session.getContextId();
             this.userId = session.getUserId();
             location = SessionManagementStrings.UNKNOWN_LOCATION;
+        }
+
+        private long parseLoginTime(Session session) {
+            Object oLoginTime = session.getParameter(Session.PARAM_LOGIN_TIME);
+            if (null == oLoginTime) {
+                return 0L;
+            }
+
+            if (oLoginTime instanceof Number) {
+                return ((Number) oLoginTime).longValue();
+            }
+
+            try {
+                return Long.parseLong(oLoginTime.toString());
+            } catch (NumberFormatException e) {
+                // Cannot be parsed to a long value
+                return 0L;
+            }
         }
 
         public Builder setSessionId(String sessionId) {
