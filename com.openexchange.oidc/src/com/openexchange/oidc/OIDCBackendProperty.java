@@ -64,11 +64,12 @@ public enum OIDCBackendProperty implements Property {
     authorizationEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     tokenEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     clientSecret(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    jwkSet(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    jwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     jwsAlgorithm(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     scope(OIDCProperty.PREFIX,"openid"),
     issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    responseType(OIDCProperty.PREFIX, "code");
+    responseType(OIDCProperty.PREFIX, "code"), 
+    userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
     
     private final String fqn;
     private final Object defaultValue;

@@ -94,4 +94,6 @@ public interface OIDCBackendConfig {
      * @return The response type. Never <code>null</code>.
      */
     String getResponseType();
+    
+    String getUserInfoEndpoint();
 }

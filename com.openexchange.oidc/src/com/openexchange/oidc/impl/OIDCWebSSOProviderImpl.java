@@ -51,6 +51,7 @@ package com.openexchange.oidc.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +64,7 @@ import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
@@ -71,11 +73,16 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
+import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
@@ -88,6 +95,7 @@ import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
+import net.minidev.json.JSONObject;
 
 
 /**
@@ -98,6 +106,8 @@ import com.openexchange.oidc.state.StateManagement;
  */
 public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
+    private static final String GET_THE_ID_TOKEN = "get the IDToken";
+    private static final String LOAD_EMAIL_ADDRESS = "load email address";
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
@@ -130,19 +140,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
         String redirectURI = backendConfig.getRedirectURIAuth();
         try {
-            Builder requestBuilder = new Builder(new ResponseType(backendConfig.getResponseType()), Scope.parse(backendConfig.getScope()), new ClientID(backendConfig.getClientID()), new URI(redirectURI));
+            Builder requestBuilder = new Builder(new ResponseType(backendConfig.getResponseType()), this.backend.getScope(), new ClientID(backendConfig.getClientID()), new URI(redirectURI));
             requestBuilder.nonce(nonce);
             requestBuilder.state(state);
             requestBuilder.endpointURI(new URI(authorizationEndpoint));
-            //TODO QS-VS: remove if request is clean
-//            AuthenticationRequest request = new AuthenticationRequest(
-//                new URI(authorizationEndpoint),
-//                new ResponseType(backend.getBackendConfig().getResponseType()),
-//                Scope.parse(backend.getBackendConfig().getScope()),
-//                new ClientID(backend.getBackendConfig().getClientID()),
-//                new URI(redirectURI),
-//                state,
-//                nonce);
             requestString = this.backend.getAuthorisationRequest(requestBuilder, httpRequest).toURI().toString();
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.CORRUPTED_URI.create(e, authorizationEndpoint, redirectURI);
@@ -200,20 +201,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
             IDTokenClaimsSet idTokenClaimsSet = this.validTokenResponse(tokenResponse, storedRequestInformation);
-            if(idTokenClaimsSet != null) {
-                redirectionString = this.loginUserAndRedirect(idTokenClaimsSet, storedRequestInformation);
+            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+            if(idTokenClaimsSet != null && bearerAccessToken != null) {
+                String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
+                redirectionString = this.loginUserAndRedirect(emailAddress);
             } else {
                 throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
             }
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -222,7 +216,43 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return redirectionString;
     }
     
-    private String loginUserAndRedirect(IDTokenClaimsSet idTokenClaimsSet, AuthenticationRequestInfo storedRequestInformation) {
+    private String loadEmailAddressFromIDP(BearerAccessToken bearerAccessToken) throws OXException {
+        UserInfoRequest userInfoReq = null;
+        String userInfoEndpoint = this.backend.getBackendConfig().getUserInfoEndpoint();
+        try {
+            userInfoReq = new UserInfoRequest(new URI(userInfoEndpoint), bearerAccessToken);
+        } catch (URISyntaxException e1) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e1, userInfoEndpoint);
+        }
+
+        HTTPResponse userInfoHTTPResp = null;
+        try {
+          userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
+        } catch (SerializeException | IOException e) {
+            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, LOAD_EMAIL_ADDRESS);
+        }
+
+        UserInfoResponse userInfoResponse = null;
+        try {
+          userInfoResponse = UserInfoResponse.parse(userInfoHTTPResp);
+        } catch (ParseException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, LOAD_EMAIL_ADDRESS);
+        }
+
+        if (userInfoResponse instanceof UserInfoErrorResponse) {
+          ErrorObject error = ((UserInfoErrorResponse) userInfoResponse).getErrorObject();
+          throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(error.getCode() + " " + error.getDescription());
+        }
+
+        UserInfoSuccessResponse successResponse = (UserInfoSuccessResponse) userInfoResponse;
+        if (successResponse == null) {
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create();
+        }
+        return successResponse.getUserInfo().getEmailAddress();
+    }
+    
+    private String loginUserAndRedirect(String emailAddress) throws OXException {
+        
         return null;
     }
 
@@ -230,25 +260,46 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation);
     }
     
-    private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws URISyntaxException {
+    private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws OXException {
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        URI callback = new URI(this.backend.getBackendConfig().getRedirectURIAuth());
+        String redirectURIAuth = this.backend.getBackendConfig().getRedirectURIAuth();
+        URI callback = null;
+        try {
+            callback = new URI(redirectURIAuth);
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, redirectURIAuth);
+        }
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
     
-        URI tokenEndpoint = new URI(this.backend.getBackendConfig().getTokenEndpoint());
+        URI tokenEndpoint = null;
+        String tokenEndpointConfig = this.backend.getBackendConfig().getTokenEndpoint();
+        try {
+            tokenEndpoint = new URI(tokenEndpointConfig);
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, tokenEndpointConfig);
+        }
     
-        //TODO QS-VS: Scope from property, why is this not working like documented??
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, new Scope("openid","email","profile"));
+        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
     }
     
-    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws IOException, ParseException, OXException {
+    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         // TODO QS-VS: ISt die send Methode sicher genug?
-        HTTPResponse httpResponse = httpRequest.send();
-        TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
+        HTTPResponse httpResponse = null;
+        try {
+            httpResponse = httpRequest.send();
+        } catch (IOException e) {
+            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, GET_THE_ID_TOKEN);
+        }
+        TokenResponse tokenResponse = null;
+        try {
+            tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
+        } catch (ParseException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);
+        }
         
         if (tokenResponse instanceof TokenErrorResponse) {
             ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();

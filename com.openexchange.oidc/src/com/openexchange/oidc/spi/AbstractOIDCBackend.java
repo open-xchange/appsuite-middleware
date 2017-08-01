@@ -63,6 +63,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -178,6 +179,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
         } 
         return result;
+    }
+    
+    @Override
+    public Scope getScope() {
+        String scopes = getBackendConfig().getScope();
+        String[] scopeArray = scopes.split(";");
+        return new Scope(scopeArray);
     }
     
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist

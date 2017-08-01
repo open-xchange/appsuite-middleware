@@ -70,8 +70,12 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 7),
     IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors", Category.CATEGORY_ERROR, 8), 
     IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: %1$s", Category.CATEGORY_ERROR, 9), 
-    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", CATEGORY_ERROR, 10), 
-    INVALID_IDTOKEN_GENERAL("Unable to extract claims from the given IDToken for unspecified reasons, see the logfiles for more information.", Category.CATEGORY_ERROR, 11);
+    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", Category.CATEGORY_ERROR, 10), 
+    INVALID_IDTOKEN_GENERAL("Unable to extract claims from the given IDToken for unspecified reasons, see the logfiles for more information.", Category.CATEGORY_ERROR, 11), 
+    UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: %1$s", Category.CATEGORY_ERROR, 12), 
+    UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to %1$s", Category.CATEGORY_ERROR, 13), 
+    UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to %1$s", Category.CATEGORY_ERROR, 14), 
+    UNABLE_TO_PARSE_URI("Unable to parse the following URI: %1$s", Category.CATEGORY_CONFIGURATION, 15);
 
     private final String message;
     private final String displayMessage;

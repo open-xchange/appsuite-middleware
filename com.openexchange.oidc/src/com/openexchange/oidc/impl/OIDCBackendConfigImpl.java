@@ -44,7 +44,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
 
     @Override
     public String getJwkSet() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwkSet);
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwkSetEndpoint);
     }
 
     @Override
@@ -65,6 +65,11 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     @Override
     public String getResponseType() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
+    }
+    
+    @Override
+    public String getUserInfoEndpoint() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.userInfoEndpoint);
     }
 
 }
