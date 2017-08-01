@@ -53,8 +53,8 @@ import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
 import com.openexchange.user.UserService;
 
 /**

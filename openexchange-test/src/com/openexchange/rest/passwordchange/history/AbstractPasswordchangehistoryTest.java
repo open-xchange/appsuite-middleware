@@ -53,8 +53,8 @@ import static org.junit.Assert.assertFalse;
 import org.json.JSONObject;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.tracker.impl.PasswordChangeInfoImpl;
+import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
 import com.openexchange.rest.AbstractRestTest;
 import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
 

@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**
  * {@link PasswordChangeTrackerRegistryImpl}

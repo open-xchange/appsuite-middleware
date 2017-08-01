@@ -47,37 +47,51 @@
  *
  */
 
-package com.openexchange.passwordchange.history.tracker;
+package com.openexchange.passwordchange.history.handler.impl;
 
-import com.openexchange.passwordchange.history.tracker.PasswordChangeInfo;
+import javax.xml.bind.annotation.XmlRootElement;
+import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 
 /**
- * {@link PasswordChangeInfo} - The information provided and written to the database considering the password change.
+ * {@link PasswordChangeInfoImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeInfo {
+@XmlRootElement
+public class PasswordChangeInfoImpl implements PasswordChangeInfo {
+
+    private long created;
+    private String client;
+    private String ip;
 
     /**
-     * Get the value of the date when the password got changed on
+     * Initializes a new {@link PasswordChangeInfoImpl}.
      * 
-     * @return The value as <code>long</code>
+     * @param created The time when the password change was made
+     * @param client The client that did the change
+     * @param ip The optional IP of the client
      */
-    long getCreated();
+    public PasswordChangeInfoImpl(long created, String client, String ip) {
+        super();
+        this.created = created;
+        this.client = client;
+        this.ip = ip;
+    }
 
-    /**
-     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
-     * 
-     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
-     */
-    String getClient();
+    @Override
+    public long getCreated() {
+        return created;
+    }
 
-    /**
-     * Get the IP-address the changed request was sent from
-     * 
-     * @return The IP-adress or <code>null</code>
-     */
-    String getIP();
+    @Override
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public String getIP() {
+        return ip;
+    }
 
 }
