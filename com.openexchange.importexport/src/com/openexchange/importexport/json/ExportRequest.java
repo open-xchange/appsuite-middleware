@@ -89,21 +89,31 @@ public class ExportRequest {
         super();
         this.setSession(session);
         this.setRequest(request);
-        String value = request.getParameter("body");
 
-        if (!Strings.isEmpty(value)) {
-            String ids = value;
-            try{
-                batchIds = extractBatchArrayFromRequest(ids);
+        Object data = request.getData();
+        if (data instanceof JSONArray) {
+            try {
+                batchIds = extractBatchArrayFromRequest((JSONArray) data);
             } catch (JSONException e) {
                 throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
             }
         } else {
-            batchIds = null;
-            if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null) {
-                throw ImportExportExceptionCodes.NEED_FOLDER.create();
+            String value = request.getParameter("body");
+            if (!Strings.isEmpty(value)) {
+                String ids = value;
+                try{
+                    batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
+                } catch (JSONException e) {
+                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+                }
+            } else {
+                batchIds = null;
+                if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null) {
+                    throw ImportExportExceptionCodes.NEED_FOLDER.create();
+                }
             }
         }
+
 
         String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
         if (colStr != null) {
@@ -120,8 +130,7 @@ public class ExportRequest {
         this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
     }
 
-    private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) throws JSONException {
-        JSONArray jPairs = new JSONArray(batchArray);
+    private Map<String, List<String>> extractBatchArrayFromRequest(JSONArray jPairs) throws JSONException {
         int length = jPairs.length();
         if (length <= 0) {
             return Collections.emptyMap();
