@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -777,7 +778,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException {
+    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials credentials, Integer ctxId) throws InvalidCredentialsException, StorageException, RemoteException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
 
         basicauth.doAuthentication(auth);
@@ -785,8 +786,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         try {
             ContextService contextService = AdminServiceRegistry.getInstance().getService(ContextService.class);
             UserService userService = AdminServiceRegistry.getInstance().getService(UserService.class);
-
-            List<Integer> allContextIds = contextService.getAllContextIds();
+            List<Integer> allContextIds=null;
+            if(ctxId!=null){
+                allContextIds = Collections.singletonList(ctxId);
+            } else {
+                allContextIds = contextService.getAllContextIds();
+            }
             for (Integer contextId : allContextIds) {
                 if (scope == null || RecalculationScope.ALL.equals(scope)) {
                     Context ctx = contextService.getContext(contextId.intValue());
