@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Before;
@@ -141,10 +142,14 @@ public abstract class AbstractCombineTest {
         ca.setEndTime(until);
         return ca;
     }
-    
+
     protected CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until, int priority) {
         CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots, from, until);
         ca.setPriority(priority);
         return ca;
+    }
+
+    protected Date createDate(int year, int month, int day) {
+        return new Date(new DateTime(year, month, day).getTimestamp());
     }
 }

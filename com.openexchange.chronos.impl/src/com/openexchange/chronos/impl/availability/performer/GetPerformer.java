@@ -302,7 +302,7 @@ public class GetPerformer extends AbstractPerformer {
                     try {
                         CalendarAvailability pre = availabilityB.clone();
                         pre.setEndTime(availabilityA.getStartTime());
-                        // Find any slots that intersect with the new end time adjust and split them 
+                        // Find any slots that intersect with the new end time, adjust and split them 
                         // if the availability blocks are of equal priority, then append the first split 
                         // to the pre availability, and the last split to the preIntersections.
                         List<CalendarFreeSlot> preSlots = new ArrayList<>();
@@ -333,10 +333,9 @@ public class GetPerformer extends AbstractPerformer {
 
                         CalendarAvailability post = availabilityB.clone();
                         post.setStartTime(availabilityA.getEndTime());
-                        // Find any slots that intersect with the new start time
-                        // adjust and split them if they are of equal priority, 
-                        // then append the first split to the postIntersections a
-                        // nd the last split to the post availability.
+                        // Find any slots that intersect with the new start time, adjust and split them 
+                        // if the availability blocks are of equal priority,  then append the first split 
+                        // to the postIntersections, and the last split to the post availability.
                         List<CalendarFreeSlot> postSlots = new ArrayList<>();
                         for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
                             CalendarFreeSlot cfs = iterator.next();

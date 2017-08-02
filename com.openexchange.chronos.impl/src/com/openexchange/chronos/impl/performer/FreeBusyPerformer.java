@@ -98,6 +98,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * {@link FreeBusyPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
