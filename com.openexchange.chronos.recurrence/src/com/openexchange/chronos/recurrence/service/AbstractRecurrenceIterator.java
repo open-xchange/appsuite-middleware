@@ -138,10 +138,11 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
             while (inner.hasNext()) {
-                lookAhead = inner.next();
-                if (null != start && lookAhead + eventDuration > start.getTimeInMillis() ||
-                    null != start && 0L == eventDuration && lookAhead == start.getTimeInMillis() ||
-                    null != startPosition && position + 1 >= startPosition.intValue()) {
+                long candidate = inner.next();
+                if (start != null && candidate + eventDuration > start.getTimeInMillis() ||
+                    start != null && 0L == eventDuration && candidate == start.getTimeInMillis() ||
+                    startPosition != null && position + 1 >= startPosition.intValue()) {
+                    lookAhead = candidate;
                     break;
                 } else {
                     position++;
@@ -183,7 +184,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        if (!inner.hasNext()) {
+        if (!inner.hasNext() && lookAhead == null) {
             ChronosLogger.debug("No more instances available.");
             next = null;
             return;
