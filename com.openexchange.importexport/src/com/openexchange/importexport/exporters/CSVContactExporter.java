@@ -58,7 +58,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
@@ -363,13 +363,11 @@ public class CSVContactExporter implements Exporter {
         return l;
     }
 
-    private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
-
     protected String convertToLine(final List<String> line) {
         StringBuilder bob = new StringBuilder(1024);
         for (String token : line) {
             bob.append('"');
-            bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
+            bob.append(StringUtils.replace(token, "\"", "\"\""));
             bob.append('"');
             bob.append(CELL_DELIMITER);
         }
