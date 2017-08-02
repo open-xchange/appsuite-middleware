@@ -74,11 +74,11 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
 
     protected static Logger LOGGER = LoggerFactory.getLogger(LogbackConfigurationMBeanRegisterer.class);
 
-    private BundleContext context;
+    private final BundleContext context;
     private volatile ObjectName logbackConfObjName;
     private volatile LogbackConfiguration logbackConfiguration;
 
-    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private final IncludeStackTraceServiceImpl stackTraceService;
 
     /**
