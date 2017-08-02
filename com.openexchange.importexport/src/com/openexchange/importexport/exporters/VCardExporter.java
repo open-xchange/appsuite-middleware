@@ -58,7 +58,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -93,6 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> batch export
  */
 public class VCardExporter implements Exporter {
 
@@ -237,6 +237,22 @@ public class VCardExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
+    
+    @Override
+    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }            
+            for (String objectId : batchEntry.getValue()) {
+                try {
+                    Integer.parseInt(objectId);                    
+                } catch (NumberFormatException e) {
+                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                }
+            }
+        }
+    }
 
     @Override
     public SizedInputStream exportFolderData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
@@ -248,13 +264,15 @@ public class VCardExporter implements Exporter {
         return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
     }
 
-    @Override
-    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        Map<String, List<String>> batchIds = Collections.singletonMap(folderID, Collections.singletonList(objectID));
-        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
-    }
-
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
+      if (null != batchIds) {
+          canExportBatch(session, format, batchIds, optionalParams);
+      } else {
+          if (!canExport(session, format, folder, optionalParams)) {
+              throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
+          }
+      }
+        
       boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -268,7 +286,7 @@ public class VCardExporter implements Exporter {
                   } else if (null != batchIds) {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
                   } else {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=export."+ Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }
                   requestData.removeCachingHeader();
                   export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);

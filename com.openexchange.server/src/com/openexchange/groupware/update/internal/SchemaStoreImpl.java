@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -435,7 +436,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 state.setBackgroundUpdatesRunning(true);
                 state.setBackgroundUpdatesRunningSince(task.getLastModified());
             } else {
-                state.addExecutedTask(task.getTaskName());
+                state.addExecutedTask(task.getTaskName(), task.isSuccessful());
             }
         }
     }

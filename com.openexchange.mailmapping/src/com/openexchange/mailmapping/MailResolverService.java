@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,29 +47,17 @@
  *
  */
 
-package com.openexchange.http.probe;
+package com.openexchange.mailmapping;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link HealthProbeServlet} - Used for health checks from proxy servers in front of our backend(cluster). Many proxies use simple http get
- * request to test if backends return an answer and how long it takes to answer so they can do proper loadbalancing. This Servlet implements
- * this functionality in a minimal way.
+ * {@link MailResolverService} - The mail resolver service, which knows how to resolve mail addresses to context and user identifier pairs.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class HealthProbeServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().append("OK").flush();
-    }
-
+@SingletonService
+public interface MailResolverService extends MultipleMailResolver {
+    // Empty interface
 }

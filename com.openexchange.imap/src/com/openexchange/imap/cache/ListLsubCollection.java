@@ -616,12 +616,20 @@ final class ListLsubCollection implements Serializable {
             ListLsubEntryImpl lsubEntry = lsubMap.get(sharedNamespace);
             if (null != lsubEntry && false == lsubEntry.hasChildren()) {
                 lsubMap.remove(sharedNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
             }
         }
         for (String userNamespace : user) {
             ListLsubEntryImpl lsubEntry = lsubMap.get(userNamespace);
             if (null != lsubEntry && false == lsubEntry.hasChildren()) {
                 lsubMap.remove(userNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
             }
         }
     }
@@ -1185,7 +1193,7 @@ final class ListLsubCollection implements Serializable {
                     final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
                     if (null == oldEntry) {
                         listMap.put(ROOT_FULL_NAME, listLsubEntry);
-                        lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
+                        lsubMap.put(ROOT_FULL_NAME, new ListLsubEntryImpl(listLsubEntry, true));
                     } else {
                         oldEntry.clearChildren();
                         oldEntry.copyFrom(listLsubEntry);
@@ -2309,6 +2317,27 @@ final class ListLsubCollection implements Serializable {
                 return;
             }
             children.remove(child);
+        }
+
+        /**
+         * Removes specified LIST/LSUB entry from this LIST/LSUB entry's children
+         *
+         * @param childFullName The child full-name
+         */
+        protected void removeChildByFullName(final String childFullName) {
+            if (null == childFullName) {
+                return;
+            }
+            if (null == children) {
+                return;
+            }
+            for (Iterator<ListLsubEntryImpl> iter = children.iterator(); iter.hasNext(); ) {
+                ListLsubEntryImpl child = iter.next();
+                if (childFullName.equals(child.getFullName())) {
+                    iter.remove();
+                    return;
+                }
+            }
         }
 
         /**

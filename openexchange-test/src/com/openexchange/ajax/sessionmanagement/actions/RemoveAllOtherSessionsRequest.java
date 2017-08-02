@@ -68,16 +68,14 @@ import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
  */
 public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOtherSessionsResponse> {
 
-    private final String sessionIdToRKeep;
     private boolean failOnError;
 
-    public RemoveAllOtherSessionsRequest(String sessionIdToKeep) {
-        this(sessionIdToKeep, true);
+    public RemoveAllOtherSessionsRequest() {
+        this(true);
     }
 
-    public RemoveAllOtherSessionsRequest(String sessionIdToKeep, boolean failOnError) {
+    public RemoveAllOtherSessionsRequest(boolean failOnError) {
         super();
-        this.sessionIdToRKeep = sessionIdToKeep;
         this.failOnError = failOnError;
     }
 
@@ -103,9 +101,7 @@ public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOther
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject body = new JSONObject();
-        body.put("sessionIdToKeep", sessionIdToRKeep);
-        return body;
+        return new JSONObject();
     }
 
     @Override

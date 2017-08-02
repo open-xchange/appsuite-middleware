@@ -47,29 +47,44 @@
  *
  */
 
-package com.openexchange.http.probe;
+package com.openexchange.importexport.helpers;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link HealthProbeServlet} - Used for health checks from proxy servers in front of our backend(cluster). Many proxies use simple http get
- * request to test if backends return an answer and how long it takes to answer so they can do proper loadbalancing. This Servlet implements
- * this functionality in a minimal way.
+ * {@link ExportDefaultFileNames}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10
  */
-public class HealthProbeServlet extends HttpServlet {
-
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.getWriter().append("OK").flush();
+public final class ExportDefaultFileNames implements LocalizableStrings {
+    
+    /**
+     * The default file name for a vcard and csv export, when using batch data
+     */
+    public static final String CONTACTS_NAME = "Contacts";
+    
+    /**
+     * The default file name for an ical appointment export, when using batch data
+     */
+    public static final String ICAL_APPOINTMENT_NAME = "Appointment";
+    
+    /**
+     * The default file name for an ical task export, when using batch data
+     */
+    public static final String ICAL_TASKS_NAME = "Tasks";
+    
+    /**
+     * The default file name for an ical task export, when using batch data
+     */
+    public static final String DEFAULT_NAME = "Export";
+    
+    /**
+     * Initializes a new {@link ExportDefaultFileNames}.
+     */
+    private ExportDefaultFileNames() {
+        super();
     }
-
+    
 }

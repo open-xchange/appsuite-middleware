@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailmapping.osgiservice;
+package com.openexchange.mailmapping.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,21 +63,19 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 
 /**
- * The {@link OSGIMailMappingService} is a utility class for consulting mail mapping services
+ * The {@link MailResolverServiceImpl} is a utility class for consulting mail mapping services
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added constructor
- * @deprecated Use {@link MailResolverService}!
  */
-@Deprecated
-public class OSGIMailMappingService implements MultipleMailResolver, SimpleRegistryListener<MailResolver> {
+public class MailResolverServiceImpl implements MailResolverService, SimpleRegistryListener<MailResolver> {
 
     private final ServiceSet<MailResolver> chain;
 
     /**
-     * Initializes a new {@link OSGIMailMappingService}.
+     * Initializes a new {@link MailResolverServiceImpl}.
      */
-    public OSGIMailMappingService() {
+    public MailResolverServiceImpl() {
         super();
         chain = new ServiceSet<MailResolver>();
     }

@@ -54,10 +54,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * This switcher is able to convert a given String into a date using
@@ -142,33 +144,61 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
              * Not parsed by previous ContactSwitcher
              */
             final String dateString = (String) objects[1];
-            /*
-             * Parse date string
-             */
-            final int size = dateFormats.size();
-            for (int index = 0; index < size; index++) {
-                try {
-                    DateFormat dateFormat = dateFormats.get(index);
-                    synchronized (dateFormat) {
-                        objects[1] = dateFormat.parse(dateString);
-                    }
-                    /*
-                     * Parse successful so far. Is invalid?
-                     */
-                    if (!dateValidators.get(index).isValid(dateString)) {
-                        /*
-                         * Detected invalid value. Set to null.
-                         */
-                        objects[1] = null;
-                        ((Contact) objects[0]).addWarning(ContactExceptionCodes.DATE_CONVERSION_FAILED.create(dateString));
-                    }
-                    return objects;
-                } catch (final ParseException e) {
-                    LOG.debug(e.getMessage());
-                }
-            }
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create((String) objects[1]);
+            if (dateString.contains("/") && dateString.split("/").length == 3) {
+                return parseDateStringManually(dateString, objects);
+            } else {
+                return parseDateStringByDateFormat(dateString, objects);
+            }            
         }
+        return objects;
+    }        
+    
+    private Object[] parseDateStringByDateFormat(String dateString, final Object... objects) throws OXException {
+        final int size = dateFormats.size();
+        for (int index = 0; index < size; index++) {
+            try {
+                DateFormat dateFormat = dateFormats.get(index);
+                synchronized (dateFormat) {
+                    objects[1] = dateFormat.parse(dateString);                     
+                }
+                /*
+                 * Parse successful so far. Is invalid?
+                 */
+                if (!dateValidators.get(index).isValid(dateString)) {
+                    /*
+                     * Detected invalid value. Set to null.
+                     */
+                    objects[1] = null;
+                    ((Contact) objects[0]).addWarning(ContactExceptionCodes.DATE_CONVERSION_FAILED.create(dateString));
+                }
+                return objects;
+            } catch (final ParseException e) {
+                LOG.debug(e.getMessage());
+            }
+        }        
+        throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create((String) objects[1]);
+    }
+    
+    private Object[] parseDateStringManually(String dateString, final Object[] objects) throws OXException {
+        try {
+            String[] split = dateString.split("/");
+            final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
+            SimpleDateFormat df = new SimpleDateFormat();
+            df.setTimeZone(utc);            
+            if (Integer.valueOf(split[0]) > 12) {
+                df.applyPattern("MM/dd/yyyy");
+                objects[1] = df.parse(split[1]+"/"+split[0]+"/"+split[2]);
+            } else if (Integer.valueOf(split[1]) > 12) {
+                df.applyPattern("dd/MM/yyyy");
+                objects[1] = df.parse(split[1]+"/"+split[0]+"/"+split[2]);
+            } else {
+                parseDateStringByDateFormat(dateString, objects);
+            }
+        } catch (ParseException e) {
+            LOG.debug(e.getMessage());
+        } catch (NumberFormatException e) {
+            LOG.debug(e.getMessage());
+        } 
         return objects;
     }
 

@@ -51,11 +51,8 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.VCardExportRequest;
@@ -83,8 +80,9 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         
         JSONArray array = new JSONArray();        
         array.put(addRequestIds(folderID, contactId));
-        
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, false, true));
+        String body = array.toString();        
+
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("One vCard expected!", 1, result.length);        
@@ -101,8 +99,9 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         
         JSONArray array = new JSONArray();        
         array.put(addRequestIds(folderID, distlistId));
-        
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
+        String body = array.toString();        
+
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("One vCard expected!", 1, result.length);        
@@ -126,8 +125,9 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, firstId));
         array.put(addRequestIds(folderID, secondId));
         array.put(addRequestIds(folderID, thirdId));
-        
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
+        String body = array.toString();        
+
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Three vCard expected!", 3, result.length);        
@@ -146,7 +146,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         String vcard = (String) vcardExportResponse.getData();        
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Two vCards expected!", 2, result.length);
-        assertFileName(vcardExportResponse.getHttpResponse(), folderName1);
+        assertFileName(vcardExportResponse.getHttpResponse(), folderName1+".vcf");
     }    
     
     @Test
@@ -169,35 +169,14 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, firstId));
         array.put(addRequestIds(folderID, secondId));
         array.put(addRequestIds(secondFolderID, thirdId));
-        array.put(addRequestIds(secondFolderID, fourthId));
-        
-        VCardExportResponse vcardExportResponse = getClient().execute(new BatchExportRequest(-1, array, true, true));
+        array.put(addRequestIds(secondFolderID, fourthId));        
+        String body = array.toString();        
+
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Four vCards expected!", 4, result.length);
         assertFileName(vcardExportResponse.getHttpResponse(), "Contacts.vcf");
     }     
     
-    //---------------------------------------------------------------
-    
-    private class BatchExportRequest extends VCardExportRequest {
-        
-        private final JSONArray jsonArray;
-        
-        @Override
-        public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-            return Method.PUT;
-        }
-
-        public BatchExportRequest(int folderId, JSONArray jsonArray, Boolean exportDlists, boolean failOnError) {           
-            super(folderId, exportDlists, failOnError);
-            this.jsonArray = jsonArray;
-        }
-
-        @Override
-        public Object getBody() {
-            return jsonArray;
-        }
-        
-    }
 }

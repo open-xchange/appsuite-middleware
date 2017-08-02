@@ -1,19 +1,11 @@
 /sessionmanagement?action=removeAllOtherSessions:
-  put:
+  get:
     operationId: removeAllOtherSessions
     tags:
       - sessionmanagement
     summary: Removes all user's session expect given and blacklisted
-    consumes:
-      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON object describing the session
-        required: true
-        schema:
-          $ref: "#/definitions/RemoveAllOtherSessionsBody"
     responses:
       200:
         description: |

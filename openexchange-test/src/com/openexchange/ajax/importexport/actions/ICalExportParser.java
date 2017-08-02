@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.io.IOException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -59,6 +63,8 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ICalExportParser extends AbstractAJAXParser<ICalExportResponse> {
 
+    private HttpResponse httpResponse;
+    
     /**
      * @param failOnError
      */
@@ -79,13 +85,19 @@ public final class ICalExportParser extends AbstractAJAXParser<ICalExportRespons
      */
     @Override
     public ICalExportResponse parse(final String body) throws JSONException {
-        final ICalExportResponse retval = new ICalExportResponse();
+        final ICalExportResponse retval = new ICalExportResponse(httpResponse);
         retval.setICal(body);
         return retval;
     }
 
     @Override
     protected ICalExportResponse createResponse(final Response response) throws JSONException {
-        throw new UnsupportedOperationException();
+        return new ICalExportResponse(httpResponse);
+    }
+    
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        this.httpResponse = resp;
+        return super.checkResponse(resp, request);
     }
 }

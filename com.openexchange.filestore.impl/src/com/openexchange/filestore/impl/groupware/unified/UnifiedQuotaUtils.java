@@ -49,9 +49,6 @@
 
 package com.openexchange.filestore.impl.groupware.unified;
 
-import java.util.concurrent.TimeUnit;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -59,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.UserAndContext;
 
 /**
  * {@link UnifiedQuotaUtils} - Utility class for Unified Quota.
