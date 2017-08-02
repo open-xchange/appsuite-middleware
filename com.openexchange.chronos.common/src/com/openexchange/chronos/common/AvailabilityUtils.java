@@ -250,6 +250,24 @@ public final class AvailabilityUtils {
         return startA.before(endB) && endA.after(startB);
     }
 
+    /**
+     * Check for intersection but not contains
+     * 
+     * @param startA The start date of interval A
+     * @param endA The end date of interval A
+     * @param startB The start date of interval B
+     * @param endB The end date of interval B
+     * @return <code>true</code> if the date intervals intersect but NOT contained within each other; <code>false</code> otherwise
+     */
+    public static boolean intersectsButNotContained(DateTime startA, DateTime endA, DateTime startB, DateTime endB) {
+        if (!intersect(startA, endA, startB, endB)) {
+            return false;
+        }
+
+        // Extra check for preceding OR succeeding respectively
+        return (startA.before(startB) && endA.before(endB)) || (startA.after(startB) && endA.after(endB));
+    }
+
     ////////////////////////////////////////////////////// Date //////////////////////////////////////////////////
 
     /**
