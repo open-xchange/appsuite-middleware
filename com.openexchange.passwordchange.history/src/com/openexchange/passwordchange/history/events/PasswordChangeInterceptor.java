@@ -70,17 +70,18 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
 
-    ServiceLookup service;
-    PasswordChangeHandlerRegistry registry;
+    ServiceLookup         service;
+    PasswordChangeHelper helper;
 
     /**
      * Initializes a new {@link PasswordChangeInterceptor}.
-     * @param registry 
+     * 
+     * @param registry
      */
     public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
         super();
+        this.helper = new PasswordChangeHelper(service, registry);
         this.service = service;
-        this.registry = registry;
     }
 
     @Override
@@ -99,7 +100,7 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
                 @Override
                 public void run() {
-                    PasswordChangeUtility.recordChange(service, registry, contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
+                    helper.recordChange(contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
                 }
             });
         }
@@ -110,15 +111,16 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         final int contextID = context.getContextId();
         final int userID = user.getId();
         // Clear DB after deletion of user
+
         service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    PasswordChangeUtility.clearFor(service, registry, contextID, userID, 0);
+                    helper.clearFor(contextID, userID, 0);
                 } catch (Exception e) {
                     // In case view can not be loaded
-                    LOG.error("Could not delete password chage history for {} in context {}. Reason: ", String.valueOf(userID), String.valueOf(contextID), e.getMessage());
+                    LOG.error("Could not delete password chage history for {} in context {}. Reason: {}", String.valueOf(userID), String.valueOf(contextID), e);
                 }
             }
         });

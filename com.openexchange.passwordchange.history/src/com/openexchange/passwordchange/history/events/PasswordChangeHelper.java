@@ -61,14 +61,24 @@ import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerReg
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PasswordChangeUtility}
+ * {@link PasswordChangeHelper}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeUtility {
+public class PasswordChangeHelper {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHelper.class);
+
+    private final ServiceLookup                 service;
+    private final PasswordChangeHandlerRegistry registry;
+
+    public PasswordChangeHelper(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
+        super();
+        this.service = service;
+        this.registry = registry;
+
+    }
 
     /**
      * Calls the according tracker for a user if the feature is available and saves the data
@@ -80,9 +90,9 @@ public final class PasswordChangeUtility {
      * @param ipAddress The IP address if available
      * @param client The calling resource. E.g. {@link PasswordChangeInfo#PROVISIONING}
      */
-    public static void recordChange(ServiceLookup service, PasswordChangeHandlerRegistry registry, int contextID, int userID, final String ipAddress, final String client) {
+    public void recordChange(int contextID, int userID, final String ipAddress, final String client) {
         try {
-            PasswordHistoryHandler handler = loadHandler(service, registry, contextID, userID);
+            PasswordHistoryHandler handler = loadHandler(contextID, userID);
             PasswordChangeInfo info = new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress);
             handler.trackPasswordChange(userID, contextID, info);
         } catch (Exception e) {
@@ -100,16 +110,16 @@ public final class PasswordChangeUtility {
      * @param userID The ID of the user
      * @param limit see {@link PasswordHistoryHandler#clear(int, int, int)}
      */
-    public static void clearFor(ServiceLookup service, PasswordChangeHandlerRegistry registry, int contextID, int userID, int limit) {
+    public void clearFor(int contextID, int userID, int limit) {
         try {
-            PasswordHistoryHandler tracker = loadHandler(service, registry, contextID, userID);
+            PasswordHistoryHandler tracker = loadHandler(contextID, userID);
             tracker.clear(userID, contextID, limit);
         } catch (Exception e) {
             LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userID, contextID, e.getMessage());
         }
     }
 
-    private static PasswordHistoryHandler loadHandler(ServiceLookup service, PasswordChangeHandlerRegistry registry, int contextID, int userID) throws OXException {
+    private PasswordHistoryHandler loadHandler(int contextID, int userID) throws OXException {
         // Load config and get according tracker
         ConfigViewFactory casscade = service.getService(ConfigViewFactory.class);
         if (null == casscade) {
@@ -142,7 +152,7 @@ public final class PasswordChangeUtility {
             throw PasswordChangeHistoryException.MISSING_SERVICE.create("PasswordChangeTrackerRegistry");
         }
 
-        PasswordHistoryHandler handler = registry.getTracker(handlerName);
+        PasswordHistoryHandler handler = registry.getHandler(handlerName);
         if (null == handler) {
             // If no tracker available, there should be no tracking
             LOG.debug("Could not load {} for user {} in context {}", handlerName, userID, contextID);

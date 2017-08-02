@@ -49,9 +49,7 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -62,9 +60,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.auth.Authenticator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -73,14 +73,10 @@ import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryPr
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortType;
-import com.openexchange.passwordchange.history.rest.auth.AuthChecker;
-import com.openexchange.passwordchange.history.rest.auth.ContextAdminChecker;
-import com.openexchange.passwordchange.history.rest.auth.EveryoneChecker;
-import com.openexchange.passwordchange.history.rest.auth.ResellerAndMasterAdminChecker;
 import com.openexchange.passwordchange.history.rest.exception.HistoryRestException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.servlet.http.Authorization;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 /**
  * {@link PasswordChangeHistoryREST}
@@ -92,8 +88,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @PermitAll
 public class PasswordChangeHistoryREST {
 
-    private final ServiceLookup service;
-    private Set<AuthChecker>    checker;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryREST.class);
+    private final ServiceLookup           service;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
@@ -103,60 +99,59 @@ public class PasswordChangeHistoryREST {
     public PasswordChangeHistoryREST(ServiceLookup service) throws OXException {
         super();
         this.service = service;
-
-        checker = new LinkedHashSet<>();
-        checker.add(new ResellerAndMasterAdminChecker(service));
-        checker.add(new ContextAdminChecker(service));
-        checker.add(new EveryoneChecker(service));
     }
 
     @GET
     @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) throws Exception {
-        // Check access rights
-        ServerSession serverSession = ServerSessionAdapter.valueOf(userID, contextID);
-        checkAccess(serverSession, auth);
-
-        // Get services
-        PasswordHistoryHandler handler = getService(PasswordHistoryHandler.class);
-        ConfigViewFactory config = getService(ConfigViewFactory.class);
-        ConfigView view = config.getView(userID, contextID);
-
-        /*
-         * Check configuration
-         * Note: PasswordChangeHistory does not need to be enabled to return the data
-         * So we just check if there is a service configured that can provide the data
-         */
-        String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
-        if (null == symbolicName || symbolicName.isEmpty() || false == symbolicName.equals(handler.getSymbolicName())) {
-            return new JSONObject().put("Error: ", "No handler for the requested user configured.");
-        }
-
-        List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
-
-        // Check data
-        if (history.size() == 0) {
-            return new JSONObject().put("Error", "{No history available.}");
-        }
-
-        // Build response
-        JSONObject json = new JSONObject();
-        JSONArray entries = new JSONArray();
-        int i = 0;
-        for (PasswordChangeInfo info : history) {
-            if (limit > 0 && i >= limit) {
-                break;
+    public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) {
+        try {
+            Object retval = checkAccess(contextID, auth);
+            if (null != retval) {
+                return retval;
             }
-            JSONObject data = new JSONObject();
-            data.put("date", info.getCreated());
-            data.put("client_id", info.getClient());
-            putOptionalReadable(data, info.getClient());
-            data.put("client_address", info.getIP());
-            entries.add(i++, data);
+
+            // Get services
+            PasswordHistoryHandler handler = getService(PasswordHistoryHandler.class);
+            ConfigViewFactory config = getService(ConfigViewFactory.class);
+            ConfigView view = config.getView(userID, contextID);
+
+            /*
+             * Check configuration
+             * Note: PasswordChangeHistory does not need to be enabled to return the data
+             * So we just check if there is a service configured that can provide the data
+             */
+            String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
+            if (null == symbolicName || symbolicName.isEmpty() || false == symbolicName.equals(handler.getSymbolicName())) {
+                return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+
+            List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
+
+            // Check data
+            if (history.size() == 0) {
+                return new JSONObject();
+            }
+
+            // Build response
+            JSONArray entries = new JSONArray();
+            int i = 0;
+            for (PasswordChangeInfo info : history) {
+                if (limit > 0 && i >= limit) {
+                    break;
+                }
+                JSONObject data = new JSONObject();
+                data.put("date", info.getCreated());
+                data.put("client_id", info.getClient());
+                putOptionalReadable(data, info.getClient());
+                data.put("client_address", info.getIP());
+                entries.add(i++, data);
+            }
+            return entries;
+        } catch (Exception e) {
+            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userID, contextID, e);
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        json.put("PasswordChangeHistroy", entries);
-        return json;
     }
 
     /**
@@ -175,14 +170,29 @@ public class PasswordChangeHistoryREST {
 
     /**
      * Check if access should be granted
+     * 
+     * @param contextID The context ID to authenticated against
+     * @param auth The Base64 decoded authentication string
+     * @return <code>null</code> if everything is fine or a {@link Response} with error code.
+     * @throws OXException In case of missing service
      */
-    private void checkAccess(ServerSession session, String auth) throws OXException {
-        for (AuthChecker c : checker) {
-            if (c.checkAccess(session, auth)) {
-                return;
+    private Object checkAccess(int contextID, String auth) throws OXException {
+        // Decode auth and validate
+        if (Authorization.checkForBasicAuthorization(auth)) {
+            // Valid header
+            Credentials creds = Authorization.decode(auth);
+            if (Authorization.checkLogin(creds.getPassword())) {
+                // Authenticate the context administrator
+                Authenticator authenticator = getService(Authenticator.class);
+                try {
+                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextID);
+                    return null;
+                } catch (OXException e) {
+                    // Fall through
+                }
             }
-        }
-        throw HistoryRestException.NO_ACCESS.create();
+        } // No valid header
+        return Response.serverError().status(Response.Status.FORBIDDEN).build();
     }
 
     /**
