@@ -53,7 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -121,16 +120,18 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     @Before
     public void init() throws OXException {
         super.init();
+        // Initialise maps and lists
         attendees = new ArrayList<>();
         freeBusyTimes = new ArrayList<>();
-
         freeBusyPerAttendee = new HashMap<>();
+        availabilitiesPerAttendee = new HashMap<>();
 
+        // Mock the FreeBusyPerformer
         freeBusyPerformer = mock(FreeBusyPerformer.class);
         when(freeBusyPerformer.performMerged(attendees, from, until)).thenReturn(freeBusyPerAttendee);
         when(freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until)).thenCallRealMethod();
 
-        availabilitiesPerAttendee = new HashMap<>();
+        // Mock the GetPerformer
         getPerformer = mock(GetPerformer.class);
         when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
         when(getPerformer.getCombinedAvailableTimes(attendees, from, until)).thenCallRealMethod();
@@ -142,34 +143,45 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
      */
     @Test
     public void testSingles() throws OXException {
+        // Initialise attendee
         attendee = new Attendee();
         attendee.setEMail("foobar@ox.io");
         attendees.add(attendee);
 
+        // Initialise the free/busy time
         freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, createDate(2017, 2, 25), createDate(2017, 2, 26)));
-        
+        // Set the free/busy time for the attendee
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
+        // Initialise the free slots and availability block
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
         freeSlots.add(createCalendarFreeSlot("May 1", new DateTime(2017, 4, 1), new DateTime(2017, 4, 2)));
         freeSlots.add(createCalendarFreeSlot("May 2", new DateTime(2017, 4, 21), new DateTime(2017, 4, 22)));
         availabilities.add(createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
-
+        // Set the availability block for the attendee
         availabilitiesPerAttendee.put(attendee, availabilities);
 
+        // Mock the CalendarAvailabilityService...
         calendarAvailabilityService = mock(CalendarAvailabilityService.class);
+        // ...and calculate the combinedAvailableTimes...
         Map<Attendee, List<CalendarAvailability>> combinedAvailableTimes = getPerformer.getCombinedAvailableTimes(attendees, from, until);
-
+        // ...so they can be used inside the FreeBusyPerformer
+        // We basically bypass the service and all its prerequisites (storage, session, services) and we hook the call directly to GetPerformer
         when(calendarAvailabilityService.getCombinedAvailableTime(null, attendees, from, until)).thenReturn(combinedAvailableTimes);
 
+        // Mock the Services for the FreeBusyPerformer
         PowerMockito.mockStatic(Services.class);
         BDDMockito.given(Services.getService(CalendarAvailabilityService.class)).willReturn(calendarAvailabilityService);
 
+        // Mock the Utils
         PowerMockito.mockStatic(Utils.class);
         BDDMockito.given(Utils.getTimeZone(session)).willReturn(TimeZone.getDefault());
 
+        // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
         FreeBusyResult freeBusyResult = performCalculateFreeBusyTime.get(attendee);
+        
+        // Assert
         assertNotNull(freeBusyResult);
     }
 }
