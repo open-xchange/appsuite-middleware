@@ -199,10 +199,12 @@ public class RdbContextStorage extends ContextStorage {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
+        // Load context data from ConfigDB
+        ContextImpl context;
         try {
             Connection con = databaseService.getReadOnly();
             try {
-                return loadContext(con, contextId);
+                context = loadContext(con, contextId);
             } finally {
                 databaseService.backReadOnly(con);
             }
@@ -210,23 +212,49 @@ public class RdbContextStorage extends ContextStorage {
             if (false == ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 throw e;
             }
+
+            // Context not found. Retry with read-write connection
+            Connection con = databaseService.getWritable();
+            try {
+                context = loadContext(con, contextId);
+            } finally {
+                databaseService.backWritableAfterReading(con);
+            }
         }
 
-        // Context not found. Retry with read-write connection
-        Connection con = databaseService.getWritable();
+        // Load context data from UserDB
         try {
-            return loadContext(con, contextId);
-        } finally {
-            databaseService.backWritableAfterReading(con);
+            Connection con = databaseService.getReadOnly(contextId);
+            try {
+                setMailAdminAndAttributes(con, context);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
+        } catch (OXException e) {
+            if (false == ContextExceptionCodes.NO_MAILADMIN.equals(e)) {
+                throw e;
+            }
+
+            Connection con = databaseService.getWritable(contextId);
+            try {
+                setMailAdminAndAttributes(con, context);
+            } finally {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
         }
+
+        return context;
     }
 
-    private ContextExtended loadContext(Connection con, int contextId) throws OXException {
+    private ContextImpl loadContext(Connection con, int contextId) throws OXException {
         ContextImpl context = loadContextData(con, contextId);
         context.setLoginInfo(getLoginInfos(con, context));
+        return context;
+    }
+
+    private void setMailAdminAndAttributes(Connection con, ContextImpl context) throws OXException {
         context.setMailadmin(getAdmin(con, context.getContextId()));
         loadAndSetAttributes(con, context);
-        return context;
     }
 
     private void loadAndSetAttributes(Connection con, ContextImpl ctx) throws OXException {
