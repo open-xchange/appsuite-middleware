@@ -91,9 +91,9 @@ public class ConfigCascade implements ConfigViewFactory {
             this.path = new AtomicReference<List<ConfigProviderService>>(path);
         }
 
-        synchronized void setSearchPath(String... searchPath) throws OXException {
+        synchronized void setSearchPath(String... searchPath) {
             this.searchPath.set(searchPath);
-            this.path.set(computePathFrom(searchPath, providers));
+            this.path.set(null); // Enforce re-initialization
         }
 
         String[] getSearchPath() {
@@ -101,10 +101,20 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         List<ConfigProviderService> getConfigProviders() {
-            return this.path.get();
+            List<ConfigProviderService> path = this.path.get();
+            if (null == path) {
+                synchronized (this) {
+                    path = this.path.get();
+                    if (null == path) {
+                        path = computePathFrom(searchPath.get(), providers);
+                        this.path.set(path);
+                    }
+                }
+            }
+            return path;
         }
 
-        private List<ConfigProviderService> computePathFrom(String[] searchPath, ConcurrentMap<String, ConfigProviderService> providers) throws OXException {
+        private List<ConfigProviderService> computePathFrom(String[] searchPath, ConcurrentMap<String, ConfigProviderService> providers) {
             if (null == searchPath) {
                 return Collections.emptyList();
             }
@@ -113,7 +123,7 @@ public class ConfigCascade implements ConfigViewFactory {
             for (String scope : searchPath) {
                 ConfigProviderService configProvider = providers.get(scope);
                 if (null == configProvider) {
-                    throw OXException.general("No such config provider for scope: " + scope);
+                    throw new IllegalStateException("No such config provider for scope: " + scope);
                 }
                 p.add(configProvider);
             }
@@ -154,7 +164,7 @@ public class ConfigCascade implements ConfigViewFactory {
         return new View(-1, -1, providers, searchPath.getSearchPath(), getConfigProviders(), stringParser.get());
     }
 
-    public void setSearchPath(final String... searchPath) throws OXException {
+    public void setSearchPath(final String... searchPath) {
         this.searchPath.setSearchPath(searchPath);
     }
 
