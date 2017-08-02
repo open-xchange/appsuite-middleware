@@ -51,7 +51,6 @@ package com.openexchange.passwordchange.history.rest.api;
 
 import java.util.List;
 import javax.annotation.security.PermitAll;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -74,7 +73,8 @@ import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryPr
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortType;
-import com.openexchange.passwordchange.history.rest.exception.HistoryRestException;
+import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -103,7 +103,6 @@ public class PasswordChangeHistoryREST {
     }
 
     @GET
-    @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
     public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) {
         try {
@@ -113,25 +112,30 @@ public class PasswordChangeHistoryREST {
             }
 
             // Get services
-            PasswordHistoryHandler handler = getService(PasswordHistoryHandler.class);
+            PasswordChangeHandlerRegistry registry = getService(PasswordChangeHandlerRegistry.class);
             ConfigViewFactory config = getService(ConfigViewFactory.class);
             ConfigView view = config.getView(userID, contextID);
 
-            /*
-             * Check configuration
-             * Note: PasswordChangeHistory does not need to be enabled to return the data
-             * So we just check if there is a service configured that can provide the data
-             */
-            String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
-            if (null == symbolicName || symbolicName.isEmpty() || false == symbolicName.equals(handler.getSymbolicName())) {
-                return Response.serverError().build();
+            // Check if feature is enabled for user and which handler to get
+            Boolean enable = view.get(PasswordChangeHistoryProperties.enable.getFQPropertyName(), Boolean.class);
+            if (false == enable) {
+                // No fall back. Resource for the user not available. In other terms the user can not see the feature.
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+            String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
+            if (null == symbolicName || symbolicName.isEmpty()) {
+                //Fall back to default
+                LOG.debug("Using default value to identify password change handler.");
+                symbolicName = PasswordChangeHistoryProperties.handler.getDefaultValue(String.class);
+            }
+            PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
             List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
 
             // Check data
             if (history.size() == 0) {
-                return new JSONObject();
+                return new JSONArray();
             }
 
             // Build response
@@ -164,7 +168,7 @@ public class PasswordChangeHistoryREST {
     private <T> T getService(Class<? extends T> clazz) throws OXException {
         T retval = service.getService(clazz);
         if (null == retval) {
-            throw HistoryRestException.MISSING_SERVICE.create(clazz.getSimpleName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
         }
         return retval;
     }

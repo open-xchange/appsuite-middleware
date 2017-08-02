@@ -52,7 +52,7 @@ package com.openexchange.passwordchange.history.rest.osgi;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 
 /**
@@ -75,7 +75,7 @@ public final class PasswordChangeRestActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordHistoryHandler.class, Authenticator.class };
+        return new Class<?>[] { ConfigViewFactory.class, PasswordChangeHandlerRegistry.class, Authenticator.class };
     }
 
     @Override
