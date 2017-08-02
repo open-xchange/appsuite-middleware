@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -94,9 +94,9 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return null;
         }
         int counter = 1;
-        RecurrenceRuleIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
         while (iterator.hasNext()) {
-            long nextMillis = iterator.nextMillis();
+            long nextMillis = iterator.next();
             if (counter++ == position) {
                 Calendar retval = GregorianCalendar.getInstance(master.getStartDate().getTimeZone());
                 retval.setTimeInMillis(nextMillis);
@@ -116,9 +116,9 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return 0;
         }
         int position = 1;
-        RecurrenceRuleIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
         while (iterator.hasNext()) {
-            long nextMillis = iterator.nextMillis();
+            long nextMillis = iterator.next();
             if (nextMillis > datePosition.getTimeInMillis()) {
                 break;
             }
@@ -181,13 +181,13 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         if (null == rule.getCount() && null == rule.getUntil()) {
             return null;
         }
-        RecurrenceRuleIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true);
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true, null);
         if (false == iterator.hasNext()) {
             return null;
         }
         DateTime dateTime;
         do {
-            dateTime = iterator.nextDateTime();
+            dateTime = new DateTime(iterator.next());
         } while (iterator.hasNext());
         return new DefaultRecurrenceId(dateTime);
     }

@@ -62,6 +62,11 @@ import org.junit.runners.Parameterized.Parameters;
  */
 public abstract class AbstractSingleTimeZoneTest extends RecurrenceServiceTest {
 
+    /**
+     * Does the dtstart value count towrds the "COUNT" rule of the recurrence rule if it is not in sync with the rule?
+     */
+    protected static final boolean COUNT_DTSTART = false;
+
     public AbstractSingleTimeZoneTest(String timeZone) {
         super(timeZone);
     }

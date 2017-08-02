@@ -49,13 +49,12 @@
 
 package com.openexchange.chronos.recurrence.service;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.ChronosLogger;
@@ -78,14 +77,13 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected final Integer startPosition;
     protected final Calendar end;
     protected final Integer limit;
-    protected final long[] exceptionDates;
     protected final RecurrenceData recurrenceData;
     protected final long eventDuration;
 
     protected DateTime next;
     protected int count;
     protected int position;
-    protected RecurrenceRuleIterator inner;
+    protected RecurrenceSetIterator inner;
 
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
@@ -124,33 +122,28 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         this.startPosition = startPosition;
         this.end = end;
         this.limit = limit;
-        this.exceptionDates = exceptionDates;
         if (limit != null && limit == 0) {
             ChronosLogger.debug("Occurrence limit set to 0, nothing to do.");
             return;
         }
-        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence);
+        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence, exceptionDates);
         next = null;
         position = 0;
         count = 0;
         init();
     }
 
+    private Long lookAhead = null;
+    
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
             while (inner.hasNext()) {
-                long nextMillis = inner.peekMillis();
-                if (isException(nextMillis)) {
-                    inner.nextMillis();
-                    position++;
-                    continue;
-                }
-                if (null != start && nextMillis + eventDuration > start.getTimeInMillis() ||
-                    null != start && 0L == eventDuration && nextMillis == start.getTimeInMillis() ||
+                lookAhead = inner.next();
+                if (null != start && lookAhead + eventDuration > start.getTimeInMillis() ||
+                    null != start && 0L == eventDuration && lookAhead == start.getTimeInMillis() ||
                     null != startPosition && position + 1 >= startPosition.intValue()) {
                     break;
                 } else {
-                    inner.nextMillis();
                     position++;
                 }
             }
@@ -196,32 +189,24 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return;
         }
 
-        long peek = inner.peekMillis();
-        while (isException(peek)) {
-            ChronosLogger.debug("Next instance is exception.");
-            inner.nextMillis();
-            count++;
-            position++;
-            if (inner.hasNext()) {
-                peek = inner.peekMillis();
-            } else {
-                next = null;
-                return;
-            }
+        if (lookAhead == null) {
+            lookAhead = inner.next();
         }
-        if (this.end != null && peek >= this.end.getTimeInMillis()) {
-            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", peek, this.end.getTimeInMillis());
+
+        if (this.end != null && lookAhead >= this.end.getTimeInMillis()) {
+            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, this.end.getTimeInMillis());
             next = null;
             return;
         }
 
-        next = inner.nextDateTime();
+        if (lookAhead == null) {
+            next = new DateTime(inner.next());
+        } else {
+            next = new DateTime(lookAhead);
+            lookAhead = null;
+        }
         count++;
         position++;
-    }
-
-    private boolean isException(long start) {
-        return null != exceptionDates && -1 < Arrays.binarySearch(exceptionDates, start);
     }
 
     @Override

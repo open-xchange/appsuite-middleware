@@ -121,7 +121,12 @@ public class RecurrencePositionTest extends AbstractSingleTimeZoneTest {
         assertEquals("Wrong position", 1, service.calculateRecurrencePosition(master, getCal("01.10.2008 08:00:00")));
         assertEquals("Wrong position", 2, service.calculateRecurrencePosition(master, getCal("02.10.2008 08:00:00")));
         assertEquals("Wrong position", 3, service.calculateRecurrencePosition(master, getCal("09.10.2008 08:00:00")));
-        assertEquals("Wrong position", 0, service.calculateRecurrencePosition(master, getCal("16.10.2008 08:00:00")));
+        if (COUNT_DTSTART) {
+            assertEquals("Wrong position", 0, service.calculateRecurrencePosition(master, getCal("16.10.2008 08:00:00")));
+        } else {
+            assertEquals("Wrong position", 4, service.calculateRecurrencePosition(master, getCal("16.10.2008 08:00:00")));
+            assertEquals("Wrong position", 0, service.calculateRecurrencePosition(master, getCal("23.10.2008 08:00:00")));
+        }
     }
 
     @Test

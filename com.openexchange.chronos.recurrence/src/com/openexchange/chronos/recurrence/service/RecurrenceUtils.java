@@ -58,6 +58,10 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
 import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceList;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceRuleAdapter;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceSet;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -79,8 +83,8 @@ public class RecurrenceUtils {
      * @return The recurrence rule iterator
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
-        return getRecurrenceIterator(recurrenceData, false);
+    public static RecurrenceSetIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
+        return getRecurrenceIterator(recurrenceData, false, null);
     }
 
     /**
@@ -90,12 +94,13 @@ public class RecurrenceUtils {
      * @param recurrenceData The recurrence data
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
+     * @param exceptionDates 
      * @return The recurrence rule iterator
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    public static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
+    public static RecurrenceSetIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence, long[] exceptionDates) throws OXException {
         RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
-        return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), forwardToOccurrence);
+        return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), forwardToOccurrence, exceptionDates);
     }
 
     /**
@@ -121,10 +126,11 @@ public class RecurrenceUtils {
      * @param seriesStart The series start date, usually the date of the first occurrence
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
+     * @param exceptionDates 
      * @return The recurrence rule iterator
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    private static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceRule rule, DateTime seriesStart, boolean forwardToOccurrence) throws OXException {
+    private static RecurrenceSetIterator getRecurrenceIterator(RecurrenceRule rule, DateTime seriesStart, boolean forwardToOccurrence, long[] exceptionDates) throws OXException {
         DateTime start = seriesStart;
         try {
             if (forwardToOccurrence && false == isPotentialOccurrence(start, rule)) {
@@ -156,7 +162,12 @@ public class RecurrenceUtils {
                     }
                 }
             }
-            return rule.iterator(start);
+            RecurrenceSet recurrenceSet = new RecurrenceSet();
+            recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
+            if (exceptionDates != null && exceptionDates.length > 0) {
+                recurrenceSet.addExceptions(new RecurrenceList(exceptionDates));
+            }
+            return recurrenceSet.iterator(start.getTimeZone(), start.getTimestamp());
         } catch (IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
         }
