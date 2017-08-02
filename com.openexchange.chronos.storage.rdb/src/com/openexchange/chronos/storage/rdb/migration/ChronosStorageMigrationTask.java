@@ -53,12 +53,8 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -128,12 +124,6 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
             }
             connection.commit();
             committed = true;
-            /*
-             * mark contexts to switch to new storage & commit
-             */
-            for (int contextId : contextIds) {
-                markContextMigrated(contextService, contextId);
-            }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -146,37 +136,6 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                 dbService.backForUpdateTask(params.getContextId(), connection);
             }
         }
-    }
-
-    /**
-     * Marks a context to use the new calendar storage after a successful data migration.
-     *
-     * @param contextService A reference to the context service
-     * @param contextId The identifier of the context to mark
-     */
-    private void markContextMigrated(ContextService contextService, int contextId) throws OXException {
-        HashMap<String, String> contextAttributes = new HashMap<String, String>();
-        contextAttributes.put("config/com.openexchange.chronos.useLegacyStorage", "false");
-        contextAttributes.put("config/com.openexchange.chronos.replayToLegacyStorage", "true");
-        markContext(contextService, contextId, contextAttributes);
-    }
-
-    /**
-     * Applies one or more config properties for a specific context.
-     *
-     * @param contextService A reference to the context service
-     * @param contextId The identifier of the context to mark
-     * @param attributesToSet The attributes to set
-     */
-    private void markContext(ContextService contextService, int contextId, Map<String, String> attributesToSet) throws OXException {
-        for (Entry<String, String> entry : attributesToSet.entrySet()) {
-            String name = entry.getKey();
-            String value = entry.getValue();
-            LOG.trace("About to set attribute \"{}\" to \"{}\" in context {}...", name, value, I(contextId));
-            contextService.setAttribute(entry.getKey(), entry.getValue(), contextId);
-            LOG.trace("Successfully set attribute \"{}\" to \"{}\" in context {}.", name, value, I(contextId));
-        }
-        LOG.info("Successfully set {} attributes in context {}.", I(attributesToSet.size()), I(contextId));
     }
 
 }
