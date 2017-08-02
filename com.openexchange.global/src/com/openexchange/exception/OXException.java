@@ -739,7 +739,13 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the sole message.
+     * Gets the sole message
+     * <p>
+     * In opposite to {@link #getLogMessage()} this method only returns the "Message" part (without code, categories, and whatever);<br>
+     * e.g. <pre>
+     *  OX-0001 Categories=ERROR Message="Huston, we have a problem" exceptionID=147
+     *                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+     *  </pre>
      *
      * @return The sole message
      */
