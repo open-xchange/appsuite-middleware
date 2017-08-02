@@ -72,9 +72,9 @@ public enum PasswordChangeHistoryProperties implements Property {
      * The handler that takes care of creating the history.
      * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
      * 
-     * Default is "DB" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
+     * Default is "Default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
      */
-    handler("DB"),
+    handler("Default"),
 
     /** 
      * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
