@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 
@@ -65,8 +64,6 @@ import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryRES
  */
 public class LimitTest extends AbstractPasswordchangehistoryTest {
 
-    
-
     @Override
     protected Application configure() {
         return new ResourceConfig(PasswordChangeHistoryREST.class);
@@ -74,9 +71,8 @@ public class LimitTest extends AbstractPasswordchangehistoryTest {
 
     @Test
     public void testLimit() throws Exception {
-        String retval = pwdhapi.list(contextID, userID, limit);
-        JSONObject json = new JSONObject(retval);
-        JSONArray array = json.getJSONArray(ARRAY_NAME);
-        assertEquals("More than one element! Limitation did not work..", 1, array.asList().size());
+        String retval = pwdhapi.passwdChanges(contextID, userID, limit, null);
+        JSONArray json = new JSONArray(retval);
+        assertEquals("More than one element! Limitation did not work..", 1, json.asList().size());
     }
 }

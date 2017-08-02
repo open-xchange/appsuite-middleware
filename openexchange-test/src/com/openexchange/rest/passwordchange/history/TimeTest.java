@@ -54,7 +54,6 @@ import static org.junit.Assert.assertEquals;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
@@ -75,19 +74,14 @@ public class TimeTest extends AbstractPasswordchangehistoryTest {
     @Test
     public void testTime() throws Exception {
 
-        String retval = pwdhapi.list(contextID, userID, 0l);
-        JSONObject json = new JSONObject(retval);
-        JSONArray array = json.getJSONArray(ARRAY_NAME).getJSONArray(0);
+        String retval = pwdhapi.passwdChanges(contextID, userID, 0l, ORDER_NEWEST);
+        JSONArray array = new JSONArray(retval);
 
         for (int i = 0; i < array.length(); i++) {
             PasswordChangeInfo info = parse(array.getJSONObject(i));
-            System.out.println(i);
-            System.out.println(info.getCreated());
-            System.out.println(send);
-            System.out.println(send - info.getCreated());
             if ((send - info.getCreated()) < 1000) {
                 // Check other criteria. This may fail if a password change made by another test was within the last second
-                assertEquals("Was not changed by this test!", "App Suite UI", info.getClient());
+                assertEquals("Was not changed by this test!", CLIENT_ID, info.getClient());
                 assertEquals("Was not changed by this test!", "127.0.0.1", info.getIP());
                 return;
             }

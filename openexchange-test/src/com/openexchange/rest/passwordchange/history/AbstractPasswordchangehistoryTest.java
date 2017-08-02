@@ -50,12 +50,17 @@
 package com.openexchange.rest.passwordchange.history;
 
 import static org.junit.Assert.assertFalse;
+import javax.ws.rs.core.HttpHeaders;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
+import com.openexchange.java.Charsets;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
 import com.openexchange.rest.AbstractRestTest;
+import com.openexchange.test.pool.TestUser;
+import com.openexchange.testing.restclient.invoker.ApiClient;
 import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
 
 /**
@@ -66,20 +71,34 @@ import com.openexchange.testing.restclient.modules.PasswordchangehistoryApi;
  */
 public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
 
-    protected static final String ARRAY_NAME = "PasswordChangeHistroy";
-
     protected PasswordchangehistoryApi pwdhapi;
-    protected Long contextID;
-    protected Long userID;
-    protected Long limit = new Long(1);
-    protected long send;
+    protected Long                     contextID;
+    protected Long                     userID;
+    protected Long                     limit = new Long(1);
+    protected long                     send;
+
+    protected String ORDER_NEWEST = "newest";
+    protected String ORDER_OLDEST = "oldest";
+
+    protected ApiClient pwdRestClient;
+
+    protected final static String CLIENT_ID = "com.openexchange.ajax.framework.AJAXClient";
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
+        // Override the rest client with context administrators credentials
+        pwdRestClient = new ApiClient();
+        pwdRestClient.setBasePath(getBasePath());
+        TestUser pwdRestUser = testContext.getAdmin();
+        pwdRestClient.setUsername(pwdRestUser.getUser());
+        pwdRestClient.setPassword(pwdRestUser.getPassword());
+        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String((pwdRestUser.getUser() + ":" + pwdRestUser.getPassword()).getBytes(Charsets.UTF_8));
+        pwdRestClient.addDefaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
+
         // API to operate on
-        pwdhapi = new PasswordchangehistoryApi(getRestClient());
+        pwdhapi = new PasswordchangehistoryApi(pwdRestClient);
 
         // Do a password change
         PasswordChangeUpdateRequest request = new PasswordChangeUpdateRequest(testUser.getPassword(), testUser.getPassword(), true);
@@ -94,9 +113,9 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
     }
 
     protected PasswordChangeInfo parse(JSONObject data) throws Exception {
-        final String ip = filter(data, "ip");
-        final String client = filter(data, "client");
-        final Long created = Long.valueOf(filter(data, "created"));
+        final String ip = filter(data, "client_address");
+        final String client = filter(data, "client_id");
+        final Long created = Long.valueOf(filter(data, "date"));
 
         return new PasswordChangeInfoImpl(created, client, ip);
     }
