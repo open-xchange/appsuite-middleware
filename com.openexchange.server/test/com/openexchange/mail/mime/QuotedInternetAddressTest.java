@@ -67,6 +67,12 @@ public class QuotedInternetAddressTest {
     public QuotedInternetAddressTest() {
         super();
     }
+    
+    @Test
+    public void testBug54879() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"atest\"@example.com");
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
+    }
 
          @Test
      public void testBug33552() throws Exception {
