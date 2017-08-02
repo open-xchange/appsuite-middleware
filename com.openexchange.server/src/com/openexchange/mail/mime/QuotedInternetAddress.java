@@ -1256,7 +1256,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
+        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT_NO_QUOTE) < 0;
     }
 
     /**
@@ -1280,7 +1280,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final String SPECIALS_NO_DOT_NO_AT = "()<>,;:\\\"[]";
+    private static final String SPECIALS_NO_DOT_NO_AT_NO_QUOTE = "()<>,;:\\[]";
 
     private static final String SPECIALS_NO_DOT = "()<>@,;:\\\"[]";
 
