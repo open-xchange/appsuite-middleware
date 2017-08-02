@@ -319,8 +319,9 @@ public class GetPerformer extends AbstractPerformer {
                                     postSplit.setStartTime(availabilityB.getEndTime());
                                     preIntersections.add(postSplit);
                                 } else {
-                                    // Otherwise the end time of the free slot 
-                                    cfs.setEndTime(availabilityB.getStartTime());
+                                    // Otherwise the end time of the free slot will be shortened
+                                    // to match the the start time of the availability block A
+                                    cfs.setEndTime(availabilityA.getStartTime());
                                 }
                             } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), pre.getStartTime(), pre.getEndTime())) {
                                 preSlots.add(cfs);
