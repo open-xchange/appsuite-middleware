@@ -202,7 +202,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
     }
 
     private static FileStorage getFileStorage(int contextId) throws OXException {
-        if (QuotaMode.CONTEXT.equals(MODE)) {
+        if (QuotaMode.CONTEXT.equals(getMode())) {
             return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
         }
 

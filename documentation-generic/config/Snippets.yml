@@ -45,7 +45,8 @@ properties:
       tags: ["Snippet", "Limit"]
     - key: com.openexchange.snippet.filestore.quota.perUserLimit
       description: |
-        Specifies the snippet quota limit in bytes. Only active in case [[com.openexchange.snippet.filestore.quota.mode]] is set to <code>independent</code>.
+        Specifies the snippet quota limit as a byte value including an optional unit (e.g. <code>10 MB</code> or <code>17.5kB</code>). 
+        Only active in case [[com.openexchange.snippet.filestore.quota.mode]] is set to <code>independent</code>.
       defaultValue: 5242880
       version: 7.10.0
       reloadable: true

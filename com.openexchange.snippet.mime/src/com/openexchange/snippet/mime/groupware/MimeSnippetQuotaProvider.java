@@ -52,6 +52,9 @@ package com.openexchange.snippet.mime.groupware;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
@@ -119,7 +122,15 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
     }
 
     private Quota getSizeQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
-        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, USER_LIMIT_PROPERTY, viewFactory, 5242880);
+        long def = 5242880;
+        long limit = def;
+        ConfigView configView = viewFactory.getView(session.getUserId(), session.getContextId());
+        // Get property
+        ConfigProperty<String> property = configView.property(USER_LIMIT_PROPERTY, String.class);
+        if (property.isDefined()) {
+            limit = ConfigTools.parseBytes(property.get());
+        }
+
         if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_SIZE;
         }
