@@ -725,14 +725,81 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
     public boolean contains(CalendarAvailabilityField field) {
         return fields.contains(field);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#clone()
      */
     @Override
     public CalendarAvailability clone() throws CloneNotSupportedException {
-        //TODO: implement
-        return (CalendarAvailability) super.clone();
+        CalendarAvailability clone = (CalendarAvailability) super.clone();
+        if (contains(AvailabilityField.busytype)) {
+            clone.setBusyType(busyType);
+        }
+        if (contains(AvailabilityField.categories)) {
+            clone.setCategories(categories);
+        }
+        if (contains(AvailabilityField.classification)) {
+            clone.setClassification(classification);
+        }
+        if (contains(AvailabilityField.comment)) {
+            clone.setComments(comments);
+        }
+        if (contains(AvailabilityField.created)) {
+            clone.setCreated(created);
+        }
+        if (contains(AvailabilityField.createdBy)) {
+            clone.setCreatedBy(createdBy);
+        }
+        if (contains(AvailabilityField.description)) {
+            clone.setDescription(description);
+        }
+        if (contains(AvailabilityField.dtend)) {
+            clone.setEndTime(endTime);
+        }
+        if (contains(AvailabilityField.dtstamp)) {
+            clone.setCreationTimestamp(creationTimestamp);
+        }
+        if (contains(AvailabilityField.dtstart)) {
+            clone.setStartTime(startTime);
+        }
+        if (contains(AvailabilityField.duration)) {
+            clone.setDuration(duration);
+        }
+        if (contains(AvailabilityField.extendedProperties)) {
+            clone.setExtendedProperties(extendedProperties);
+        }
+        if (contains(AvailabilityField.id)) {
+            clone.setId(id);
+        }
+        if (contains(AvailabilityField.lastModified)) {
+            clone.setLastModified(lastModified);
+        }
+        if (contains(AvailabilityField.location)) {
+            clone.setLocation(location);
+        }
+        if (contains(AvailabilityField.organizer)) {
+            clone.setOrganizer(organizer);
+        }
+        if (contains(AvailabilityField.priority)) {
+            clone.setPriority(priority);
+        }
+        if (contains(AvailabilityField.seq)) {
+            clone.setSequence(sequence);
+        }
+        if (contains(AvailabilityField.summary)) {
+            clone.setSummary(summary);
+        }
+        if (contains(AvailabilityField.uid)) {
+            clone.setUid(uid);
+        }
+        if (contains(AvailabilityField.url)) {
+            clone.setUrl(url);
+        }
+        clone.setCalendarUser(calendarUser);
+
+        return clone;
     }
 
     /*
