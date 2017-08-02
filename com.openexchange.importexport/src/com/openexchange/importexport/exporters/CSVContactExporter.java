@@ -166,41 +166,43 @@ public class CSVContactExporter implements Exporter {
     protected static final ContactField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS.toArray(new ContactField[DEFAULT_FIELDS.size()]);
 
     @Override
-    public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) {
+    public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) {
         if (!format.equals(Format.CSV)) {
             return false;
         }
+
+        // load folder
         FolderObject fo;
         try {
-            fo = getFolderObject(sessObj, folder);
+            fo = getFolderObject(session, folder);
         } catch (final OXException e) {
             return false;
         }
+
         // check format of folder
         if (fo.getModule() != FolderObject.CONTACT) {
             return false;
         }
+
         // check read access to folder
         EffectivePermission perm;
         try {
-            perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-                sessObj.getUserId(),
-                sessObj.getContext()));
+            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+            return perm.canReadAllObjects();
         } catch (final OXException e) {
             return false;
         }
-        return perm.canReadAllObjects();
     }
-    
+
     @Override
     public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
                 throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-            }            
+            }
             for (String objectId : batchEntry.getValue()) {
                 try {
-                    Integer.parseInt(objectId);                    
+                    Integer.parseInt(objectId);
                 } catch (NumberFormatException e) {
                     throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
                 }
@@ -281,7 +283,7 @@ public class CSVContactExporter implements Exporter {
     @Override
     public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         canExportBatch(sessObj, format, batchIds, optionalParams);
-        
+
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = DEFAULT_FIELDS_ARRAY;
