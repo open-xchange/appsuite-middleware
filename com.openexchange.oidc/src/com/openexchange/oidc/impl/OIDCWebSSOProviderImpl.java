@@ -186,10 +186,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return hostname;
     }
 
+    //TODO QS-VS: Bessere Strukturierung der Methode
     @Override
     public String authenticateUser(HttpServletRequest httpRequest) throws OXException{
         String redirectionString = "";
-        TokenRequest tokenReq;
         
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(httpRequest.getParameter("state"));
         
@@ -198,7 +198,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         
         try {
-            tokenReq = createTokenRequest(httpRequest);
+            TokenRequest tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
             IDTokenClaimsSet idTokenClaimsSet = this.validTokenResponse(tokenResponse, storedRequestInformation);
             BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
@@ -218,12 +218,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     
     private String loadEmailAddressFromIDP(BearerAccessToken bearerAccessToken) throws OXException {
         UserInfoRequest userInfoReq = null;
-        String userInfoEndpoint = this.backend.getBackendConfig().getUserInfoEndpoint();
-        try {
-            userInfoReq = new UserInfoRequest(new URI(userInfoEndpoint), bearerAccessToken);
-        } catch (URISyntaxException e1) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e1, userInfoEndpoint);
-        }
+        userInfoReq = new UserInfoRequest(getURIFromPath(this.backend.getBackendConfig().getUserInfoEndpoint()), bearerAccessToken);
 
         HTTPResponse userInfoHTTPResp = null;
         try {
@@ -262,24 +257,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws OXException {
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        String redirectURIAuth = this.backend.getBackendConfig().getRedirectURIAuth();
-        URI callback = null;
-        try {
-            callback = new URI(redirectURIAuth);
-        } catch (URISyntaxException e) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, redirectURIAuth);
-        }
+        URI callback = this.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
     
-        URI tokenEndpoint = null;
-        String tokenEndpointConfig = this.backend.getBackendConfig().getTokenEndpoint();
-        try {
-            tokenEndpoint = new URI(tokenEndpointConfig);
-        } catch (URISyntaxException e) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, tokenEndpointConfig);
-        }
+        URI tokenEndpoint = getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
     
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
@@ -307,5 +290,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         
         return (OIDCTokenResponse) tokenResponse;
+    }
+    
+    private URI getURIFromPath(String path) throws OXException{
+        try {
+            return new URI(path);
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, path);
+        }
     }
 }
