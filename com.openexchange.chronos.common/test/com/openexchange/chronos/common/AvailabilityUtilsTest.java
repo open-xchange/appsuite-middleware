@@ -91,8 +91,8 @@ public class AvailabilityUtilsTest {
         b.setStartTime(new DateTime(2017, 10, 18));
         b.setEndTime(new DateTime(2017, 10, 19));
 
-        assertTrue(AvailabilityUtils.intersect(base, b));
-        assertTrue(AvailabilityUtils.intersect(b, base));
+        assertFalse(AvailabilityUtils.contained(base, b));
+        assertTrue(AvailabilityUtils.contained(b, base));
     }
 
     /**
