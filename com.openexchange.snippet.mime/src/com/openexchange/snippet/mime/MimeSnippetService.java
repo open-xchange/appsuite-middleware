@@ -98,7 +98,7 @@ public final class MimeSnippetService implements QuotaAwareSnippetService {
 
     @Override
     public List<String> getFilesToIgnore(int contextId) throws OXException {
-        if (ignoreQuota()) {
+        if (!ignoreQuota()) {
             return Collections.emptyList();
         }
         return MimeSnippetFileAccess.getFiles(contextId);
