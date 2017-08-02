@@ -285,19 +285,16 @@ public class GetPerformer extends AbstractPerformer {
                     availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
                     iteratorB.remove();
                 } else if (AvailabilityUtils.contained(availabilityA, availabilityB)) {
-                    List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
-                    flattenList.addAll(availabilityA.getCalendarFreeSlots());
-                    flattenList.addAll(availabilityB.getCalendarFreeSlots());
                     List<CalendarFreeSlot> preIntersections = new ArrayList<>();
                     List<CalendarFreeSlot> postIntersections = new ArrayList<>();
+                    List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
                     try {
                         CalendarAvailability pre = availabilityB.clone();
                         pre.setEndTime(availabilityA.getStartTime());
-                        // Find any slots that intersect with the new end time
-                        // adjust and split them if they are of equal priority, then append the first split 
-                        // to the pre availability, and the last split to the preIntersections.
-                        for (CalendarFreeSlot cfs : availabilityB.getCalendarFreeSlots()) {
-                            if (AvailabilityUtils.intersect(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                        List<CalendarFreeSlot> preSlots = new ArrayList<>();
+                        for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                            CalendarFreeSlot cfs = iterator.next();
+                            if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                                 if (availabilityA.compareTo(availabilityB) == 0) {
                                     CalendarFreeSlot preSplit = cfs.clone();
                                     preSplit.setEndTime(availabilityA.getStartTime());
@@ -309,10 +306,12 @@ public class GetPerformer extends AbstractPerformer {
                                 } else {
                                     cfs.setEndTime(availabilityB.getStartTime());
                                 }
-                                break; // There will only be one intersection
+                            } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), pre.getStartTime(), pre.getEndTime())) {
+                                preSlots.add(cfs);
+                                iterator.remove();
                             }
                         }
-
+                        pre.setCalendarFreeSlots(preSlots);
                         presAndPosts.add(pre);
 
                         CalendarAvailability post = availabilityB.clone();
@@ -320,8 +319,10 @@ public class GetPerformer extends AbstractPerformer {
                         // Find any slots that intersect with the new start time
                         // adjust and split them if they are of equal priority, then append the first split
                         // to the postIntersections and the last split to the post availability.
-                        for (CalendarFreeSlot cfs : availabilityB.getCalendarFreeSlots()) {
-                            if (AvailabilityUtils.intersect(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                        List<CalendarFreeSlot> postSlots = new ArrayList<>();
+                        for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                            CalendarFreeSlot cfs = iterator.next();
+                            if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                                 if (availabilityA.compareTo(availabilityB) == 0) {
                                     CalendarFreeSlot preSplit = cfs.clone();
                                     preSplit.setEndTime(availabilityB.getStartTime());
@@ -333,17 +334,22 @@ public class GetPerformer extends AbstractPerformer {
                                 } else {
                                     cfs.setStartTime(availabilityA.getEndTime());
                                 }
-                                break; // There will only be one intersection
+                            } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), post.getStartTime(), post.getEndTime())) {
+                                postSlots.add(cfs);
+                                iterator.remove();
                             }
                         }
+                        post.setCalendarFreeSlots(postSlots);
                         presAndPosts.add(post);
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
                     }
-                    availabilityB.setCalendarFreeSlots(combineSlots(flattenList));
+                    flattenList.addAll(availabilityA.getCalendarFreeSlots());
+                    flattenList.addAll(availabilityB.getCalendarFreeSlots());
+                    availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
                     // Add any splits from the intersections to the availability B
-                    availabilityB.getCalendarFreeSlots().addAll(preIntersections);
-                    availabilityB.getCalendarFreeSlots().addAll(postIntersections);
+                    availabilityA.getCalendarFreeSlots().addAll(preIntersections);
+                    availabilityA.getCalendarFreeSlots().addAll(postIntersections);
 
                     // Remove the contained availability
                     iteratorB.remove();
