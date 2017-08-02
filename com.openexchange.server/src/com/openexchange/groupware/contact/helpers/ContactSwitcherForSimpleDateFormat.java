@@ -148,12 +148,13 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
                 return parseDateStringManually(dateString, objects);
             } else {
                 return parseDateStringByDateFormat(dateString, objects);
-            }
+            } 
+            
         }
         return objects;
     }        
     
-    private Object[] parseDateStringByDateFormat(String dateString, final Object[] objects) throws OXException {
+    private Object[] parseDateStringByDateFormat(String dateString, final Object... objects) throws OXException {
         final int size = dateFormats.size();
         for (int index = 0; index < size; index++) {
             try {
@@ -175,7 +176,6 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
             } catch (final ParseException e) {
                 LOG.debug(e.getMessage());
             }
-            throw ContactExceptionCodes.DATE_CONVERSION_FAILED.create((String) objects[1]);
         }
         return objects;
     }
