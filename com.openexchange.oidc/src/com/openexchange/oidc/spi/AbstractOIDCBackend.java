@@ -75,8 +75,13 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestImpl;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -186,6 +191,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         String scopes = getBackendConfig().getScope();
         String[] scopeArray = scopes.split(";");
         return new Scope(scopeArray);
+    }
+    
+    @Override
+    public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
+        String login = userID + "@" + contextID;
+        String defaultClient = loginConfiguration.getDefaultClient();
+        LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, "secret", false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
+        return parseLogin;
     }
     
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist

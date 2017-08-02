@@ -51,7 +51,6 @@ package com.openexchange.oidc.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -63,7 +62,6 @@ import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
@@ -75,7 +73,6 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
@@ -83,10 +80,19 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginMethodClosure;
+import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.login.internal.LoginResultImpl;
+import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
@@ -95,7 +101,6 @@ import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
-import net.minidev.json.JSONObject;
 
 
 /**
@@ -111,12 +116,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
+    private final LoginConfiguration loginConfiguration;
     
     
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, LoginConfiguration loginConfiguration) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
+        this.loginConfiguration = loginConfiguration;
     }
     
     @Override
@@ -204,7 +211,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
             if(idTokenClaimsSet != null && bearerAccessToken != null) {
                 String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
-                redirectionString = this.loginUserAndRedirect(emailAddress);
+                redirectionString = this.loginUserAndRedirect(httpRequest, emailAddress);
             } else {
                 throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
             }
@@ -246,8 +253,20 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return successResponse.getUserInfo().getEmailAddress();
     }
     
-    private String loginUserAndRedirect(String emailAddress) throws OXException {
-        
+    private String loginUserAndRedirect(HttpServletRequest httpRequest, String emailAddress) throws OXException {
+        MailResolver mailMapping = Services.getService(MailResolver.class);
+        ResolvedMail resolvedMail = mailMapping.resolve(emailAddress);
+        if (resolvedMail == null) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_USER_ADDRESS.create(emailAddress);
+        }
+        LoginRequest loginRequest = this.backend.getLoginRequest(httpRequest, resolvedMail.getUserID(), resolvedMail.getContextID(), this.loginConfiguration);
+        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
+            
+            @Override
+            public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
+                return null;
+            }
+        });
         return null;
     }
 

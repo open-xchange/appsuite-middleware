@@ -75,7 +75,8 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: %1$s", Category.CATEGORY_ERROR, 12), 
     UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to %1$s", Category.CATEGORY_ERROR, 13), 
     UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to %1$s", Category.CATEGORY_ERROR, 14), 
-    UNABLE_TO_PARSE_URI("Unable to parse the following URI: %1$s", Category.CATEGORY_CONFIGURATION, 15);
+    UNABLE_TO_PARSE_URI("Unable to parse the following URI: %1$s", Category.CATEGORY_CONFIGURATION, 15), 
+    UNABLE_TO_PARSE_USER_ADDRESS("The following email address could not be mapped to a user: %1$s, potential data inconsistency, since this address was responded by the IDP.", Category.CATEGORY_CONFLICT, 16);
 
     private final String message;
     private final String displayMessage;

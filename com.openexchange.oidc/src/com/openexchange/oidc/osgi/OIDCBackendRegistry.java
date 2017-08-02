@@ -59,6 +59,8 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
@@ -86,6 +88,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     private final ConcurrentList<OIDCBackend> backends;
     private ConcurrentHashMap<OIDCBackend, Stack<String>> backendServlets;
     private ConcurrentHashMap<OIDCBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
+    private LoginConfiguration loginConfiguration;
 
     //TODO QS-VS: comment
     public OIDCBackendRegistry(BundleContext context, ServiceLookup services) {
@@ -94,7 +97,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         this.backends = new ConcurrentList<>();
         this.backendServlets = new ConcurrentHashMap<>();
         this.backendServiceRegistrations = new ConcurrentHashMap<>();
-
+        this.loginConfiguration = LoginServlet.getLoginConfiguration();
     }
     
     @Override
@@ -114,7 +117,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)));
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.loginConfiguration);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, this.services, config), "init");

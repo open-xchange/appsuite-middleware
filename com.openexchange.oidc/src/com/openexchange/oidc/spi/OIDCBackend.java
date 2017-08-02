@@ -60,7 +60,10 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
@@ -111,5 +114,7 @@ public interface OIDCBackend {
     IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException;
 
     Scope getScope();
+
+    LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
 }

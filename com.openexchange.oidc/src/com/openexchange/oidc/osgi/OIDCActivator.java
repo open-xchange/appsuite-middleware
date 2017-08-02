@@ -53,6 +53,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
@@ -77,6 +78,7 @@ public class OIDCActivator extends HousekeepingActivator{
             DispatcherPrefixService.class, 
             HazelcastInstance.class,
             HostnameService.class,
+            MailResolver.class
         };
     }
 
