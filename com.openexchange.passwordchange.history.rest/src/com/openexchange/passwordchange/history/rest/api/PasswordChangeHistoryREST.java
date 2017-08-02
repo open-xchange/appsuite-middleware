@@ -185,7 +185,7 @@ public class PasswordChangeHistoryREST {
                 // Authenticate the context administrator
                 Authenticator authenticator = getService(Authenticator.class);
                 try {
-                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextID);
+                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextID, true);
                     return null;
                 } catch (OXException e) {
                     // Fall through
