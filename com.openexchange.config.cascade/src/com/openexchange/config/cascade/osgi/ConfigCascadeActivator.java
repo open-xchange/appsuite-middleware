@@ -212,8 +212,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         configured = true;
 
         String[] searchPath = scops.split("\\s*,\\s*");
-        cascade.setSearchPath(searchPath);
-
         for (String scope : searchPath) {
             if ("server".equals(scope)) {
                 continue;
@@ -224,6 +222,8 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
             cascade.setProvider(scope, trackingProvider);
             trackingProvider.open();
         }
+
+        cascade.setSearchPath(searchPath);
     }
 
 }
