@@ -71,7 +71,7 @@ public class CascadingConfigurationImplTest {
     private ConfigView view = null;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         cascade.setProvider("server", new InMemoryConfigProvider());
         cascade.setProvider("context", new InMemoryConfigProvider());
         cascade.setProvider("user", new InMemoryConfigProvider());
