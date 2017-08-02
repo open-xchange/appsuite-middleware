@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordchange.history.handler.impl;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 
 /**
@@ -58,10 +57,9 @@ import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@XmlRootElement
 public class PasswordChangeInfoImpl implements PasswordChangeInfo {
 
-    private long created;
+    private long   created;
     private String client;
     private String ip;
 
@@ -94,4 +92,45 @@ public class PasswordChangeInfoImpl implements PasswordChangeInfo {
         return ip;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 61;
+        int result = 1;
+        result = prime * result + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + (int) (created ^ (created >>> 32));
+        result = prime * result + ((ip == null) ? 0 : ip.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PasswordChangeInfoImpl other = (PasswordChangeInfoImpl) obj;
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
+        if (created != other.created) {
+            return false;
+        }
+        if (ip == null) {
+            if (other.ip != null) {
+                return false;
+            }
+        } else if (!ip.equals(other.ip)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -64,16 +64,15 @@ import com.openexchange.session.Session;
 public class PasswordChangeEventListener implements EventHandler {
 
     private static final String TOPIC = "com/openexchange/passwordchange";
-    private final ServiceLookup service;
-    private final PasswordChangeHandlerRegistry registry;
+
+    PasswordChangeHelper helper;
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.
      */
     public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
         super();
-        this.service = service;
-        this.registry = registry;
+        this.helper = new PasswordChangeHelper(service, registry);
     }
 
     /**
@@ -97,6 +96,6 @@ public class PasswordChangeEventListener implements EventHandler {
         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
 
         // Process tracking
-        PasswordChangeUtility.recordChange(service, registry, contextID, userID, ipAdderess, session.getClient());
+        helper.recordChange(contextID, userID, ipAdderess, session.getClient());
     }
 }

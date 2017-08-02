@@ -71,8 +71,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryCreateTableTask.class);
-    private static final String HISTORY_NAME = "user_password_history";
+    private static final org.slf4j.Logger LOG          = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryCreateTableTask.class);
+    private static final String           HISTORY_NAME = "user_password_history";
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
@@ -83,7 +83,9 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
         sb.append("created LONG NOT NULL,");
         sb.append("source VARCHAR(256) NULL DEFAULT NULL,");
         sb.append("ip VARCHAR(45) NULL DEFAULT NULL,");
-        sb.append("PRIMARY KEY (id));");
+        sb.append("PRIMARY KEY (id),");
+        sb.append("INDEX context_and_user (cid, uid)");
+        sb.append(");");
         return sb.toString();
     }
 

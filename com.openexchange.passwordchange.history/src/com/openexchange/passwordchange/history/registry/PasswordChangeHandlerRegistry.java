@@ -118,7 +118,7 @@ public class PasswordChangeHandlerRegistry implements ServiceTrackerCustomizer<P
      * @param symbolicName The name of the {@link PasswordHistoryHandler}
      * @return The {@link PasswordHistoryHandler} or <code>null</code>
      */
-    public synchronized PasswordHistoryHandler getTracker(String symbolicName) {
+    public synchronized PasswordHistoryHandler getHandler(String symbolicName) {
         if (checkSymbolic(symbolicName)) {
             return this.handler.get(symbolicName);
         }
