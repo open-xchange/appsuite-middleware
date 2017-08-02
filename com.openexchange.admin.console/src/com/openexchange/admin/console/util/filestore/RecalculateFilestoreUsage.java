@@ -60,9 +60,6 @@ import org.apache.commons.cli.Options;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 
@@ -127,7 +124,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
             boolean hasScopeOption = cmd.hasOption(OPT_SCOPE_LONG);
             if (hasScopeOption) {
                 String scope = hasScopeOption ? cmd.getOptionValue(OPT_SCOPE_LONG) : null;
-                recalculateUsingScope(scope, oxutil);
+                recalculateUsingScope(scope, oxutil, null);
             } else {
                 recalculateDedicated(options, cmd, oxutil);
             }
@@ -138,7 +135,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
         return null;
     }
 
-    private void recalculateDedicated(Options options, CommandLine cmd, OXUtilInterface oxutil) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
+    private void recalculateDedicated(Options options, CommandLine cmd, OXUtilInterface oxutil) throws Exception {
         // Require 'context' option
         if (false == cmd.hasOption(OPT_CONTEXT_LONG)) {
             System.err.println("If \"" + OPT_SCOPE_LONG + "\" option is not set, the \"" + OPT_CONTEXT_LONG + "\" is required.");
@@ -147,14 +144,19 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
         int contextId = parseInt(OPT_CONTEXT_LONG, 0, cmd, options);
 
         // Check optional 'user' option
-        int userId = 0;
+        Integer userId = null;
         if (cmd.hasOption(OPT_USER_LONG)) {
-            userId = parseInt(OPT_USER_LONG, 0, cmd, options);
+            if("all".equals(cmd.getOptionValue(OPT_USER_LONG).toString().toLowerCase())){
+                recalculateUsingScope(RecalculationScope.USER.name(), oxutil, Integer.valueOf(contextId));
+                return;
+            } else {
+                userId = Integer.valueOf(parseInt(OPT_USER_LONG, 0, cmd, options));
+            }
         }
 
         // Trigger recalculation
-        if (userId > 0) {
-            oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), Integer.valueOf(userId), credentials);
+        if (userId != null && userId > 0) {
+            oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), userId, credentials);
             System.out.println("Filestore usage has been successfully recalculated for user " + userId + " in context " + contextId);
         } else {
             oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), null, credentials);
@@ -162,7 +164,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
         }
     }
 
-    private void recalculateUsingScope(String scopeName, final OXUtilInterface oxutil) throws Exception {
+    private void recalculateUsingScope(String scopeName, final OXUtilInterface oxutil, final Integer ctxId) throws Exception {
         // Create & execute task to recalculates usages for given scope
         final RecalculationScope scope = RecalculationScope.getScopeByName(scopeName);
         final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
@@ -172,7 +174,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
             @Override
             public void run() {
                 try {
-                    oxutil.recalculateFilestoreUsage(scope, credentials);
+                    oxutil.recalculateFilestoreUsage(scope, credentials, ctxId);
                 } catch (Exception e) {
                     errorRef.set(e);
                 }
@@ -225,6 +227,6 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getName() {
-        return "recalculatefilestoreusage [-c <context-id> [-u <user-id>] | --all <scope>]";
+        return "recalculatefilestoreusage [-c <context-id> [-u <user-id>] | --scope <scope>]";
     }
 }

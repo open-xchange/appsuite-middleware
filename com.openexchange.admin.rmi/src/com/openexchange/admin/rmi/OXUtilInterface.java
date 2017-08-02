@@ -594,9 +594,10 @@ public interface OXUtilInterface extends Remote {
      *
      * @param scope The scope
      * @param auth Credentials for authenticating against server.
+     * @param ctxId An optional context id to limit the calculation to this context.
      * @throws InvalidCredentialsException In case the credentials are wrong
      * @throws RemoteException
      * @throws OXException In case the usage couldn't be recalculated
      */
-    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials auth) throws InvalidCredentialsException, StorageException, RemoteException;
+    public void recalculateFilestoreUsage(RecalculationScope scope, Credentials auth, Integer ctxId) throws InvalidCredentialsException, StorageException, RemoteException;
 }
