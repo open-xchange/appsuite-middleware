@@ -299,7 +299,7 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
         CalendarAvailability calendarAvailabilityB = availableTime.get(1);
         assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 1), calendarAvailabilityB.getStartTime());
         assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityB.getEndTime());
-        assertEquals("The amount of free slots does not match", 3, calendarAvailabilityB.getCalendarFreeSlots().size());
+        assertEquals("The amount of free slots does not match", 2, calendarAvailabilityB.getCalendarFreeSlots().size());
         
         CalendarAvailability calendarAvailabilityC = availableTime.get(2);
         assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityC.getStartTime());
@@ -310,11 +310,11 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
         assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 0, 3), freeSlotA.getStartTime());
         assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 0, 25), freeSlotA.getEndTime());
 
-        CalendarFreeSlot freeSlotB = calendarAvailabilityA.getCalendarFreeSlots().get(1);
+        CalendarFreeSlot freeSlotB = calendarAvailabilityB.getCalendarFreeSlots().get(0);
         assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 3), freeSlotB.getStartTime());
         assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 5), freeSlotB.getEndTime());
 
-        CalendarFreeSlot freeSlotC = calendarAvailabilityA.getCalendarFreeSlots().get(2);
+        CalendarFreeSlot freeSlotC = calendarAvailabilityB.getCalendarFreeSlots().get(1);
         assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 8), freeSlotC.getStartTime());
         assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 15), freeSlotC.getEndTime());
     }
