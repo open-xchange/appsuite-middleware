@@ -347,7 +347,7 @@ public class GetPerformer extends AbstractPerformer {
                     flattenList.addAll(availabilityA.getCalendarFreeSlots());
                     flattenList.addAll(availabilityB.getCalendarFreeSlots());
                     availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
-                    // Add any splits from the intersections to the availability B
+                    // Add any splits from the intersections to the availability A
                     availabilityA.getCalendarFreeSlots().addAll(preIntersections);
                     availabilityA.getCalendarFreeSlots().addAll(postIntersections);
 
