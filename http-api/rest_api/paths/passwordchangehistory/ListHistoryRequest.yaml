@@ -1,5 +1,7 @@
 /admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes:
   get:
+    security:
+      - basicAuth: []
     operationId: passwd-changes
     tags:
       - Passwordchangehistory

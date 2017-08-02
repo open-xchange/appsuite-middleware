@@ -61,6 +61,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -123,7 +124,7 @@ public class PasswordChangeHistoryREST {
              */
             String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
             if (null == symbolicName || symbolicName.isEmpty() || false == symbolicName.equals(handler.getSymbolicName())) {
-                return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                return Response.serverError().build();
             }
 
             List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
@@ -150,7 +151,7 @@ public class PasswordChangeHistoryREST {
             return entries;
         } catch (Exception e) {
             LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userID, contextID, e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.serverError().build();
         }
     }
 
@@ -192,7 +193,7 @@ public class PasswordChangeHistoryREST {
                 }
             }
         } // No valid header
-        return Response.serverError().status(Response.Status.FORBIDDEN).build();
+        return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"").build();
     }
 
     /**
