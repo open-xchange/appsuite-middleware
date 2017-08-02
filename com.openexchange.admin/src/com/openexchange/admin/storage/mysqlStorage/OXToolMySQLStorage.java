@@ -2781,7 +2781,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
 
                     if (lang != null) {
-                        if (lang.indexOf('_') == -1) {
+                        if (lang.indexOf('_') < 0) {
                             throw new InvalidDataException("language must contain an underscore, e.g. en_US");
                         }
                         user.setLanguage(lang);
@@ -2794,7 +2794,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
-            if (lang.indexOf('_') == -1) {
+            if (lang.indexOf('_') < 0) {
                 throw new InvalidDataException("language must contain an underscore, e.g. en_US");
             }
         }
