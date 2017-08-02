@@ -128,7 +128,7 @@ public class PasswordChangeHelper {
         }
         ConfigView view = casscade.getView(userID, contextID);
         Boolean enabled = PasswordChangeHistoryProperties.enable.getDefaultValue(Boolean.class);
-        String handlerName = PasswordChangeHistoryProperties.handler.getDefaultValue(String.class);
+        String handlerName = null;
 
         try {
             enabled = view.get(PasswordChangeHistoryProperties.enable.getFQPropertyName(), Boolean.class);
@@ -143,8 +143,8 @@ public class PasswordChangeHelper {
         }
 
         if (null == handlerName || handlerName.isEmpty()) {
-            LOG.debug("No PasswordChangeTracker found .. No tracking wanted ");
-            throw PasswordChangeHistoryException.MISSING_CONFIGURATION.create(userID, contextID);
+            handlerName = PasswordChangeHistoryProperties.handler.getDefaultValue(String.class);
+            LOG.debug("No PasswordChangeTracker found. Falling back to default value");           
         }
 
         if (null == registry) {
