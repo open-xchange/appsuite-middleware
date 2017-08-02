@@ -95,7 +95,7 @@ public class ExportRequest {
             try {
                 batchIds = extractBatchArrayFromRequest((JSONArray) data);
             } catch (JSONException e) {
-                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+                throw ImportExportExceptionCodes.COULD_NOT_PARSE_JSON_BODY.create(e);
             }
         } else {
             String value = request.getParameter("body");
@@ -104,7 +104,7 @@ public class ExportRequest {
                 try{
                     batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
                 } catch (JSONException e) {
-                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+                    throw ImportExportExceptionCodes.COULD_NOT_PARSE_JSON_BODY.create(e);
                 }
             } else {
                 batchIds = null;

@@ -186,8 +186,10 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
 
     /** %1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s */
     WARNINGS_AND_TRUNCATED_RESULTS("%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s", CATEGORY_WARNING, 1322, ImportExportExceptionMessages.WARNINGS_AND_TRUNCATED_RESULTS_MSG),
+    
+    COULD_NOT_PARSE_JSON_BODY("Could not parse json body parameters for folders and objects.", Category.CATEGORY_USER_INPUT, 1323, ImportExportExceptionMessages.COULD_NOT_PARSE_JSON_BODY_MSG),
     ;
-
+    
     private String message;
     private Category category;
     private int number;
