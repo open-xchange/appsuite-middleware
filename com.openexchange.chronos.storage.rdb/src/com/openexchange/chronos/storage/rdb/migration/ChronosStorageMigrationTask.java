@@ -93,7 +93,10 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName() };
+        return new String[] { 
+            com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName(), 
+            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" 
+        };
     }
 
     @Override
