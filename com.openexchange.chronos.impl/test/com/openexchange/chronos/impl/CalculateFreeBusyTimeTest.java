@@ -383,7 +383,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(7);
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 1)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 20)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 3, 5)));
