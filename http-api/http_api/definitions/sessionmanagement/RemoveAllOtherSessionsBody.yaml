@@ -1,4 +1,4 @@
-type: json
+type: object
 properties:
   sessionIdToKeep:
     type: string
