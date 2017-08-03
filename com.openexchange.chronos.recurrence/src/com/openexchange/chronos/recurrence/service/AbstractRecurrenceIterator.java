@@ -49,7 +49,11 @@
 
 package com.openexchange.chronos.recurrence.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -84,6 +88,9 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected int count;
     protected int position;
     protected RecurrenceSetIterator inner;
+    protected final long[] exceptionDates;
+    
+    
 
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
@@ -122,11 +129,12 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         this.startPosition = startPosition;
         this.end = end;
         this.limit = limit;
+        this.exceptionDates = exceptionDates;
         if (limit != null && limit == 0) {
             ChronosLogger.debug("Occurrence limit set to 0, nothing to do.");
             return;
         }
-        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence, exceptionDates);
+        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence);
         next = null;
         position = 0;
         count = 0;
@@ -139,6 +147,10 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
             while (inner.hasNext()) {
                 long candidate = inner.next();
+                if (isException(candidate)) {
+                    position++;
+                    continue;
+                }
                 if (start != null && candidate + eventDuration > start.getTimeInMillis() ||
                     start != null && 0L == eventDuration && candidate == start.getTimeInMillis() ||
                     startPosition != null && position + 1 >= startPosition.intValue()) {
@@ -194,6 +206,17 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             lookAhead = inner.next();
         }
 
+        while (isException(lookAhead)) {
+            ChronosLogger.debug("Next instance is exception.");
+            position++;
+            if (inner.hasNext()) {
+                lookAhead = inner.next();
+            } else {
+                next = null;
+                return;
+            }
+        }
+
         if (this.end != null && lookAhead >= this.end.getTimeInMillis()) {
             ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", lookAhead, this.end.getTimeInMillis());
             next = null;
@@ -237,6 +260,10 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             return new DateTime(null, timestamp).toAllDay();
         }
         return new DateTime(seriesStart.getCalendarMetrics(), seriesStart.getTimeZone(), timestamp);
+    }
+
+    private boolean isException(long start) {
+        return null != exceptionDates && -1 < Arrays.binarySearch(exceptionDates, start);
     }
 
     /**

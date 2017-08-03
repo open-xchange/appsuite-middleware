@@ -181,7 +181,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         if (null == rule.getCount() && null == rule.getUntil()) {
             return null;
         }
-        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true, null);
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData, true);
         if (false == iterator.hasNext()) {
             return null;
         }
