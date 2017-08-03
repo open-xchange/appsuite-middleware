@@ -73,7 +73,7 @@ import com.openexchange.cli.AbstractRmiCLI;
 public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
     private static final String OPT_USER_SHORT = "u";
-    private static final String OPT_USER_LONG = "userid";
+    private static final String OPT_USER_LONG = "user";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
     private static final String OPT_SCOPE_LONG = "scope";
@@ -103,8 +103,8 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
         options.addOption(new Option(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, true, "The context ID for that the file store usage shall be recalculated. "+
                                                                                 "If a user ID is also set, the according user file store is "+
                                                                                 "affected."));
-        options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "The user ID for which the user file store usage shall be recalculated. "+
-                                                                          "A value of 'all' recalculates the usages for all user file stores in "+
+        options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "The user ID for which the user file store usage shall be recalculated or "+
+                                                                          "'all' to recalculates the usages for all user file stores in "+
                                                                           "the given context."));
 
         Option allOption = new Option(null, OPT_SCOPE_LONG, true, "If all file store usages for the given scope shall be recalculated. "+
