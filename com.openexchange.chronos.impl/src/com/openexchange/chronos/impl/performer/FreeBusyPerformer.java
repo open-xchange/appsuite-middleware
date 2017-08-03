@@ -259,16 +259,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
-
-            // Append all availability blocks
-            eventsFreeBusyTimes.addAll(freeBusyTimes);
-
             // Mark the rest of the range as free
-            List<FreeBusyTime> freeBlocks = calculateFreeBlocks(eventsFreeBusyTimes, from, until);
-
-            // Add the rest free blocks
-            eventsFreeBusyTimes.addAll(freeBlocks);
-
+            calculateFreeBlocks(eventsFreeBusyTimes, from, until);
             // Sort by starting date
             Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
 
@@ -320,6 +312,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Append all event freeBusyTime blocks
         eventsFreeBusyTimes.addAll(auxiliaryList);
+        // Append all availability blocks
+        eventsFreeBusyTimes.addAll(freeBusyTimes);
     }
 
     /**
@@ -429,15 +423,15 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
         }
     }
-    
+
     /**
      * Calculates the rest of the free blocks that remain in the specified interval
+     * 
      * @param eventsFreeBusyTimes The already existing {@link FreeBusyTime} blocks
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return A {@link List} with {@link FreeBusyTime} block marked as {@link FbType#FREE} 
      */
-    private List<FreeBusyTime> calculateFreeBlocks(List<FreeBusyTime> eventsFreeBusyTimes, Date from, Date until) {
+    private void calculateFreeBlocks(List<FreeBusyTime> eventsFreeBusyTimes, Date from, Date until) {
         List<FreeBusyTime> freeBlocks = new ArrayList<>();
         Date s = from;
         for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
@@ -454,8 +448,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         if (freeBusyTime.getEndTime().before(until) && (!freeBusyTime.getFbType().equals(FbType.FREE))) {
             freeBlocks.add(new FreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), until));
         }
-        
-        return freeBlocks;
+
+        // Add the rest free blocks
+        eventsFreeBusyTimes.addAll(freeBlocks);
     }
 
     /**
