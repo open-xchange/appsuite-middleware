@@ -53,8 +53,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.junit.Before;
 import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -87,6 +89,7 @@ public abstract class AbstractCombineTest {
         // Mock the session
         session = mock(CalendarSession.class);
         when(session.getUserId()).thenReturn(1);
+        when(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class)).thenReturn(TimeZone.getTimeZone("Europe/Berlin"));
 
         // Mock the storage
         storage = mock(CalendarAvailabilityStorage.class);
