@@ -69,6 +69,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
 
 /**
@@ -108,7 +109,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public boolean execute() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(delegate, "<unknown>"));
             boolean retval = delegate.execute();
             con.updatePerformed();
             return retval;
@@ -128,7 +129,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public ResultSet executeQuery() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(delegate, "<unknown>"));
             return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             logSyntaxError(syntaxError, delegate, con);
@@ -146,7 +147,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public int executeUpdate() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
+            LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(delegate, "<unknown>"));
             int retval = delegate.executeUpdate();
             con.updatePerformed();
             return retval;
