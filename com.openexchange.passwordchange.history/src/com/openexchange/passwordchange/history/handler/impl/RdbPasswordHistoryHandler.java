@@ -55,8 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -76,18 +80,16 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
-    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=?;";
-    private static final String GET_DATA_ASC = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY id ASC;";
-    private static final String GET_DATA_DESC = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY id DESC;";
+    private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?;";
 
-    private static final String CLEAR_FOR_ID = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
+    private static final String CLEAR_FOR_ID   = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
     private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?);";
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbPasswordHistoryHandler.class);
-    private static final String SYMBOLIC_NAME = "default";
+    private static final org.slf4j.Logger LOG           = org.slf4j.LoggerFactory.getLogger(RdbPasswordHistoryHandler.class);
+    private static final String           SYMBOLIC_NAME = "default";
 
     private final ServiceLookup service;
 
@@ -103,15 +105,40 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     @Override
     public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type) {
+        return listPasswordChanges(userID, contextID, type, null);
+    }
+
+    @Override
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type, Set<String> fieldNames) {
         List<PasswordChangeInfo> retval = new LinkedList<>();
         Connection con = null;
         PreparedStatement stmt = null;
         DatabaseService dbService = null;
         try {
-            // Get data
+            // Get services
             dbService = getService(DatabaseService.class);
             con = dbService.getReadOnly(contextID);
-            stmt = con.prepareStatement(getData(type));
+
+            StringBuilder builder = new StringBuilder(GET_DATA);
+            if (null == fieldNames) {
+                // Default is ID
+                builder.append("id ");
+                builder.append(type.name());
+            } else {
+                // User send fields
+                for (String field : fieldNames) {
+                    builder.append(field);
+                    builder.append(" ");
+                    builder.append(type.name());
+                    builder.append(",");
+                }
+                //Remove last ','
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            builder.append(";");
+
+            // Get data
+            stmt = con.prepareStatement(builder.toString());
             stmt.setInt(1, contextID);
             stmt.setInt(2, userID);
             stmt.execute();
@@ -141,23 +168,6 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         }
         return retval;
 
-    }
-
-    /**
-     * Converts the SortType into fitting SQL command
-     * 
-     * @return The SQL command
-     */
-    private String getData(SortType type) {
-        switch (type) {
-            case NEWEST:
-                return GET_DATA_DESC;
-            case OLDEST:
-                return GET_DATA_ASC;
-            case NONE:
-            default:
-                return GET_DATA;
-        }
     }
 
     @Override
@@ -278,6 +288,32 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         if (null == retval) {
             throw PasswordChangeHistoryException.MISSING_SERVICE.create(clazz.getSimpleName());
         }
+        return retval;
+    }
+
+    @Override
+    public Map<String, Set<String>> getFieldNames() {
+        Map<String, Set<String>> retval = new HashMap<>(3);
+        Set<String> entries = new HashSet<>(3);
+
+        entries.add("date");
+        entries.add("created");
+        entries.add("time");
+        retval.put("created", entries);
+
+        entries = new HashSet<>(3);
+        entries.add("source");
+        entries.add("client_id");
+        entries.add("origin");
+        retval.put("source", entries);
+
+        entries = new HashSet<>(4);
+        entries.add("ip");
+        entries.add("ip_address");
+        entries.add("client_ip");
+        entries.add("client_address");
+        retval.put("ip", entries);
+
         return retval;
     }
 }

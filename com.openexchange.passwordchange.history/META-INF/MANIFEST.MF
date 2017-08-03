@@ -36,4 +36,5 @@ Import-Package: com.openexchange.config.cascade,
 Bundle-Activator: com.openexchange.passwordchange.history.osgi.PasswordChangeHistoryActivator
 Export-Package: com.openexchange.passwordchange.history.groupware,
  com.openexchange.passwordchange.history.handler,
- com.openexchange.passwordchange.history.registry
+ com.openexchange.passwordchange.history.registry,
+ com.openexchange.passwordchange.history.utilities

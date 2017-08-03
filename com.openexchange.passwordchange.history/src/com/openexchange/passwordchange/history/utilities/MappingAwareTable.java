@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history.utilities;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
- * {@link SortType} The types of different sorting for {@link PasswordChangeInfo}s
+ * {@link MappingAwareTable} - Helps {@link MappingService} to get the field names.
+ * Classes that operate on tables and known the field should implement this interface
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum SortType {
+public interface MappingAwareTable {
 
-    /** Sort by newest entries first. */
-    DESC,
-
-    /** Sort by oldest entries first */
-    ASC
-
-    ;
+    /**
+     * Get the field names used in the table. Each field names defines a {@link Set} of keywords it can be matched to.
+     * 
+     * @return The field names
+     */
+    Map<String, Set<String>> getFieldNames();
 }

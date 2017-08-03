@@ -49,7 +49,10 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -104,7 +107,7 @@ public class PasswordChangeHistoryREST {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("order") String order) {
+    public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("sort") String sort) {
         try {
             Object retval = checkAccess(contextID, auth);
             if (null != retval) {
@@ -123,6 +126,7 @@ public class PasswordChangeHistoryREST {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
+            // Get handler
             String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
             if (null == symbolicName || symbolicName.isEmpty()) {
                 //Fall back to default
@@ -131,8 +135,14 @@ public class PasswordChangeHistoryREST {
             }
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
-            List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, getType(order));
-
+            // Find out if sorting has to be done
+            Set<String> fields = getFields(sort, handler.getFieldNames());
+            List<PasswordChangeInfo> history;
+            if (fields.isEmpty()) {
+                history = handler.listPasswordChanges(userID, contextID, getType(sort));
+            } else {
+                history = handler.listPasswordChanges(userID, contextID, getType(sort), fields);
+            }
             // Check data
             if (history.size() == 0) {
                 return new JSONArray();
@@ -157,6 +167,44 @@ public class PasswordChangeHistoryREST {
             LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userID, contextID, e);
             return Response.serverError().build();
         }
+    }
+
+    /**
+     * Matches REST field names to SQL field names for sorting
+     * 
+     * @param sort The unparsed field names
+     * @param fieldNames The provided SQL names
+     * @return A set of SQL field names to sort by. Can be empty
+     */
+    private Set<String> getFields(String sort, Map<String, Set<String>> fieldNames) {
+        Set<String> retval = new LinkedHashSet<>(fieldNames.size());
+        if (null == sort) {
+            return retval;
+        }
+        if(sort.startsWith("-")) {
+            sort = sort.substring(1);
+        }
+
+        String[] splitted = sort.split(",");
+
+        for (String split : splitted) {
+            // Go through every field
+            for (String sqlName : fieldNames.keySet()) {
+                boolean found = false;
+                // Get every alternative field name
+                for (String match : fieldNames.get(sqlName)) {
+                    if (match.equals(split)) {
+                        retval.add(sqlName);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) { // Speed up
+                    break;
+                }
+            }
+        }
+        return retval;
     }
 
     /**
@@ -217,21 +265,15 @@ public class PasswordChangeHistoryREST {
     }
 
     /**
-     * Get the type fitting to the given string. Default(Defined in MW-809) is {@link #NEWEST}
+     * Get the sort type
      * 
-     * @param type The type as String
+     * @param sort The type as String
      * @return A {@link SortType}
      */
-    private SortType getType(String type) {
-        if (null == type) {
-            return SortType.NEWEST;
+    private SortType getType(String sort) {
+        if (null != sort && sort.startsWith("-")) {
+            return SortType.DESC;
         }
-        for (SortType sType : SortType.values()) {
-            String name = sType.getTypeName();
-            if (name.equals(type)) {
-                return sType;
-            }
-        }
-        return SortType.NEWEST;
+        return SortType.ASC;
     }
 }
