@@ -28,13 +28,15 @@
         type: integer
         format: int64
       - in: query
-        name: order
-        description: Available options "newest" and "oldest". "newest" will sort the entries with the latest change first (Sorting descending), "oldest" the other way around (Sorting ascending). "newest" ist default.
+        name: sort
+        description: Comma sperated list of fields to sort the output for. Field names that begin with "-" will be sorted descanding else the fields get sorted ascanding. For valid field names see responses.
         required: false
         type: string
     responses:
       200:
-        description: An JSONObject containing an array with the entries
+        description: | 
+            An JSONArray containing the data. Returnd fields will be "date" and "client_id". "date" defines the time of the change and "client_id" the identifier the changeing client transmitted.
+            In case the IP address is known "client_address" will also be returned. If the field "client_id" is well known an optional parameter "client_name" is returned with a more human readable description.
         schema:
           type: string
       400:
