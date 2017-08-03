@@ -215,16 +215,16 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
     }
 
     /**
-     * Helper method to register a LoginRequestHandler
+     * Helper method to register a RequestHandler
      * @param samlBackend the SAMLBackend
      * @param serviceRegistrations the registrations of that samlBackend
-     * @param actionSamlLogin the action to be used as a parameter
-     * @param loginRH the LoginRequestHandler to be registered
+     * @param samlAction the action to be used as a parameter
+     * @param requestHandler the RequestHandler to be registered
      */
-    private void registerRequestHandler(final SAMLBackend samlBackend, final Stack<ServiceRegistration<?>> serviceRegistrations, String actionSamlLogin, LoginRequestHandler loginRH) {
-        Dictionary<String, Object> loginRHProperties = new Hashtable<String, Object>();
-        loginRHProperties.put(AJAXServlet.PARAMETER_ACTION, actionSamlLogin + getPathString(samlBackend.getPath()));
-        serviceRegistrations.push(context.registerService(LoginRequestHandler.class, loginRH, loginRHProperties));
+    private void registerRequestHandler(final SAMLBackend samlBackend, final Stack<ServiceRegistration<?>> serviceRegistrations, String samlAction, LoginRequestHandler requestHandler) {
+        Dictionary<String, Object> requestHandlerProps = new Hashtable<String, Object>();
+        requestHandlerProps.put(AJAXServlet.PARAMETER_ACTION, samlAction + getPathString(samlBackend.getPath()));
+        serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
 
     /**
