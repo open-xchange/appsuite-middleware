@@ -592,8 +592,13 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
      * @see java.lang.Object#clone()
      */
     @Override
-    public CalendarFreeSlot clone() throws CloneNotSupportedException {
-        CalendarFreeSlot clone = (CalendarFreeSlot) super.clone();
+    public CalendarFreeSlot clone() {
+        CalendarFreeSlot clone;
+        try {
+            clone = (CalendarFreeSlot) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
         if (contains(FreeSlotField.calendarAvailabilityId)) {
             clone.setCalendarAvailabilityId(calendarAvailabilityId);
         }

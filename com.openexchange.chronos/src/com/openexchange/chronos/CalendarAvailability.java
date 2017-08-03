@@ -732,8 +732,13 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      * @see java.lang.Object#clone()
      */
     @Override
-    public CalendarAvailability clone() throws CloneNotSupportedException {
-        CalendarAvailability clone = (CalendarAvailability) super.clone();
+    public CalendarAvailability clone() {
+        CalendarAvailability clone;
+        try {
+            clone = (CalendarAvailability) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
         if (contains(AvailabilityField.busytype)) {
             clone.setBusyType(busyType);
         }

@@ -299,68 +299,65 @@ public class GetPerformer extends AbstractPerformer {
                     List<CalendarFreeSlot> preIntersections = new ArrayList<>();
                     List<CalendarFreeSlot> postIntersections = new ArrayList<>();
                     List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
-                    try {
-                        CalendarAvailability pre = availabilityB.clone();
-                        pre.setEndTime(availabilityA.getStartTime());
-                        // Find any slots that intersect with the new end time, adjust and split them 
-                        // if the availability blocks are of equal priority, then append the first split 
-                        // to the pre availability, and the last split to the preIntersections.
-                        List<CalendarFreeSlot> preSlots = new ArrayList<>();
-                        for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                            CalendarFreeSlot cfs = iterator.next();
-                            if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
-                                if (availabilityA.compareTo(availabilityB) == 0) {
-                                    // If the priorities are equal then we split the free slot
-                                    CalendarFreeSlot preSplit = cfs.clone();
-                                    preSplit.setEndTime(availabilityA.getStartTime());
-                                    pre.getCalendarFreeSlots().add(preSplit);
 
-                                    CalendarFreeSlot postSplit = cfs.clone();
-                                    postSplit.setStartTime(availabilityB.getEndTime());
-                                    preIntersections.add(postSplit);
-                                } else {
-                                    // Otherwise the end time of the free slot will be shortened
-                                    // to match the the start time of the availability block A
-                                    cfs.setEndTime(availabilityA.getStartTime());
-                                }
-                            } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), pre.getStartTime(), pre.getEndTime())) {
-                                preSlots.add(cfs);
-                                iterator.remove();
+                    CalendarAvailability pre = availabilityB.clone();
+                    pre.setEndTime(availabilityA.getStartTime());
+                    // Find any slots that intersect with the new end time, adjust and split them 
+                    // if the availability blocks are of equal priority, then append the first split 
+                    // to the pre availability, and the last split to the preIntersections.
+                    List<CalendarFreeSlot> preSlots = new ArrayList<>();
+                    for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                        CalendarFreeSlot cfs = iterator.next();
+                        if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                            if (availabilityA.compareTo(availabilityB) == 0) {
+                                // If the priorities are equal then we split the free slot
+                                CalendarFreeSlot preSplit = cfs.clone();
+                                preSplit.setEndTime(availabilityA.getStartTime());
+                                pre.getCalendarFreeSlots().add(preSplit);
+
+                                CalendarFreeSlot postSplit = cfs.clone();
+                                postSplit.setStartTime(availabilityB.getEndTime());
+                                preIntersections.add(postSplit);
+                            } else {
+                                // Otherwise the end time of the free slot will be shortened
+                                // to match the the start time of the availability block A
+                                cfs.setEndTime(availabilityA.getStartTime());
                             }
+                        } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), pre.getStartTime(), pre.getEndTime())) {
+                            preSlots.add(cfs);
+                            iterator.remove();
                         }
-                        pre.setCalendarFreeSlots(preSlots);
-                        presAndPosts.add(pre);
-
-                        CalendarAvailability post = availabilityB.clone();
-                        post.setStartTime(availabilityA.getEndTime());
-                        // Find any slots that intersect with the new start time, adjust and split them 
-                        // if the availability blocks are of equal priority,  then append the first split 
-                        // to the postIntersections, and the last split to the post availability.
-                        List<CalendarFreeSlot> postSlots = new ArrayList<>();
-                        for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                            CalendarFreeSlot cfs = iterator.next();
-                            if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
-                                if (availabilityA.compareTo(availabilityB) == 0) {
-                                    CalendarFreeSlot preSplit = cfs.clone();
-                                    preSplit.setEndTime(availabilityB.getStartTime());
-                                    postIntersections.add(preSplit);
-
-                                    CalendarFreeSlot postSplit = cfs.clone();
-                                    postSplit.setStartTime(availabilityA.getEndTime());
-                                    post.getCalendarFreeSlots().add(postSplit);
-                                } else {
-                                    cfs.setStartTime(availabilityA.getEndTime());
-                                }
-                            } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), post.getStartTime(), post.getEndTime())) {
-                                postSlots.add(cfs);
-                                iterator.remove();
-                            }
-                        }
-                        post.setCalendarFreeSlots(postSlots);
-                        presAndPosts.add(post);
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
                     }
+                    pre.setCalendarFreeSlots(preSlots);
+                    presAndPosts.add(pre);
+
+                    CalendarAvailability post = availabilityB.clone();
+                    post.setStartTime(availabilityA.getEndTime());
+                    // Find any slots that intersect with the new start time, adjust and split them 
+                    // if the availability blocks are of equal priority,  then append the first split 
+                    // to the postIntersections, and the last split to the post availability.
+                    List<CalendarFreeSlot> postSlots = new ArrayList<>();
+                    for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                        CalendarFreeSlot cfs = iterator.next();
+                        if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
+                            if (availabilityA.compareTo(availabilityB) == 0) {
+                                CalendarFreeSlot preSplit = cfs.clone();
+                                preSplit.setEndTime(availabilityB.getStartTime());
+                                postIntersections.add(preSplit);
+
+                                CalendarFreeSlot postSplit = cfs.clone();
+                                postSplit.setStartTime(availabilityA.getEndTime());
+                                post.getCalendarFreeSlots().add(postSplit);
+                            } else {
+                                cfs.setStartTime(availabilityA.getEndTime());
+                            }
+                        } else if (AvailabilityUtils.contained(cfs.getStartTime(), cfs.getEndTime(), post.getStartTime(), post.getEndTime())) {
+                            postSlots.add(cfs);
+                            iterator.remove();
+                        }
+                    }
+                    post.setCalendarFreeSlots(postSlots);
+                    presAndPosts.add(post);
                     flattenList.addAll(availabilityA.getCalendarFreeSlots());
                     flattenList.addAll(availabilityB.getCalendarFreeSlots());
                     availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
@@ -402,20 +399,15 @@ public class GetPerformer extends AbstractPerformer {
                 CalendarFreeSlot freeSlotB = iteratorB.next();
                 if (AvailabilityUtils.contained(freeSlotA, freeSlotB)) {
                     // split
-                    try {
-                        CalendarFreeSlot pre = freeSlotB.clone();
-                        pre.setEndTime(freeSlotA.getStartTime());
-                        toAdd.add(pre);
+                    CalendarFreeSlot pre = freeSlotB.clone();
+                    pre.setEndTime(freeSlotA.getStartTime());
+                    toAdd.add(pre);
 
-                        CalendarFreeSlot post = freeSlotB.clone();
-                        post.setStartTime(freeSlotA.getEndTime());
-                        toAdd.add(post);
+                    CalendarFreeSlot post = freeSlotB.clone();
+                    post.setStartTime(freeSlotA.getEndTime());
+                    toAdd.add(post);
 
-                        iteratorB.remove();
-                    } catch (CloneNotSupportedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    iteratorB.remove();
                 } else if (AvailabilityUtils.contained(freeSlotB, freeSlotA)) {
                     iteratorB.remove();
                 } else if (AvailabilityUtils.precedesAndIntersects(freeSlotA, freeSlotB)) {
