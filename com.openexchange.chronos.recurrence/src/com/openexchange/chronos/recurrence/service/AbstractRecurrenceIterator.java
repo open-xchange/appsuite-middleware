@@ -134,7 +134,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     }
 
     private Long lookAhead = null;
-    
+
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
             while (inner.hasNext()) {
@@ -201,9 +201,9 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         }
 
         if (lookAhead == null) {
-            next = new DateTime(inner.next());
+            next = toDateTime(inner.next());
         } else {
-            next = new DateTime(lookAhead);
+            next = toDateTime(lookAhead.longValue());
             lookAhead = null;
         }
         count++;
@@ -218,6 +218,25 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     @Override
     public int getPosition() {
         return null == next ? position : position - 1;
+    }
+
+    /**
+     * Gets the date-time representation of a timestamp retrieved from the underlying recurrence set iterator.
+     * <p/>
+     * The actual value type and timezone are taken over from the recurrence data.
+     *
+     * @param timestamp The timestamp as retrieved from the underlying iterator
+     * @return The date-time with suitable type for actual recurrence data
+     */
+    private DateTime toDateTime(long timestamp) {
+        DateTime seriesStart = recurrenceData.getSeriesStart();
+        if (null == seriesStart) {
+            return new DateTime(timestamp);
+        }
+        if (seriesStart.isAllDay()) {
+            return new DateTime(null, timestamp).toAllDay();
+        }
+        return new DateTime(seriesStart.getCalendarMetrics(), seriesStart.getTimeZone(), timestamp);
     }
 
     /**
