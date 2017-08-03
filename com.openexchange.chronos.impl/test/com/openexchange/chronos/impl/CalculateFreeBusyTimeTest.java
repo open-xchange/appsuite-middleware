@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -180,8 +181,9 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
         FreeBusyResult freeBusyResult = performCalculateFreeBusyTime.get(attendee);
-        
-        // Assert
+
+        // Asserts
         assertNotNull(freeBusyResult);
+        assertEquals("The amount of the free/busy times does not match", 9, freeBusyResult.getFreeBusyTimes().size());
     }
 }
