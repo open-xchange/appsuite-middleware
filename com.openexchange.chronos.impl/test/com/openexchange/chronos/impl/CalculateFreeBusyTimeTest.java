@@ -127,6 +127,10 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         freeBusyPerAttendee = new HashMap<>();
         availabilitiesPerAttendee = new HashMap<>();
 
+        // Mock the Utils
+        PowerMockito.mockStatic(Utils.class);
+        BDDMockito.given(Utils.getTimeZone(session)).willReturn(TimeZone.getTimeZone("Europe/Berlin"));
+
         // Mock the FreeBusyPerformer
         freeBusyPerformer = mock(FreeBusyPerformer.class);
         when(freeBusyPerformer.performMerged(attendees, from, until)).thenReturn(freeBusyPerAttendee);
@@ -136,6 +140,33 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         getPerformer = mock(GetPerformer.class);
         when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
         when(getPerformer.getCombinedAvailableTimes(attendees, from, until)).thenCallRealMethod();
+    }
+
+    /**
+     * Since Mockito does not allow mocks to be return from other mocks when mocking,
+     * we have to finish the setup with in each test case, i.e.:
+     * - Mock the {@link CalendarAvailabilityService}
+     * - Calculate the combinedAvailableTimes
+     * - Mock the previous method call with the real result
+     * 
+     * This intermediate step is required in order to feed the {@link FreeBusyPerformer}
+     * with the correct combined times from the {@link CalendarAvailabilityService}
+     * 
+     * This call has to happen AFTER setting up each individual test case and BEFORE the
+     * {@link FreeBusyPerformer#performCalculateFreeBusyTime(List, Date, Date)} call happens
+     */
+    private void finishMocking() throws OXException {
+        // Mock the CalendarAvailabilityService...
+        calendarAvailabilityService = mock(CalendarAvailabilityService.class);
+        // ...and calculate the combinedAvailableTimes...
+        Map<Attendee, List<CalendarAvailability>> combinedAvailableTimes = getPerformer.getCombinedAvailableTimes(attendees, from, until);
+        // ...so they can be used inside the FreeBusyPerformer
+        // We basically bypass the service and all its prerequisites (storage, session, services) and we hook the call directly to GetPerformer
+        when(calendarAvailabilityService.getCombinedAvailableTime(null, attendees, from, until)).thenReturn(combinedAvailableTimes);
+
+        // Mock the Services for the FreeBusyPerformer
+        PowerMockito.mockStatic(Services.class);
+        BDDMockito.given(Services.getService(CalendarAvailabilityService.class)).willReturn(calendarAvailabilityService);
     }
 
     /**
@@ -162,21 +193,8 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Set the availability block for the attendee
         availabilitiesPerAttendee.put(attendee, availabilities);
 
-        // Mock the CalendarAvailabilityService...
-        calendarAvailabilityService = mock(CalendarAvailabilityService.class);
-        // ...and calculate the combinedAvailableTimes...
-        Map<Attendee, List<CalendarAvailability>> combinedAvailableTimes = getPerformer.getCombinedAvailableTimes(attendees, from, until);
-        // ...so they can be used inside the FreeBusyPerformer
-        // We basically bypass the service and all its prerequisites (storage, session, services) and we hook the call directly to GetPerformer
-        when(calendarAvailabilityService.getCombinedAvailableTime(null, attendees, from, until)).thenReturn(combinedAvailableTimes);
-
-        // Mock the Services for the FreeBusyPerformer
-        PowerMockito.mockStatic(Services.class);
-        BDDMockito.given(Services.getService(CalendarAvailabilityService.class)).willReturn(calendarAvailabilityService);
-
-        // Mock the Utils
-        PowerMockito.mockStatic(Utils.class);
-        BDDMockito.given(Utils.getTimeZone(session)).willReturn(TimeZone.getDefault());
+        // Finish mocking
+        finishMocking();
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
