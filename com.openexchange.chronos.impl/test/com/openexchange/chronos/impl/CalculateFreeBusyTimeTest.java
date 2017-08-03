@@ -194,12 +194,49 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Finish mocking
         finishMocking();
 
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(9);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 2, 26), PropsFactory.createDate(2017, 3, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 25), PropsFactory.createDate(2017, 4, 1)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 1), PropsFactory.createDate(2017, 4, 2)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 2), PropsFactory.createDate(2017, 4, 21)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 21), PropsFactory.createDate(2017, 4, 22)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 22), PropsFactory.createDate(2017, 4, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 30), PropsFactory.createDate(2017, 5, 30)));
+
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
         FreeBusyResult freeBusyResult = performCalculateFreeBusyTime.get(attendee);
 
         // Asserts
         assertNotNull(freeBusyResult);
-        assertEquals("The amount of the free/busy times does not match", 9, freeBusyResult.getFreeBusyTimes().size());
+        assertFreeBusyTimes(expectedFreeBusyTimes, freeBusyResult.getFreeBusyTimes());
+    }
+
+    /**
+     * Asserts that the expected {@link List} of {@link FreeBusyTime} is equal the actual {@link List}
+     * of {@link FreeBusyTime}s
+     * 
+     * @param expected the expected list
+     * @param actual the actual list
+     */
+    private void assertFreeBusyTimes(List<FreeBusyTime> expected, List<FreeBusyTime> actual) {
+        assertEquals("The amount of the free/busy times does not match", expected.size(), actual.size());
+        for (int index = 0; index < actual.size(); index++) {
+            assertFreeBusyTime(expected.get(index), actual.get(index));
+        }
+    }
+
+    /**
+     * Asserts that the expected {@link FreeBusyTime} is equal the actual {@link FreeBusyTime}
+     * 
+     * @param expected The expected {@link FreeBusyTime}
+     * @param actual The actual {@link FreeBusyTime}
+     */
+    private void assertFreeBusyTime(FreeBusyTime expected, FreeBusyTime actual) {
+        assertEquals(expected.getFbType(), actual.getFbType());
+        assertEquals(expected.getStartTime(), actual.getStartTime());
+        assertEquals(expected.getEndTime(), actual.getEndTime());
     }
 }
