@@ -209,13 +209,13 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             } else {
                 Integer limit = null;
                 try {
-                    limit = casscade.getView(userID, contextID).get(PasswordChangeHistoryProperties.limit.getFQPropertyName(), Integer.class);
+                    limit = casscade.getView(userID, contextID).get(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
                 } catch (Exception e) {
                     // Nothing configured. Go with standard value
                     LOG.debug("Error while getting c.o.passwordchange.history.limit for user {}", userID);
                 }
                 if (null == limit) {
-                    limit = PasswordChangeHistoryProperties.limit.getDefaultValue(Integer.class);
+                    limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
                 }
 
                 clear(userID, contextID, limit.intValue());

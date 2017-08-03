@@ -63,39 +63,40 @@ public enum PasswordChangeHistoryProperties implements Property {
      * The property that indicates if a password change should be recorded into a history.
      * If set to <code>true</code> a history is saved.
      * If set to <code>false</code> no history is saved.
-     * 
+     *
      * Default is <code>false</code>.
      */
-    enable(false),
+    ENABLE("enable", Boolean.FALSE),
 
     /**
      * The handler that takes care of creating the history.
      * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
-     * 
+     *
      * Default is "Default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
      */
-    handler("default"),
+    HANDLER("handler", "default"),
 
-    /** 
+    /**
      * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
      * for a specific user.
-     *  
-     * Default is <code>10</code>. 
+     *
+     * Default is <code>10</code>.
      */
-    limit(10)
+    LIMIT("limit", Integer.valueOf(10))
 
     ;
 
-    private static final String PREFIX = "com.openexchange.passwordchange.history.";
+    private final String fqn;
     private final Object defaultValue;
 
-    private PasswordChangeHistoryProperties(Object defaultValue) {
+    private PasswordChangeHistoryProperties(String name, Object defaultValue) {
         this.defaultValue = defaultValue;
+        this.fqn = "com.openexchange.passwordchange.history." + name;
     }
 
     @Override
     public String getFQPropertyName() {
-        return PREFIX + this.name();
+        return fqn;
     }
 
     @Override

@@ -121,18 +121,18 @@ public class PasswordChangeHistoryREST {
             ConfigView view = config.getView(userID, contextID);
 
             // Check if feature is enabled for user and which handler to get
-            Boolean enable = view.get(PasswordChangeHistoryProperties.enable.getFQPropertyName(), Boolean.class);
+            Boolean enable = view.get(PasswordChangeHistoryProperties.ENABLE.getFQPropertyName(), Boolean.class);
             if (false == enable) {
                 // No fall back. Resource for the user not available. In other terms the user can not see the feature.
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
             // Get handler
-            String symbolicName = view.get(PasswordChangeHistoryProperties.handler.getFQPropertyName(), String.class);
+            String symbolicName = view.get(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
             if (null == symbolicName || symbolicName.isEmpty()) {
                 //Fall back to default
                 LOG.debug("Using default value to identify password change handler.");
-                symbolicName = PasswordChangeHistoryProperties.handler.getDefaultValue(String.class);
+                symbolicName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
             }
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
