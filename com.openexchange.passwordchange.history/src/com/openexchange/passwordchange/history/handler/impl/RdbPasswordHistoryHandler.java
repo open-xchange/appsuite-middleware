@@ -104,12 +104,12 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type) {
-        return listPasswordChanges(userID, contextID, type, null);
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
+        return listPasswordChanges(userID, contextID, null);
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type, Set<String> fieldNames) {
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<String, SortType> fieldNames) {
         List<PasswordChangeInfo> retval = new LinkedList<>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -123,13 +123,13 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             if (null == fieldNames) {
                 // Default is ID
                 builder.append("id ");
-                builder.append(type.name());
+                builder.append(SortType.ASC);
             } else {
                 // User send fields
-                for (String field : fieldNames) {
+                for (String field : fieldNames.keySet()) {
                     builder.append(field);
                     builder.append(" ");
-                    builder.append(type.name());
+                    builder.append(fieldNames.get(field));
                     builder.append(",");
                 }
                 //Remove last ','

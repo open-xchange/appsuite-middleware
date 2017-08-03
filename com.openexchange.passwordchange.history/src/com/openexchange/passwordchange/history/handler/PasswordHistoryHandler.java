@@ -50,7 +50,7 @@
 package com.openexchange.passwordchange.history.handler;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.utilities.MappingAwareTable;
@@ -68,21 +68,19 @@ public interface PasswordHistoryHandler extends MappingAwareTable {
      * 
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
-     * @param type The {@link SortType} to sort the list to
      * @return {@link List} of all available password change events (~ the history)
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID);
 
     /**
      * The current data stored in the database
      * 
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
-     * @param type The {@link SortType} to sort the list to
-     * @param fieldNames The field names that should be sorted by. Caller has to make sure that the order of elements is predictable.
+     * @param fieldNames The field names that should be sorted with the corresponding {@link SortType}. Caller has to make sure that the order of elements is predictable.
      * @return {@link List} of all available password change events (~ the history)
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, SortType type, Set<String> fieldNames);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<String, SortType> fieldNames);
 
     /**
      * Adds a new set of information to the database
