@@ -172,7 +172,7 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Retrieves the the combined {@link AvailableTime} slots for the current user.
+     * Retrieves the the combined {@link CalendarAvailability} blocks for the current user.
      * 
      * @return A {@link List} with the combined {@link CalendarAvailability} blocks for the user
      * @throws OXException if an error is occurred
@@ -180,6 +180,20 @@ public class GetPerformer extends AbstractPerformer {
     public List<CalendarAvailability> getCombinedAvailableTime() throws OXException {
         int userId = session.getUserId();
         List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        return combine(calendarAvailabilities);
+    }
+
+    /**
+     * Retrieves the combined {@link CalendarAvailability} blocks in the specified interval for the current user
+     * 
+     * @param from The starting point of the interval
+     * @param until The ending point of the interval
+     * @return A {@link List} with the combined {@link CalendarAvailability} blocks for the user in the specified interval
+     * @throws OXException
+     */
+    public List<CalendarAvailability> getCombinedAvailableTimeInRange(Date from, Date until) throws OXException {
+        int userId = session.getUserId();
+        List<CalendarAvailability> calendarAvailabilities = storage.loadCalenarAvailabilityInRange(userId, from, until);
         return combine(calendarAvailabilities);
     }
 
