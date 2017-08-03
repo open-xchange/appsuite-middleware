@@ -551,11 +551,7 @@ public final class Init {
         cascade.setProvider("server", new InMemoryConfigProvider());
         cascade.setProvider("context", new InMemoryConfigProvider());
         cascade.setProvider("user", new InMemoryConfigProvider());
-        try {
-            cascade.setSearchPath("user", "context", "server");
-        } catch (OXException e) {
-            // Cannot occur
-        }
+        cascade.setSearchPath("user", "context", "server");
         cascade.setStringParser(new BasicTypesStringParser());
         services.put(ConfigViewFactory.class, cascade);
         TestServiceRegistry.getInstance().addService(ConfigViewFactory.class, cascade);
