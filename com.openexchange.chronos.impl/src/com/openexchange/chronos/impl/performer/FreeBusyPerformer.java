@@ -59,6 +59,7 @@ import static com.openexchange.tools.arrays.Collections.put;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,6 +86,7 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -116,6 +118,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         EventField.RECURRENCE_RULE
     };
     //@formatter:on
+
+    private static final Comparator<FreeBusyTime> freeBusyTimeDateTimeComparator = new FreeBusyTimeDateTimeComparator();
 
     /**
      * Initializes a new {@link FreeBusyPerformer}.
@@ -389,6 +393,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Add the rest free blocks
             eventsFreeBusyTimes.addAll(freeBlocks);
 
+            // Sort by starting date
+            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
+
             // Create result
             FreeBusyResult result = new FreeBusyResult();
             result.setFreeBusyTimes(eventsFreeBusyTimes);
@@ -649,6 +656,35 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             freeBusyTimes.add(new FreeBusyTime(getFbType(event), new Date(start), new Date(end)));
         }
         return freeBusyTimes;
+    }
+
+    /**
+     * {@link FreeBusyTime} - DateTime comparator. Orders {@link FreeBusyTime} items
+     * by start date (ascending)
+     */
+    private static class FreeBusyTimeDateTimeComparator implements Comparator<FreeBusyTime> {
+
+        /**
+         * Initialises a new {@link GetPerformer.DateTimeComparator}.
+         */
+        public FreeBusyTimeDateTimeComparator() {
+            super();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare(FreeBusyTime o1, FreeBusyTime o2) {
+            if (o1.getStartTime().before(o2.getStartTime())) {
+                return -1;
+            } else if (o1.getStartTime().after(o2.getStartTime())) {
+                return 1;
+            }
+            return 0;
+        }
     }
 
 }
