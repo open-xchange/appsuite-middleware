@@ -150,27 +150,6 @@ public abstract class ChronosAction implements AJAXActionService {
         return com.openexchange.osgi.Tools.requireService(clazz, services);
     }
 
-    //    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData) throws OXException {
-    //       return parseFolderParameter(requestData, true);
-    //    }
-    //
-    //    protected CompositeFolderID parseFolderParameter(AJAXRequestData requestData, boolean required) throws OXException {
-    //        String value;
-    //        if(required){
-    //            value = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-    //        } else {
-    //            value = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-    //        }
-    //        if(value==null){
-    //            return null;
-    //        }
-    //        try {
-    //            return CompositeFolderID.parse(value);
-    //        } catch (IllegalArgumentException e) {
-    //            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, AJAXServlet.PARAMETER_FOLDERID, value);
-    //        }
-    //    }
-
     protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) {
         RecurrenceId recurrenceId = null != optRecurrenceId ? new DefaultRecurrenceId(optRecurrenceId) : null;
         return new EventID(folderId, objectId, recurrenceId);

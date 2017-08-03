@@ -83,6 +83,7 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 
 /**
  *
@@ -152,18 +153,19 @@ public class UpdateAttendeeAction extends ChronosAction {
                 }
                 throw e;
             }
-            List<CreateResult> creations = updateAttendeeResult.getCreations();
-            List<UpdateResult> updates = updateAttendeeResult.getUpdates();
-            List<OXException> warnings = null;
-            Event toUpdate = null;
-            if (creations.size() == 1) {
-                toUpdate = creations.get(0).getCreatedEvent();
-            } else {
-                toUpdate = updates.get(0).getUpdate();
-            }
 
+            List<OXException> warnings = null;
             List<CalendarResult> results = null;
             if (((JSONObject) data).has(ALARMS_FIELD)) {
+                List<CreateResult> creations = updateAttendeeResult.getCreations();
+                List<UpdateResult> updates = updateAttendeeResult.getUpdates();
+
+                Event toUpdate = null;
+                if (creations.size() == 1) {
+                    toUpdate = creations.get(0).getCreatedEvent();
+                } else {
+                    toUpdate = updates.get(0).getUpdate();
+                }
                 Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
                 try {
                     if (parseParameter == null) {
@@ -173,7 +175,8 @@ public class UpdateAttendeeAction extends ChronosAction {
                         EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) data, toUpdate, zone);
                     }
                     try {
-
+                        // Update calendar session with new timestamp
+                        calendarAccess.getSession().setParameter(PARAMETER_TIMESTAMP, updateAttendeeResult.getTimestamp());
                         CalendarResult updateAlarmResult = calendarAccess.updateEvent(eventID, toUpdate);
                         results = new ArrayList<>(2);
                         results.add(updateAttendeeResult);
