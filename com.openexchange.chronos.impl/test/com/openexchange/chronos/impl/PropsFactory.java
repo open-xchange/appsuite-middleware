@@ -149,6 +149,17 @@ final class PropsFactory {
         return ca;
     }
 
+    /**
+     * Creates a {@link CalendarAvailability} with in the specified interval,
+     * with the specified {@link BusyType}, the specified free slots and the specified priority
+     * 
+     * @param busyType The {@link BusyType}
+     * @param freeSlots The free slots
+     * @param from The starting point of the {@link CalendarAvailability}'s interval
+     * @param until The ending point of the {@link CalendarAvailability}'s interval
+     * @param priority the priority of the {@link CalendarAvailability}
+     * @return The new {@link CalendarAvailability}
+     */
     static CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until, int priority) {
         CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots, from, until);
         ca.setPriority(priority);

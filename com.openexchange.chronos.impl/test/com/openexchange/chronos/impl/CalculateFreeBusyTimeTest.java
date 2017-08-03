@@ -106,7 +106,6 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     // Base interval 01/01/2017 - 30/06/2017
     private Date from = PropsFactory.createDate(2017, 0, 1);
     private Date until = PropsFactory.createDate(2017, 5, 30);
-    private Attendee attendee;
 
     /**
      * Initialises a new {@link CalculateFreeBusyTimeTest}.
@@ -176,8 +175,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     @Test
     public void testSingles() throws OXException {
         // Initialise attendee
-        attendee = new Attendee();
-        attendee.setEMail("foobar@ox.io");
+        Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
         // Initialise the free/busy time
