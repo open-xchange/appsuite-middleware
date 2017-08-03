@@ -49,6 +49,7 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -136,12 +137,12 @@ public class PasswordChangeHistoryREST {
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
             // Find out if sorting has to be done
-            Set<String> fields = getFields(sort, handler.getFieldNames());
+            Map<String, SortType> fields = getFields(sort, handler.getFieldNames());
             List<PasswordChangeInfo> history;
             if (fields.isEmpty()) {
-                history = handler.listPasswordChanges(userID, contextID, getType(sort));
+                history = handler.listPasswordChanges(userID, contextID);
             } else {
-                history = handler.listPasswordChanges(userID, contextID, getType(sort), fields);
+                history = handler.listPasswordChanges(userID, contextID, fields);
             }
             // Check data
             if (history.size() == 0) {
@@ -176,25 +177,27 @@ public class PasswordChangeHistoryREST {
      * @param fieldNames The provided SQL names
      * @return A set of SQL field names to sort by. Can be empty
      */
-    private Set<String> getFields(String sort, Map<String, Set<String>> fieldNames) {
-        Set<String> retval = new LinkedHashSet<>(fieldNames.size());
+    private Map<String, SortType> getFields(String sort, Map<String, Set<String>> fieldNames) {
+        Map<String, SortType> retval = new LinkedHashMap<>();
         if (null == sort) {
             return retval;
-        }
-        if(sort.startsWith("-")) {
-            sort = sort.substring(1);
         }
 
         String[] splitted = sort.split(",");
 
         for (String split : splitted) {
+            boolean desc = false;
+            if (split.startsWith("-")) {
+                split = split.substring(1);
+                desc = true;
+            }
             // Go through every field
             for (String sqlName : fieldNames.keySet()) {
                 boolean found = false;
                 // Get every alternative field name
                 for (String match : fieldNames.get(sqlName)) {
                     if (match.equals(split)) {
-                        retval.add(sqlName);
+                        retval.put(sqlName, desc ? SortType.DESC : SortType.ASC);
                         found = true;
                         break;
                     }
@@ -262,18 +265,5 @@ public class PasswordChangeHistoryREST {
                 return;
             }
         }
-    }
-
-    /**
-     * Get the sort type
-     * 
-     * @param sort The type as String
-     * @return A {@link SortType}
-     */
-    private SortType getType(String sort) {
-        if (null != sort && sort.startsWith("-")) {
-            return SortType.DESC;
-        }
-        return SortType.ASC;
     }
 }
