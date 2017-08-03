@@ -720,7 +720,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     private void doRecalculateFilestoreUsage(Integer contextId, Integer userId, boolean errorOnMissingUserFilestore) throws StorageException {
         int iContextId = contextId.intValue();
         int iUserId = null == userId ? 0 : userId.intValue();
-
+        boolean isCtxFilestore = true;
         try {
             QuotaFileStorage quotaFileStorage = null;
             if (iUserId <= 0) {
@@ -733,45 +733,51 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
                     if (errorOnMissingUserFilestore) {
                         throw new StorageException("User " + iUserId + " in context " + iContextId + " has no individual file storage configured");
                     }
-
                     // Ignore...
                     return;
                 }
-
                 quotaFileStorage = quotaFileStorageService.getQuotaFileStorage(iUserId, iContextId, Info.administrative());
-            }
-
-            Set<String> filesToIgnore = new TreeSet<String>();
-
-            /*
-             * The ResourceCache might store resources in the file storage. Depending on its configuration (preview.properties)
-             * these files affect the contexts quota or not.
-             */
-            {
-                boolean quotaAware = false;
-                ConfigurationService configurationService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-                if (configurationService != null) {
-                    quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
-                }
-
-                if (!quotaAware) {
-                    ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-                    Set<String> refIds = metadataStore.loadRefIds(iContextId);
-                    filesToIgnore.addAll(refIds);
-                }
+                isCtxFilestore=false;
             }
 
             /*
-             * Depending on the configuration snippets doesn't count towards the usage too.
+             * Only ignore files for context filestores
              */
-            {
-                QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
-                if (service != null && service.ignoreQuota()) {
-                    filesToIgnore.addAll(service.getFilesToIgnore(iContextId));
-                }
-            }
+            if(isCtxFilestore){
+                Set<String> filesToIgnore = new TreeSet<String>();
 
-            quotaFileStorage.recalculateUsage(filesToIgnore);
+                /*
+                 * The ResourceCache might store resources in the file storage. Depending on its configuration (preview.properties)
+                 * these files affect the contexts quota or not.
+                 */
+                {
+                    boolean quotaAware = false;
+                    ConfigurationService configurationService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+                    if (configurationService != null) {
+                        quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
+                    }
+
+                    if (!quotaAware) {
+                        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+                        Set<String> refIds = metadataStore.loadRefIds(iContextId);
+                        filesToIgnore.addAll(refIds);
+                    }
+                }
+
+                /*
+                 * Depending on the configuration snippets doesn't count towards the usage too.
+                 */
+                {
+                    QuotaAwareSnippetService service = AdminServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
+                    if (service != null && service.ignoreQuota()) {
+                        filesToIgnore.addAll(service.getFilesToIgnore(iContextId));
+                    }
+                }
+
+                quotaFileStorage.recalculateUsage(filesToIgnore);
+            } else {
+                quotaFileStorage.recalculateUsage();
+            }
         } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
