@@ -138,7 +138,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
             deletedEvents = postProcess(events, session.getUserId(), true);
         }
-        return getResult(newAndModifiedEvents, deletedEvents);
+        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
 
     /**
@@ -174,16 +174,12 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
             Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
-                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
+                session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
                 deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
             } finally {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
         }
-        return getResult(newAndModifiedEvents, deletedEvents);
-    }
-
-    private static UpdatesResult getResult(final List<Event> newAndModifiedEvents, final List<Event> deletedEvents) {
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
 

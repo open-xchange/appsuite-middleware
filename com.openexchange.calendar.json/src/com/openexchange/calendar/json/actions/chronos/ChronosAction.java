@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.json.actions.chronos;
 
+import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.AbstractMap;
@@ -305,8 +306,9 @@ public abstract class ChronosAction extends AppointmentAction {
         }
         if (null != deletedEvents) {
             for (Event event : deletedEvents) {
-                Appointment appointment = converter.getAppointment(event);
+                Appointment appointment = new Appointment();
                 appointment.setMarker(Marker.ID_ONLY);
+                appointment.setObjectID(asInt(event.getId()));
                 delta.addDeleted(appointment);
                 timestamp = getLatestTimestamp(timestamp, event);
             }
