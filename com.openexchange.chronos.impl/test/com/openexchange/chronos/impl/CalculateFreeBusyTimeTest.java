@@ -256,7 +256,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     }
 
     /**
-     * Tests a single overlap between an Event and a free slot of an availability
+     * Tests a single overlap between a preceding event and a free slot of an availability
      */
     @Test
     public void testSingleOverlapAvailabilityWithPrecedingEvent() throws OXException {
@@ -267,7 +267,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("Overlapping with event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
+        freeSlots.add(PropsFactory.createCalendarFreeSlot("Overlapping with preceding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
         availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
         availabilitiesPerAttendee.put(attendee, availabilities);
 
@@ -289,6 +289,41 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Asserts
         assertNotNull(freeBusyResult);
         AssertUtil.assertFreeBusyTimes(expectedFreeBusyTimes, freeBusyResult.getFreeBusyTimes());
+    }
 
+    /**
+     * Tests a single overlap between a succeeding event and a free slot of an availability
+     */
+    @Test
+    public void testSingleOverlapAvailabilityWithSucceedingEvent() throws OXException {
+        Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
+        attendees.add(attendee);
+
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
+        freeBusyPerAttendee.put(attendee, freeBusyTimes);
+
+        List<CalendarFreeSlot> freeSlots = new ArrayList<>(1);
+        freeSlots.add(PropsFactory.createCalendarFreeSlot("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
+        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
+        availabilitiesPerAttendee.put(attendee, availabilities);
+
+        // Finish mocking
+        finishMocking();
+
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(6);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 1)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 27)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 2, 27), PropsFactory.createDate(2017, 2, 29)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 3, 10)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 3, 10), PropsFactory.createDate(2017, 5, 30)));
+
+        // Perform the calculation
+        Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
+        FreeBusyResult freeBusyResult = performCalculateFreeBusyTime.get(attendee);
+
+        // Asserts
+        assertNotNull(freeBusyResult);
+        AssertUtil.assertFreeBusyTimes(expectedFreeBusyTimes, freeBusyResult.getFreeBusyTimes());
     }
 }
