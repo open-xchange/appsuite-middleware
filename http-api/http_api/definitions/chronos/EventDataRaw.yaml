@@ -69,14 +69,6 @@ folder:
 createdBy: 
   $ref: "#/definitions/CalendarUser"
   description: The creator of the event.
-changeExceptionDates:
-  type: array
-  description: An array of changed recurrences.
-  items:
-    type: string
-    description: |
-     The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. "20170708T220000Z"), a floating date-time (E.g. "20170708T220000") 
-     or a date (E.g. "20170708"). See rfc 5545 chapter 3.3.5. for more informations.
 deleteExceptionDates:
   type: array
   description: An array of deleted recurrences.
