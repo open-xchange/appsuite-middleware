@@ -272,26 +272,26 @@ public class EventPatches {
                 /*
                  * check if there's a single new change exception holding only the snoozed alarm (and no further changes)
                  */
-                List<Event> newChangeExceptions = getNewChangeExceptions(resource.getEvent(), importedChangeExceptions);
-                if (null == newChangeExceptions || 1 != newChangeExceptions.size()) {
-                    return;
-                }
-                Event newChangeException = newChangeExceptions.get(0);
-                Alarm snoozedAlarm = null;
-                Alarm snoozeAlarm = null;
-                if (null != newChangeException && null != newChangeException.getAlarms()) {
-                    for (Alarm alarm : newChangeException.getAlarms()) {
-                        snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, newChangeException.getAlarms());
-                        if (null != snoozedAlarm) {
-                            snoozeAlarm = alarm;
-                            break;
+                try {
+                    List<Event> newChangeExceptions = getNewChangeExceptions(resource, importedChangeExceptions);
+                    if (null == newChangeExceptions || 1 != newChangeExceptions.size()) {
+                        return;
+                    }
+                    Event newChangeException = newChangeExceptions.get(0);
+                    Alarm snoozedAlarm = null;
+                    Alarm snoozeAlarm = null;
+                    if (null != newChangeException && null != newChangeException.getAlarms()) {
+                        for (Alarm alarm : newChangeException.getAlarms()) {
+                            snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, newChangeException.getAlarms());
+                            if (null != snoozedAlarm) {
+                                snoozeAlarm = alarm;
+                                break;
+                            }
                         }
                     }
-                }
-                if (null == snoozedAlarm || null == snoozeAlarm) {
-                    return;
-                }
-                try {
+                    if (null == snoozedAlarm || null == snoozeAlarm) {
+                        return;
+                    }
                     RecurrenceId recurrenceId = newChangeException.getRecurrenceId();
                     CalendarSession calendarSession = resource.getCalendarSession();
                     calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
@@ -335,16 +335,19 @@ public class EventPatches {
          * Extracts those change exceptions that are considered as "new", i.e. change exceptions that do not already exist based on the
          * change exception dates of the original recurring event master.
          *
-         * @param originalEvent The original recurring master event
+         * @param resource The event resource
          * @param importedChangeExceptions The imported change exceptions as supplied by the client
          * @return The new exceptions, or an empty list if there are none
          */
-        private static List<Event> getNewChangeExceptions(Event originalEvent, List<Event> importedChangeExceptions) {
+        private static List<Event> getNewChangeExceptions(EventResource resource, List<Event> importedChangeExceptions) throws OXException {
             if (null == importedChangeExceptions || 0 == importedChangeExceptions.size()) {
                 return Collections.emptyList();
             }
+            CalendarSession session = resource.getCalendarSession();
+            Event originalEvent = resource.getEvent();
+            List<Event> changeExceptions = session.getCalendarService().getChangeExceptions(session, originalEvent.getFolderId(), originalEvent.getSeriesId());
+            SortedSet<RecurrenceId> changeExceptionDates = CalendarUtils.getRecurrenceIds(changeExceptions);
             List<Event> newChangeExceptions = new ArrayList<Event>(importedChangeExceptions.size());
-            SortedSet<RecurrenceId> changeExceptionDates = originalEvent.getChangeExceptionDates();
             if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
                 newChangeExceptions.addAll(importedChangeExceptions);
             } else {

@@ -116,8 +116,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     private static final EventField[] BASIC_FIELDS = new EventField[] {
         EventField.UID, EventField.FILENAME, EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID,
         EventField.CREATED, EventField.CREATED_BY, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.CLASSIFICATION,
-        EventField.START_DATE, EventField.END_DATE,
-        EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
+        EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES
     };
 
     protected final GroupwareCaldavFactory factory;

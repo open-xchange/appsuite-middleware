@@ -84,7 +84,6 @@ import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
-import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
@@ -612,15 +611,16 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeSeriesId();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new DefaultDbMapping<RecurrenceId, Event>("intfield05", "Recurrence id", Types.INTEGER) {
+        mappings.put(EventField.RECURRENCE_ID, new DefaultDbMultiMapping<RecurrenceId, Event>(new String[] { "intfield05", "field08" }, "Recurrence id") {
 
             @Override
-            public RecurrenceId get(ResultSet resultSet, String columnLabel) throws SQLException {
-                int recurrencePosition = resultSet.getInt(columnLabel);
+            public RecurrenceId get(ResultSet resultSet, String[] columnLabels) throws SQLException {
+                int recurrencePosition = resultSet.getInt(columnLabels[0]);
                 if (resultSet.wasNull() || 0 >= recurrencePosition) {
                     return null;
                 }
-                return new StoredRecurrenceId(recurrencePosition);
+                long recurrenceDatePosition = resultSet.getLong(columnLabels[1]);
+                return new StoredRecurrenceId(recurrencePosition, recurrenceDatePosition);
             }
 
             @Override
@@ -628,12 +628,14 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 RecurrenceId value = isSet(event) ? get(event) : null;
                 if (null == value) {
                     statement.setNull(parameterIndex, Types.INTEGER);
+                    statement.setNull(parameterIndex + 1, Types.BIGINT);
                 } else if (StoredRecurrenceId.class.isInstance(value)) {
                     statement.setInt(parameterIndex, ((StoredRecurrenceId) value).getRecurrencePosition());
+                    statement.setLong(parameterIndex + 1, ((StoredRecurrenceId) value).getRecurrenceDatePosition());
                 } else {
                     throw new IllegalArgumentException("Unable to set recurrence id \"" + value + "\" in prepared statement");
                 }
-                return 1;
+                return 2;
             }
 
             @Override
@@ -717,28 +719,6 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public int getSqlType() {
                 return Types.VARCHAR;
-            }
-        });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new VarCharMapping<Event>("field08", "Change exception dates") {
-
-            @Override
-            public void set(Event event, String value) {
-                event.setChangeExceptionDates(deserializeExceptionDates(value));
-            }
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsChangeExceptionDates();
-            }
-
-            @Override
-            public String get(Event event) {
-                return serializeExceptionDates(event.getChangeExceptionDates());
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeChangeExceptionDates();
             }
         });
         mappings.put(EventField.DELETE_EXCEPTION_DATES, new VarCharMapping<Event>("field07", "Delete exception dates") {

@@ -112,16 +112,6 @@ public class EventOccurrence extends UnmodifiableEvent {
     }
 
     @Override
-    public SortedSet<RecurrenceId> getChangeExceptionDates() {
-        return null;
-    }
-
-    @Override
-    public boolean containsChangeExceptionDates() {
-        return false;
-    }
-
-    @Override
     public SortedSet<RecurrenceId> getDeleteExceptionDates() {
         return null;
     }

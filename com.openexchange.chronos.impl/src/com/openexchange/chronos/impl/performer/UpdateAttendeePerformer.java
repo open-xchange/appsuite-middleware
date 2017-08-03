@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -118,7 +117,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * load original event data & attendee
          */
-        Event originalEvent = loadEventData(objectID);
+        Event originalEvent = loadEventData(objectID, false);
         attendee = session.getEntityResolver().prepare(attendee);
         Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
         /*
@@ -216,20 +215,21 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceID) throws OXException {
+    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
+            recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+            Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
+            if (null != originalExceptionEvent) {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceID);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
                 /*
                  * update for new change exception, prepare & insert the exception
                  */
-                Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceID));
+                Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId));
                 storage.getEventStorage().insertEvent(exceptionEvent);
                 /*
                  * take over all original attendees, attachments & alarms
@@ -246,8 +246,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(exceptionEvent.getId(), attendeeUpdate);
                 }
-                addChangeExceptionDate(originalEvent, recurrenceID);
                 result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
+                touch(originalEvent.getSeriesId());
             }
         } else if (isSeriesException(originalEvent)) {
             /*
@@ -258,7 +258,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
         }
     }
 

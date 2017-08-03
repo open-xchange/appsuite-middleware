@@ -108,7 +108,7 @@ public abstract class AbstractHandler implements CachingHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractHandler.class);
 
     /** A collection of fields that are always included when querying events from the storage */
-    public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
+    public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
 
     protected final CachingCalendarAccess cachedCalendarAccess;
 
@@ -148,7 +148,7 @@ public abstract class AbstractHandler implements CachingHandler {
 
     /**
      * In case of errors revert lastUpdate to previous one.
-     * 
+     *
      * @throws OXException
      */
     private void revertLastUpdated() throws OXException {
@@ -294,10 +294,10 @@ public abstract class AbstractHandler implements CachingHandler {
 
     protected CalendarAccount getAccount() throws OXException {
         CalendarAccountStorageFactory storageFactory = Services.getService(CalendarAccountStorageFactory.class);
-        
+
         CalendarAccountStorage accountStorage = storageFactory.create(this.cachedCalendarAccess.getSession().getContext());
         CalendarAccount account = accountStorage.loadAccount(this.cachedCalendarAccess.getAccount().getAccountId());
-        
+
         if (null == account || account.getUserId() != this.cachedCalendarAccess.getSession().getUserId()) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(this.cachedCalendarAccess.getAccount().getAccountId()));
         }

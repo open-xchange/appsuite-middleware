@@ -56,11 +56,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -132,7 +129,6 @@ public class CreateEventsCallable implements Callable<Void> {
          * create further events as change exceptions
          */
         if (1 < events.size()) {
-            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
             for (int i = 1; i < events.size(); i++) {
                 Event importedChangeException = applyDefaults(events.get(i), now);
                 importedChangeException.setSeriesId(id);
@@ -144,12 +140,7 @@ public class CreateEventsCallable implements Callable<Void> {
                 if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
                     calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, this.cachedCalendarAccess.getSession().getUserId(), importedChangeException.getAlarms());
                 }
-                changeExceptionDates.add(importedChangeException.getRecurrenceId());
             }
-            Event eventUpdate = new Event();
-            eventUpdate.setId(id);
-            eventUpdate.setChangeExceptionDates(changeExceptionDates);
-            calendarStorage.getEventStorage().updateEvent(eventUpdate);
         }
     }
 

@@ -65,7 +65,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -86,10 +88,10 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
+import com.openexchange.chronos.common.mapping.AbstractEventUpdates;
 import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.AbstractEventUpdates;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventUpdates;
@@ -1306,6 +1308,25 @@ public class CalendarUtils {
                 }
             }
         };
+    }
+
+    /**
+     * Creates a sorted set of the recurrence identifiers for a list of change exception events.
+     *
+     * @param changeExceptions The change exceptions to get the recurrence identifiers from
+     * @return The recurrence identifiers, or an empty set if there are none
+     */
+    public static SortedSet<RecurrenceId> getRecurrenceIds(List<Event> changeExceptions) {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        if (null != changeExceptions) {
+            for (Event changeException : changeExceptions) {
+                RecurrenceId recurrenceId = changeException.getRecurrenceId();
+                if (null != recurrenceId) {
+                    recurrenceIds.add(recurrenceId);
+                }
+            }
+        }
+        return recurrenceIds;
     }
 
 }

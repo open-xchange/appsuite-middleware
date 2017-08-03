@@ -203,7 +203,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 /*
                  * expand & check all occurrences of event series in period
                  */
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(eventInPeriod, from, until);
+                Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
                     DateTime occurrenceEnd = CalendarUtils.calculateEnd(eventInPeriod, recurrenceId);
@@ -240,7 +240,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * resolve occurrences for event series & derive checked period
          */
-        List<RecurrenceId> eventRecurrenceIds = asList(session.getRecurrenceService().iterateRecurrenceIds(masterEvent, today, null));
+        List<RecurrenceId> eventRecurrenceIds = asList(getRecurrenceIterator(masterEvent, today, null));
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
         }

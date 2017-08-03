@@ -104,11 +104,16 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /** The event fields returned in free/busy queries by default */
-    private static final EventField[] FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+    private static final EventField[] FREEBUSY_FIELDS = {
+        EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
+        EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
+        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
     };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
-    private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+    private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
+        EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID,
+        EventField.RECURRENCE_RULE
     };
 
     /**
@@ -147,7 +152,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
-        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
+        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
@@ -212,7 +217,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /**
      * Calculates the free/busy time ranges from the user defined availability and the free/busy operation
-     * 
+     *
      * @param attendees The attendees to calculate the free/busy information for
      * @param from The start time of the interval
      * @param until The end time of the interval
@@ -336,14 +341,14 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 while (iterator.hasNext()) {
                     FreeBusyTime availabilityFreeBusyTime = iterator.next();
                     if (AvailabilityUtils.contained(availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime(), eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block 
+                        // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block
                         iterator.remove();
                     } else if (AvailabilityUtils.precedesAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
+                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
                         // then adjust the start time of the freeBusyTime block of the availability
                         availabilityFreeBusyTime.setStartTime(eventFreeBusyTime.getEndTime());
                     } else if (AvailabilityUtils.succeedsAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability 
+                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
                         // then adjust the end time of the freeBusyTime block of the availability
                         availabilityFreeBusyTime.setEndTime(eventFreeBusyTime.getStartTime());
                     } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
@@ -377,14 +382,14 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * Given that the {@link Event}'s free busy time block is fully contained
      * with in the availability's block, it splits the specified {@link FreeBusyTime}
      * in two intervals:
-     * 
+     *
      * <p><b>Interval A</b>
      * <ul>
      * <li>Start time: The start time of the availability's block</li>
      * <li>End time: The start time of the event's block</li>
      * </ul>
      * </p>
-     * 
+     *
      * <p>
      * <b>Interval B</b>
      * <ul>
@@ -392,7 +397,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * <li>End time: The end time of the availability's block</li>
      * </ul>
      * </p>
-     * 
+     *
      * @param auxiliaryList The auxiliary {@link List} to add the new intervals
      * @param freeBusyTime The {@link Event}'s {@link FreeBusyTime} block
      * @param toSplit The availability's {@link FreeBusyTime} block to split

@@ -52,11 +52,15 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +77,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -115,17 +120,17 @@ public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, 
+        EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */
     public static final EventField[] NON_CLASSIFIED_FIELDS = {
-        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.CREATED, EventField.CREATED_BY,
+        EventField.CLASSIFICATION, EventField.CREATED, EventField.UID, EventField.FILENAME, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.DELETE_EXCEPTION_DATES, EventField.END_DATE, EventField.ID,
         EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
-        EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP,
-        EventField.UID, EventField.FILENAME
+        EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
 
     /**
@@ -516,43 +521,36 @@ public class Utils {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
     public static Event applyExceptionDates(CalendarStorage storage, Event seriesMaster, int forUser) throws OXException {
-        if (false == isSeriesMaster(seriesMaster)) {
+        if (false == isSeriesMaster(seriesMaster) || false == isGroupScheduled(seriesMaster) || isOrganizer(seriesMaster, forUser) || 
+            isLastUserAttendee(seriesMaster.getAttendees(), forUser)) {
+            /*
+             * "real" delete exceptions for all attendees, take over as-is
+             */
             return seriesMaster;
-        }
+        }        
         /*
-         * lookup all known change exceptions
+         * check which change exceptions exist where the user is not attending
          */
-        SortedSet<RecurrenceId> changeExceptionDates = seriesMaster.getChangeExceptionDates();
-        if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
-            return seriesMaster;
-        }
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.NOT_EQUALS, I(forUser)))
         ;
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, getFields((EventField[]) null));
-        changeExceptions = storage.getUtilities().loadAdditionalEventData(forUser, changeExceptions, new EventField[] { EventField.ATTENDEES });
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
+        if (null == changeExceptions || 0 == changeExceptions.size()) {
+            return seriesMaster;
+        }
         /*
-         * check which change exception the user attends
+         * apply a 'userized' version of exception dates
          */
-        SortedSet<RecurrenceId> userizedChangeExceptions = new TreeSet<RecurrenceId>();
-        SortedSet<RecurrenceId> userizedDeleteExceptions = new TreeSet<RecurrenceId>();
+        SortedSet<RecurrenceId> userizedExceptionDates = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
-            userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
+            userizedExceptionDates.addAll(seriesMaster.getDeleteExceptionDates());
         }
         for (Event changeException : changeExceptions) {
-            RecurrenceId exceptionDate = changeException.getRecurrenceId();
-            if (CalendarUtils.contains(changeException.getAttendees(), forUser)) {
-                userizedChangeExceptions.add(exceptionDate);
-            } else {
-                userizedDeleteExceptions.add(exceptionDate);
-            }
+            userizedExceptionDates.add(changeException.getRecurrenceId());
         }
-        /*
-         * apply 'userized' versions of exception dates
-         */
-        seriesMaster.setChangeExceptionDates(userizedChangeExceptions);
-        seriesMaster.setDeleteExceptionDates(userizedDeleteExceptions);
+        seriesMaster.setDeleteExceptionDates(userizedExceptionDates);
         return seriesMaster;
     }
 
@@ -584,6 +582,24 @@ public class Utils {
             }
         }
         return timestamp;
+    }
+
+    /**
+     * Combines multiple collections of recurrence identifiers within a sorted set.
+     *
+     * @param recurrenceIds1 The first collection of recurrence identifiers, or <code>null</code> if not defined
+     * @param recurrenceIds2 The second collection of recurrence identifiers, or <code>null</code> if not defined
+     * @return A sorted set of all recurrence identifiers found in the supplied collections
+     */
+    public static SortedSet<RecurrenceId> combine(Collection<RecurrenceId> recurrenceIds1, Collection<RecurrenceId> recurrenceIds2) {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        if (null != recurrenceIds1) {
+            recurrenceIds1.addAll(recurrenceIds1);
+        }
+        if (null != recurrenceIds2) {
+            recurrenceIds1.addAll(recurrenceIds2);
+        }
+        return recurrenceIds;
     }
 
     /**

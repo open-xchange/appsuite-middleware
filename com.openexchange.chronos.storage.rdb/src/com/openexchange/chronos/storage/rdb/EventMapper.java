@@ -318,28 +318,6 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.setDeleteExceptionDates(value);
             }
         });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("changeExceptions", "Change exceptions") {
-
-            @Override
-            public boolean isSet(Event event) {
-                return event.containsChangeExceptionDates();
-            }
-
-            @Override
-            public void remove(Event event) {
-                event.removeChangeExceptionDates();
-            }
-
-            @Override
-            protected SortedSet<RecurrenceId> getRecurrenceIds(Event event) {
-                return event.getChangeExceptionDates();
-            }
-
-            @Override
-            protected void setRecurrenceIds(Event event, SortedSet<RecurrenceId> value) {
-                event.setChangeExceptionDates(value);
-            }
-        });
         mappings.put(EventField.CREATED, new BigIntMapping<Event>("created", "Created") {
 
             @Override

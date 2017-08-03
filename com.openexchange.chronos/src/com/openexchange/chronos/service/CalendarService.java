@@ -166,6 +166,8 @@ public interface CalendarService {
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * </ul>
      *
      * @param session The calendar session

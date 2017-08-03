@@ -50,9 +50,14 @@
 package com.openexchange.calendar.json.actions.chronos;
 
 import java.util.Date;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -113,7 +118,7 @@ public class DefaultEventConverter extends EventConverter {
         Date oldRangeStart = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date oldRangeEnd = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         try {
-            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
+            session.set(CalendarParameters.PARAMETER_FIELDS, null);
             session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
             session.set(CalendarParameters.PARAMETER_RANGE_START, null);
             session.set(CalendarParameters.PARAMETER_RANGE_END, null);
@@ -121,6 +126,28 @@ public class DefaultEventConverter extends EventConverter {
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
             session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
+            session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
+            session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
+        }
+    }
+
+    @Override
+    protected SortedSet<RecurrenceId> loadChangeExceptionDates(Event event) throws OXException {
+        TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        Date oldRangeStart = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date oldRangeEnd = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.RECURRENCE_ID });
+            session.set(CalendarParameters.PARAMETER_RANGE_START, null);
+            session.set(CalendarParameters.PARAMETER_RANGE_END, null);
+            List<Event> changeExceptions = session.getCalendarService().getChangeExceptions(session, event.getFolderId(), event.getSeriesId());
+            for (Event changeException : changeExceptions) {
+                recurrenceIds.add(changeException.getRecurrenceId());
+            }
+            return recurrenceIds;
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
             session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
             session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
         }

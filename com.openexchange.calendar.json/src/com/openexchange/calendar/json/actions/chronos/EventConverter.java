@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -223,8 +224,6 @@ public abstract class EventConverter {
                 return EventField.RECURRENCE_RULE;
             case CalendarObject.DELETE_EXCEPTIONS:
                 return EventField.DELETE_EXCEPTION_DATES;
-            case CalendarObject.CHANGE_EXCEPTIONS:
-                return EventField.CHANGE_EXCEPTION_DATES;
             case Appointment.TIMEZONE:
                 return EventField.START_DATE;
             case CalendarObject.PARTICIPANTS:
@@ -279,6 +278,8 @@ public abstract class EventConverter {
      * @return The event
      */
     protected abstract Event getEvent(EventID eventID, EventField... fields) throws OXException;
+
+    protected abstract SortedSet<RecurrenceId> loadChangeExceptionDates(Event event) throws OXException;
 
     /**
      * Gets the default timezone to use as fallback.
@@ -489,17 +490,9 @@ public abstract class EventConverter {
                 event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             }
         }
-        if (appointment.containsChangeExceptions()) {
-            if (null == appointment.getChangeException()) {
-                event.setChangeExceptionDates(null);
-            } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
-            }
-        }
         if (appointment.containsDeleteExceptions()) {
             if (null == appointment.getDeleteException()) {
-                event.setChangeExceptionDates(null);
+                event.setDeleteExceptionDates(null);
             } else {
                 RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
                 event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
@@ -723,11 +716,17 @@ public abstract class EventConverter {
                 appointment.setOccurrence(pattern.getOccurrences());
             }
         }
-        if (null != event.getChangeExceptionDates()) {
-            appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
-        }
+        //        if (null != event.getChangeExceptionDates()) {
+        //            appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
+        //        }
         if (null != event.getDeleteExceptionDates()) {
             appointment.setDeleteExceptions(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));
+        }
+        if (isSeriesMaster(event)) {
+            SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(event);
+            if (0 < changeExceptionDates.size()) {
+                appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(changeExceptionDates));
+            }
         }
 
         //appointment.setNotification(false);

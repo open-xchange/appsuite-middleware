@@ -105,7 +105,6 @@ public abstract class RecurrenceServiceTest {
         clone.removeId();
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
-        clone.removeChangeExceptionDates();
         clone.setStartDate(DT(start, clone.getStartDate().getTimeZone(), clone.getStartDate().isAllDay()));
         clone.setEndDate(DT(end, clone.getEndDate().getTimeZone(), clone.getEndDate().isAllDay()));
 
@@ -121,7 +120,6 @@ public abstract class RecurrenceServiceTest {
         clone.removeId();
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
-        clone.removeChangeExceptionDates();
         clone.setRecurrenceId(new DefaultRecurrenceId(DT(recurrenceId, master.getStartDate().getTimeZone(), master.getStartDate().isAllDay())));
         clone.setStartDate(DT(start, clone.getStartDate().getTimeZone(), clone.getStartDate().isAllDay()));
         clone.setEndDate(DT(end, clone.getEndDate().getTimeZone(), clone.getEndDate().isAllDay()));
@@ -138,7 +136,6 @@ public abstract class RecurrenceServiceTest {
         clone.removeId();
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
-        clone.removeChangeExceptionDates();
         clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
@@ -155,7 +152,6 @@ public abstract class RecurrenceServiceTest {
         clone.removeId();
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
-        clone.removeChangeExceptionDates();
         clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
@@ -198,7 +194,6 @@ public abstract class RecurrenceServiceTest {
         instance.removeId();
         instance.removeRecurrenceRule();
         instance.removeDeleteExceptionDates();
-        instance.removeChangeExceptionDates();
         instance.setRecurrenceId(new DefaultRecurrenceId(DT(recurrenceId, master.getStartDate().getTimeZone(), master.getStartDate().isAllDay())));
         instance.setStartDate(DT(start, instance.getStartDate().getTimeZone(), instance.getStartDate().isAllDay()));
         instance.setEndDate(DT(end, instance.getEndDate().getTimeZone(), instance.getEndDate().isAllDay()));
@@ -224,11 +219,6 @@ public abstract class RecurrenceServiceTest {
             if (other.getCategories() != null)
                 return false;
         } else if (!event.getCategories().equals(other.getCategories()))
-            return false;
-        if (event.getChangeExceptionDates() == null) {
-            if (other.getChangeExceptionDates() != null)
-                return false;
-        } else if (!event.getChangeExceptionDates().equals(other.getChangeExceptionDates()))
             return false;
         if (event.getClassification() != other.getClassification())
             return false;
@@ -337,9 +327,6 @@ public abstract class RecurrenceServiceTest {
         }
         if (event.containsCategories()) {
             clone.setCategories(cloneList(event.getCategories()));
-        }
-        if (event.containsChangeExceptionDates()) {
-            clone.setChangeExceptionDates(cloneSet(event.getChangeExceptionDates()));
         }
         if (event.containsClassification()) {
             clone.setClassification(event.getClassification());

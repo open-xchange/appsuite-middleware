@@ -177,16 +177,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return result;
     }
 
-    private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
+    private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (contains(originalEvent.getDeleteExceptionDates(), recurrenceID)) {
-                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getSeriesId(), recurrenceID);
+            if (contains(originalEvent.getDeleteExceptionDates(), recurrenceId)) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getSeriesId(), recurrenceId);
             }
-            if (contains(originalEvent.getChangeExceptionDates(), recurrenceID)) {
+            recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+            Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
+            if (null != originalExceptionEvent) {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceID);
                 if (updateEvent(originalExceptionEvent, updatedEvent)) {
                     result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
                     touch(originalEvent.getSeriesId());
@@ -195,7 +196,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for new change exception, prepare & insert a plain exception first
                  */
-                Event newExceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceID));
+                Event newExceptionEvent = prepareException(originalEvent, recurrenceId);
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 /*
                  * take over all original attendees, attachments & alarms
@@ -214,8 +215,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 newExceptionEvent.setAttachments(originalEvent.getAttachments());
                 updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
-                addChangeExceptionDate(originalEvent, recurrenceID);
                 result.addCreation(new CreateResultImpl(loadEventData(newExceptionEvent.getId())));
+                touch(originalEvent.getSeriesId());
             }
         } else if (isSeriesException(originalEvent)) {
             /*
@@ -229,7 +230,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceID));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
         }
     }
 
@@ -350,7 +351,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Adjusts any previously existing change- and delete exceptions whenever a series event is rescheduled. In particluar:
+     * Adjusts any previously existing change- and delete exceptions whenever a series event is rescheduled. In particular:
      * <ul>
      * <li>If the series master event's period is changed, any series exceptions are removed</li>
      * <li>If an event series is turned into a single event, any series exceptions are removed</li>
@@ -365,31 +366,29 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * check if applicable for event update
          */
         Event originalEvent = eventUpdate.getOriginal();
-        if (false == isSeriesMaster(originalEvent) ||
-            (isNullOrEmpty(originalEvent.getChangeExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates()))) {
+        if (false == isSeriesMaster(eventUpdate.getOriginal()) ||
+            false == eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE })) {
+            return false;
+        }
+        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(originalEvent.getSeriesId());
+        SortedSet<RecurrenceId> deleteExceptionDates = originalEvent.getDeleteExceptionDates();
+        if (isNullOrEmpty(deleteExceptionDates) && isNullOrEmpty(changeExceptionDates)) {
             return false;
         }
         /*
          * reset all delete- and change exceptions if master period changes, or if recurrence is deleted
          */
+        boolean wasUpdated = false;
         if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE }) ||
             eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE) && null == eventUpdate.getUpdate().getRecurrenceRule()) {
             eventUpdate.getUpdate().setDeleteExceptionDates(null);
-            eventUpdate.getUpdate().setChangeExceptionDates(null);
-            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
+            deleteExceptions(originalEvent.getSeriesId(), changeExceptionDates);
+            wasUpdated |= true;
+        } else if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
             /*
              * recurrence rule changed, build list of possible exception dates matching the new rule
              */
-            SortedSet<RecurrenceId> exceptionDates = new TreeSet<RecurrenceId>();
-            if (null != originalEvent.getDeleteExceptionDates()) {
-                exceptionDates.addAll(originalEvent.getDeleteExceptionDates());
-            }
-            if (null != originalEvent.getChangeExceptionDates()) {
-                exceptionDates.addAll(originalEvent.getChangeExceptionDates());
-            }
+            SortedSet<RecurrenceId> exceptionDates = Utils.combine(deleteExceptionDates, changeExceptionDates);
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.last().getValue().getTimestamp());
             untilCalendar.add(Calendar.DATE, 1);
             List<RecurrenceId> possibleExceptionDates = asList(session.getRecurrenceService().iterateRecurrenceIds(
@@ -397,28 +396,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */
-            boolean wasUpdated = false;
-            if (false == isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
+            if (false == isNullOrEmpty(deleteExceptionDates)) {
                 SortedSet<RecurrenceId> newDeleteExceptionDates = new TreeSet<RecurrenceId>(originalEvent.getDeleteExceptionDates());
                 if (newDeleteExceptionDates.retainAll(possibleExceptionDates)) {
                     eventUpdate.getUpdate().setDeleteExceptionDates(newDeleteExceptionDates);
                     wasUpdated |= true;
                 }
             }
-            if (false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
-                List<RecurrenceId> notMatchingChangeExceptionDates = new ArrayList<RecurrenceId>(originalEvent.getChangeExceptionDates());
+            if (false == isNullOrEmpty(changeExceptionDates)) {
+                List<RecurrenceId> notMatchingChangeExceptionDates = new ArrayList<RecurrenceId>(changeExceptionDates);
                 notMatchingChangeExceptionDates.removeAll(possibleExceptionDates);
                 if (0 < notMatchingChangeExceptionDates.size()) {
                     deleteExceptions(originalEvent.getSeriesId(), notMatchingChangeExceptionDates);
-                    SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(originalEvent.getChangeExceptionDates());
-                    newChangeExceptionDates.removeAll(notMatchingChangeExceptionDates);
-                    eventUpdate.getUpdate().setChangeExceptionDates(newChangeExceptionDates);
                     wasUpdated |= true;
                 }
             }
-            return wasUpdated;
         }
-        return false;
+        return wasUpdated;
     }
 
     /**
@@ -504,7 +498,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     private boolean updateDeleteExceptions(Event originalEvent, Event updatedEvent) throws OXException {
-        if (isSeriesMaster(originalEvent) && null != updatedEvent.getDeleteExceptionDates() && 0 < updatedEvent.getDeleteExceptionDates().size()) {
+        if (isSeriesMaster(originalEvent) && false == isNullOrEmpty(updatedEvent.getDeleteExceptionDates())) {
             if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
                 /*
                  * "real" delete exceptions for all attendees, take over as-is during normal update routine
@@ -524,11 +518,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
                     RecurrenceId recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, newDeleteException);
-                    if (contains(originalEvent.getChangeExceptionDates(), newDeleteException)) {
+                    Event changeException = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
+                    if (null != changeException) {
                         /*
                          * remove attendee from existing change exception
                          */
-                        delete(loadExceptionData(originalEvent.getId(), recurrenceId), userAttendee);
+                        delete(changeException, userAttendee);
                     } else {
                         /*
                          * creation of new delete exception for this attendee
@@ -753,7 +748,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                          */
                         EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
                         eventUpdate.setSeriesId(null);
-                        eventUpdate.setChangeExceptionDates(null);
                         eventUpdate.setDeleteExceptionDates(null);
                         break;
                     }
@@ -800,12 +794,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         }
                     }
                     break;
-                case CHANGE_EXCEPTION_DATES:
-                    if (isNullOrEmpty(eventUpdate.getDeleteExceptionDates()) && isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
-                        // ignore neutral value
-                        break;
-                    }
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 case CREATED:
                     // ignore implicitly
                     eventUpdate.removeCreated();
@@ -846,44 +834,93 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         /*
-         * adjust attendee-dependent fields
+         * adjust attendee-dependent fields (for non-exception events)
          */
-        if (null == newAttendees || 0 == newAttendees.size()) {
-            /*
-             * no group-scheduled event (any longer), ensure to take over common calendar folder & remove organizer
-             */
-            if (null != originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
-                eventUpdate.setOrganizer(null);
-            }
-            if (null == originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
-                eventUpdate.setFolderId(folder.getID());
-            }
-        } else {
-            /*
-             * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
-             */
-            if (null == originalEvent.getOrganizer()) {
-                eventUpdate.setOrganizer(prepareOrganizer(eventUpdate.getOrganizer()));
-            } else if (eventUpdate.containsOrganizer()) {
-                Organizer organizer = session.getEntityResolver().prepare(eventUpdate.getOrganizer(), CalendarUserType.INDIVIDUAL);
-                if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
-                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
-                }
-                eventUpdate.removeOrganizer(); // ignore
-            }
-            if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
-                eventUpdate.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+        if (false == isSeriesException(originalEvent)) {
+            if (isNullOrEmpty(newAttendees)) {
+                adjustForNonGroupScheduled(originalEvent, eventUpdate);
+            } else {
+                adjustForGroupScheduled(originalEvent, eventUpdate);
             }
         }
-        if (calendarUserId != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
-            Consistency.setCalenderUser(folder, eventUpdate);
-        }
+        /*
+         * wrap changes and return as item update (if there are any)
+         */
         if (0 == EventMapper.getInstance().getAssignedFields(eventUpdate).length) {
             return null;
         }
         EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
         Consistency.setModified(timestamp, eventUpdate, session.getUserId());
         return new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, eventUpdate);
+    }
+
+    /**
+     * Prepares certain properties in the passed event update to reflect that the event is or is now a <i>group-scheduled</i> event.
+     * <p/>
+     * This includes the organizer property of the event, as well as the common parent folder identifier and associated the calendar user
+     * of the event.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    private void adjustForGroupScheduled(Event originalEvent, Event eventUpdate) throws OXException {
+        /*
+         * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
+         */
+        if (null == originalEvent.getOrganizer()) {
+            eventUpdate.setOrganizer(prepareOrganizer(eventUpdate.getOrganizer()));
+        } else if (eventUpdate.containsOrganizer()) {
+            Organizer organizer = session.getEntityResolver().prepare(eventUpdate.getOrganizer(), CalendarUserType.INDIVIDUAL);
+            if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
+                throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
+            }
+            eventUpdate.removeOrganizer(); // ignore
+        }
+        if (PublicType.getInstance().equals(folder.getType())) {
+            if (null == originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
+                eventUpdate.setFolderId(folder.getID());
+            }
+            if (0 != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
+                eventUpdate.setCalendarUser(0);
+            }
+        } else {
+            if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
+                eventUpdate.setFolderId(null);
+            }
+            if (0 == originalEvent.getCalendarUser()) {
+                eventUpdate.setCalendarUser(folder.getCreatedBy());
+            } else if (eventUpdate.containsCalendarUser()) {
+                if (eventUpdate.getCalendarUser() != originalEvent.getCalendarUser()) {
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.CALENDAR_USER);
+                }
+                eventUpdate.removeCalendarUser(); // ignore
+            }
+        }
+    }
+
+    /**
+     * Prepares certain properties in the passed event update to reflect that the event is not or no longer a <i>group-scheduled</i> event.
+     * <p/>
+     * This includes the organizer property of the event, as well as the common parent folder identifier and associated the calendar user
+     * of the event.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    private void adjustForNonGroupScheduled(Event originalEvent, Event eventUpdate) throws OXException {
+        /*
+         * no group-scheduled event (any longer), ensure to take over common calendar folder & user, remove organizer
+         */
+        if (null != originalEvent.getOrganizer() || eventUpdate.containsOrganizer()) {
+            eventUpdate.setOrganizer(null);
+        }
+        if (false == folder.getID().equals(originalEvent.getFolderId()) || eventUpdate.containsFolderId()) {
+            eventUpdate.setFolderId(folder.getID());
+        }
+        int calendarUser = PublicType.getInstance().equals(folder.getType()) ? 0 : folder.getCreatedBy();
+        if (calendarUser != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
+            eventUpdate.setCalendarUser(calendarUser);
+        }
     }
 
     private void requireWritePermissions(Event originalEvent) throws OXException {

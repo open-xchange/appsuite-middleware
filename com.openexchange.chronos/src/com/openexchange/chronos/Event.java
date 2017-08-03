@@ -93,7 +93,6 @@ public class Event {
     private String seriesId;
     private String recurrenceRule;
     private RecurrenceId recurrenceId;
-    private SortedSet<RecurrenceId> changeExceptionDates;
     private SortedSet<RecurrenceId> deleteExceptionDates;
 
     private EventStatus status;
@@ -1023,42 +1022,6 @@ public class Event {
      */
     public boolean containsRecurrenceId() {
         return setFields.contains(EventField.RECURRENCE_ID);
-    }
-
-    /**
-     * Gets the change exception dates of the event.
-     *
-     * @return The change exception dates
-     */
-    public SortedSet<RecurrenceId> getChangeExceptionDates() {
-        return changeExceptionDates;
-    }
-
-    /**
-     * Sets the change exception dates of the event.
-     *
-     * @param value The change exception dates to set
-     */
-    public void setChangeExceptionDates(SortedSet<RecurrenceId> value) {
-        changeExceptionDates = value;
-        setFields.add(EventField.CHANGE_EXCEPTION_DATES);
-    }
-
-    /**
-     * Removes the change exception dates of the event.
-     */
-    public void removeChangeExceptionDates() {
-        changeExceptionDates = null;
-        setFields.remove(EventField.CHANGE_EXCEPTION_DATES);
-    }
-
-    /**
-     * Gets a value indicating whether the change exception dates of the event has been set or not.
-     *
-     * @return <code>true</code> if the change exception dates is set, <code>false</code>, otherwise
-     */
-    public boolean containsChangeExceptionDates() {
-        return setFields.contains(EventField.CHANGE_EXCEPTION_DATES);
     }
 
     /**
