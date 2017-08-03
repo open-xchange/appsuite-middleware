@@ -258,6 +258,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
+            // Sort by starting date
+            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
             // Mark the rest of the range as free
             calculateFreeBlocks(eventsFreeBusyTimes, from, until);
             // Sort by starting date
