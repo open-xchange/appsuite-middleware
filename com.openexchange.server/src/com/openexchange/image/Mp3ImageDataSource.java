@@ -232,6 +232,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 
@@ -240,6 +241,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 

@@ -212,7 +212,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                     return location;
                 }
             } catch (OXException e) {
-                LOG.warn("Failed to determine location for session with IP address {}", ipAddress, e);
+                LOG.debug("Failed to determine location for session with IP address {}", ipAddress, e);
             }
         }
 

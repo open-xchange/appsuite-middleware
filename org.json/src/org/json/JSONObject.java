@@ -660,19 +660,36 @@ public class JSONObject extends AbstractJSONValue {
      * @return true if the key exists in the JSONObject.
      */
     public boolean has(final String key) {
-        return this.myHashMap.containsKey(key);
+        return null != key && this.myHashMap.containsKey(key);
     }
-    
-    
+
     /**
-     * Determine if the JSONObject contains one of the specific keys.
-     * @param keys List of keys
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
      * @return true if one key exist in the JSONObject
      */
-    public boolean hasOne(String ...keys) {
+    public boolean hasAny(String... keys) {
         if (keys != null) {
             for (String key : keys) {
-                if (has(key)) {
+                if (null != key && this.myHashMap.containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
+     * @return true if one key exist in the JSONObject
+     */
+    public boolean hasAny(Collection<String> keys) {
+        if (keys != null) {
+            for (String key : keys) {
+                if (null != key && this.myHashMap.containsKey(key)) {
                     return true;
                 }
             }

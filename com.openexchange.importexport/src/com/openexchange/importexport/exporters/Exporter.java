@@ -72,16 +72,31 @@ public interface Exporter {
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
     /**
+     * Checks if the given folder can be exported in the given format
      *
      * @param session The session object to be able to check permissions.
      * @param format Format the exported data is supposed to be in
      * @param folder Folder that should be exported. Note: A folder can only contain data of one type
      * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return true, if the given folders can be exported in the given format; false otherwise
+     * @return true, if the given folders can be exported in the given format; false otherwise     
+     * @throws OXException if check fails
      */
     boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException;
-
+    
     /**
+     * Checks if the given batch data can be exported in the given format
+     *
+     * @param session The session object to be able to check permissions.
+     * @param format Format the exported data is supposed to be in
+     * @param batchIds Batch data that should be exported. Note: A batch can only contain data of one type
+     * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
+     * @return true, if the given folders can be exported in the given format; false otherwise  
+     * @throws OXException if check fails
+     */
+    void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException;
+    
+    /**
+     * Exports the data of a given folder
      *
      * @param session The session object to be able to check permissions.
      * @param format Format the returned InputStream should be in.
@@ -89,11 +104,12 @@ public interface Exporter {
      * @param fieldsToBeExported A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
      * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
      * @return InputStream in requested format.
-     * @throws OXException
+     * @throws OXException if export fails
      */
     SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
+    
     /**
+     * Exports the data of the given folders and objects 
      *
      * @param session The session object to be able to check permissions.
      * @param format Format the returned InputStream should be in.
@@ -101,17 +117,17 @@ public interface Exporter {
      * @param fieldsToBeExported A list of fields of that folder that should be exported. Convention: If the list is empty, all fields are exported.
      * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
      * @return InputStream in requested format.
-     * @throws OXException
+     * @throws OXException if export fails
      */
     SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-
+    
     /**
      * Creates a proper export file name based on the folder to export
      *
      * @param session The session object to be able to check permissions.
      * @param folder The folder to name the export file after.
      * @return String the name of the export file.
-     * @throws OXException
+     * @throws OXException if file name creation fails
      */
     String getFolderExportFileName(ServerSession session, String folder) throws OXException;
 
@@ -121,7 +137,7 @@ public interface Exporter {
      * @param session The session object to be able to check permissions.
      * @param batchIds The Identifiers which determine the export file name.
      * @return String the name of the export file.
-     * @throws OXException
+     * @throws OXException if file name creation fails 
      */
     String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds) throws OXException;
 }

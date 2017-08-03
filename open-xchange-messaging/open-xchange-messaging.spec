@@ -3,7 +3,6 @@
 
 Name:           open-xchange-messaging
 BuildArch:      noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
 %else
@@ -12,17 +11,13 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define        ox_release 3
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -30,7 +25,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open Xchange backend messaging extension
-Autoreqprov:   no
+Autoreqprov:    no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-oauth >= @OXVERSION@
 Requires:       open-xchange-xerces
