@@ -2,15 +2,10 @@
 
 Name:          open-xchange-linkedin
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
