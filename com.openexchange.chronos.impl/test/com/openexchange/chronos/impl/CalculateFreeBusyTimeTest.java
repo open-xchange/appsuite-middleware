@@ -365,7 +365,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     }
 
     /**
-     * Tests a single overlap between an event that is contains a free slot of an availability
+     * Tests a single overlap between an event that contains a free slot of an availability
      */
     @Test
     public void testSingleOverlapAvailabilityWithContainedEvent() throws OXException {
