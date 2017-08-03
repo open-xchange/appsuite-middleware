@@ -254,7 +254,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // For each availability block and each calendar free slot create an equivalent free busy time slot
             List<FreeBusyTime> freeBusyTimes = calculateFreeBusyTimes(availableTime, timeZone);
-
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
