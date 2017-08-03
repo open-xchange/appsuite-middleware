@@ -100,7 +100,19 @@ final class PropsFactory {
      * @return The new {@link Date}
      */
     static Date createDate(int year, int month, int day) {
-        return new Date(new DateTime(year, month, day).getTimestamp());
+        return new Date(createDateTime(year, month, day).getTimestamp());
+    }
+
+    /**
+     * Creates a {@link DateTime} with the specified year, month, day
+     * 
+     * @param year The year
+     * @param month The month
+     * @param day the day
+     * @return The new {@link Date}
+     */
+    static DateTime createDateTime(int year, int month, int day) {
+        return new DateTime(year, month, day);
     }
 
     /**
