@@ -131,12 +131,13 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void updateAccount(int id, Map<String, Object> data) throws OXException {
+    public void updateAccount(int id, Map<String, Object> data, long timestamp) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
+            checkConcurrentModification(connection, context.getContextId(), id, timestamp);
             updated = updateAccount(connection, context.getContextId(), id, System.currentTimeMillis(), data);
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -144,6 +145,29 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         } finally {
             release(connection, updated);
         }
+    }
+
+    private static void checkConcurrentModification(Connection connection, int cid, int id, long timestamp) throws SQLException, OXException {
+        long lastModified = getLastModified(connection, cid, id);
+        if (lastModified > timestamp) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(id, timestamp, lastModified);
+        } else if (lastModified < 0) {
+            LOG.warn("Unable to retrieve last modification timestamp. Will allow to update calendar account.");
+        }
+    }
+
+    private static long getLastModified(Connection connection, int cid, int id) throws SQLException {
+        String sql = "SELECT modified FROM calendar_account WHERE cid=? AND id=?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, cid);
+            stmt.setInt(2, id);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+            }
+        }
+        return -1L;
     }
 
     @Override

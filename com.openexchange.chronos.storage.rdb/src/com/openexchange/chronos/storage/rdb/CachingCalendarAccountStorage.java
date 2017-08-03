@@ -88,8 +88,8 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
     
     @Override
-    public void updateAccount(int id, Map<String, Object> configuration) throws OXException {
-        delegate.updateAccount(id, configuration);
+    public void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException {
+        delegate.updateAccount(id, configuration, timestamp);
         invalidateCalendarAccounts(new int[] { id });
     }
     

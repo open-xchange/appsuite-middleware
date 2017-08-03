@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching;
 
 import static org.junit.Assert.assertEquals;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -64,8 +65,13 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.impl.CachingCalendarAccessImpl;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -78,7 +84,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServerSessionAdapter.class })
+@PrepareForTest({ ServerSessionAdapter.class, Services.class })
 public class CachingCalendarAccessTest {
 
     private CachingCalendarAccessImpl cachingCalendarAccess;
@@ -95,6 +101,15 @@ public class CachingCalendarAccessTest {
     @Mock
     private CalendarParameters parameters;
 
+    @Mock
+    private CalendarStorageFactory calendarStorageFactory;
+
+    @Mock
+    private DatabaseService databaseService;
+
+    @Mock
+    private Connection connection;
+
     private Map<String, Object> calendarConfig = new HashMap<String, Object>();
 
     @Before
@@ -104,20 +119,25 @@ public class CachingCalendarAccessTest {
         PowerMockito.mockStatic(ServerSessionAdapter.class);
         PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(serverSession);
 
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(CalendarStorageFactory.class)).thenReturn(calendarStorageFactory);
+        PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
+        PowerMockito.when(databaseService.getWritable((Context)Matchers.any())).thenReturn(connection);
+
         cachingCalendarAccess = new CachingCalendarAccessImpl(session, account, parameters);
 
         Mockito.when(account.getConfiguration()).thenReturn(calendarConfig);
     }
 
     @Test
-    public void testGetType_noEntryForLastUpdateFound_returnInitialInsert() {
+    public void testGetType_noEntryForLastUpdateFound_returnInitialInsert() throws OXException {
         ProcessingType type = cachingCalendarAccess.getType();
 
         assertEquals(ProcessingType.INITIAL_INSERT, type);
     }
 
     @Test
-    public void testGetType_lastUpdateToSmall_returnInitialInsert() {
+    public void testGetType_lastUpdateToSmall_returnInitialInsert() throws OXException {
         calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(0));
 
         ProcessingType type = cachingCalendarAccess.getType();
@@ -126,7 +146,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetType_lastUpdateToSmall2_returnInitialInsert() {
+    public void testGetType_lastUpdateToSmall2_returnInitialInsert() throws OXException {
         calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(-111111111));
 
         ProcessingType type = cachingCalendarAccess.getType();
@@ -135,7 +155,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetType_lastUpdateFarAway_returnUpdate() {
+    public void testGetType_lastUpdateFarAway_returnUpdate() throws OXException {
         calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(111111111));
 
         ProcessingType type = cachingCalendarAccess.getType();
@@ -144,7 +164,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetType_lastInDefinedRange_returnReadDB() {
+    public void testGetType_lastInDefinedRange_returnReadDB() throws OXException {
         long currentTimeMillis = System.currentTimeMillis();
         calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(currentTimeMillis));
 

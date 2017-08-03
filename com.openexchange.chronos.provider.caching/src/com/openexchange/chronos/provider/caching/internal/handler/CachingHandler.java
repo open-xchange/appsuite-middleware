@@ -63,13 +63,17 @@ import com.openexchange.exception.OXException;
  */
 public interface CachingHandler {
 
-    List<Event> execute(List<EventID> eventIds) throws OXException;
+    void execute(List<EventID> eventIds) throws OXException;
 
-    List<Event> execute(String folderId) throws OXException;
+    void execute(String folderId) throws OXException;
 
-    Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
+    void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
 
-    CachingHandler requireUpToDate() throws OXException;
+    List<Event> search(List<EventID> eventIds) throws OXException;
 
+    List<Event> search(String folderId) throws OXException;
+
+    Event search(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
+    
     void handleExceptions(OXException e) throws OXException;
 }

@@ -49,10 +49,14 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import org.apache.commons.lang3.ArrayUtils;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -62,6 +66,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -74,6 +79,10 @@ import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link UpdateHandler}
@@ -91,19 +100,17 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> execute(String folderId) throws OXException {
-        updateLastUpdated();
-
+    public void execute(String folderId) throws OXException {
         EventUpdates diff = generateEventDiff(folderId);
         processDiff(diff);
 
-        return searchEvents(folderId);
+        updateLastUpdated();
     }
 
     private EventUpdates generateEventDiff(String folderId) throws OXException {
         List<Event> extEventsInFolder = getAndPrepareExtEvents(folderId);
 
-        List<Event> persistedEventsInFolder = searchEvents(folderId);
+        List<Event> persistedEventsInFolder = searchEvents(folderId, true);
         EventUpdates eventUpdates = CalendarUtils.getEventUpdates(persistedEventsInFolder, extEventsInFolder, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
 
         return eventUpdates;
@@ -120,15 +127,58 @@ public class UpdateHandler extends AbstractHandler {
             return;
         }
 
-        CalendarStorage calendarStorage = getCalendarStorage();
         for (Event event : diff.getRemovedItems()) {
-            calendarStorage.getEventStorage().deleteEvent(event.getId());
-            calendarStorage.getAttendeeStorage().deleteAttendees(event.getId());
-            calendarStorage.getAlarmStorage().deleteAlarms(event.getId());
+            delete(event);
         }
     }
 
-    private void create(EventUpdates diff) throws OXException {
+    protected void delete(Event originalEvent) throws OXException {
+        CalendarStorage calendarStorage = getCalendarStorage();
+        /*
+         * recursively delete any existing event exceptions
+         */
+        if (isSeriesMaster(originalEvent)) {
+            deleteExceptions(originalEvent.getFolderId(), originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()));
+        }
+        /*
+         * delete event data from storage
+         */
+        String id = originalEvent.getId();
+        calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), this.cachedCalendarAccess.getAccount().getUserId()));
+        calendarStorage.getAttendeeStorage().insertAttendeeTombstones(id, calendarStorage.getUtilities().getTombstones(originalEvent.getAttendees()));
+        calendarStorage.getAlarmStorage().deleteAlarms(id);
+        calendarStorage.getEventStorage().deleteEvent(id);
+        calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
+    }
+
+    protected SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(CalendarUtils.getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(CalendarUtils.getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
+        List<Event> changeExceptions = getCalendarStorage().getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
+        return CalendarUtils.getRecurrenceIds(changeExceptions);
+    }
+    
+    protected void deleteExceptions(String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
+        for (Event originalExceptionEvent : loadExceptionData(folderId, seriesID, exceptionDates)) {
+            delete(originalExceptionEvent);
+        }
+    }
+    
+    protected List<Event> loadExceptionData(String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
+        List<Event> exceptions = new ArrayList<Event>();
+        if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
+            for (RecurrenceId recurrenceID : recurrenceIDs) {
+                Event exception = getCalendarStorage().getEventStorage().loadException(seriesID, recurrenceID, null);
+                if (null == exception) {
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesID, String.valueOf(recurrenceID));
+                }
+                exception.setFolderId(folderId);
+                exceptions.add(exception);
+            }
+        }
+        return getCalendarStorage().getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, EventField.values());
+    }
+
+    private void create(EventUpdates diff) {
         if (diff.isEmpty()) {
             return;
         }
@@ -206,8 +256,13 @@ public class UpdateHandler extends AbstractHandler {
                 attendeeStorage.deleteAttendees(eventId, attendeeUpdates.getRemovedItems());
             }
             if (!attendeeUpdates.getUpdatedItems().isEmpty()) {
-                //FIXME
-                //                attendeeStorage.updateAttendees(eventId, attendeeUpdates.getUpdatedItems().ge);
+                List<Attendee> attendees = new ArrayList<Attendee>();
+                for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeUpdates.getUpdatedItems()) {
+                    attendees.add(attendeeUpdate.getUpdate());
+                }
+                if (!attendees.isEmpty()) {
+                    attendeeStorage.updateAttendees(eventId, attendees);
+                }
             }
         }
     }
@@ -222,20 +277,17 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         execute(folderId);
-        return searchEvent(eventId);
     }
 
     @Override
-    public List<Event> execute(List<EventID> eventIds) throws OXException {
-        updateLastUpdated();
-
+    public void execute(List<EventID> eventIds) throws OXException {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
         for (String folderId : sortEventIDsPerFolderId.keySet()) {
             EventUpdates diff = generateEventDiff(folderId);
             processDiff(diff);
         }
-        return searchEvents(eventIds);
+        updateLastUpdated();
     }
 }

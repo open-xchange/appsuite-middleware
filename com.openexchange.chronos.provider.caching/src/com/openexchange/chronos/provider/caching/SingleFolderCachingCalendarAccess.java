@@ -64,7 +64,6 @@ import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 
 /**
@@ -111,10 +110,8 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         List<Event> events = new ArrayList<Event>();
         checkFolderId(this.folder.getId());
         for (Event event : getEvents()) {
-            if (CalendarUtils.isInRange(event, getFrom(), getUntil(), TimeZones.UTC)) {
-                event.setFolderId(this.folder.getId());
-                events.add(event);
-            }
+            event.setFolderId(this.folder.getId());
+            events.add(event);
         }
         return events;
     }

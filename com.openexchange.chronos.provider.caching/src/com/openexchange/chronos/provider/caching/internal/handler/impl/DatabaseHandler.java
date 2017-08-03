@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
 import java.util.List;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.service.EventID;
@@ -69,17 +68,14 @@ public class DatabaseHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> execute(String folderId) throws OXException {
-        return searchEvents(folderId);
+    public void execute(String folderId) throws OXException {
     }
 
     @Override
-    public Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        return searchEvent(eventId);
+    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
     }
 
     @Override
-    public List<Event> execute(List<EventID> eventIds) throws OXException {
-        return searchEvents(eventIds);
+    public void execute(List<EventID> eventIds) throws OXException {
     }
 }

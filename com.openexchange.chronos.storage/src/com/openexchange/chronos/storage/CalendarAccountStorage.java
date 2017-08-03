@@ -77,8 +77,9 @@ public interface CalendarAccountStorage {
      *
      * @param id The identifier of the account to update
      * @param configuration The provider-specific configuration data for the calendar account
+     * @param timestamp The timestamp that specifies the last the last modification of the account
      */
-    void updateAccount(int id, Map<String, Object> configuration) throws OXException;
+    void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException;
 
     /**
      * Deletes an existing calendar account.

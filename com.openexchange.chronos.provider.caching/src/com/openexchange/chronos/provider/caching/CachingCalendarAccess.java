@@ -48,6 +48,7 @@
 
 package com.openexchange.chronos.provider.caching;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +57,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.caching.internal.db.DatabaseConnectionHelper;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandlerFactory;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
@@ -64,7 +66,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -80,16 +82,21 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class CachingCalendarAccess implements CalendarAccess {
 
-    protected static final String LAST_UPDATE = "lastUpdate";
+    public static final String LAST_UPDATE = "lastUpdate";
+
+    public static final String PREVIOUS_LAST_UPDATE = "previousLastUpdate";
 
     private final ServerSession session;
     private final CalendarAccount account;
     private final CalendarParameters parameters;
 
+    private final DatabaseConnectionHelper databaseConnectionHelper;
+
     public CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
+        this.databaseConnectionHelper = new DatabaseConnectionHelper(Services.getService(DatabaseService.class), this.session.getContext(), this.account.getAccountId());
     }
 
     /**
@@ -113,10 +120,14 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            return cachingHandler.requireUpToDate().execute(folderId, eventId, recurrenceId);
+            cachingHandler.execute(folderId, eventId, recurrenceId);
+            this.databaseConnectionHelper.commit();
+            return cachingHandler.search(folderId, eventId, recurrenceId);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
+        } finally {
+            databaseConnectionHelper.back();
         }
     }
 
@@ -126,10 +137,14 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            return cachingHandler.requireUpToDate().execute(eventIDs);
+            cachingHandler.execute(eventIDs);
+            this.databaseConnectionHelper.commit();
+            return cachingHandler.search(eventIDs);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
+        } finally {
+            databaseConnectionHelper.back();
         }
     }
 
@@ -139,12 +154,15 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            return cachingHandler.requireUpToDate().execute(folderId);
+            cachingHandler.execute(folderId);
+            this.databaseConnectionHelper.commit();
+            return cachingHandler.search(folderId);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
+        } finally {
+            databaseConnectionHelper.back();
         }
-
     }
 
     public ServerSession getSession() {
@@ -159,16 +177,25 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
         return parameters;
     }
 
-    public final CalendarStorage getCalendarStorage() throws OXException {
-        return Services.getService(CalendarStorageFactory.class).create(getSession().getContext(), getAccount().getAccountId(), null);
+    public final CalendarStorage getCalendarStorage() {
+        return databaseConnectionHelper.getCalendarStorage();
+    }
+
+    public Connection getWriteConnection() {
+        return databaseConnectionHelper.getWriteConnection();
+    }
+
+    public Connection getReadConnection() {
+        return databaseConnectionHelper.getReadConnection();
     }
 
     /**
      * Returns the type of processing that should be executed for the current request
      * 
      * @return {@link ProcessingType} that indicates the following steps of processing
+     * @throws OXException
      */
-    protected final ProcessingType getType() {
+    protected final ProcessingType getType() throws OXException {
         Number lastUpdate = (Number) getConfiguration(LAST_UPDATE);
         if (lastUpdate == null || lastUpdate.longValue() <= 0) {
             return ProcessingType.INITIAL_INSERT;
@@ -187,8 +214,9 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
      * 
      * @param key The configuration key
      * @return {@link Object} With the set configuration
+     * @throws OXException
      */
-    protected Object getConfiguration(String key) {
+    protected Object getConfiguration(String key) throws OXException {
         return getAccount().getConfiguration().get(key);
     }
 
@@ -202,6 +230,6 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
      */
     public void saveConfig(Map<String, Object> configuration) throws OXException {
         CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
-        accountStorage.updateAccount(this.getAccount().getAccountId(), configuration);
+        accountStorage.updateAccount(this.account.getAccountId(), configuration, this.getAccount().getLastModified().getTime());
     }
 }

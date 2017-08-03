@@ -91,7 +91,7 @@ public class UpdateAction extends AbstractAccountAction {
         CalendarAccountStorage storage = factory.create(session.getContext());
         CalendarAccount account = storage.loadAccount(Integer.parseInt(accountId));
         // Updates
-        storage.updateAccount(Integer.parseInt(accountId), account.getConfiguration());
+        storage.updateAccount(Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
         return new AJAXRequestResult();
     }
 }

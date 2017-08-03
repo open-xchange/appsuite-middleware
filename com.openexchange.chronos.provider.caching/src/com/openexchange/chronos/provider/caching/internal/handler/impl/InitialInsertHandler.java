@@ -72,35 +72,31 @@ public class InitialInsertHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> execute(String folderId) throws OXException {
-        updateLastUpdated();
-
+    public void execute(String folderId) throws OXException {
         List<Event> externalEvents = getAndPrepareExtEvents(folderId);
         createAsync(externalEvents);
-        return searchEvents(folderId);
+
+        updateLastUpdated();
     }
 
     @Override
-    public List<Event> execute(List<EventID> eventIds) throws OXException {
-        updateLastUpdated();
-
+    public void execute(List<EventID> eventIds) throws OXException {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
 
         List<Event> events = Collections.emptyList();
         for (String folderId : sortEventIDsPerFolderId.keySet()) {
             events.addAll(getAndPrepareExtEvents(folderId));
         }
-
         createAsync(events);
-        return searchEvents(eventIds);
+
+        updateLastUpdated();
     }
 
     @Override
-    public Event execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        updateLastUpdated();
-
+    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         List<Event> externalEvents = getAndPrepareExtEvents(folderId);
         createAsync(externalEvents);
-        return searchEvent(eventId);
+
+        updateLastUpdated();
     }
 }

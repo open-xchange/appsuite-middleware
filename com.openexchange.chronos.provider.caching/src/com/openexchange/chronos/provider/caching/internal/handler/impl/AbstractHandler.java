@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
@@ -65,20 +64,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
@@ -88,8 +84,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
@@ -108,41 +102,42 @@ public abstract class AbstractHandler implements CachingHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractHandler.class);
 
     /** A collection of fields that are always included when querying events from the storage */
-    public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
+    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
 
     protected final CachingCalendarAccess cachedCalendarAccess;
 
     public AbstractHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super();
         this.cachedCalendarAccess = cachedCalendarAccess;
     }
 
     @Override
-    public CachingHandler requireUpToDate() throws OXException {
-        Date persistedLastModified = getAccount().getLastModified();
-        if (null != this.cachedCalendarAccess.getAccount().getLastModified() && this.cachedCalendarAccess.getAccount().getLastModified().getTime() > persistedLastModified.getTime()) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(this.cachedCalendarAccess.getAccount().getAccountId()), L(persistedLastModified.getTime()), L(this.cachedCalendarAccess.getAccount().getLastModified().getTime()));
-        }
-        return this;
-    }
-
-    @Override
     public void handleExceptions(OXException e) throws OXException {
+        LOG.error("An error occurred: {}", e.getMessage(), e);
         this.revertLastUpdated();
     }
 
-    protected CalendarStorage getCalendarStorage() throws OXException {
+    protected CalendarStorage getCalendarStorage() {
         return this.cachedCalendarAccess.getCalendarStorage();
     }
 
+    /**
+     * Update the lastModified configuration of the account which means the update of the cached calendar information. It is not meant the timestamp of the CalendarAccount database row.
+     * 
+     * This method has to be called <b>before</b> processing the feed so that the configuration will be invalidated based on the change. If this does not happen only the up-to-date account will be used.
+     * 
+     * @throws OXException
+     */
     protected void updateLastUpdated() throws OXException {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
-        Object lastUpdate = configuration.get("lastUpdate");
+        Object lastUpdate = configuration.get(CachingCalendarAccess.LAST_UPDATE);
+        Long now = L(System.currentTimeMillis());
         if (lastUpdate != null) {
             Long previousLastUpdate = L((long) lastUpdate);
-            configuration.put("previousLastUpdate", previousLastUpdate);
+            configuration.put(CachingCalendarAccess.PREVIOUS_LAST_UPDATE, previousLastUpdate);
+        } else {
+            configuration.put(CachingCalendarAccess.PREVIOUS_LAST_UPDATE, now);
         }
-        configuration.put("lastUpdate", L(System.currentTimeMillis()));
+        configuration.put(CachingCalendarAccess.LAST_UPDATE, now);
         this.cachedCalendarAccess.saveConfig(configuration);
     }
 
@@ -153,27 +148,14 @@ public abstract class AbstractHandler implements CachingHandler {
      */
     private void revertLastUpdated() throws OXException {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
-        Long previousLastUpdate = L((long) configuration.get("previousLastUpdate"));
-        configuration.put("lastUpdate", previousLastUpdate);
+        Long previousLastUpdate = L((long) configuration.get(CachingCalendarAccess.PREVIOUS_LAST_UPDATE));
+        configuration.put(CachingCalendarAccess.LAST_UPDATE, previousLastUpdate);
         this.cachedCalendarAccess.saveConfig(configuration);
     }
+    
 
-    protected Event searchEvent(String eventId) throws OXException {
-        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
-
-        Event event = getCalendarStorage().getEventStorage().loadEvent(eventId, fields);
-        return loadAdditionalEventData(getAccount().getUserId(), Collections.singletonList(event), fields).get(0);
-    }
-
-    protected List<Event> searchEvents(String folderId) throws OXException {
-        SearchTerm<?> searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId);
-        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
-        List<Event> events = getCalendarStorage().getEventStorage().searchEvents(searchTerm, new SearchOptions(this.cachedCalendarAccess.getParameters()), fields);
-
-        return loadAdditionalEventData(getAccount().getUserId(), events, fields);
-    }
-
-    protected List<Event> searchEvents(List<EventID> eventIDs) throws OXException {
+    @Override
+    public List<Event> search(List<EventID> eventIDs) throws OXException {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
         EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
 
@@ -183,7 +165,36 @@ public abstract class AbstractHandler implements CachingHandler {
             events.addAll(readEventsInFolder);
         }
 
-        return loadAdditionalEventData(getAccount().getUserId(), events, fields);
+        return loadAdditionalEventData(this.cachedCalendarAccess.getAccount().getUserId(), events, fields);
+    }
+
+    @Override
+    public List<Event> search(String folderId) throws OXException {
+        return searchEvents(folderId, false);
+    }
+
+    @Override
+    public Event search(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+        return searchEvent(eventId);
+    }
+
+    protected Event searchEvent(String eventId) throws OXException {
+        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
+
+        Event event = getCalendarStorage().getEventStorage().loadEvent(eventId, fields);
+        return loadAdditionalEventData(this.cachedCalendarAccess.getAccount().getUserId(), Collections.singletonList(event), fields).get(0);
+    }
+
+    protected List<Event> searchEvents(String folderId, boolean all) throws OXException {
+        SearchTerm<?> searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId);
+        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
+        SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
+        if (all) {
+            searchOptions = null;
+        }
+        List<Event> events = getCalendarStorage().getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+
+        return loadAdditionalEventData(this.cachedCalendarAccess.getAccount().getUserId(), events, fields);
     }
 
     private List<Event> readEventsInFolder(String folderId, List<EventID> eventIDs) throws OXException {
@@ -193,7 +204,7 @@ public abstract class AbstractHandler implements CachingHandler {
                 objectIDs.add(eventID.getObjectID());
             }
         }
-        List<Event> events = readEventsInFolder(folderId, objectIDs.toArray(new String[objectIDs.size()]), null);
+        List<Event> events = readEventsInFolder(folderId, objectIDs.toArray(new String[objectIDs.size()]), null, true);
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             Event event = CalendarUtils.find(events, eventID.getObjectID());
@@ -221,7 +232,7 @@ public abstract class AbstractHandler implements CachingHandler {
         return orderedEvents;
     }
 
-    protected List<Event> readEventsInFolder(String folderId, String[] objectIDs, Date updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(String folderId, String[] objectIDs, Date updatedSince, boolean all) throws OXException {
         SearchTerm<?> folderSearchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId);
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(folderSearchTerm);
         if (null != objectIDs) {
@@ -241,13 +252,15 @@ public abstract class AbstractHandler implements CachingHandler {
             searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
         }
         EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.ALARMS, EventField.ATTENDEES);
-        return getCalendarStorage().getEventStorage().searchEvents(searchTerm, new SearchOptions(this.cachedCalendarAccess.getParameters()), fields);
+        SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
+        if (all) {
+            searchOptions = null;
+        }
+        return getCalendarStorage().getEventStorage().searchEvents(searchTerm, searchOptions, fields);
     }
 
     protected List<Event> getAndPrepareExtEvents(String folderId) throws OXException {
         List<Event> extEventsInFolder = this.cachedCalendarAccess.getEvents(folderId);
-
-        filterByRanges(extEventsInFolder);
         HandlerHelper.setFolderId(extEventsInFolder, folderId);
 
         return extEventsInFolder;
@@ -261,47 +274,15 @@ public abstract class AbstractHandler implements CachingHandler {
         return this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
     }
 
-    protected void filterByRanges(List<Event> events) {
-        Iterator<Event> iterator = events.iterator();
-        Date from = getFrom();
-        Date until = getUntil();
-
-        if ((from == null) && (until == null)) {
-            return;
-        }
-
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
-
-            if (!CalendarUtils.isInRange(event, from, until, TimeZone.getTimeZone(this.cachedCalendarAccess.getSession().getUser().getTimeZone()))) {
-                iterator.remove();
-            }
-        }
-    }
-
-    protected void createAsync(List<Event> externalEvents) throws OXException {
+    protected void createAsync(List<Event> externalEvents) {
         ExecutorService threadPool = Executors.newSingleThreadExecutor();
         Future<Void> submit = threadPool.submit(new CreateEventsCallable(cachedCalendarAccess, externalEvents));
 
         try {
-            submit.get(2, TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            LOG.info("Persisting {} events for caching didn't happen in time. It might be that not all events will be returned.", externalEvents.size());
+            submit.get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Error while persisting {} events.", externalEvents.size(), e);
         }
-    }
-
-    protected CalendarAccount getAccount() throws OXException {
-        CalendarAccountStorageFactory storageFactory = Services.getService(CalendarAccountStorageFactory.class);
-
-        CalendarAccountStorage accountStorage = storageFactory.create(this.cachedCalendarAccess.getSession().getContext());
-        CalendarAccount account = accountStorage.loadAccount(this.cachedCalendarAccess.getAccount().getAccountId());
-
-        if (null == account || account.getUserId() != this.cachedCalendarAccess.getSession().getUserId()) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(this.cachedCalendarAccess.getAccount().getAccountId()));
-        }
-        return account;
     }
 
     private EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
