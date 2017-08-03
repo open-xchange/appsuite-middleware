@@ -143,9 +143,11 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     /**
      * Since Mockito does not allow mocks to be return from other mocks when mocking,
      * we have to finish the setup with in each test case, i.e.:
-     * - Mock the {@link CalendarAvailabilityService}
-     * - Calculate the combinedAvailableTimes
-     * - Mock the previous method call with the real result
+     * <ul>
+     * <li>Mock the {@link CalendarAvailabilityService}</li>
+     * <li>Calculate the combinedAvailableTimes</li>
+     * <li>Mock the previous method call with the real result</li>
+     * </ul>
      * 
      * This intermediate step is required in order to feed the {@link FreeBusyPerformer}
      * with the correct combined times from the {@link CalendarAvailabilityService}
