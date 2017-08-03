@@ -1351,7 +1351,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-            int maxNumberOfSchemas = maxUnits / CONTEXTS_PER_SCHEMA;
+            int maxNumberOfSchemas;
+            {
+                float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
+                maxNumberOfSchemas = (int) quotient;
+                if (quotient != maxNumberOfSchemas) {
+                    maxNumberOfSchemas++;
+                }
+            }
 
             // Check how many are allowed to be created
             List<String> existingSchemas = OXUtilMySQLStorageCommon.listDatabases(db);
@@ -1459,7 +1466,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-                numberOfSchemas = maxUnits / CONTEXTS_PER_SCHEMA;
+                {
+                    float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
+                    numberOfSchemas = (int) quotient;
+                    if (quotient != numberOfSchemas) {
+                        numberOfSchemas++;
+                    }
+                }
             }
         }
 
