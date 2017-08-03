@@ -52,13 +52,9 @@ package com.openexchange.chronos.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.dmfs.rfc5545.DateTime;
 import org.junit.Before;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -95,61 +91,5 @@ public abstract class AbstractCombineTest {
         // Mock the storage
         storage = mock(CalendarAvailabilityStorage.class);
         when(storage.loadCalendarAvailabilities(1)).thenReturn(availabilities);
-    }
-
-    /**
-     * Creates a {@link CalendarFreeSlot} with the specified summary within the specified interval
-     * 
-     * @param summary The summary
-     * @param from The starting point in the interval
-     * @param until The ending point in the interval
-     * @return The {@link CalendarFreeSlot}
-     */
-    protected CalendarFreeSlot createCalendarFreeSlot(String summary, DateTime from, DateTime until) {
-        CalendarFreeSlot cfs = new CalendarFreeSlot();
-        cfs.setSummary(summary);
-        cfs.setStartTime(from);
-        cfs.setEndTime(until);
-        return cfs;
-    }
-
-    /**
-     * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
-     * 
-     * @param busyType The {@link BusyType} of the availability
-     * @param freeSlots The free slots
-     * @return The {@link CalendarAvailability}
-     */
-    protected CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots) {
-        CalendarAvailability ca = new CalendarAvailability();
-        ca.setBusyType(busyType);
-        ca.setCalendarFreeSlots(freeSlots);
-        return ca;
-    }
-
-    /**
-     * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
-     * 
-     * @param busyType The {@link BusyType} of the availability
-     * @param freeSlots The free slots
-     * @param from The starting point of the interval
-     * @param until The ending point of the interval
-     * @return The {@link CalendarAvailability}
-     */
-    protected CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until) {
-        CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots);
-        ca.setStartTime(from);
-        ca.setEndTime(until);
-        return ca;
-    }
-
-    protected CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until, int priority) {
-        CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots, from, until);
-        ca.setPriority(priority);
-        return ca;
-    }
-
-    protected Date createDate(int year, int month, int day) {
-        return new Date(new DateTime(year, month, day).getTimestamp());
     }
 }

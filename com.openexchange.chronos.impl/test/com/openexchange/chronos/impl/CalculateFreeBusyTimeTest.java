@@ -104,8 +104,8 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     private CalendarAvailabilityService calendarAvailabilityService;
 
     // Base interval 01/01/2017 - 30/06/2017
-    private Date from = createDate(2017, 0, 1);
-    private Date until = createDate(2017, 5, 30);
+    private Date from = PropsFactory.createDate(2017, 0, 1);
+    private Date until = PropsFactory.createDate(2017, 5, 30);
     private Attendee attendee;
 
     /**
@@ -150,15 +150,15 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         attendees.add(attendee);
 
         // Initialise the free/busy time
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, createDate(2017, 2, 25), createDate(2017, 2, 26)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
         // Set the free/busy time for the attendee
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
         // Initialise the free slots and availability block
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
-        freeSlots.add(createCalendarFreeSlot("May 1", new DateTime(2017, 4, 1), new DateTime(2017, 4, 2)));
-        freeSlots.add(createCalendarFreeSlot("May 2", new DateTime(2017, 4, 21), new DateTime(2017, 4, 22)));
-        availabilities.add(createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
+        freeSlots.add(PropsFactory.createCalendarFreeSlot("May 1", new DateTime(2017, 4, 1), new DateTime(2017, 4, 2)));
+        freeSlots.add(PropsFactory.createCalendarFreeSlot("May 2", new DateTime(2017, 4, 21), new DateTime(2017, 4, 22)));
+        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
         // Set the availability block for the attendee
         availabilitiesPerAttendee.put(attendee, availabilities);
 
