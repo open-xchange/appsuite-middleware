@@ -53,7 +53,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -62,7 +65,6 @@ import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
@@ -71,36 +73,28 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.authentication.Authenticated;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.LoginMethodClosure;
-import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.mailmapping.MailResolver;
-import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.osgi.Services;
+import com.openexchange.oidc.spi.AuthenticationInfo;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
+import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -112,11 +106,11 @@ import com.openexchange.oidc.state.StateManagement;
 public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private static final String GET_THE_ID_TOKEN = "get the IDToken";
-    private static final String LOAD_EMAIL_ADDRESS = "load email address";
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
     private final LoginConfiguration loginConfiguration;
+    private final SessionReservationService sessionReservationService;
     
     
     public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, LoginConfiguration loginConfiguration) {
@@ -124,6 +118,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         this.backend = backend;
         this.stateManagement = stateManagement;
         this.loginConfiguration = loginConfiguration;
+        this.sessionReservationService = Services.getService(SessionReservationService.class);
     }
     
     @Override
@@ -195,7 +190,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     //TODO QS-VS: Bessere Strukturierung der Methode
     @Override
-    public String authenticateUser(HttpServletRequest httpRequest) throws OXException{
+    public String authenticateUser(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException{
         String redirectionString = "";
         
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(httpRequest.getParameter("state"));
@@ -207,14 +202,18 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
-            IDTokenClaimsSet idTokenClaimsSet = this.validTokenResponse(tokenResponse, storedRequestInformation);
-            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
-            if(idTokenClaimsSet != null && bearerAccessToken != null) {
-                String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
-                redirectionString = this.loginUserAndRedirect(httpRequest, emailAddress);
-            } else {
-                throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
+            
+            if (this.validTokenResponse(tokenResponse, storedRequestInformation) != null) {
+                this.sendLoginRequestToServer(httpRequest, httpResponse, tokenResponse);
             }
+            
+//            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+//            if(idTokenClaimsSet != null && bearerAccessToken != null) {
+//                String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
+//                redirectionString = this.sendLoginRequestToServer(httpRequest, emailAddress);
+//            } else {
+//                throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
+//            }
         } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -223,51 +222,52 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return redirectionString;
     }
     
-    private String loadEmailAddressFromIDP(BearerAccessToken bearerAccessToken) throws OXException {
-        UserInfoRequest userInfoReq = null;
-        userInfoReq = new UserInfoRequest(getURIFromPath(this.backend.getBackendConfig().getUserInfoEndpoint()), bearerAccessToken);
-
-        HTTPResponse userInfoHTTPResp = null;
+    private String sendLoginRequestToServer(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OIDCTokenResponse tokenResponse) throws OXException {
+        AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(tokenResponse);
+        String sessionToken = sessionReservationService.reserveSessionFor(
+            authInfo.getUserId(), 
+            authInfo.getContextId(), 
+            60l, 
+            TimeUnit.SECONDS, 
+            authInfo.getProperties());
         try {
-          userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
-        } catch (SerializeException | IOException e) {
-            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, LOAD_EMAIL_ADDRESS);
+            URIBuilder redirectLocation = new URIBuilder()
+                .setScheme(this.getRedirectScheme(httpRequest))
+                .setHost(this.getDomainName(Services.getService(HostnameService.class), httpRequest))
+                .setPath(getRedirectPathPrefix() + "login")
+                .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
+                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + this.backend.getPath());
+            Tools.disableCaching(httpResponse);
+            httpResponse.sendRedirect(redirectLocation.build().toString());
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of login request URI");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        UserInfoResponse userInfoResponse = null;
-        try {
-          userInfoResponse = UserInfoResponse.parse(userInfoHTTPResp);
-        } catch (ParseException e) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, LOAD_EMAIL_ADDRESS);
-        }
-
-        if (userInfoResponse instanceof UserInfoErrorResponse) {
-          ErrorObject error = ((UserInfoErrorResponse) userInfoResponse).getErrorObject();
-          throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(error.getCode() + " " + error.getDescription());
-        }
-
-        UserInfoSuccessResponse successResponse = (UserInfoSuccessResponse) userInfoResponse;
-        if (successResponse == null) {
-            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create();
-        }
-        return successResponse.getUserInfo().getEmailAddress();
+//        MailResolver mailMapping = Services.getService(MailResolver.class);
+//        ResolvedMail resolvedMail = mailMapping.resolve(emailAddress);
+//        if (resolvedMail == null) {
+//            throw OIDCExceptionCode.UNABLE_TO_PARSE_USER_ADDRESS.create(emailAddress);
+//        }
+//        LoginRequest loginRequest = this.backend.getLoginRequest(httpRequest, resolvedMail.getUserID(), resolvedMail.getContextID(), this.loginConfiguration);
+//        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
+//            
+//            @Override
+//            public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
+//                return null;
+//            }
+//        });
+        return null;
     }
     
-    private String loginUserAndRedirect(HttpServletRequest httpRequest, String emailAddress) throws OXException {
-        MailResolver mailMapping = Services.getService(MailResolver.class);
-        ResolvedMail resolvedMail = mailMapping.resolve(emailAddress);
-        if (resolvedMail == null) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_USER_ADDRESS.create(emailAddress);
-        }
-        LoginRequest loginRequest = this.backend.getLoginRequest(httpRequest, resolvedMail.getUserID(), resolvedMail.getContextID(), this.loginConfiguration);
-        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
-            
-            @Override
-            public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
-                return null;
-            }
-        });
-        return null;
+    private String getRedirectScheme(HttpServletRequest httpRequest) {
+        boolean secure = Tools.considerSecure(httpRequest);
+        return secure ? "https" : "http";
+    }
+    
+    private String getRedirectPathPrefix() {
+        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+        return prefixService.getPrefix();
     }
 
     private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {

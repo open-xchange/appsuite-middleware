@@ -49,6 +49,7 @@
 package com.openexchange.oidc;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,5 +67,5 @@ public interface OIDCWebSSOProvider {
      */
     String getLoginRedirectRequest(HttpServletRequest httpRequest) throws OXException;
 
-    String authenticateUser(HttpServletRequest httpRequest) throws OXException;
+    String authenticateUser(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
 }

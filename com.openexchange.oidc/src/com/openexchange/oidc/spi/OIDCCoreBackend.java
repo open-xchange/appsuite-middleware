@@ -48,6 +48,25 @@
  */
 package com.openexchange.oidc.spi;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.ResolvedMail;
+import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.oidc.osgi.Services;
+
 /**
  * The implementation of the core OpenID backend.
  *
@@ -55,4 +74,58 @@ package com.openexchange.oidc.spi;
  * @since v7.10.0
  */
 public class OIDCCoreBackend extends AbstractOIDCBackend{
+
+    private static final String LOAD_EMAIL_ADDRESS = "load email address";
+    
+    @Override
+    public AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse) throws OXException {
+        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
+        MailResolver mailMapping = Services.getService(MailResolver.class);
+        ResolvedMail resolvedMail = mailMapping.resolve(emailAddress);
+        int contextId = resolvedMail.getContextID();
+        int userId = resolvedMail.getUserID();
+        AuthenticationInfo resultInfo = new AuthenticationInfo(contextId, userId);
+        resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
+        
+        return resultInfo;
+    }
+    
+    private String loadEmailAddressFromIDP(BearerAccessToken bearerAccessToken) throws OXException {
+        UserInfoRequest userInfoReq = null;
+        userInfoReq = new UserInfoRequest(getURIFromPath(this.getBackendConfig().getUserInfoEndpoint()), bearerAccessToken);
+
+        HTTPResponse userInfoHTTPResp = null;
+        try {
+          userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
+        } catch (SerializeException | IOException e) {
+            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, LOAD_EMAIL_ADDRESS);
+        }
+
+        UserInfoResponse userInfoResponse = null;
+        try {
+          userInfoResponse = UserInfoResponse.parse(userInfoHTTPResp);
+        } catch (ParseException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, LOAD_EMAIL_ADDRESS);
+        }
+
+        if (userInfoResponse instanceof UserInfoErrorResponse) {
+          ErrorObject error = ((UserInfoErrorResponse) userInfoResponse).getErrorObject();
+          throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(error.getCode() + " " + error.getDescription());
+        }
+
+        UserInfoSuccessResponse successResponse = (UserInfoSuccessResponse) userInfoResponse;
+        if (successResponse == null) {
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create();
+        }
+        return successResponse.getUserInfo().getEmailAddress();
+    }
+    
+    private URI getURIFromPath(String path) throws OXException{
+        try {
+            return new URI(path);
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, path);
+        }
+    }
 }

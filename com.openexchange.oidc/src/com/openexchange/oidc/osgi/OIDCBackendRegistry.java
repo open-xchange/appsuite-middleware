@@ -48,6 +48,8 @@
  */
 package com.openexchange.oidc.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.Servlet;
@@ -59,8 +61,10 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
@@ -70,10 +74,12 @@ import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.http.AuthenticationService;
 import com.openexchange.oidc.http.InitService;
+import com.openexchange.oidc.impl.OIDCLoginRequestHandler;
 import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.oidc.state.CoreStateManagement;
+import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -122,7 +128,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, this.services, config), "init");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
-                
+                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.LOGIN_ACTION, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend));
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
                 
@@ -186,6 +192,12 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         String servletName = prefix + part;
         httpService.registerServlet(servletName, servlet, null, null);
         servlets.push(servletName);
+    }
+    
+    private void registerRequestHandler(final OIDCBackend backend, final Stack<ServiceRegistration<?>> serviceRegistrations, String oidcAction, LoginRequestHandler requestHandler) {
+        Dictionary<String, Object> requestHandlerProps = new Hashtable<String, Object>();
+        requestHandlerProps.put(AJAXServlet.PARAMETER_ACTION, oidcAction + backend.getPath());
+        serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
 
     //TODO QS-VS: comment

@@ -50,6 +50,7 @@ package com.openexchange.oidc.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -58,6 +59,7 @@ import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.reservation.SessionReservationService;
 
 /**
  * Activates the OpenID feature.
@@ -78,7 +80,9 @@ public class OIDCActivator extends HousekeepingActivator{
             DispatcherPrefixService.class, 
             HazelcastInstance.class,
             HostnameService.class,
-            MailResolver.class
+            MailResolver.class,
+            SessionReservationService.class,
+            LoginRequestHandler.class
         };
     }
 
