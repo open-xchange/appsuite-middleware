@@ -238,6 +238,150 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Adjust the intervals
+        adjustIntervals(from, until, availableTimes, timeZone);
+
+        // Iterate over all calendar availability blocks for all attendees
+        Map<Attendee, FreeBusyResult> results = new HashMap<>();
+        for (Attendee attendee : attendees) {
+            List<CalendarAvailability> availableTime = availableTimes.get(attendee);
+            if (availableTime == null) {
+                // TODO: collect and set warnings
+                List<OXException> warnings = new ArrayList<>();
+                FreeBusyResult result = new FreeBusyResult();
+                result.setWarnings(warnings);
+                continue;
+            }
+
+            // For each availability block and each calendar free slot create an equivalent free busy time slot
+            List<FreeBusyTime> freeBusyTimes = calculateFreeBusyTimes(availableTime, timeZone);
+
+            // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
+            // in regard to the mergedFreeBusyTimes
+            List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
+            adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
+
+            // Append all availability blocks
+            eventsFreeBusyTimes.addAll(freeBusyTimes);
+
+            // Mark the rest of the range as free
+            List<FreeBusyTime> freeBlocks = calculateFreeBlocks(eventsFreeBusyTimes, from, until);
+
+            // Add the rest free blocks
+            eventsFreeBusyTimes.addAll(freeBlocks);
+
+            // Sort by starting date
+            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
+
+            // Create result
+            FreeBusyResult result = new FreeBusyResult();
+            result.setFreeBusyTimes(eventsFreeBusyTimes);
+
+            // Set result for attendee
+            results.put(attendee, result);
+        }
+
+        return results;
+    }
+
+    /**
+     * Adjusts the ranges of the {@link FreeBusyTime} slots that are marked as FREE
+     * in regard to the mergedFreeBusyTimes
+     * 
+     * @param freeBusyTimes
+     * @param eventsFreeBusyTimes
+     * @return
+     */
+    private void adjustRanges(List<FreeBusyTime> freeBusyTimes, List<FreeBusyTime> eventsFreeBusyTimes) {
+        List<FreeBusyTime> auxiliaryList = new ArrayList<>();
+        for (FreeBusyTime eventFreeBusyTime : eventsFreeBusyTimes) {
+            Iterator<FreeBusyTime> iterator = freeBusyTimes.iterator();
+            while (iterator.hasNext()) {
+                FreeBusyTime availabilityFreeBusyTime = iterator.next();
+                if (AvailabilityUtils.contained(availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime(), eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime())) {
+                    // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block
+                    iterator.remove();
+                } else if (AvailabilityUtils.precedesAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
+                    // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
+                    // then adjust the start time of the freeBusyTime block of the availability
+                    availabilityFreeBusyTime.setStartTime(eventFreeBusyTime.getEndTime());
+                } else if (AvailabilityUtils.succeedsAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
+                    // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
+                    // then adjust the end time of the freeBusyTime block of the availability
+                    availabilityFreeBusyTime.setEndTime(eventFreeBusyTime.getStartTime());
+                } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
+                    // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
+                    // then split the freeBusyTime block of the availability and remove it from the list
+                    splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime);
+                    // Remove
+                    iterator.remove();
+                }
+            }
+        }
+
+        // Append all event freeBusyTime blocks
+        eventsFreeBusyTimes.addAll(auxiliaryList);
+    }
+
+    /**
+     * Create an equivalent free busy time slot for each availability block and each calendar free slot in the
+     * specified {@link CalendarAvailability} blocks
+     * 
+     * @param availableTime The {@link CalendarAvailability} blocks
+     * @param timeZone The user's {@link TimeZone}
+     * @return A {@link List} with {@link FreeBusyTime} slots
+     */
+    private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) {
+        List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
+        for (CalendarAvailability availability : availableTime) {
+            // Get the availability's start/end times
+            Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
+            Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
+            Date slotEndTime = endTime;
+            for (CalendarFreeSlot calendarFreeSlot : availability.getCalendarFreeSlots()) {
+                // Get the slot's start/end times
+                Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
+                slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
+
+                // Create a split for the availability component with the equivalent BusyType
+                FreeBusyTime freeBusyTime = new FreeBusyTime();
+                freeBusyTime.setStartTime(startTime);
+                freeBusyTime.setEndTime(slotStartTime);
+                freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
+                freeBusyTimes.add(freeBusyTime);
+
+                // For each available component in the availability component mark the f/b as FREE
+                FreeBusyTime slot = new FreeBusyTime();
+                slot.setStartTime(slotStartTime);
+                slot.setEndTime(slotEndTime);
+                slot.setFbType(FbType.FREE);
+                freeBusyTimes.add(slot);
+
+                // Start from slot end time on the next iteration
+                startTime = slotEndTime;
+            }
+
+            // Create the last block
+            if (endTime.after(slotEndTime)) {
+                FreeBusyTime freeBusyTime = new FreeBusyTime();
+                freeBusyTime.setStartTime(startTime);
+                freeBusyTime.setEndTime(endTime);
+                freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
+                freeBusyTimes.add(freeBusyTime);
+            }
+        }
+        return freeBusyTimes;
+    }
+
+    /**
+     * Adjusts (if necessary) the intervals of the specified {@link CalendarAvailability} blocks according to the specified
+     * range
+     * 
+     * @param from The starting point of the interval
+     * @param until The ending point of the interval
+     * @param availableTimes The {@link CalendarAvailability} blocks to adjust
+     * @param timeZone The user's {@link TimeZone}
+     */
+    private void adjustIntervals(Date from, Date until, Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) {
         for (List<CalendarAvailability> availabilities : availableTimes.values()) {
             Iterator<CalendarAvailability> iterator = availabilities.iterator();
             while (iterator.hasNext()) {
@@ -284,127 +428,34 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 }
             }
         }
-
-        // Iterate over all calendar availability blocks for all attendees
-        Map<Attendee, FreeBusyResult> results = new HashMap<>();
-        for (Attendee attendee : attendees) {
-            List<CalendarAvailability> availableTime = availableTimes.get(attendee);
-            if (availableTime == null) {
-                // TODO: collect and set warnings
-                List<OXException> warnings = new ArrayList<>();
-                FreeBusyResult result = new FreeBusyResult();
-                result.setWarnings(warnings);
-                continue;
-            }
-
-            // For each availability block and each calendar free slot create an equivalent free busy time slot
-            List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
-            for (CalendarAvailability availability : availableTime) {
-                // Get the availability's start/end times
-                Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
-                Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
-                Date slotEndTime = endTime;
-                for (CalendarFreeSlot calendarFreeSlot : availability.getCalendarFreeSlots()) {
-                    // Get the slot's start/end times
-                    Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
-                    slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
-
-                    // Create a split for the availability component with the equivalent BusyType
-                    FreeBusyTime freeBusyTime = new FreeBusyTime();
-                    freeBusyTime.setStartTime(startTime);
-                    freeBusyTime.setEndTime(slotStartTime);
-                    freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                    freeBusyTimes.add(freeBusyTime);
-
-                    // For each available component in the availability component mark the f/b as FREE
-                    FreeBusyTime slot = new FreeBusyTime();
-                    slot.setStartTime(slotStartTime);
-                    slot.setEndTime(slotEndTime);
-                    slot.setFbType(FbType.FREE);
-                    freeBusyTimes.add(slot);
-
-                    // Start from slot end time on the next iteration
-                    startTime = slotEndTime;
-                }
-
-                // Create the last block
-                if (endTime.after(slotEndTime)) {
-                    FreeBusyTime freeBusyTime = new FreeBusyTime();
-                    freeBusyTime.setStartTime(startTime);
-                    freeBusyTime.setEndTime(endTime);
-                    freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                    freeBusyTimes.add(freeBusyTime);
+    }
+    
+    /**
+     * Calculates the rest of the free blocks that remain in the specified interval
+     * @param eventsFreeBusyTimes The already existing {@link FreeBusyTime} blocks
+     * @param from The starting point in the interval
+     * @param until The ending point in the interval
+     * @return A {@link List} with {@link FreeBusyTime} block marked as {@link FbType#FREE} 
+     */
+    private List<FreeBusyTime> calculateFreeBlocks(List<FreeBusyTime> eventsFreeBusyTimes, Date from, Date until) {
+        List<FreeBusyTime> freeBlocks = new ArrayList<>();
+        Date s = from;
+        for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
+            if (freeBusyTime.getStartTime().after(s)) {
+                if (!freeBusyTime.getFbType().equals(FbType.FREE)) {
+                    freeBlocks.add(new FreeBusyTime(FbType.FREE, s, freeBusyTime.getStartTime()));
                 }
             }
-
-            // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
-            // in regard to the mergedFreeBusyTimes
-            List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
-            List<FreeBusyTime> auxiliaryList = new ArrayList<>();
-            for (FreeBusyTime eventFreeBusyTime : eventsFreeBusyTimes) {
-                Iterator<FreeBusyTime> iterator = freeBusyTimes.iterator();
-                while (iterator.hasNext()) {
-                    FreeBusyTime availabilityFreeBusyTime = iterator.next();
-                    if (AvailabilityUtils.contained(availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime(), eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime block of the availability is entirely contained with in the freeBusyTime of the event, then ignore that freeBusyTime block
-                        iterator.remove();
-                    } else if (AvailabilityUtils.precedesAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
-                        // then adjust the start time of the freeBusyTime block of the availability
-                        availabilityFreeBusyTime.setStartTime(eventFreeBusyTime.getEndTime());
-                    } else if (AvailabilityUtils.succeedsAndIntersects(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime of the event precedes and intersects with the freeBusyTime block of the availability
-                        // then adjust the end time of the freeBusyTime block of the availability
-                        availabilityFreeBusyTime.setEndTime(eventFreeBusyTime.getStartTime());
-                    } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
-                        // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
-                        // then split the freeBusyTime block of the availability and remove it from the list
-                        splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime);
-                        // Remove
-                        iterator.remove();
-                    }
-                }
-                //auxiliaryList.add(eventFreeBusyTime);
-            }
-
-            // Append all event freeBusyTime blocks
-            eventsFreeBusyTimes.addAll(auxiliaryList);
-            // Append all availability blocks
-            eventsFreeBusyTimes.addAll(freeBusyTimes);
-
-            // Mark the rest of the range as free
-            List<FreeBusyTime> freeBlocks = new ArrayList<>();
-            Date s = from;
-            for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
-                if (freeBusyTime.getStartTime().after(s)) {
-                    if (!freeBusyTime.getFbType().equals(FbType.FREE)) {
-                        freeBlocks.add(new FreeBusyTime(FbType.FREE, s, freeBusyTime.getStartTime()));
-                    }
-                }
-                s = freeBusyTime.getEndTime();
-            }
-
-            // Add the last block
-            FreeBusyTime freeBusyTime = eventsFreeBusyTimes.get(eventsFreeBusyTimes.size() - 1);
-            if (freeBusyTime.getEndTime().before(until) && (!freeBusyTime.getFbType().equals(FbType.FREE))) {
-                freeBlocks.add(new FreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), until));
-            }
-
-            // Add the rest free blocks
-            eventsFreeBusyTimes.addAll(freeBlocks);
-
-            // Sort by starting date
-            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
-
-            // Create result
-            FreeBusyResult result = new FreeBusyResult();
-            result.setFreeBusyTimes(eventsFreeBusyTimes);
-
-            // Set result for attendee
-            results.put(attendee, result);
+            s = freeBusyTime.getEndTime();
         }
 
-        return results;
+        // Add the last block
+        FreeBusyTime freeBusyTime = eventsFreeBusyTimes.get(eventsFreeBusyTimes.size() - 1);
+        if (freeBusyTime.getEndTime().before(until) && (!freeBusyTime.getFbType().equals(FbType.FREE))) {
+            freeBlocks.add(new FreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), until));
+        }
+        
+        return freeBlocks;
     }
 
     /**
