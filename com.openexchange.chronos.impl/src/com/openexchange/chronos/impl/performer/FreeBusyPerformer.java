@@ -103,18 +103,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
+    //@formatter:off
     /** The event fields returned in free/busy queries by default */
     private static final EventField[] FREEBUSY_FIELDS = {
         EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
         EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
-        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
-    };
+        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
     private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_ID,
         EventField.RECURRENCE_RULE
     };
+    //@formatter:on
 
     /**
      * Initializes a new {@link FreeBusyPerformer}.
@@ -359,13 +360,34 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         iterator.remove();
                     }
                 }
-                auxiliaryList.add(eventFreeBusyTime);
+                //auxiliaryList.add(eventFreeBusyTime);
             }
 
             // Append all event freeBusyTime blocks
             eventsFreeBusyTimes.addAll(auxiliaryList);
             // Append all availability blocks
             eventsFreeBusyTimes.addAll(freeBusyTimes);
+
+            // Mark the rest of the range as free
+            List<FreeBusyTime> freeBlocks = new ArrayList<>();
+            Date s = from;
+            for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
+                if (freeBusyTime.getStartTime().after(s)) {
+                    if (!freeBusyTime.getFbType().equals(FbType.FREE)) {
+                        freeBlocks.add(new FreeBusyTime(FbType.FREE, s, freeBusyTime.getStartTime()));
+                    }
+                }
+                s = freeBusyTime.getEndTime();
+            }
+
+            // Add the last block
+            FreeBusyTime freeBusyTime = eventsFreeBusyTimes.get(eventsFreeBusyTimes.size() - 1);
+            if (freeBusyTime.getEndTime().before(until) && (!freeBusyTime.getFbType().equals(FbType.FREE))) {
+                freeBlocks.add(new FreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), until));
+            }
+
+            // Add the rest free blocks
+            eventsFreeBusyTimes.addAll(freeBlocks);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
