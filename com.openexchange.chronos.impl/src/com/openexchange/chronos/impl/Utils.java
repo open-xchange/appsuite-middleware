@@ -55,7 +55,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -120,7 +119,7 @@ public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, 
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
@@ -521,13 +520,13 @@ public class Utils {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
     public static Event applyExceptionDates(CalendarStorage storage, Event seriesMaster, int forUser) throws OXException {
-        if (false == isSeriesMaster(seriesMaster) || false == isGroupScheduled(seriesMaster) || isOrganizer(seriesMaster, forUser) || 
+        if (false == isSeriesMaster(seriesMaster) || false == isGroupScheduled(seriesMaster) || isOrganizer(seriesMaster, forUser) ||
             isLastUserAttendee(seriesMaster.getAttendees(), forUser)) {
             /*
              * "real" delete exceptions for all attendees, take over as-is
              */
             return seriesMaster;
-        }        
+        }
         /*
          * check which change exceptions exist where the user is not attending
          */
@@ -536,7 +535,8 @@ public class Utils {
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.NOT_EQUALS, I(forUser)))
         ;
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
+        EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID };
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
         if (null == changeExceptions || 0 == changeExceptions.size()) {
             return seriesMaster;
         }

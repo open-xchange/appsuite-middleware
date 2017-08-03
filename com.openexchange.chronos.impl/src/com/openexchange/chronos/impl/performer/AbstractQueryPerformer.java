@@ -293,7 +293,8 @@ public abstract class AbstractQueryPerformer {
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
+        EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
+        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
