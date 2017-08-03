@@ -51,7 +51,7 @@ package com.openexchange.passwordchange.history.events;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -65,7 +65,7 @@ public class PasswordChangeEventListener implements EventHandler {
 
     private static final String TOPIC = "com/openexchange/passwordchange";
 
-    PasswordChangeHelper helper;
+    final PasswordChangeHelper helper;
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.

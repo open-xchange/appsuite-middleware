@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.passwordchange.history.registry;
+package com.openexchange.passwordchange.history.handler;
 
 import java.util.Map;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**
  * 

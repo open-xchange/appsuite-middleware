@@ -52,12 +52,13 @@ package com.openexchange.passwordchange.history.events;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.exception.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -124,7 +125,7 @@ public class PasswordChangeHelper {
         ConfigViewFactory casscade = service.getService(ConfigViewFactory.class);
         if (null == casscade) {
             LOG.warn("Could not get config.");
-            throw PasswordChangeHistoryException.MISSING_SERVICE.create("ConfigCasscade");
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         ConfigView view = casscade.getView(userID, contextID);
         Boolean enabled = PasswordChangeHistoryProperties.ENABLE.getDefaultValue(Boolean.class);
@@ -149,14 +150,14 @@ public class PasswordChangeHelper {
 
         if (null == registry) {
             LOG.debug("Could not get PasswordChangeTrackerRegistry");
-            throw PasswordChangeHistoryException.MISSING_SERVICE.create("PasswordChangeTrackerRegistry");
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(PasswordChangeHandlerRegistry.class.getName());
         }
 
         PasswordHistoryHandler handler = registry.getHandler(handlerName);
         if (null == handler) {
             // If no tracker available, there should be no tracking
             LOG.debug("Could not load {} for user {} in context {}", handlerName, userID, contextID);
-            throw PasswordChangeHistoryException.MISSING_TRACKER.create(handlerName);
+            throw PasswordChangeHistoryException.MISSING_HANDLER.create(handlerName);
         }
         return handler;
     }
