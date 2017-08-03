@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.AbstractUserServiceInterceptor;

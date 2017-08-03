@@ -51,9 +51,9 @@ package com.openexchange.passwordchange.history.handler;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.passwordchange.history.groupware.MappingAwareTable;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.utilities.MappingAwareTable;
 
 /**
  * {@link PasswordHistoryHandler} - Defines the operations need to be done to for a password change history

@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.passwordchange.exception;
+package com.openexchange.passwordchange.history.exception;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 
 /**
  * {@link PasswordChangeHistoryException}
@@ -61,15 +60,13 @@ import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode {
+public enum PasswordChangeHistoryException implements OXExceptionCode {
 
-    MISSING_SERVICE("Service %s missing for a password change history", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 100),
+    DISABLED("Password change history for user %1$s in context %1$s is disabled", Category.CATEGORY_PERMISSION_DENIED, 101),
 
-    DISABLED("Password change histroy for user %s in context %s is disabled", MESSAGE, Category.CATEGORY_PERMISSION_DENIED, 101),
+    MISSING_CONFIGURATION("Handler for user %1$s in context %1$s is not configured. Therefor no history is created.", Category.CATEGORY_CONFIGURATION, 102),
 
-    MISSING_CONFIGURATION("Handler for user %s in context %s is not configured. Therefor no history is created.", MESSAGE, Category.CATEGORY_CONFIGURATION, 102),
-
-    MISSING_TRACKER("The handler %s was not found in the register.", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 103)
+    MISSING_HANDLER("The handler %1$s was not found in the register.", Category.CATEGORY_SERVICE_DOWN, 103)
 
     ;
 
@@ -77,15 +74,12 @@ public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode
 
     private final String message;
 
-    private final String displayMessage;
-
     private final Category category;
 
     private final int number;
 
-    private PasswordChangeHistoryException(final String message, String displayMessage, final Category category, final int number) {
+    private PasswordChangeHistoryException(final String message, final Category category, final int number) {
         this.message = message;
-        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -115,11 +109,6 @@ public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode
         return message;
     }
 
-    @Override
-    public String getDisplayMessage() {
-        return displayMessage;
-    }
-
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
@@ -137,5 +126,16 @@ public enum PasswordChangeHistoryException implements DisplayableOXExceptionCode
      */
     public OXException create(final Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+    
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

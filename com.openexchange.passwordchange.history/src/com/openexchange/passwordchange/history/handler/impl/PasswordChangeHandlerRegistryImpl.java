@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.passwordchange.history.registry;
+package com.openexchange.passwordchange.history.handler.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**

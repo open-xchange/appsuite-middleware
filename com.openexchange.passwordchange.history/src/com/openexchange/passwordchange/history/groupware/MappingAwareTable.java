@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.utilities;
+package com.openexchange.passwordchange.history.groupware;
 
 import java.util.Map;
 import java.util.Set;

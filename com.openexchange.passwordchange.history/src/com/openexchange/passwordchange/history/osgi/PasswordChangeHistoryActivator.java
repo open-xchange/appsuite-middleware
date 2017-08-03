@@ -67,10 +67,10 @@ import com.openexchange.passwordchange.history.events.PasswordChangeEventListene
 import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.events.PasswordHistoryDeleteListener;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.impl.PasswordChangeHandlerRegistryImpl;
 import com.openexchange.passwordchange.history.handler.impl.RdbPasswordHistoryHandler;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistryImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserServiceInterceptor;
 

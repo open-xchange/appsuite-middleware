@@ -65,11 +65,12 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.exception.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -286,7 +287,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     private <T extends Object> T getService(Class<? extends T> clazz) throws OXException {
         T retval = service.getService(clazz);
         if (null == retval) {
-            throw PasswordChangeHistoryException.MISSING_SERVICE.create(clazz.getSimpleName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
         return retval;
     }
@@ -306,13 +307,6 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         entries.add("client_id");
         entries.add("origin");
         retval.put("source", entries);
-
-        entries = new HashSet<>(4);
-        entries.add("ip");
-        entries.add("ip_address");
-        entries.add("client_ip");
-        entries.add("client_address");
-        retval.put("ip", entries);
 
         return retval;
     }

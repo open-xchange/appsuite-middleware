@@ -50,7 +50,6 @@
 package com.openexchange.passwordchange.history.rest.api;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,10 +73,10 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortType;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;

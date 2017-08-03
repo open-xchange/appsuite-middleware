@@ -7,8 +7,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.exception.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.registry.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -32,7 +32,7 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
                 // Get users in context and remove password for them
                 UserService userService = service.getService(UserService.class);
                 if (null == userService) {
-                    throw PasswordChangeHistoryException.MISSING_SERVICE.create(UserService.class.getSimpleName());
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
                 }
                 Context ctx = userService.getContext(event.getId());
                 for (User user : userService.getUser(ctx)) {
