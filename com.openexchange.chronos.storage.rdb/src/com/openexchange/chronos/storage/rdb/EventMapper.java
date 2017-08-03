@@ -296,7 +296,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 event.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("deleteExceptions", "Delete exceptions") {
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new RecurrenceIdListMapping<Event>("exDate", "Delete exceptions") {
 
             @Override
             public boolean isSet(Event event) {

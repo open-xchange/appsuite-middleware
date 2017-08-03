@@ -113,14 +113,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "modified BIGINT(20)," +
                 "modifiedBy INT4 UNSIGNED," +
                 "start datetime NOT NULL," +
-                "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "end datetime DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
+                "exDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +
-                "deleteExceptions TEXT DEFAULT NULL," +
-                "changeExceptions TEXT DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -161,14 +160,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "modified BIGINT(20)," +
                 "modifiedBy INT4 UNSIGNED," +
                 "start datetime DEFAULT NULL," +
-                "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
+                "end datetime DEFAULT NULL," +
                 "endTimezone VARCHAR(255) DEFAULT NULL," +
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
+                "exDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +
-                "deleteExceptions TEXT DEFAULT NULL," +
-                "changeExceptions TEXT DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
