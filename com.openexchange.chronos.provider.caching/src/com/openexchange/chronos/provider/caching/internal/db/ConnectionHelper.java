@@ -65,14 +65,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link DatabaseConnectionHelper}
+ * {@link ConnectionHelper}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class DatabaseConnectionHelper {
+public class ConnectionHelper {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseConnectionHelper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConnectionHelper.class);
 
     private final DatabaseService databaseService;
     private final Context context;
@@ -80,7 +80,7 @@ public class DatabaseConnectionHelper {
     private SimpleDBProvider dbProvider;
     private boolean committed;
 
-    public DatabaseConnectionHelper(DatabaseService databaseService, Context context, int accountId) {
+    public ConnectionHelper(DatabaseService databaseService, Context context, int accountId) {
         this.databaseService = databaseService;
         this.context = context;
 
@@ -91,7 +91,7 @@ public class DatabaseConnectionHelper {
             this.dbProvider = new SimpleDBProvider(readOnly, writable);
             this.calendarStorage = Services.getService(CalendarStorageFactory.class).create(context, accountId, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         } catch (OXException | SQLException e) {
-            LoggerFactory.getLogger(DatabaseConnectionHelper.class).error("Error while creating ConnectionHelper. Won't be able to handle connections!", e);
+            LoggerFactory.getLogger(ConnectionHelper.class).error("Error while creating ConnectionHelper. Won't be able to handle connections!", e);
         }
     }
 

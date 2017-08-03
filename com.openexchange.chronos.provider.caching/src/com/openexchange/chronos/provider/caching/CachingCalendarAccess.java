@@ -57,7 +57,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.db.DatabaseConnectionHelper;
+import com.openexchange.chronos.provider.caching.internal.db.ConnectionHelper;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandlerFactory;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
@@ -90,13 +90,13 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     private final CalendarAccount account;
     private final CalendarParameters parameters;
 
-    private final DatabaseConnectionHelper databaseConnectionHelper;
+    private final ConnectionHelper databaseConnectionHelper;
 
     public CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
-        this.databaseConnectionHelper = new DatabaseConnectionHelper(Services.getService(DatabaseService.class), this.session.getContext(), this.account.getAccountId());
+        this.databaseConnectionHelper = new ConnectionHelper(Services.getService(DatabaseService.class), this.session.getContext(), this.account.getAccountId());
     }
 
     /**
