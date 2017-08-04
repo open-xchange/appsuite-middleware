@@ -126,24 +126,11 @@ public interface RecurrenceService {
     RecurrenceIterator<Event> iterateEventOccurrences(Event seriesMaster, Date from, Date until) throws OXException;
 
     /**
-     * Initializes a new recurrence iterator for the recurrence identifiers of an event series.
-     * <p/>
-     * Any change- and delete exceptions (as found in the corresponding properties of the series master event) are ignored implicitly,
-     * and won't be contained in the resulting iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the
-     * iterator is forwarded to the first occurrence automatically if the series master event's start does not fall into the pattern.
-     *
-     * @param seriesMaster The series master event
-     * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
-     * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
-     * @return The resulting event occurrence iterator
-     */
-    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(Event seriesMaster, Date from, Date until) throws OXException;
-
-    /**
      * Initializes a new recurrence iterator for the recurrence identifiers of a recurrence data object.
      * <p/>
-     * Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first occurrence
-     * automatically if the series master event's start does not fall into the pattern.
+     * Any exception dates (as defined in the passed recurrence data) are ignored implicitly, and won't be contained in the resulting
+     * iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first
+     * occurrence automatically if the recurrence start does not fall into the pattern.
      *
      * @param recurrenceData The recurrence data
      * @return The resulting event occurrence iterator
@@ -153,8 +140,9 @@ public interface RecurrenceService {
     /**
      * Initializes a new recurrence iterator for the recurrence identifiers of a recurrence data object.
      * <p/>
-     * Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first occurrence
-     * automatically if the series master event's start does not fall into the pattern.
+     * Any exception dates (as defined in the passed recurrence data) are ignored implicitly, and won't be contained in the resulting
+     * iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first
+     * occurrence automatically if the recurrence start does not fall into the pattern.
      *
      * @param recurrenceData The recurrence data
      * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
@@ -166,11 +154,13 @@ public interface RecurrenceService {
     /**
      * Initializes a new recurrence iterator for the recurrence identifiers of a recurrence data object.
      * <p/>
-     * Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first occurrence
-     * automatically if the series master event's start does not fall into the pattern.
+     * Any exception dates (as defined in the passed recurrence data) are ignored implicitly, and won't be contained in the resulting
+     * iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first
+     * occurrence automatically if the recurrence start does not fall into the pattern.
      *
      * @param recurrenceData The recurrence data
-     * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with the first occurrence
+     * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with
+     *            the first occurrence
      * @param limit The maximum number of calculated occurrences, or <code>null</code> for no limitation
      * @return The resulting recurrence iterator
      */
