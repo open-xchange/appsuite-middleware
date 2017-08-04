@@ -88,7 +88,6 @@ import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
-import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -204,8 +203,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 /*
                  * expand & check all occurrences of event series in period
                  */
-                RecurrenceData recurrenceData = getRecurrenceData(eventInPeriod, eventsInPeriod);
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
+                Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
                     DateTime occurrenceEnd = CalendarUtils.calculateEnd(eventInPeriod, recurrenceId);
@@ -287,8 +285,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
-                RecurrenceData recurrenceData = getRecurrenceData(eventInPeriod, eventsInPeriod);
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
+                Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
