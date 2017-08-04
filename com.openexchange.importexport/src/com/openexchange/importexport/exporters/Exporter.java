@@ -90,10 +90,10 @@ public interface Exporter {
      * @param format Format the exported data is supposed to be in
      * @param batchIds Batch data that should be exported. Note: A batch can only contain data of one type
      * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return true, if the given folders can be exported in the given format; false otherwise  
+     * @return true, if the given folders and objects can be exported in the given format; false otherwise
      * @throws OXException if check fails
      */
-    void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException;
+    boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException;
     
     /**
      * Exports the data of a given folder
@@ -127,9 +127,8 @@ public interface Exporter {
      * @param session The session object to be able to check permissions.
      * @param folder The folder to name the export file after.
      * @return String the name of the export file.
-     * @throws OXException if file name creation fails
      */
-    String getFolderExportFileName(ServerSession session, String folder) throws OXException;
+    String getFolderExportFileName(ServerSession session, String folder);
 
     /**
      * Creates a proper export file name based on the batch of ids to export
@@ -137,7 +136,6 @@ public interface Exporter {
      * @param session The session object to be able to check permissions.
      * @param batchIds The Identifiers which determine the export file name.
      * @return String the name of the export file.
-     * @throws OXException if file name creation fails 
      */
-    String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds) throws OXException;
+    String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds);
 }
