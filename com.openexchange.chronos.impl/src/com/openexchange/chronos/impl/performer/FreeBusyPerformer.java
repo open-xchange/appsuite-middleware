@@ -282,7 +282,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * 
      * @param freeBusyTimes
      * @param eventsFreeBusyTimes
-     * @return
      */
     private void adjustRanges(List<FreeBusyTime> freeBusyTimes, List<FreeBusyTime> eventsFreeBusyTimes) {
         List<FreeBusyTime> auxiliaryList = new ArrayList<>();
@@ -447,14 +446,14 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      */
     private void calculateFreeBlocks(List<FreeBusyTime> eventsFreeBusyTimes, Date from, Date until) {
         List<FreeBusyTime> freeBlocks = new ArrayList<>();
-        Date s = from;
+        Date start = from;
         for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
-            if (freeBusyTime.getStartTime().after(s)) {
+            if (freeBusyTime.getStartTime().after(start)) {
                 if (!freeBusyTime.getFbType().equals(FbType.FREE)) {
-                    freeBlocks.add(new FreeBusyTime(FbType.FREE, s, freeBusyTime.getStartTime()));
+                    freeBlocks.add(new FreeBusyTime(FbType.FREE, start, freeBusyTime.getStartTime()));
                 }
             }
-            s = freeBusyTime.getEndTime();
+            start = freeBusyTime.getEndTime();
         }
 
         // Add the last block
