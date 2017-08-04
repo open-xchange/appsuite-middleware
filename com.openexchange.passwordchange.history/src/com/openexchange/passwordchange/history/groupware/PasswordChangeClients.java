@@ -53,7 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * {@link PasswordChangeClients}
+ * {@link PasswordChangeClients} - Well known clients
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -64,10 +64,7 @@ public enum PasswordChangeClients {
     APP_SUITE("open-xchange-appsuite", "App Suite UI", "appsuite", "app_suite"),
 
     /** Password changes made by the Provisioning Interface */
-    PROVISIONING("provisioning-api", "Provisioning API", "provisioning"),
-
-    /** Generic placeholder for all unknown client providing a password change */
-    UNKNOWN("unknown", "Unknown client", "not known")
+    PROVISIONING("provisioning-api", "Provisioning API", "provisioning")
 
     ;
 
@@ -105,18 +102,26 @@ public enum PasswordChangeClients {
     /**
      * Get a more human readable version of the identifier
      * 
-     * @return
+     * @return A human readable representing the identifier
      */
     public String getDisplayName() {
         return displayName;
     }
 
-    public boolean matches(String toMatch) {
-        for (String matcher : matchers) {
-            if (matcher.equalsIgnoreCase(toMatch) || matcher.contains(toMatch)) {
-                return true;
+    /**
+     * Matches a string to well known client
+     * 
+     * @param toMatch The string to match to a client
+     * @return A {@link PasswordChangeClients} or <code>null</code>Ï
+     */
+    public static PasswordChangeClients match(String toMatch) {
+        for (PasswordChangeClients client : PasswordChangeClients.values()) {
+            for (String matcher : client.matchers) {
+                if (matcher.equalsIgnoreCase(toMatch) || matcher.contains(toMatch)) {
+                    return client;
+                }
             }
         }
-        return false;
+        return null;
     }
 }

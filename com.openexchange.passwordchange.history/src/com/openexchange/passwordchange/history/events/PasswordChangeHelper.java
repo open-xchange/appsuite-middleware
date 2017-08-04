@@ -52,6 +52,7 @@ package com.openexchange.passwordchange.history.events;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
@@ -62,7 +63,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PasswordChangeHelper}
+ * {@link PasswordChangeHelper} - Utility class to save or clear password changes history
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -74,6 +75,13 @@ public class PasswordChangeHelper {
     private final ServiceLookup                 service;
     private final PasswordChangeHandlerRegistry registry;
 
+    /**
+     * 
+     * Initializes a new {@link PasswordChangeHelper}.
+     * 
+     * @param service The {@link ServiceLookup} to get services from
+     * @param registry The {@link PasswordChangeHandlerRegistry} to get the {@link PasswordHistoryHandler} from
+     */
     public PasswordChangeHelper(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
         super();
         this.service = service;
@@ -97,8 +105,7 @@ public class PasswordChangeHelper {
             PasswordChangeInfo info = new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress);
             handler.trackPasswordChange(userID, contextID, info);
         } catch (Exception e) {
-            // IF this happens some property won't be there ..
-            LOG.debug("Error while tracking password change for user {} in context {}. Reason: ", userID, contextID, e.getMessage());
+            LOG.debug("Error while tracking password change for user {} in context {}. Reason: ", userID, contextID, e.getMessage(), e);
         }
     }
 
@@ -116,10 +123,18 @@ public class PasswordChangeHelper {
             PasswordHistoryHandler tracker = loadHandler(contextID, userID);
             tracker.clear(userID, contextID, limit);
         } catch (Exception e) {
-            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userID, contextID, e.getMessage());
+            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userID, contextID, e.getMessage(), e);
         }
     }
 
+    /**
+     * Get the handler for the specified user in a specific context
+     * 
+     * @param contextID The ID of the context
+     * @param userID The ID of the user
+     * @return A {@link PasswordHistoryHandler} for the user
+     * @throws OXException In case a service is missing or some properties aren't configured (well)
+     */
     private PasswordHistoryHandler loadHandler(int contextID, int userID) throws OXException {
         // Load config and get according tracker
         ConfigViewFactory casscade = service.getService(ConfigViewFactory.class);
@@ -143,9 +158,9 @@ public class PasswordChangeHelper {
             throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
         }
 
-        if (null == handlerName || handlerName.isEmpty()) {
+        if (Strings.isEmpty(handlerName)) {
             handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
-            LOG.debug("No PasswordChangeTracker found. Falling back to default value");           
+            LOG.debug("No PasswordChangeTracker found. Falling back to default value");
         }
 
         if (null == registry) {

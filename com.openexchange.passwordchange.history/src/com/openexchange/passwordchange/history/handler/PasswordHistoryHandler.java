@@ -64,7 +64,7 @@ import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 public interface PasswordHistoryHandler extends MappingAwareTable {
 
     /**
-     * The current data stored in the database
+     * List the current data stored in the database
      * 
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
@@ -73,7 +73,7 @@ public interface PasswordHistoryHandler extends MappingAwareTable {
     List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID);
 
     /**
-     * The current data stored in the database
+     * List the current data stored in the database
      * 
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user

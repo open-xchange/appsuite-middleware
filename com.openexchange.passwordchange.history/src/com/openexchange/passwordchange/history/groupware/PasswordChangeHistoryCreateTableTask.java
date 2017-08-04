@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link PasswordChangeHistoryCreateTableTask}
+ * {@link PasswordChangeHistoryCreateTableTask} - Creates the table "user_password_history"
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -96,6 +96,14 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
         super();
     }
 
+    /**
+     * Creates the table
+     * 
+     * @param tablename The table name
+     * @param sqlCreate The command to create the table
+     * @param contextId The context to operate on
+     * @throws OXException In case of {@link SQLException}
+     */
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;

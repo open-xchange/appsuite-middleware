@@ -54,11 +54,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**
- * {@link PasswordChangeTrackerRegistryImpl}
+ * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistry} as an {@link ServiceTrackerCustomizer}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -81,11 +82,11 @@ public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomiz
     /**
      * Register a new {@link PasswordHistoryHandler}
      * 
-     * @param symbolicName The name to search the handler for
+     * @param symbolicName The name to search the handler forÏ‚
      * @param handler The actual handler
      */
-    public synchronized void register(String symbolicName, PasswordHistoryHandler handler) {
-        if (checkSymbolic(symbolicName) || null != handler) {
+    public void register(String symbolicName, PasswordHistoryHandler handler) {
+        if (false == Strings.isEmpty(symbolicName) || null != handler) {
             this.handler.put(symbolicName, handler);
         } else {
             LOG.debug("Could not add PasswordHistoryHandler for name {}", symbolicName);
@@ -97,41 +98,41 @@ public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomiz
      * 
      * @param symbolicName The name of the {@link PasswordHistoryHandler}
      */
-    public synchronized void unregister(String symbolicName) {
-        if (checkSymbolic(symbolicName)) {
+    public void unregister(String symbolicName) {
+        if (false == Strings.isEmpty(symbolicName)) {
             LOG.debug("Try to remove PasswordChangeTracker with name {}", symbolicName);
             this.handler.remove(symbolicName);
         }
     }
 
     @Override
-    public synchronized Map<String, PasswordHistoryHandler> getHandlers() {
+    public Map<String, PasswordHistoryHandler> getHandlers() {
         return this.handler;
     }
 
     @Override
-    public synchronized PasswordHistoryHandler getHandler(String symbolicName) {
-        if (checkSymbolic(symbolicName)) {
+    public PasswordHistoryHandler getHandler(String symbolicName) {
+        if (false == Strings.isEmpty(symbolicName)) {
             return this.handler.get(symbolicName);
         }
         return null;
     }
 
-    private boolean checkSymbolic(String symbolicName) {
-        return null != symbolicName && false == symbolicName.isEmpty();
-    }
-
     @Override
     public PasswordHistoryHandler addingService(ServiceReference<PasswordHistoryHandler> reference) {
         PasswordHistoryHandler tracker = context.getService(reference);
-        register(tracker.getSymbolicName(), tracker);
+        try {
+            register(tracker.getSymbolicName(), tracker);
+        } catch (Exception e) {
+            LOG.warn("Could not add service. Reason: {}", e.getClass(), e);
+            context.ungetService(reference);
+        }
         return tracker;
     }
 
     @Override
     public void modifiedService(ServiceReference<PasswordHistoryHandler> reference, PasswordHistoryHandler service) {
         // Ignore
-
     }
 
     @Override

@@ -53,8 +53,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link MappingAwareTable} - Helps {@link MappingService} to get the field names.
- * Classes that operate on tables and known the field should implement this interface
+ * {@link MappingAwareTable} - The implementing table is aware that other services user different names for intern used table field names.
+ * Therefore the table does implement this interface to provide a mapping of alternative names for the field names.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -62,7 +62,8 @@ import java.util.Set;
 public interface MappingAwareTable {
 
     /**
-     * Get the field names used in the table. Each field names defines a {@link Set} of keywords it can be matched to.
+     * Get the field names used in the table. Each field names defines a {@link Set} of alternative names it can be matched to.
+     * Returned field names might not be represent all field.
      * 
      * @return The field names
      */

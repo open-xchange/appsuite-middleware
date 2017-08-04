@@ -65,7 +65,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
@@ -74,7 +73,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RdbPasswordHistoryHandler}
+ * {@link RdbPasswordHistoryHandler} - Default {@link PasswordHistoryHandler}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -121,8 +120,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             con = dbService.getReadOnly(contextID);
 
             StringBuilder builder = new StringBuilder(GET_DATA);
-            if (null == fieldNames) {
-                // Default is ID
+            if (null == fieldNames || fieldNames.isEmpty()) {
+                // Default is ID ascending
                 builder.append("id ");
                 builder.append(SortType.ASC);
             } else {
@@ -157,10 +156,10 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                     retval.add(new PasswordChangeInfoImpl(created, client, ip));
                 }
             } catch (SQLException e) {
-                LOG.debug("Error while getting password history from DB.");
+                LOG.debug("Error while getting password history from DB. Reason: {}", e.getCause(), e);
             }
         } catch (Exception e) {
-            LOG.warn("Could not get password history. Cause: {}\nMessage: {} ", e.getCause(), e.getMessage());
+            LOG.warn("Could not get password history. Cause: {}\nMessage: {} ", e.getCause(), e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
             if (null != dbService) {
@@ -194,7 +193,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             stmt.setLong(5, System.currentTimeMillis());
             stmt.execute();
         } catch (Exception e) {
-            LOG.warn("Could not save password history. Error: {}", e.getMessage());
+            LOG.warn("Could not save password history. Error: {}", e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
             if (null != dbService) {
@@ -213,7 +212,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                     limit = casscade.getView(userID, contextID).get(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
                 } catch (Exception e) {
                     // Nothing configured. Go with standard value
-                    LOG.debug("Error while getting c.o.passwordchange.history.limit for user {}", userID);
+                    LOG.debug("Error while getting com.openexchange.passwordchange.history.limit for user {}", userID, e);
                 }
                 if (null == limit) {
                     limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
@@ -222,7 +221,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 clear(userID, contextID, limit.intValue());
             }
         } catch (Exception e) {
-            LOG.warn("Could not clear password change history for " + userID + " in context " + contextID);
+            LOG.warn("Could not clear password change history for " + userID + " in context " + contextID, e);
         }
     }
 
@@ -275,7 +274,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 }
             }
         } catch (Exception e) {
-            LOG.warn("Could not delete password histroy.");
+            LOG.warn("Could not delete password histroy.", e);
         } finally {
             Databases.closeSQLStuff(stmt);
             if (null != dbService) {
@@ -284,6 +283,13 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         }
     }
 
+    /**
+     * Get a specific service
+     * 
+     * @param clazz The class of the service
+     * @return The service
+     * @throws OXException In case service can not be loaded
+     */
     private <T extends Object> T getService(Class<? extends T> clazz) throws OXException {
         T retval = service.getService(clazz);
         if (null == retval) {
@@ -294,7 +300,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     @Override
     public Map<String, Set<String>> getFieldNames() {
-        Map<String, Set<String>> retval = new HashMap<>(3);
+        // Use only date and source. Only those two will always be sent to the client
+        Map<String, Set<String>> retval = new HashMap<>(2);
         Set<String> entries = new HashSet<>(3);
 
         entries.add("date");

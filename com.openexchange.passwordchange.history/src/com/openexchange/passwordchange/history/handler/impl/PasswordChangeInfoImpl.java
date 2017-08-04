@@ -52,7 +52,7 @@ package com.openexchange.passwordchange.history.handler.impl;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 
 /**
- * {@link PasswordChangeInfoImpl}
+ * {@link PasswordChangeInfoImpl} - Implementation of {@link PasswordChangeInfo}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0

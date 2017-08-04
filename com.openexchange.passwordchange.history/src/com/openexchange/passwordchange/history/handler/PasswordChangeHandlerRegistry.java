@@ -53,7 +53,7 @@ import java.util.Map;
 
 /**
  * 
- * {@link PasswordChangeHandlerRegistry}
+ * {@link PasswordChangeHandlerRegistry} - Registry to get available {@link PasswordHistoryHandler}s from
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -68,7 +68,7 @@ public interface PasswordChangeHandlerRegistry {
     public Map<String, PasswordHistoryHandler> getHandlers();
 
     /**
-     * Get a specific tracker with given name
+     * Get a specific {@link PasswordHistoryHandler} with given name
      * 
      * @param symbolicName The name of the {@link PasswordHistoryHandler}
      * @return The {@link PasswordHistoryHandler} or <code>null</code>

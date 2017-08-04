@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link PasswordChangeHistoryException}
+ * {@link PasswordChangeHistoryException} - Exception for PasswordChangeHistory bundle
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -127,7 +127,7 @@ public enum PasswordChangeHistoryException implements OXExceptionCode {
     public OXException create(final Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
