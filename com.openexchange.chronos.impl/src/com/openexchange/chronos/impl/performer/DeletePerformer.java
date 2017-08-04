@@ -67,12 +67,14 @@ import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -266,8 +268,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * check if there are any further occurrences left
          */
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(originalMasterEvent.getRecurrenceRule(), originalMasterEvent.getStartDate(), null);
         boolean hasOccurrences = false;
-        RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(originalMasterEvent, null, null);
+        RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData);
         while (iterator.hasNext()) {
             if (false == contains(deleteExceptionDates, iterator.next())) {
                 hasOccurrences = true;

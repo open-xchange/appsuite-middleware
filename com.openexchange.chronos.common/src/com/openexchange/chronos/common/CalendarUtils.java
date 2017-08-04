@@ -95,6 +95,7 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
@@ -991,7 +992,8 @@ public class CalendarUtils {
      * @return <code>true</code> if the event series is in the past, <code>false</code>, otherwise
      */
     public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, TimeZone timeZone) throws OXException {
-        return false == recurrenceService.iterateRecurrenceIds(seriesMaster, now, null).hasNext();
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
+        return false == recurrenceService.iterateRecurrenceIds(recurrenceData, now, null).hasNext();
     }
 
     /**
@@ -1327,6 +1329,26 @@ public class CalendarUtils {
             }
         }
         return recurrenceIds;
+    }
+
+    /**
+     * Creates an array of timestamps (milliseconds since epoch) of the supplied sorted set of recurrence identifiers, ready to be used
+     * as exception dates in recurrence data.
+     *
+     * @param recurrenceIds The recurrence identifiers to get the timestamps for
+     * @return The timestamps in a sorted array of <code>long</code>s, or <code>null</code> if no recurrence identifiers are passed
+     * @see RecurrenceData#getExceptionDates
+     */
+    public static long[] getExceptionDates(SortedSet<RecurrenceId> recurrenceIds) {
+        if (null == recurrenceIds || recurrenceIds.isEmpty()) {
+            return null;
+        }
+        long[] exceptionDates = new long[recurrenceIds.size()];
+        int position = 0;
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            exceptionDates[position++] = recurrenceId.getValue().getTimestamp();
+        }
+        return exceptionDates;
     }
 
 }

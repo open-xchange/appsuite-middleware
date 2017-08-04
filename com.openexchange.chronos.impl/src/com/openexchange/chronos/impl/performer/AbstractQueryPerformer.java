@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -76,9 +77,11 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -176,22 +179,15 @@ public abstract class AbstractQueryPerformer {
      * @see #getChangeExceptionDates(String)
      */
     protected Iterator<RecurrenceId> getRecurrenceIterator(Event masterEvent, Date from, Date until) throws OXException {
-        final TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
         if (null != masterEvent.getSeriesId()) {
             recurrenceIds.addAll(getChangeExceptionDates(masterEvent.getSeriesId()));
         }
         if (null != masterEvent.getDeleteExceptionDates()) {
             recurrenceIds.addAll(masterEvent.getDeleteExceptionDates());
         }
-        Event adjustedSeriesMaster = new DelegatingEvent(masterEvent) {
-
-            @Override
-            public SortedSet<RecurrenceId> getDeleteExceptionDates() {
-                return recurrenceIds;
-            }
-        };
-        return session.getRecurrenceService().iterateRecurrenceIds(adjustedSeriesMaster, from, until);
-        //        return session.getRecurrenceService().iterateRecurrenceIds(masterEvent, from, until);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), getExceptionDates(recurrenceIds));
+        return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
     }
 
     /**

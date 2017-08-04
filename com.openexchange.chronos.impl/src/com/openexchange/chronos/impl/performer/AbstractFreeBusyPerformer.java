@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -57,11 +58,16 @@ import static com.openexchange.chronos.common.CalendarUtils.isPublicClassificati
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -233,6 +239,29 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             }
         }
         return null;
+    }
+
+    /**
+     * Prepares recurrence data for a specific event series in the checked period, considering the exception dates defined in the series
+     * master event, as well as any overridden instances of the same series found in the overall list of events overlapping the checked
+     * period.
+     *
+     * @param seriesMasterInPeriod The series master event to get the recurrence data for
+     * @param eventsInPeriod The overall list of events overlapping the checked period
+     * @return The recurrence data
+     */
+    protected static RecurrenceData getRecurrenceData(Event seriesMasterInPeriod, List<Event> eventsInPeriod) {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        if (null != seriesMasterInPeriod.getDeleteExceptionDates()) {
+            recurrenceIds.addAll(seriesMasterInPeriod.getDeleteExceptionDates());
+        }
+        String seriesId = seriesMasterInPeriod.getSeriesId();
+        for (Event event : eventsInPeriod) {
+            if (seriesId.equals(event.getSeriesId()) && null != event.getRecurrenceId()) {
+                recurrenceIds.add(event.getRecurrenceId());
+            }
+        }
+        return new DefaultRecurrenceData(seriesMasterInPeriod.getRecurrenceRule(), seriesMasterInPeriod.getStartDate(), getExceptionDates(recurrenceIds));
     }
 
 }

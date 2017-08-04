@@ -94,7 +94,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return null;
         }
         int counter = 1;
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
         RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next();
@@ -117,7 +117,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return 0;
         }
         int position = 1;
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
         RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next();
@@ -137,13 +137,6 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         Calendar fromCalendar = null != from ? initCalendar(TimeZones.UTC, from) : null;
         Calendar untilCalendar = null != until ? initCalendar(TimeZones.UTC, until) : null;
         return new RecurrenceIterator(seriesMaster, true, fromCalendar, untilCalendar, null, false);
-    }
-
-    @Override
-    public com.openexchange.chronos.service.RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(Event seriesMaster, Date from, Date until) throws OXException {
-        Calendar fromCalendar = null != from ? initCalendar(TimeZones.UTC, from) : null;
-        Calendar untilCalendar = null != until ? initCalendar(TimeZones.UTC, until) : null;
-        return new RecurrenceIdIterator(seriesMaster, true, fromCalendar, untilCalendar, null, false);
     }
 
     @Override

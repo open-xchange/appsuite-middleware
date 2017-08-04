@@ -78,6 +78,7 @@ import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -444,7 +445,8 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(seriesMaster, new Date(recurrenceID.getValue().getTimestamp()), null);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
+        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }

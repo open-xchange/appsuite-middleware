@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
@@ -98,6 +99,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
@@ -113,6 +115,7 @@ import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
@@ -389,10 +392,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * recurrence rule changed, build list of possible exception dates matching the new rule
              */
             SortedSet<RecurrenceId> exceptionDates = Utils.combine(deleteExceptionDates, changeExceptionDates);
+            RecurrenceData recurrenceData = new DefaultRecurrenceData(
+                eventUpdate.getUpdate().getRecurrenceRule(), eventUpdate.getOriginal().getStartDate(), getExceptionDates(exceptionDates));
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.last().getValue().getTimestamp());
             untilCalendar.add(Calendar.DATE, 1);
             List<RecurrenceId> possibleExceptionDates = asList(session.getRecurrenceService().iterateRecurrenceIds(
-                eventUpdate.getUpdate(), new Date(exceptionDates.first().getValue().getTimestamp()), untilCalendar.getTime()));
+                recurrenceData, new Date(exceptionDates.first().getValue().getTimestamp()), untilCalendar.getTime()));
             /*
              * reset no longer matching delete- and change exceptions if recurrence rule changes
              */
