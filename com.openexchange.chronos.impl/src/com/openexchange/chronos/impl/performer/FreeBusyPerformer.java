@@ -331,6 +331,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Get the availability's start/end times
             Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
+            // Mark the entire block as busy if there are no free slots
+            if (availability.getCalendarFreeSlots().isEmpty()) {
+                FreeBusyTime freeBusyTime = new FreeBusyTime();
+                freeBusyTime.setStartTime(startTime);
+                freeBusyTime.setEndTime(endTime);
+                freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
+                freeBusyTimes.add(freeBusyTime);
+                continue;
+            }
+
             Date slotEndTime = endTime;
             for (CalendarFreeSlot calendarFreeSlot : availability.getCalendarFreeSlots()) {
                 // Get the slot's start/end times
