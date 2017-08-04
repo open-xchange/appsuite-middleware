@@ -72,6 +72,7 @@ import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.impl.PasswordChangeHandlerRegistryImpl;
 import com.openexchange.passwordchange.history.handler.impl.RdbPasswordHistoryHandler;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
@@ -94,7 +95,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ThreadPoolService.class, DatabaseService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ThreadPoolService.class, DatabaseService.class, UserService.class };
     }
 
     @Override
@@ -103,7 +104,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
 
         // Register a password change registry  
         PasswordChangeHandlerRegistryImpl registry = new PasswordChangeHandlerRegistryImpl(context);
-        PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);  
+        PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
         registry.register(defaultHandler.getSymbolicName(), defaultHandler);
         track(PasswordHistoryHandler.class, registry);
         openTrackers();
@@ -119,8 +120,7 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor(this, registry));
 
         // Register DeleteListener to handle user/context deletions
-        DeleteListener deleteListerner = new PasswordHistoryDeleteListener(this, registry);
-        registerService(DeleteListener.class, deleteListerner);
+        registerService(DeleteListener.class, new PasswordHistoryDeleteListener(this, registry));
 
         // Register UpdateTask
         registerService(CreateTableService.class, new PasswordChangeHistoryCreateTableTask());
