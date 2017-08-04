@@ -72,6 +72,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -516,7 +517,7 @@ public class Utils {
      * @param storage A reference to the calendar storage to use
      * @param seriesMaster The series master event
      * @param forUser The identifier of the user to apply the exception dates for
-     * @return The passed event reference, with possibly adjusted exception dates
+     * @return The passed event reference, or a custom version of the series master event with adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
     public static Event applyExceptionDates(CalendarStorage storage, Event seriesMaster, int forUser) throws OXException {
@@ -543,15 +544,20 @@ public class Utils {
         /*
          * apply a 'userized' version of exception dates
          */
-        SortedSet<RecurrenceId> userizedExceptionDates = new TreeSet<RecurrenceId>();
+        final SortedSet<RecurrenceId> userizedExceptionDates = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
             userizedExceptionDates.addAll(seriesMaster.getDeleteExceptionDates());
         }
         for (Event changeException : changeExceptions) {
             userizedExceptionDates.add(changeException.getRecurrenceId());
         }
-        seriesMaster.setDeleteExceptionDates(userizedExceptionDates);
-        return seriesMaster;
+        return new DelegatingEvent(seriesMaster) {
+
+            @Override
+            public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+                return userizedExceptionDates;
+            }
+        };
     }
 
     /**

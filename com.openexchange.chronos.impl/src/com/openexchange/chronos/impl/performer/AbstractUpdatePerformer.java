@@ -64,6 +64,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -76,7 +77,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.CreateResultImpl;
 import com.openexchange.chronos.impl.DeleteResultImpl;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.impl.Utils;
@@ -181,8 +181,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
-        storage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
-        result.addDeletion(new DeleteResultImpl(originalEvent));
+        storage.getAttendeeStorage().deleteAttendees(id);
+        /*
+         * add appropriate delete result
+         */
+        result.addDeletion(new DeleteResultImpl(userize(originalEvent)));
     }
 
     /**
@@ -206,23 +209,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
-        int userID = originalAttendee.getEntity();
+        int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userID);
+            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userId);
         }
         /*
          * delete event data from storage for this attendee
          */
-        String objectID = originalEvent.getId();
+        String objectId = originalEvent.getId();
         storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertAttendeeTombstone(objectID, originalAttendee);
-        storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
-        storage.getAlarmStorage().deleteAlarms(objectID, userID);
+        storage.getAttendeeStorage().insertAttendeeTombstone(objectId, originalAttendee);
+        storage.getAttendeeStorage().deleteAttendees(objectId, Collections.singletonList(originalAttendee));
+        storage.getAlarmStorage().deleteAlarms(objectId, userId);
         /*
          * 'touch' event & add track update result
          */
-        touch(objectID);
-        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(objectID)));
+        touch(objectId);
+        result.addUpdate(new UpdateResultImpl(userize(originalEvent), userize(loadEventData(objectId))));
     }
 
     /**
@@ -273,6 +276,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
         storage.getEventStorage().insertEvent(exceptionEvent);
+        Event deletedException = EventMapper.getInstance().copy(exceptionEvent, new Event(), EventField.values());
         /*
          * take over all other original attendees
          */
@@ -296,8 +300,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * touch series master event & track in result
          */
         touch(originalMasterEvent.getId());
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(originalMasterEvent.getId())));
-        result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
+        result.addUpdate(new UpdateResultImpl(userize(originalMasterEvent), userize(loadEventData(originalMasterEvent.getId(), false))));
+        result.addDeletion(new DeleteResultImpl(userize(deletedException)));
     }
 
     /**
@@ -371,15 +375,14 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return event;
     }
 
-    protected List<Event> loadExceptionData(String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
+    protected List<Event> loadExceptionData(String seriesId, Collection<RecurrenceId> recurrenceIds) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
-        if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
-            for (RecurrenceId recurrenceID : recurrenceIDs) {
-                Event exception = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
+        if (null != recurrenceIds && 0 < recurrenceIds.size()) {
+            for (RecurrenceId recurrenceId : recurrenceIds) {
+                Event exception = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
                 if (null == exception) {
-                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesID, String.valueOf(recurrenceID));
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, String.valueOf(recurrenceId));
                 }
-                exception.setFolderId(folder.getID());
                 exceptions.add(exception);
             }
         }
@@ -398,7 +401,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event changeException = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
         if (null != changeException) {
             changeException = storage.getUtilities().loadAdditionalEventData(calendarUserId, changeException, null);
-            changeException.setFolderId(folder.getID());
         }
         return changeException;
     }
@@ -451,4 +453,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return organizer;
     }
 
+    /**
+     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
+     * via {@link #calendarUserId}. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * </ul>
+     *
+     * @param event The event to userize from the current calendar user's point of view
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    protected Event userize(Event event) throws OXException {
+        return userize(event, calendarUserId);
+    }
 }

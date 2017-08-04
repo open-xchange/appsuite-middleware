@@ -72,6 +72,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -260,6 +261,39 @@ public abstract class AbstractQueryPerformer {
             }
         }
         return sortEvents(processedEvents, new SearchOptions(session));
+    }
+
+    /**
+     * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * </ul>
+     *
+     * @param event The event to userize
+     * @param forUser The identifier of the user in whose point of view the event should be adjusted
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    protected Event userize(Event event, int forUser) throws OXException {
+        if (isSeriesMaster(event)) {
+            event = applyExceptionDates(storage, event, forUser);
+        }
+        final String folderView = Utils.getFolderView(storage, event, forUser);
+        if (false == folderView.equals(event.getFolderId())) {
+            event = new DelegatingEvent(event) {
+
+                @Override
+                public String getFolderId() {
+                    return folderView;
+                }
+            };
+        }
+        return anonymizeIfNeeded(session, event);
     }
 
     /**

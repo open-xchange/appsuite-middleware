@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
@@ -67,6 +66,7 @@ import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarResultImpl;
@@ -75,7 +75,6 @@ import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -109,7 +108,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      */
     public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceId, long clientTimestamp) throws OXException {
         /*
-         * load original event data & attendees
+         * load plain original event data
          */
         Event originalEvent = loadEventData(objectID, false);
         /*
@@ -252,9 +251,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * there are no occurrences remaining at all after the deletion, the whole series event is deleted.
      *
      * @param originalMasterEvent The original series master event
-     * @param recurrenceID The recurrence identifier of the occurrence to add
+     * @param recurrenceId The recurrence identifier of the occurrence to add
      */
-    private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
+    private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceId) throws OXException {
         /*
          * build new set of delete exception dates
          */
@@ -262,22 +261,16 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         if (null != originalMasterEvent.getDeleteExceptionDates()) {
             deleteExceptionDates.addAll(originalMasterEvent.getDeleteExceptionDates());
         }
-        if (false == deleteExceptionDates.add(recurrenceID)) {
-            // TODO throw/log?
+        if (false == deleteExceptionDates.add(recurrenceId)) {
+            /*
+             * cannot delete a no longer existing occurrence
+             */
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalMasterEvent.getId(), String.valueOf(recurrenceId));
         }
         /*
          * check if there are any further occurrences left
          */
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(originalMasterEvent.getRecurrenceRule(), originalMasterEvent.getStartDate(), null);
-        boolean hasOccurrences = false;
-        RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData);
-        while (iterator.hasNext()) {
-            if (false == contains(deleteExceptionDates, iterator.next())) {
-                hasOccurrences = true;
-                break;
-            }
-        }
-        if (hasOccurrences) {
+        if (hasFurtherOccurrences(originalMasterEvent, deleteExceptionDates)) {
             /*
              * update series master accordingly
              */
@@ -286,14 +279,28 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
-            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-            result.addUpdate(new UpdateResultImpl(originalMasterEvent, updatedMasterEvent));
+            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+            result.addUpdate(new UpdateResultImpl(userize(originalMasterEvent), userize(updatedMasterEvent)));
         } else {
             /*
              * delete series master
              */
             delete(originalMasterEvent);
         }
+    }
+
+    /**
+     * Gets a value indicating whether an event series has further occurrences besides the occurrences identified by the supplied
+     * recurrence identifiers or not.
+     *
+     * @param seriesMaster The series master event
+     * @param recurrenceIds The recurrence identifiers to skip
+     * @return <code>true</code> if the event's reucrrence set yields at least one further occurrence, <code>false</code>, otherwise
+     */
+    private boolean hasFurtherOccurrences(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIds) throws OXException {
+        long[] exceptionDates = CalendarUtils.getExceptionDates(recurrenceIds);
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), exceptionDates);
+        return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
     }
 
     /**
@@ -306,13 +313,13 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * delete the exception
          */
-        String seriesID = originalExceptionEvent.getSeriesId();
-        RecurrenceId recurrenceID = originalExceptionEvent.getRecurrenceId();
+        String seriesId = originalExceptionEvent.getSeriesId();
+        RecurrenceId recurrenceId = originalExceptionEvent.getRecurrenceId();
         delete(originalExceptionEvent);
         /*
          * update the series master accordingly
          */
-        addDeleteExceptionDate(loadEventData(seriesID), recurrenceID);
+        addDeleteExceptionDate(loadEventData(seriesId, false), recurrenceId);
     }
 
     /**
