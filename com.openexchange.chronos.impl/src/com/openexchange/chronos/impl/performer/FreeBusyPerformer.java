@@ -487,7 +487,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         FreeBusyTime intervalB = new FreeBusyTime();
         intervalB.setFbType(FbType.FREE);
         intervalB.setStartTime(freeBusyTime.getEndTime());
-        intervalA.setEndTime(toSplit.getEndTime());
+        intervalB.setEndTime(toSplit.getEndTime());
 
         auxiliaryList.add(intervalA);
         auxiliaryList.add(intervalB);
