@@ -3774,6 +3774,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                         checkNext = true;
                                     }
                                 }
+                            } else {
+                                // Reset last remembered database since not selected at all
+                                lastDatabaseId = 0;
                             }
                         } else {
                             checkNext = true;
