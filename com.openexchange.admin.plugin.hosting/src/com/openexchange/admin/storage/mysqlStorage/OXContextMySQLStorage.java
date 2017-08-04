@@ -69,8 +69,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -82,6 +84,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import com.google.common.collect.Lists;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -106,6 +109,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
+import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -3049,74 +3053,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            // Determine non-referenced ones (contained in 'contexts_per_dbschema' but not referenced within 'context_server2db_pool' associations)
-            stmt = configCon.prepareStatement("SELECT contexts_per_dbschema.db_pool_id, contexts_per_dbschema.schemaname, db_pool.url, db_pool.driver, db_pool.login, db_pool.password FROM contexts_per_dbschema JOIN db_pool ON contexts_per_dbschema.db_pool_id=db_pool.db_pool_id LEFT JOIN context_server2db_pool ON contexts_per_dbschema.db_pool_id=context_server2db_pool.write_db_pool_id AND contexts_per_dbschema.schemaname COLLATE utf8_unicode_ci = context_server2db_pool.db_schema COLLATE utf8_unicode_ci WHERE context_server2db_pool.write_db_pool_id IS NULL");
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                List<Database> schemas = new LinkedList<Database>();
-                do {
-                    Database db = new Database(rs.getInt(1));
-                    db.setScheme(rs.getString(2));
-                    db.setUrl(rs.getString(3));
-                    db.setDriver(rs.getString(4));
-                    db.setLogin(rs.getString(5));
-                    db.setPassword(rs.getString(6));
-                    schemas.add(db);
-                } while (rs.next());
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-
-                // Check if really non-existent or simply empty
-                PreparedStatement deleteStmt = null;
-                PreparedStatement updateStmt = null;
-                PreparedStatement updateStmt2 = null;
-                try {
-                    for (Database schema : schemas) {
-                        if (OXUtilMySQLStorageCommon.existsDatabase(schema)) {
-                            // Empty one...
-                            if (null == updateStmt) {
-                                updateStmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=0 WHERE db_pool_id=? AND schemaname=?");
-                            }
-                            updateStmt.setInt(1, schema.getId().intValue());
-                            updateStmt.setString(2, schema.getScheme());
-                            updateStmt.addBatch();
-                        } else {
-                            // Non-existent
-                            if (null == deleteStmt) {
-                                deleteStmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
-                            }
-                            deleteStmt.setInt(1, schema.getId().intValue());
-                            deleteStmt.setString(2, schema.getScheme());
-                            deleteStmt.addBatch();
-                            if (null == updateStmt2) {
-                                updateStmt2 = configCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
-                            }
-                            updateStmt2.setInt(1, schema.getId().intValue());
-                            updateStmt2.setString(2, schema.getScheme());
-                            updateStmt2.addBatch();
-                        }
-                    }
-                    if (null != deleteStmt) {
-                        deleteStmt.executeBatch();
-                    }
-                    if (null != updateStmt) {
-                        updateStmt.executeBatch();
-                    }
-                    if (null != updateStmt2) {
-                        updateStmt2.executeBatch();
-                    }
-                } finally {
-                    Databases.closeSQLStuff(deleteStmt, updateStmt);
-                }
-            } else {
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-            }
-
-            // Check count entries for existing ones
-            stmt = configCon.prepareStatement("SELECT write_db_pool_id FROM db_cluster ORDER BY write_db_pool_id ASC");
+            // Determine registered databases (ignore those with max_units=0)
+            stmt = configCon.prepareStatement("SELECT write_db_pool_id FROM db_cluster WHERE max_units <> 0 ORDER BY write_db_pool_id ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No database registered...
@@ -3131,6 +3069,215 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs = null;
             stmt = null;
 
+            // Determine referenced schemas in 'context_server2db_pool' associations
+            Map<Integer, Database> databases;
+            Map<Database, Set<String>> db2ReferencedSchemas;
+            {
+                stmt = configCon.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool");
+                rs = stmt.executeQuery();
+                Map<Integer, Set<String>> poolAndSchemas;
+                if (rs.next()) {
+                    poolAndSchemas = new LinkedHashMap<>();
+                    do {
+                        Integer poolId = Integer.valueOf(rs.getInt(1));
+                        Set<String> schemas = poolAndSchemas.get(poolId);
+                        if (null == schemas) {
+                            schemas = new LinkedHashSet<>();
+                            poolAndSchemas.put(poolId, schemas);
+                        }
+                        schemas.add(rs.getString(2));
+                    } while (rs.next());
+                } else {
+                    poolAndSchemas = null;
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                databases = new HashMap<>(null == poolAndSchemas ? 16 : poolAndSchemas.size());
+                db2ReferencedSchemas = new LinkedHashMap<>(null == poolAndSchemas ? 16 : poolAndSchemas.size());
+                stmt = configCon.prepareStatement(Databases.getIN("SELECT db_pool_id, url, driver, login, password, name FROM db_pool WHERE db_pool_id IN (", poolIds.size()));
+                int pos = 1;
+                for (Integer poolId : poolIds) {
+                    stmt.setInt(pos++, poolId.intValue());
+                }
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int poolId = rs.getInt(1);
+                    Database db = new Database(poolId);
+                    db.setUrl(rs.getString(2));
+                    db.setDriver(rs.getString(3));
+                    db.setLogin(rs.getString(4));
+                    db.setPassword(rs.getString(5));
+                    db.setName(rs.getString(6));
+                    Set<String> schemas = null == poolAndSchemas ? new LinkedHashSet<String>(0) : poolAndSchemas.get(Integer.valueOf(poolId));
+                    if (null == schemas) {
+                        schemas = new LinkedHashSet<String>(0);
+                    }
+                    db2ReferencedSchemas.put(db, schemas);
+                    databases.put(Integer.valueOf(poolId), db);
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+
+            // Determine really existing schemas per database
+            Map<Database, Set<String>> db2ExistingSchemas = new LinkedHashMap<>(db2ReferencedSchemas.size());
+            {
+                for (Map.Entry<Database, Set<String>> entry : db2ReferencedSchemas.entrySet()) {
+                    Database db = entry.getKey();
+                    List<String> schemas = OXUtilMySQLStorageCommon.listDatabases(db);
+                    db2ExistingSchemas.put(db, new LinkedHashSet<>(schemas));
+                }
+            }
+
+            // Determine contained schemas in 'contexts_per_dbschema' table
+            Map<Database, Set<String>> db2ContainedSchemas = new LinkedHashMap<>(db2ReferencedSchemas.size());
+            stmt = configCon.prepareStatement("SELECT db_pool_id, schemaname FROM contexts_per_dbschema");
+            rs = stmt.executeQuery();
+            Set<Integer> db2delete = null;
+            Set<PoolAndSchema> schemas2delete = null;
+            while (rs.next()) {
+                Integer poolId = Integer.valueOf(rs.getInt(1));
+                Database db = databases.get(poolId);
+                if (null == db) {
+                    // Such a database does not exist
+                    if (null == db2delete) {
+                        db2delete = new HashSet<>();
+                    }
+                    db2delete.add(poolId);
+                } else {
+                    String schema = rs.getString(2);
+                    Set<String> existingSchemas = db2ExistingSchemas.get(db);
+                    if (existingSchemas.remove(schema)) {
+                        // Schema was contained in really existing schemas
+                        Set<String> containedSchemas = db2ContainedSchemas.get(db);
+                        if (null == containedSchemas) {
+                            containedSchemas = new LinkedHashSet<>();
+                            db2ContainedSchemas.put(db, containedSchemas);
+                        }
+                        containedSchemas.add(schema);
+                    } else {
+                        // Contained but does not exist
+                        if (null == schemas2delete) {
+                            schemas2delete = new HashSet<>();
+                        }
+                        schemas2delete.add(new PoolAndSchema(poolId.intValue(), schema));
+                    }
+                }
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Drop the ones referring to non-existing database hosts
+            if (null != db2delete) {
+                PreparedStatement deleteStmt = null;
+                try {
+                    deleteStmt = configCon.prepareStatement(Databases.getIN("DELETE FROM contexts_per_dbschema WHERE db_pool_id IN (", db2delete.size()));
+                    int pos = 1;
+                    for (Integer poolId : db2delete) {
+                        deleteStmt.setInt(pos++, poolId.intValue());
+                    }
+                    deleteStmt.executeUpdate();
+                    Databases.closeSQLStuff(deleteStmt);
+
+                    deleteStmt = configCon.prepareStatement(Databases.getIN("DELETE FROM dbschema_lock WHERE db_pool_id IN (", db2delete.size()));
+                    pos = 1;
+                    for (Integer poolId : db2delete) {
+                        deleteStmt.setInt(pos++, poolId.intValue());
+                    }
+                    deleteStmt.executeUpdate();
+                } finally {
+                    Databases.closeSQLStuff(deleteStmt);
+                }
+            }
+
+            // Drop the ones referring to non-existing database schemas
+            if (null != schemas2delete) {
+                PreparedStatement deleteStmt = configCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+                PreparedStatement deleteStmt2 = configCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
+                try {
+                    for (PoolAndSchema poolAndSchema : schemas2delete) {
+                        deleteStmt.setInt(1, poolAndSchema.getPoolId());
+                        deleteStmt.setString(2, poolAndSchema.getSchema());
+                        deleteStmt.addBatch();
+
+                        deleteStmt2.setInt(1, poolAndSchema.getPoolId());
+                        deleteStmt2.setString(2, poolAndSchema.getSchema());
+                        deleteStmt2.addBatch();
+                    }
+                    deleteStmt.executeBatch();
+                    deleteStmt2.executeBatch();
+                } finally {
+                    Databases.closeSQLStuff(deleteStmt, deleteStmt2);
+                }
+            }
+
+            // Insert really existing schemas to 'contexts_per_dbschema' (if not contained)
+            {
+                long now = System.currentTimeMillis();
+                for (Map.Entry<Database, Set<String>> entry : db2ExistingSchemas.entrySet()) {
+                    Database db = entry.getKey();
+                    Set<String> schemas = entry.getValue();
+                    if (null != schemas && !schemas.isEmpty()) {
+                        for (List<String> schemasToInsert : Lists.partition(new ArrayList<>(schemas), 25)) {
+                            PreparedStatement insertStmt = null;
+                            try {
+                                insertStmt = configCon.prepareStatement("INSERT IGNORE INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?)");
+                                for (String schema : schemasToInsert) {
+                                    insertStmt.setInt(1, db.getId().intValue());
+                                    insertStmt.setString(2, schema);
+                                    insertStmt.setInt(3, 0);
+                                    insertStmt.setLong(4, now);
+                                    insertStmt.addBatch();
+
+                                    Set<String> containedSchemas = db2ContainedSchemas.get(db);
+                                    if (null == containedSchemas) {
+                                        containedSchemas = new LinkedHashSet<>();
+                                        db2ContainedSchemas.put(db, containedSchemas);
+                                    }
+                                    containedSchemas.add(schema);
+                                }
+                                insertStmt.executeBatch();
+                            } finally {
+                                Databases.closeSQLStuff(insertStmt);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Determine non-referenced ones (contained in 'contexts_per_dbschema' but not referenced within 'context_server2db_pool' associations)
+            PreparedStatement updateStmt = null;
+            try {
+                for (Map.Entry<Database, Set<String>> db2ContainedSchemasEntry : db2ContainedSchemas.entrySet()) {
+                    Database db = db2ContainedSchemasEntry.getKey();
+                    Set<String> containedSchemas = db2ContainedSchemasEntry.getValue();
+                    Set<String> referencedSchemas = db2ReferencedSchemas.get(db);
+
+                    for (String containedSchema : containedSchemas) {
+                        if (false == referencedSchemas.contains(containedSchema)) {
+                            if (null == updateStmt) {
+                                updateStmt = configCon.prepareStatement("UPDATE contexts_per_dbschema SET count=0 WHERE db_pool_id=? AND schemaname=?");
+                            }
+                            updateStmt.setInt(1, db.getId().intValue());
+                            updateStmt.setString(2, containedSchema);
+                            updateStmt.addBatch();
+                        }
+                    }
+
+                    // Don't know whether to check the other way around, which would mean there is an entry in 'context_server2db_pool' associations,
+                    // but actually referring to a non-existing schema...
+                }
+                if (null != updateStmt) {
+                    updateStmt.executeBatch();
+                }
+            } finally {
+                Databases.closeSQLStuff(updateStmt);
+            }
+
             class SchemaCount {
 
                 final String schemaName;
@@ -3141,8 +3288,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     this.count = count;
                     this.schemaName = schemaName;
                 }
-            }
-            ;
+            };
 
             Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
             for (Integer poolId : poolIds) {
@@ -3161,37 +3307,40 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             if (false == counts.isEmpty()) {
-                stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
-                long now = System.currentTimeMillis();
-                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
-                    int poolId = entry.getKey().intValue();
-                    List<SchemaCount> schemaCounts = entry.getValue();
-                    for (SchemaCount schemaCount : schemaCounts) {
-                        stmt.setInt(1, poolId);
-                        stmt.setString(2, schemaCount.schemaName);
-                        stmt.setInt(3, schemaCount.count);
-                        stmt.setLong(4, now);
-                        stmt.setInt(5, schemaCount.count);
-                        stmt.addBatch();
+                // Insert with 25-sized batches
+                for (List<Map.Entry<Integer, List<SchemaCount>>> entries : Lists.partition(new ArrayList<>(counts.entrySet()), 25)) {
+                    stmt = configCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE count=?");
+                    long now = System.currentTimeMillis();
+                    for (Map.Entry<Integer, List<SchemaCount>> entry : entries) {
+                        int poolId = entry.getKey().intValue();
+                        List<SchemaCount> schemaCounts = entry.getValue();
+                        for (SchemaCount schemaCount : schemaCounts) {
+                            stmt.setInt(1, poolId);
+                            stmt.setString(2, schemaCount.schemaName);
+                            stmt.setInt(3, schemaCount.count);
+                            stmt.setLong(4, now);
+                            stmt.setInt(5, schemaCount.count);
+                            stmt.addBatch();
+                        }
                     }
-                }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
 
-                stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
-                for (Map.Entry<Integer, List<SchemaCount>> entry : counts.entrySet()) {
-                    int poolId = entry.getKey().intValue();
-                    List<SchemaCount> schemaCounts = entry.getValue();
-                    for (SchemaCount schemaCount : schemaCounts) {
-                        stmt.setInt(1, poolId);
-                        stmt.setString(2, schemaCount.schemaName);
-                        stmt.addBatch();
+                    stmt = configCon.prepareStatement("INSERT IGNORE INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+                    for (Map.Entry<Integer, List<SchemaCount>> entry : entries) {
+                        int poolId = entry.getKey().intValue();
+                        List<SchemaCount> schemaCounts = entry.getValue();
+                        for (SchemaCount schemaCount : schemaCounts) {
+                            stmt.setInt(1, poolId);
+                            stmt.setString(2, schemaCount.schemaName);
+                            stmt.addBatch();
+                        }
                     }
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
                 }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
             }
         } catch (SQLException e) {
             LOG.error("SQL Error", e);
