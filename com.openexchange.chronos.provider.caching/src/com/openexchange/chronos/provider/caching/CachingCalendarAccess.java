@@ -48,7 +48,6 @@
 
 package com.openexchange.chronos.provider.caching;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +56,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.db.ConnectionHelper;
+import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandlerFactory;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
@@ -65,8 +64,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -90,13 +87,10 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     private final CalendarAccount account;
     private final CalendarParameters parameters;
 
-    private final ConnectionHelper databaseConnectionHelper;
-
     public CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
-        this.databaseConnectionHelper = new ConnectionHelper(Services.getService(DatabaseService.class), this.session.getContext(), this.account.getAccountId());
     }
 
     /**
@@ -120,14 +114,14 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            cachingHandler.execute(folderId, eventId, recurrenceId);
-            this.databaseConnectionHelper.commit();
-            return cachingHandler.search(folderId, eventId, recurrenceId);
+            List<Event> doIt = new CachingExecutor(this, cachingHandler).doIt(folderId, eventId, recurrenceId);
+            if (doIt != null && !doIt.isEmpty()) {
+                return doIt.get(0);
+            }
+            return new Event(); //FIXME how to handle empty search results?
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
-        } finally {
-            databaseConnectionHelper.back();
         }
     }
 
@@ -137,14 +131,10 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            cachingHandler.execute(eventIDs);
-            this.databaseConnectionHelper.commit();
-            return cachingHandler.search(eventIDs);
+            return new CachingExecutor(this, cachingHandler).doIt(eventIDs);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
-        } finally {
-            databaseConnectionHelper.back();
         }
     }
 
@@ -154,14 +144,10 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            cachingHandler.execute(folderId);
-            this.databaseConnectionHelper.commit();
-            return cachingHandler.search(folderId);
+            return new CachingExecutor(this, cachingHandler).doIt(folderId);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
-        } finally {
-            databaseConnectionHelper.back();
         }
     }
 
@@ -175,18 +161,6 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
     public CalendarParameters getParameters() {
         return parameters;
-    }
-
-    public final CalendarStorage getCalendarStorage() {
-        return databaseConnectionHelper.getCalendarStorage();
-    }
-
-    public Connection getWriteConnection() {
-        return databaseConnectionHelper.getWriteConnection();
-    }
-
-    public Connection getReadConnection() {
-        return databaseConnectionHelper.getReadConnection();
     }
 
     /**

@@ -51,8 +51,11 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
@@ -78,11 +82,16 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link UpdateHandler}
@@ -99,46 +108,32 @@ public class UpdateHandler extends AbstractHandler {
         super(cachedCalendarAccess);
     }
 
-    @Override
-    public void execute(String folderId) throws OXException {
-        EventUpdates diff = generateEventDiff(folderId);
-        processDiff(diff);
-
-        updateLastUpdated();
+    private EventUpdates generateEventDiff(List<Event> persistedEvents, List<Event> updatedEvents) throws OXException {
+        return CalendarUtils.getEventUpdates(persistedEvents, updatedEvents, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
     }
 
-    private EventUpdates generateEventDiff(String folderId) throws OXException {
-        List<Event> extEventsInFolder = getAndPrepareExtEvents(folderId);
-
-        List<Event> persistedEventsInFolder = searchEvents(folderId, true);
-        EventUpdates eventUpdates = CalendarUtils.getEventUpdates(persistedEventsInFolder, extEventsInFolder, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
-
-        return eventUpdates;
+    private void processDiff(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+        create(calendarStorage, diff);
+        delete(calendarStorage, diff);
+        update(calendarStorage, diff);
     }
 
-    private void processDiff(EventUpdates diff) throws OXException {
-        create(diff);
-        delete(diff);
-        update(diff);
-    }
-
-    private void delete(EventUpdates diff) throws OXException {
+    private void delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.isEmpty()) {
             return;
         }
 
         for (Event event : diff.getRemovedItems()) {
-            delete(event);
+            delete(calendarStorage, event);
         }
     }
 
-    protected void delete(Event originalEvent) throws OXException {
-        CalendarStorage calendarStorage = getCalendarStorage();
+    protected void delete(CalendarStorage calendarStorage, Event originalEvent) throws OXException {
         /*
          * recursively delete any existing event exceptions
          */
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getFolderId(), originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()));
+            deleteExceptions(calendarStorage, originalEvent.getFolderId(), originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
         }
         /*
          * delete event data from storage
@@ -151,23 +146,23 @@ public class UpdateHandler extends AbstractHandler {
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
     }
 
-    protected SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
+    protected SortedSet<RecurrenceId> getChangeExceptionDates(CalendarStorage calendarStorage, String seriesId) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(CalendarUtils.getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(CalendarUtils.getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
-        List<Event> changeExceptions = getCalendarStorage().getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
+        List<Event> changeExceptions = calendarStorage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
-    
-    protected void deleteExceptions(String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
-        for (Event originalExceptionEvent : loadExceptionData(folderId, seriesID, exceptionDates)) {
-            delete(originalExceptionEvent);
+
+    protected void deleteExceptions(CalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
+        for (Event originalExceptionEvent : loadExceptionData(calendarStorage, folderId, seriesID, exceptionDates)) {
+            delete(calendarStorage, originalExceptionEvent);
         }
     }
-    
-    protected List<Event> loadExceptionData(String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
+
+    protected List<Event> loadExceptionData(CalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
             for (RecurrenceId recurrenceID : recurrenceIDs) {
-                Event exception = getCalendarStorage().getEventStorage().loadException(seriesID, recurrenceID, null);
+                Event exception = calendarStorage.getEventStorage().loadException(seriesID, recurrenceID, null);
                 if (null == exception) {
                     throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesID, String.valueOf(recurrenceID));
                 }
@@ -175,17 +170,17 @@ public class UpdateHandler extends AbstractHandler {
                 exceptions.add(exception);
             }
         }
-        return getCalendarStorage().getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, EventField.values());
+        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, EventField.values());
     }
 
-    private void create(EventUpdates diff) {
+    private void create(CalendarStorage calendarStorage, EventUpdates diff) {
         if (diff.isEmpty()) {
             return;
         }
-        createAsync(diff.getAddedItems());
+        createAsync(calendarStorage, diff.getAddedItems());
     }
 
-    private void update(EventUpdates diff) throws OXException {
+    private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.isEmpty()) {
             return;
         }
@@ -193,11 +188,11 @@ public class UpdateHandler extends AbstractHandler {
         boolean containsUID = containsUid(diff.getUpdatedItems());
         if (!containsUID) {
             //FIXME generate reproducible UID for upcoming refreshes
-            delete(diff);
-            create(diff);
+            delete(calendarStorage, diff);
+            create(calendarStorage, diff);
             return;
         }
-        EventStorage eventStorage = getCalendarStorage().getEventStorage();
+        EventStorage eventStorage = calendarStorage.getEventStorage();
 
         for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
 
@@ -209,19 +204,19 @@ public class UpdateHandler extends AbstractHandler {
 
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {
-                updateAttendees(updatedEvent.getId(), attendeeUpdates);
+                updateAttendees(calendarStorage, updatedEvent.getId(), attendeeUpdates);
             }
 
             CollectionUpdate<Alarm, AlarmField> alarmUpdates = eventUpdate.getAlarmUpdates();
             if (!alarmUpdates.isEmpty()) {
-                updateAlarms(updatedEvent, alarmUpdates);
+                updateAlarms(calendarStorage, updatedEvent, alarmUpdates);
             }
         }
     }
 
-    private void updateAlarms(Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
+    private void updateAlarms(CalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
         if (!alarmUpdates.isEmpty()) {
-            AlarmStorage alarmStorage = getCalendarStorage().getAlarmStorage();
+            AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 alarmStorage.insertAlarms(event, event.getCreatedBy(), alarmUpdates.getAddedItems());
             }
@@ -246,9 +241,9 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    private void updateAttendees(String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+    private void updateAttendees(CalendarStorage calendarStorage, String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
         if (!attendeeUpdates.isEmpty()) {
-            AttendeeStorage attendeeStorage = getCalendarStorage().getAttendeeStorage();
+            AttendeeStorage attendeeStorage = calendarStorage.getAttendeeStorage();
             if (!attendeeUpdates.getAddedItems().isEmpty()) {
                 attendeeStorage.insertAttendees(eventId, attendeeUpdates.getAddedItems());
             }
@@ -277,17 +272,78 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        execute(folderId);
+    public List<Event> getExternalEvents(String folderId) throws OXException {
+        return getAndPrepareExtEvents(folderId);
+    }
+
+//    @Override
+//    public Event getPersistedEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+//        return search(folderId, eventId, recurrenceId);
+//    }
+
+    @Override
+    public List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException {
+        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
+        if (sortEventIDsPerFolderId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection readConnection = null;
+
+        Context context = this.cachedCalendarAccess.getSession().getContext();
+        List<Event> persistedEvents = new ArrayList<>();
+        try {
+            readConnection = dbService.getReadOnly(context);
+            CalendarStorage calendarStorage = initStorage(new SimpleDBProvider(readConnection, null));
+            for (String folderId : sortEventIDsPerFolderId.keySet()) {
+                persistedEvents.addAll(searchInternal(calendarStorage, folderId, true));
+            }
+        } finally {
+            if (null != readConnection) {
+                dbService.backReadOnly(context, readConnection);
+            }
+        }
+        return persistedEvents;
     }
 
     @Override
-    public void execute(List<EventID> eventIds) throws OXException {
-        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
-        for (String folderId : sortEventIDsPerFolderId.keySet()) {
-            EventUpdates diff = generateEventDiff(folderId);
-            processDiff(diff);
+    public List<Event> getPersistedEvents(String folderId) throws OXException {
+        return searchInternal(folderId, true);
+    }
+
+    @Override
+    public void persist(EventUpdates diff) throws OXException {
+        if (diff.isEmpty()) {
+            return;
         }
-        updateLastUpdated();
+        boolean committed = false;
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection writeConnection = null;
+        Context context = this.cachedCalendarAccess.getSession().getContext();
+        try {
+            writeConnection = dbService.getWritable(context);
+            writeConnection.setAutoCommit(false);
+            processDiff(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff);
+
+            writeConnection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            if (DBUtils.isTransactionRollbackException(e)) {
+                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e, e.getMessage());
+            }
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != writeConnection) {
+                if (false == committed) {
+                    Databases.rollback(writeConnection);
+                    Databases.autocommit(writeConnection);
+                    dbService.backWritableAfterReading(context, writeConnection);
+                } else {
+                    Databases.autocommit(writeConnection);
+                    dbService.backWritable(context, writeConnection);
+                }
+            }
+        }
+
     }
 }

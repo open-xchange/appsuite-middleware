@@ -49,10 +49,12 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,14 +70,23 @@ public class DatabaseHandler extends AbstractHandler {
     }
 
     @Override
-    public void execute(String folderId) throws OXException {
+    public List<Event> getExternalEvents(String folderId) throws OXException {
+        return Collections.emptyList();
     }
 
     @Override
-    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+    public List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException {
+        return search(eventIds);
     }
 
     @Override
-    public void execute(List<EventID> eventIds) throws OXException {
+    public List<Event> getPersistedEvents(String folderId) throws OXException {
+        return searchInternal(folderId, true);
     }
+
+    @Override
+    public void persist(EventUpdates diff) throws OXException {}
+
+    @Override
+    public void updateLastUpdated() throws OXException {}
 }

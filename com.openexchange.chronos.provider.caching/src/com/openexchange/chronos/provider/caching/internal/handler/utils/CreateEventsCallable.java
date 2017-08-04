@@ -73,10 +73,12 @@ public class CreateEventsCallable implements Callable<Void> {
 
     private final List<Event> newEvents;
     private final CachingCalendarAccess cachedCalendarAccess;
+    private final CalendarStorage calendarStorage;
 
-    public CreateEventsCallable(CachingCalendarAccess cachingCalendarAccess, List<Event> lNewEvents) {
+    public CreateEventsCallable(CalendarStorage calendarStorage, CachingCalendarAccess cachingCalendarAccess, List<Event> lNewEvents) {
         this.cachedCalendarAccess = cachingCalendarAccess;
         this.newEvents = lNewEvents;
+        this.calendarStorage = calendarStorage;
     }
 
     @Override
@@ -106,7 +108,6 @@ public class CreateEventsCallable implements Callable<Void> {
             return;
         }
         List<Event> events = Arrays.asList(lEvents);
-        CalendarStorage calendarStorage = this.cachedCalendarAccess.getCalendarStorage();
         /*
          * create first event (master or non-recurring)
          */

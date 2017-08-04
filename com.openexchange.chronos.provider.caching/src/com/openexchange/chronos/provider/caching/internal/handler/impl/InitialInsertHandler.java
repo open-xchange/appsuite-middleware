@@ -49,15 +49,22 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link InitialInsertHandler}
@@ -72,31 +79,50 @@ public class InitialInsertHandler extends AbstractHandler {
     }
 
     @Override
-    public void execute(String folderId) throws OXException {
-        List<Event> externalEvents = getAndPrepareExtEvents(folderId);
-        createAsync(externalEvents);
-
-        updateLastUpdated();
+    public List<Event> getExternalEvents(String folderId) throws OXException {
+        return getAndPrepareExtEvents(folderId);
     }
 
     @Override
-    public void execute(List<EventID> eventIds) throws OXException {
-        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
+    public List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException {
+        return Collections.emptyList();
+    }
 
-        List<Event> events = Collections.emptyList();
-        for (String folderId : sortEventIDsPerFolderId.keySet()) {
-            events.addAll(getAndPrepareExtEvents(folderId));
+    @Override
+    public List<Event> getPersistedEvents(String folderId) throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void persist(EventUpdates diff) throws OXException {
+        boolean committed = false;
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection writeConnection = null;
+        Context context = this.cachedCalendarAccess.getSession().getContext();
+        try {
+            writeConnection = dbService.getWritable(context);
+            writeConnection.setAutoCommit(false);
+            createAsync(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
+
+            writeConnection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            if (DBUtils.isTransactionRollbackException(e)) {
+                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e, e.getMessage());
+            }
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != writeConnection) {
+                if (false == committed) {
+                    Databases.rollback(writeConnection);
+                    Databases.autocommit(writeConnection);
+                    dbService.backWritableAfterReading(context, writeConnection);
+                } else {
+                    Databases.autocommit(writeConnection);
+                    dbService.backWritable(context, writeConnection);
+                }
+            }
         }
-        createAsync(events);
-
-        updateLastUpdated();
     }
 
-    @Override
-    public void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        List<Event> externalEvents = getAndPrepareExtEvents(folderId);
-        createAsync(externalEvents);
-
-        updateLastUpdated();
-    }
 }

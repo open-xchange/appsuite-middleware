@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,17 +64,21 @@ import com.openexchange.exception.OXException;
  */
 public interface CachingHandler {
 
-    void execute(List<EventID> eventIds) throws OXException;
+    List<Event> getExternalEvents(String folderId) throws OXException;
 
-    void execute(String folderId) throws OXException;
+    List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException;
 
-    void execute(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
+    List<Event> getPersistedEvents(String folderId) throws OXException;
+
+    void persist(EventUpdates diff) throws OXException;
 
     List<Event> search(List<EventID> eventIds) throws OXException;
 
     List<Event> search(String folderId) throws OXException;
 
     Event search(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
-    
+
     void handleExceptions(OXException e) throws OXException;
+
+    void updateLastUpdated() throws OXException;
 }
