@@ -49,11 +49,8 @@
 
 package com.openexchange.chronos.recurrence.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -89,8 +86,8 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected int position;
     protected RecurrenceSetIterator inner;
     protected final long[] exceptionDates;
-    
-    
+
+
 
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
@@ -105,7 +102,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
     protected AbstractRecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this(new DefaultRecurrenceData(master), getEventDuration(master), forwardToOccurrence, ignoreExceptions ? null : getExceptionDates(master), start, end, null, limit);
+        this(new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null), getEventDuration(master), forwardToOccurrence, ignoreExceptions ? null : getExceptionDates(master), start, end, null, limit);
     }
 
     /**

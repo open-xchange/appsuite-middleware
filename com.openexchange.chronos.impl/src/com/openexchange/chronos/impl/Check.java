@@ -409,7 +409,7 @@ public class Check {
     public static String recurrenceRuleIsValid(RecurrenceService recurrenceService, Event event) throws OXException {
         String recurrenceRule = event.getRecurrenceRule();
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            recurrenceService.validate(new DefaultRecurrenceData(event));
+            recurrenceService.validate(new DefaultRecurrenceData(recurrenceRule, event.getStartDate(), null));
         }
         return recurrenceRule;
     }

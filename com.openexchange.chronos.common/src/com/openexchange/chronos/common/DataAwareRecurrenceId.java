@@ -65,12 +65,12 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
     /**
      * Initializes a new {@link DataAwareRecurrenceId}.
      *
-     * @param recurrenceData The underlying recurrence data of the corresponding series
+     * @param delegate The underlying recurrence data of the corresponding series
      * @param value The recurrence-id value
      */
-    public DataAwareRecurrenceId(RecurrenceData recurrenceData, DateTime value) {
+    public DataAwareRecurrenceId(RecurrenceData delegate, DateTime value) {
         super(value);
-        this.recurrenceData = recurrenceData;
+        this.recurrenceData = delegate;
     }
 
     @Override
@@ -81,6 +81,11 @@ public class DataAwareRecurrenceId extends DefaultRecurrenceId implements Recurr
     @Override
     public DateTime getSeriesStart() {
         return recurrenceData.getSeriesStart();
+    }
+
+    @Override
+    public long[] getExceptionDates() {
+        return recurrenceData.getExceptionDates();
     }
 
     @Override

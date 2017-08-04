@@ -729,7 +729,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             /*
              * take over end-date of last occurrence
              */
-            RecurrenceId lastRecurrenceId = Services.getService(RecurrenceService.class).getLastOccurrence(new DefaultRecurrenceData(event));
+            DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
+            RecurrenceId lastRecurrenceId = Services.getService(RecurrenceService.class).getLastOccurrence(recurrenceData);
             if (null == lastRecurrenceId) {
                 return Long.MAX_VALUE; // never ending series
             }

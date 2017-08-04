@@ -121,16 +121,17 @@ public class OriginalEventHolder {
             }
             if (event.getId().equals(event.getSeriesId())) {
                 // series master
-                originalRecurrenceData = new DefaultRecurrenceData(event);
+                originalRecurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
             } else if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 DateTime startDate = event.getStartDate();
-                originalRecurrenceData = new DefaultRecurrenceData(null, startDate);
+                originalRecurrenceData = new DefaultRecurrenceData(null, startDate, null);
             } else {
                 // recurrence data from fetched series master
                 EventID masterEventId = new EventID(event.getFolderId(), event.getSeriesId());
                 try {
-                    originalRecurrenceData = new DefaultRecurrenceData(eventConverter.getEvent(masterEventId, FIELDS));
+                    Event seriesMaster = eventConverter.getEvent(masterEventId, FIELDS);
+                    originalRecurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
                 } catch (OXException e) {
                     getLogger(OriginalEventHolder.class).debug("Error retrieving original data for event {}.", masterEventId, e);
                 }

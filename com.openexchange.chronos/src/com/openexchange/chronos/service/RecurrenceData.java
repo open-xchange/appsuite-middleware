@@ -73,4 +73,11 @@ public interface RecurrenceData {
      */
     DateTime getSeriesStart();
 
+    /**
+     * Gets the list of exception dates to exclude from the recurrence set.
+     *
+     * @return The exception dates, or <code>null</code> if there are none
+     */
+    long[] getExceptionDates();
+
 }

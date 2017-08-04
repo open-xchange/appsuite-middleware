@@ -127,7 +127,7 @@ public class RecurrencePositionTest {
          * prepare all day event series
          */
         Event event = getAllDayEventSeries("FREQ=DAILY", "today at 00:00:00", "tomorrow at 00:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -149,7 +149,7 @@ public class RecurrencePositionTest {
          * prepare all day event series
          */
         Event event = getAllDayEventSeries("FREQ=WEEKLY", "yesterday at 00:00:00", "tomorrow at 00:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -171,7 +171,7 @@ public class RecurrencePositionTest {
          * prepare event series
          */
         Event event = getEventSeries("FREQ=DAILY", timeZone, "tomorrow at 00:00:00", "tomorrow at 01:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -193,7 +193,7 @@ public class RecurrencePositionTest {
          * prepare event series
          */
         Event event = getEventSeries("FREQ=DAILY", timeZone, "tomorrow at 12:00:00", "tomorrow at 13:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -215,7 +215,7 @@ public class RecurrencePositionTest {
          * prepare event series
          */
         Event event = getEventSeries("FREQ=DAILY", timeZone, "today at 23:00:00", "tomorrow at 00:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -237,7 +237,7 @@ public class RecurrencePositionTest {
          * prepare event series
          */
         Event event = getEventSeries("FREQ=DAILY", timeZone, "today at 23:00:00", "tomorrow at 01:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */
@@ -259,7 +259,7 @@ public class RecurrencePositionTest {
          * prepare event series
          */
         Event event = getEventSeries("FREQ=DAILY", timeZone, "today at 00:00:00", "tomorrow at 00:00:00");
-        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
         /*
          * check recurrence position conversion
          */

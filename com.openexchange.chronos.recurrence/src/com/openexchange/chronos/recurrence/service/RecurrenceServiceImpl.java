@@ -94,7 +94,8 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return null;
         }
         int counter = 1;
-        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next();
             if (counter++ == position) {
@@ -116,7 +117,8 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             return 0;
         }
         int position = 1;
-        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(master));
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), null);
+        RecurrenceSetIterator iterator = RecurrenceUtils.getRecurrenceIterator(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.next();
             if (nextMillis > datePosition.getTimeInMillis()) {

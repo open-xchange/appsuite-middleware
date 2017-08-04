@@ -593,7 +593,7 @@ public abstract class EventConverter {
             if (event.containsStartDate() || event.containsEndDate()) {
                 // prefer start/end date of first occurrence for the series master event
                 if (null == recurrenceData) {
-                    recurrenceData = new DefaultRecurrenceData(event);
+                    recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
                 }
                 RecurrenceId firstRecurrenceId = null;
                 RecurrenceIterator<RecurrenceId> iterator = getRecurrenceService().iterateRecurrenceIds(recurrenceData);
@@ -681,7 +681,7 @@ public abstract class EventConverter {
 
             if (null == recurrenceData) {
                 if (isSeriesMaster(event)) {
-                    recurrenceData = new DefaultRecurrenceData(event);
+                    recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
                 } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                     recurrenceData = (RecurrenceData) event.getRecurrenceId();
                 } else {
@@ -1030,11 +1030,11 @@ public abstract class EventConverter {
         if (false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
-                return new DefaultRecurrenceData(null, event.getStartDate());
+                return new DefaultRecurrenceData(null, event.getStartDate(), null);
             }
             event = getEvent(new EventID(event.getFolderId(), event.getSeriesId()), recurrenceFields);
         }
-        return new DefaultRecurrenceData(event);
+        return new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
     }
 
     /**

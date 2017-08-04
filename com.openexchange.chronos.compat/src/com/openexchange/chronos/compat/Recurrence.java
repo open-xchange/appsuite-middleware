@@ -228,7 +228,7 @@ public class Recurrence {
         if (until.after(recurrenceData.getSeriesStart())) {
             try {
                 rrule.setUntil(null);
-                DefaultRecurrenceData unlimitedRecurrenceData = new DefaultRecurrenceData(rrule.toString(), recurrenceData.getSeriesStart());
+                DefaultRecurrenceData unlimitedRecurrenceData = new DefaultRecurrenceData(rrule.toString(), recurrenceData.getSeriesStart(), null);
                 RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(unlimitedRecurrenceData);
                 while (iterator.hasNext()) {
                     DateTime occurrenceStart = iterator.next().getValue();

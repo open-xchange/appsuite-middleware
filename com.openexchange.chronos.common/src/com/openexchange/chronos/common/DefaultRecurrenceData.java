@@ -50,7 +50,6 @@
 package com.openexchange.chronos.common;
 
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.RecurrenceData;
 
 /**
@@ -63,26 +62,20 @@ public class DefaultRecurrenceData implements RecurrenceData {
 
     private final String rrule;
     private final DateTime seriesStart;
+    private final long[] exceptionDates;
 
     /**
      * Initializes a new {@link DefaultRecurrenceData}.
      *
      * @param rrule The underlying recurrence rule
      * @param seriesStart The series start date, usually the date of the first occurrence
+     * @param exceptionDates The list of exception dates to exclude from the recurrence set, or <code>null</code> if there are none
      */
-    public DefaultRecurrenceData(String rrule, DateTime seriesStart) {
+    public DefaultRecurrenceData(String rrule, DateTime seriesStart, long[] exceptionDates) {
         super();
         this.rrule = rrule;
         this.seriesStart = seriesStart;
-    }
-
-    /**
-     * Initializes a new {@link DefaultRecurrenceData} based on the series master event.
-     *
-     * @param seriesMaster The series master event
-     */
-    public DefaultRecurrenceData(Event seriesMaster) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate());
+        this.exceptionDates = exceptionDates;
     }
 
     @Override
@@ -96,8 +89,13 @@ public class DefaultRecurrenceData implements RecurrenceData {
     }
 
     @Override
+    public long[] getExceptionDates() {
+        return exceptionDates;
+    }
+
+    @Override
     public String toString() {
-        return "DefaultRecurrenceData [rrule=" + rrule + ", seriesStart=" + seriesStart + "]";
+        return "DefaultRecurrenceData [rrule=" + rrule + ", seriesStart=" + seriesStart + ", exceptionDates=" + exceptionDates + "]";
     }
 
 }

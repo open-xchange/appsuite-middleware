@@ -591,7 +591,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(2, seriesID);
             stmt.setInt(3, seriesID);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? new DefaultRecurrenceData(readEvent(connection, resultSet, fields, null)) : null;
+                if (resultSet.next()) {
+                    Event event = readEvent(connection, resultSet, fields, null);
+                    return new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
+                }
+                return null;
             }
         }
     }

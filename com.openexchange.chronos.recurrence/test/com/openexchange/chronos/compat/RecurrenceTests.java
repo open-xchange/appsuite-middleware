@@ -149,19 +149,19 @@ public class RecurrenceTests {
     public void testSimpleRecurringRulesToPattern() throws Exception {
         TimeZone tz = TimeZone.getDefault();
 
-        SeriesPattern pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1", new DateTime(tz, 1222865100000L)));
+        SeriesPattern pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1", new DateTime(tz, 1222865100000L), null));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;COUNT=3", new DateTime(1222865100000L)));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;COUNT=3", new DateTime(1222865100000L), null));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|o|3|s|1222865100000|e|1222992000000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", new DateTime(1222865100000L)));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=DAILY;INTERVAL=1;UNTIL=20081012T124500Z", new DateTime(1222865100000L), null));
         Assert.assertEquals("Wrong pattern.", "t|1|i|1|s|1222865100000|e|1223769600000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", new DateTime(1222840800000L)));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;BYDAY=WE", new DateTime(1222840800000L), null));
         Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|8|s|1222840800000|", pattern.toString());
 
-        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", new DateTime(1222840800000L)));
+        pattern = Recurrence.getSeriesPattern(recurrenceService, new DefaultRecurrenceData("FREQ=WEEKLY;INTERVAL=1;COUNT=5;BYDAY=WE,FR", new DateTime(1222840800000L), null));
         Assert.assertEquals("Wrong pattern.", "t|2|i|1|a|40|o|5|s|1222840800000|e|1224028800000|", pattern.toString());
     }
 

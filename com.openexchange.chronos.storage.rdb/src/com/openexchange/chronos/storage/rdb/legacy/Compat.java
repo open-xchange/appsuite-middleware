@@ -210,7 +210,7 @@ public class Compat {
         Event eventData = new Event();
         EventMapper.getInstance().copy(event, eventData, EventMapper.getInstance().getMappedFields());
         if (isSeriesMaster(eventData)) {
-            RecurrenceData recurrenceData = new DefaultRecurrenceData(eventData);
+            RecurrenceData recurrenceData = new DefaultRecurrenceData(eventData.getRecurrenceRule(), eventData.getStartDate(), null);
             if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
                 /*
                  * convert recurrence rule to legacy pattern & derive "absolute duration" / "recurrence calculator" field
@@ -453,7 +453,7 @@ public class Compat {
          * iterate recurrence and take over start date of first occurrence
          */
         Date startDate;
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster));
+        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesStart, null));
         if (iterator.hasNext()) {
             calendar.setTimeInMillis(iterator.next().getValue().getTimestamp());
             calendar.set(Calendar.HOUR_OF_DAY, startHour);
