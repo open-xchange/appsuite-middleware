@@ -196,10 +196,10 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     
     private void registerRequestHandler(final OIDCBackend backend, final Stack<ServiceRegistration<?>> serviceRegistrations, String oidcAction, LoginRequestHandler requestHandler) {
         Dictionary<String, Object> requestHandlerProps = new Hashtable<String, Object>();
-        requestHandlerProps.put(AJAXServlet.PARAMETER_ACTION, oidcAction + backend.getPath());
+        requestHandlerProps.put(AJAXServlet.PARAMETER_ACTION, oidcAction + OIDCTools.getPathString(backend.getPath()));
         serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
-
+    
     //TODO QS-VS: comment
     public void stop() {
         

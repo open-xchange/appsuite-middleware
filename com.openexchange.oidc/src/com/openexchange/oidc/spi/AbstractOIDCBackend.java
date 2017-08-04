@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -80,6 +81,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
@@ -113,7 +115,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
     public String getPath() {
-        return null;
+        return "";
     }
     
     @Override
@@ -200,8 +202,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
         String login = userID + "@" + contextID;
         String defaultClient = loginConfiguration.getDefaultClient();
-        LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, "secret", false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
+        LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
         return parseLogin;
+    }
+    
+    @Override
+    public Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state) {
+        return defaultAuthenticated;
     }
     
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist

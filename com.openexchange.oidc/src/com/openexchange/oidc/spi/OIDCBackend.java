@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.spi;
 
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -63,6 +64,7 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -119,5 +121,7 @@ public interface OIDCBackend {
     LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
     AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse)  throws OXException;
+
+    Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 
 }

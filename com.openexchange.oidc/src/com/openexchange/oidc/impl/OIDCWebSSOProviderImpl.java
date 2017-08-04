@@ -206,14 +206,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             if (this.validTokenResponse(tokenResponse, storedRequestInformation) != null) {
                 this.sendLoginRequestToServer(httpRequest, httpResponse, tokenResponse);
             }
-            
-//            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
-//            if(idTokenClaimsSet != null && bearerAccessToken != null) {
-//                String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
-//                redirectionString = this.sendLoginRequestToServer(httpRequest, emailAddress);
-//            } else {
-//                throw OIDCExceptionCode.INVALID_IDTOKEN_GENERAL.create();
-//            }
         } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -236,7 +228,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setHost(this.getDomainName(Services.getService(HostnameService.class), httpRequest))
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
-                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + this.backend.getPath());
+                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(httpResponse);
             httpResponse.sendRedirect(redirectLocation.build().toString());
         } catch (URISyntaxException e) {
@@ -244,19 +236,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        MailResolver mailMapping = Services.getService(MailResolver.class);
-//        ResolvedMail resolvedMail = mailMapping.resolve(emailAddress);
-//        if (resolvedMail == null) {
-//            throw OIDCExceptionCode.UNABLE_TO_PARSE_USER_ADDRESS.create(emailAddress);
-//        }
-//        LoginRequest loginRequest = this.backend.getLoginRequest(httpRequest, resolvedMail.getUserID(), resolvedMail.getContextID(), this.loginConfiguration);
-//        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
-//            
-//            @Override
-//            public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
-//                return null;
-//            }
-//        });
         return null;
     }
     
