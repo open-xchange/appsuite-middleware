@@ -496,7 +496,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
 
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(1);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("Starting Edge Overlap A", PropsFactory.createDateTime(2016, 11, 29), PropsFactory.createDateTime(2017, 0, 3)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("Ending Edge Overlap A", PropsFactory.createDateTime(2016, 0, 29), PropsFactory.createDateTime(2017, 1, 1)));
+        freeSlots.add(PropsFactory.createCalendarFreeSlot("Ending Edge Overlap A", PropsFactory.createDateTime(2017, 0, 29), PropsFactory.createDateTime(2017, 1, 1)));
         availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2016, 0, 1), new DateTime(2017, 1, 1)));
 
         freeSlots = new ArrayList<>(1);
