@@ -76,7 +76,7 @@ import com.openexchange.user.UserServiceInterceptor;
 
 /**
  * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link PasswordChangeHistoryActivator} - Activator for PasswordChangeHistory bundle
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0

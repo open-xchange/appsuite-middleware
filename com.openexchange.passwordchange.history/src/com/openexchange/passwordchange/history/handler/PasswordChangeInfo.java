@@ -76,7 +76,7 @@ public interface PasswordChangeInfo {
     /**
      * Get the IP-address the changed request was sent from
      * 
-     * @return The IP-adress or <code>null</code>
+     * @return The IP-address or <code>null</code>
      */
     String getIP();
 

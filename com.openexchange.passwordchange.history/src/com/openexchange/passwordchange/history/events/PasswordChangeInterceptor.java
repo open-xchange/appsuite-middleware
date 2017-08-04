@@ -56,6 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.AbstractUserServiceInterceptor;
@@ -70,13 +71,15 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
 
-    ServiceLookup         service;
-    PasswordChangeHelper helper;
+    final ServiceLookup        service;
+    final PasswordChangeHelper helper;
 
     /**
+     * 
      * Initializes a new {@link PasswordChangeInterceptor}.
      * 
-     * @param registry
+     * @param service The {@link ServiceLookup} to get services from
+     * @param registry The {@link PasswordChangeHandlerRegistry} to get the {@link PasswordHistoryHandler} from
      */
     public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
         super();
@@ -111,7 +114,6 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         final int contextID = context.getContextId();
         final int userID = user.getId();
         // Clear DB after deletion of user
-
         service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
             @Override

@@ -71,6 +71,7 @@ import com.openexchange.auth.Authenticator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
@@ -83,7 +84,7 @@ import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 /**
- * {@link PasswordChangeHistoryREST}
+ * {@link PasswordChangeHistoryREST} - The REST endpoint for PasswordChangeHistory
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -98,6 +99,7 @@ public class PasswordChangeHistoryREST {
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
      * 
+     * @param service The {@link ServiceLookup} to get services from
      * @throws Exception
      */
     public PasswordChangeHistoryREST(ServiceLookup service) throws OXException {
@@ -109,8 +111,10 @@ public class PasswordChangeHistoryREST {
     @Produces(MediaType.APPLICATION_JSON)
     public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("sort") String sort) {
         try {
+            // Check for access
             Object retval = checkAccess(contextID, auth);
             if (null != retval) {
+                // Return error response
                 return retval;
             }
 
@@ -128,21 +132,17 @@ public class PasswordChangeHistoryREST {
 
             // Get handler
             String symbolicName = view.get(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
-            if (null == symbolicName || symbolicName.isEmpty()) {
+            if (Strings.isEmpty(symbolicName)) {
                 //Fall back to default
                 LOG.debug("Using default value to identify password change handler.");
                 symbolicName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
             }
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
-            // Find out if sorting has to be done
+            // Filter field "sort" information an get data
             Map<String, SortType> fields = getFields(sort, handler.getFieldNames());
-            List<PasswordChangeInfo> history;
-            if (fields.isEmpty()) {
-                history = handler.listPasswordChanges(userID, contextID);
-            } else {
-                history = handler.listPasswordChanges(userID, contextID, fields);
-            }
+            List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, fields);
+
             // Check data
             if (history.size() == 0) {
                 return new JSONArray();
@@ -178,31 +178,33 @@ public class PasswordChangeHistoryREST {
      */
     private Map<String, SortType> getFields(String sort, Map<String, Set<String>> fieldNames) {
         Map<String, SortType> retval = new LinkedHashMap<>();
-        if (null == sort) {
+        if (Strings.isEmpty(sort)) {
             return retval;
         }
 
         String[] splitted = sort.split(",");
 
         for (String split : splitted) {
-            boolean desc = false;
-            if (split.startsWith("-")) {
-                split = split.substring(1);
-                desc = true;
-            }
-            // Go through every field
-            for (String sqlName : fieldNames.keySet()) {
-                boolean found = false;
-                // Get every alternative field name
-                for (String match : fieldNames.get(sqlName)) {
-                    if (match.equals(split)) {
-                        retval.put(sqlName, desc ? SortType.DESC : SortType.ASC);
-                        found = true;
+            if (false == Strings.isEmpty(split)) {
+                boolean desc = false;
+                if (split.startsWith("-")) {
+                    split = split.substring(1);
+                    desc = true;
+                }
+                // Go through every field
+                for (String sqlName : fieldNames.keySet()) {
+                    boolean found = false;
+                    // Get every alternative field name
+                    for (String match : fieldNames.get(sqlName)) {
+                        if (match.equals(split)) {
+                            retval.put(sqlName, desc ? SortType.DESC : SortType.ASC);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) { // Speed up
                         break;
                     }
-                }
-                if (found) { // Speed up
-                    break;
                 }
             }
         }
@@ -258,11 +260,10 @@ public class PasswordChangeHistoryREST {
      * @throws JSONException
      */
     private void putOptionalReadable(JSONObject data, String convertee) throws JSONException {
-        for (PasswordChangeClients client : PasswordChangeClients.values()) {
-            if (client.matches(convertee)) {
-                data.put("client_name", client.getDisplayName());
-                return;
-            }
+        PasswordChangeClients client = PasswordChangeClients.match(convertee);
+        if (null != client) {
+            data.put("client_name", client.getDisplayName());
+            return;
         }
     }
 }
