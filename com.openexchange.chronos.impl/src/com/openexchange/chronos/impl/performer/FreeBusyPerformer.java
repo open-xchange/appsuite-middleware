@@ -346,13 +346,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 // Get the slot's start/end times
                 Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
-
-                // Create a split for the availability component with the equivalent BusyType
-                FreeBusyTime freeBusyTime = new FreeBusyTime();
-                freeBusyTime.setStartTime(startTime);
-                freeBusyTime.setEndTime(slotStartTime);
-                freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                freeBusyTimes.add(freeBusyTime);
+                
+                // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
+                if (!slotStartTime.equals(startTime)) {
+                    // Create a split for the availability component with the equivalent BusyType
+                    FreeBusyTime freeBusyTime = new FreeBusyTime();
+                    freeBusyTime.setStartTime(startTime);
+                    freeBusyTime.setEndTime(slotStartTime);
+                    freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
+                    freeBusyTimes.add(freeBusyTime);
+                }
 
                 // For each available component in the availability component mark the f/b as FREE
                 FreeBusyTime slot = new FreeBusyTime();
