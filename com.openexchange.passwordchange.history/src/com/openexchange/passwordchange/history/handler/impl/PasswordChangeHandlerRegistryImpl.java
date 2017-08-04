@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
@@ -64,6 +65,7 @@ import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+@SingletonService
 public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistry {
 
     private static final org.slf4j.Logger       LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryImpl.class);
