@@ -356,7 +356,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             }
 
             // Create the last block
-            if (endTime.after(slotEndTime)) {
+            if (endTime.after(slotEndTime) || endTime.equals(slotEndTime)) {
                 FreeBusyTime freeBusyTime = new FreeBusyTime();
                 freeBusyTime.setStartTime(startTime);
                 freeBusyTime.setEndTime(endTime);
