@@ -112,7 +112,7 @@ public enum PasswordChangeClients {
      * Matches a string to well known client
      * 
      * @param toMatch The string to match to a client
-     * @return A {@link PasswordChangeClients} or <code>null</code>Ï
+     * @return A {@link PasswordChangeClients} or <code>null</code>
      */
     public static PasswordChangeClients match(String toMatch) {
         for (PasswordChangeClients client : PasswordChangeClients.values()) {
