@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
@@ -82,15 +83,18 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.FreeSlotField;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -324,7 +328,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
      */
-    private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) {
+    private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) throws OXException {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
         for (CalendarAvailability availability : availableTime) {
             // Get the availability's start/end times
@@ -345,7 +349,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 // Get the slot's start/end times
                 Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
-                
+
                 // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
                 if (!slotStartTime.equals(startTime)) {
                     // Create a split for the availability component with the equivalent BusyType
@@ -356,15 +360,36 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     freeBusyTimes.add(freeBusyTime);
                 }
 
-                // For each available component in the availability component mark the f/b as FREE
-                FreeBusyTime slot = new FreeBusyTime();
-                slot.setStartTime(slotStartTime);
-                slot.setEndTime(slotEndTime);
-                slot.setFbType(FbType.FREE);
-                freeBusyTimes.add(slot);
+                // Process any recurrence rule
+                if (calendarFreeSlot.contains(FreeSlotField.rrule)) {
+                    RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(calendarFreeSlot.getRecurrenceRule(), calendarFreeSlot.getStartTime(), null));
+                    long endOccurence = slotEndTime.getTime() - slotStartTime.getTime();
+                    while (recurrenceIterator.hasNext()) {
+                        long nextOccurence = recurrenceIterator.next();
+                        FreeBusyTime slot = new FreeBusyTime();
+                        Date startOccurence = new Date(nextOccurence);
+                        if (startOccurence.after(endTime)) {
+                            break;
+                        }
+                        slot.setStartTime(startOccurence);
+                        Date endOfOccurence = new Date(endOccurence);
+                        slot.setEndTime(endOfOccurence);
+                        slot.setFbType(FbType.FREE);
+                        freeBusyTimes.add(slot);
 
-                // Start from slot end time on the next iteration
-                startTime = slotEndTime;
+                        startTime = endOfOccurence;
+                    }
+                } else {
+                    // For each available component in the availability component mark the f/b as FREE
+                    FreeBusyTime slot = new FreeBusyTime();
+                    slot.setStartTime(slotStartTime);
+                    slot.setEndTime(slotEndTime);
+                    slot.setFbType(FbType.FREE);
+                    freeBusyTimes.add(slot);
+
+                    // Start from slot end time on the next iteration
+                    startTime = slotEndTime;
+                }
             }
 
             // Create the last block

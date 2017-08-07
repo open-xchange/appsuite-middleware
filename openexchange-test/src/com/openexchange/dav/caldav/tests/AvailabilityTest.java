@@ -69,7 +69,8 @@ public class AvailabilityTest extends CalDAVTest {
 
     /**
      * Simple test that simulates the creation of an availability block
-     * on the client and syncs it to the server
+     * with a single available slot on the client and the immediate sync
+     * on the server.
      */
     @Test
     public void setAvailabilityFromClient() throws Exception {
@@ -103,11 +104,4 @@ public class AvailabilityTest extends CalDAVTest {
         assertEquals("The start date does not match", start, TimeTools.D(available.getProperty("DTSTART").getValue(), TimeZone.getTimeZone("Europe/Berlin")));
         assertEquals("The end date does not match", end, TimeTools.D(available.getProperty("DTEND").getValue(), TimeZone.getTimeZone("Europe/Berlin")));
     }
-
-    /**
-     * Simple test that simulates the creation of an availability block
-     * on the server and syncs it to the client
-     */
-    @Test
-    public void setAvailabilityFromServer() throws Exception {}
 }

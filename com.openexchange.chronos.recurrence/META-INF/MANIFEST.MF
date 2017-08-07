@@ -21,3 +21,4 @@ Import-Package: com.openexchange.chronos,
  org.dmfs.rfc5545.recurrenceset,
  org.osgi.framework,
  org.slf4j
+Export-Package: com.openexchange.chronos.recurrence.service
