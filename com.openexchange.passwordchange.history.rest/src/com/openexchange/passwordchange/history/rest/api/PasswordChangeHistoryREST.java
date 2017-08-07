@@ -52,7 +52,6 @@ package com.openexchange.passwordchange.history.rest.api;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -77,6 +76,7 @@ import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryPr
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.SortField;
 import com.openexchange.passwordchange.history.handler.SortType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -140,7 +140,13 @@ public class PasswordChangeHistoryREST {
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
             // Filter field "sort" information an get data
-            Map<String, SortType> fields = getFields(sort, handler.getFieldNames());
+            Map<SortField, SortType> fields = null;
+            try {
+                fields = getFields(sort);
+            } catch (OXException e) {
+                LOG.debug("Could not match field name.", e);
+                return Response.serverError().build();
+            }
             List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, fields);
 
             // Check data
@@ -175,9 +181,10 @@ public class PasswordChangeHistoryREST {
      * @param sort The unparsed field names
      * @param fieldNames The provided SQL names
      * @return A set of SQL field names to sort by. Can be empty
+     * @throws OXException In case of unknown field name
      */
-    private Map<String, SortType> getFields(String sort, Map<String, Set<String>> fieldNames) {
-        Map<String, SortType> retval = new LinkedHashMap<>();
+    private Map<SortField, SortType> getFields(String sort) throws OXException {
+        Map<SortField, SortType> retval = new LinkedHashMap<>();
         if (Strings.isEmpty(sort)) {
             return retval;
         }
@@ -191,20 +198,14 @@ public class PasswordChangeHistoryREST {
                     split = split.substring(1);
                     desc = true;
                 }
-                // Go through every field
-                for (String sqlName : fieldNames.keySet()) {
-                    boolean found = false;
-                    // Get every alternative field name
-                    for (String match : fieldNames.get(sqlName)) {
-                        if (match.equals(split)) {
-                            retval.put(sqlName, desc ? SortType.DESC : SortType.ASC);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) { // Speed up
-                        break;
-                    }
+                // Check field names
+                if (split.equals("client_id")) {
+                    retval.put(SortField.CLIENT_ID, desc ? SortType.DESC : SortType.ASC);
+                } else if (split.equals("date")) {
+                    retval.put(SortField.DATE, desc ? SortType.DESC : SortType.ASC);
+                } else {
+                    // Not supported
+                    throw new OXException(100, "Can't match tranmitted field " + split);
                 }
             }
         }

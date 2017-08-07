@@ -47,25 +47,18 @@
  *
  */
 
-package com.openexchange.passwordchange.history.groupware;
-
-import java.util.Map;
-import java.util.Set;
+package com.openexchange.passwordchange.history.handler;
 
 /**
- * {@link MappingAwareTable} - The implementing table is aware that other services user different names for intern used table field names.
- * Therefore the table does implement this interface to provide a mapping of alternative names for the field names.
+ * {@link SortField} - Fields to sort the output by
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface MappingAwareTable {
+public enum SortField {
+    /** The time the password change was made */
+    DATE,
 
-    /**
-     * Get the field names used in the table. Each field names defines a {@link Set} of alternative names it can be matched to.
-     * Returned field names might not be represent all field.
-     * 
-     * @return The field names
-     */
-    Map<String, Set<String>> getFieldNames();
+    /** The ID of which client did the password change */
+    CLIENT_ID
 }

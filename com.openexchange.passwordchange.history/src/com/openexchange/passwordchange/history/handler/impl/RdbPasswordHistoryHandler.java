@@ -55,12 +55,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -68,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.handler.SortField;
 import com.openexchange.passwordchange.history.handler.SortType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -109,7 +107,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<String, SortType> fieldNames) {
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortType> fieldNames) {
         List<PasswordChangeInfo> retval = new LinkedList<>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -126,8 +124,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 builder.append(SortType.ASC);
             } else {
                 // User send fields
-                for (String field : fieldNames.keySet()) {
-                    builder.append(field);
+                for (SortField field : fieldNames.keySet()) {
+                    builder.append(fieldToTable(field));
                     builder.append(" ");
                     builder.append(fieldNames.get(field));
                     builder.append(",");
@@ -298,23 +296,16 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         return retval;
     }
 
-    @Override
-    public Map<String, Set<String>> getFieldNames() {
-        // Use only date and source. Only those two will always be sent to the client
-        Map<String, Set<String>> retval = new HashMap<>(2);
-        Set<String> entries = new HashSet<>(3);
-
-        entries.add("date");
-        entries.add("created");
-        entries.add("time");
-        retval.put("created", entries);
-
-        entries = new HashSet<>(3);
-        entries.add("source");
-        entries.add("client_id");
-        entries.add("origin");
-        retval.put("source", entries);
-
-        return retval;
+    /**
+     * Get the corresponding table name
+     * 
+     * @param field The field name from REST client
+     * @return A string representing a table field name
+     */
+    private String fieldToTable(SortField field) {
+        if (field.equals(SortField.CLIENT_ID)) {
+            return "source";
+        }
+        return "created";
     }
 }
