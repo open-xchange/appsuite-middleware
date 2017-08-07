@@ -3125,8 +3125,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // Determine really existing schemas per database
             Map<Database, Set<String>> db2ExistingSchemas = new LinkedHashMap<>(db2ReferencedSchemas.size());
             {
-                for (Map.Entry<Database, Set<String>> entry : db2ReferencedSchemas.entrySet()) {
-                    Database db = entry.getKey();
+                for (Database db : db2ReferencedSchemas.keySet()) {
                     List<String> schemas = OXUtilMySQLStorageCommon.listDatabases(db);
                     db2ExistingSchemas.put(db, new LinkedHashSet<>(schemas));
                 }
