@@ -354,6 +354,11 @@ public final class PropertyNames {
      * calendar-data xmlns="urn:ietf:params:xml:ns:caldav"
      */
     public static final DavPropertyName CALENDAR_DATA = DavPropertyName.create("calendar-data", NS_CALDAV);
+    
+    /**
+     * calendar-availability xmlns="http://calendarserver.org/ns/"
+     */
+    public static final DavPropertyName CALENDAR_AVAILABILITY = DavPropertyName.create("calendar-availability", NS_CALENDARSERVER);
 
     /**
      * calendar-query xmlns="urn:ietf:params:xml:ns:caldav"
