@@ -76,10 +76,10 @@ public interface PasswordHistoryHandler {
      * 
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
-     * @param fieldNames The field names that should be sorted with the corresponding {@link SortType}. Caller has to make sure that the order of elements is predictable.
+     * @param fieldNames The field names that should be sorted with the corresponding {@link SortOrder}. Caller has to make sure that the order of elements is predictable.
      * @return {@link List} of all available password change events (~ the history)
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortType> fieldNames);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames);
 
     /**
      * Adds a new set of information to the database

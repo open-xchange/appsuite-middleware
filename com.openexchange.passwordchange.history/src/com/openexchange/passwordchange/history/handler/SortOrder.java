@@ -50,12 +50,12 @@
 package com.openexchange.passwordchange.history.handler;
 
 /**
- * {@link SortType} The types of different sorting for {@link PasswordChangeInfo}s
+ * {@link SortOrder} The types of different sorting for {@link PasswordChangeInfo}s
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum SortType {
+public enum SortOrder {
 
     /** Sort by newest entries first. */
     DESC,
