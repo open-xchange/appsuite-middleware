@@ -53,6 +53,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.security.PermitAll;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -77,7 +78,7 @@ import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegi
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortField;
-import com.openexchange.passwordchange.history.handler.SortType;
+import com.openexchange.passwordchange.history.handler.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -140,13 +141,7 @@ public class PasswordChangeHistoryREST {
             PasswordHistoryHandler handler = registry.getHandler(symbolicName);
 
             // Filter field "sort" information an get data
-            Map<SortField, SortType> fields = null;
-            try {
-                fields = getFields(sort);
-            } catch (OXException e) {
-                LOG.debug("Could not match field name.", e);
-                return Response.serverError().build();
-            }
+            Map<SortField, SortOrder> fields = getFields(sort);
             List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, fields);
 
             // Check data
@@ -176,15 +171,14 @@ public class PasswordChangeHistoryREST {
     }
 
     /**
-     * Matches REST field names to SQL field names for sorting
+     * Matches REST field names to data field names for sorting
      * 
      * @param sort The unparsed field names
-     * @param fieldNames The provided SQL names
-     * @return A set of SQL field names to sort by. Can be empty
-     * @throws OXException In case of unknown field name
+     * @param fieldNames The field names to sort by
+     * @return A set of data field. Can be empty
      */
-    private Map<SortField, SortType> getFields(String sort) throws OXException {
-        Map<SortField, SortType> retval = new LinkedHashMap<>();
+    private Map<SortField, SortOrder> getFields(String sort) {
+        Map<SortField, SortOrder> retval = new LinkedHashMap<>();
         if (Strings.isEmpty(sort)) {
             return retval;
         }
@@ -200,12 +194,12 @@ public class PasswordChangeHistoryREST {
                 }
                 // Check field names
                 if (split.equals("client_id")) {
-                    retval.put(SortField.CLIENT_ID, desc ? SortType.DESC : SortType.ASC);
+                    retval.put(SortField.CLIENT_ID, desc ? SortOrder.DESC : SortOrder.ASC);
                 } else if (split.equals("date")) {
-                    retval.put(SortField.DATE, desc ? SortType.DESC : SortType.ASC);
+                    retval.put(SortField.DATE, desc ? SortOrder.DESC : SortOrder.ASC);
                 } else {
                     // Not supported
-                    throw new OXException(100, "Can't match tranmitted field " + split);
+                    throw new BadRequestException("Can't match field " + split);
                 }
             }
         }

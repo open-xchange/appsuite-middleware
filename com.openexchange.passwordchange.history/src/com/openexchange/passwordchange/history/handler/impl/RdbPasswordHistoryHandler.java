@@ -66,7 +66,7 @@ import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryPr
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.handler.SortField;
-import com.openexchange.passwordchange.history.handler.SortType;
+import com.openexchange.passwordchange.history.handler.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -107,7 +107,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortType> fieldNames) {
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames) {
         List<PasswordChangeInfo> retval = new LinkedList<>();
         Connection con = null;
         PreparedStatement stmt = null;
@@ -121,7 +121,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             if (null == fieldNames || fieldNames.isEmpty()) {
                 // Default is ID ascending
                 builder.append("id ");
-                builder.append(SortType.ASC);
+                builder.append(SortOrder.ASC);
             } else {
                 // User send fields
                 for (SortField field : fieldNames.keySet()) {
