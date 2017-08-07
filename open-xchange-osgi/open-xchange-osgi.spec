@@ -29,7 +29,11 @@ Obsoletes:     open-xchange-activation < %{version}
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 Requires:      java-headless >= 1.8.0
 %else
+%if 0%{?rhel_version} && 0%{?rhel_version} == 700
+Requires:      java-headless >= 1:1.8.0
+%else
 Requires:      java-headless >= 1.8.0
+%endif
 %endif
 # No ibm java on RHEL and on SLE, please
 Conflicts:     java-ibm
