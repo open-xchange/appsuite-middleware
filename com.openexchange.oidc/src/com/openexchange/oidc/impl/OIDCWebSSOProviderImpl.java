@@ -192,7 +192,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     @Override
     public String authenticateUser(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException{
         String redirectionString = "";
-        
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(httpRequest.getParameter("state"));
         
         if (storedRequestInformation == null) {

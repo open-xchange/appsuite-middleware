@@ -74,6 +74,7 @@ import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.http.AuthenticationService;
 import com.openexchange.oidc.http.InitService;
+import com.openexchange.oidc.http.LogoutService;
 import com.openexchange.oidc.impl.OIDCLoginRequestHandler;
 import com.openexchange.oidc.impl.OIDCWebSSOProviderImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
@@ -128,6 +129,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler, this.services, config), "init");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
+                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
                 this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.LOGIN_ACTION, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend));
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {

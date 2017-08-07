@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.authentication.Authenticated;
@@ -13,6 +15,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
@@ -24,6 +27,7 @@ import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 
@@ -75,17 +79,27 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             return;
         }
         
-     // Do the login
         LoginResult result = loginUser(req, context, user, reservation.getState());
 
-        // Obtain associated session
         Session session = result.getSession();
+        
+     // Add session log properties
+        LogProperties.putSessionProperties(session);
+
+        // Add headers and cookies from login result
+        LoginServlet.addHeadersAndCookies(result, resp);
+
+        // Store session
+        SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
+        LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), this.loginConfiguration);
+        
         sendRedirect(session, req, resp);
     }
 
     private LoginResult loginUser(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> state) throws OXException {
         final LoginRequest loginRequest = backend.getLoginRequest(httpRequest, user.getId(), context.getContextId(), loginConfiguration);
 
+        //TODO QS-VS: Wirft eine Exception: Missing parameter in user's mail config: Session password not set.
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
           
           @Override
@@ -121,10 +135,11 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         };
     }
     
-    private void sendRedirect(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        //Get Ui web path
-        
-        //Add SessionId as parameter
+    private void sendRedirect(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+//        String uiWebPath = this.loginConfiguration.getUiWebPath();
+        //TODO QS-VS: Load UI-Webpath from where??
+        String uiWebPath = "/appsuite/ui";
+        httpResponse.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
     }
 
 }
