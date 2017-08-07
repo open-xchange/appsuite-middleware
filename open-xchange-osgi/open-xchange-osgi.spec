@@ -26,14 +26,10 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-Requires:      java-headless >= 1.8.0
+%if 0%{?rhel_version}
+Requires:      java-1.8.0-openjdk-headless
 %else
-%if 0%{?rhel_version} && 0%{?rhel_version} == 700
-Requires:      java-headless >= 1:1.8.0
-%else
-Requires:      java-headless >= 1.8.0
-%endif
+Requires:      java-1_8_0-openjdk-headless
 %endif
 # No ibm java on RHEL and on SLE, please
 Conflicts:     java-ibm
