@@ -101,7 +101,7 @@ public final class TimeTools {
         return calendar;
     }
 
-    private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm", "yyyy-MM-dd HH:mm" };
+    private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm", "yyyy-MM-dd HH:mm", "yyyyMMdd'T'HHmmss" };
 
     public static Calendar createCalendar(TimeZone tz, int year, int month, int day, int hour) {
         Calendar calendar = new GregorianCalendar(tz);
