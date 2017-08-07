@@ -1,3 +1,9 @@
+open-xchange-themes-default (7.8.3-31) stable; urgency=medium
+
+  * Build for patch 2017-08-07 (4303)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 31 Jul 2017 15:55:19 +0200
+
 open-xchange-themes-default (7.8.3-30) stable; urgency=medium
 
   * Build for patch 2017-07-24 (4284)

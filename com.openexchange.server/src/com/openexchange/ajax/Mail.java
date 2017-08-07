@@ -4463,7 +4463,11 @@ public class Mail extends PermissionServlet {
         }
     }
 
-    public void actionPutStoreFlagsMultiple(final ServerSession session, final JSONWriter writer, final String[] mailIDs, final String folder, final int flagsBits, final boolean flagValue, final MailServletInterface mailInterfaceArg) throws JSONException {
+    public void actionPutStoreFlagsMultiple(ServerSession session, JSONWriter writer, String[] mailIDs, String folder, int flagsBits, boolean flagValue, MailServletInterface mailInterfaceArg) throws JSONException {
+        actionPutStoreFlagsMultiple(session, writer, mailIDs, folder, flagsBits, flagValue, false, mailInterfaceArg);
+    }
+
+    public void actionPutStoreFlagsMultiple(ServerSession session, JSONWriter writer, String[] mailIDs, String folder, int flagsBits, boolean flagValue, boolean collectAddresses, MailServletInterface mailInterfaceArg) throws JSONException {
         try {
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
@@ -4473,6 +4477,26 @@ public class Mail extends PermissionServlet {
                     closeMailInterface = true;
                 }
                 mailInterface.updateMessageFlags(folder, mailIDs, flagsBits, flagValue);
+
+                if (collectAddresses) {
+                    // Trigger contact collector
+                    try {
+                        ServerUserSetting setting = ServerUserSetting.getInstance();
+                        int contextId = session.getContextId();
+                        int userId = session.getUserId();
+                        if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
+                            for (String mailId : mailIDs) {
+                                MailMessage mail = mailInterface.getMessage(folder, mailId, false);
+                                if (null != mail) {
+                                    triggerContactCollector(session, mail, false);
+                                }
+                            }
+                        }
+                    } catch (final OXException e) {
+                        LOG.warn("Contact collector could not be triggered.", e);
+                    }
+                }
+
                 final Response response = new Response(session);
                 for (String mailID : mailIDs) {
                     response.reset();
