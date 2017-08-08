@@ -262,7 +262,7 @@ public class GetPerformer extends AbstractPerformer {
         Map<T, List<CalendarAvailability>> map = new HashMap<>();
         for (CalendarAvailability availability : availabilities) {
             T type = reverseLookup.get(availability.getCalendarUser());
-            Collections.put(map, type, map.get(type));
+            Collections.put(map, type, availability);
         }
         return map;
     }
