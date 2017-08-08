@@ -264,29 +264,6 @@ public final class UpdateTaskToolkit {
         return job;
     }
 
-    private static List<Integer> getRegisteredServersIDs(Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT server_id FROM server");
-            rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                // Huh...?
-                return Collections.emptyList();
-            }
-
-            List<Integer> serverIds = new LinkedList<>();
-            do {
-                serverIds.add(Integer.valueOf(rs.getInt(1)));
-            } while (rs.next());
-            return serverIds;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
     /**
      * Gets schemas and their contexts as a map.
      *
