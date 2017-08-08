@@ -376,7 +376,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      */
     private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) throws OXException {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
-        List<FreeBusyTime> auxilliary = new ArrayList<>();
         for (CalendarAvailability availability : availableTime) {
             // Get the availability's start/end times
             Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
@@ -399,16 +398,15 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
                 }
                 // For each available component in the availability component mark the f/b as FREE
-                auxilliary.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
+                freeBusyTimes.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
                 // Start from slot end time on the next iteration
                 startTime = slotEndTime;
             }
 
             //Create the last block
             if (endTime.after(slotEndTime)) {
-                auxilliary.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
+                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
             }
-            freeBusyTimes.addAll(auxilliary);
         }
         return freeBusyTimes;
     }
