@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.availability.performer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.service.AvailabilityField;
@@ -104,6 +105,12 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
             // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
             if (!availability.contains(AvailabilityField.dtstamp)) {
                 availability.setCreationTimestamp(timeNow);
+            }
+            if (availability.getStartTime() == null) {
+                availability.setStartTime(new DateTime(0));
+            }
+            if (availability.getEndTime() == null) {
+                availability.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
             }
             caIds.add(availabilityId);
 
