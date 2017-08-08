@@ -47,47 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.account.json.actions;
+package com.openexchange.chronos.calendar.account.service.impl;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.calendar.account.service.osgi.Services;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
+import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
+
 
 /**
- * {@link NewAction}
+ * {@link CalendarAccountServiceFactoryImpl}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class NewAction extends AbstractAccountAction {
-
-    /**
-     * Initialises a new {@link NewAction}.
-     * 
-     * @param services
-     */
-    public NewAction(ServiceLookup services) {
-        super(services);
-    }
+public class CalendarAccountServiceFactoryImpl implements CalendarAccountServiceFactory {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject data = requestData.getData(JSONObject.class);
-        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (Strings.isEmpty(providerId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
-        }
-        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
-        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
-        int createdId = service.insertAccount(providerId, session.getUserId(), data.asMap());
-        return new AJAXRequestResult(createdId);
+    public CalendarAccountService create(int userId, Context context) throws OXException {
+        //For testing, find a better way without playing factory proxy, maybe just use one factory
+        return new CalendarAccountServiceImpl(Services.getService(CalendarAccountStorageFactory.class).create(context), userId);
     }
 
 }

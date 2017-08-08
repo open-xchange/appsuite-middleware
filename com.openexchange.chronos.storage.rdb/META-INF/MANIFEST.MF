@@ -73,3 +73,4 @@ Import-Package: com.github.mangstadt.vinnie,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.storage.rdb.osgi.RdbCalendarStorageActivator
+Export-Package: com.openexchange.chronos.storage.rdb

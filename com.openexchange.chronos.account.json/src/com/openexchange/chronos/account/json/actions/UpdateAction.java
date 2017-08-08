@@ -52,8 +52,8 @@ package com.openexchange.chronos.account.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -87,11 +87,11 @@ public class UpdateAction extends AbstractAccountAction {
         if (Strings.isEmpty(accountId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
-        CalendarAccountStorageFactory factory = getService(CalendarAccountStorageFactory.class);
-        CalendarAccountStorage storage = factory.create(session.getContext());
-        CalendarAccount account = storage.loadAccount(Integer.parseInt(accountId));
+        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
+        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
+        CalendarAccount account = service.loadAccount(Integer.parseInt(accountId));
         // Updates
-        storage.updateAccount(Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
+        service.updateAccount(Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
         return new AJAXRequestResult();
     }
 }

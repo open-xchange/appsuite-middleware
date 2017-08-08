@@ -47,47 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.account.json.actions;
+package com.openexchange.chronos.calendar.account.service.osgi;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link NewAction}
+ * {@link CalendarAccountServiceActivator}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class NewAction extends AbstractAccountAction {
+public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
-    /**
-     * Initialises a new {@link NewAction}.
-     * 
-     * @param services
-     */
-    public NewAction(ServiceLookup services) {
-        super(services);
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarAccountServiceActivator.class);
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject data = requestData.getData(JSONObject.class);
-        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (Strings.isEmpty(providerId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { CalendarAccountStorageFactory.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle {}", context.getBundle());
+            Services.set(this);
+            registerService(CalendarAccountServiceFactory.class, new com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceFactoryImpl());
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
+            throw e;
         }
-        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
-        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
-        int createdId = service.insertAccount(providerId, session.getUserId(), data.asMap());
-        return new AJAXRequestResult(createdId);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        Services.set(null);
+        super.stopBundle();
     }
 
 }

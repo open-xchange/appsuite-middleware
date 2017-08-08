@@ -286,6 +286,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
      */
     IGNORED_INVALID_DATA("Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]", IGNORED_INVALID_DATA_MSG, Category.CATEGORY_WARNING, 1990),
+    /**
+     * <li>The operation could not be completed due to insufficient permissions.</li>
+     * <li>Insufficient permissions</li>
+     */
+    INSUFFICIENT_ACCOUNT_PERMISSIONS("Insufficient permissions", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 5072),
 
     ;
 

@@ -53,8 +53,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -85,11 +85,11 @@ public class DeleteAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         JSONArray data = requestData.getData(JSONArray.class);
-        CalendarAccountStorageFactory factory = getService(CalendarAccountStorageFactory.class);
-        CalendarAccountStorage storage = factory.create(session.getContext());
+        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
+        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
         try {
             for (int i = 0; i < data.length(); i++) {
-                storage.deleteAccount(data.getInt(i));
+                service.deleteAccount(data.getInt(i));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
