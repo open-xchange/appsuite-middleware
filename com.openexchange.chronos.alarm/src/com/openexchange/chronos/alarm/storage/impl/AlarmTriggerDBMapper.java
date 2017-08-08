@@ -1,0 +1,257 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.chronos.alarm.storage.impl;
+
+import java.util.EnumMap;
+import com.openexchange.chronos.alarm.AlarmTrigger;
+import com.openexchange.chronos.alarm.AlarmTriggerField;
+import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
+import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
+import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
+import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+
+/**
+ * {@link AlarmTriggerDBMapper}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
+public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTriggerField> {
+
+    private static final AlarmTriggerDBMapper INSTANCE = new AlarmTriggerDBMapper();
+
+    @Override
+    public AlarmTrigger newInstance() {
+        return new AlarmTrigger();
+    }
+
+    @Override
+    public AlarmTriggerField[] newArray(int size) {
+       return new AlarmTriggerField[size];
+    }
+
+    @Override
+    protected EnumMap<AlarmTriggerField, ? extends DbMapping<? extends Object, AlarmTrigger>> createMappings() {
+        EnumMap<AlarmTriggerField, DbMapping<? extends Object, AlarmTrigger>> mappings = new EnumMap<AlarmTriggerField, DbMapping<? extends Object, AlarmTrigger>>(AlarmTriggerField.class);
+
+        mappings.put(AlarmTriggerField.USER_ID, new IntegerMapping<AlarmTrigger>("user", "User ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Integer value) {
+                alarmTrigger.setUserId(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsUserId();
+            }
+
+            @Override
+            public Integer get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getUserId();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeUserId();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.CONTEXT_ID, new IntegerMapping<AlarmTrigger>("cid", "Context ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Integer value) {
+                alarmTrigger.setContextId(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsContextId();
+            }
+
+            @Override
+            public Integer get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getContextId();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removesContextId();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>("account", "Account") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Integer value) {
+                alarmTrigger.setAccount(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsAccount();
+            }
+
+            @Override
+            public Integer get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getAccount();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeAccount();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>("alarm", "Alarm ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Integer value) {
+                alarmTrigger.setAlarm(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsAlarm();
+            }
+
+            @Override
+            public Integer get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getAlarm();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeAlarm();
+            }
+        });
+
+
+        mappings.put(AlarmTriggerField.ACTION, new VarCharMapping<AlarmTrigger>("action", "Action") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, String value) {
+                alarmTrigger.setAction(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsAction();
+            }
+
+            @Override
+            public String get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getAction();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeAction();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.TIME, new BigIntMapping<AlarmTrigger>("triggerDate", "Time") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Long value) {
+                alarmTrigger.setTime(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsTime();
+            }
+
+            @Override
+            public Long get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getTime();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeTime();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.PROCESSED, new BooleanMapping<AlarmTrigger>("processed", "Alarm ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Boolean value) {
+                alarmTrigger.setProcessed(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsProcessed();
+            }
+
+            @Override
+            public Boolean get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.isProcessed();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeProcessed();
+            }
+        });
+        return mappings;
+    }
+
+    /**
+     * @return
+     */
+    public static AlarmTriggerDBMapper getInstance() {
+        return INSTANCE;
+    }
+
+}
