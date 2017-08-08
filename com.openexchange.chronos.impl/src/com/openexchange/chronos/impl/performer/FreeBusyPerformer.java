@@ -243,7 +243,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring free slot instances 
-        expandRecurringInstances(availableTimes, timeZone);
+        expandRecurringInstances(from, until, availableTimes, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availableTimes, timeZone);
 
@@ -264,6 +264,11 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
+            if (eventsFreeBusyTimes.isEmpty()) {
+                // FIXME: The empty event free/busy list is unmodifiable 
+                eventsFreeBusyTimes = new ArrayList<>(0);
+            }
+
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
             // Sort by starting date
             Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
@@ -289,11 +294,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
-    private void expandRecurringInstances(Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) throws OXException {
+    private void expandRecurringInstances(Date from, Date until, Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) throws OXException {
         for (Attendee attendee : availableTimes.keySet()) {
             for (CalendarAvailability calendarAvailability : availableTimes.get(attendee)) {
                 List<CalendarFreeSlot> auxFreeSlot = new ArrayList<>();
-                Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
                 for (Iterator<CalendarFreeSlot> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
                     CalendarFreeSlot freeSlot = iterator.next();
                     // No recurring free slot? Skip
@@ -309,7 +313,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         long nextOccurrence = recurrenceIterator.next();
                         Date startOfOccurrence = new Date(nextOccurrence);
                         // We reached the availability's end? Stop
-                        if (startOfOccurrence.after(endTime)) {
+                        if (startOfOccurrence.after(until)) {
                             break;
                         }
                         // Determine the end of the occurrence's instance
