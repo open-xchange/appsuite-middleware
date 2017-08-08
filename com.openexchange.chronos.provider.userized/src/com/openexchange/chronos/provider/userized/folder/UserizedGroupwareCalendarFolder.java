@@ -49,16 +49,16 @@
 
 package com.openexchange.chronos.provider.userized.folder;
 
-import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import java.util.Map;
 
 /**
- * {@link UserizedCalendarFolder} - {@link CalendarFolder} with user specific properties
+ * {@link UserizedGroupwareCalendarFolder} - {@link CalendarFolder} with user specific properties
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface UserizedCalendarFolder extends CalendarFolder {
+public interface UserizedGroupwareCalendarFolder extends GroupwareCalendarFolder {
 
     /**
      * Get the user ID the folder belongs to

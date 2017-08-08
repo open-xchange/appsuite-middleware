@@ -55,9 +55,9 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
-import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.userized.folder.UserizedCalendarFolder;
-import com.openexchange.chronos.provider.userized.folder.UserizedCalendarFolderProvider;
+import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
+import com.openexchange.chronos.provider.userized.folder.UserizedGroupwareCalendarFolder;
+import com.openexchange.chronos.provider.userized.folder.UserizedGroupwareCalendarFolderProvider;
 import com.openexchange.chronos.provider.userized.folder.UserizedFolderField;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -66,14 +66,14 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link UserizedCalendarFolderProviderImpl}
+ * {@link UserizedGroupwareCalendarFolderProviderImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolderProvider {
+public class UserizedGroupwareCalendarFolderProviderImpl implements UserizedGroupwareCalendarFolderProvider {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserizedCalendarFolderProviderImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserizedGroupwareCalendarFolderProviderImpl.class);
 
     private final static String GET         = "SELECT name, value FROM oxfolder_userized WHERE cid=? AND fuid=? AND userid=?;";
     private final static String EXIST       = "SELECT EXISTS(SELECT 1 FROM oxfolder_userized WHERE cid=? AND fuid=? AND userid=? LIMIT 1);";
@@ -86,10 +86,10 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     private final ServiceLookup service;
 
     /**
-     * Initializes a new {@link UserizedCalendarFolderProviderImpl}.
+     * Initializes a new {@link UserizedGroupwareCalendarFolderProviderImpl}.
      * 
      */
-    public UserizedCalendarFolderProviderImpl(ServiceLookup service) {
+    public UserizedGroupwareCalendarFolderProviderImpl(ServiceLookup service) {
         super();
         this.service = service;
 
@@ -129,7 +129,7 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     }
 
     @Override
-    public UserizedCalendarFolder getFolder(CalendarFolder folder, int contextId, int userId) {
+    public UserizedGroupwareCalendarFolder getFolder(GroupwareCalendarFolder folder, int contextId, int userId) {
         Connection connection = null;
         DatabaseService dbService = null;
         PreparedStatement stmt = null;
@@ -159,7 +159,7 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
                 dbService.backReadOnly(connection);
             }
         }
-        return new DefaultUserizedCalendarFolder(folder, contextId, userId);
+        return new DefaultUserizedGroupwareCalendarFolder(folder, contextId, userId);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     }
 
     @Override
-    public void deleteFolder(UserizedCalendarFolder folder) {
+    public void deleteFolder(UserizedGroupwareCalendarFolder folder) {
         deleteFolder(Integer.valueOf(folder.getId()), folder.getContextId(), folder.getUserId());
     }
 
@@ -273,7 +273,7 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     }
 
     @Override
-    public void insertFolder(UserizedCalendarFolder folder) {
+    public void insertFolder(UserizedGroupwareCalendarFolder folder) {
         insertFolder(Integer.valueOf(folder.getId()), folder.getContextId(), folder.getUserId(), folder.additionalProperties());
     }
 
@@ -292,15 +292,15 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     }
 
     /**
-     * Fills a {@link UserizedCalendarFolder} with its properties
+     * Fills a {@link UserizedGroupwareCalendarFolder} with its properties
      * 
      * @param cFolder The original {@link CalendarFolder}
      * @param userId The ID of the user the folder belongs to
      * @param properties The properties of the folder
-     * @return A {@link UserizedCalendarFolder}
+     * @return A {@link UserizedGroupwareCalendarFolder}
      */
-    private UserizedCalendarFolder fill(CalendarFolder cFolder, int contextId, int userId, Map<String, String> properties) {
-        DefaultUserizedCalendarFolder folder = new DefaultUserizedCalendarFolder(cFolder, contextId, userId);
+    private UserizedGroupwareCalendarFolder fill(GroupwareCalendarFolder cFolder, int contextId, int userId, Map<String, String> properties) {
+        DefaultUserizedGroupwareCalendarFolder folder = new DefaultUserizedGroupwareCalendarFolder(cFolder, contextId, userId);
         // Parser for every entry
         for (String propertyName : properties.keySet()) {
             parseFolderFields(folder, propertyName, properties.get(propertyName));
@@ -309,13 +309,13 @@ public class UserizedCalendarFolderProviderImpl implements UserizedCalendarFolde
     }
 
     /**
-     * Parses for known fields. Any additional fields will be available throughÏ to {@link UserizedCalendarFolder#additionalProperties()}
+     * Parses for known fields. Any additional fields will be available throughÏ to {@link UserizedGroupwareCalendarFolder#additionalProperties()}
      * 
-     * @param folder {@link DefaultUserizedCalendarFolder} to add the values to
+     * @param folder {@link DefaultUserizedGroupwareCalendarFolder} to add the values to
      * @param name The name to compare to known fields
      * @param value The value of the name
      */
-    private void parseFolderFields(DefaultUserizedCalendarFolder folder, String name, String value) {
+    private void parseFolderFields(DefaultUserizedGroupwareCalendarFolder folder, String name, String value) {
         if (UserizedFolderField.ALTERNATIVE_DESCRIPTION.equalsField(name)) {
             folder.setAlternativeDescription(value);
         } else if (UserizedFolderField.ALTERNATIVE_NAME.equalsField(name)) {

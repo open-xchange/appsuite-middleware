@@ -51,8 +51,8 @@ package com.openexchange.chronos.provider.userized.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import com.openexchange.chronos.provider.userized.folder.UserizedCalendarFolderProvider;
-import com.openexchange.chronos.provider.userized.folder.impl.UserizedCalendarFolderProviderImpl;
+import com.openexchange.chronos.provider.userized.folder.UserizedGroupwareCalendarFolderProvider;
+import com.openexchange.chronos.provider.userized.folder.impl.UserizedGroupwareCalendarFolderProviderImpl;
 import com.openexchange.chronos.provider.userized.groupware.CreateUserizedFolderTask;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -91,6 +91,6 @@ public class UserizedCalendarFolderActivator extends HousekeepingActivator {
 
         });
 
-        registerService(UserizedCalendarFolderProvider.class, new UserizedCalendarFolderProviderImpl(this));
+        registerService(UserizedGroupwareCalendarFolderProvider.class, new UserizedGroupwareCalendarFolderProviderImpl(this));
     }
 }

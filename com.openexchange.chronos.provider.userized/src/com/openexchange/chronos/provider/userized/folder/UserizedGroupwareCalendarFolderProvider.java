@@ -50,15 +50,15 @@
 package com.openexchange.chronos.provider.userized.folder;
 
 import java.util.Map;
-import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 
 /**
- * {@link UserizedCalendarFolderProvider}
+ * {@link UserizedGroupwareCalendarFolderProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface UserizedCalendarFolderProvider {
+public interface UserizedGroupwareCalendarFolderProvider {
 
     /**
      * Deletes a user-specific folder. Does not delete the folder itself! Only deletes the user-specific properties for the folder.
@@ -72,9 +72,9 @@ public interface UserizedCalendarFolderProvider {
     /**
      * Deletes a user-specific folder. Does not delete the folder itself! Only deletes the user-specific properties for the folder.
      * 
-     * @param folder The {@link UserizedCalendarFolder} from which to remove the user-specified properties
+     * @param folder The {@link UserizedGroupwareCalendarFolder} from which to remove the user-specified properties
      */
-    void deleteFolder(UserizedCalendarFolder folder);
+    void deleteFolder(UserizedGroupwareCalendarFolder folder);
 
     /**
      * Deletes a single property from a folder.
@@ -87,7 +87,7 @@ public interface UserizedCalendarFolderProvider {
     void deleteFolderProperty(int folderId, int contextId, int userId, String name);
 
     /**
-     * Check if a folder has user-specific properties and therefore exits in terms of a {@link UserizedCalendarFolder}
+     * Check if a folder has user-specific properties and therefore exits in terms of a {@link UserizedGroupwareCalendarFolder}
      * 
      * @param folderId The ID of the folder to check existence for
      * @param contextId The context ID of the user
@@ -98,15 +98,15 @@ public interface UserizedCalendarFolderProvider {
     boolean exists(int folderId, int contextId, int userId);
 
     /**
-     * Get a {@link UserizedCalendarFolder} for a specific user
+     * Get a {@link UserizedGroupwareCalendarFolder} for a specific user
      * 
      * @param folder The {@link CalendarFolder}
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
-     * @return An {@link UserizedCalendarFolder}. If a folder in terms of {@link #exists(CalendarFolder, int)}
+     * @return An {@link UserizedGroupwareCalendarFolder}. If a folder in terms of {@link #exists(CalendarFolder, int)}
      *         does not exist a folder with default values is returned
      */
-    UserizedCalendarFolder getFolder(CalendarFolder folder, int contextId, int userId);
+    UserizedGroupwareCalendarFolder getFolder(GroupwareCalendarFolder folder, int contextId, int userId);
 
     /**
      * Insert user-specific values for a folder into a database.
@@ -126,6 +126,6 @@ public interface UserizedCalendarFolderProvider {
      * 
      * @param folder The user-specific folder
      */
-    void insertFolder(UserizedCalendarFolder folder);
+    void insertFolder(UserizedGroupwareCalendarFolder folder);
 
 }

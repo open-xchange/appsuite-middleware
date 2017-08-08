@@ -54,18 +54,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
-import com.openexchange.chronos.provider.userized.folder.UserizedCalendarFolder;
+import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
+import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.chronos.provider.userized.folder.UserizedGroupwareCalendarFolder;
 import com.openexchange.java.Strings;
 
 /**
- * {@link DefaultUserizedCalendarFolder} - Default / Fall-back for a {@link UserizedCalendarFolder}
+ * {@link DefaultUserizedGroupwareCalendarFolder} - Default / Fall-back for a {@link UserizedGroupwareCalendarFolder}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class DefaultUserizedCalendarFolder implements UserizedCalendarFolder {
+public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupwareCalendarFolder {
 
     private boolean subscribed = false;
     private boolean sync       = false;
@@ -78,16 +79,16 @@ public class DefaultUserizedCalendarFolder implements UserizedCalendarFolder {
     private final int userId;
     private final int contextId;
 
-    private final CalendarFolder folder;
+    private final GroupwareCalendarFolder folder;
 
     /**
      * 
-     * Initializes a new {@link DefaultUserizedCalendarFolder}.
+     * Initializes a new {@link DefaultUserizedGroupwareCalendarFolder}.
      * 
      * @param folder The {@link CalendarFolder}
      * @param userId The user the folder belongs to
      */
-    public DefaultUserizedCalendarFolder(CalendarFolder folder, int contextId, int userId) {
+    public DefaultUserizedGroupwareCalendarFolder(GroupwareCalendarFolder folder, int contextId, int userId) {
         properties = new ConcurrentHashMap<>();
         this.folder = folder;
         this.contextId = contextId;
@@ -199,5 +200,35 @@ public class DefaultUserizedCalendarFolder implements UserizedCalendarFolder {
     @Override
     public Transp getTransparency() {
         return folder.getTransparency();
+    }
+
+    @Override
+    public boolean isDefaultFolder() {
+        return folder.isDefaultFolder();
+    }
+
+    @Override
+    public String getParentId() {
+        return folder.getParentId();
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return folder.getModifiedBy();
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return folder.getCreatedBy();
+    }
+
+    @Override
+    public Date getCreationDate() {
+        return folder.getCreationDate();
+    }
+
+    @Override
+    public GroupwareFolderType getType() {
+        return folder.getType();
     }
 }
