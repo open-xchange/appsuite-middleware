@@ -71,6 +71,7 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.CalendarUserType;
@@ -350,42 +351,29 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
 
+                // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
+                if (!slotStartTime.equals(startTime)) {
+                    // Create a split for the availability component with the equivalent BusyType
+                    freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
+                }
+
                 // Process any recurrence rule
                 if (calendarFreeSlot.contains(FreeSlotField.rrule)) {
                     RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(calendarFreeSlot.getRecurrenceRule(), calendarFreeSlot.getStartTime(), null));
                     long endOccurence = slotEndTime.getTime() - slotStartTime.getTime();
                     while (recurrenceIterator.hasNext()) {
-                        long nextOccurence = recurrenceIterator.next();
-                        FreeBusyTime slot = new FreeBusyTime();
-                        Date startOccurence = new Date(nextOccurence);
-                        if (startOccurence.after(endTime)) {
+                        long nextOccurrence = recurrenceIterator.next();
+                        Date startOfOccurrence = new Date(nextOccurrence);
+                        if (startOfOccurrence.after(endTime)) {
                             break;
                         }
-                        slot.setStartTime(startOccurence);
-                        Date endOfOccurence = new Date(startOccurence.getTime() + endOccurence);
-                        slot.setEndTime(endOfOccurence);
-                        slot.setFbType(FbType.FREE);
-                        freeBusyTimes.add(slot);
-
-                        startTime = endOfOccurence;
+                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + endOccurence);
+                        freeBusyTimes.add(createFreeBusyTime(FbType.FREE, startOfOccurrence, endOfOccurrence));
+                        startTime = endOfOccurrence;
                     }
                 } else {
-                    // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
-                    if (!slotStartTime.equals(startTime)) {
-                        // Create a split for the availability component with the equivalent BusyType
-                        FreeBusyTime freeBusyTime = new FreeBusyTime();
-                        freeBusyTime.setStartTime(startTime);
-                        freeBusyTime.setEndTime(slotStartTime);
-                        freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                        freeBusyTimes.add(freeBusyTime);
-                    }
-
                     // For each available component in the availability component mark the f/b as FREE
-                    FreeBusyTime slot = new FreeBusyTime();
-                    slot.setStartTime(slotStartTime);
-                    slot.setEndTime(slotEndTime);
-                    slot.setFbType(FbType.FREE);
-                    freeBusyTimes.add(slot);
+                    freeBusyTimes.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
 
                     // Start from slot end time on the next iteration
                     startTime = slotEndTime;
@@ -394,11 +382,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // Create the last block
             if (endTime.after(slotEndTime)) {
-                FreeBusyTime freeBusyTime = new FreeBusyTime();
-                freeBusyTime.setStartTime(startTime);
-                freeBusyTime.setEndTime(endTime);
-                freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                freeBusyTimes.add(freeBusyTime);
+                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
             }
         }
         return freeBusyTimes;
@@ -528,6 +512,36 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         auxiliaryList.add(intervalA);
         auxiliaryList.add(intervalB);
+    }
+
+    /**
+     * Creates and returns a {@link FreeBusyTime} instance with the specified {@link FbType}
+     * in the specified interval
+     * 
+     * @param fbType The free/busy type
+     * @param startTime The start time of the instance
+     * @param endTime The end time of the instance
+     * @return The {@link FreeBusyTime}
+     */
+    private FreeBusyTime createFreeBusyTime(FbType fbType, Date startTime, Date endTime) {
+        FreeBusyTime freeBusyTime = new FreeBusyTime();
+        freeBusyTime.setStartTime(startTime);
+        freeBusyTime.setEndTime(endTime);
+        freeBusyTime.setFbType(fbType);
+        return freeBusyTime;
+    }
+
+    /**
+     * Creates and returns a {@link FreeBusyTime} instance with the specified {@link BusyType}
+     * in the specified interval
+     * 
+     * @param busyType The free/busy type
+     * @param startTime The start time of the instance
+     * @param endTime The end time of the instance
+     * @return The {@link FreeBusyTime}
+     */
+    private FreeBusyTime createFreeBusyTime(BusyType busyType, Date startTime, Date slotStartTime) {
+        return createFreeBusyTime(AvailabilityUtils.convertFreeBusyType(busyType), startTime, slotStartTime);
     }
 
     /**
