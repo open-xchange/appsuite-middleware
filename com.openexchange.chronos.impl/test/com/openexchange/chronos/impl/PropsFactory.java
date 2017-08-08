@@ -132,6 +132,21 @@ final class PropsFactory {
     }
 
     /**
+     * Creates a recurring {@link CalendarFreeSlot} with the specified summary with in the specified interval
+     * 
+     * @param summary The summary
+     * @param from The starting point in the interval
+     * @param until The ending point in the interval
+     * @param recurrenceRule The recurrence rule as string
+     * @return The recurring {@link CalendarFreeSlot}
+     */
+    static CalendarFreeSlot createRecurringCalendarFreeSlot(String summary, DateTime from, DateTime until, String recurrenceRule) {
+        CalendarFreeSlot cfs = createCalendarFreeSlot(summary, from, until);
+        cfs.setRecurrenceRule(recurrenceRule);
+        return cfs;
+    }
+
+    /**
      * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
      * 
      * @param busyType The {@link BusyType} of the availability
