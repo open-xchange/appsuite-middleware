@@ -321,7 +321,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         // Add to the auxiliary
                         auxFreeSlot.add(occ);
                     }
-                    // Remove the "seed" free slot, and retain only its occurrences
+                    // Remove the "seed" free slot, and only retain its occurrences
                     iterator.remove();
                 }
                 calendarAvailability.getCalendarFreeSlots().addAll(auxFreeSlot);

@@ -575,6 +575,5 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Asserts
         assertNotNull(freeBusyResult);
         AssertUtil.assertFreeBusyTimes(expectedFreeBusyTimes, freeBusyResult.getFreeBusyTimes());
-
     }
 }
