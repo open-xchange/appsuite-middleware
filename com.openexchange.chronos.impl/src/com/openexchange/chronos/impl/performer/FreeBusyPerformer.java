@@ -242,6 +242,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, List<CalendarAvailability>> availableTimes = availabilityService.getCombinedAvailableTime(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
+
+        // TODO: expand recurring instances
+        expandRecurringInstances(availableTimes, timeZone);
+
         // Adjust the intervals
         adjustIntervals(from, until, availableTimes, timeZone);
 
@@ -282,6 +286,47 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
+     * Expands any recurring instances found in the specified available times {@link Map}
+     * 
+     * @param availableTimes The available times for the attendees
+     * @param timeZone The {@link TimeZone} of the user
+     */
+    private void expandRecurringInstances(Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) throws OXException {
+        for (Attendee attendee : availableTimes.keySet()) {
+            for (CalendarAvailability calendarAvailability : availableTimes.get(attendee)) {
+                List<CalendarFreeSlot> auxFreeSlot = new ArrayList<>();
+                Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
+                for (Iterator<CalendarFreeSlot> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                    CalendarFreeSlot freeSlot = iterator.next();
+                    if (!freeSlot.contains(FreeSlotField.rrule)) {
+                        continue;
+                    }
+                    Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
+                    Date slotEndTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getEndTime(), timeZone));
+                    RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(freeSlot.getRecurrenceRule(), freeSlot.getStartTime(), null));
+                    long endOccurence = slotEndTime.getTime() - slotStartTime.getTime();
+                    while (recurrenceIterator.hasNext()) {
+                        long nextOccurrence = recurrenceIterator.next();
+                        Date startOfOccurrence = new Date(nextOccurrence);
+                        if (startOfOccurrence.after(endTime)) {
+                            break;
+                        }
+                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + endOccurence);
+
+                        CalendarFreeSlot occ = freeSlot.clone();
+                        occ.setStartTime(new DateTime(startOfOccurrence.getTime()));
+                        occ.setEndTime(new DateTime(endOfOccurrence.getTime()));
+
+                        auxFreeSlot.add(occ);
+                    }
+                    iterator.remove();
+                }
+                calendarAvailability.getCalendarFreeSlots().addAll(auxFreeSlot);
+            }
+        }
+    }
+
+    /**
      * Adjusts the ranges of the {@link FreeBusyTime} slots that are marked as FREE
      * in regard to the mergedFreeBusyTimes
      * 
@@ -308,7 +353,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
                     // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
                     // then split the freeBusyTime block of the availability and remove it from the list
-                    splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime);
+                    splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime, FbType.FREE);
                     // Remove
                     iterator.remove();
                 }
@@ -331,6 +376,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      */
     private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) throws OXException {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
+        List<FreeBusyTime> auxilliary = new ArrayList<>();
         for (CalendarAvailability availability : availableTime) {
             // Get the availability's start/end times
             Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
@@ -352,34 +398,17 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     // Create a split for the availability component with the equivalent BusyType
                     freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
                 }
-
-                // Process any recurrence rule
-                if (calendarFreeSlot.contains(FreeSlotField.rrule)) {
-                    RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(calendarFreeSlot.getRecurrenceRule(), calendarFreeSlot.getStartTime(), null));
-                    long endOccurence = slotEndTime.getTime() - slotStartTime.getTime();
-                    while (recurrenceIterator.hasNext()) {
-                        long nextOccurrence = recurrenceIterator.next();
-                        Date startOfOccurrence = new Date(nextOccurrence);
-                        if (startOfOccurrence.after(endTime)) {
-                            break;
-                        }
-                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + endOccurence);
-                        freeBusyTimes.add(createFreeBusyTime(FbType.FREE, startOfOccurrence, endOfOccurrence));
-                        startTime = endOfOccurrence;
-                    }
-                } else {
-                    // For each available component in the availability component mark the f/b as FREE
-                    freeBusyTimes.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
-
-                    // Start from slot end time on the next iteration
-                    startTime = slotEndTime;
-                }
+                // For each available component in the availability component mark the f/b as FREE
+                auxilliary.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
+                // Start from slot end time on the next iteration
+                startTime = slotEndTime;
             }
 
-            // Create the last block
+            //Create the last block
             if (endTime.after(slotEndTime)) {
-                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
+                auxilliary.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
             }
+            freeBusyTimes.addAll(auxilliary);
         }
         return freeBusyTimes;
     }
@@ -492,12 +521,12 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * </p>
      *
      * @param auxiliaryList The auxiliary {@link List} to add the new intervals
-     * @param freeBusyTime The {@link Event}'s {@link FreeBusyTime} block
-     * @param toSplit The availability's {@link FreeBusyTime} block to split
+     * @param freeBusyTime The middle {@link FreeBusyTime} block
+     * @param toSplit The {@link FreeBusyTime} block to split
      */
-    private void splitFreeBusyTime(List<FreeBusyTime> auxiliaryList, FreeBusyTime freeBusyTime, FreeBusyTime toSplit) {
-        auxiliaryList.add(createFreeBusyTime(FbType.FREE, toSplit.getStartTime(), freeBusyTime.getStartTime()));
-        auxiliaryList.add(createFreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), toSplit.getEndTime()));
+    private void splitFreeBusyTime(List<FreeBusyTime> auxiliaryList, FreeBusyTime freeBusyTime, FreeBusyTime toSplit, FbType splitFbType) {
+        auxiliaryList.add(createFreeBusyTime(splitFbType, toSplit.getStartTime(), freeBusyTime.getStartTime()));
+        auxiliaryList.add(createFreeBusyTime(splitFbType, freeBusyTime.getEndTime(), toSplit.getEndTime()));
     }
 
     /**
