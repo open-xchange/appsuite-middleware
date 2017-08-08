@@ -50,7 +50,7 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
-
+import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -59,8 +59,6 @@ import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-
-import javapns.json.JSONException;
 import javapns.notification.PushNotificationPayload;
 
 
