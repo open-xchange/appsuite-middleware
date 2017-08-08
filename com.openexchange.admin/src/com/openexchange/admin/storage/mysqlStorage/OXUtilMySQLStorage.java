@@ -3272,7 +3272,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     PreparedStatement stmt = null;
                     ResultSet rs = null;
                     try {
-                        stmt = con.prepareStatement("SELECT 1 FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?");
+                        stmt = con.prepareStatement("SELECT 1 FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=? LIMIT 1");
                         stmt.setInt(1, serverId);
                         stmt.setInt(2, poolId);
                         stmt.setString(3, schema);
