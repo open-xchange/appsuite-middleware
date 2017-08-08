@@ -350,16 +350,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
 
-                // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
-                if (!slotStartTime.equals(startTime)) {
-                    // Create a split for the availability component with the equivalent BusyType
-                    FreeBusyTime freeBusyTime = new FreeBusyTime();
-                    freeBusyTime.setStartTime(startTime);
-                    freeBusyTime.setEndTime(slotStartTime);
-                    freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
-                    freeBusyTimes.add(freeBusyTime);
-                }
-
                 // Process any recurrence rule
                 if (calendarFreeSlot.contains(FreeSlotField.rrule)) {
                     RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(calendarFreeSlot.getRecurrenceRule(), calendarFreeSlot.getStartTime(), null));
@@ -372,7 +362,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                             break;
                         }
                         slot.setStartTime(startOccurence);
-                        Date endOfOccurence = new Date(endOccurence);
+                        Date endOfOccurence = new Date(startOccurence.getTime() + endOccurence);
                         slot.setEndTime(endOfOccurence);
                         slot.setFbType(FbType.FREE);
                         freeBusyTimes.add(slot);
@@ -380,6 +370,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         startTime = endOfOccurence;
                     }
                 } else {
+                    // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
+                    if (!slotStartTime.equals(startTime)) {
+                        // Create a split for the availability component with the equivalent BusyType
+                        FreeBusyTime freeBusyTime = new FreeBusyTime();
+                        freeBusyTime.setStartTime(startTime);
+                        freeBusyTime.setEndTime(slotStartTime);
+                        freeBusyTime.setFbType(AvailabilityUtils.convertFreeBusyType(availability.getBusyType()));
+                        freeBusyTimes.add(freeBusyTime);
+                    }
+
                     // For each available component in the availability component mark the f/b as FREE
                     FreeBusyTime slot = new FreeBusyTime();
                     slot.setStartTime(slotStartTime);
