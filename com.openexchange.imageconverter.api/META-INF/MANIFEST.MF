@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange ImageConverterAPI
+Bundle-SymbolicName: com.openexchange.imageconverter.api
+Bundle-Version: 1.0.0
+Bundle-Vendor: OPENEXCHANGE
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: 
+ com.openexchange.annotation,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.osgi.annotation,
+ org.apache.commons.lang,
+ org.json,
+ org.slf4j
+Export-Package: com.openexchange.imageconverter.api
