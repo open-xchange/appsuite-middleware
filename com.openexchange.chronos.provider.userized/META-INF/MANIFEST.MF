@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Chronos calendar provider service defintions
+Bundle-SymbolicName: com.openexchange.chronos.provider.userized
+Bundle-Version: 7.8.4
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.service,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.update,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.id,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Bundle-Activator: com.openexchange.chronos.provider.userized.osgi.UserizedCalendarFolderActivator
