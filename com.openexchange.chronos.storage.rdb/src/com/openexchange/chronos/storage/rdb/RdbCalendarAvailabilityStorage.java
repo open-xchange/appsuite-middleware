@@ -567,11 +567,11 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         // 1) Fetch all calendar availability items within the interval
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(calendarAvailabilityMapper.getColumns(mappedFields, "c."));
+        sb.append("SELECT ").append(calendarAvailabilityMapper.getColumns(mappedFields));
         sb.append(" FROM ").append(CA_TABLE_NAME);
         sb.append(" WHERE cid=?");
-        sb.append(" AND user IN (").append(CalendarAvailabilityMapper.getParameters(userIds.size())).append(")");
-        sb.append(" AND start >= ? AND end <= ?;");
+        sb.append(" AND user IN (").append(CalendarAvailabilityMapper.getParameters(userIds.size())).append(");");
+        //sb.append(" AND start >= ? AND end <= ?;");
 
         List<CalendarAvailability> availabilities = null;
         int parameterIndex = 1;
@@ -580,8 +580,8 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             for (Integer id : userIds) {
                 stmt.setInt(parameterIndex++, id);
             }
-            stmt.setLong(parameterIndex++, from.getTime());
-            stmt.setLong(parameterIndex++, until.getTime());
+            //stmt.setLong(parameterIndex++, from.getTime());
+            //stmt.setLong(parameterIndex++, until.getTime());
             availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
         }
 
