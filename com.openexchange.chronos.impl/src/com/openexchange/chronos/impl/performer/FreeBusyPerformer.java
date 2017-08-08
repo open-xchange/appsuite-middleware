@@ -296,25 +296,29 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
                 for (Iterator<CalendarFreeSlot> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
                     CalendarFreeSlot freeSlot = iterator.next();
+                    // No recurring free slot? Skip
                     if (!freeSlot.contains(FreeSlotField.rrule)) {
                         continue;
                     }
                     Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
                     Date slotEndTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getEndTime(), timeZone));
                     RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(freeSlot.getRecurrenceRule(), freeSlot.getStartTime(), null));
-                    long endOccurence = slotEndTime.getTime() - slotStartTime.getTime();
+                    // Find out the duration of the "seed" free slot
+                    long duration = slotEndTime.getTime() - slotStartTime.getTime();
                     while (recurrenceIterator.hasNext()) {
                         long nextOccurrence = recurrenceIterator.next();
                         Date startOfOccurrence = new Date(nextOccurrence);
+                        // We reached the availability's end? Stop
                         if (startOfOccurrence.after(endTime)) {
                             break;
                         }
-                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + endOccurence);
-
+                        // Determine the end of the occurrence's instance
+                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + duration);
+                        // Create the occurrence
                         CalendarFreeSlot occ = freeSlot.clone();
                         occ.setStartTime(new DateTime(startOfOccurrence.getTime()));
                         occ.setEndTime(new DateTime(endOfOccurrence.getTime()));
-
+                        // Add to the auxiliary
                         auxFreeSlot.add(occ);
                     }
                     iterator.remove();
