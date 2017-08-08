@@ -107,7 +107,7 @@ public class ChronosActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class };
+        return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class };
     }
 
     @Override
@@ -128,8 +128,8 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
-            CalendarAvailabilityServiceImpl service = new CalendarAvailabilityServiceImpl();
-            registerService(CalendarAvailabilityService.class, service);
+            registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
+
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
