@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -76,7 +78,6 @@ import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link UpdateTaskToolkit} - Toolkit for update tasks.
@@ -144,7 +145,7 @@ public final class UpdateTaskToolkit {
             // Get update task by class name
             final UpdateTaskV2 updateTask = getUpdateTask(className);
             // Get all available schemas
-            final Map<String, Set<Integer>> map = getSchemasAndContexts();
+            final Map<PoolAndSchema, Set<Integer>> map = getSchemasAndContexts(null, true);
             // ... and iterate them
             final Iterator<Set<Integer>> iter = map.values().iterator();
             while (iter.hasNext()) {
@@ -165,7 +166,7 @@ public final class UpdateTaskToolkit {
      */
     public static UpdateTaskToolkitJob<Void> runUpdateOnAllSchemas(final boolean throwExceptionOnFailure) throws OXException {
         // Get all available schemas
-        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        final Map<PoolAndSchema, Set<Integer>> map = getSchemasAndContexts(null, true);
         final int total = map.size();
 
         // Status text
@@ -263,7 +264,28 @@ public final class UpdateTaskToolkit {
         return job;
     }
 
-    private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";
+    private static List<Integer> getRegisteredServersIDs(Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT server_id FROM server");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // Huh...?
+                return Collections.emptyList();
+            }
+
+            List<Integer> serverIds = new LinkedList<>();
+            do {
+                serverIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            return serverIds;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
 
     /**
      * Gets schemas and their contexts as a map.
@@ -271,41 +293,82 @@ public final class UpdateTaskToolkit {
      * @return A map containing schemas and their contexts.
      * @throws OXException If an error occurs
      */
-    private static Map<String, Set<Integer>> getSchemasAndContexts() throws OXException {
-        final Connection con = Database.get(false);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    private static Map<PoolAndSchema, Set<Integer>> getSchemasAndContexts(String optSchema, boolean onlyOneContext) throws OXException {
+        int serverId = Database.getServerId();
+
+        // Determine all DB schemas that are currently in use
+        Connection con = Database.get(false);
         try {
-            stmt = con.prepareStatement(SQL_SELECT_SCHEMAS);
-            rs = stmt.executeQuery();
-            final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
-            while (rs.next()) {
-                final String schemaName = rs.getString(1);
-                final int contextId = rs.getInt(2);
-                Set<Integer> contextIds = schemasAndContexts.get(schemaName);
-                if (null == contextIds) {
-                    contextIds = new HashSet<Integer>();
-                    schemasAndContexts.put(schemaName, contextIds);
+            // Grab in-use database schemas
+            List<PoolAndSchema> l;
+            {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema WHERE count > 0" + (null == optSchema ? "" : " AND schemaname=?"));
+                    if (null != optSchema) {
+                        stmt.setString(1, optSchema);
+                    }
+                    rs = stmt.executeQuery();
+                    if (false == rs.next()) {
+                        // No database schema in use
+                        return Collections.emptyMap();
+                    }
+
+                    l = new LinkedList<>();
+                    do {
+                        l.add(new PoolAndSchema(rs.getInt(1), rs.getString(2)));
+                    } while (rs.next());
+                } catch (SQLException e) {
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
                 }
-                contextIds.add(Integer.valueOf(contextId));
+            }
+
+            Map<PoolAndSchema, Set<Integer>> schemasAndContexts = new HashMap<>(l.size());
+            for (PoolAndSchema pas : l) {
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?" + (onlyOneContext ? " LIMIT 1" : ""));
+                    stmt.setInt(1, serverId);
+                    stmt.setInt(2, pas.poolId);
+                    stmt.setString(3, pas.schema);
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        Set<Integer> contextIds = new HashSet<Integer>(onlyOneContext ? 1 : 256);
+                        do {
+                            contextIds.add(Integer.valueOf(rs.getInt(1)));
+                        } while (rs.next());
+                        schemasAndContexts.put(pas, contextIds);
+                    }
+                } catch (SQLException e) {
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                }
             }
             return schemasAndContexts;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
             Database.back(false, con);
         }
-
     }
 
     public static int getContextIdBySchema(final String schemaName) throws OXException {
-        final Map<String, Set<Integer>> map = getSchemasAndContexts();
-        final Set<Integer> set = map.get(schemaName);
-        if (null == set) {
-            throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
+        Map<PoolAndSchema, Set<Integer>> map = getSchemasAndContexts(schemaName, true);
+        for (Map.Entry<PoolAndSchema, Set<Integer>> schemaAndContexts : map.entrySet()) {
+            if (schemaName.equals(schemaAndContexts.getKey().schema)) {
+                Set<Integer> set = schemaAndContexts.getValue();
+                if (null == set) {
+                    throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
+                }
+                return set.iterator().next().intValue();
+            }
         }
-        return set.iterator().next().intValue();
+        throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
     }
 
     /**
@@ -330,6 +393,49 @@ public final class UpdateTaskToolkit {
 
     private static SchemaUpdateState getSchema(final int contextId) throws OXException {
         return SchemaStore.getInstance().getSchema(contextId);
+    }
+
+    private static final class PoolAndSchema {
+        final int poolId;
+        final String schema;
+        private final int hash;
+
+        PoolAndSchema(int poolId, String schema) {
+            super();
+            this.poolId = poolId;
+            this.schema = schema;
+
+            int result = 31 * 1 + poolId;
+            result = 31 * result + ((schema == null) ? 0 : schema.hashCode());
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof PoolAndSchema)) {
+                return false;
+            }
+            PoolAndSchema other = (PoolAndSchema) obj;
+            if (poolId != other.poolId) {
+                return false;
+            }
+            if (schema == null) {
+                if (other.schema != null) {
+                    return false;
+                }
+            } else if (!schema.equals(other.schema)) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }
