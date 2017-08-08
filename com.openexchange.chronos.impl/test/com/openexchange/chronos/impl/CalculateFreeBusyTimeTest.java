@@ -545,25 +545,27 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
 
         // Initialise the free slots and availability block
         List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createRecurringCalendarFreeSlot("May 1", new DateTime(2017, 4, 3), new DateTime(2017, 4, 4), "FREQ=WEEKLY;BYDAY=WE"));
+        freeSlots.add(PropsFactory.createRecurringCalendarFreeSlot("May - Recurring every Wednesday", new DateTime(2017, 4, 3), new DateTime(2017, 4, 4), "FREQ=WEEKLY;BYDAY=WE"));
         availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
         // Set the availability block for the attendee
         availabilitiesPerAttendee.put(attendee, availabilities);
 
         // Finish mocking
         finishMocking();
-        
+
         List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(9);
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 2, 26), PropsFactory.createDate(2017, 3, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 25), PropsFactory.createDate(2017, 4, 3)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 3), PropsFactory.createDate(2017, 4, 4)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 2), PropsFactory.createDate(2017, 4, 21)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 3), PropsFactory.createDate(2017, 4, 4)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 2), PropsFactory.createDate(2017, 4, 21)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 21), PropsFactory.createDate(2017, 4, 22)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 22), PropsFactory.createDate(2017, 4, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 4), PropsFactory.createDate(2017, 4, 10)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 10), PropsFactory.createDate(2017, 4, 11)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 11), PropsFactory.createDate(2017, 4, 17)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 17), PropsFactory.createDate(2017, 4, 18)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 18), PropsFactory.createDate(2017, 4, 24)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 24), PropsFactory.createDate(2017, 4, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 25), PropsFactory.createDate(2017, 4, 30)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.FREE, PropsFactory.createDate(2017, 4, 30), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
