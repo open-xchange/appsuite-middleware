@@ -91,4 +91,9 @@ public interface AlarmTriggerStorage {
      */
     List<AlarmTrigger> getAlarms(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
 
+
+    void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds) throws OXException;
+
+    void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException;
+
 }

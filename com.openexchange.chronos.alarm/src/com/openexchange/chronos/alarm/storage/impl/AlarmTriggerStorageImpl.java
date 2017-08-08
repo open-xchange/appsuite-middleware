@@ -61,6 +61,7 @@ import com.openexchange.chronos.alarm.AlarmTrigger;
 import com.openexchange.chronos.alarm.AlarmTriggerField;
 import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -226,6 +227,42 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
 
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField[] fields) throws SQLException, OXException {
         return MAPPER.fromResultSet(resultSet, fields);
+    }
+
+    @Override
+    public void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds) throws OXException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        Connection writeCon = dbService.getWritable(contextId);
+        try {
+            deleteAlarms(contextId, accountId, alarmIds, writeCon);
+        } finally {
+            dbService.backReadOnly(contextId, writeCon);
+        }
+
+    }
+
+    private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm IN (";
+
+    @Override
+    public void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException {
+        PreparedStatement prepareStatement=null;
+        try {
+            String sql = Databases.getIN(SQL_DELETE, alarmIds.size());
+            prepareStatement = writeCon.prepareStatement(sql);
+            int x=0;
+            prepareStatement.setInt(++x, contextId);
+            prepareStatement.setInt(++x, accountId);
+            for(Integer alarmId: alarmIds){
+                prepareStatement.setInt(++x, alarmId);
+            }
+            prepareStatement.executeUpdate();
+        } catch (SQLException e) {
+            // TODO wrap as ox exception
+            e.printStackTrace();
+        } finally {
+            Databases.closeSQLStuff(prepareStatement);
+        }
+
     }
 
 }

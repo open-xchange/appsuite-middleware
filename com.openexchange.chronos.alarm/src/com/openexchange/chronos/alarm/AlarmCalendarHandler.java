@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
@@ -58,6 +59,7 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,13 +72,12 @@ public class AlarmCalendarHandler implements CalendarHandler {
 
     private final AlarmTriggerStorage storage;
 
-
     /**
      * Initializes a new {@link AlarmCalendarHandler}.
      */
     public AlarmCalendarHandler(AlarmTriggerStorage storage) {
         super();
-        this.storage=storage;
+        this.storage = storage;
     }
 
     @Override
@@ -85,12 +86,12 @@ public class AlarmCalendarHandler implements CalendarHandler {
         try {
             int contextId = result.getSession().getContextId();
             List<CreateResult> creations = result.getCreations();
-            if(creations!=null && !creations.isEmpty()){
+            if (creations != null && !creations.isEmpty()) {
 
-                for(CreateResult createResult: creations){
+                for (CreateResult createResult : creations) {
                     Event eve = createResult.getCreatedEvent();
-                    if(eve.containsAlarms()){
-                        for(Alarm alarm: createResult.getCreatedEvent().getAlarms()){
+                    if (eve.containsAlarms()) {
+                        for (Alarm alarm : eve.getAlarms()) {
 
                             AlarmTrigger trigger = new AlarmTrigger();
                             trigger.setAccount(0);
@@ -100,8 +101,8 @@ public class AlarmCalendarHandler implements CalendarHandler {
                             trigger.setProcessed(false);
                             trigger.setAlarm(alarm.getId());
 
-                            if(createResult.getCreatedEvent().containsRecurrenceRule()){
-//                            trigger.setRecurrence();
+                            if (eve.containsRecurrenceRule()) {
+                                //                            trigger.setRecurrence();
                             }
                             trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), eve, TimeZone.getTimeZone("UTC")).getTime());
                             storage.insertAlarm(trigger);
@@ -110,9 +111,35 @@ public class AlarmCalendarHandler implements CalendarHandler {
                     }
 
                 }
-
-
             }
+
+            List<DeleteResult> deletions = result.getDeletions();
+            if (deletions != null && !deletions.isEmpty()) {
+
+                for (DeleteResult createResult : deletions) {
+                    Event eve = createResult.getDeletedEvent();
+                    if (eve.containsAlarms()) {
+                        for (Alarm alarm : eve.getAlarms()) {
+
+                            AlarmTrigger trigger = new AlarmTrigger();
+                            trigger.setAccount(0);
+                            trigger.setUserId(result.getCalendarUser());
+                            trigger.setContextId(contextId);
+                            trigger.setAction(alarm.getAction().getValue());
+                            trigger.setProcessed(false);
+                            trigger.setAlarm(alarm.getId());
+
+                            if (eve.containsRecurrenceRule()) {
+                                //                                trigger.setRecurrence();
+                            }
+                            trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), eve, TimeZone.getTimeZone("UTC")).getTime());
+                            storage.deleteAlarms(contextId, 0, Collections.singletonList(alarm.getId()));
+                        }
+                    }
+
+                }
+            }
+
         } catch (OXException e) {
             // TODO handle exception
         }
