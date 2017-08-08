@@ -242,10 +242,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, List<CalendarAvailability>> availableTimes = availabilityService.getCombinedAvailableTime(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
-
-        // TODO: expand recurring instances
+        // Expand any recurring free slot instances 
         expandRecurringInstances(availableTimes, timeZone);
-
         // Adjust the intervals
         adjustIntervals(from, until, availableTimes, timeZone);
 
