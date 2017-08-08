@@ -67,13 +67,6 @@ public class HealthProbeServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.getWriter().append("OK").flush();

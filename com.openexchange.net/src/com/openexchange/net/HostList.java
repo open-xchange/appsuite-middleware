@@ -49,6 +49,7 @@
 
 package com.openexchange.net;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -136,6 +137,61 @@ public class HostList {
         this.ipRanges = ipRanges;
         this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
+    }
+
+    private final static int INADDR4SZ = 4;
+    private final static int INADDR16SZ = 16;
+    private final static int INT16SZ = 2;
+
+    static String numericToTextFormatV4(byte[] src) {
+        StringBuilder sb = new StringBuilder(16);
+        sb.append((src[0] & 0xff)).append('.');
+        sb.append((src[1] & 0xff)).append('.');
+        sb.append((src[2] & 0xff)).append('.');
+        sb.append((src[3] & 0xff));
+        return sb.toString();
+    }
+
+    static String numericToTextFormatV6(byte[] src) {
+        StringBuffer sb = new StringBuffer(39);
+        for (int i = 0; i < (INADDR16SZ / INT16SZ); i++) {
+            sb.append(Integer.toHexString(((src[i << 1] << 8) & 0xff00) | (src[(i << 1) + 1] & 0xff)));
+            if (i < (INADDR16SZ / INT16SZ) - 1) {
+                sb.append(":");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Checks if specified host name is contained in this host list.
+     * <p>
+     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
+     *
+     * @param hostAddress The host address
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean contains(InetAddress hostAddress) {
+        byte[] octets = hostAddress.getAddress();
+        if (null != octets) {
+            if (INADDR4SZ == octets.length) {
+                // IPv4
+                for (IPRange ipRange : this.ipRanges) {
+                    if (ipRange.containsIPv4(octets, numericToTextFormatV4(octets))) {
+                        return true;
+                    }
+                }
+            } else if (INADDR16SZ == octets.length) {
+                // IPv6
+                for (IPRange ipRange : this.ipRanges) {
+                    if (ipRange.containsIPv6(octets, numericToTextFormatV6(octets))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return contains(hostAddress.getHostName());
     }
 
     /**

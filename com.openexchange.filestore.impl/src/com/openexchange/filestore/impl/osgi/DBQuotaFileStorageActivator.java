@@ -197,20 +197,6 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
         // Update tasks
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable(), new AddInitialUserFilestoreUsage(), new MakeQuotaMaxConsistentInUserTable()));
-
-        registerService(ForcedReloadable.class, new ForcedReloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                UnifiedQuotaUtils.invalidateCache();
-            }
-
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
-        }, null);
-
         registerService(DeleteListener.class, new UnifiedQuotaDeleteListener(unifiedQuotaServices), null);
         registerService(FilestoreDataMoveListener.class, new UnifiedQuotaFilestoreDataMoveListener(unifiedQuotaServices), null);
 

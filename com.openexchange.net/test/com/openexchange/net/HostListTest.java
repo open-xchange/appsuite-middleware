@@ -50,9 +50,6 @@
 package com.openexchange.net;
 
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -96,7 +93,7 @@ public class HostListTest {
      public void testContains_containsNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
-        boolean contains = hl.contains(null);
+        boolean contains = hl.contains((String) null);
 
         assertFalse(contains);
     }
@@ -139,7 +136,7 @@ public class HostListTest {
             assertTrue(e instanceof IllegalArgumentException);
         }
     }
-    
+
          @Test
      public void testHostListv4_throwsException3() {
         try {

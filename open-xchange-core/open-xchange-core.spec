@@ -21,7 +21,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1579,6 +1579,16 @@ do
   ox_remove_property ${property} ${pfile}
 done
 
+# SoftwareChange_Request-4249
+set -e
+TMPFILE=$(mktemp)
+/opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
+if [ -e $TMPFILE ]; then
+  cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+  rm -f $TMPFILE
+fi
+set +e
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1620,6 +1630,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Tue Aug 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-08-07 (4304)
 * Mon Jul 17 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-07-24 (4285)
 * Mon Jul 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
