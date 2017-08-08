@@ -136,16 +136,17 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String displayName = MessageDataUtil.getDisplayName(messageData);
                 String senderAddress = MessageDataUtil.getSender(messageData);
                 String sender = displayName.length() == 0 ? senderAddress : displayName;
+                String folder = MessageDataUtil.getFolder(messageData);
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
-                
+
                 if (false == Strings.isEmpty(subject)) {
                     // Non-silent push
                     StringBuilder sb = new StringBuilder(sender);
                     sb.append("\n");
                     sb.append(subject);
                     payload.addAlert(sb.toString());
-                    
+
                     MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
 
                     if (config.isApnBadgeEnabled() && unread >= 0) {
@@ -159,6 +160,8 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
                 if (path.length() > 0) {
                     payload.addCustomDictionary("cid", path);
+                } else if (folder.length() > 0) {
+                    payload.addCustomDictionary("folder", folder);
                 }
 
                 return new Message<PushNotificationPayload>() {
