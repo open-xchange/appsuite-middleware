@@ -64,6 +64,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,6 +85,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -133,6 +135,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -371,6 +374,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             fireDeleteEventAndDeleteTableData(ctx, con, sorted_tables);
 
+            // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
             con.commit();
             rollback = false;
         } catch (SQLException e) {
@@ -399,28 +403,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // Now go through tables and delete the remainders
-        for (int i = sorted_tables.size() - 1; i >= 0; i--) {
-            deleteTableData(ctx, con, sorted_tables.get(i));
-        }
-
-        // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
-        PreparedStatement stmt = null;
+        Integer contextId = ctx.getId();
+        Statement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM contextAttribute WHERE cid = ?");
-            stmt.setInt(1, ctx.getId().intValue());
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private void deleteTableData(final Context ctx, final Connection con, final TableObject to) throws SQLException {
-        LOG.debug("Deleting data from table {} for context {}", to.getName(), ctx.getId());
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM " + to.getName() + " WHERE cid=?");
-            stmt.setInt(1, ctx.getId().intValue());
-            stmt.executeUpdate();
+            stmt = con.createStatement();
+            for (int i = sorted_tables.size(); i-- > 0;) {
+                String tableName = sorted_tables.get(i).getName();
+                LOG.debug("Deleting data from table {} for context {}", tableName, contextId);
+                stmt.addBatch("DELETE FROM " + tableName + " WHERE cid=" + contextId);
+            }
+            stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
         }
@@ -1769,54 +1761,81 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }// end of table loop
     }
 
+    // Deduced from https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html
+    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder()
+        .put("BIT", Types.BIT)
+        .put("TINYINT", Types.TINYINT)
+        .put("BOOL", Types.BOOLEAN)
+        .put("BOOLEAN", Types.BOOLEAN)
+        .put("SMALLINT", Types.SMALLINT)
+        .put("MEDIUMINT", Types.INTEGER)
+        .put("INT", Types.INTEGER)
+        .put("INTEGERR", Types.INTEGER)
+        .put("BIGINT", Types.BIGINT)
+        .put("FLOAT", Types.FLOAT)
+        .put("DOUBLE", Types.DOUBLE)
+        .put("DECIMAL", Types.DECIMAL)
+        .put("DATE", Types.DATE)
+        .put("DATETIME", Types.TIMESTAMP)
+        .put("TIMESTAMP", Types.TIMESTAMP)
+        .put("TIME", Types.TIME)
+        .put("YEAR", Types.DATE)
+        .put("CHAR", Types.CHAR)
+        .put("VARCHAR", Types.VARCHAR)
+        .put("BINARY", Types.BINARY)
+        .put("VARBINARY", Types.VARBINARY)
+        .put("TINYBLOB", Types.BLOB)
+        .put("TINYTEXT", Types.VARCHAR)
+        .put("BLOB", Types.BLOB)
+        .put("TEXT", Types.VARCHAR)
+        .put("MEDIUMBLOB", Types.BLOB)
+        .put("MEDIUMTEXT", Types.VARCHAR)
+        .put("LONGBLOB", Types.BLOB)
+        .put("LONGTEXT", Types.VARCHAR)
+        .put("ENUM", Types.CHAR)
+        .put("SET", Types.CHAR)
+        .build();
+
     private List<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
-        final List<TableObject> tableObjects = new LinkedList<TableObject>();
-
-        // this.dbmetadata = this.dbConnection.getMetaData();
-        final DatabaseMetaData db_metadata = ox_db_write_connection.getMetaData();
-        // get the tables to check
-        ResultSet rs2 = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            rs2 = db_metadata.getTables(null, null, null, null);
-            TableObject to = null;
-            while (rs2.next()) {
-                final String table_name = rs2.getString("TABLE_NAME");
-                to = new TableObject();
-                to.setName(table_name);
-                // fetch all columns from table and see if it contains matching column
-                ResultSet columns_res = null;
-                try {
-                    columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
-
-                    boolean table_matches = false;
-                    while (columns_res.next()) {
-
-                        final TableColumnObject tco = new TableColumnObject();
-                        final String column_name = columns_res.getString("COLUMN_NAME");
-                        tco.setName(column_name);
-                        tco.setType(columns_res.getInt("DATA_TYPE"));
-                        tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
-
-                        // if table has our criteria column, we should fetch data from it
-                        if (column_name.equals(this.selectionCriteria)) {
-                            table_matches = true;
-                        }
-                        // add column to table
-                        to.addColumn(tco);
-                    }
-
-                    if (table_matches) {
-                        tableObjects.add(to);
-                    }
-                } finally {
-                    closeSQLStuff(columns_res);
-                }
+            stmt = ox_db_write_connection.prepareStatement("SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=?");
+            stmt.setString(1, ox_db_write_connection.getCatalog());
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No tables
+                return new ArrayList<>(0);
             }
+
+            List<TableObject> tableObjects = new LinkedList<TableObject>();
+            TableObject to = null;
+            do {
+                String tableName = rs.getString(1);
+                if (null == to || !to.getName().equals(tableName)) {
+                    to = new TableObject();
+                    to.setName(tableName);
+                }
+
+                TableColumnObject tco = new TableColumnObject();
+                String columnName = rs.getString(2);
+                tco.setName(columnName); // COLUMN_NAME
+                Integer type = MYSQL_TYPES.get(Strings.toUpperCase(rs.getString(3)));
+                tco.setType(null == type ? Types.VARCHAR : type.intValue());
+                tco.setColumnSize((int) rs.getLong(4));
+
+                // if table has our criteria column, we should fetch data from it
+                if (columnName.equals(this.selectionCriteria)) {
+                    tableObjects.add(to);
+                }
+                // add column to table
+                to.addColumn(tco);
+            } while (rs.next());
+            LOG.debug("####### Found -> {} tables", tableObjects.size());
+            return tableObjects;
         } finally {
-            closeSQLStuff(rs2);
+            Databases.closeSQLStuff(rs, stmt);
         }
-        LOG.debug("####### Found -> {} tables", tableObjects.size());
-        return tableObjects;
     }
 
     private List<TableObject> sortTableObjects(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {

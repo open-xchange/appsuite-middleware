@@ -1690,7 +1690,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     /**
      * Check for an empty string
-     * 
+     *
      * @param string The string to check
      */
     private static boolean isEmpty(final String string) {
