@@ -540,7 +540,4 @@ public class GetPerformer extends AbstractPerformer {
         java.util.Collections.sort(combined, Comparators.freeSlotDateTimeComparator);
         return combined;
     }
-
-    ///////////////////////////////////////// Comparators //////////////////////////////////////
-
 }
