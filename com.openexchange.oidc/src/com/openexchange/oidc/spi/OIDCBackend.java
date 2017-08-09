@@ -70,6 +70,7 @@ import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
+import com.openexchange.session.Session;
 
 /**
  * Determines all features an OpenID backend must have to function correctly.
@@ -120,8 +121,10 @@ public interface OIDCBackend {
 
     LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
-    AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse)  throws OXException;
+    AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse) throws OXException;
 
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
+
+    String getLogoutRequest(Session session) throws OXException;
 
 }

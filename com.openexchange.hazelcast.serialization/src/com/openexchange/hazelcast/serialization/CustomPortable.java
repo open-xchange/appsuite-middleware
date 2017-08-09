@@ -95,6 +95,8 @@ public interface CustomPortable extends Portable {
     
     public static final int PORTABLE_OIDC_AUTHN_REQUEST_INFO = 400;
 
+    public static final int PORTABLE_OIDC_LOGOUT_REQUEST_INFO = 401;
+
     /**
      * Gets the ID of the dynamic portable factory.<p/>
      *

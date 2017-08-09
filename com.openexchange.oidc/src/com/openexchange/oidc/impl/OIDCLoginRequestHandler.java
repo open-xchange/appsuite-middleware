@@ -51,9 +51,16 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
     }
     
+    //TODO QS-VS: optimize function
     private void performLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException, OXException {
         String sessionToken = req.getParameter(OIDCTools.SESSION_TOKEN);
         if (Strings.isEmpty(sessionToken)) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        
+        String idToken = req.getParameter(OIDCTools.IDTOKEN);
+        if (Strings.isEmpty(idToken)) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -83,7 +90,9 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
         Session session = result.getSession();
         
-     // Add session log properties
+        session.setParameter(OIDCTools.IDTOKEN, idToken);
+        
+        // Add session log properties
         LogProperties.putSessionProperties(session);
 
         // Add headers and cookies from login result

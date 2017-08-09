@@ -69,7 +69,9 @@ public enum OIDCBackendProperty implements Property {
     scope(OIDCProperty.PREFIX,"openid"),
     issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     responseType(OIDCProperty.PREFIX, "code"), 
-    userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
+    userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    logoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    redirectURIPostLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
     
     private final String fqn;
     private final Object defaultValue;

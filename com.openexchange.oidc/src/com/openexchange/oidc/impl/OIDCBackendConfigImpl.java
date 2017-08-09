@@ -72,4 +72,14 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.userInfoEndpoint);
     }
 
+    @Override
+    public String getLogoutEndpoint() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.logoutEndpoint);
+    }
+
+    @Override
+    public String getRedirectURIPostLogout() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIPostLogout);
+    }
+
 }

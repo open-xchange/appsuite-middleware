@@ -76,7 +76,10 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to %1$s", Category.CATEGORY_ERROR, 13), 
     UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to %1$s", Category.CATEGORY_ERROR, 14), 
     UNABLE_TO_PARSE_URI("Unable to parse the following URI: %1$s", Category.CATEGORY_CONFIGURATION, 15), 
-    UNABLE_TO_PARSE_USER_ADDRESS("The following email address could not be mapped to a user: %1$s, potential data inconsistency, since this address was responded by the IDP.", Category.CATEGORY_CONFLICT, 16);
+    UNABLE_TO_PARSE_USER_ADDRESS("The following email address could not be mapped to a user: %1$s, potential data inconsistency, since this address was responded by the IDP.", Category.CATEGORY_CONFLICT, 16), 
+    LOGOUT_TOKEN_NOT_THERE("The OpenID server did not send a logout_token.", Category.CATEGORY_ERROR, 17),
+    INVALID_LOGOUT_REQUEST("Received an invalid logout request: %1$s", Category.CATEGORY_WARNING, 18), 
+    UNABLE_TO_PARSE_SESSIONS_IDTOKEN("Unable to parse the IDToken which was transported with the session.", Category.CATEGORY_WARNING, 19);
 
     private final String message;
     private final String displayMessage;

@@ -72,7 +72,7 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
     public void readPortable(PortableReader reader) throws IOException {
         DefaultAuthenticationRequestInfo authenticationInfo = new DefaultAuthenticationRequestInfo(new State(reader.readUTF(STATE)), 
             reader.readUTF(DOMAINNAME), reader.readUTF(DEEPLINK), new Nonce(reader.readUTF(NONCE)), this.getMapFromArray(reader.readUTFArray(UI_CLIENT_INFORMATION)), reader.readUTF(UI_CLIENT_ID));
-        setDelegate(authenticationInfo);
+        this.setDelegate(authenticationInfo);
     }
 
     private Map<String, String> getMapFromArray(String[] readUTFArray) {

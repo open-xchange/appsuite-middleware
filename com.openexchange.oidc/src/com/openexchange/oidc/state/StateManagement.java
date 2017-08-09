@@ -68,5 +68,9 @@ public interface StateManagement {
     void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
     
     AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
+    
+    void addLogoutRequest(LogoutRequestInfo logoutRequestInfo);
+    
+    LogoutRequestInfo getAndRemoveLoginRequestInfo(String state);
 
 }

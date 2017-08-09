@@ -48,8 +48,6 @@
  */
 package com.openexchange.oidc;
 
-import java.net.URL;
-
 /**
  * {@link OIDCBackendConfig}
  *
@@ -96,4 +94,8 @@ public interface OIDCBackendConfig {
     String getResponseType();
     
     String getUserInfoEndpoint();
+    
+    String getLogoutEndpoint();
+    
+    String getRedirectURIPostLogout();
 }

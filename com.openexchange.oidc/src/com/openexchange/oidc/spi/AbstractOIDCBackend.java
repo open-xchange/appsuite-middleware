@@ -50,6 +50,7 @@ package com.openexchange.oidc.spi;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
@@ -63,6 +64,7 @@ import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
@@ -73,6 +75,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
@@ -92,6 +95,8 @@ import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
+import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.Session;
 
 /**
  * Reference implementation of an OpenID backend.
@@ -209,6 +214,23 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state) {
         return defaultAuthenticated;
+    }
+    
+    @Override
+    public String getLogoutRequest(Session session) throws OXException {
+        URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
+
+        JWT idToken = null;
+        try {
+            idToken = JWTParser.parse((String) session.getParameter(OIDCTools.IDTOKEN));
+        } catch (ParseException e) {
+            //TODO QS-VS: Eventuell das Token mit rausgeben?
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN.create(e);
+        }
+
+        URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostLogout());
+        LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
+        return logoutRequest.toURI().toString();
     }
     
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist

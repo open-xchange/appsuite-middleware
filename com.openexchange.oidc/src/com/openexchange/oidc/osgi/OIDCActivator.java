@@ -60,6 +60,7 @@ import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
 /**
@@ -84,7 +85,8 @@ public class OIDCActivator extends HousekeepingActivator{
             MailResolver.class,
             SessionReservationService.class,
             ContextService.class,
-            UserService.class
+            UserService.class,
+            SessiondService.class
         };
     }
 

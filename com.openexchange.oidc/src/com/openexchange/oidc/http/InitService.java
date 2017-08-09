@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.oidc.OIDCConfig;
+import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.server.ServiceLookup;
@@ -104,6 +105,10 @@ public class InitService extends OIDCServlet {
             buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
         } catch (OXException e) {
             //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
+            if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
+                LOG.debug(e.getLocalizedMessage());
+                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            }
         }
     }
 
@@ -111,6 +116,8 @@ public class InitService extends OIDCServlet {
         String redirectUri = "";
         if (flow.equals("login")) {
             redirectUri = provider.getLoginRedirectRequest(httpRequest);
+        } else if (flow.equals("logout")) {
+            redirectUri = provider.getLogoutRedirectRequest(httpRequest);
         }
         return redirectUri;
     }

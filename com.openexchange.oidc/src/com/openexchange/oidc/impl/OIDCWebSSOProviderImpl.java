@@ -93,7 +93,9 @@ import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -227,6 +229,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setHost(this.getDomainName(Services.getService(HostnameService.class), httpRequest))
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
+                .setParameter(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString())
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(httpResponse);
             httpResponse.sendRedirect(redirectLocation.build().toString());
@@ -254,12 +257,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws OXException {
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
-        URI callback = this.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
+        URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
     
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
     
-        URI tokenEndpoint = getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
+        URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
     
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
@@ -289,11 +292,27 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return (OIDCTokenResponse) tokenResponse;
     }
     
-    private URI getURIFromPath(String path) throws OXException{
-        try {
-            return new URI(path);
-        } catch (URISyntaxException e) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, path);
+    @Override
+    public void logoutCurrentUser(String state) {
+    }
+
+    @Override
+    public String getLogoutRedirectRequest(HttpServletRequest httpRequest) throws OXException {
+        Session session = this.extractSessionFromRequest(httpRequest);
+        return this.backend.getLogoutRequest(session);
+    }
+
+    private Session extractSessionFromRequest(HttpServletRequest httpRequest) throws OXException {
+        String sessionId = httpRequest.getParameter("session");
+        if (sessionId == null) {
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("No session parameter set.");
         }
+
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        Session session = sessiondService.getSession(sessionId);
+        if (session == null) {
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("Invalid session parameter, no session found.");
+        }
+        return session;
     }
 }
