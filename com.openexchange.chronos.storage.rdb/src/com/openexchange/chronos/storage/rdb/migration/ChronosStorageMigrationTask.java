@@ -51,9 +51,12 @@ package com.openexchange.chronos.storage.rdb.migration;
 
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.tableExists;
 import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -89,9 +92,9 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { 
-            com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName(), 
-            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" 
+        return new String[] {
+            com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask.class.getName(),
+            "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2"
         };
     }
 
@@ -111,6 +114,10 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
+            /*
+             * prepare destination tables
+             */
+            emptyDestinationTables(connection);
             /*
              * migrate calendar data for all contexts & increment progress
              */
@@ -135,6 +142,28 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                 autocommit(connection);
                 dbService.backForUpdateTask(params.getContextId(), connection);
             }
+        }
+    }
+
+    private static void emptyDestinationTables(Connection connection) throws SQLException {
+        for (String tableName : new com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService().tablesToCreate()) {
+            if (tableExists(connection, tableName) && false == isEmpty(connection, tableName)) {
+                LOG.info("Emptying table \"{}\" as preparation for calendar storage migration.", tableName);
+                empty(connection, tableName);
+            }
+        }
+    }
+
+    private static void empty(Connection connection, String tableName) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("TRUNCATE " + tableName + ';')) {
+            stmt.executeUpdate();
+        }
+    }
+
+    private static boolean isEmpty(Connection connection, String tableName) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT NULL FROM " + tableName + " LIMIT 1;");
+            ResultSet resultSet = stmt.executeQuery()) {
+            return false == resultSet.next();
         }
     }
 
