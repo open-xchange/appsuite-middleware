@@ -75,6 +75,7 @@ import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
@@ -124,9 +125,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
 
     @Override
     public Permission[] getPermissions() {
-        return new Permission[] {
-            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
-                Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
+        return new Permission[] { new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
         };
     }
 
@@ -173,16 +172,15 @@ public class ScheduleOutboxCollection extends DAVCollection {
         Element scheduleResponse = new Element("schedule-response", CAL_NS);
         if (null != freeBusyRequest) {
             for (FreeBusyData freeBusyData : freeBusyRequest) {
-                Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee;
+                Map<Attendee, FreeBusyResult> freeBusyPerAttendee;
                 try {
-                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().getMergedFreeBusy(
-                        getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()));
+                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().calculateFreeBusyTime(getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()));
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
                     continue;
                 }
                 for (Attendee attendee : freeBusyData.getAttendees()) {
-                    scheduleResponse.addContent(getResponse(freeBusyData, attendee, freeBusyPerAttendee.get(attendee)));
+                    scheduleResponse.addContent(getResponse(freeBusyData, attendee, freeBusyPerAttendee.get(attendee).getFreeBusyTimes()));
                 }
             }
         }
@@ -284,14 +282,17 @@ public class ScheduleOutboxCollection extends DAVCollection {
 
     @Override
     public void setLanguage(String language) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override
     public void setLength(Long length) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override
     public void setContentType(String type) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override
