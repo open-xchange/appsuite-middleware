@@ -265,7 +265,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
 
-        /* Calendar Availability Tables
+        // Calendar Availability Tables
         tablesByName.put("calendar_availability",
             "CREATE TABLE calendar_availability (" +
                 "cid INT4 UNSIGNED NOT NULL," +
@@ -335,7 +335,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "id INT4 UNSIGNED NOT NULL," +
                 "PRIMARY KEY (cid)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
-        );*/
+        );
         return tablesByName; //@formatter:on
     }
 
