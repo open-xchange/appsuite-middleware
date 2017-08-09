@@ -59,7 +59,6 @@ import static com.openexchange.tools.arrays.Collections.put;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,14 +83,13 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DateTimeComparator;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -125,9 +123,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         EventField.RECURRENCE_RULE
     };
     //@formatter:on
-
-    private static final Comparator<FreeBusyTime> freeBusyTimeDateTimeComparator = new FreeBusyTimeDateTimeComparator();
-    private static final Comparator<CalendarFreeSlot> freeSlotDateTimeComparator = new FreeSlotDateTimeComparator();
 
     /**
      * Initializes a new {@link FreeBusyPerformer}.
@@ -273,7 +268,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
             // Sort by starting date
-            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
+            Collections.sort(eventsFreeBusyTimes, Comparators.freeBusyTimeDateTimeComparator);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
@@ -394,7 +389,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             Date slotStartTime = startTime;
             Date slotEndTime = endTime;
-            java.util.Collections.sort(availability.getCalendarFreeSlots(), freeSlotDateTimeComparator);
+            java.util.Collections.sort(availability.getCalendarFreeSlots(), Comparators.freeSlotDateTimeComparator);
             for (CalendarFreeSlot calendarFreeSlot : availability.getCalendarFreeSlots()) {
                 // Get the slot's start/end times
                 slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
@@ -740,63 +735,4 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         }
         return freeBusyTimes;
     }
-
-    /**
-     * {@link FreeBusyTime} - DateTime comparator. Orders {@link FreeBusyTime} items
-     * by start date (ascending)
-     */
-    private static class FreeBusyTimeDateTimeComparator implements Comparator<FreeBusyTime> {
-
-        /**
-         * Initialises a new {@link GetPerformer.DateTimeComparator}.
-         */
-        public FreeBusyTimeDateTimeComparator() {
-            super();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(FreeBusyTime o1, FreeBusyTime o2) {
-            if (o1.getStartTime().before(o2.getStartTime())) {
-                return -1;
-            } else if (o1.getStartTime().after(o2.getStartTime())) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
-    /**
-     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarFreeSlot} items
-     * by start date (ascending)
-     */
-    private static class FreeSlotDateTimeComparator implements Comparator<CalendarFreeSlot> {
-
-        /**
-         * Initialises a new {@link GetPerformer.DateTimeComparator}.
-         */
-        public FreeSlotDateTimeComparator() {
-            super();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(CalendarFreeSlot o1, CalendarFreeSlot o2) {
-            if (o1.getStartTime().before(o2.getStartTime())) {
-                return -1;
-            } else if (o1.getStartTime().after(o2.getStartTime())) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
 }

@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,7 +64,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DateTimeComparator;
+import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
@@ -77,10 +76,6 @@ import com.openexchange.tools.arrays.Collections;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class GetPerformer extends AbstractPerformer {
-
-    private static final Comparator<CalendarAvailability> availabilityDateTimeComparator = new AvailabilityDateTimeComparator();
-    private static final Comparator<CalendarFreeSlot> freeSlotDateTimeComparator = new FreeSlotDateTimeComparator();
-    private static final Comparator<CalendarAvailability> priorityComparator = new PriorityComparator();
 
     /**
      * Initialises a new {@link GetPerformer}.
@@ -276,7 +271,7 @@ public class GetPerformer extends AbstractPerformer {
      */
     private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
         // Sort by priority; higher priority will be on top
-        java.util.Collections.sort(calendarAvailabilities, priorityComparator);
+        java.util.Collections.sort(calendarAvailabilities, Comparators.priorityComparator);
 
         // The combined available time
         List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
@@ -397,7 +392,7 @@ public class GetPerformer extends AbstractPerformer {
         availableTime.addAll(presAndPosts);
 
         // Sort by start date
-        java.util.Collections.sort(availableTime, availabilityDateTimeComparator);
+        java.util.Collections.sort(availableTime, Comparators.availabilityDateTimeComparator);
         return availableTime;
     }
 
@@ -509,7 +504,7 @@ public class GetPerformer extends AbstractPerformer {
      */
     private List<CalendarFreeSlot> combineSlots(List<CalendarFreeSlot> freeSlots) {
         // Sort by starting date
-        java.util.Collections.sort(freeSlots, freeSlotDateTimeComparator);
+        java.util.Collections.sort(freeSlots, Comparators.freeSlotDateTimeComparator);
 
         List<CalendarFreeSlot> combined = new ArrayList<>(freeSlots.size());
         Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
@@ -542,103 +537,10 @@ public class GetPerformer extends AbstractPerformer {
             combined.add(a);
         }
         // Sort by starting date
-        java.util.Collections.sort(combined, freeSlotDateTimeComparator);
+        java.util.Collections.sort(combined, Comparators.freeSlotDateTimeComparator);
         return combined;
     }
 
     ///////////////////////////////////////// Comparators //////////////////////////////////////
 
-    /**
-     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarFreeSlot} items
-     * by start date (ascending)
-     */
-    private static class FreeSlotDateTimeComparator implements Comparator<CalendarFreeSlot> {
-
-        /**
-         * Initialises a new {@link GetPerformer.DateTimeComparator}.
-         */
-        public FreeSlotDateTimeComparator() {
-            super();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(CalendarFreeSlot o1, CalendarFreeSlot o2) {
-            if (o1.getStartTime().before(o2.getStartTime())) {
-                return -1;
-            } else if (o1.getStartTime().after(o2.getStartTime())) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
-    /**
-     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarAvailability} items
-     * by start date (ascending)
-     */
-    private static class AvailabilityDateTimeComparator implements Comparator<CalendarAvailability> {
-
-        /**
-         * Initialises a new {@link GetPerformer.DateTimeComparator}.
-         */
-        public AvailabilityDateTimeComparator() {
-            super();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
-            if (o1.getStartTime().before(o2.getStartTime())) {
-                return -1;
-            } else if (o1.getStartTime().after(o2.getStartTime())) {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
-    /**
-     * {@link PriorityComparator} - Priority comparator. Orders {@link CalendarAvailability} items
-     * by priority (descending). We want elements with higher priority (in this context '1' > '9' > '0')
-     * to be on the top of the list.
-     */
-    private static class PriorityComparator implements Comparator<CalendarAvailability> {
-
-        /**
-         * Initialises a new {@link GetPerformer.PriorityComparator}.
-         */
-        public PriorityComparator() {
-            super();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
-            // Use '10' for '0' as '0' has a lower priority than '9' 
-            int o1Priority = o1.getPriority() == 0 ? 10 : o1.getPriority();
-            int o2Priority = o2.getPriority() == 0 ? 10 : o2.getPriority();
-
-            //We want elements with higher priority (in this context '1' > '9' > '0') to be on the top of the list
-            if (o1Priority > o2Priority) {
-                return 1;
-            } else if (o1Priority < o2Priority) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    }
 }
