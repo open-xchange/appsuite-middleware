@@ -103,7 +103,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
             availability.setCalendarUser(session.getUserId());
             availability.setLastModified(timeNow);
             // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
-            if (!availability.contains(AvailabilityField.dtstamp)) {
+            if (availability.getCreationTimestamp() == null) {
                 availability.setCreationTimestamp(timeNow);
             }
             if (availability.getStartTime() == null) {
@@ -121,8 +121,14 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);
                 // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
-                if (!freeSlot.contains(FreeSlotField.dtstamp)) {
+                if (freeSlot.getCreationTimestamp() == null) {
                     freeSlot.setCreationTimestamp(timeNow);
+                }
+                if (freeSlot.getStartTime() == null) {
+                    freeSlot.setStartTime(new DateTime(0));
+                }
+                if (freeSlot.getEndTime() == null) {
+                    freeSlot.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
                 }
             }
         }
