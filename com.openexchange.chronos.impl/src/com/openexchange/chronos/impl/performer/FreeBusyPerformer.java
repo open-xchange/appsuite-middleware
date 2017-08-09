@@ -296,6 +296,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         for (Attendee attendee : availableTimes.keySet()) {
             for (CalendarAvailability calendarAvailability : availableTimes.get(attendee)) {
                 List<CalendarFreeSlot> auxFreeSlot = new ArrayList<>();
+                Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
                 for (Iterator<CalendarFreeSlot> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
                     CalendarFreeSlot freeSlot = iterator.next();
                     // No recurring free slot? Skip
@@ -311,7 +312,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         long nextOccurrence = recurrenceIterator.next();
                         Date startOfOccurrence = new Date(nextOccurrence);
                         // We reached the availability's end? Stop
-                        if (startOfOccurrence.after(until)) {
+                        if (startOfOccurrence.after(until) || startOfOccurrence.after(endTime)) {
                             break;
                         }
                         // Determine the end of the occurrence's instance
