@@ -319,9 +319,9 @@ public class UserizedGroupwareCalendarFolderProviderImpl implements UserizedGrou
         if (UserizedFolderField.USER_COLOR.equalsField(name)) {
             folder.setUserColor(value);
         } else if (UserizedFolderField.USER_DESCRIPTION.equalsField(name)) {
-            folder.setAlternativeDescription(value);
+            folder.setUserDescription(value);
         } else if (UserizedFolderField.USER_NAME.equalsField(name)) {
-            folder.setAlternativeName(value);
+            folder.setUserName(value);
         } else if (UserizedFolderField.SUBSCRIBED.equalsField(name)) {
             folder.setSubscribed(Boolean.valueOf(value));
         } else if (UserizedFolderField.SYNC.equalsField(name)) {

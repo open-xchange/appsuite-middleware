@@ -140,7 +140,7 @@ public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupware
         return userName;
     }
 
-    public void setAlternativeName(String alternativeName) {
+    public void setUserName(String alternativeName) {
         this.userName = alternativeName;
     }
 
@@ -149,7 +149,7 @@ public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupware
         return userDescription;
     }
 
-    public void setAlternativeDescription(String alternaticeDescription) {
+    public void setUserDescription(String alternaticeDescription) {
         this.userDescription = alternaticeDescription;
     }
 
@@ -182,6 +182,8 @@ public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupware
     public void setAdditionalProperty(String key, String value) {
         properties.put(key, value);
     }
+
+    /* Delegate all GroupwareCalendarFolder abilities */
 
     @Override
     public String getId() {

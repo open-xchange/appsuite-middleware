@@ -53,7 +53,7 @@ import java.util.Map;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 
 /**
- * {@link UserizedGroupwareCalendarFolderProvider}
+ * {@link UserizedGroupwareCalendarFolderProvider} - Provides user-specific folders for
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
