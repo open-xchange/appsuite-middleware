@@ -274,10 +274,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
             // Sort by starting date
             Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
-            // Mark the rest of the range as free
-            calculateFreeBlocks(eventsFreeBusyTimes, from, until);
-            // Sort by starting date
-            Collections.sort(eventsFreeBusyTimes, freeBusyTimeDateTimeComparator);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
@@ -362,7 +358,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 } else if (AvailabilityUtils.contained(eventFreeBusyTime.getStartTime(), eventFreeBusyTime.getEndTime(), availabilityFreeBusyTime.getStartTime(), availabilityFreeBusyTime.getEndTime())) {
                     // If the freeBusyTime of the event is entirely contained with in the freeBusyTime block of the availability,
                     // then split the freeBusyTime block of the availability and remove it from the list
-                    splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime, FbType.FREE);
+                    splitFreeBusyTime(auxiliaryList, eventFreeBusyTime, availabilityFreeBusyTime);
                     // Remove
                     iterator.remove();
                 }
@@ -408,8 +404,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     // Create a split for the availability component with the equivalent BusyType
                     freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
                 }
-                // For each available component in the availability component mark the f/b as FREE
-                freeBusyTimes.add(createFreeBusyTime(FbType.FREE, slotStartTime, slotEndTime));
                 // Start from slot end time on the next iteration
                 startTime = slotEndTime;
             }
@@ -481,35 +475,6 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
-     * Calculates the rest of the free blocks that remain in the specified interval
-     * 
-     * @param eventsFreeBusyTimes The already existing {@link FreeBusyTime} blocks
-     * @param from The starting point in the interval
-     * @param until The ending point in the interval
-     */
-    private void calculateFreeBlocks(List<FreeBusyTime> eventsFreeBusyTimes, Date from, Date until) {
-        List<FreeBusyTime> freeBlocks = new ArrayList<>();
-        Date start = from;
-        for (FreeBusyTime freeBusyTime : eventsFreeBusyTimes) {
-            if (freeBusyTime.getStartTime().after(start)) {
-                if (!freeBusyTime.getFbType().equals(FbType.FREE)) {
-                    freeBlocks.add(createFreeBusyTime(FbType.FREE, start, freeBusyTime.getStartTime()));
-                }
-            }
-            start = freeBusyTime.getEndTime();
-        }
-
-        // Add the last block
-        FreeBusyTime freeBusyTime = eventsFreeBusyTimes.get(eventsFreeBusyTimes.size() - 1);
-        if (freeBusyTime.getEndTime().before(until) && (!freeBusyTime.getFbType().equals(FbType.FREE))) {
-            freeBlocks.add(createFreeBusyTime(FbType.FREE, freeBusyTime.getEndTime(), until));
-        }
-
-        // Add the rest free blocks
-        eventsFreeBusyTimes.addAll(freeBlocks);
-    }
-
-    /**
      * Given that the {@link Event}'s free busy time block is fully contained
      * with in the availability's block, it splits the specified {@link FreeBusyTime}
      * in two intervals:
@@ -531,11 +496,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      *
      * @param auxiliaryList The auxiliary {@link List} to add the new intervals
      * @param freeBusyTime The middle {@link FreeBusyTime} block
-     * @param toSplit The {@link FreeBusyTime} block to split
      */
-    private void splitFreeBusyTime(List<FreeBusyTime> auxiliaryList, FreeBusyTime freeBusyTime, FreeBusyTime toSplit, FbType splitFbType) {
-        auxiliaryList.add(createFreeBusyTime(splitFbType, toSplit.getStartTime(), freeBusyTime.getStartTime()));
-        auxiliaryList.add(createFreeBusyTime(splitFbType, freeBusyTime.getEndTime(), toSplit.getEndTime()));
+    private void splitFreeBusyTime(List<FreeBusyTime> auxiliaryList, FreeBusyTime freeBusyTime, FreeBusyTime toSplit) {
+        auxiliaryList.add(createFreeBusyTime(toSplit.getFbType(), toSplit.getStartTime(), freeBusyTime.getStartTime()));
+        auxiliaryList.add(createFreeBusyTime(toSplit.getFbType(), freeBusyTime.getEndTime(), toSplit.getEndTime()));
     }
 
     /**
