@@ -111,8 +111,10 @@ public interface FreeBusyService {
     List<EventConflict> checkForConflicts(CalendarSession session, Event event, List<Attendee> attendees) throws OXException;
 
     /**
-     * Calculates the free-busy time information for the specified {@link Attendee}s regarding the
-     * {@link CalendarAvailability}
+     * Calculates the free-busy time information for the specified {@link Attendee}s taken into consideration their
+     * {@link CalendarAvailability} blocks. It first retrieves the merged free busy information using
+     * the {@link #getMergedFreeBusy(CalendarSession, List, Date, Date)} method and combines those slots
+     * with the {@link CalendarAvailability} blocks of their respective users.
      * 
      * @param session The calendar session
      * @param attendees The {@link Attendee}s to calculate the free busy time for
