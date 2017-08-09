@@ -91,32 +91,47 @@ public interface UserizedGroupwareCalendarFolder extends GroupwareCalendarFolder
     /**
      * Indicates if the folder has an user-specific name.
      * 
-     * @return <code>true</code> if the user-specified an other folder name than specified in {@link CalendarFolder#getName()},
+     * @return <code>true</code> if the user-specified an other folder name than specified in {@link GroupwareCalendarFolder#getName()},
      *         <code>false</code> if there is no user-specific folder name.
      */
-    boolean hasAlternativeName();
+    boolean hasUserName();
 
     /**
      * Indicates if the folder has an user-specific description
      * 
-     * @return <code>true</code> if the user-specified an other description than specified in {@link CalendarFolder#getDescription()},
+     * @return <code>true</code> if the user-specified an other description than specified in {@link GroupwareCalendarFolder#getDescription()},
      *         <code>false</code> if there is no user-specific folder description.
      */
-    boolean hasAlternativeDescription();
+    boolean hasUserDescription();
+
+    /**
+     * Indicates if the folder has an user-specific color
+     * 
+     * @return <code>true</code> if the user-specified an other color than specified in {@link GroupwareCalendarFolder#getColor()},
+     *         <code>false</code> if there is no user-specific folder description.
+     */
+    boolean hasUserColor();
 
     /**
      * Get the user-specific folder name
      * 
-     * @return The user-specific name or <code>null</code> if there is no user-specific folder name
+     * @return The user-specific name or <code>null</code> if not defined
      */
-    String getAlternativeName();
+    String getUserName();
 
     /**
      * Get the user-specific folder description
      * 
-     * @return The user-specific folder description or <code>null</code> if there is no user-specific folder description
+     * @return The user-specific folder description or <code>null</code> if not defined
      */
-    String getAlternativeDescription();
+    String getUserDescription();
+
+    /**
+     * Gets the calendar color.
+     * 
+     * @return The calendar color, or <code>null</code> if not defined
+     */
+    String getUserColor();
 
     /**
      * Get additional user-specific properties for this folder.

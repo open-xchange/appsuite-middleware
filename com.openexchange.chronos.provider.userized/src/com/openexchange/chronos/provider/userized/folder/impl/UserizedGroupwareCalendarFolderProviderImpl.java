@@ -316,9 +316,11 @@ public class UserizedGroupwareCalendarFolderProviderImpl implements UserizedGrou
      * @param value The value of the name
      */
     private void parseFolderFields(DefaultUserizedGroupwareCalendarFolder folder, String name, String value) {
-        if (UserizedFolderField.ALTERNATIVE_DESCRIPTION.equalsField(name)) {
+        if (UserizedFolderField.USER_COLOR.equalsField(name)) {
+            folder.setUserColor(value);
+        } else if (UserizedFolderField.USER_DESCRIPTION.equalsField(name)) {
             folder.setAlternativeDescription(value);
-        } else if (UserizedFolderField.ALTERNATIVE_NAME.equalsField(name)) {
+        } else if (UserizedFolderField.USER_NAME.equalsField(name)) {
             folder.setAlternativeName(value);
         } else if (UserizedFolderField.SUBSCRIBED.equalsField(name)) {
             folder.setSubscribed(Boolean.valueOf(value));

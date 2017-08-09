@@ -71,8 +71,10 @@ public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupware
     private boolean subscribed = false;
     private boolean sync       = false;
 
-    private String aName;
-    private String aDescription;
+    /* User specified name, description and color for this folder */
+    private String userName;
+    private String userDescription;
+    private String userColor;
 
     private Map<String, String> properties;
 
@@ -124,31 +126,45 @@ public class DefaultUserizedGroupwareCalendarFolder implements UserizedGroupware
     }
 
     @Override
-    public boolean hasAlternativeName() {
-        return false == Strings.isEmpty(aName);
+    public boolean hasUserName() {
+        return false == Strings.isEmpty(userName);
     }
 
     @Override
-    public boolean hasAlternativeDescription() {
-        return false == Strings.isEmpty(aDescription);
+    public boolean hasUserDescription() {
+        return false == Strings.isEmpty(userDescription);
     }
 
     @Override
-    public String getAlternativeName() {
-        return aName;
+    public String getUserName() {
+        return userName;
     }
 
     public void setAlternativeName(String alternativeName) {
-        this.aName = alternativeName;
+        this.userName = alternativeName;
     }
 
     @Override
-    public String getAlternativeDescription() {
-        return aDescription;
+    public String getUserDescription() {
+        return userDescription;
     }
 
     public void setAlternativeDescription(String alternaticeDescription) {
-        this.aDescription = alternaticeDescription;
+        this.userDescription = alternaticeDescription;
+    }
+
+    @Override
+    public boolean hasUserColor() {
+        return null != userColor;
+    }
+
+    @Override
+    public String getUserColor() {
+        return userColor;
+    }
+
+    public void setUserColor(String color) {
+        this.userColor = color;
     }
 
     @Override

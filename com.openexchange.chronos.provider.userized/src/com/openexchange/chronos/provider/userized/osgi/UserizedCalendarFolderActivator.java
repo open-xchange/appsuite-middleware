@@ -91,6 +91,7 @@ public class UserizedCalendarFolderActivator extends HousekeepingActivator {
 
         });
 
+        // Register provider
         registerService(UserizedGroupwareCalendarFolderProvider.class, new UserizedGroupwareCalendarFolderProviderImpl(this));
     }
 }

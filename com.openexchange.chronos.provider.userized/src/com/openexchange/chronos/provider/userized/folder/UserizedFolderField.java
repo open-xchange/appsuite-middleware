@@ -59,12 +59,15 @@ public enum UserizedFolderField {
 
     /** Additional undefined property */
     ADDITIONAL(""),
+    
+    /** Alternative user color */
+    USER_COLOR("userColor"),
 
     /** Alternative folder description */
-    ALTERNATIVE_DESCRIPTION("alternativeDescription"),
+    USER_DESCRIPTION("userDescription"),
 
     /** Alternative folder name */
-    ALTERNATIVE_NAME("alternativeName"),
+    USER_NAME("userName"),
 
     /** If the folder is subscribed */
     SUBSCRIBED("subscribded"),
