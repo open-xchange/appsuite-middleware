@@ -76,6 +76,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.USER_HAS_NO_AVAILABILITY_SET;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -291,6 +292,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Insufficient permissions</li>
      */
     INSUFFICIENT_ACCOUNT_PERMISSIONS("Insufficient permissions", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 5072),
+    /**
+     * The user '%1$s' has set no availability
+     */
+    NO_AVAILABILITY_FOR_USER("The user '%1$s' has set no availability", USER_HAS_NO_AVAILABILITY_SET, Category.CATEGORY_WARNING, 5073),
 
     ;
 

@@ -87,6 +87,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
@@ -252,8 +253,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         for (Attendee attendee : attendees) {
             List<CalendarAvailability> availableTime = availableTimes.get(attendee);
             if (availableTime == null) {
-                // TODO: collect and set warnings
-                List<OXException> warnings = new ArrayList<>();
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.NO_AVAILABILITY_FOR_USER.create(attendee.getEntity()));
                 FreeBusyResult result = new FreeBusyResult();
                 result.setWarnings(warnings);
                 continue;
