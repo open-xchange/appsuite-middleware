@@ -244,6 +244,30 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
                 alarmTrigger.removeProcessed();
             }
         });
+
+        mappings.put(AlarmTriggerField.RECURRENCE, new VarCharMapping<AlarmTrigger>("recurrence", "Recurrence ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, String value) {
+                alarmTrigger.setRecurrence(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsRecurrence();
+            }
+
+            @Override
+            public String get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getRecurrence();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeRecurrence();
+            }
+        });
+
         return mappings;
     }
 

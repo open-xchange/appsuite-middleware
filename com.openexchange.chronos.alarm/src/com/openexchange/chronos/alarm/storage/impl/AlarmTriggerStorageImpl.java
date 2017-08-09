@@ -60,6 +60,7 @@ import java.util.List;
 import com.openexchange.chronos.alarm.AlarmTrigger;
 import com.openexchange.chronos.alarm.AlarmTriggerField;
 import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -87,18 +88,18 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
     }
 
     @Override
-    public void insertAlarm(AlarmTrigger trigger) throws OXException{
+    public void insertAlarmTrigger(AlarmTrigger trigger) throws OXException{
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection writeCon = dbService.getWritable(trigger.getContextId());
         try {
-            insertAlarm(trigger, writeCon);
+            insertAlarmTrigger(trigger, writeCon);
         } finally {
             dbService.backWritable(trigger.getContextId(), writeCon);
         }
     };
 
     @Override
-    public void insertAlarm(AlarmTrigger trigger, Connection writeCon) throws OXException{
+    public void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException{
 
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
@@ -113,23 +114,23 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
                 logExecuteUpdate(stmt);
             }
         } catch (SQLException e) {
-            //TODO wrap in ox exception
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void updateAlarm(AlarmTrigger trigger) throws OXException{
+    public void updateAlarmTrigger(AlarmTrigger trigger) throws OXException{
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection writeCon = dbService.getWritable(trigger.getContextId());
         try {
-            insertAlarm(trigger, writeCon);
+            insertAlarmTrigger(trigger, writeCon);
         } finally {
             dbService.backWritable(trigger.getContextId(), writeCon);
         }
     };
 
     @Override
-    public void updateAlarm(AlarmTrigger trigger, Connection writeCon) throws OXException{
+    public void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException{
 
         try {
             AlarmTriggerField[] assignedfields = MAPPER.getAssignedFields(trigger);
@@ -146,23 +147,23 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
                 logExecuteUpdate(stmt);
             }
         } catch (SQLException e) {
-            // TODO wrap in ox exception
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public List<AlarmTrigger> getAlarms(int contextId, int account, long until, AlarmTriggerField fields[]) throws OXException{
+    public List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[]) throws OXException{
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection con = dbService.getReadOnly(contextId);
         try {
-            return getAlarms(contextId, account, until, fields, con);
+            return getAlarmTriggers(contextId, account, until, fields, con);
         } finally {
             dbService.backReadOnly(contextId, con);
         }
     }
 
     @Override
-    public List<AlarmTrigger> getAlarms(int contextId, int account, long until, AlarmTriggerField fields[], Connection con) throws OXException{
+    public List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[], Connection con) throws OXException{
         try {
             StringBuilder stringBuilder = new StringBuilder()
                 .append("SELECT ").append(MAPPER.getColumns(fields))
@@ -184,8 +185,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
             }
             return alrmTriggers;
         } catch (SQLException e) {
-            // TODO wrap as ox exception
-            throw new OXException();
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     };
 
@@ -230,11 +230,11 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
     }
 
     @Override
-    public void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds) throws OXException {
+    public void deleteAlarmTriggers(int contextId, int accountId, List<Integer> alarmIds) throws OXException {
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection writeCon = dbService.getWritable(contextId);
         try {
-            deleteAlarms(contextId, accountId, alarmIds, writeCon);
+            deleteAlarmTriggers(contextId, accountId, alarmIds, writeCon);
         } finally {
             dbService.backReadOnly(contextId, writeCon);
         }
@@ -244,7 +244,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
     private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm IN (";
 
     @Override
-    public void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException {
+    public void deleteAlarmTriggers(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException {
         PreparedStatement prepareStatement=null;
         try {
             String sql = Databases.getIN(SQL_DELETE, alarmIds.size());
@@ -257,8 +257,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
             }
             prepareStatement.executeUpdate();
         } catch (SQLException e) {
-            // TODO wrap as ox exception
-            e.printStackTrace();
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(prepareStatement);
         }

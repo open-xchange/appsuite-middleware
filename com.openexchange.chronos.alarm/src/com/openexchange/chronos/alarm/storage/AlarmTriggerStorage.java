@@ -63,13 +63,13 @@ import com.openexchange.exception.OXException;
  */
 public interface AlarmTriggerStorage {
 
-    void insertAlarm(AlarmTrigger trigger) throws OXException;
+    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
 
-    void insertAlarm(AlarmTrigger trigger, Connection writeCon) throws OXException;
+    void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
 
-    void updateAlarm(AlarmTrigger trigger) throws OXException;
+    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
 
-    void updateAlarm(AlarmTrigger trigger, Connection writeCon) throws OXException;
+    void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
 
     /**
      * @param contextId
@@ -79,7 +79,7 @@ public interface AlarmTriggerStorage {
      * @return
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarms(int contextId, int account, long until, AlarmTriggerField[] fields, Connection con) throws OXException;
+    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields, Connection con) throws OXException;
 
     /**
      * @param contextId
@@ -89,11 +89,11 @@ public interface AlarmTriggerStorage {
      * @return
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarms(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
+    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
 
 
-    void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds) throws OXException;
+    void deleteAlarmTriggers(int contextId, int accountId, List<Integer> alarmIds) throws OXException;
 
-    void deleteAlarms(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException;
+    void deleteAlarmTriggers(int contextId, int accountId, List<Integer> alarmIds, Connection writeCon) throws OXException;
 
 }
