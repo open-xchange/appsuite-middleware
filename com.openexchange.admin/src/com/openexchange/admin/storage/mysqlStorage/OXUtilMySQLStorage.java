@@ -83,6 +83,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.internet.idn.IDNA;
@@ -3100,18 +3101,25 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         class Usage {
 
             private final AtomicLong usage;
+            private final AtomicInteger entities;
 
             Usage(long initialUsage) {
                 super();
                 this.usage = new AtomicLong(initialUsage);
+                this.entities = new AtomicInteger(1);
             }
 
-            void add(long usage) {
+            void addForEntity(long usage) {
                 this.usage.addAndGet(usage);
+                entities.incrementAndGet();
             }
 
             long getUsage() {
                 return usage.get();
+            }
+
+            int getEntities() {
+                return entities.get();
             }
         }
         final ConcurrentMap<Integer, Usage> id2usage = new ConcurrentHashMap<>(stores.size());
@@ -3188,12 +3196,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     if (null != fsUsage) {
                                         // Another thread inserted usage in the meantime
                                         if (usage > 0) {
-                                            fsUsage.add(usage);
+                                            fsUsage.addForEntity(usage);
                                         }
                                     }
                                 } else {
                                     if (usage > 0) {
-                                        fsUsage.add(usage);
+                                        fsUsage.addForEntity(usage);
                                     }
                                 }
                             }
@@ -3291,10 +3299,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         // Await completion
         ThreadPools.<Void, StorageException> awaitCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
 
+        // Correct size (in MB) and apply possible usage information
         for (Filestore store : stores) {
             Usage fsUsage = id2usage.get(store.getId());
             store.setSize(L(toMB(l(store.getSize()))));
-            store.setUsed(L(toMB(null == fsUsage ? 0L : fsUsage.getUsage())));
+            if (null == fsUsage) {
+                store.setCurrentContexts(Integer.valueOf(0));
+                store.setUsed(L(0));
+            } else {
+                store.setCurrentContexts(Integer.valueOf(fsUsage.getEntities()));
+                store.setUsed(L(toMB(fsUsage.getUsage())));
+            }
         }
     }
 
