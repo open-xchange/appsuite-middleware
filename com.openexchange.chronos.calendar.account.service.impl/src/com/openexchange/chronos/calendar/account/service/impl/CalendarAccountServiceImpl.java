@@ -68,10 +68,11 @@ import com.openexchange.exception.OXException;
  */
 public class CalendarAccountServiceImpl implements CalendarAccountService {
 
+    //Maybe put the default account in a central position
     /** The default <i>internal</i> calendar provider account */
     private static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
 
-    private final CalendarAccountStorage delegate;
+    private final CalendarAccountStorage storage;
     //Maybe use session instead
     private final int userId;
 
@@ -82,34 +83,34 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
      */
     public CalendarAccountServiceImpl(CalendarAccountStorage calendarAccountStorage, int userId) {
         super();
-        this.delegate = calendarAccountStorage;
+        this.storage = calendarAccountStorage;
         this.userId = userId;
     }
 
     @Override
     public int insertAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException {
-        return delegate.insertAccount(providerId, userId, configuration);
+        return storage.insertAccount(providerId, userId, configuration);
     }
 
     @Override
     public void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException {
         if (DEFAULT_ACCOUNT.getAccountId() == id) {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
         } else if (accountPermissionCheck(id)) {
-            delegate.updateAccount(id, configuration, timestamp);
+            storage.updateAccount(id, configuration, timestamp);
         } else {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
         }
     }
 
     @Override
     public void deleteAccount(int id) throws OXException {
         if (DEFAULT_ACCOUNT.getAccountId() == id) {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
         } else if (accountPermissionCheck(id)) {
-            delegate.deleteAccount(id);
+            storage.deleteAccount(id);
         } else {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
         }
     }
 
@@ -118,9 +119,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
         if (DEFAULT_ACCOUNT.getAccountId() == id) {
             return DEFAULT_ACCOUNT;
         } else if (accountPermissionCheck(id)) {
-            return delegate.loadAccount(id);
+            return storage.loadAccount(id);
         } else {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
         }
     }
 
@@ -129,7 +130,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
         if (this.userId == userId) {
             List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
             accounts.add(DEFAULT_ACCOUNT);
-            accounts.addAll(delegate.loadAccounts(userId));
+            accounts.addAll(storage.loadAccounts(userId));
             return accounts;
         } else {
             throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
@@ -137,11 +138,11 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     private boolean accountPermissionCheck(int accId) throws OXException {
-        CalendarAccount account = delegate.loadAccount(accId);
-        if (userId == account.getUserId()) {
-            return true;
+        CalendarAccount account = storage.loadAccount(accId);
+        if (null == account || userId != account.getUserId()) {
+            return false;
         }
-        return false;
+        return true;
     }
 
 }

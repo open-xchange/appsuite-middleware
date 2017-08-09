@@ -82,6 +82,8 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
@@ -95,8 +97,6 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -522,14 +522,15 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      * @return The calendar accounts
      */
     private List<CalendarAccount> getAccounts() throws OXException {
-        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        accounts.add(DEFAULT_ACCOUNT);
-        CalendarAccountStorageFactory storageFactory = services.getOptionalService(CalendarAccountStorageFactory.class);
-        if (null != storageFactory) {
-            CalendarAccountStorage accountStorage = storageFactory.create(ServerSessionAdapter.valueOf(session).getContext());
-            accounts.addAll(accountStorage.loadAccounts(session.getUserId()));
+        CalendarAccountServiceFactory serviceFactory = services.getOptionalService(CalendarAccountServiceFactory.class);
+        if (null != serviceFactory) {
+            CalendarAccountService accountService = serviceFactory.create(session.getUserId(), ServerSessionAdapter.valueOf(session).getContext());
+            return accountService.loadAccounts(session.getUserId()); 
+        } else {
+            List<CalendarAccount> accounts = new ArrayList<CalendarAccount>(1);
+            accounts.add(DEFAULT_ACCOUNT);
+            return accounts;
         }
-        return accounts;
     }
 
     /**
@@ -539,19 +540,11 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      * @return The calendar account
      */
     private CalendarAccount getAccount(int accountId) throws OXException {
-        if (DEFAULT_ACCOUNT.getAccountId() == accountId) {
-            return DEFAULT_ACCOUNT;
+        CalendarAccountServiceFactory serviceFactory = services.getOptionalService(CalendarAccountServiceFactory.class);
+        if (null == serviceFactory) {
+            throw ServiceExceptionCode.absentService(CalendarAccountServiceFactory.class);
         }
-        CalendarAccountStorageFactory storageFactory = services.getOptionalService(CalendarAccountStorageFactory.class);
-        if (null == storageFactory) {
-            throw ServiceExceptionCode.absentService(CalendarAccountStorageFactory.class);
-        }
-        CalendarAccountStorage accountStorage = storageFactory.create(ServerSessionAdapter.valueOf(session).getContext());
-        CalendarAccount account = accountStorage.loadAccount(accountId);
-        if (null == account || account.getUserId() != session.getUserId()) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
-        }
-        return account;
+        return serviceFactory.create(session.getUserId(), ServerSessionAdapter.valueOf(session).getContext()).loadAccount(accountId);
     }
 
     @Override
