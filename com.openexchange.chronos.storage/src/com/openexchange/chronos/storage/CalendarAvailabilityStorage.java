@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.CalendarAvailability;
 import com.openexchange.chronos.CalendarFreeSlot;
@@ -94,7 +93,7 @@ public interface CalendarAvailabilityStorage {
     void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException;
 
     /**
-     * Inserts a the specified {@link List} of {@link CalendarAvailability} objects to the storage
+     * Inserts the specified {@link List} of {@link CalendarAvailability} objects to the storage
      * 
      * @param calendarAvailabilities The {@link List} with the {@link CalendarAvailability} objects
      * @throws OXException if the objects cannot be inserted or any other error is occurred
@@ -122,12 +121,10 @@ public interface CalendarAvailabilityStorage {
      * Loads the {@link CalendarAvailability} information for the users with the specified identifiers in the specified interval.
      * 
      * @param userIds The {@link List} of user identifiers
-     * @param from The starting point in the interval
-     * @param until The ending point in the interval
      * @return A {@link List} with the {@link CalendarAvailability} for each user
      * @throws OXException if the items cannot be retrieved
      */
-    List<CalendarAvailability> loadUserCalendarAvailability(List<Integer> userIds, Date from, Date until) throws OXException;
+    List<CalendarAvailability> loadCalendarAvailabilities(List<Integer> userIds) throws OXException;
 
     /**
      * Load all {@link CalendarAvailability} blocks for the specified user
@@ -137,17 +134,6 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if an error is occurred
      */
     List<CalendarAvailability> loadCalendarAvailabilities(int userId) throws OXException;
-
-    /**
-     * Loads the {@link CalendarAvailability} blocks for the specified user in the specified interval
-     * 
-     * @param userId The user identifier
-     * @param from The starting point in time
-     * @param until The ending point in time
-     * @return A {@link List} with all {@link CalendarAvailability} blocks or an empty {@link List}
-     * @throws OXException if the items cannot be retrieved or any other error is occurred
-     */
-    List<CalendarAvailability> loadCalenarAvailabilityInRange(int userId, Date from, Date until) throws OXException;
 
     /**
      * Loads from the storage the {@link CalendarFreeSlot}s for the {@link CalendarAvailability}

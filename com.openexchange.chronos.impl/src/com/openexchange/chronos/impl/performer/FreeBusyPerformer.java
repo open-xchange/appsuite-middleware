@@ -265,7 +265,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
             if (eventsFreeBusyTimes.isEmpty()) {
-                // FIXME: The empty event free/busy list is unmodifiable 
+                // FIXME: The empty event free/busy list is unmodifiable
                 eventsFreeBusyTimes = new ArrayList<>(0);
             }
 

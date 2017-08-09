@@ -175,16 +175,6 @@ public interface CalendarAvailabilityService {
     void deleteAvailabilities(CalendarSession session, List<String> availabilityIds) throws OXException;
 
     /**
-     * Deletes the {@link CalendarAvailability} blocks within the specified time range
-     * 
-     * @param session The {@link CalendarSession}
-     * @param from The start date of the interval
-     * @param until the end date of the interval
-     * @throws OXException if any error is occurred
-     */
-    void deleteAvailabilities(CalendarSession session, Date from, Date until) throws OXException;
-
-    /**
      * Purges all {@link CalendarAvailability} blocks for the specified user
      * 
      * @param session The {@link CalendarSession}

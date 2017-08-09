@@ -251,17 +251,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailabilities(com.openexchange.chronos.service.CalendarSession, java.util.Date, java.util.Date)
-     */
-    @Override
-    public void deleteAvailabilities(CalendarSession session, Date from, Date until) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#purgeAvailabilities(com.openexchange.chronos.service.CalendarSession)
      */
     @Override

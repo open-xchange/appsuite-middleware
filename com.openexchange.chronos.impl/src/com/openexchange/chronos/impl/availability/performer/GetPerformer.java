@@ -119,7 +119,8 @@ public class GetPerformer extends AbstractPerformer {
      * @throws OXException if an error occurs
      */
     public List<CalendarAvailability> performInRange(Date from, Date until) throws OXException {
-        return storage.loadCalenarAvailabilityInRange(session.getUserId(), from, until);
+        // TODO: adjust ranges
+        return storage.loadCalendarAvailabilities(session.getUserId());
     }
 
     /**
@@ -127,7 +128,7 @@ public class GetPerformer extends AbstractPerformer {
      * 
      * @param attendees the {@link List} of {@link Attendee}s to fetch the availability for
      * @param from The starting point in the interval
-     * @param until The ending poing in the interval
+     * @param until The ending point in the interval
      * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
      * @throws OXException if an error is occurred
      */
@@ -193,7 +194,7 @@ public class GetPerformer extends AbstractPerformer {
      */
     public List<CalendarAvailability> getCombinedAvailableTimeInRange(Date from, Date until) throws OXException {
         int userId = session.getUserId();
-        List<CalendarAvailability> calendarAvailabilities = storage.loadCalenarAvailabilityInRange(userId, from, until);
+        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
     }
 
@@ -258,7 +259,7 @@ public class GetPerformer extends AbstractPerformer {
      * @throws OXException if an error is occurred
      */
     private <T extends CalendarUser> Map<T, List<CalendarAvailability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
-        List<CalendarAvailability> availabilities = storage.loadUserCalendarAvailability(new ArrayList<>(reverseLookup.keySet()), from, until);
+        List<CalendarAvailability> availabilities = storage.loadCalendarAvailabilities(new ArrayList<>(reverseLookup.keySet()));
         Map<T, List<CalendarAvailability>> map = new HashMap<>();
         for (CalendarAvailability availability : availabilities) {
             T type = reverseLookup.get(availability.getCalendarUser());
