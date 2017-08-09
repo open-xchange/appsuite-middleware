@@ -79,7 +79,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
-import ch.qos.logback.core.util.FileSize;
 
 /**
  * {@link TracingSocketMonitor}
@@ -312,7 +311,7 @@ public class TracingSocketMonitor implements SocketMonitor {
 
             SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
             triggeringPolicy.setContext(context);
-            triggeringPolicy.setMaxFileSize(FileSize.valueOf(Integer.toString(config.getLoggingFileLimit())));
+            triggeringPolicy.setMaxFileSize(Integer.toString(config.getLoggingFileLimit()));
 
             FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
             rollingPolicy.setContext(context);
