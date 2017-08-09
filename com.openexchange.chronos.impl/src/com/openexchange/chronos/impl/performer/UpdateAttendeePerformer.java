@@ -74,10 +74,8 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
-import com.openexchange.chronos.impl.CreateResultImpl;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -107,17 +105,17 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the attendee update in an event.
      *
-     * @param objectID The identifier of the event to update the attendee in
-     * @param recurrenceID The recurrence identifier of the occurrence to update, or <code>null</code> if no specific occurrence is targeted
+     * @param objectId The identifier of the event to update the attendee in
+     * @param recurrenceId The recurrence identifier of the occurrence to update, or <code>null</code> if no specific occurrence is targeted
      * @param attendee The attendee data to update
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceID, Attendee attendee, Long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
         /*
          * load original event data & attendee
          */
-        Event originalEvent = loadEventData(objectID, false);
+        Event originalEvent = loadEventData(objectId, false);
         attendee = session.getEntityResolver().prepare(attendee);
         Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
         /*
@@ -136,15 +134,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
-
-        if(needsConflictCheck(originalEvent, originalAttendee, attendee)){
+        if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(attendee));
         }
-
-        if (null == recurrenceID) {
+        if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
-            updateAttendee(originalEvent, originalAttendee, attendee, recurrenceID);
+            updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
         }
         return result;
     }
@@ -189,7 +185,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
         if (null == attendeeUpdate) {
             //TODO or throw?
-            result.addUpdate(new UpdateResultImpl(originalEvent, originalEvent));
+            //            result.addUpdate(new UpdateResultImpl(originalEvent, originalEvent));
             return;
         }
         if (attendeeUpdate.containsFolderID()) {
@@ -204,14 +200,18 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         storage.getAttendeeStorage().updateAttendee(originalEvent.getId(), attendeeUpdate);
         touch(originalEvent.getId());
-        result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
+        Event updatedEvent = loadEventData(originalEvent.getId(), false);
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
              */
-            Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
+            Event originalMasterEvent = loadEventData(originalEvent.getSeriesId(), false);
             touch(originalEvent.getSeriesId());
-            result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(originalEvent.getSeriesId())));
+            Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId(), false);
+            result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
+            result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
         }
     }
 
@@ -240,14 +240,22 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                     insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
                 }
                 /*
-                 * perform the attendee update
+                 * perform the attendee update & touch parent series
                  */
                 Attendee attendeeUpdate = prepareAttendeeUpdate(exceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(exceptionEvent.getId(), attendeeUpdate);
                 }
-                result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
                 touch(originalEvent.getSeriesId());
+                /*
+                 * track results
+                 */
+                Event createdException = loadEventData(exceptionEvent.getId(), false);
+                Event updatedMasterEvent = loadEventData(originalEvent.getId(), false);
+                result.addPlainCreation(createdException);
+                result.addUserizedCreation(userize(createdException));
+                result.addPlainUpdate(originalEvent, updatedMasterEvent);
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedMasterEvent));
             }
         } else if (isSeriesException(originalEvent)) {
             /*

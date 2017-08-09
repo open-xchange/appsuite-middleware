@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.service;
 
-import com.openexchange.chronos.Event;
-
 /**
  * {@link DeleteResult}
  *
@@ -60,10 +58,10 @@ import com.openexchange.chronos.Event;
 public interface DeleteResult extends TimestampedResult {
 
     /**
-     * Gets the deleted event.
+     * Gets the full identifier of the deleted event.
      *
-     * @return The event
+     * @return The identifier of the deleted event
      */
-    Event getDeletedEvent();
+    EventID getEventID();
 
 }

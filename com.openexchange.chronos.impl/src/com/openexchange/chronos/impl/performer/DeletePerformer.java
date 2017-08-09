@@ -69,10 +69,9 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -106,7 +105,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The result
      */
-    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceId, long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectID, RecurrenceId recurrenceId, long clientTimestamp) throws OXException {
         /*
          * load plain original event data
          */
@@ -280,7 +279,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
-            result.addUpdate(new UpdateResultImpl(userize(originalMasterEvent), userize(updatedMasterEvent)));
+            result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
+            result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
         } else {
             /*
              * delete series master
@@ -333,14 +333,16 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * delete the attendee in the exception
          */
-        String seriesID = originalExceptionEvent.getSeriesId();
+        String seriesId = originalExceptionEvent.getSeriesId();
         delete(originalExceptionEvent, originalAttendee);
         /*
          * 'touch' the series master accordingly
          */
-        Event originalMasterEvent = loadEventData(seriesID);
-        touch(seriesID);
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, loadEventData(seriesID)));
+        Event originalMasterEvent = loadEventData(seriesId);
+        touch(seriesId);
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+        result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
+        result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
     }
 
     private void requireDeletePermissions(Event originalEvent) throws OXException {

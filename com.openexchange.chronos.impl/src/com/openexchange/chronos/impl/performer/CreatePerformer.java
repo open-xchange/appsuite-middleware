@@ -63,10 +63,9 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.CreateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -99,7 +98,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @param event The event to create
      * @return The result
      */
-    public CalendarResultImpl perform(Event event) throws OXException {
+    public InternalCalendarResult perform(Event event) throws OXException {
         /*
          * check current session user's permissions
          */
@@ -139,7 +138,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
-        result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));
+        Event createdEvent = loadEventData(newEvent.getId(), false);
+        result.addPlainCreation(createdEvent);
+        result.addUserizedCreation(userize(createdEvent));
         return result;
     }
 

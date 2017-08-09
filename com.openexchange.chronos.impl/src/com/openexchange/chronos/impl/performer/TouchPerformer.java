@@ -50,8 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.impl.CalendarResultImpl;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -77,15 +76,21 @@ public class TouchPerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Performs the touch operation.
+     * Performs the <i>touch</i> operation.
      *
-     * @param objectID The identifier of the event to touch
+     * @param id The identifier of the event to touch
      * @return The update result
      */
-    public CalendarResultImpl perform(String objectID) throws OXException {
-        Event event = loadEventData(objectID);
-        touch(objectID);
-        return result.addUpdate(new UpdateResultImpl(event, loadEventData(event.getId())));
+    public InternalCalendarResult perform(String id) throws OXException {
+        /*
+         * 'touch' event & track results
+         */
+        Event originalEvent = loadEventData(id, false);
+        touch(id);
+        Event updatedEvent = loadEventData(id, false);
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+        return result;
     }
 
 }

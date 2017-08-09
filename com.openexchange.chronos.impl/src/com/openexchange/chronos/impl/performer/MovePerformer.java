@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -79,11 +80,11 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -111,27 +112,16 @@ public class MovePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the move of an event to another folder. No further updates are processed.
      *
-     * @param objectID The identifier of the event to move
+     * @param objectId The identifier of the event to move
      * @param targetFolder The target folder to move the event to
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The result
      */
-    public CalendarResultImpl perform(String objectID, UserizedFolder targetFolder, long clientTimestamp) throws OXException {
-        return perform(loadEventData(objectID), targetFolder, clientTimestamp);
-    }
-
-    /**
-     * Performs the move of an event to another folder. No further updates are processed.
-     *
-     * @param originalEvent The original event to move
-     * @param targetFolder The target folder to move the event to
-     * @param clientTimestamp The client timestamp to catch concurrent modifications
-     * @return The result
-     */
-    public CalendarResultImpl perform(Event originalEvent, UserizedFolder targetFolder, long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectId, UserizedFolder targetFolder, long clientTimestamp) throws OXException {
         /*
-         * check current session user's permissions
+         * load original event & check current session user's permissions
          */
+        Event originalEvent = loadEventData(objectId, false);
         Check.eventIsInFolder(originalEvent, folder);
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         if (session.getUserId() == originalEvent.getCreatedBy()) {
@@ -164,11 +154,15 @@ public class MovePerformer extends AbstractUpdatePerformer {
             throw new UnsupportedOperationException("Move not implemented from " + folder.getType() + " to " + targetFolder.getType());
         }
         /*
-         * track update & return result
+         * track & return results
          */
         Event updatedEvent = loadEventData(originalEvent.getId(), false);
-        updatedEvent.setFolderId(targetFolder.getID());
-        result.addUpdate(new UpdateResultImpl(originalEvent, updatedEvent));
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        if (isAttendee(updatedEvent, calendarUserId)) {
+            result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+        } else {
+            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+        }
         return result;
     }
 

@@ -94,6 +94,7 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -1349,6 +1350,17 @@ public class CalendarUtils {
             exceptionDates[position++] = recurrenceId.getValue().getTimestamp();
         }
         return exceptionDates;
+    }
+
+    /**
+     * Gets the full identifier for the supplied event, based on the property values for {@link EventField#FOLDER_ID},
+     * {@link EventField#ID} and {@link EventField#RECURRENCE_ID}.
+     *
+     * @param event The event to get the full identifier for
+     * @return The full identifier for the event
+     */
+    public static EventID getEventID(Event event) {
+        return new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId());
     }
 
 }

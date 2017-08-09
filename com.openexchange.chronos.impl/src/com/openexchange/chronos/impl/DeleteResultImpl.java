@@ -49,9 +49,8 @@
 
 package com.openexchange.chronos.impl;
 
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.service.EventID;
 
 /**
  * {@link DeleteResultImpl}
@@ -61,26 +60,28 @@ import com.openexchange.exception.OXException;
  */
 public class DeleteResultImpl implements DeleteResult {
 
-    private final Event deletedEvent;
+    private final long timestamp;
+    private final EventID eventID;
 
     /**
      * Initializes a new {@link DeleteResultImpl}.
      *
-     * @param deletedEvent The original event
+     * @param timestamp The timestamp
+     * @param eventID The identifier of the deleted event
      */
-    public DeleteResultImpl(Event deletedEvent) throws OXException {
+    public DeleteResultImpl(long timestamp, EventID eventID) {
         super();
-        this.deletedEvent = deletedEvent;
-    }
-
-    @Override
-    public Event getDeletedEvent() {
-        return deletedEvent;
+        this.timestamp = timestamp;
+        this.eventID = eventID;
     }
 
     @Override
     public long getTimestamp() {
-        return deletedEvent.getTimestamp();
+        return timestamp;
     }
 
+    @Override
+    public EventID getEventID() {
+        return eventID;
+    }
 }

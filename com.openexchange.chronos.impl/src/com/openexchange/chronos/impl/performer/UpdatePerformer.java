@@ -106,11 +106,9 @@ import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.CreateResultImpl;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -153,34 +151,40 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the update operation.
      *
-     * @param objectID The identifier of the event to update
+     * @param objectId The identifier of the event to update
      * @param recurrenceId The optional id of the recurrence.
-     * @param updatedEvent The updated event data
+     * @param updatedEventData The updated event data
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The update result
      */
-    public CalendarResultImpl perform(String objectID, RecurrenceId recurrenceId, Event updatedEvent, long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Event updatedEventData, long clientTimestamp) throws OXException {
         /*
          * load original event data
          */
-        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectID, false), clientTimestamp);
+        Event originalEvent = requireUpToDateTimestamp(loadEventData(objectId, false), clientTimestamp);
         /*
          * update event or event occurrence
          */
-        if (null == recurrenceId && updatedEvent.containsRecurrenceId()) {
-            recurrenceId = updatedEvent.getRecurrenceId();
+        if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
+            recurrenceId = updatedEventData.getRecurrenceId();
         }
         if (isSeriesMaster(originalEvent) && null != recurrenceId) {
-            updateEvent(originalEvent, updatedEvent, recurrenceId);
+            updateEvent(originalEvent, updatedEventData, recurrenceId);
         } else {
-            if (updateEvent(originalEvent, updatedEvent)) {
-                result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
+            if (updateEvent(originalEvent, updatedEventData)) {
+                Event updatedEvent = loadEventData(originalEvent.getId(), false);
+                result.addPlainUpdate(originalEvent, updatedEvent);
+                if (CalendarUtils.isAttendee(originalEvent, calendarUserId)) {
+                    result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+                } else {
+                    result.addUserizedCreation(userize(updatedEvent));
+                }
             }
         }
         return result;
     }
 
-    private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceId) throws OXException {
+    private void updateEvent(Event originalEvent, Event updatedEventData, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             if (contains(originalEvent.getDeleteExceptionDates(), recurrenceId)) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getSeriesId(), recurrenceId);
@@ -191,9 +195,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for existing change exception
                  */
-                if (updateEvent(originalExceptionEvent, updatedEvent)) {
-                    result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
+                if (updateEvent(originalExceptionEvent, updatedEventData)) {
                     touch(originalEvent.getSeriesId());
+                    Event updatedExceptionEvent = loadEventData(originalExceptionEvent.getId(), false);
+                    Event updatedMasterEvent = loadEventData(originalEvent.getId(), false);
+                    result.addPlainUpdate(originalExceptionEvent, updatedExceptionEvent);
+                    result.addUserizedUpdate(userize(originalExceptionEvent), userize(updatedExceptionEvent));
+                    result.addPlainUpdate(originalEvent, updatedMasterEvent);
+                    result.addUserizedUpdate(userize(originalEvent), userize(updatedMasterEvent));
                 }
             } else {
                 /*
@@ -217,17 +226,31 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 newExceptionEvent.setAttachments(originalEvent.getAttachments());
-                updateEvent(newExceptionEvent, updatedEvent, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
-                result.addCreation(new CreateResultImpl(loadEventData(newExceptionEvent.getId())));
-                touch(originalEvent.getSeriesId());
+                updateEvent(newExceptionEvent, updatedEventData, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
+                touch(originalEvent.getId());
+                /*
+                 * track results
+                 */
+                Event createdException = loadEventData(newExceptionEvent.getId(), false);
+                Event updatedMasterEvent = loadEventData(originalEvent.getId(), false);
+                result.addPlainCreation(createdException);
+                result.addUserizedCreation(userize(createdException));
+                result.addPlainUpdate(originalEvent, updatedMasterEvent);
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedMasterEvent));
             }
         } else if (isSeriesException(originalEvent)) {
             /*
              * update for existing change exception
              */
-            if (updateEvent(originalEvent, updatedEvent)) {
-                result.addUpdate(new UpdateResultImpl(originalEvent, loadEventData(originalEvent.getId())));
-                touch(originalEvent.getSeriesId());
+            if (updateEvent(originalEvent, updatedEventData)) {
+                Event originalMasterEvent = loadEventData(originalEvent.getSeriesId(), false);
+                touch(originalMasterEvent.getId());
+                Event updatedExceptionEvent = loadEventData(originalEvent.getId(), false);
+                Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+                result.addPlainUpdate(originalEvent, updatedExceptionEvent);
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedExceptionEvent));
+                result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
+                result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
             }
         } else {
             /*
@@ -241,31 +264,31 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Updates an existing event.
      *
      * @param originalEvent The original event data
-     * @param updatedEvent The updated event data
+     * @param eventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link UpdatePerformer#SKIPPED_FIELDS} are always skipped
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean updateEvent(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    private boolean updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         boolean wasUpdated = false;
         /*
          * check if folder view on event is allowed as needed
          */
-        if (needsExistenceCheckInTargetFolder(originalEvent, updatedEvent)) {
+        if (needsExistenceCheckInTargetFolder(originalEvent, eventData)) {
             Check.eventIsInFolder(originalEvent, folder);
         }
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && updatedEvent.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, updatedEvent)) {
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, eventData)) {
             wasUpdated |= true;
             originalEvent = loadEventData(originalEvent.getId());
         }
         /*
          * update event data
          */
-        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), updatedEvent);
+        AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), eventData);
         List<Attendee> newAttendees = attendeeHelper.previewChanges();
-        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent, newAttendees, ignoredFields);
+        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, eventData, newAttendees, ignoredFields);
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
              * check permissions & conflicts
@@ -296,27 +319,27 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * process any attendee updates
          */
-        if (updatedEvent.containsAttendees()) {
-            wasUpdated |= updateAttendees(originalEvent, updatedEvent, attendeeHelper);
+        if (eventData.containsAttendees()) {
+            wasUpdated |= updateAttendees(originalEvent, eventData, attendeeHelper);
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
         /*
          * process any attachment updates
          */
-        if (updatedEvent.containsAttachments()) {
-            wasUpdated |= updateAttachments(originalEvent, originalEvent.getAttachments(), updatedEvent.getAttachments());
+        if (eventData.containsAttachments()) {
+            wasUpdated |= updateAttachments(originalEvent, originalEvent.getAttachments(), eventData.getAttachments());
         }
         /*
          * process any alarm updates for the calendar user
          */
-        if (updatedEvent.containsAlarms()) {
+        if (eventData.containsAlarms()) {
             Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
             if (null != eventUpdate) {
                 changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
             }
             changedEvent.setFolderId(folder.getID());
-            wasUpdated |= updateAlarms(changedEvent, calendarUserId, updatedEvent.getAlarms());
+            wasUpdated |= updateAlarms(changedEvent, calendarUserId, eventData.getAlarms());
         }
         /*
          * update any stored alarm triggers of all users if required

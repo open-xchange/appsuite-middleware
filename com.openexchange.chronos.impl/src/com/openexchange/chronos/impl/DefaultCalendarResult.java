@@ -47,42 +47,85 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.impl;
 
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdateResult;
 
 /**
- * {@link IDManglingDeleteResult}
+ * {@link DefaultCalendarResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingDeleteResult implements DeleteResult {
+public class DefaultCalendarResult implements CalendarResult {
 
-    private final DeleteResult delegate;
-    private final int accountId;
+    private final CalendarSession session;
+    private final int calendarUserId;
+    private final String folderId;
+
+    private final List<CreateResult> creations;
+    private final List<UpdateResult> updates;
+    private final List<DeleteResult> deletions;
 
     /**
-     * Initializes a new {@link IDManglingDeleteResult}.
+     * Initializes a new {@link DefaultCalendarResult}.
      *
-     * @param delegate The result delegate
-     * @param accountId The identifier of the calendar account the result originates in
+     * @param session The calendar session
+     * @param calendarUserId The actual calendar user
+     * @param folderId The identifier of the targeted calendar folder
+     * @param creations The create results, or <code>null</code> if there are none
+     * @param deletions The delete results, or <code>null</code> if there are none
+     * @param updates The update results, or <code>null</code> if there are none
      */
-    public IDManglingDeleteResult(DeleteResult delegate, int accountId) {
+    public DefaultCalendarResult(CalendarSession session, int calendarUserId, String folderId, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
         super();
-        this.delegate = delegate;
-        this.accountId = accountId;
+        this.session = session;
+        this.calendarUserId = calendarUserId;
+        this.folderId = folderId;
+        this.creations = creations;
+        this.updates = updates;
+        this.deletions = deletions;
+    }
+
+    @Override
+    public CalendarSession getSession() {
+        return session;
+    }
+
+    @Override
+    public int getCalendarUser() {
+        return calendarUserId;
+    }
+
+    @Override
+    public String getFolderID() {
+        return folderId;
     }
 
     @Override
     public long getTimestamp() {
-        return delegate.getTimestamp();
+        return Math.max(Utils.getMaximumTimestamp(creations), Math.max(Utils.getMaximumTimestamp(deletions), Utils.getMaximumTimestamp(updates)));
     }
 
     @Override
-    public EventID getEventID() {
-        return IDMangling.getUniqueId(accountId, delegate.getEventID());
+    public List<DeleteResult> getDeletions() {
+        return null == deletions ? Collections.<DeleteResult> emptyList() : Collections.unmodifiableList(deletions);
+    }
+
+    @Override
+    public List<UpdateResult> getUpdates() {
+        return null == updates ? Collections.<UpdateResult> emptyList() : Collections.unmodifiableList(updates);
+    }
+
+    @Override
+    public List<CreateResult> getCreations() {
+        return null == creations ? Collections.<CreateResult> emptyList() : Collections.unmodifiableList(creations);
     }
 
 }

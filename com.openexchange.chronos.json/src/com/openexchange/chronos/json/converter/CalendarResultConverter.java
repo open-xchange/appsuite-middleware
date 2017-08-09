@@ -61,6 +61,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -166,7 +167,15 @@ public class CalendarResultConverter implements ResultConverter {
     private JSONArray convertDeleteEvents(List<DeleteResult> results, String timeZoneID, Session session) throws OXException {
         JSONArray events = new JSONArray(results.size());
         for (DeleteResult deleteResult : results) {
-            events.put(convertEvent(deleteResult.getDeletedEvent(), timeZoneID, session));
+            EventID eventID = deleteResult.getEventID();
+            Event deletedEvent = new Event();
+            deletedEvent.setId(eventID.getObjectID());
+            deletedEvent.setFolderId(eventID.getFolderID());
+            if (null != eventID.getRecurrenceID()) {
+                deletedEvent.setRecurrenceId(eventID.getRecurrenceID());
+            }
+            deletedEvent.setTimestamp(deleteResult.getTimestamp());
+            events.put(convertEvent(deletedEvent, timeZoneID, session));
         }
         return events;
     }

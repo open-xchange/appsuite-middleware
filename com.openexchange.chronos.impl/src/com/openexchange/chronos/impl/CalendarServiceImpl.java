@@ -258,13 +258,18 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * insert event & notify handlers
          */
-        return notifyHandlers(new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(new UnmodifiableEvent(event));
             }
-        }.executeUpdate());
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
     }
 
     @Override
@@ -272,17 +277,22 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update event & notify handlers
          */
-        return notifyHandlers(new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
 
-        }.executeUpdate());
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
     }
 
     @Override
@@ -290,48 +300,63 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * touch event & notify handlers
          */
-        return notifyHandlers(new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new TouchPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID());
             }
 
-        }.executeUpdate());
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
     }
 
     @Override
     public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final String folderId) throws OXException {
         /*
-         * move event & notify handlers
+         * move event
          */
-        return notifyHandlers(new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
             }
-        }.executeUpdate());
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
     }
 
     @Override
     public CalendarResult updateAttendee(CalendarSession session, final EventID eventID, final Attendee attendee) throws OXException {
         /*
-         * update attendee & notify handlers
+         * update attendee
          */
-        return notifyHandlers(new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
 
             }
-        }.executeUpdate());
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
     }
 
     @Override
@@ -339,10 +364,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * delete event
          */
-        CalendarResult result = new AbstractCalendarStorageOperation<CalendarResult>(session) {
+        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected CalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
 
@@ -350,17 +375,16 @@ public class CalendarServiceImpl implements CalendarService {
 
             }
         }.executeUpdate();
-
         /*
-         * notify handlers
+         * notify handlers & return userized result
          */
         notifyHandlers(result);
-        return result;
+        return result.getUserizedResult();
     }
 
-    private CalendarResult notifyHandlers(CalendarResult result) {
+    private InternalCalendarResult notifyHandlers(InternalCalendarResult result) {
         for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(result);
+            handler.handle(result.getPlainResult());
         }
         return result;
     }

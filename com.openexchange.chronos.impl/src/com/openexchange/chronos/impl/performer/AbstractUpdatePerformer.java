@@ -50,8 +50,10 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolderView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,13 +76,12 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.CalendarResultImpl;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.DeleteResultImpl;
-import com.openexchange.chronos.impl.UpdateResultImpl;
+import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -98,7 +99,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final int calendarUserId;
     protected final UserizedFolder folder;
     protected final Date timestamp;
-    protected final CalendarResultImpl result;
+    protected final InternalCalendarResult result;
 
     /**
      * Initializes a new {@link AbstractUpdatePerformer}.
@@ -112,7 +113,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.folder = folder;
         this.calendarUserId = getCalendarUserId(folder);
         this.timestamp = new Date();
-        this.result = new CalendarResultImpl(session, calendarUserId, folder.getID());
+        this.result = new InternalCalendarResult(session, calendarUserId, folder.getID());
     }
 
     /**
@@ -169,6 +170,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions
          */
+        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()));
         }
@@ -176,16 +178,19 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertAttendeeTombstones(id, storage.getUtilities().getTombstones(originalEvent.getAttendees()));
+        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
+        tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
+        storage.getEventStorage().insertEventTombstone(tombstone);
+        storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
         /*
-         * add appropriate delete result
+         * add appropriate delete results
          */
-        result.addDeletion(new DeleteResultImpl(userize(originalEvent)));
+        result.addPlainDeletion(timestamp.getTime(), getEventID(originalEvent));
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
     }
 
     /**
@@ -209,6 +214,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
+        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userId);
@@ -216,16 +222,20 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * delete event data from storage for this attendee
          */
-        String objectId = originalEvent.getId();
-        storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
-        storage.getAttendeeStorage().insertAttendeeTombstone(objectId, originalAttendee);
-        storage.getAttendeeStorage().deleteAttendees(objectId, Collections.singletonList(originalAttendee));
-        storage.getAlarmStorage().deleteAlarms(objectId, userId);
+        String id = originalEvent.getId();
+        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
+        tombstone.setAttendees(Collections.singletonList(storage.getUtilities().getTombstone(originalAttendee)));
+        storage.getEventStorage().insertEventTombstone(tombstone);
+        storage.getAttendeeStorage().insertAttendeeTombstones(id, originalEvent.getAttendees());
+        storage.getAttendeeStorage().deleteAttendees(id, Collections.singletonList(originalAttendee));
+        storage.getAlarmStorage().deleteAlarms(id, userId);
         /*
-         * 'touch' event & add track update result
+         * 'touch' event & track calendar results
          */
-        touch(objectId);
-        result.addUpdate(new UpdateResultImpl(userize(originalEvent), userize(loadEventData(objectId))));
+        touch(id);
+        Event updatedEvent = loadEventData(id, false);
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
     }
 
     /**
@@ -272,11 +282,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      */
     protected void deleteFromRecurrence(Event originalMasterEvent, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
         /*
-         * create new exception event
+         * prepare & insert a new plain exception
          */
+        String folderView = getFolderView(storage, originalMasterEvent, calendarUserId);
         Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
         storage.getEventStorage().insertEvent(exceptionEvent);
-        Event deletedException = EventMapper.getInstance().copy(exceptionEvent, new Event(), EventField.values());
         /*
          * take over all other original attendees
          */
@@ -287,9 +297,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * take over all other original alarms
          */
         for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
-            int userID = entry.getKey().intValue();
-            if (userID != originalAttendee.getEntity()) {
-                insertAlarms(exceptionEvent, userID, entry.getValue(), true);
+            int userId = entry.getKey().intValue();
+            if (userId != originalAttendee.getEntity()) {
+                insertAlarms(exceptionEvent, userId, entry.getValue(), true);
             }
         }
         /*
@@ -297,11 +307,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), exceptionEvent.getId(), originalMasterEvent.getAttachments());
         /*
-         * touch series master event & track in result
+         * touch series master event
          */
         touch(originalMasterEvent.getId());
-        result.addUpdate(new UpdateResultImpl(userize(originalMasterEvent), userize(loadEventData(originalMasterEvent.getId(), false))));
-        result.addDeletion(new DeleteResultImpl(userize(deletedException)));
+        /*
+         * track results
+         */
+        Event createdException = loadEventData(exceptionEvent.getId(), false);
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+        result.addPlainCreation(createdException);
+        result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalMasterEvent.getId(), recurrenceId));
+        result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
     }
 
     /**

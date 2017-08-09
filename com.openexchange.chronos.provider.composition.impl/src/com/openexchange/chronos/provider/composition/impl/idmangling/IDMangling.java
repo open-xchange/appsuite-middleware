@@ -225,22 +225,6 @@ public class IDMangling {
     }
 
     /**
-     * Gets the fully qualified composite representation of a specific relative folder identifier.
-     * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
-     *
-     * @param accountId The identifier of the account the folder originates in
-     * @param relativeFolderId The relative folder identifier
-     * @return The unique folder identifier
-     */
-    public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
-            return relativeFolderId;
-        }
-        return mangleFolderId(accountId, relativeFolderId);
-    }
-
-    /**
      * Gets the relative representation of a specific unique composite folder identifier.
      * <p/>
      * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
@@ -271,6 +255,33 @@ public class IDMangling {
             return uniqueEventID;
         }
         return new EventID(getRelativeFolderId(uniqueEventID.getFolderID()), uniqueEventID.getObjectID(), uniqueEventID.getRecurrenceID());
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative folder identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeFolderId The relative folder identifier
+     * @return The unique folder identifier
+     */
+    public static String getUniqueFolderId(int accountId, String relativeFolderId) {
+        if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
+            return relativeFolderId;
+        }
+        return mangleFolderId(accountId, relativeFolderId);
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative event identifier.
+     *
+     * @param accountId The identifier of the account the event originates in
+     * @param relativeID The relative full event identifier
+     * @return The unique full event identifier
+     */
+    public static EventID getUniqueId(int accountId, EventID relativeID) {
+        return new EventID(getUniqueFolderId(accountId, relativeID.getFolderID()), relativeID.getObjectID(), relativeID.getRecurrenceID());
     }
 
     /**

@@ -62,6 +62,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -148,8 +149,16 @@ public class MultipleCalendarResultConverter implements ResultConverter {
                         updates.add(updatedResult.getUpdate());
                     }
                 }
-                for (DeleteResult deletedResult : calendarResult.getDeletions()) {
-                    deletes.add(deletedResult.getDeletedEvent());
+                for (DeleteResult deleteResult : calendarResult.getDeletions()) {
+                    EventID eventID = deleteResult.getEventID();
+                    Event deletedEvent = new Event();
+                    deletedEvent.setId(eventID.getObjectID());
+                    deletedEvent.setFolderId(eventID.getFolderID());
+                    if (null != eventID.getRecurrenceID()) {
+                        deletedEvent.setRecurrenceId(eventID.getRecurrenceID());
+                    }
+                    deletedEvent.setTimestamp(deleteResult.getTimestamp());
+                    deletes.add(deletedEvent);
                 }
             }
 
