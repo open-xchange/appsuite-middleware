@@ -25,3 +25,4 @@ Import-Package: com.openexchange.chronos,
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.provider.userized.osgi.UserizedCalendarFolderActivator
+Export-Package: com.openexchange.chronos.provider.userized.folder
