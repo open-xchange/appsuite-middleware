@@ -1052,5 +1052,13 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
         // TODO Auto-generated method stub
         return null;
     }
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.calendar.CalendarCollectionService#getReadPermission(int, int, com.openexchange.session.Session, com.openexchange.groupware.contexts.Context, boolean)
+     */
+    @Override
+    public boolean getReadPermission(int oid, int fid, Session so, Context ctx, boolean checkPrivate) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
 }
