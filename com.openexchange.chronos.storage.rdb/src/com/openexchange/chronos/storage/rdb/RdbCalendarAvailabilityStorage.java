@@ -110,7 +110,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      */
     @Override
     public String nextAvailableId() throws OXException {
-        return nextId("calendar_free_slot_sequence");
+        return nextId("calendar_available_sequence");
     }
 
     /*
