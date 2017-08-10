@@ -311,6 +311,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "description TEXT DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "location VARCHAR(255) DEFAULT NULL," +
+                "exDate TEXT DEFAULT NULL," +
                 "recurrence BIGINT(20) DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
                 "summary VARCHAR(255) DEFAULT NULL," +
