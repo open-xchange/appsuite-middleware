@@ -85,17 +85,6 @@ public class GetPerformer extends AbstractGetPerformer {
     }
 
     /**
-     * Retrieves the {@link Availability} with the specified identifier
-     * 
-     * @param calendarAvailabilityId The {@link Availability}'s identifier
-     * @return The {@link Availability}
-     * @throws OXException if the {@link Availability} cannot be retrieved
-     */
-    public Availability perform(String calendarAvailabilityId) throws OXException {
-        return storage.loadAvailability(calendarAvailabilityId);
-    }
-
-    /**
      * Retrieves a {@link List} with all {@link Availability} blocks of the current user
      * 
      * @return a {@link List} with all {@link Availability} blocks of the current user
