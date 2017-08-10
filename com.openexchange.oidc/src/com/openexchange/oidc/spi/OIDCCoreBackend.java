@@ -51,6 +51,7 @@ package com.openexchange.oidc.spi;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.servlet.http.HttpServletRequest;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -76,9 +77,9 @@ import com.openexchange.oidc.osgi.Services;
 public class OIDCCoreBackend extends AbstractOIDCBackend{
 
     private static final String LOAD_EMAIL_ADDRESS = "load email address";
-    
+
     @Override
-    public AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse) throws OXException {
+    public AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException {
         BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
         String emailAddress = this.loadEmailAddressFromIDP(bearerAccessToken);
         MailResolver mailMapping = Services.getService(MailResolver.class);
@@ -87,10 +88,10 @@ public class OIDCCoreBackend extends AbstractOIDCBackend{
         int userId = resolvedMail.getUserID();
         AuthenticationInfo resultInfo = new AuthenticationInfo(contextId, userId);
         resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
-        
+
         return resultInfo;
     }
-    
+
     private String loadEmailAddressFromIDP(BearerAccessToken bearerAccessToken) throws OXException {
         UserInfoRequest userInfoReq = null;
         userInfoReq = new UserInfoRequest(getURIFromPath(this.getBackendConfig().getUserInfoEndpoint()), bearerAccessToken);
@@ -120,7 +121,7 @@ public class OIDCCoreBackend extends AbstractOIDCBackend{
         }
         return successResponse.getUserInfo().getEmailAddress();
     }
-    
+
     private URI getURIFromPath(String path) throws OXException{
         try {
             return new URI(path);

@@ -113,8 +113,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final StateManagement stateManagement;
     private final LoginConfiguration loginConfiguration;
     private final SessionReservationService sessionReservationService;
-    
-    
+
+
     public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, LoginConfiguration loginConfiguration) {
         super();
         this.backend = backend;
@@ -122,22 +122,22 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         this.loginConfiguration = loginConfiguration;
         this.sessionReservationService = Services.getService(SessionReservationService.class);
     }
-    
+
     @Override
     public String getLoginRedirectRequest(HttpServletRequest httpRequest) throws OXException{
         State state = new State();
         Nonce nonce = new Nonce();
-        
+
         String requestString = getRequestString(state, nonce, httpRequest);
-        
+
         if (requestString.isEmpty()) {
             throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
         }
-        
+
         this.addRequestToStateManager(httpRequest, state, nonce);
         return requestString;
     }
-    
+
     private String getRequestString(State state, Nonce nonce, HttpServletRequest httpRequest) throws OXException {
         String requestString = "";
         OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
@@ -154,29 +154,29 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         return requestString;
     }
-    
+
     private void addRequestToStateManager(HttpServletRequest httpRequest, State state, Nonce nonce) {
         String deepLink = httpRequest.getParameter("deep_link");
         String uiClientID = this.getUiClient(httpRequest);
         String hostname = this.getDomainName(Services.getService(HostnameService.class), httpRequest);
         Map<String, String> additionalClientInformation = new HashMap<>();
-        
+
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation, uiClientID);
         this.stateManagement.addAuthenticationRequest(authenticationRequestInfo);
     }
-    
+
     private String getUiClient(HttpServletRequest httpRequest) {
         String uiClientID = httpRequest.getParameter("client");
-        
+
         if (uiClientID == null || uiClientID.isEmpty()) {
-           
+
             LoginConfiguration loginConfiguration =  LoginServlet.getLoginConfiguration();
             uiClientID = loginConfiguration.getDefaultClient();
         }
-        
+
         return uiClientID;
     }
-    
+
     private String getDomainName(HostnameService hostnameService, HttpServletRequest httpRequest) {
         if (hostnameService == null) {
             return httpRequest.getServerName();
@@ -195,15 +195,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public String authenticateUser(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException{
         String redirectionString = "";
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(httpRequest.getParameter("state"));
-        
+
         if (storedRequestInformation == null) {
             throw OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.create();
         }
-        
+
         try {
             TokenRequest tokenReq = createTokenRequest(httpRequest);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
-            
+
             if (this.validTokenResponse(tokenResponse, storedRequestInformation) != null) {
                 this.sendLoginRequestToServer(httpRequest, httpResponse, tokenResponse);
             }
@@ -211,17 +211,17 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         return redirectionString;
     }
-    
+
     private String sendLoginRequestToServer(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OIDCTokenResponse tokenResponse) throws OXException {
-        AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(tokenResponse);
+        AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(httpRequest, tokenResponse);
         String sessionToken = sessionReservationService.reserveSessionFor(
-            authInfo.getUserId(), 
-            authInfo.getContextId(), 
-            60l, 
-            TimeUnit.SECONDS, 
+            authInfo.getUserId(),
+            authInfo.getContextId(),
+            60l,
+            TimeUnit.SECONDS,
             authInfo.getProperties());
         try {
             URIBuilder redirectLocation = new URIBuilder()
@@ -240,12 +240,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         return null;
     }
-    
+
     private String getRedirectScheme(HttpServletRequest httpRequest) {
         boolean secure = Tools.considerSecure(httpRequest);
         return secure ? "https" : "http";
     }
-    
+
     private String getRedirectPathPrefix() {
         DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
         return prefixService.getPrefix();
@@ -254,20 +254,20 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
         return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation);
     }
-    
+
     private TokenRequest createTokenRequest(HttpServletRequest httpRequest) throws OXException {
         AuthorizationCode code = new AuthorizationCode(httpRequest.getParameter("code"));
         URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
-    
+
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
-    
+
         URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
-    
+
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
     }
-    
+
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         // TODO QS-VS: ISt die send Methode sicher genug?
@@ -283,15 +283,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);
         }
-        
+
         if (tokenResponse instanceof TokenErrorResponse) {
             ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(error.getCode() + ", " + error.getDescription());
         }
-        
+
         return (OIDCTokenResponse) tokenResponse;
     }
-    
+
     @Override
     public void logoutCurrentUser(String state) {
     }

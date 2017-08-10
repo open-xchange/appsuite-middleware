@@ -62,7 +62,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
@@ -82,7 +81,7 @@ public interface OIDCBackend {
 
     /**
      * Get the configuration of the OpenID feature
-     * 
+     *
      * @return The configuration, never <code>null</code>
      */
     OIDCConfig getOIDCConfig();
@@ -91,7 +90,7 @@ public interface OIDCBackend {
 
     /**
      * Get the OpenID part of this backends servlet path.
-     * 
+     *
      * @return The path, never <code>null</code>
      */
     String getPath();
@@ -114,14 +113,14 @@ public interface OIDCBackend {
     JWSAlgorithm getJWSAlgorithm() throws OXException;
 
     AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest);
-    
+
     IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException;
 
     Scope getScope();
 
     LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
-    AuthenticationInfo resolveAuthenticationResponse(OIDCTokenResponse tokenResponse) throws OXException;
+    AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest httpRequest, OIDCTokenResponse tokenResponse) throws OXException;
 
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 

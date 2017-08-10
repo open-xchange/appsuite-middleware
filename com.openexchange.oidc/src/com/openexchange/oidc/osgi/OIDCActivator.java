@@ -70,16 +70,16 @@ import com.openexchange.user.UserService;
  * @since v7.10.0
  */
 public class OIDCActivator extends HousekeepingActivator{
-    
+
     private OIDCFeature oidcFeature;
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] 
+        return new Class<?>[]
         {
-            LeanConfigurationService.class, 
-            HttpService.class, 
-            DispatcherPrefixService.class, 
+            LeanConfigurationService.class,
+            HttpService.class,
+            DispatcherPrefixService.class,
             HazelcastInstance.class,
             HostnameService.class,
             MailResolver.class,
@@ -103,12 +103,13 @@ public class OIDCActivator extends HousekeepingActivator{
             context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         if (this.oidcFeature != null) {
             this.oidcFeature.close();
         }
+        Services.setServices(null);
         super.stopBundle();
     }
 }
