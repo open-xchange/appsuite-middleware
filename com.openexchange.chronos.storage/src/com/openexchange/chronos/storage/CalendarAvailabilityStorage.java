@@ -63,17 +63,6 @@ import com.openexchange.exception.OXException;
 public interface CalendarAvailabilityStorage {
 
     /**
-     * Generates the next unique identifier for inserting new {@link Availability} data.
-     * <p/>
-     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialised using
-     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favour of an externally controlled transaction.
-     *
-     * @return The next unique event identifier
-     * @throws OXException if the next identifier cannot be generated or any other error is occurred
-     */
-    String nextAvailabilityId() throws OXException;
-
-    /**
      * Generates the next unique identifier for inserting new {@link Available} data.
      * <p/>
      * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialised using

@@ -151,28 +151,6 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
             }
 
         });
-        mappings.put(AvailableField.calendarAvailabilityId, new IntegerMapping<Available>("availability", "Availability Parent ID") {
-
-            @Override
-            public boolean isSet(Available object) {
-                return object.contains(AvailableField.calendarAvailabilityId);
-            }
-
-            @Override
-            public void set(Available object, Integer value) throws OXException {
-                object.setCalendarAvailabilityId(Integer.toString(value));
-            }
-
-            @Override
-            public Integer get(Available object) {
-                return Integer.valueOf(object.getCalendarAvailabilityId());
-            }
-
-            @Override
-            public void remove(Available object) {
-                object.removeCalendarAvailabilityId();
-            }
-        });
         mappings.put(AvailableField.user, new IntegerMapping<Available>("user", "Calendar User ID") {
 
             @Override

@@ -67,7 +67,6 @@ public class Available implements FieldAware, Cloneable {
     private String id;
 
     private int calendarUser;
-    private String availabilityId;
     private String uid;
     /** dtstamp */
     private Date creationTimestamp;
@@ -498,33 +497,6 @@ public class Available implements FieldAware, Cloneable {
     }
 
     /**
-     * Gets the calendarAvailabilityId
-     *
-     * @return The calendarAvailabilityId
-     */
-    public String getCalendarAvailabilityId() {
-        return availabilityId;
-    }
-
-    /**
-     * Sets the calendarAvailabilityId
-     *
-     * @param calendarAvailabilityId The calendarAvailabilityId to set
-     */
-    public void setCalendarAvailabilityId(String calendarAvailabilityId) {
-        this.availabilityId = calendarAvailabilityId;
-        fields.add(AvailableField.calendarAvailabilityId);
-    }
-
-    /**
-     * Removes the calendar availability parent id
-     */
-    public void removeCalendarAvailabilityId() {
-        this.availabilityId = null;
-        fields.remove(AvailableField.calendarAvailabilityId);
-    }
-
-    /**
      * Gets the calendarUser
      *
      * @return The calendarUser
@@ -599,9 +571,6 @@ public class Available implements FieldAware, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
-        if (contains(AvailableField.calendarAvailabilityId)) {
-            clone.setCalendarAvailabilityId(availabilityId);
-        }
         if (contains(AvailableField.categories)) {
             clone.setCategories(categories);
         }
@@ -651,7 +620,6 @@ public class Available implements FieldAware, Cloneable {
             clone.setUid(uid);
         }
         clone.setCalendarUser(calendarUser);
-        clone.setCalendarAvailabilityId(availabilityId);
 
         return clone;
     }
