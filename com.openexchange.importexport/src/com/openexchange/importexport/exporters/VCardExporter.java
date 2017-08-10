@@ -285,9 +285,9 @@ public class VCardExporter implements Exporter {
               if (null != out) {
                   requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                   if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getFolderExportFileName(session, folder) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getFolderExportFileName(session, folder) + Format.VCARD.getExtension()+"\"");
                   } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension()+"\"");
                   } else {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }
