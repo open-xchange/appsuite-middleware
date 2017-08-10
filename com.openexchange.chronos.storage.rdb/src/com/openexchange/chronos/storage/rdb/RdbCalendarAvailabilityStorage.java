@@ -187,13 +187,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
-    public void insertAvailable(Available available) throws OXException {
+    public void insertAvailable(List<Available> available) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = insertAvailabilityItem(available, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+            // Insert the available chunk-wise
+            for (List<Available> partition : Lists.partition(available, INSERT_CHUNK_SIZE)) {
+                updated += insertAvailabilityItems(partition, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());

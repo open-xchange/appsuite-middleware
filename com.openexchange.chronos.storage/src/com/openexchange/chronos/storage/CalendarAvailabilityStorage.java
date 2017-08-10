@@ -90,12 +90,12 @@ public interface CalendarAvailabilityStorage {
     void insertAvailabilities(List<Availability> availabilities) throws OXException;
 
     /**
-     * Inserts the specified {@link Available}
+     * Inserts the specified {@link Available} blocks
      * 
-     * @param available The {@link Available} to insert
-     * @throws OXException if the object cannot be inserted to the storage or any other error is occurred
+     * @param available The {@link Available} blocks to insert
+     * @throws OXException if the objects cannot be inserted to the storage or any other error is occurred
      */
-    void insertAvailable(Available available) throws OXException;
+    void insertAvailable(List<Available> available) throws OXException;
 
     /**
      * Loads from the storage the {@link Availability} with the specified identifier
