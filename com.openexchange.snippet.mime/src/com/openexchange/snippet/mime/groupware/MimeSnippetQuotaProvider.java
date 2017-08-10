@@ -52,9 +52,6 @@ package com.openexchange.snippet.mime.groupware;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.config.ConfigTools;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
@@ -80,8 +77,7 @@ import com.openexchange.snippet.mime.Services;
 public class MimeSnippetQuotaProvider implements QuotaProvider {
 
     private static final String MODULE_ID = "mime_snippet";
-    private static final String PROP_NAME = "com.openexchange.snippet.quota.limit";
-    private static final String USER_LIMIT_PROPERTY = "com.openexchange.snippet.filestore.quota.perUserLimit";
+    private static final String PROP_AMOUNT_LIMIT = "com.openexchange.snippet.quota.limit";
 
     private final AtomicReference<SnippetService> snippetServiceRef;
 
@@ -112,8 +108,13 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         return "Snippet";
     }
 
-    private Quota getAmountQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
-        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, PROP_NAME, viewFactory);
+    private Quota getAmountQuota(Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        }
+
+        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, PROP_AMOUNT_LIMIT, viewFactory);
         if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         }
@@ -121,27 +122,27 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
         return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
-    private Quota getSizeQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
-        long def = 5242880;
-        long limit = def;
-        ConfigView configView = viewFactory.getView(session.getUserId(), session.getContextId());
-        // Get property
-        ConfigProperty<String> property = configView.property(USER_LIMIT_PROPERTY, String.class);
-        if (property.isDefined()) {
-            limit = ConfigTools.parseBytes(property.get());
+    private Quota optSizeQuota(Session session) throws OXException {
+        SnippetManagement snippetManagement = snippetServiceRef.get().getManagement(session);
+        if (!(snippetManagement instanceof QuotaAwareSnippetManagement)) {
+            // No storage quota
+            return null;
         }
 
+        QuotaAwareSnippetManagement quotaAwareSnippetManagement = ((QuotaAwareSnippetManagement) snippetManagement);
+        if (false == quotaAwareSnippetManagement.hasQuota()) {
+            // No storage quota
+            return null;
+        }
+
+        // Retrieve size limit
+        long limit = quotaAwareSnippetManagement.getLimit();
         if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_SIZE;
         }
 
-        SnippetManagement management = snippetServiceRef.get().getManagement(session);
-        long usage = 0;
-        if(management instanceof QuotaAwareSnippetManagement){
-            usage = ((QuotaAwareSnippetManagement) management).getUsage();
-        }
-
-        return new Quota(QuotaType.SIZE, limit, usage);
+        // Retrieve usage as well and return
+        return new Quota(QuotaType.SIZE, limit, quotaAwareSnippetManagement.getUsage());
     }
 
     @Override
@@ -150,14 +151,13 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
         }
 
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        Quota amountQuota = getAmountQuota(session);
+        DefaultAccountQuota accountQuota = new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota);
+        Quota sizeQuota = optSizeQuota(session);
+        if (null != sizeQuota) {
+            accountQuota.addQuota(sizeQuota);
         }
-
-        Quota amountQuota = getAmountQuota(session, viewFactory);
-        Quota sizeQuota = getSizeQuota(session, viewFactory);
-        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota).addQuota(sizeQuota);
+        return accountQuota;
     }
 
     @Override
