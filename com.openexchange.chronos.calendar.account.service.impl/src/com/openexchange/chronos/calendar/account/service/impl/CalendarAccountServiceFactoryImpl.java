@@ -68,7 +68,7 @@ public class CalendarAccountServiceFactoryImpl implements CalendarAccountService
     @Override
     public CalendarAccountService create(int userId, Context context) throws OXException {
         //For testing, find a better way without playing factory proxy, maybe just use one factory
-        return new CalendarAccountServiceImpl(Services.getService(CalendarAccountStorageFactory.class).create(context), userId);
+        return new CalendarAccountServiceImpl(Services.getOptionalService(CalendarAccountStorageFactory.class).create(context), userId);
     }
 
 }

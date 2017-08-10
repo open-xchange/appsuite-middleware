@@ -76,6 +76,11 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle {}", context.getBundle());
