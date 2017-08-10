@@ -108,8 +108,10 @@ public class CalendarAvailability extends SingleXMLPropertyMixin {
             inputStream = exportICal.getClosingStream();
             return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
         } catch (OXException e) {
+            //TODO: Exception handling
             e.printStackTrace();
         } catch (IOException e) {
+            //TODO: Exception handling
             e.printStackTrace();
         } finally {
             Streams.close(inputStream);
