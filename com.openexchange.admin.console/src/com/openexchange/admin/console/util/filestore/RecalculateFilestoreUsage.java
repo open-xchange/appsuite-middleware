@@ -100,18 +100,15 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(new Option(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, true, "The context ID for that the file store usage shall be recalculated. "+
-                                                                                "If a user ID is also set, the according user file store is "+
-                                                                                "affected."));
-        options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "The user ID for which the user file store usage shall be recalculated or "+
-                                                                          "'all' to recalculates the usages for all user file stores in "+
-                                                                          "the given context."));
+        options.addOption(new Option(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, true, "The identifier of the context for which the file storage usage shall be recalculated. "+
+                                                                                "If a user identifier is also specified, only the user-associated file storage is considered."));
+        options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "The identifier of the user for which the file storage usage shall be recalculated or "+
+                                                                          "'all' to recalculates the usages for all user-associated file storage in the given context."));
 
-        Option allOption = new Option(null, OPT_SCOPE_LONG, true, "If all file store usages for the given scope shall be recalculated. "+
-                                                                 "Scope can be either set to 'all', 'context' or 'user'. If set "+
+        Option allOption = new Option(null, OPT_SCOPE_LONG, true, "Scope can be either set to either 'all', 'context' or 'user'. If set "+
                                                                  "to 'all', all usages of all context and user file stores are recalculated. "+
-                                                                 "Otherwise only context or user file store usages are recalculated. "+
-                                                                 "Cannot be used in conjunction with '-c' or '-u'.");
+                                                                 "Otherwise the usages of either context- or user-associated file storages are recalculated. "+
+                                                                 "Cannot be used in conjunction with the '--" + OPT_CONTEXT_LONG + "' or '--" + OPT_USER_LONG + "'.");
         allOption.setArgName("scope");
         options.addOption(allOption);
     }
@@ -142,25 +139,33 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
             System.exit(-1);
         }
         int contextId = parseInt(OPT_CONTEXT_LONG, 0, cmd, options);
+        if (contextId <= 0) {
+            System.err.println("\"" + OPT_CONTEXT_LONG + "\" does not specify a valid context identifier.");
+            System.exit(-1);
+        }
 
         // Check optional 'user' option
         Integer userId = null;
         if (cmd.hasOption(OPT_USER_LONG)) {
-            if("all".equals(cmd.getOptionValue(OPT_USER_LONG).toString().toLowerCase())){
+            if ("all".equals(cmd.getOptionValue(OPT_USER_LONG).toLowerCase())) {
                 recalculateUsingScope(RecalculationScope.USER.name(), oxutil, Integer.valueOf(contextId));
                 return;
-            } else {
-                userId = Integer.valueOf(parseInt(OPT_USER_LONG, 0, cmd, options));
+            }
+
+            userId = Integer.valueOf(parseInt(OPT_USER_LONG, 0, cmd, options));
+            if (userId.intValue() <= 0) {
+                System.err.println("\"" + OPT_USER_LONG + "\" does not specify a valid user identifier.");
+                System.exit(-1);
             }
         }
 
         // Trigger recalculation
-        if (userId != null && userId > 0) {
+        if (userId != null) {
             oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), userId, credentials);
-            System.out.println("Filestore usage has been successfully recalculated for user " + userId + " in context " + contextId);
+            System.out.println("Usage has been successfully recalculated for user " + userId + " in context " + contextId);
         } else {
             oxutil.recalculateFilestoreUsage(Integer.valueOf(contextId), null, credentials);
-            System.out.println("Filestore usage has been successfully recalculated for context " + contextId);
+            System.out.println("Usage has been successfully recalculated for context " + contextId);
         }
     }
 
@@ -174,7 +179,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
             @Override
             public void run() {
                 try {
-                    oxutil.recalculateFilestoreUsage(scope, credentials, ctxId);
+                    oxutil.recalculateFilestoreUsage(scope, ctxId, credentials);
                 } catch (Exception e) {
                     errorRef.set(e);
                 }
@@ -184,7 +189,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
         new Thread(ft, RecalculateFilestoreUsage.class.getSimpleName()).start();
 
         // Await task termination
-        System.out.print("Recalculating usages of filestores");
+        System.out.print("Recalculating usages of file storages");
         int c = 34;
         while (false == ft.isDone()) {
             System.out.print(".");
@@ -202,7 +207,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
             throw error;
         }
 
-        System.out.println("Filestores' usages have been successfully recalculated");
+        System.out.println("Usages have been successfully recalculated");
     }
 
     @Override
@@ -222,7 +227,7 @@ public class RecalculateFilestoreUsage extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "The command-line tool to recalculate the usage of filestores";
+        return "The command-line tool to recalculate the usage of file storages";
     }
 
     @Override

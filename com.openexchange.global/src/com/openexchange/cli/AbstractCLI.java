@@ -224,7 +224,7 @@ public abstract class AbstractCLI<R, C> {
      * @return The syntax for this application
      */
     protected abstract String getName();
-    
+
     protected String getHeader() {
         return null;
     }
@@ -256,7 +256,7 @@ public abstract class AbstractCLI<R, C> {
             }
         }
         if (port < 1 || port > 65535) {
-            System.err.println("Port parameter is out of range: " + sPort + ". Valid range is from 1 to 65535.");
+            System.err.println("Port argument '-" + opt + "' is out of range: " + sPort + ". Valid range is from 1 to 65535.");
             printHelp(options);
             System.exit(1);
         }
@@ -282,7 +282,7 @@ public abstract class AbstractCLI<R, C> {
             try {
                 i = Integer.parseInt(sInt.trim());
             } catch (final NumberFormatException e) {
-                System.err.println("Integer parameter is not a number: " + sInt);
+                System.err.println("Integer option '-" + opt + "' is not a number: " + sInt);
                 printHelp(options);
                 System.exit(1);
             }
@@ -309,7 +309,7 @@ public abstract class AbstractCLI<R, C> {
             try {
                 i = Integer.parseInt(sInt.trim());
             } catch (final NumberFormatException e) {
-                System.err.println("Integer parameter is not a number: " + sInt);
+                System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
                 printHelp(options);
                 System.exit(1);
             }
