@@ -56,10 +56,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AvailableTime;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.AvailableTime;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.common.AvailabilityUtils;
@@ -181,6 +181,26 @@ public class GetPerformer extends AbstractGetPerformer {
         int userId = session.getUserId();
         List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
+    }
+
+    /**
+     * Retrieves the {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval
+     * 
+     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} blocks for
+     * @param from The start point in the time interval
+     * @param until The end point in the time interval
+     * @return A {@link Map} with {@link Availability} slots for the {@link Attendee}s
+     * @throws OXException if an error is occurred
+     */
+    public Map<Attendee, Availability> getCombinedAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, Availability> availableTimes = new HashMap<>();
+        //TODO: Implement
+        return availableTimes;
+        //        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        //        for (Attendee attendee : attendees) {
+        //            List<Availability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+        //            availableTimes.put(attendee, combine(calendarAvailabilities));
+        //        }
     }
 
     /**
