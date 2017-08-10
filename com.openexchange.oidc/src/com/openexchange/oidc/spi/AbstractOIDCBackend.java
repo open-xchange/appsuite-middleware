@@ -218,6 +218,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
     public String getLogoutRequest(Session session) throws OXException {
+        // TODO QS-VS: switch to either a) terminate cookies locally and redirect to OX logout handler 
+        // or b) prepare OIDC single logout redirect
+        
         URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
 
         JWT idToken = null;

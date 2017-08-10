@@ -229,7 +229,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setHost(this.getDomainName(Services.getService(HostnameService.class), httpRequest))
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
-                .setParameter(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString())
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(httpResponse);
             httpResponse.sendRedirect(redirectLocation.build().toString());

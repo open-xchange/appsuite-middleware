@@ -67,6 +67,7 @@ import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
+import com.openexchange.oidc.tools.OIDCTools;
 
 /**
  * The implementation of the core OpenID backend.
@@ -88,7 +89,7 @@ public class OIDCCoreBackend extends AbstractOIDCBackend{
         int userId = resolvedMail.getUserID();
         AuthenticationInfo resultInfo = new AuthenticationInfo(contextId, userId);
         resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
-
+        resultInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         return resultInfo;
     }
 

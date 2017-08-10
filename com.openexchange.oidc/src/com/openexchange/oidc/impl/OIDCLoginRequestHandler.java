@@ -59,16 +59,16 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             return;
         }
         
-        String idToken = req.getParameter(OIDCTools.IDTOKEN);
-        if (Strings.isEmpty(idToken)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        
         SessionReservationService sessionReservationService = Services.getService(SessionReservationService.class);
         Reservation reservation = sessionReservationService.removeReservation(sessionToken);
         if (null == reservation) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        
+        String idToken = reservation.getState().get(OIDCTools.IDTOKEN);
+        if (Strings.isEmpty(idToken)) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         
