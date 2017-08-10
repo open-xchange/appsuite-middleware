@@ -92,7 +92,7 @@ public class NewAction extends AbstractAction {
             Availability availability = CalendarAvailabilityMapper.getInstance().deserialize(requestBody, CalendarAvailabilityMapper.getInstance().getMappedFields());
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
-            SetResult setResult = service.setAvailability(calendarSession, Collections.singletonList(availability));
+            SetResult setResult = service.setAvailability(calendarSession, availability);
             if (setResult.getIds().size() != 1) {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to set the calendar availability");
             }

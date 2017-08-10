@@ -92,24 +92,4 @@ public class SetPerformer extends AbstractUpdatePerformer {
         result.setIds(availabilityIds);
         return result;
     }
-
-    /**
-     * Performs the update
-     * 
-     * @param calendarAvailabilities
-     * @return
-     * @throws OXException
-     */
-    public SetResult perform(List<Availability> calendarAvailabilities) throws OXException {
-        // Pre-conditions check
-        CheckUtil.check(calendarAvailabilities);
-
-        // Prepare for storage
-        List<String> availabilityIds = prepareForStorage(storage, calendarAvailabilities);
-        storage.insertAvailabilities(calendarAvailabilities);
-
-        // Set the ids to the result
-        result.setIds(availabilityIds);
-        return result;
-    }
 }

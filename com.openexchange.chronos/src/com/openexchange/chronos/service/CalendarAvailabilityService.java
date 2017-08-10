@@ -77,19 +77,6 @@ public interface CalendarAvailabilityService {
     SetResult setAvailability(CalendarSession session, Availability availability) throws OXException;
 
     /**
-     * Sets the availability for the specified user. If any of the specified {@link Availability} overlaps
-     * with any of the existing {@link Availability} both blocks will be stored
-     * 
-     * @param session The {@link CalendarSession}
-     * @param availability A list with {@link Availability} groupings to set
-     * @return A {@link SetResult} with the unique identifiers of the {@link Availability} blocks and any
-     *         warnings that occurred during the operation
-     * @throws OXException if the availability cannot be set
-     * @deprecated Use {@link #setAvailability(CalendarSession, Availability)} instead.
-     */
-    SetResult setAvailability(CalendarSession session, List<Availability> availability) throws OXException;
-
-    /**
      * Gets the {@link Availability} for the current user
      * 
      * @param session the {@link CalendarSession}
