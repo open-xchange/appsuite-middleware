@@ -69,6 +69,7 @@ public interface CalendarAccountService {
      * @param userId The identifier of the user the account is added for
      * @param configuration The provider-specific configuration data for the calendar account
      * @return The identifier of the newly inserted calendar account
+     * @throws OXException if a database error occurs
      */
     int insertAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException;
 
@@ -78,6 +79,7 @@ public interface CalendarAccountService {
      * @param id The identifier of the account to update
      * @param configuration The provider-specific configuration data for the calendar account
      * @param timestamp The timestamp that specifies the last the last modification of the account
+     * @throws OXException if permission check fails
      */
     void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException;
 
@@ -85,6 +87,7 @@ public interface CalendarAccountService {
      * Deletes an existing calendar account and checks for permissions.
      *
      * @param id The identifier of the account to delete
+     * @throws OXException if permission check fails
      */
     void deleteAccount(int id) throws OXException;
 
@@ -93,6 +96,7 @@ public interface CalendarAccountService {
      *
      * @param id The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
+     * @throws OXException if permission check fails
      */
     CalendarAccount loadAccount(int id) throws OXException;
 
@@ -101,6 +105,7 @@ public interface CalendarAccountService {
      *
      * @param userId The identifier of the user to get the accounts for
      * @return The accounts, or an empty list if none were found
+     * @throws OXException if permission check fails
      */
     List<CalendarAccount> loadAccounts(int userId) throws OXException;
 
