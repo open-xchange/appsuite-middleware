@@ -51,13 +51,13 @@ package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.service.AvailabilityField;
-import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.chronos.service.AvailableField;
+import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.exception.OXException;
 
 /**
@@ -77,10 +77,22 @@ class CheckUtil {
      */
     static void check(List<Availability> availabilities) throws OXException {
         for (Availability availability : availabilities) {
-            checkMandatory(availability, AvailabilityField.uid);
-            checkConstraints(availability);
-            checkRanges(availability);
+            check(availability);
         }
+    }
+
+    /**
+     * Check the validity of the values of the specified {@link Availability} block
+     * according to the <a href="https://tools.ietf.org/html/rfc7953">RFC-7953</a>
+     * 
+     * @param availability The {@link Availability} block to check
+     * @throws OXException if any of the fields in any of the {@link Availability} does not meet
+     *             the regulations of the RFC
+     */
+    static void check(Availability availability) throws OXException {
+        checkMandatory(availability, AvailabilityField.uid);
+        checkConstraints(availability);
+        checkRanges(availability);
     }
 
     /**

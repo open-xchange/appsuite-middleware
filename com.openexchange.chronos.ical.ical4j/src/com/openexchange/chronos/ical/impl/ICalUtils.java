@@ -200,7 +200,7 @@ public class ICalUtils {
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
         importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
-        importedCalendar.setAvailabilities(importAvailabilities(vCalendar.getAvailabilities(), mapper, parameters));
+        importedCalendar.setAvailabilities(importAvailability(vCalendar.getAvailability(), mapper, parameters));
         return importedCalendar;
     }
 
@@ -258,22 +258,17 @@ public class ICalUtils {
     /**
      * Imports the specified {@link VAvailability} components
      * 
-     * @param availabilityComponents A {@link ComponentList} with all the {@link VAvailability} components
+     * @param availabilityComponent A {@link ComponentList} with all the {@link VAvailability} components
      * @param mapper The {@link ICalMapper}
      * @param parameters The {@link ICalParameters}
      * @return A {@link List} with the imported {@link Availability} components
      * @throws OXException if an error is occurred
      */
-    static List<Availability> importAvailabilities(ComponentList availabilityComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
-        if (null == availabilityComponents) {
+    static Availability importAvailability(Component availabilityComponent, ICalMapper mapper, ICalParameters parameters) throws OXException {
+        if (null == availabilityComponent) {
             return null;
         }
-        List<Availability> availabilities = new ArrayList<Availability>(availabilityComponents.size());
-        Iterator<?> iterator = availabilityComponents.iterator();
-        while (iterator.hasNext()) {
-            availabilities.add(importAvailability((VAvailability) iterator.next(), mapper, parameters));
-        }
-        return availabilities;
+        return importAvailability((VAvailability) availabilityComponent, mapper, parameters);
     }
 
     static FreeBusyData importFreeBusy(int index, VFreeBusy vFreeBusy, ICalMapper mapper, ICalParameters parameters) throws OXException {

@@ -87,6 +87,23 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.service.CalendarAvailabilityService#setAvailability(com.openexchange.chronos.service.CalendarSession, com.openexchange.chronos.Availability)
+     */
+    @Override
+    public SetResult setAvailability(CalendarSession session, final Availability availability) throws OXException {
+        return new AbstractCalendarAvailabilityStorageOperation<SetResult>(session) {
+
+            @Override
+            protected SetResult execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                return new SetPerformer(storage, session).perform(availability);
+            }
+
+        }.executeUpdate();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#setAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List)
      */
     @Override

@@ -203,7 +203,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
                 service.purgeAvailabilities(calendarSession);
             }
             // ...and set the new one(s)
-            service.setAvailability(calendarSession, importedIcal.getAvailabilities());
+            service.setAvailability(calendarSession, importedIcal.getAvailability());
         } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         } finally {

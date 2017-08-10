@@ -66,6 +66,17 @@ import com.openexchange.exception.OXException;
 public interface CalendarAvailabilityService {
 
     /**
+     * Sets the availability for the specified user. Any existing {@link Availability} blocks will be overriden
+     * 
+     * @param session The {@link CalendarSession}
+     * @param availability The {@link Availability} to set
+     * @return A {@link SetResult} with the unique identifier of the {@link Availability} block and any
+     *         warnings that occurred during the operation
+     * @throws OXException if the availability cannot be set
+     */
+    SetResult setAvailability(CalendarSession session, Availability availability) throws OXException;
+
+    /**
      * Sets the availability for the specified user. If any of the specified {@link Availability} overlaps
      * with any of the existing {@link Availability} both blocks will be stored
      * 
