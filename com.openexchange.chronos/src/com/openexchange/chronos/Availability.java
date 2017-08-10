@@ -97,7 +97,7 @@ public class Availability implements FieldAware, Comparable<Availability>, Clone
     private ExtendedProperties extendedProperties;
     private List<String> categories;
 
-    private List<Available> calendarFreeSlots;
+    private List<Available> available;
 
     private EnumSet<AvailabilityField> fields;
 
@@ -624,22 +624,22 @@ public class Availability implements FieldAware, Comparable<Availability>, Clone
     }
 
     /**
-     * Gets the calendarFreeSlots
+     * Gets the {@link Available} components
      * s
      * 
-     * @return The calendarFreeSlots
+     * @return The {@link Available} components
      */
-    public List<Available> getCalendarFreeSlots() {
-        return calendarFreeSlots;
+    public List<Available> getAvailable() {
+        return available;
     }
 
     /**
-     * Sets the calendarFreeSlots
+     * Sets the {@link Available} components
      *
-     * @param calendarFreeSlots The calendarFreeSlots to set
+     * @param available The {@link Available} components to set
      */
-    public void setCalendarFreeSlots(List<Available> calendarFreeSlots) {
-        this.calendarFreeSlots = calendarFreeSlots;
+    public void setAvailable(List<Available> available) {
+        this.available = available;
     }
 
     /**

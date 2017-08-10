@@ -59,7 +59,7 @@ import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.AvailabilityField;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -127,7 +127,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             txPolicy.setAutoCommit(connection, false);
             int caAmount = insertCalendarAvailabilityItem(calendarAvailability, AVAILABILITY_TABLE_NAME, AVAILABILITY_MAPPER, connection);
             int freeSlotsCount = 0;
-            for (List<Available> slots : Lists.partition(calendarAvailability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+            for (List<Available> slots : Lists.partition(calendarAvailability.getAvailable(), INSERT_CHUNK_SIZE)) {
                 freeSlotsCount += insertCalendarAvailabilityItems(slots, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
             }
             txPolicy.commit(connection);
@@ -157,7 +157,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
                 // Insert the free slots chunk-wise
                 for (Availability availability : chunk) {
-                    for (List<Available> slots : Lists.partition(availability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+                    for (List<Available> slots : Lists.partition(availability.getAvailable(), INSERT_CHUNK_SIZE)) {
                         updated += insertCalendarAvailabilityItems(slots, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
                     }
                 }
@@ -428,7 +428,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
             Availability availability = AVAILABILITY_MAPPER.fromResultSet(logExecuteQuery(stmt), mappedFields);
-            availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
+            availability.setAvailable(loadCalendarFreeSlots(connection, availability.getId()));
             return availability;
         }
     }
@@ -453,7 +453,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             List<Availability> availabilities = AVAILABILITY_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
 
             for (Availability availability : availabilities) {
-                availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
+                availability.setAvailable(loadCalendarFreeSlots(connection, availability.getId()));
             }
             return availabilities;
         }
@@ -470,7 +470,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws SQLException if an SQL error is occurred
      */
     private Available loadCalendarFreeSlot(Connection connection, String availabilityId, String freeSlotId) throws OXException, SQLException {
-        FreeSlotField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
+        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER).append(" AND calendarAvailability=? AND id=?;");
 
         int parameterIndex = 0;
@@ -493,7 +493,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws SQLException
      */
     private List<Available> loadCalendarFreeSlots(Connection connection, String availabilityId) throws OXException, SQLException {
-        FreeSlotField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
+        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER).append(" AND calendarAvailability=?;");
 
         int parameterIndex = 1;
@@ -534,7 +534,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
         // 2) Then fetch all free slots of the calendar availability items
         for (Availability ca : availabilities) {
-            ca.setCalendarFreeSlots(loadAvailable(ca.getId()));
+            ca.setAvailable(loadAvailable(ca.getId()));
         }
         return availabilities;
     }

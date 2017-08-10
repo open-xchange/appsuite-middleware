@@ -291,10 +291,10 @@ public class GetPerformer extends AbstractPerformer {
 
                 // Higher or equal priority, adjust times
                 if (AvailabilityUtils.contained(availabilityB, availabilityA)) {
-                    List<Available> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
-                    flattenList.addAll(availabilityB.getCalendarFreeSlots());
-                    flattenList.addAll(availabilityA.getCalendarFreeSlots());
-                    availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
+                    List<Available> flattenList = new ArrayList<>(availabilityB.getAvailable().size() + availabilityA.getAvailable().size());
+                    flattenList.addAll(availabilityB.getAvailable());
+                    flattenList.addAll(availabilityA.getAvailable());
+                    availabilityA.setAvailable(combineSlots(flattenList));
                     iteratorB.remove();
                 } else if (AvailabilityUtils.contained(availabilityA, availabilityB)) {
                     // Block A is entirely contained in block B, and since the list is sorted by priority
@@ -308,7 +308,7 @@ public class GetPerformer extends AbstractPerformer {
                     // +--------------------------------------------+
                     List<Available> preIntersections = new ArrayList<>();
                     List<Available> postIntersections = new ArrayList<>();
-                    List<Available> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
+                    List<Available> flattenList = new ArrayList<>(availabilityB.getAvailable().size() + availabilityA.getAvailable().size());
 
                     Availability pre = availabilityB.clone();
                     pre.setEndTime(availabilityA.getStartTime());
@@ -316,14 +316,14 @@ public class GetPerformer extends AbstractPerformer {
                     // if the availability blocks are of equal priority, then append the first split 
                     // to the pre availability, and the last split to the preIntersections.
                     List<Available> preSlots = new ArrayList<>();
-                    for (Iterator<Available> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                    for (Iterator<Available> iterator = availabilityB.getAvailable().iterator(); iterator.hasNext();) {
                         Available cfs = iterator.next();
                         if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                             if (availabilityA.compareTo(availabilityB) == 0) {
                                 // If the priorities are equal then we split the free slot
                                 Available preSplit = cfs.clone();
                                 preSplit.setEndTime(availabilityA.getStartTime());
-                                pre.getCalendarFreeSlots().add(preSplit);
+                                pre.getAvailable().add(preSplit);
 
                                 Available postSplit = cfs.clone();
                                 postSplit.setStartTime(availabilityB.getEndTime());
@@ -338,7 +338,7 @@ public class GetPerformer extends AbstractPerformer {
                             iterator.remove();
                         }
                     }
-                    pre.setCalendarFreeSlots(preSlots);
+                    pre.setAvailable(preSlots);
                     presAndPosts.add(pre);
 
                     Availability post = availabilityB.clone();
@@ -347,7 +347,7 @@ public class GetPerformer extends AbstractPerformer {
                     // if the availability blocks are of equal priority,  then append the first split 
                     // to the postIntersections, and the last split to the post availability.
                     List<Available> postSlots = new ArrayList<>();
-                    for (Iterator<Available> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                    for (Iterator<Available> iterator = availabilityB.getAvailable().iterator(); iterator.hasNext();) {
                         Available cfs = iterator.next();
                         if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                             if (availabilityA.compareTo(availabilityB) == 0) {
@@ -357,7 +357,7 @@ public class GetPerformer extends AbstractPerformer {
 
                                 Available postSplit = cfs.clone();
                                 postSplit.setStartTime(availabilityA.getEndTime());
-                                post.getCalendarFreeSlots().add(postSplit);
+                                post.getAvailable().add(postSplit);
                             } else {
                                 cfs.setStartTime(availabilityA.getEndTime());
                             }
@@ -366,14 +366,14 @@ public class GetPerformer extends AbstractPerformer {
                             iterator.remove();
                         }
                     }
-                    post.setCalendarFreeSlots(postSlots);
+                    post.setAvailable(postSlots);
                     presAndPosts.add(post);
-                    flattenList.addAll(availabilityA.getCalendarFreeSlots());
-                    flattenList.addAll(availabilityB.getCalendarFreeSlots());
-                    availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
+                    flattenList.addAll(availabilityA.getAvailable());
+                    flattenList.addAll(availabilityB.getAvailable());
+                    availabilityA.setAvailable(combineSlots(flattenList));
                     // Add any splits from the intersections to the availability A
-                    availabilityA.getCalendarFreeSlots().addAll(preIntersections);
-                    availabilityA.getCalendarFreeSlots().addAll(postIntersections);
+                    availabilityA.getAvailable().addAll(preIntersections);
+                    availabilityA.getAvailable().addAll(postIntersections);
 
                     // Remove the contained availability
                     iteratorB.remove();
@@ -404,8 +404,8 @@ public class GetPerformer extends AbstractPerformer {
      */
     private void adjustSlots(Availability a, Availability b) {
         List<Available> toAdd = new ArrayList<>();
-        for (Available freeSlotA : a.getCalendarFreeSlots()) {
-            for (Iterator<Available> iteratorB = b.getCalendarFreeSlots().iterator(); iteratorB.hasNext();) {
+        for (Available freeSlotA : a.getAvailable()) {
+            for (Iterator<Available> iteratorB = b.getAvailable().iterator(); iteratorB.hasNext();) {
                 Available freeSlotB = iteratorB.next();
                 if (AvailabilityUtils.contained(freeSlotA, freeSlotB)) {
                     // split
@@ -427,7 +427,7 @@ public class GetPerformer extends AbstractPerformer {
                 }
             }
             // Add any splits
-            b.getCalendarFreeSlots().addAll(toAdd);
+            b.getAvailable().addAll(toAdd);
         }
     }
 
@@ -446,7 +446,7 @@ public class GetPerformer extends AbstractPerformer {
         List<Available> flattenSlots = new ArrayList<>();
         for (Availability calendarAvailability : calendarAvailabilities) {
             busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
-            flattenSlots.addAll(calendarAvailability.getCalendarFreeSlots());
+            flattenSlots.addAll(calendarAvailability.getAvailable());
         }
 
         AvailableTime availableTime = new AvailableTime();

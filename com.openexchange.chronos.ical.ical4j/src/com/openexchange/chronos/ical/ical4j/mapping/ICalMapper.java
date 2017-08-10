@@ -156,7 +156,7 @@ public class ICalMapper {
         }
 
         // Parse the free slots/available sub-components
-        for (com.openexchange.chronos.Available freeSlot : availability.getCalendarFreeSlots()) {
+        for (com.openexchange.chronos.Available freeSlot : availability.getAvailable()) {
             Available available = new Available();
             for (ICalMapping<Available, com.openexchange.chronos.Available> mapping : AvailableMappings.ALL) {
                 mapping.export(freeSlot, available, parameters, warnings);
@@ -246,7 +246,7 @@ public class ICalMapper {
     public Availability importVAvailability(VAvailability vAvailability, ICalParameters parameters, List<OXException> warnings) {
         Availability calendarAvailability = new Availability();
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
-        calendarAvailability.setCalendarFreeSlots(importAvailable(vAvailability.getAvailable(), parameters, warnings));
+        calendarAvailability.setAvailable(importAvailable(vAvailability.getAvailable(), parameters, warnings));
         for (ICalMapping<VAvailability, Availability> mapping : AvailabilityMappings.ALL) {
             mapping.importICal(vAvailability, calendarAvailability, iCalParameters, warnings);
         }

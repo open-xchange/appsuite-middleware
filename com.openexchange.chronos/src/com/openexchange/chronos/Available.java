@@ -54,7 +54,7 @@ import java.util.EnumSet;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 
 /**
  * {@link Available} - Defines an available time range within a {@link Availability} component
@@ -91,14 +91,14 @@ public class Available implements FieldAware, Cloneable {
 
     //TODO: iana-props, exdate, rdate, contact
 
-    private final EnumSet<FreeSlotField> fields;
+    private final EnumSet<AvailableField> fields;
 
     /**
      * Initialises a new {@link Available}.
      */
     public Available() {
         super();
-        fields = EnumSet.noneOf(FreeSlotField.class);
+        fields = EnumSet.noneOf(AvailableField.class);
     }
 
     /**
@@ -117,7 +117,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setId(String id) {
         this.id = id;
-        fields.add(FreeSlotField.id);
+        fields.add(AvailableField.id);
     }
 
     /**
@@ -125,7 +125,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeId() {
         this.id = null;
-        fields.remove(FreeSlotField.id);
+        fields.remove(AvailableField.id);
     }
 
     /**
@@ -135,7 +135,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setUid(String uid) {
         this.uid = uid;
-        fields.add(FreeSlotField.uid);
+        fields.add(AvailableField.uid);
     }
 
     /**
@@ -143,7 +143,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeUid() {
         this.uid = null;
-        fields.remove(FreeSlotField.uid);
+        fields.remove(AvailableField.uid);
     }
 
     /**
@@ -153,14 +153,14 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
-        fields.add(FreeSlotField.dtstamp);
+        fields.add(AvailableField.dtstamp);
     }
 
     /**
      * Removes the creation timestamp
      */
     public void removeCreationTimestamp() {
-        fields.remove(FreeSlotField.dtstamp);
+        fields.remove(AvailableField.dtstamp);
     }
 
     /**
@@ -170,7 +170,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setStartTime(DateTime startTime) {
         this.startTime = startTime;
-        fields.add(FreeSlotField.dtstart);
+        fields.add(AvailableField.dtstart);
     }
 
     /**
@@ -187,7 +187,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeStartTime() {
         this.startTime = null;
-        fields.remove(FreeSlotField.dtstart);
+        fields.remove(AvailableField.dtstart);
     }
 
     /**
@@ -197,7 +197,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setEndTime(DateTime endTime) {
         this.endTime = endTime;
-        fields.add(FreeSlotField.dtend);
+        fields.add(AvailableField.dtend);
     }
 
     /**
@@ -205,7 +205,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeEndTime() {
         this.endTime = null;
-        fields.remove(FreeSlotField.dtend);
+        fields.remove(AvailableField.dtend);
     }
 
     /**
@@ -224,7 +224,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setDuration(long duration) {
         this.duration = duration;
-        fields.add(FreeSlotField.duration);
+        fields.add(AvailableField.duration);
     }
 
     /**
@@ -243,7 +243,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setCreated(Date created) {
         this.created = created;
-        fields.add(FreeSlotField.created);
+        fields.add(AvailableField.created);
     }
 
     /**
@@ -251,7 +251,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeCreated() {
         this.created = null;
-        fields.remove(FreeSlotField.created);
+        fields.remove(AvailableField.created);
     }
 
     /**
@@ -270,7 +270,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
-        fields.add(FreeSlotField.lastModified);
+        fields.add(AvailableField.lastModified);
     }
 
     /**
@@ -278,7 +278,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeLastModified() {
         this.lastModified = null;
-        fields.remove(FreeSlotField.lastModified);
+        fields.remove(AvailableField.lastModified);
     }
 
     /**
@@ -297,7 +297,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setDescription(String description) {
         this.description = description;
-        fields.add(FreeSlotField.description);
+        fields.add(AvailableField.description);
     }
 
     /**
@@ -305,7 +305,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeDescription() {
         this.description = null;
-        fields.remove(FreeSlotField.description);
+        fields.remove(AvailableField.description);
     }
 
     /**
@@ -324,7 +324,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setSummary(String summary) {
         this.summary = summary;
-        fields.add(FreeSlotField.summary);
+        fields.add(AvailableField.summary);
     }
 
     /**
@@ -332,7 +332,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeSummary() {
         this.summary = null;
-        fields.remove(FreeSlotField.summary);
+        fields.remove(AvailableField.summary);
     }
 
     /**
@@ -351,7 +351,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setRecurrenceId(RecurrenceId recurrenceId) {
         this.recurrenceId = recurrenceId;
-        fields.add(FreeSlotField.recurid);
+        fields.add(AvailableField.recurid);
     }
 
     /**
@@ -359,7 +359,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeRecurrenceId() {
         this.recurrenceId = null;
-        fields.remove(FreeSlotField.recurid);
+        fields.remove(AvailableField.recurid);
     }
 
     /**
@@ -378,7 +378,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setCategories(List<String> categories) {
         this.categories = categories;
-        fields.add(FreeSlotField.categories);
+        fields.add(AvailableField.categories);
     }
 
     /**
@@ -386,7 +386,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeCategories() {
         this.categories = null;
-        fields.remove(FreeSlotField.categories);
+        fields.remove(AvailableField.categories);
     }
 
     /**
@@ -405,7 +405,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
-        fields.add(FreeSlotField.extendedProperties);
+        fields.add(AvailableField.extendedProperties);
     }
 
     /**
@@ -413,7 +413,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeExtendedProperties() {
         this.extendedProperties = null;
-        fields.remove(FreeSlotField.extendedProperties);
+        fields.remove(AvailableField.extendedProperties);
     }
 
     /**
@@ -432,7 +432,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setComments(List<String> comments) {
         this.comments = comments;
-        fields.add(FreeSlotField.comment);
+        fields.add(AvailableField.comment);
     }
 
     /**
@@ -440,7 +440,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeComments() {
         this.comments = null;
-        fields.remove(FreeSlotField.comment);
+        fields.remove(AvailableField.comment);
     }
 
     /**
@@ -486,7 +486,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setRecurrenceRule(String recurrenceRule) {
         this.recurrenceRule = recurrenceRule;
-        fields.add(FreeSlotField.rrule);
+        fields.add(AvailableField.rrule);
     }
 
     /**
@@ -494,7 +494,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeRecurrenceRule() {
         this.recurrenceRule = null;
-        fields.remove(FreeSlotField.rrule);
+        fields.remove(AvailableField.rrule);
     }
 
     /**
@@ -513,7 +513,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setCalendarAvailabilityId(String calendarAvailabilityId) {
         this.availabilityId = calendarAvailabilityId;
-        fields.add(FreeSlotField.calendarAvailabilityId);
+        fields.add(AvailableField.calendarAvailabilityId);
     }
 
     /**
@@ -521,7 +521,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeCalendarAvailabilityId() {
         this.availabilityId = null;
-        fields.remove(FreeSlotField.calendarAvailabilityId);
+        fields.remove(AvailableField.calendarAvailabilityId);
     }
 
     /**
@@ -540,7 +540,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void setCalendarUser(int calendarUser) {
         this.calendarUser = calendarUser;
-        fields.add(FreeSlotField.user);
+        fields.add(AvailableField.user);
     }
 
     /**
@@ -573,7 +573,7 @@ public class Available implements FieldAware, Cloneable {
      */
     public void removeLocation() {
         this.location = null;
-        fields.remove(FreeSlotField.location);
+        fields.remove(AvailableField.location);
     }
 
     /*
@@ -599,55 +599,55 @@ public class Available implements FieldAware, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
-        if (contains(FreeSlotField.calendarAvailabilityId)) {
+        if (contains(AvailableField.calendarAvailabilityId)) {
             clone.setCalendarAvailabilityId(availabilityId);
         }
-        if (contains(FreeSlotField.categories)) {
+        if (contains(AvailableField.categories)) {
             clone.setCategories(categories);
         }
-        if (contains(FreeSlotField.comment)) {
+        if (contains(AvailableField.comment)) {
             clone.setComments(comments);
         }
-        if (contains(FreeSlotField.created)) {
+        if (contains(AvailableField.created)) {
             clone.setCreated(created);
         }
-        if (contains(FreeSlotField.description)) {
+        if (contains(AvailableField.description)) {
             clone.setDescription(description);
         }
-        if (contains(FreeSlotField.dtend)) {
+        if (contains(AvailableField.dtend)) {
             clone.setEndTime(endTime);
         }
-        if (contains(FreeSlotField.dtstamp)) {
+        if (contains(AvailableField.dtstamp)) {
             clone.setCreationTimestamp(creationTimestamp);
         }
-        if (contains(FreeSlotField.dtstart)) {
+        if (contains(AvailableField.dtstart)) {
             clone.setStartTime(startTime);
         }
-        if (contains(FreeSlotField.duration)) {
+        if (contains(AvailableField.duration)) {
             clone.setDuration(duration);
         }
-        if (contains(FreeSlotField.extendedProperties)) {
+        if (contains(AvailableField.extendedProperties)) {
             clone.setExtendedProperties(extendedProperties);
         }
-        if (contains(FreeSlotField.id)) {
+        if (contains(AvailableField.id)) {
             clone.setId(id);
         }
-        if (contains(FreeSlotField.lastModified)) {
+        if (contains(AvailableField.lastModified)) {
             clone.setLastModified(lastModified);
         }
-        if (contains(FreeSlotField.location)) {
+        if (contains(AvailableField.location)) {
             clone.setLocation(location);
         }
-        if (contains(FreeSlotField.recurid)) {
+        if (contains(AvailableField.recurid)) {
             clone.setRecurrenceId(recurrenceId);
         }
-        if (contains(FreeSlotField.rrule)) {
+        if (contains(AvailableField.rrule)) {
             clone.setRecurrenceRule(recurrenceRule);
         }
-        if (contains(FreeSlotField.summary)) {
+        if (contains(AvailableField.summary)) {
             clone.setSummary(summary);
         }
-        if (contains(FreeSlotField.uid)) {
+        if (contains(AvailableField.uid)) {
             clone.setUid(uid);
         }
         clone.setCalendarUser(calendarUser);

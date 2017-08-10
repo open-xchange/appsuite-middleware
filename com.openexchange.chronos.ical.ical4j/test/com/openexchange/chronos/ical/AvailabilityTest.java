@@ -95,7 +95,7 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uid does not match", "0428C7D2-688E-4D2E-AC52-CD112E2469DF", availability.getUid());
 
-        List<Available> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getAvailable();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
@@ -151,7 +151,7 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uid does not match", "84D0F948-7FC6-4C1D-BBF3-BA9827B424B5", availability.getUid());
 
-        List<Available> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getAvailable();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 2 'available' sub-components", 2, freeSlots.size());
 
@@ -241,7 +241,7 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), availability.getStartTime().getTimeZone());
         assertEquals("The end timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), availability.getEndTime().getTimeZone());
 
-        List<Available> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getAvailable();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
@@ -260,7 +260,7 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Denver"), availability.getStartTime().getTimeZone());
         assertEquals("The end timezone does not match", java.util.TimeZone.getTimeZone("America/Denver"), availability.getEndTime().getTimeZone());
 
-        freeSlots = availability.getCalendarFreeSlots();
+        freeSlots = availability.getAvailable();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
@@ -279,7 +279,7 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), availability.getStartTime().getTimeZone());
         assertNull("The end timezone does not match", availability.getEndTime());
 
-        freeSlots = availability.getCalendarFreeSlots();
+        freeSlots = availability.getAvailable();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
