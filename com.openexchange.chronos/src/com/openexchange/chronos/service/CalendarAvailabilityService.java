@@ -85,6 +85,7 @@ public interface CalendarAvailabilityService {
      * @return A {@link SetResult} with the unique identifiers of the {@link Availability} blocks and any
      *         warnings that occurred during the operation
      * @throws OXException if the availability cannot be set
+     * @deprecated Use {@link #setAvailability(CalendarSession, Availability)} instead.
      */
     SetResult setAvailability(CalendarSession session, List<Availability> availability) throws OXException;
 

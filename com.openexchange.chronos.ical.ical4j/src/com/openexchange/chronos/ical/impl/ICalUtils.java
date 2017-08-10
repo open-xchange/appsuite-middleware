@@ -200,7 +200,7 @@ public class ICalUtils {
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
         importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
         importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
-        importedCalendar.setAvailabilities(importAvailability(vCalendar.getAvailability(), mapper, parameters));
+        importedCalendar.setAvailability(importAvailability(vCalendar.getAvailability(), mapper, parameters));
         return importedCalendar;
     }
 

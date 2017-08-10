@@ -217,7 +217,7 @@ public class Calendar {
      *
      * @param availability The availability to set
      */
-    public void setAvailabilities(Availability availability) {
+    public void setAvailability(Availability availability) {
         this.availability = availability;
     }
 
