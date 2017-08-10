@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.availability.json;
+package com.openexchange.chronos.impl.availability.performer;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import com.openexchange.chronos.Availability;
-import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.Available;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 
 /**
- * {@link ListAction}
+ * {@link AbstractGetPerformer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ListAction extends AbstractAction {
+abstract class AbstractGetPerformer extends AbstractPerformer {
 
     /**
-     * Initialises a new {@link ListAction}.
+     * Initialises a new {@link AbstractGetPerformer}.
+     * 
+     * @param storage The {@link CalendarAvailabilityStorage}
+     * @param session The groupware {@link CalendarSession}
      */
-    public ListAction(ServiceLookup services) {
-        super(services);
+    public AbstractGetPerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
+        super(storage, session);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Prepares the specified {@link Available} blocks for delivery by wrapping them
+     * into an {@link Availability} container
      * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     * @param available The {@link List} with the {@link Available} blocks to prepare
+     * @return The {@link Availability} object
      */
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        CalendarSession calendarSession = getSession(session);
-        CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
-        Availability availability = service.getAvailability(calendarSession);
-        return new AJAXRequestResult(availability);
+    Availability prepareForDelivery(List<Available> available) {
+        Organizer organizer = new Organizer();
+        organizer.setEntity(session.getUserId());
+
+        Availability availability = new Availability();
+        availability.setCalendarUser(session.getUserId());
+        availability.setCreationTimestamp(new Date(System.currentTimeMillis()));
+        availability.setOrganizer(organizer);
+        availability.setAvailable(available);
+        availability.setUid(UUID.randomUUID().toString());
+
+        return availability;
     }
+
 }

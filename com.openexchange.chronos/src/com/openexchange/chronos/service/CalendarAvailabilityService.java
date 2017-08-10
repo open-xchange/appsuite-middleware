@@ -96,7 +96,7 @@ public interface CalendarAvailabilityService {
      * @return An unmodifiable {@link List} with {@link Availability} blocks
      * @throws OXException if an error is occurred
      */
-    List<Availability> getAvailability(CalendarSession session) throws OXException;
+    Availability getAvailability(CalendarSession session) throws OXException;
 
     /**
      * Gets the {@link Availability} for the current user in the specified interval

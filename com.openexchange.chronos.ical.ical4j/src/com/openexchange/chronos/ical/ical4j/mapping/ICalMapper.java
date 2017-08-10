@@ -156,12 +156,12 @@ public class ICalMapper {
         }
 
         // Parse the free slots/available sub-components
-        for (com.openexchange.chronos.Available freeSlot : availability.getAvailable()) {
-            Available available = new Available();
+        for (com.openexchange.chronos.Available availableBlock : availability.getAvailable()) {
+            Available availableComponent = new Available();
             for (ICalMapping<Available, com.openexchange.chronos.Available> mapping : AvailableMappings.ALL) {
-                mapping.export(freeSlot, available, parameters, warnings);
+                mapping.export(availableBlock, availableComponent, parameters, warnings);
             }
-            vAvailability.getAvailable().add(available);
+            vAvailability.getAvailable().add(availableComponent);
         }
 
         return vAvailability;

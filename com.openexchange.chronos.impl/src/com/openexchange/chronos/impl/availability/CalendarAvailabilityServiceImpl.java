@@ -54,8 +54,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.impl.availability.performer.DeletePerformer;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
@@ -124,11 +124,11 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession)
      */
     @Override
-    public List<Availability> getAvailability(CalendarSession session) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<List<Availability>>(session) {
+    public Availability getAvailability(CalendarSession session) throws OXException {
+        return new AbstractCalendarAvailabilityStorageOperation<Availability>(session) {
 
             @Override
-            protected List<Availability> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+            protected Availability execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
                 return new GetPerformer(storage, session).perform();
             }
 

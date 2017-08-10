@@ -51,7 +51,6 @@ package com.openexchange.caldav.mixins;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.chronos.ical.CalendarExport;
@@ -98,13 +97,12 @@ public class CalendarAvailability extends SingleXMLPropertyMixin {
             CalendarSession calendarSession = calendarService.init(factory.getSession());
 
             CalendarAvailabilityService service = factory.getService(CalendarAvailabilityService.class);
-            List<com.openexchange.chronos.Availability> availability = service.getAvailability(calendarSession);
+            com.openexchange.chronos.Availability availability = service.getAvailability(calendarSession);
             // export the availability
             ICalService iCalService = factory.getService(ICalService.class);
             CalendarExport exportICal = iCalService.exportICal(iCalService.initParameters());
-            for (com.openexchange.chronos.Availability av : availability) {
-                exportICal.add(av);
-            }
+            exportICal.add(availability);
+
             inputStream = exportICal.getClosingStream();
             return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
         } catch (OXException e) {

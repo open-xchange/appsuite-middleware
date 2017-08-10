@@ -75,7 +75,7 @@ import com.openexchange.tools.arrays.Collections;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetPerformer extends AbstractPerformer {
+public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Initialises a new {@link GetPerformer}.
@@ -101,8 +101,9 @@ public class GetPerformer extends AbstractPerformer {
      * @return a {@link List} with all {@link Availability} blocks of the current user
      * @throws OXException if the list cannot be retrieved
      */
-    public List<Availability> perform() throws OXException {
-        return storage.loadCalendarAvailabilities(session.getUserId());
+    public Availability perform() throws OXException {
+        List<Available> available = storage.loadAvailable(session.getUserId());
+        return prepareForDelivery(available);
     }
 
     /**

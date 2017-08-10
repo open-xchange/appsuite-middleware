@@ -195,14 +195,14 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
             ICalService iCalService = getFactory().getService(ICalService.class);
             inputStream = new ByteArrayInputStream(iCalAvailability.getBytes());
             ImportedCalendar importedIcal = iCalService.importICal(inputStream, iCalService.initParameters());
-            // Check for already existing availability blocks...
+            // Check for an already existing availability block...
             CalendarAvailabilityService service = getFactory().getService(CalendarAvailabilityService.class);
-            List<com.openexchange.chronos.Availability> availabilities = service.getAvailability(calendarSession);
-            // ...purge the old ones...
-            if (availabilities != null && availabilities.size() > 0) {
+            com.openexchange.chronos.Availability currentAvailability = service.getAvailability(calendarSession);
+            // ...purge the old one...
+            if (currentAvailability != null) {
                 service.purgeAvailabilities(calendarSession);
             }
-            // ...and set the new one(s)
+            // ...and set the new one
             service.setAvailability(calendarSession, importedIcal.getAvailability());
         } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
