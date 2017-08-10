@@ -70,13 +70,13 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.USER_HAS_NO_AVAILABILITY_SET;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -293,9 +293,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INSUFFICIENT_ACCOUNT_PERMISSIONS("Insufficient permissions", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 5072),
     /**
-     * The user '%1$s' has set no availability
+     * <li>The attendee '%1$s' is either not an internal user or does not exist.</li>
+     * <li>Internal attendee not found [attendee %1$s]</li>
      */
-    NO_AVAILABILITY_FOR_USER("The user '%1$s' has set no availability", USER_HAS_NO_AVAILABILITY_SET, Category.CATEGORY_WARNING, 5073),
+    UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     ;
 

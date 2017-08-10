@@ -115,7 +115,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
 
-    public static final String USER_HAS_NO_AVAILABILITY_SET = "The user '%1$s' has set no availability.";
+    public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The attendee '%1$s' is either not an internal user or does not exist.";
 
     /**
      * Initializes a new {@link CalendarExceptionMessages}.

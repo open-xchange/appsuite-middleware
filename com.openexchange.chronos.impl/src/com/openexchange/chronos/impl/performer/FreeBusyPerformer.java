@@ -87,8 +87,8 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
@@ -245,19 +245,22 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Adjust the intervals
         adjustIntervals(from, until, availableTimes, timeZone);
 
-        // Iterate over all calendar availability blocks for all attendees
+        // Check for not existing users
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
-            List<CalendarAvailability> availableTime = availableTimes.get(attendee);
-            if (availableTime == null) {
-                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.NO_AVAILABILITY_FOR_USER.create(attendee.getEntity()));
+            if (!freeBusyPerAttendee.containsKey(attendee)) {
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.UNKNOWN_INTERNAL_ATTENDEE.create(attendee.getEntity()));
                 FreeBusyResult result = new FreeBusyResult();
                 result.setWarnings(warnings);
-                continue;
+                results.put(attendee, result);
             }
+        }
 
+        // Iterate over all calendar availability blocks for all attendees
+        for (Attendee attendee : attendees) {
+            List<CalendarAvailability> availableTime = availableTimes.get(attendee);
             // For each availability block and each calendar free slot create an equivalent free busy time slot
-            List<FreeBusyTime> freeBusyTimes = calculateFreeBusyTimes(availableTime, timeZone);
+            List<FreeBusyTime> freeBusyTimes = availableTime.isEmpty() ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availableTime, timeZone);
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
