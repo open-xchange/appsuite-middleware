@@ -50,7 +50,7 @@
 package com.openexchange.chronos.impl.availability.performer;
 
 import java.util.List;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SetResult;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
@@ -80,7 +80,7 @@ public class SetPerformer extends AbstractUpdatePerformer {
      * @return
      * @throws OXException
      */
-    public SetResult perform(List<CalendarAvailability> calendarAvailabilities) throws OXException {
+    public SetResult perform(List<Availability> calendarAvailabilities) throws OXException {
         // Pre-conditions check
         CheckUtil.check(calendarAvailabilities);
 

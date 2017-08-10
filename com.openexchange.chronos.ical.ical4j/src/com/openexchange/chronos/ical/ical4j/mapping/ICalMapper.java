@@ -53,8 +53,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -142,24 +141,24 @@ public class ICalMapper {
     }
 
     /**
-     * Exports the specified {@link CalendarAvailability} block to a {@link VAvailability} component.
+     * Exports the specified {@link Availability} block to a {@link VAvailability} component.
      * 
-     * @param availability The {@link CalendarAvailability} block to export
+     * @param availability The {@link Availability} block to export
      * @param parameters Further options to use, or <code>null</code> to stick with the defaults
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     * @return The exported {@link CalendarAvailability} as a {@link VAvailability} component
+     * @return The exported {@link Availability} as a {@link VAvailability} component
      */
-    public VAvailability exportAvailability(CalendarAvailability availability, ICalParameters parameters, List<OXException> warnings) {
+    public VAvailability exportAvailability(Availability availability, ICalParameters parameters, List<OXException> warnings) {
         VAvailability vAvailability = new VAvailability();
         ICalParameters icalParams = ICalUtils.getParametersOrDefault(parameters);
-        for (ICalMapping<VAvailability, CalendarAvailability> mapping : AvailabilityMappings.ALL) {
+        for (ICalMapping<VAvailability, Availability> mapping : AvailabilityMappings.ALL) {
             mapping.export(availability, vAvailability, icalParams, warnings);
         }
 
         // Parse the free slots/available sub-components
-        for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
+        for (com.openexchange.chronos.Available freeSlot : availability.getCalendarFreeSlots()) {
             Available available = new Available();
-            for (ICalMapping<Available, CalendarFreeSlot> mapping : AvailableMappings.ALL) {
+            for (ICalMapping<Available, com.openexchange.chronos.Available> mapping : AvailableMappings.ALL) {
                 mapping.export(freeSlot, available, parameters, warnings);
             }
             vAvailability.getAvailable().add(available);
@@ -242,13 +241,13 @@ public class ICalMapper {
      * @param vAvailability The {@link VAvailability} component to import
      * @param parameters Further options to use, or <code>null</code> to stick with the defaults
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     * @return The imported {@link CalendarAvailability} data
+     * @return The imported {@link Availability} data
      */
-    public CalendarAvailability importVAvailability(VAvailability vAvailability, ICalParameters parameters, List<OXException> warnings) {
-        CalendarAvailability calendarAvailability = new CalendarAvailability();
+    public Availability importVAvailability(VAvailability vAvailability, ICalParameters parameters, List<OXException> warnings) {
+        Availability calendarAvailability = new Availability();
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
         calendarAvailability.setCalendarFreeSlots(importAvailable(vAvailability.getAvailable(), parameters, warnings));
-        for (ICalMapping<VAvailability, CalendarAvailability> mapping : AvailabilityMappings.ALL) {
+        for (ICalMapping<VAvailability, Availability> mapping : AvailabilityMappings.ALL) {
             mapping.importICal(vAvailability, calendarAvailability, iCalParameters, warnings);
         }
         return calendarAvailability;
@@ -262,8 +261,8 @@ public class ICalMapper {
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      * @return A {@link List} with the imported {@link Available} data
      */
-    public List<CalendarFreeSlot> importAvailable(ComponentList availableBlocks, ICalParameters parameters, List<OXException> warnings) {
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(availableBlocks.size());
+    public List<com.openexchange.chronos.Available> importAvailable(ComponentList availableBlocks, ICalParameters parameters, List<OXException> warnings) {
+        List<com.openexchange.chronos.Available> freeSlots = new ArrayList<>(availableBlocks.size());
         Iterator<?> iterator = availableBlocks.iterator();
         while (iterator.hasNext()) {
             freeSlots.add(importAvailable((Available) iterator.next(), parameters, warnings));
@@ -277,12 +276,12 @@ public class ICalMapper {
      * @param available The {@link Available} sub-component to import
      * @param parameters Further options to use, or <code>null</code> to stick with the defaults
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     * @return The imported {@link CalendarFreeSlot} data
+     * @return The imported {@link Available} data
      */
-    public CalendarFreeSlot importAvailable(Available available, ICalParameters parameters, List<OXException> warnings) {
-        CalendarFreeSlot freeSlot = new CalendarFreeSlot();
+    public com.openexchange.chronos.Available importAvailable(Available available, ICalParameters parameters, List<OXException> warnings) {
+        com.openexchange.chronos.Available freeSlot = new com.openexchange.chronos.Available();
         ICalParameters iCalParameters = ICalUtils.getParametersOrDefault(parameters);
-        for (ICalMapping<Available, CalendarFreeSlot> mapping : AvailableMappings.ALL) {
+        for (ICalMapping<Available, com.openexchange.chronos.Available> mapping : AvailableMappings.ALL) {
             mapping.importICal(available, freeSlot, iCalParameters, warnings);
         }
         return freeSlot;

@@ -52,7 +52,7 @@ package com.openexchange.chronos.ical.ical4j.mapping.availability;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
 import net.fortuna.ical4j.model.component.VAvailability;
 
@@ -67,7 +67,7 @@ public class AvailabilityMappings {
      * Holds a collection of all known availability mappings.
      */
     //@formatter:off
-    public static List<ICalMapping<VAvailability, CalendarAvailability>> ALL = Collections.<ICalMapping<VAvailability, CalendarAvailability>> unmodifiableList(Arrays.asList(
+    public static List<ICalMapping<VAvailability, Availability>> ALL = Collections.<ICalMapping<VAvailability, Availability>> unmodifiableList(Arrays.asList(
         new DtStampMapping(),
         new UidMapping(),
         new BusyTypeMapping(),

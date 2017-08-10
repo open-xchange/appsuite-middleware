@@ -57,13 +57,13 @@ import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
 
 /**
- * {@link CalendarAvailability} - Defines periods of availability for a calendar user.
+ * {@link Availability} - Defines periods of availability for a calendar user.
  * Provides a grouping of available time information over a specific range of time.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarAvailability implements FieldAware, Comparable<CalendarAvailability>, Cloneable {
+public class Availability implements FieldAware, Comparable<Availability>, Cloneable {
 
     private String id;
 
@@ -97,16 +97,16 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
     private ExtendedProperties extendedProperties;
     private List<String> categories;
 
-    private List<CalendarFreeSlot> calendarFreeSlots;
+    private List<Available> calendarFreeSlots;
 
     private EnumSet<AvailabilityField> fields;
 
     // TODO: map iana-properties?
 
     /**
-     * Initialises a new {@link CalendarAvailability}.
+     * Initialises a new {@link Availability}.
      */
-    public CalendarAvailability() {
+    public Availability() {
         super();
         fields = EnumSet.noneOf(AvailabilityField.class);
     }
@@ -629,7 +629,7 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      * 
      * @return The calendarFreeSlots
      */
-    public List<CalendarFreeSlot> getCalendarFreeSlots() {
+    public List<Available> getCalendarFreeSlots() {
         return calendarFreeSlots;
     }
 
@@ -638,7 +638,7 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      *
      * @param calendarFreeSlots The calendarFreeSlots to set
      */
-    public void setCalendarFreeSlots(List<CalendarFreeSlot> calendarFreeSlots) {
+    public void setCalendarFreeSlots(List<Available> calendarFreeSlots) {
         this.calendarFreeSlots = calendarFreeSlots;
     }
 
@@ -732,10 +732,10 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      * @see java.lang.Object#clone()
      */
     @Override
-    public CalendarAvailability clone() {
-        CalendarAvailability clone;
+    public Availability clone() {
+        Availability clone;
         try {
-            clone = (CalendarAvailability) super.clone();
+            clone = (Availability) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
@@ -825,7 +825,7 @@ public class CalendarAvailability implements FieldAware, Comparable<CalendarAvai
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override
-    public int compareTo(CalendarAvailability o) {
+    public int compareTo(Availability o) {
         //TODO: consider the '0' case
         if (getPriority() > o.getPriority()) {
             return -1;

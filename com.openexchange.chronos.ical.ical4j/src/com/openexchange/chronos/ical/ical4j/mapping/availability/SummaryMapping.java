@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAvailability;
@@ -60,7 +60,7 @@ import net.fortuna.ical4j.model.property.Summary;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SummaryMapping extends ICalTextMapping<VAvailability, CalendarAvailability> {
+public class SummaryMapping extends ICalTextMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link SummaryMapping}.
@@ -75,7 +75,7 @@ public class SummaryMapping extends ICalTextMapping<VAvailability, CalendarAvail
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
      */
     @Override
-    protected String getValue(CalendarAvailability object) {
+    protected String getValue(Availability object) {
         return object.getSummary();
     }
 
@@ -85,7 +85,7 @@ public class SummaryMapping extends ICalTextMapping<VAvailability, CalendarAvail
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
      */
     @Override
-    protected void setValue(CalendarAvailability object, String value) {
+    protected void setValue(Availability object, String value) {
         object.setSummary(value);
     }
 

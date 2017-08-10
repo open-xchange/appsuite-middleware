@@ -57,7 +57,7 @@ import org.junit.Test;
 import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 import com.openexchange.exception.OXException;
 
@@ -84,7 +84,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineSingleAvailabilitySortedNoOverlaps() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
+        List<Available> freeSlots = new ArrayList<>(3);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
@@ -110,7 +110,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineSingleAvailabilityUnsortedNoOverlaps() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
+        List<Available> freeSlots = new ArrayList<>(3);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
@@ -133,7 +133,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineMultipleAvailabilitySortedNoOverlaps() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
+        List<Available> freeSlots = new ArrayList<>(3);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
@@ -162,7 +162,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineSingleAvailabilityWithOverlaps() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
+        List<Available> freeSlots = new ArrayList<>(3);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("Overlap January/February", new DateTime(2017, 0, 5), new DateTime(2017, 1, 4)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
@@ -189,7 +189,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineSingleAvailabilityWithContained() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(3);
+        List<Available> freeSlots = new ArrayList<>(3);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("Contained in February", new DateTime(2017, 1, 10), new DateTime(2017, 1, 12)));
@@ -215,7 +215,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineSingleAvailabilityWithContainedAndOverlap() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(4);
+        List<Available> freeSlots = new ArrayList<>(4);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("Contained in February", new DateTime(2017, 1, 10), new DateTime(2017, 1, 12)));
@@ -245,7 +245,7 @@ public class CombineAvailableTimeTest extends AbstractCombineTest {
     @Test
     public void testCombineMultipleAvailabilitiesWithContainedAndOverlaps() throws OXException {
         // Create the free slots
-        List<CalendarFreeSlot> freeSlots = new ArrayList<>(4);
+        List<Available> freeSlots = new ArrayList<>(4);
         freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
         freeSlots.add(PropsFactory.createCalendarFreeSlot("Contained in February", new DateTime(2017, 1, 10), new DateTime(2017, 1, 12)));

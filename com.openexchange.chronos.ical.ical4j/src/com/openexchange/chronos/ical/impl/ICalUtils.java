@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -261,14 +261,14 @@ public class ICalUtils {
      * @param availabilityComponents A {@link ComponentList} with all the {@link VAvailability} components
      * @param mapper The {@link ICalMapper}
      * @param parameters The {@link ICalParameters}
-     * @return A {@link List} with the imported {@link CalendarAvailability} components
+     * @return A {@link List} with the imported {@link Availability} components
      * @throws OXException if an error is occurred
      */
-    static List<CalendarAvailability> importAvailabilities(ComponentList availabilityComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static List<Availability> importAvailabilities(ComponentList availabilityComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
         if (null == availabilityComponents) {
             return null;
         }
-        List<CalendarAvailability> availabilities = new ArrayList<CalendarAvailability>(availabilityComponents.size());
+        List<Availability> availabilities = new ArrayList<Availability>(availabilityComponents.size());
         Iterator<?> iterator = availabilityComponents.iterator();
         while (iterator.hasNext()) {
             availabilities.add(importAvailability((VAvailability) iterator.next(), mapper, parameters));
@@ -288,10 +288,10 @@ public class ICalUtils {
      * @param vAvailability The {@link VAvailability} to import
      * @param mapper The {@link ICalMapper} to use
      * @param parameters The {@link ICalParameters}
-     * @return The imported {@link VAvailability} component as {@link CalendarAvailability}
+     * @return The imported {@link VAvailability} component as {@link Availability}
      * @throws OXException if a parsing error occurs
      */
-    static CalendarAvailability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    static Availability importAvailability(VAvailability vAvailability, ICalMapper mapper, ICalParameters parameters) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return mapper.importVAvailability(vAvailability, parameters, warnings);

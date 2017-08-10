@@ -58,8 +58,8 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.common.AvailabilityUtils;
@@ -85,49 +85,49 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Retrieves the {@link CalendarAvailability} with the specified identifier
+     * Retrieves the {@link Availability} with the specified identifier
      * 
-     * @param calendarAvailabilityId The {@link CalendarAvailability}'s identifier
-     * @return The {@link CalendarAvailability}
-     * @throws OXException if the {@link CalendarAvailability} cannot be retrieved
+     * @param calendarAvailabilityId The {@link Availability}'s identifier
+     * @return The {@link Availability}
+     * @throws OXException if the {@link Availability} cannot be retrieved
      */
-    public CalendarAvailability perform(String calendarAvailabilityId) throws OXException {
+    public Availability perform(String calendarAvailabilityId) throws OXException {
         return storage.loadCalendarAvailability(calendarAvailabilityId);
     }
 
     /**
-     * Retrieves a {@link List} with all {@link CalendarAvailability} blocks of the current user
+     * Retrieves a {@link List} with all {@link Availability} blocks of the current user
      * 
-     * @return a {@link List} with all {@link CalendarAvailability} blocks of the current user
+     * @return a {@link List} with all {@link Availability} blocks of the current user
      * @throws OXException if the list cannot be retrieved
      */
-    public List<CalendarAvailability> perform() throws OXException {
+    public List<Availability> perform() throws OXException {
         return storage.loadCalendarAvailabilities(session.getUserId());
     }
 
     /**
-     * Retrieves a {@link List} with {@link CalendarAvailability} blocks in the specified range
+     * Retrieves a {@link List} with {@link Availability} blocks in the specified range
      * 
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return a {@link List} with {@link CalendarAvailability} blocks in the specified range
+     * @return a {@link List} with {@link Availability} blocks in the specified range
      * @throws OXException if an error occurs
      */
-    public List<CalendarAvailability> performInRange(Date from, Date until) throws OXException {
+    public List<Availability> performInRange(Date from, Date until) throws OXException {
         // TODO: adjust ranges
         return storage.loadCalendarAvailabilities(session.getUserId());
     }
 
     /**
-     * Retrieves a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * Retrieves a {@link Map} of {@link Availability} blocks for the specified {@link Attendee}s in the specified interval
      * 
      * @param attendees the {@link List} of {@link Attendee}s to fetch the availability for
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified interval
+     * @return a {@link Map} of {@link Availability} blocks for the specified {@link Attendee}s in the specified interval
      * @throws OXException if an error is occurred
      */
-    public Map<Attendee, List<CalendarAvailability>> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, List<Availability>> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Prepare the attendees
         attendees = session.getEntityResolver().prepare(attendees);
         // Filter the external ones
@@ -145,15 +145,15 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Retrieves a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link CalendarUser}s in the specified interval
+     * Retrieves a {@link Map} of {@link Availability} blocks for the specified {@link CalendarUser}s in the specified interval
      * 
      * @param attendees the {@link List} of {@link CalendarUser}s to fetch the availability for
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return a {@link Map} of {@link CalendarAvailability} blocks for the specified {@link CalendarUser}s in the specified interval
+     * @return a {@link Map} of {@link Availability} blocks for the specified {@link CalendarUser}s in the specified interval
      * @throws OXException if an error is occurred
      */
-    public Map<CalendarUser, List<CalendarAvailability>> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
+    public Map<CalendarUser, List<Availability>> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
         // Create a reverse lookup index and filter internal users
         Map<Integer, CalendarUser> reverseLookup = new HashMap<>();
         List<Integer> filtered = new ArrayList<>();
@@ -168,45 +168,45 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Retrieves the the combined {@link CalendarAvailability} blocks for the current user.
+     * Retrieves the the combined {@link Availability} blocks for the current user.
      * 
-     * @return A {@link List} with the combined {@link CalendarAvailability} blocks for the user
+     * @return A {@link List} with the combined {@link Availability} blocks for the user
      * @throws OXException if an error is occurred
      */
-    public List<CalendarAvailability> getCombinedAvailableTime() throws OXException {
+    public List<Availability> getCombinedAvailableTime() throws OXException {
         int userId = session.getUserId();
-        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
     }
 
     /**
-     * Retrieves the combined {@link CalendarAvailability} blocks in the specified interval for the current user
+     * Retrieves the combined {@link Availability} blocks in the specified interval for the current user
      * 
      * @param from The starting point of the interval
      * @param until The ending point of the interval
-     * @return A {@link List} with the combined {@link CalendarAvailability} blocks for the user in the specified interval
+     * @return A {@link List} with the combined {@link Availability} blocks for the user in the specified interval
      * @throws OXException
      */
-    public List<CalendarAvailability> getCombinedAvailableTimeInRange(Date from, Date until) throws OXException {
+    public List<Availability> getCombinedAvailableTimeInRange(Date from, Date until) throws OXException {
         int userId = session.getUserId();
-        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
     }
 
     /**
-     * Retrieves the {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified time interval
+     * Retrieves the {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval
      * 
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link CalendarAvailability} blocks for
+     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} blocks for
      * @param from The start point in the time interval
      * @param until The end point in the time interval
-     * @return A {@link Map} with {@link CalendarAvailability} slots for the {@link Attendee}s
+     * @return A {@link Map} with {@link Availability} slots for the {@link Attendee}s
      * @throws OXException if an error is occurred
      */
-    public Map<Attendee, List<CalendarAvailability>> getCombinedAvailableTimes(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<CalendarAvailability>> availableTimes = new HashMap<>();
-        Map<Attendee, List<CalendarAvailability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+    public Map<Attendee, List<Availability>> getCombinedAvailableTimes(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, List<Availability>> availableTimes = new HashMap<>();
+        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
         for (Attendee attendee : attendees) {
-            List<CalendarAvailability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            List<Availability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
             availableTimes.put(attendee, combine(calendarAvailabilities));
         }
         return availableTimes;
@@ -219,7 +219,7 @@ public class GetPerformer extends AbstractPerformer {
      */
     public AvailableTime getAvailableTime() throws OXException {
         int userId = session.getUserId();
-        List<CalendarAvailability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
         return getAvailableTime(userId, calendarAvailabilities);
     }
 
@@ -234,9 +234,9 @@ public class GetPerformer extends AbstractPerformer {
      */
     public Map<Attendee, AvailableTime> getAvailableTime(List<Attendee> attendees, Date from, Date until) throws OXException {
         Map<Attendee, AvailableTime> availableTimes = new HashMap<>();
-        Map<Attendee, List<CalendarAvailability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
         for (Attendee attendee : attendees) {
-            List<CalendarAvailability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            List<Availability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
             availableTimes.put(attendee, getAvailableTime(attendee.getEntity(), calendarAvailabilities));
         }
         return availableTimes;
@@ -245,18 +245,18 @@ public class GetPerformer extends AbstractPerformer {
     ///////////////////////////////// HELPERS /////////////////////////////////////
 
     /**
-     * Retrieves the {@link CalendarAvailability} blocks for the specified users
+     * Retrieves the {@link Availability} blocks for the specified users
      * 
      * @param reverseLookup The reverse lookup map for the entities
      * @param from The starting point of the interval
      * @param until The ending point of the interval
-     * @return A {@link Map} of {@link CalendarAvailability} blocks for the specified users in the specified interval
+     * @return A {@link Map} of {@link Availability} blocks for the specified users in the specified interval
      * @throws OXException if an error is occurred
      */
-    private <T extends CalendarUser> Map<T, List<CalendarAvailability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
-        List<CalendarAvailability> availabilities = storage.loadCalendarAvailabilities(new ArrayList<>(reverseLookup.keySet()));
-        Map<T, List<CalendarAvailability>> map = new HashMap<>();
-        for (CalendarAvailability availability : availabilities) {
+    private <T extends CalendarUser> Map<T, List<Availability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
+        List<Availability> availabilities = storage.loadCalendarAvailabilities(new ArrayList<>(reverseLookup.keySet()));
+        Map<T, List<Availability>> map = new HashMap<>();
+        for (Availability availability : availabilities) {
             T type = reverseLookup.get(availability.getCalendarUser());
             Collections.put(map, type, availability);
         }
@@ -264,26 +264,26 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Combines the specified {@link CalendarAvailability} blocks and handles any intersects, overlaps and contains
+     * Combines the specified {@link Availability} blocks and handles any intersects, overlaps and contains
      * 
-     * @param calendarAvailabilities The {@link List} of the {@link CalendarAvailability} blocks to combine
-     * @return The combined {@link CalendarAvailability} blocks
+     * @param calendarAvailabilities The {@link List} of the {@link Availability} blocks to combine
+     * @return The combined {@link Availability} blocks
      */
-    private List<CalendarAvailability> combine(List<CalendarAvailability> calendarAvailabilities) {
+    private List<Availability> combine(List<Availability> calendarAvailabilities) {
         // Sort by priority; higher priority will be on top
         java.util.Collections.sort(calendarAvailabilities, Comparators.priorityComparator);
 
         // The combined available time
-        List<CalendarAvailability> availableTime = new ArrayList<>(calendarAvailabilities.size());
+        List<Availability> availableTime = new ArrayList<>(calendarAvailabilities.size());
         // Auxiliary list to store any splits
-        List<CalendarAvailability> presAndPosts = new ArrayList<>();
+        List<Availability> presAndPosts = new ArrayList<>();
         int index = 0;
-        for (Iterator<CalendarAvailability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
-            CalendarAvailability availabilityA = iteratorA.next();
-            List<CalendarAvailability> subList = calendarAvailabilities.subList(++index, calendarAvailabilities.size());
-            Iterator<CalendarAvailability> iteratorB = subList.iterator();
+        for (Iterator<Availability> iteratorA = calendarAvailabilities.iterator(); iteratorA.hasNext();) {
+            Availability availabilityA = iteratorA.next();
+            List<Availability> subList = calendarAvailabilities.subList(++index, calendarAvailabilities.size());
+            Iterator<Availability> iteratorB = subList.iterator();
             while (iteratorB.hasNext()) {
-                CalendarAvailability availabilityB = iteratorB.next();
+                Availability availabilityB = iteratorB.next();
                 // No intersection, carry on
                 if (!AvailabilityUtils.intersect(availabilityA, availabilityB)) {
                     continue;
@@ -291,7 +291,7 @@ public class GetPerformer extends AbstractPerformer {
 
                 // Higher or equal priority, adjust times
                 if (AvailabilityUtils.contained(availabilityB, availabilityA)) {
-                    List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
+                    List<Available> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
                     flattenList.addAll(availabilityB.getCalendarFreeSlots());
                     flattenList.addAll(availabilityA.getCalendarFreeSlots());
                     availabilityA.setCalendarFreeSlots(combineSlots(flattenList));
@@ -306,26 +306,26 @@ public class GetPerformer extends AbstractPerformer {
                     // +--------------------------------------------+               +------------+---------------------------+-------------+
                     // |           Block B, Priority: 5             |               
                     // +--------------------------------------------+
-                    List<CalendarFreeSlot> preIntersections = new ArrayList<>();
-                    List<CalendarFreeSlot> postIntersections = new ArrayList<>();
-                    List<CalendarFreeSlot> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
+                    List<Available> preIntersections = new ArrayList<>();
+                    List<Available> postIntersections = new ArrayList<>();
+                    List<Available> flattenList = new ArrayList<>(availabilityB.getCalendarFreeSlots().size() + availabilityA.getCalendarFreeSlots().size());
 
-                    CalendarAvailability pre = availabilityB.clone();
+                    Availability pre = availabilityB.clone();
                     pre.setEndTime(availabilityA.getStartTime());
                     // Find any slots that intersect with the new end time, adjust and split them 
                     // if the availability blocks are of equal priority, then append the first split 
                     // to the pre availability, and the last split to the preIntersections.
-                    List<CalendarFreeSlot> preSlots = new ArrayList<>();
-                    for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                        CalendarFreeSlot cfs = iterator.next();
+                    List<Available> preSlots = new ArrayList<>();
+                    for (Iterator<Available> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                        Available cfs = iterator.next();
                         if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                             if (availabilityA.compareTo(availabilityB) == 0) {
                                 // If the priorities are equal then we split the free slot
-                                CalendarFreeSlot preSplit = cfs.clone();
+                                Available preSplit = cfs.clone();
                                 preSplit.setEndTime(availabilityA.getStartTime());
                                 pre.getCalendarFreeSlots().add(preSplit);
 
-                                CalendarFreeSlot postSplit = cfs.clone();
+                                Available postSplit = cfs.clone();
                                 postSplit.setStartTime(availabilityB.getEndTime());
                                 preIntersections.add(postSplit);
                             } else {
@@ -341,21 +341,21 @@ public class GetPerformer extends AbstractPerformer {
                     pre.setCalendarFreeSlots(preSlots);
                     presAndPosts.add(pre);
 
-                    CalendarAvailability post = availabilityB.clone();
+                    Availability post = availabilityB.clone();
                     post.setStartTime(availabilityA.getEndTime());
                     // Find any slots that intersect with the new start time, adjust and split them 
                     // if the availability blocks are of equal priority,  then append the first split 
                     // to the postIntersections, and the last split to the post availability.
-                    List<CalendarFreeSlot> postSlots = new ArrayList<>();
-                    for (Iterator<CalendarFreeSlot> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                        CalendarFreeSlot cfs = iterator.next();
+                    List<Available> postSlots = new ArrayList<>();
+                    for (Iterator<Available> iterator = availabilityB.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                        Available cfs = iterator.next();
                         if (AvailabilityUtils.intersectsButNotContained(cfs.getStartTime(), cfs.getEndTime(), availabilityA.getStartTime(), availabilityA.getEndTime())) {
                             if (availabilityA.compareTo(availabilityB) == 0) {
-                                CalendarFreeSlot preSplit = cfs.clone();
+                                Available preSplit = cfs.clone();
                                 preSplit.setEndTime(availabilityB.getStartTime());
                                 postIntersections.add(preSplit);
 
-                                CalendarFreeSlot postSplit = cfs.clone();
+                                Available postSplit = cfs.clone();
                                 postSplit.setStartTime(availabilityA.getEndTime());
                                 post.getCalendarFreeSlots().add(postSplit);
                             } else {
@@ -397,23 +397,23 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Adjusts the {@link CalendarFreeSlot}s of the specified {@link CalendarAvailability} blocks
+     * Adjusts the {@link Available}s of the specified {@link Availability} blocks
      * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
+     * @param a The {@link Availability} A
+     * @param b The {@link Availability} B
      */
-    private void adjustSlots(CalendarAvailability a, CalendarAvailability b) {
-        List<CalendarFreeSlot> toAdd = new ArrayList<>();
-        for (CalendarFreeSlot freeSlotA : a.getCalendarFreeSlots()) {
-            for (Iterator<CalendarFreeSlot> iteratorB = b.getCalendarFreeSlots().iterator(); iteratorB.hasNext();) {
-                CalendarFreeSlot freeSlotB = iteratorB.next();
+    private void adjustSlots(Availability a, Availability b) {
+        List<Available> toAdd = new ArrayList<>();
+        for (Available freeSlotA : a.getCalendarFreeSlots()) {
+            for (Iterator<Available> iteratorB = b.getCalendarFreeSlots().iterator(); iteratorB.hasNext();) {
+                Available freeSlotB = iteratorB.next();
                 if (AvailabilityUtils.contained(freeSlotA, freeSlotB)) {
                     // split
-                    CalendarFreeSlot pre = freeSlotB.clone();
+                    Available pre = freeSlotB.clone();
                     pre.setEndTime(freeSlotA.getStartTime());
                     toAdd.add(pre);
 
-                    CalendarFreeSlot post = freeSlotB.clone();
+                    Available post = freeSlotB.clone();
                     post.setStartTime(freeSlotA.getEndTime());
                     toAdd.add(post);
 
@@ -438,13 +438,13 @@ public class GetPerformer extends AbstractPerformer {
      * @return The {@link AvailableTime} slots for the current user
      * @throws OXException if an error is occurred
      */
-    private AvailableTime getAvailableTime(int userId, List<CalendarAvailability> calendarAvailabilities) throws OXException {
+    private AvailableTime getAvailableTime(int userId, List<Availability> calendarAvailabilities) throws OXException {
         // Sort by priority (see: https://tools.ietf.org/html/rfc7953#section-4 RFC 7953, section 4</a>
         java.util.Collections.sort(calendarAvailabilities);
 
         BusyType busyType = BusyType.BUSY_TENTATIVE;
-        List<CalendarFreeSlot> flattenSlots = new ArrayList<>();
-        for (CalendarAvailability calendarAvailability : calendarAvailabilities) {
+        List<Available> flattenSlots = new ArrayList<>();
+        for (Availability calendarAvailability : calendarAvailabilities) {
             busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
             flattenSlots.addAll(calendarAvailability.getCalendarFreeSlots());
         }
@@ -460,28 +460,28 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Combines the specified {@link CalendarFreeSlot}s to a single {@link AvailableTime}
+     * Combines the specified {@link Available}s to a single {@link AvailableTime}
      * 
-     * @param freeSlots The {@link CalendarFreeSlot}s to combine
+     * @param freeSlots The {@link Available}s to combine
      * @param availableTime The {@link AvailableTime} to combine to
      */
-    private void combine(List<CalendarFreeSlot> freeSlots, AvailableTime availableTime) {
-        Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
+    private void combine(List<Available> freeSlots, AvailableTime availableTime) {
+        Iterator<Available> iteratorA = freeSlots.iterator();
         int index = 0;
         // Keeps track of the removed objects
-        List<CalendarFreeSlot> removed = new ArrayList<>();
+        List<Available> removed = new ArrayList<>();
         while (iteratorA.hasNext()) {
-            CalendarFreeSlot a = iteratorA.next();
+            Available a = iteratorA.next();
             if (removed.contains(a)) {
                 iteratorA.remove();
                 removed.remove(a);
                 continue;
             }
 
-            List<CalendarFreeSlot> lookAheadList = freeSlots.subList(++index, freeSlots.size());
-            Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
+            List<Available> lookAheadList = freeSlots.subList(++index, freeSlots.size());
+            Iterator<Available> iteratorB = lookAheadList.iterator();
             while (iteratorB.hasNext()) {
-                CalendarFreeSlot b = iteratorB.next();
+                Available b = iteratorB.next();
                 // If it is completely contained then skip it
                 if (AvailabilityUtils.contained(b, a)) {
                     removed.add(b);
@@ -498,31 +498,31 @@ public class GetPerformer extends AbstractPerformer {
     }
 
     /**
-     * Combines the specified {@link CalendarFreeSlot}s
+     * Combines the specified {@link Available}s
      * 
-     * @param freeSlots The {@link CalendarFreeSlot}s to combine
+     * @param freeSlots The {@link Available}s to combine
      */
-    private List<CalendarFreeSlot> combineSlots(List<CalendarFreeSlot> freeSlots) {
+    private List<Available> combineSlots(List<Available> freeSlots) {
         // Sort by starting date
         java.util.Collections.sort(freeSlots, Comparators.freeSlotDateTimeComparator);
 
-        List<CalendarFreeSlot> combined = new ArrayList<>(freeSlots.size());
-        Iterator<CalendarFreeSlot> iteratorA = freeSlots.iterator();
+        List<Available> combined = new ArrayList<>(freeSlots.size());
+        Iterator<Available> iteratorA = freeSlots.iterator();
         int index = 0;
         // Keeps track of the removed objects
-        List<CalendarFreeSlot> removed = new ArrayList<>();
+        List<Available> removed = new ArrayList<>();
         while (iteratorA.hasNext()) {
-            CalendarFreeSlot a = iteratorA.next();
+            Available a = iteratorA.next();
             if (removed.contains(a)) {
                 iteratorA.remove();
                 removed.remove(a);
                 continue;
             }
 
-            List<CalendarFreeSlot> lookAheadList = freeSlots.subList(++index, freeSlots.size());
-            Iterator<CalendarFreeSlot> iteratorB = lookAheadList.iterator();
+            List<Available> lookAheadList = freeSlots.subList(++index, freeSlots.size());
+            Iterator<Available> iteratorB = lookAheadList.iterator();
             while (iteratorB.hasNext()) {
-                CalendarFreeSlot b = iteratorB.next();
+                Available b = iteratorB.next();
                 // If it is completely contained then skip it
                 if (AvailabilityUtils.contained(b, a)) {
                     removed.add(b);

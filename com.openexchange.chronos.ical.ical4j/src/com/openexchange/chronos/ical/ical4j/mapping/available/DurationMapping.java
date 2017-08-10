@@ -52,7 +52,6 @@ package com.openexchange.chronos.ical.ical4j.mapping.available;
 import java.util.Date;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -66,7 +65,7 @@ import net.fortuna.ical4j.model.property.Duration;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DurationMapping extends AbstractICalMapping<Available, CalendarFreeSlot> {
+public class DurationMapping extends AbstractICalMapping<Available, com.openexchange.chronos.Available> {
 
     /**
      * Initialises a new {@link DurationMapping}.
@@ -81,7 +80,7 @@ public class DurationMapping extends AbstractICalMapping<Available, CalendarFree
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void export(CalendarFreeSlot object, Available component, ICalParameters parameters, List<OXException> warnings) {
+    public void export(com.openexchange.chronos.Available object, Available component, ICalParameters parameters, List<OXException> warnings) {
         removeProperties(component, Property.DURATION); // stick to DTEND for export
     }
 
@@ -91,7 +90,7 @@ public class DurationMapping extends AbstractICalMapping<Available, CalendarFree
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void importICal(Available component, CalendarFreeSlot object, ICalParameters parameters, List<OXException> warnings) {
+    public void importICal(Available component, com.openexchange.chronos.Available object, ICalParameters parameters, List<OXException> warnings) {
         Duration duration = (Duration) component.getProperty(Property.DURATION);
         if (null == duration || null == duration.getDuration()) {
             return;
@@ -99,9 +98,9 @@ public class DurationMapping extends AbstractICalMapping<Available, CalendarFree
         // If duration and startDate are set, then try to determine the endDate
         DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
         if (null != dtStart && null != dtStart.getDate()) {
-            CalendarFreeSlot freeSlot = new CalendarFreeSlot();
-            new DtStartMapping().importICal(component, freeSlot, parameters, warnings);
-            DateTime startDate = freeSlot.getStartTime();
+            com.openexchange.chronos.Available available = new com.openexchange.chronos.Available();
+            new DtStartMapping().importICal(component, available, parameters, warnings);
+            DateTime startDate = available.getStartTime();
             java.util.Date endDate = duration.getDuration().getTime(new Date(startDate.getTimestamp()));
             object.setEndTime(new DateTime(endDate.getTime()));
         }

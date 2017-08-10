@@ -50,7 +50,7 @@
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Property;
@@ -63,7 +63,7 @@ import net.fortuna.ical4j.model.property.DtStart;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DtStartMapping extends ICalDateTimeMapping<VAvailability, CalendarAvailability> {
+public class DtStartMapping extends ICalDateTimeMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link DtStartMapping}.
@@ -78,7 +78,7 @@ public class DtStartMapping extends ICalDateTimeMapping<VAvailability, CalendarA
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
-    protected DateTime getValue(CalendarAvailability object) {
+    protected DateTime getValue(Availability object) {
         return object.getStartTime().getTimestamp() == 0 ? null : object.getStartTime();
     }
 
@@ -88,7 +88,7 @@ public class DtStartMapping extends ICalDateTimeMapping<VAvailability, CalendarA
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
-    protected void setValue(CalendarAvailability object, DateTime value) {
+    protected void setValue(Availability object, DateTime value) {
         object.setStartTime(value);
     }
 

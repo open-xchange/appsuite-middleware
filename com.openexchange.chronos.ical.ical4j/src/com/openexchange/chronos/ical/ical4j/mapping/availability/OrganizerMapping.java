@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping;
 import net.fortuna.ical4j.model.component.VAvailability;
@@ -59,7 +59,7 @@ import net.fortuna.ical4j.model.component.VAvailability;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OrganizerMapping extends ICalOrganizerMapping<VAvailability, CalendarAvailability> {
+public class OrganizerMapping extends ICalOrganizerMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link OrganizerMapping}.
@@ -74,7 +74,7 @@ public class OrganizerMapping extends ICalOrganizerMapping<VAvailability, Calend
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping#getValue(java.lang.Object)
      */
     @Override
-    protected Organizer getValue(CalendarAvailability object) {
+    protected Organizer getValue(Availability object) {
         return object.getOrganizer();
     }
 
@@ -84,7 +84,7 @@ public class OrganizerMapping extends ICalOrganizerMapping<VAvailability, Calend
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalOrganizerMapping#setValue(java.lang.Object, com.openexchange.chronos.Organizer)
      */
     @Override
-    protected void setValue(CalendarAvailability object, Organizer value) {
+    protected void setValue(Availability object, Organizer value) {
         object.setOrganizer(value);
     }
 

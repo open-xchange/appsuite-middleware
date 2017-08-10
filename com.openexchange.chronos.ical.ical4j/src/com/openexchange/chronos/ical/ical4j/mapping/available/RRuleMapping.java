@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.available;
 
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.Available;
@@ -60,7 +59,7 @@ import net.fortuna.ical4j.model.property.RRule;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RRuleMapping extends ICalTextMapping<Available, CalendarFreeSlot> {
+public class RRuleMapping extends ICalTextMapping<Available, com.openexchange.chronos.Available> {
 
     /**
      * Initialises a new {@link RRuleMapping}.
@@ -75,7 +74,7 @@ public class RRuleMapping extends ICalTextMapping<Available, CalendarFreeSlot> {
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
      */
     @Override
-    protected String getValue(CalendarFreeSlot object) {
+    protected String getValue(com.openexchange.chronos.Available object) {
         return object.getRecurrenceRule();
     }
 
@@ -85,7 +84,7 @@ public class RRuleMapping extends ICalTextMapping<Available, CalendarFreeSlot> {
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
      */
     @Override
-    protected void setValue(CalendarFreeSlot object, String value) {
+    protected void setValue(com.openexchange.chronos.Available object, String value) {
         object.setRecurrenceRule(value);
     }
 

@@ -53,8 +53,8 @@ import java.util.Date;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AvailableTimeSlot;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 
@@ -68,43 +68,43 @@ public final class AvailabilityUtils {
     ////////////////////////////////////////// Calendar Availability ////////////////////////////////////////////////
 
     /**
-     * Checks if the {@link DateTime} interval of the specified {@link CalendarAvailability} A precedes and intersects with the
-     * {@link DateTime} interval of the specified {@link CalendarAvailability} interval B
+     * Checks if the {@link DateTime} interval of the specified {@link Availability} A precedes and intersects with the
+     * {@link DateTime} interval of the specified {@link Availability} interval B
      * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
-     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link CalendarAvailability} A precedes and intersects
-     *         with {@link DateTime} interval of the specified {@link CalendarAvailability} B; <code>false</code> otherwise
+     * @param a The {@link Availability} A
+     * @param b The {@link Availability} B
+     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link Availability} A precedes and intersects
+     *         with {@link DateTime} interval of the specified {@link Availability} B; <code>false</code> otherwise
      */
-    public static boolean precedesAndIntersects(CalendarAvailability a, CalendarAvailability b) {
+    public static boolean precedesAndIntersects(Availability a, Availability b) {
         return precedesAndIntersects(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
     /**
-     * Checks if the {@link DateTime} interval of the specified {@link CalendarAvailability} A succeeds and intersects with the
-     * {@link DateTime} interval of the specified {@link CalendarAvailability} interval B
+     * Checks if the {@link DateTime} interval of the specified {@link Availability} A succeeds and intersects with the
+     * {@link DateTime} interval of the specified {@link Availability} interval B
      * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
-     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link CalendarAvailability} A succeeds and intersects
-     *         with {@link DateTime} interval of the specified {@link CalendarAvailability} B; <code>false</code> otherwise
+     * @param a The {@link Availability} A
+     * @param b The {@link Availability} B
+     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link Availability} A succeeds and intersects
+     *         with {@link DateTime} interval of the specified {@link Availability} B; <code>false</code> otherwise
      */
-    public static boolean succeedsAndIntersects(CalendarAvailability a, CalendarAvailability b) {
+    public static boolean succeedsAndIntersects(Availability a, Availability b) {
         return succeedsAndIntersects(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
     /**
-     * Checks if the {@link DateTime} interval of the specified {@link CalendarAvailability} A is completely contained
-     * with in the {@link DateTime} interval of the specified {@link CalendarAvailability} B
+     * Checks if the {@link DateTime} interval of the specified {@link Availability} A is completely contained
+     * with in the {@link DateTime} interval of the specified {@link Availability} B
      * 
      * @param startA The start date of the interval A
      * @param endA The end date of the interval A
      * @param startB the start date of the interval B
      * @param endB The end date of the interval B
-     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link CalendarAvailability} A is completely contained
-     *         with in the {@link DateTime} interval of the specified {@link CalendarAvailability} B; <code>false</code> otherwise
+     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link Availability} A is completely contained
+     *         with in the {@link DateTime} interval of the specified {@link Availability} B; <code>false</code> otherwise
      */
-    public static boolean contained(CalendarAvailability a, CalendarAvailability b) {
+    public static boolean contained(Availability a, Availability b) {
         return contained(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
@@ -116,54 +116,54 @@ public final class AvailabilityUtils {
      * <li>whether the ending point of A is after the starting point of B</li>
      * </ul>
      * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
+     * @param a The {@link Availability} A
+     * @param b The {@link Availability} B
      * @return <code>true</code> if they intersect; <code>false</code> otherwise
      */
-    public static boolean intersect(CalendarAvailability a, CalendarAvailability b) {
+    public static boolean intersect(Availability a, Availability b) {
         return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
     /////////////////////////////////////////// Calendar Free Slot ////////////////////////////////////////////////////
 
     /**
-     * Checks if the {@link DateTime} interval of the specified {@link CalendarFreeSlot} A precedes and intersects with the
-     * {@link DateTime} interval of the specified {@link CalendarFreeSlot} interval B
+     * Checks if the {@link DateTime} interval of the specified {@link Available} A precedes and intersects with the
+     * {@link DateTime} interval of the specified {@link Available} interval B
      * 
-     * @param a The {@link CalendarFreeSlot} A
-     * @param b The {@link CalendarFreeSlot} B
-     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link CalendarFreeSlot} A precedes and intersects
-     *         with {@link DateTime} interval of the specified {@link CalendarFreeSlot} B; <code>false</code> otherwise
+     * @param a The {@link Available} A
+     * @param b The {@link Available} B
+     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link Available} A precedes and intersects
+     *         with {@link DateTime} interval of the specified {@link Available} B; <code>false</code> otherwise
      */
-    public static boolean precedesAndIntersects(CalendarFreeSlot a, CalendarFreeSlot b) {
+    public static boolean precedesAndIntersects(Available a, Available b) {
         return precedesAndIntersects(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
     /**
-     * Checks if the {@link DateTime} interval of the specified {@link CalendarFreeSlot} A succeeds and intersects with the
-     * {@link DateTime} interval of the specified {@link CalendarFreeSlot} interval B
+     * Checks if the {@link DateTime} interval of the specified {@link Available} A succeeds and intersects with the
+     * {@link DateTime} interval of the specified {@link Available} interval B
      * 
-     * @param a The {@link CalendarFreeSlot} A
-     * @param b The {@link CalendarFreeSlot} B
-     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link CalendarFreeSlot} A succeeds and intersects
-     *         with {@link DateTime} interval of the specified {@link CalendarFreeSlot} B; <code>false</code> otherwise
+     * @param a The {@link Available} A
+     * @param b The {@link Available} B
+     * @return <code>true</code> if the {@link DateTime} interval of the specified {@link Available} A succeeds and intersects
+     *         with {@link DateTime} interval of the specified {@link Available} B; <code>false</code> otherwise
      */
-    public static boolean succeedsAndIntersects(CalendarFreeSlot a, CalendarFreeSlot b) {
+    public static boolean succeedsAndIntersects(Available a, Available b) {
         return succeedsAndIntersects(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
     /**
-     * Checks if the {@link Date} interval of the specified {@link CalendarFreeSlot} A is completely contained
-     * with in the {@link Date} interval of the specified {@link CalendarFreeSlot} B
+     * Checks if the {@link Date} interval of the specified {@link Available} A is completely contained
+     * with in the {@link Date} interval of the specified {@link Available} B
      * 
      * @param startA The start date of the interval A
      * @param endA The end date of the interval A
      * @param startB the start date of the interval B
      * @param endB The end date of the interval B
-     * @return <code>true</code> if the {@link Date} interval of the specified {@link CalendarFreeSlot} A is completely contained
-     *         with in the {@link Date} interval of the specified {@link CalendarFreeSlot} B; <code>false</code> otherwise
+     * @return <code>true</code> if the {@link Date} interval of the specified {@link Available} A is completely contained
+     *         with in the {@link Date} interval of the specified {@link Available} B; <code>false</code> otherwise
      */
-    public static boolean contained(CalendarFreeSlot a, CalendarFreeSlot b) {
+    public static boolean contained(Available a, Available b) {
         return contained(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
@@ -175,11 +175,11 @@ public final class AvailabilityUtils {
      * <li>whether the ending point of A is after the starting point of B</li>
      * </ul>
      * 
-     * @param a The {@link CalendarAvailability} A
-     * @param b The {@link CalendarAvailability} B
+     * @param a The {@link Availability} A
+     * @param b The {@link Availability} B
      * @return <code>true</code> if they intersect; <code>false</code> otherwise
      */
-    public static boolean intersect(CalendarFreeSlot a, CalendarFreeSlot b) {
+    public static boolean intersect(Available a, Available b) {
         return intersect(a.getStartTime(), a.getEndTime(), b.getStartTime(), b.getEndTime());
     }
 
@@ -338,13 +338,13 @@ public final class AvailabilityUtils {
     //////////////////////////////////// Merge /////////////////////////////////////////
 
     /**
-     * Merge the start and end times of the specified {@link CalendarFreeSlot}s
+     * Merge the start and end times of the specified {@link Available}s
      * 
-     * @param a The {@link CalendarFreeSlot} A
-     * @param b The {@link CalendarFreeSlot} B
-     * @return An {@link AvailableTimeSlot} with the merged start and end times of the specified {@link CalendarFreeSlot}
+     * @param a The {@link Available} A
+     * @param b The {@link Available} B
+     * @return An {@link AvailableTimeSlot} with the merged start and end times of the specified {@link Available}
      */
-    public static AvailableTimeSlot mergeFreeSlots(CalendarFreeSlot a, CalendarFreeSlot b) {
+    public static AvailableTimeSlot mergeFreeSlots(Available a, Available b) {
         AvailableTimeSlot ats = new AvailableTimeSlot();
         ats.setFrom(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
         ats.setUntil(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
@@ -352,14 +352,14 @@ public final class AvailabilityUtils {
     }
 
     /**
-     * Merges the specified {@link CalendarFreeSlot}s
+     * Merges the specified {@link Available}s
      * 
-     * @param a The {@link CalendarFreeSlot} A
-     * @param b The {@link CalendarFreeSlot} B
-     * @return a new merged {@link CalendarFreeSlot} instance
+     * @param a The {@link Available} A
+     * @param b The {@link Available} B
+     * @return a new merged {@link Available} instance
      */
-    public static CalendarFreeSlot merge(CalendarFreeSlot a, CalendarFreeSlot b) {
-        CalendarFreeSlot ats = new CalendarFreeSlot();
+    public static Available merge(Available a, Available b) {
+        Available ats = new Available();
         ats.setStartTime(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
         ats.setEndTime(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
         return ats;
@@ -368,12 +368,12 @@ public final class AvailabilityUtils {
     ////////////////////////////////////// Convert ///////////////////////////////////////
 
     /**
-     * Converts the specified {@link CalendarFreeSlot} to an {@link AvailableTimeSlot}
+     * Converts the specified {@link Available} to an {@link AvailableTimeSlot}
      * 
-     * @param freeSlot The {@link CalendarFreeSlot} to convert
+     * @param freeSlot The {@link Available} to convert
      * @return The converted {@link AvailableTimeSlot}
      */
-    public static AvailableTimeSlot convert(CalendarFreeSlot freeSlot) {
+    public static AvailableTimeSlot convert(Available freeSlot) {
         AvailableTimeSlot ats = new AvailableTimeSlot();
         ats.setFrom(freeSlot.getStartTime());
         ats.setUntil(freeSlot.getEndTime());

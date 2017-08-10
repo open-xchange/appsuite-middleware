@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
@@ -107,7 +107,7 @@ public interface CalendarExport {
      * @param calendarAvailability The Calendar availability component to add
      * @return A self reference
      */
-    CalendarExport add(CalendarAvailability calendarAvailability) throws OXException;
+    CalendarExport add(Availability calendarAvailability) throws OXException;
 
     /**
      * Sets the method to be declared in the <code>VCALENDAR</code> component.

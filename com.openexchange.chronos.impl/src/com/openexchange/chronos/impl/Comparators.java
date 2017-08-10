@@ -50,8 +50,8 @@
 package com.openexchange.chronos.impl;
 
 import java.util.Comparator;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.common.DateTimeComparator;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
@@ -63,16 +63,16 @@ import com.openexchange.chronos.impl.availability.performer.GetPerformer;
  */
 public class Comparators {
 
-    public static final Comparator<CalendarAvailability> availabilityDateTimeComparator = new AvailabilityDateTimeComparator();
-    public static final Comparator<CalendarFreeSlot> freeSlotDateTimeComparator = new FreeSlotDateTimeComparator();
-    public static final Comparator<CalendarAvailability> priorityComparator = new PriorityComparator();
+    public static final Comparator<Availability> availabilityDateTimeComparator = new AvailabilityDateTimeComparator();
+    public static final Comparator<Available> freeSlotDateTimeComparator = new FreeSlotDateTimeComparator();
+    public static final Comparator<Availability> priorityComparator = new PriorityComparator();
     public static final Comparator<FreeBusyTime> freeBusyTimeDateTimeComparator = new FreeBusyTimeDateTimeComparator();
 
     /**
-     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarFreeSlot} items
+     * {@link DateTimeComparator} - DateTime comparator. Orders {@link Available} items
      * by start date (ascending)
      */
-    public static class FreeSlotDateTimeComparator implements Comparator<CalendarFreeSlot> {
+    public static class FreeSlotDateTimeComparator implements Comparator<Available> {
 
         /**
          * Initialises a new {@link GetPerformer.DateTimeComparator}.
@@ -87,7 +87,7 @@ public class Comparators {
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
-        public int compare(CalendarFreeSlot o1, CalendarFreeSlot o2) {
+        public int compare(Available o1, Available o2) {
             if (o1.getStartTime().before(o2.getStartTime())) {
                 return -1;
             } else if (o1.getStartTime().after(o2.getStartTime())) {
@@ -98,10 +98,10 @@ public class Comparators {
     }
 
     /**
-     * {@link DateTimeComparator} - DateTime comparator. Orders {@link CalendarAvailability} items
+     * {@link DateTimeComparator} - DateTime comparator. Orders {@link Availability} items
      * by start date (ascending)
      */
-    public static class AvailabilityDateTimeComparator implements Comparator<CalendarAvailability> {
+    public static class AvailabilityDateTimeComparator implements Comparator<Availability> {
 
         /**
          * Initialises a new {@link GetPerformer.DateTimeComparator}.
@@ -116,7 +116,7 @@ public class Comparators {
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
-        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+        public int compare(Availability o1, Availability o2) {
             if (o1.getStartTime().before(o2.getStartTime())) {
                 return -1;
             } else if (o1.getStartTime().after(o2.getStartTime())) {
@@ -127,11 +127,11 @@ public class Comparators {
     }
 
     /**
-     * {@link PriorityComparator} - Priority comparator. Orders {@link CalendarAvailability} items
+     * {@link PriorityComparator} - Priority comparator. Orders {@link Availability} items
      * by priority (descending). We want elements with higher priority (in this context '1' > '9' > '0')
      * to be on the top of the list.
      */
-    public static class PriorityComparator implements Comparator<CalendarAvailability> {
+    public static class PriorityComparator implements Comparator<Availability> {
 
         /**
          * Initialises a new {@link GetPerformer.PriorityComparator}.
@@ -146,7 +146,7 @@ public class Comparators {
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
-        public int compare(CalendarAvailability o1, CalendarAvailability o2) {
+        public int compare(Availability o1, Availability o2) {
             // Use '10' for '0' as '0' has a lower priority than '9' 
             int o1Priority = o1.getPriority() == 0 ? 10 : o1.getPriority();
             int o2Priority = o2.getPriority() == 0 ? 10 : o2.getPriority();

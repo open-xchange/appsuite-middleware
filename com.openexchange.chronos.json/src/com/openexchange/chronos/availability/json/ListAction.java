@@ -52,7 +52,7 @@ package com.openexchange.chronos.availability.json;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -82,7 +82,7 @@ public class ListAction extends AbstractAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         CalendarSession calendarSession = getSession(session);
         CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
-        List<CalendarAvailability> list = service.getAvailability(calendarSession);
+        List<Availability> list = service.getAvailability(calendarSession);
         return new AJAXRequestResult(list);
     }
 }

@@ -60,7 +60,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -80,7 +80,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, FreeSlotField> {
+public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotField> {
 
     private static final CalendarFreeSlotMapper INSTANCE = new CalendarFreeSlotMapper();
 
@@ -106,8 +106,8 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
      * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
      */
     @Override
-    public CalendarFreeSlot newInstance() {
-        return new CalendarFreeSlot();
+    public Available newInstance() {
+        return new Available();
     }
 
     /*
@@ -126,140 +126,140 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
-    protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, CalendarFreeSlot>> createMappings() {
-        EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, CalendarFreeSlot>>(FreeSlotField.class);
-        mappings.put(FreeSlotField.id, new IntegerMapping<CalendarFreeSlot>("id", "Free Slot ID") {
+    protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, Available>> createMappings() {
+        EnumMap<FreeSlotField, DbMapping<? extends Object, Available>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, Available>>(FreeSlotField.class);
+        mappings.put(FreeSlotField.id, new IntegerMapping<Available>("id", "Free Slot ID") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.id);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Integer value) throws OXException {
+            public void set(Available object, Integer value) throws OXException {
                 object.setId(Integer.toString(value));
             }
 
             @Override
-            public Integer get(CalendarFreeSlot object) {
+            public Integer get(Available object) {
                 return Integer.valueOf(object.getId());
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeId();
             }
 
         });
-        mappings.put(FreeSlotField.calendarAvailabilityId, new IntegerMapping<CalendarFreeSlot>("calendarAvailability", "Calendar Availability Parent ID") {
+        mappings.put(FreeSlotField.calendarAvailabilityId, new IntegerMapping<Available>("calendarAvailability", "Calendar Availability Parent ID") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.calendarAvailabilityId);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Integer value) throws OXException {
+            public void set(Available object, Integer value) throws OXException {
                 object.setCalendarAvailabilityId(Integer.toString(value));
             }
 
             @Override
-            public Integer get(CalendarFreeSlot object) {
+            public Integer get(Available object) {
                 return Integer.valueOf(object.getCalendarAvailabilityId());
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeCalendarAvailabilityId();
             }
         });
-        mappings.put(FreeSlotField.user, new IntegerMapping<CalendarFreeSlot>("user", "Calendar User ID") {
+        mappings.put(FreeSlotField.user, new IntegerMapping<Available>("user", "Calendar User ID") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.user);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Integer value) throws OXException {
+            public void set(Available object, Integer value) throws OXException {
                 object.setCalendarUser(value);
             }
 
             @Override
-            public Integer get(CalendarFreeSlot object) {
+            public Integer get(Available object) {
                 return object.getCalendarUser();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeCalendarUser();
             }
         });
-        mappings.put(FreeSlotField.uid, new VarCharMapping<CalendarFreeSlot>("uid", "Free Slot UID") {
+        mappings.put(FreeSlotField.uid, new VarCharMapping<Available>("uid", "Free Slot UID") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.uid);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 object.setUid(value);
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 return object.getUid();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeUid();
             }
 
         });
-        mappings.put(FreeSlotField.dtstart, new DateTimeMapping<CalendarFreeSlot>("start", "startTimezone", "allDay", "Start DateTime") {
+        mappings.put(FreeSlotField.dtstart, new DateTimeMapping<Available>("start", "startTimezone", "allDay", "Start DateTime") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.dtstart);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, DateTime value) throws OXException {
+            public void set(Available object, DateTime value) throws OXException {
                 object.setStartTime(value);
             }
 
             @Override
-            public DateTime get(CalendarFreeSlot object) {
+            public DateTime get(Available object) {
                 return object.getStartTime();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeStartTime();
             }
 
         });
-        mappings.put(FreeSlotField.dtend, new DefaultDbMultiMapping<DateTime, CalendarFreeSlot>(new String[] { "end", "endTimezone" }, "End date") {
+        mappings.put(FreeSlotField.dtend, new DefaultDbMultiMapping<DateTime, Available>(new String[] { "end", "endTimezone" }, "End date") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.dtend);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, DateTime value) throws OXException {
+            public void set(Available object, DateTime value) throws OXException {
                 object.setEndTime(value);
             }
 
             @Override
-            public DateTime get(CalendarFreeSlot object) {
+            public DateTime get(Available object) {
                 return object.getEndTime();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeEndTime();
             }
 
@@ -286,7 +286,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
             @Override
-            public int set(PreparedStatement statement, int parameterIndex, CalendarFreeSlot object) throws SQLException {
+            public int set(PreparedStatement statement, int parameterIndex, Available object) throws SQLException {
                 DateTime value = get(object);
                 if (null == value) {
                     statement.setNull(parameterIndex, Types.TIMESTAMP);
@@ -298,156 +298,156 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
                 return 2;
             }
         });
-        mappings.put(FreeSlotField.created, new BigIntMapping<CalendarFreeSlot>("created", "Created") {
+        mappings.put(FreeSlotField.created, new BigIntMapping<Available>("created", "Created") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.created);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Long value) throws OXException {
+            public void set(Available object, Long value) throws OXException {
                 object.setCreated(value == null ? null : new Date(value.longValue()));
             }
 
             @Override
-            public Long get(CalendarFreeSlot object) {
+            public Long get(Available object) {
                 Date created = object.getCreated();
                 return created == null ? null : created.getTime();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeCreated();
             }
         });
-        mappings.put(FreeSlotField.lastModified, new BigIntMapping<CalendarFreeSlot>("modified", "Last Modified") {
+        mappings.put(FreeSlotField.lastModified, new BigIntMapping<Available>("modified", "Last Modified") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.lastModified);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, Long value) throws OXException {
+            public void set(Available object, Long value) throws OXException {
                 object.setLastModified(value == null ? null : new Date(value));
             }
 
             @Override
-            public Long get(CalendarFreeSlot object) {
+            public Long get(Available object) {
                 return object.getLastModified().getTime();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeLastModified();
             }
         });
-        mappings.put(FreeSlotField.description, new VarCharMapping<CalendarFreeSlot>("description", "Description") {
+        mappings.put(FreeSlotField.description, new VarCharMapping<Available>("description", "Description") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.description);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 object.setDescription(value);
                 ;
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 return object.getDescription();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeDescription();
             }
         });
-        mappings.put(FreeSlotField.recurid, new BigIntMapping<CalendarFreeSlot>("recurrence", "Recurrence ID") {
+        mappings.put(FreeSlotField.recurid, new BigIntMapping<Available>("recurrence", "Recurrence ID") {
 
             @Override
-            public void set(CalendarFreeSlot object, Long value) {
+            public void set(Available object, Long value) {
                 object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(new DateTime(value.longValue())));
             }
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.recurid);
             }
 
             @Override
-            public Long get(CalendarFreeSlot object) {
+            public Long get(Available object) {
                 RecurrenceId value = object.getRecurrenceId();
                 return null == value ? null : L(value.getValue().getTimestamp());
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(FreeSlotField.rrule, new VarCharMapping<CalendarFreeSlot>("rrule", "Recurrence Rule") {
+        mappings.put(FreeSlotField.rrule, new VarCharMapping<Available>("rrule", "Recurrence Rule") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.rrule);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 object.setRecurrenceRule(value);
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 return object.getRecurrenceRule();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(FreeSlotField.summary, new VarCharMapping<CalendarFreeSlot>("summary", "Summary") {
+        mappings.put(FreeSlotField.summary, new VarCharMapping<Available>("summary", "Summary") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.summary);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 object.setSummary(value);
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 return object.getSummary();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeSummary();
             }
         });
-        mappings.put(FreeSlotField.categories, new VarCharMapping<CalendarFreeSlot>("categories", "Categories") {
+        mappings.put(FreeSlotField.categories, new VarCharMapping<Available>("categories", "Categories") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.categories);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 String[] split = Strings.splitByCommaNotInQuotes(value);
                 object.setCategories(split == null ? null : Arrays.asList(split));
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 List<String> categories = object.getCategories();
                 if (categories == null || categories.size() == 0) {
                     return null;
@@ -463,25 +463,25 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeCategories();
             }
         });
-        mappings.put(FreeSlotField.comment, new VarCharMapping<CalendarFreeSlot>("comment", "Comment") {
+        mappings.put(FreeSlotField.comment, new VarCharMapping<Available>("comment", "Comment") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.comment);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, String value) throws OXException {
+            public void set(Available object, String value) throws OXException {
                 String[] split = Strings.splitByCommaNotInQuotes(value);
                 object.setComments(split == null ? null : Arrays.asList(split));
             }
 
             @Override
-            public String get(CalendarFreeSlot object) {
+            public String get(Available object) {
                 List<String> comments = object.getComments();
                 if (comments == null || comments.size() == 0) {
                     return null;
@@ -497,29 +497,29 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<CalendarFreeSlot, Fr
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeComments();
             }
         });
-        mappings.put(FreeSlotField.extendedProperties, new ExtendedPropertiesMapping<CalendarFreeSlot>("extendedProperties", "Extended Properties") {
+        mappings.put(FreeSlotField.extendedProperties, new ExtendedPropertiesMapping<Available>("extendedProperties", "Extended Properties") {
 
             @Override
-            public boolean isSet(CalendarFreeSlot object) {
+            public boolean isSet(Available object) {
                 return object.contains(FreeSlotField.extendedProperties);
             }
 
             @Override
-            public void set(CalendarFreeSlot object, ExtendedProperties value) throws OXException {
+            public void set(Available object, ExtendedProperties value) throws OXException {
                 object.setExtendedProperties(value);
             }
 
             @Override
-            public ExtendedProperties get(CalendarFreeSlot object) {
+            public ExtendedProperties get(Available object) {
                 return object.getExtendedProperties();
             }
 
             @Override
-            public void remove(CalendarFreeSlot object) {
+            public void remove(Available object) {
                 object.removeExtendedProperties();
             }
 

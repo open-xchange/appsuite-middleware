@@ -52,8 +52,8 @@ package com.openexchange.chronos.impl.availability.performer;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
@@ -68,15 +68,15 @@ import com.openexchange.exception.OXException;
 class CheckUtil {
 
     /**
-     * Check the validity of the values of the specified {@link List} with {@link CalendarAvailability} blocks
+     * Check the validity of the values of the specified {@link List} with {@link Availability} blocks
      * according to the <a href="https://tools.ietf.org/html/rfc7953">RFC-7953</a>
      * 
-     * @param availabilities The {@link List} of {@link CalendarAvailability} blocks to check
-     * @throws OXException if any of the fields in any of the {@link CalendarAvailability} does not meet
+     * @param availabilities The {@link List} of {@link Availability} blocks to check
+     * @throws OXException if any of the fields in any of the {@link Availability} does not meet
      *             the regulations of the RFC
      */
-    static void check(List<CalendarAvailability> availabilities) throws OXException {
-        for (CalendarAvailability availability : availabilities) {
+    static void check(List<Availability> availabilities) throws OXException {
+        for (Availability availability : availabilities) {
             checkMandatory(availability, AvailabilityField.uid);
             checkConstraints(availability);
             checkRanges(availability);
@@ -84,12 +84,12 @@ class CheckUtil {
     }
 
     /**
-     * Check specific constraints that apply to a {@link CalendarAvailability} DAO
+     * Check specific constraints that apply to a {@link Availability} DAO
      * 
-     * @param availability The {@link CalendarAvailability} to check
+     * @param availability The {@link Availability} to check
      * @throws OXException if any of the constraints is violated
      */
-    private static void checkConstraints(CalendarAvailability availability) throws OXException {
+    private static void checkConstraints(Availability availability) throws OXException {
         if (!availability.contains(AvailabilityField.dtstart) && availability.contains(AvailabilityField.duration)) {
             throw new OXException(31145, "The 'duration' field is set, but the 'start' field is not");
         }
@@ -101,19 +101,19 @@ class CheckUtil {
         if (availability.getCalendarFreeSlots() == null) {
             return;
         }
-        for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
+        for (Available freeSlot : availability.getCalendarFreeSlots()) {
             checkMandatory(freeSlot, FreeSlotField.uid, FreeSlotField.dtstart);
             checkConstraints(freeSlot);
         }
     }
 
     /**
-     * Check specific constraints that apply to a {@link CalendarFreeSlot} DAO
+     * Check specific constraints that apply to a {@link Available} DAO
      * 
-     * @param availability The {@link CalendarFreeSlot} to check
+     * @param availability The {@link Available} to check
      * @throws OXException if any of the constraints is violated
      */
-    private static void checkConstraints(CalendarFreeSlot freeSlot) throws OXException {
+    private static void checkConstraints(Available freeSlot) throws OXException {
         if (freeSlot.contains(FreeSlotField.dtend) && freeSlot.contains(FreeSlotField.duration)) {
             throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
         }
@@ -140,7 +140,7 @@ class CheckUtil {
      * @param availability
      * @throws OXException
      */
-    private static void checkRanges(CalendarAvailability availability) throws OXException {
+    private static void checkRanges(Availability availability) throws OXException {
         // If "DTSTART" is not present, then the start time is unbounded.
         if (!availability.contains(AvailabilityField.dtstart)) {
             availability.setStartTime(new DateTime(Long.MAX_VALUE));

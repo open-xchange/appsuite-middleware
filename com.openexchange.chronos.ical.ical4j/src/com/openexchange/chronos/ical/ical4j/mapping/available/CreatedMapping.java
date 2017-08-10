@@ -50,7 +50,6 @@
 package com.openexchange.chronos.ical.ical4j.mapping.available;
 
 import java.util.Date;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.Available;
@@ -63,7 +62,7 @@ import net.fortuna.ical4j.model.property.UtcProperty;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CreatedMapping extends ICalUtcMapping<Available, CalendarFreeSlot> {
+public class CreatedMapping extends ICalUtcMapping<Available, com.openexchange.chronos.Available> {
 
     /**
      * Initialises a new {@link CreatedMapping}.
@@ -78,7 +77,7 @@ public class CreatedMapping extends ICalUtcMapping<Available, CalendarFreeSlot> 
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
      */
     @Override
-    protected Date getValue(CalendarFreeSlot object) {
+    protected Date getValue(com.openexchange.chronos.Available object) {
         return object.getCreated();
     }
 
@@ -88,7 +87,7 @@ public class CreatedMapping extends ICalUtcMapping<Available, CalendarFreeSlot> 
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
      */
     @Override
-    protected void setValue(CalendarFreeSlot object, Date value) {
+    protected void setValue(com.openexchange.chronos.Available object, Date value) {
         object.setCreated(value == null ? new Date() : value);
     }
 

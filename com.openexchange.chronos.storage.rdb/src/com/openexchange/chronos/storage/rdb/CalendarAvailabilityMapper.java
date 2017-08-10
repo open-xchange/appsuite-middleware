@@ -60,7 +60,7 @@ import java.util.EnumMap;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
@@ -80,7 +80,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailability, AvailabilityField> {
+public class CalendarAvailabilityMapper extends DefaultDbMapper<Availability, AvailabilityField> {
 
     private static final CalendarAvailabilityMapper INSTANCE = new CalendarAvailabilityMapper();
 
@@ -106,8 +106,8 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
      * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
      */
     @Override
-    public CalendarAvailability newInstance() {
-        return new CalendarAvailability();
+    public Availability newInstance() {
+        return new Availability();
     }
 
     /*
@@ -126,210 +126,210 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
-    protected EnumMap<AvailabilityField, ? extends DbMapping<? extends Object, CalendarAvailability>> createMappings() {
-        EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarAvailability>> mappings = new EnumMap<AvailabilityField, DbMapping<? extends Object, CalendarAvailability>>(AvailabilityField.class);
-        mappings.put(AvailabilityField.id, new IntegerMapping<CalendarAvailability>("id", "Availability ID") {
+    protected EnumMap<AvailabilityField, ? extends DbMapping<? extends Object, Availability>> createMappings() {
+        EnumMap<AvailabilityField, DbMapping<? extends Object, Availability>> mappings = new EnumMap<AvailabilityField, DbMapping<? extends Object, Availability>>(AvailabilityField.class);
+        mappings.put(AvailabilityField.id, new IntegerMapping<Availability>("id", "Availability ID") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.id);
             }
 
             @Override
-            public void set(CalendarAvailability object, Integer value) throws OXException {
+            public void set(Availability object, Integer value) throws OXException {
                 object.setId(Integer.toString(value));
             }
 
             @Override
-            public Integer get(CalendarAvailability object) {
+            public Integer get(Availability object) {
                 return Integer.valueOf(object.getId());
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeId();
             }
 
         });
-        mappings.put(AvailabilityField.uid, new VarCharMapping<CalendarAvailability>("uid", "Availability UID") {
+        mappings.put(AvailabilityField.uid, new VarCharMapping<Availability>("uid", "Availability UID") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.uid);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setUid(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getUid();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeUid();
             }
 
         });
-        mappings.put(AvailabilityField.user, new IntegerMapping<CalendarAvailability>("user", "Calendar User ID") {
+        mappings.put(AvailabilityField.user, new IntegerMapping<Availability>("user", "Calendar User ID") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.user);
             }
 
             @Override
-            public void set(CalendarAvailability object, Integer value) throws OXException {
+            public void set(Availability object, Integer value) throws OXException {
                 object.setCalendarUser(value);
             }
 
             @Override
-            public Integer get(CalendarAvailability object) {
+            public Integer get(Availability object) {
                 return object.getCalendarUser();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeCalendarUser();
             }
         });
-        mappings.put(AvailabilityField.busytype, new VarCharMapping<CalendarAvailability>("busyType", "Busy Type") {
+        mappings.put(AvailabilityField.busytype, new VarCharMapping<Availability>("busyType", "Busy Type") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.busytype);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setBusyType(BusyType.parseFromString(value));
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 BusyType busyType = object.getBusyType();
                 return busyType == null ? BusyType.BUSY_UNAVAILABLE.getValue() : busyType.getValue();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeBusyType();
             }
         });
-        mappings.put(AvailabilityField.classification, new VarCharMapping<CalendarAvailability>("class", "Classification") {
+        mappings.put(AvailabilityField.classification, new VarCharMapping<Availability>("class", "Classification") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.classification);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setClassification(new Classification(value));
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 Classification classification = object.getClassification();
                 return classification == null ? null : classification.getValue();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeClassification();
             }
         });
-        mappings.put(AvailabilityField.created, new BigIntMapping<CalendarAvailability>("created", "Created") {
+        mappings.put(AvailabilityField.created, new BigIntMapping<Availability>("created", "Created") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.created);
             }
 
             @Override
-            public void set(CalendarAvailability object, Long value) throws OXException {
+            public void set(Availability object, Long value) throws OXException {
                 object.setCreated(value == null ? null : new Date(value.longValue()));
             }
 
             @Override
-            public Long get(CalendarAvailability object) {
+            public Long get(Availability object) {
                 Date created = object.getCreated();
                 return created == null ? null : created.getTime();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeCreated();
             }
         });
-        mappings.put(AvailabilityField.description, new VarCharMapping<CalendarAvailability>("description", "Description") {
+        mappings.put(AvailabilityField.description, new VarCharMapping<Availability>("description", "Description") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.description);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setDescription(value);
                 ;
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getDescription();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeDescription();
             }
         });
-        mappings.put(AvailabilityField.dtstart, new DateTimeMapping<CalendarAvailability>("start", "startTimezone", "allDay", "Start DateTime") {
+        mappings.put(AvailabilityField.dtstart, new DateTimeMapping<Availability>("start", "startTimezone", "allDay", "Start DateTime") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.dtstart);
             }
 
             @Override
-            public void set(CalendarAvailability object, DateTime value) throws OXException {
+            public void set(Availability object, DateTime value) throws OXException {
                 object.setStartTime(value);
             }
 
             @Override
-            public DateTime get(CalendarAvailability object) {
+            public DateTime get(Availability object) {
                 return object.getStartTime();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeStartTime();
             }
 
         });
-        mappings.put(AvailabilityField.dtend, new DefaultDbMultiMapping<DateTime, CalendarAvailability>(new String[] { "end", "endTimezone" }, "End date") {
+        mappings.put(AvailabilityField.dtend, new DefaultDbMultiMapping<DateTime, Availability>(new String[] { "end", "endTimezone" }, "End date") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.dtend);
             }
 
             @Override
-            public void set(CalendarAvailability object, DateTime value) throws OXException {
+            public void set(Availability object, DateTime value) throws OXException {
                 object.setEndTime(value);
             }
 
             @Override
-            public DateTime get(CalendarAvailability object) {
+            public DateTime get(Availability object) {
                 return object.getEndTime();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeEndTime();
             }
 
@@ -356,7 +356,7 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public int set(PreparedStatement statement, int parameterIndex, CalendarAvailability object) throws SQLException {
+            public int set(PreparedStatement statement, int parameterIndex, Availability object) throws SQLException {
                 DateTime value = get(object);
                 if (null == value) {
                     statement.setNull(parameterIndex, Types.TIMESTAMP);
@@ -368,178 +368,178 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
                 return 2;
             }
         });
-        mappings.put(AvailabilityField.lastModified, new BigIntMapping<CalendarAvailability>("modified", "Last Modified") {
+        mappings.put(AvailabilityField.lastModified, new BigIntMapping<Availability>("modified", "Last Modified") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.lastModified);
             }
 
             @Override
-            public void set(CalendarAvailability object, Long value) throws OXException {
+            public void set(Availability object, Long value) throws OXException {
                 object.setLastModified(value == null ? null : new Date(value));
             }
 
             @Override
-            public Long get(CalendarAvailability object) {
+            public Long get(Availability object) {
                 return object.getLastModified().getTime();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeLastModified();
             }
         });
-        mappings.put(AvailabilityField.location, new VarCharMapping<CalendarAvailability>("location", "Location") {
+        mappings.put(AvailabilityField.location, new VarCharMapping<Availability>("location", "Location") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.location);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setLocation(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getLocation();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeLocation();
             }
         });
-        mappings.put(AvailabilityField.organizer, new VarCharMapping<CalendarAvailability>("organizer", "Organizer") {
+        mappings.put(AvailabilityField.organizer, new VarCharMapping<Availability>("organizer", "Organizer") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.organizer);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 Organizer organizer = new Organizer();
                 organizer.setUri(value);
                 object.setOrganizer(organizer);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 Organizer organizer = object.getOrganizer();
                 return organizer == null ? null : organizer.getUri();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeOrganizer();
             }
         });
-        mappings.put(AvailabilityField.priority, new IntegerMapping<CalendarAvailability>("priority", "Priority") {
+        mappings.put(AvailabilityField.priority, new IntegerMapping<Availability>("priority", "Priority") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.priority);
             }
 
             @Override
-            public void set(CalendarAvailability object, Integer value) throws OXException {
+            public void set(Availability object, Integer value) throws OXException {
                 object.setPriority(value);
             }
 
             @Override
-            public Integer get(CalendarAvailability object) {
+            public Integer get(Availability object) {
                 return object.getPriority();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removePriority();
             }
         });
-        mappings.put(AvailabilityField.seq, new IntegerMapping<CalendarAvailability>("sequence", "Sequence") {
+        mappings.put(AvailabilityField.seq, new IntegerMapping<Availability>("sequence", "Sequence") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.seq);
             }
 
             @Override
-            public void set(CalendarAvailability object, Integer value) throws OXException {
+            public void set(Availability object, Integer value) throws OXException {
                 object.setSequence(value == null ? 0 : value);
             }
 
             @Override
-            public Integer get(CalendarAvailability object) {
+            public Integer get(Availability object) {
                 return object.getSequence();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeSequence();
             }
         });
-        mappings.put(AvailabilityField.summary, new VarCharMapping<CalendarAvailability>("summary", "Summary") {
+        mappings.put(AvailabilityField.summary, new VarCharMapping<Availability>("summary", "Summary") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.summary);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setSummary(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getSummary();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeSummary();
             }
         });
-        mappings.put(AvailabilityField.url, new VarCharMapping<CalendarAvailability>("url", "URL") {
+        mappings.put(AvailabilityField.url, new VarCharMapping<Availability>("url", "URL") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.url);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setUrl(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getUrl();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeUrl();
             }
         });
-        mappings.put(AvailabilityField.categories, new VarCharMapping<CalendarAvailability>("categories", "Categories") {
+        mappings.put(AvailabilityField.categories, new VarCharMapping<Availability>("categories", "Categories") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.categories);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 String[] split = Strings.splitByCommaNotInQuotes(value);
                 object.setCategories(split == null ? null : Arrays.asList(split));
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 List<String> categories = object.getCategories();
                 if (categories == null || categories.size() == 0) {
                     return null;
@@ -555,25 +555,25 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeCategories();
             }
         });
-        mappings.put(AvailabilityField.comment, new VarCharMapping<CalendarAvailability>("comment", "Comment") {
+        mappings.put(AvailabilityField.comment, new VarCharMapping<Availability>("comment", "Comment") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.comment);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 String[] split = Strings.splitByCommaNotInQuotes(value);
                 object.setComments(split == null ? null : Arrays.asList(split));
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 List<String> comments = object.getComments();
                 if (comments == null || comments.size() == 0) {
                     return null;
@@ -589,29 +589,29 @@ public class CalendarAvailabilityMapper extends DefaultDbMapper<CalendarAvailabi
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeComments();
             }
         });
-        mappings.put(AvailabilityField.extendedProperties, new ExtendedPropertiesMapping<CalendarAvailability>("extendedProperties", "Extended Properties") {
+        mappings.put(AvailabilityField.extendedProperties, new ExtendedPropertiesMapping<Availability>("extendedProperties", "Extended Properties") {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.extendedProperties);
             }
 
             @Override
-            public void set(CalendarAvailability object, ExtendedProperties value) throws OXException {
+            public void set(Availability object, ExtendedProperties value) throws OXException {
                 object.setExtendedProperties(value);
             }
 
             @Override
-            public ExtendedProperties get(CalendarAvailability object) {
+            public ExtendedProperties get(Availability object) {
                 return object.getExtendedProperties();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeExtendedProperties();
             }
 

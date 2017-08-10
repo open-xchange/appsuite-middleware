@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.available;
 
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Dur;
@@ -68,7 +67,7 @@ import net.fortuna.ical4j.util.Dates;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DtEndMapping extends ICalDateTimeMapping<Available, CalendarFreeSlot> {
+public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchange.chronos.Available> {
 
     /**
      * Initialises a new {@link DtEndMapping}.
@@ -83,7 +82,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, CalendarFreeSlo
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
-    protected org.dmfs.rfc5545.DateTime getValue(CalendarFreeSlot object) {
+    protected org.dmfs.rfc5545.DateTime getValue(com.openexchange.chronos.Available object) {
         return object.getEndTime();
     }
 
@@ -93,7 +92,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, CalendarFreeSlo
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
-    protected void setValue(CalendarFreeSlot object, org.dmfs.rfc5545.DateTime value) {
+    protected void setValue(com.openexchange.chronos.Available object, org.dmfs.rfc5545.DateTime value) {
         object.setEndTime(value);
     }
 

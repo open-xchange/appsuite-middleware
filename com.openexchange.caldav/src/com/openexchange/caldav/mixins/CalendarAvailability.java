@@ -98,11 +98,11 @@ public class CalendarAvailability extends SingleXMLPropertyMixin {
             CalendarSession calendarSession = calendarService.init(factory.getSession());
 
             CalendarAvailabilityService service = factory.getService(CalendarAvailabilityService.class);
-            List<com.openexchange.chronos.CalendarAvailability> availability = service.getAvailability(calendarSession);
+            List<com.openexchange.chronos.Availability> availability = service.getAvailability(calendarSession);
             // export the availability
             ICalService iCalService = factory.getService(ICalService.class);
             CalendarExport exportICal = iCalService.exportICal(iCalService.initParameters());
-            for (com.openexchange.chronos.CalendarAvailability av : availability) {
+            for (com.openexchange.chronos.Availability av : availability) {
                 exportICal.add(av);
             }
             inputStream = exportICal.getClosingStream();

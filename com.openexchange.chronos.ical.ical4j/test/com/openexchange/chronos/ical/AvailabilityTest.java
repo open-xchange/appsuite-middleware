@@ -54,8 +54,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 
 /**
  * {@link AvailabilityTest}
@@ -91,15 +91,15 @@ public class AvailabilityTest extends ICalTest {
         assertNotNull("No availability components found", importICal.getAvailabilities());
         assertEquals("Expected 1 availability component", 1, importICal.getAvailabilities().size());
 
-        CalendarAvailability availability = importICal.getAvailabilities().get(0);
+        Availability availability = importICal.getAvailabilities().get(0);
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uid does not match", "0428C7D2-688E-4D2E-AC52-CD112E2469DF", availability.getUid());
 
-        List<CalendarFreeSlot> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getCalendarFreeSlots();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
-        CalendarFreeSlot freeSlot = freeSlots.get(0);
+        Available freeSlot = freeSlots.get(0);
         assertEquals("The summary does not match", "Monday to Friday from 9:00 to 17:00", freeSlot.getSummary());
         assertEquals("The uid does not match", "34EDA59B-6BB1-4E94-A66C-64999089C0AF", freeSlot.getUid());
         assertEquals("The recurrence rule does not match", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR", freeSlot.getRecurrenceRule());
@@ -147,15 +147,15 @@ public class AvailabilityTest extends ICalTest {
         assertNotNull("No availability components found", importICal.getAvailabilities());
         assertEquals("Expected 1 availability component", 1, importICal.getAvailabilities().size());
 
-        CalendarAvailability availability = importICal.getAvailabilities().get(0);
+        Availability availability = importICal.getAvailabilities().get(0);
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uid does not match", "84D0F948-7FC6-4C1D-BBF3-BA9827B424B5", availability.getUid());
 
-        List<CalendarFreeSlot> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getCalendarFreeSlots();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 2 'available' sub-components", 2, freeSlots.size());
 
-        CalendarFreeSlot freeSlot = freeSlots.get(0);
+        Available freeSlot = freeSlots.get(0);
         assertEquals("The summary does not match", "Monday to Thursday from 9:00 to 17:00", freeSlot.getSummary());
         assertEquals("The uid does not match", "7B33093A-7F98-4EED-B381-A5652530F04D", freeSlot.getUid());
         assertEquals("The recurrence rule does not match", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH", freeSlot.getRecurrenceRule());
@@ -235,17 +235,17 @@ public class AvailabilityTest extends ICalTest {
         assertEquals("Expected 3 availability component", 3, importICal.getAvailabilities().size());
 
         // Availability 1
-        CalendarAvailability availability = importICal.getAvailabilities().get(0);
+        Availability availability = importICal.getAvailabilities().get(0);
         assertEquals("The organizer uri does not match", "mailto:bernard@example.com", availability.getOrganizer().getUri());
         assertEquals("The uid does not match", "BE082249-7BDD-4FE0-BDBA-DE6598C32FC9", availability.getUid());
         assertEquals("The start timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), availability.getStartTime().getTimeZone());
         assertEquals("The end timezone does not match", java.util.TimeZone.getTimeZone("America/Montreal"), availability.getEndTime().getTimeZone());
 
-        List<CalendarFreeSlot> freeSlots = availability.getCalendarFreeSlots();
+        List<Available> freeSlots = availability.getCalendarFreeSlots();
         assertNotNull("No 'available' sub-components found", freeSlots);
         assertEquals("Expected 1 'available' sub-component", 1, freeSlots.size());
 
-        CalendarFreeSlot freeSlot = freeSlots.get(0);
+        Available freeSlot = freeSlots.get(0);
         assertEquals("The summary does not match", "Monday to Friday from 9:00 to 17:00", freeSlot.getSummary());
         assertEquals("The uid does not match", "54602321-CEDB-4620-9099-757583263981", freeSlot.getUid());
         assertEquals("The recurrence rule does not match", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR", freeSlot.getRecurrenceRule());

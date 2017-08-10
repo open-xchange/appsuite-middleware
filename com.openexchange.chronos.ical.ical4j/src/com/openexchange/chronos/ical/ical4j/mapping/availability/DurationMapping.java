@@ -52,7 +52,7 @@ package com.openexchange.chronos.ical.ical4j.mapping.availability;
 import java.util.Date;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -66,7 +66,7 @@ import net.fortuna.ical4j.model.property.Duration;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DurationMapping extends AbstractICalMapping<VAvailability, CalendarAvailability> {
+public class DurationMapping extends AbstractICalMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link DurationMapping}.
@@ -81,7 +81,7 @@ public class DurationMapping extends AbstractICalMapping<VAvailability, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void export(CalendarAvailability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
+    public void export(Availability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
         removeProperties(component, Property.DURATION); // stick to DTEND for export
     }
 
@@ -91,7 +91,7 @@ public class DurationMapping extends AbstractICalMapping<VAvailability, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void importICal(VAvailability component, CalendarAvailability object, ICalParameters parameters, List<OXException> warnings) {
+    public void importICal(VAvailability component, Availability object, ICalParameters parameters, List<OXException> warnings) {
         Duration duration = (Duration) component.getProperty(Property.DURATION);
         if (null == duration || null == duration.getDuration()) {
             return;
@@ -99,7 +99,7 @@ public class DurationMapping extends AbstractICalMapping<VAvailability, Calendar
         // If duration and startDate are set, then try to determine the endDate
         DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
         if (null != dtStart && null != dtStart.getDate()) {
-            CalendarAvailability availability = new CalendarAvailability();
+            Availability availability = new Availability();
             new DtStartMapping().importICal(component, availability, parameters, warnings);
             DateTime startDate = availability.getStartTime();
             java.util.Date endDate = duration.getDuration().getTime(new Date(startDate.getTimestamp()));

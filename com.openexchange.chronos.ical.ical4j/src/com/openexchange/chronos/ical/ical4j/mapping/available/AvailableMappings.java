@@ -52,7 +52,6 @@ package com.openexchange.chronos.ical.ical4j.mapping.available;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapping;
 import net.fortuna.ical4j.model.component.Available;
 
@@ -67,7 +66,7 @@ public class AvailableMappings {
      * Holds a collection of all known availability mappings.
      */
     //@formatter:off
-    public static List<ICalMapping<Available, CalendarFreeSlot>> ALL = Collections.<ICalMapping<Available, CalendarFreeSlot>> unmodifiableList(Arrays.asList(
+    public static List<ICalMapping<Available, com.openexchange.chronos.Available>> ALL = Collections.<ICalMapping<Available, com.openexchange.chronos.Available>> unmodifiableList(Arrays.asList(
         new DtStampMapping(),
         new DtStartMapping(),
         new UidMapping(),

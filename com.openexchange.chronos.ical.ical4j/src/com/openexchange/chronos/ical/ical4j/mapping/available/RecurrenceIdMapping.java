@@ -50,7 +50,6 @@
 package com.openexchange.chronos.ical.ical4j.mapping.available;
 
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarFreeSlot;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping;
 import net.fortuna.ical4j.model.Property;
@@ -63,7 +62,7 @@ import net.fortuna.ical4j.model.property.RecurrenceId;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, CalendarFreeSlot> {
+public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, com.openexchange.chronos.Available> {
 
     /**
      * Initializes a new {@link RecurrenceIdMapping}.
@@ -78,7 +77,7 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
-    protected DateTime getValue(CalendarFreeSlot object) {
+    protected DateTime getValue(com.openexchange.chronos.Available object) {
         com.openexchange.chronos.RecurrenceId value = object.getRecurrenceId();
         return null == value ? null : value.getValue();
     }
@@ -89,7 +88,7 @@ public class RecurrenceIdMapping extends ICalDateTimeMapping<Available, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
-    protected void setValue(CalendarFreeSlot object, DateTime value) {
+    protected void setValue(com.openexchange.chronos.Available object, DateTime value) {
         object.setRecurrenceId(null != value ? new DefaultRecurrenceId(value) : null);
     }
 

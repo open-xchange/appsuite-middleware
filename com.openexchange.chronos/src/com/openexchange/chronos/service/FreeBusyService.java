@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
@@ -112,9 +112,9 @@ public interface FreeBusyService {
 
     /**
      * Calculates the free-busy time information for the specified {@link Attendee}s taken into consideration their
-     * {@link CalendarAvailability} blocks. It first retrieves the merged free busy information using
+     * {@link Availability} blocks. It first retrieves the merged free busy information using
      * the {@link #getMergedFreeBusy(CalendarSession, List, Date, Date)} method and combines those slots
-     * with the {@link CalendarAvailability} blocks of their respective users.
+     * with the {@link Availability} blocks of their respective users.
      * 
      * @param session The calendar session
      * @param attendees The {@link Attendee}s to calculate the free busy time for

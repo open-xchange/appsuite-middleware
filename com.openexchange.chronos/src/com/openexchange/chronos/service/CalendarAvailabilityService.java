@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AvailableTime;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
@@ -66,36 +66,36 @@ import com.openexchange.exception.OXException;
 public interface CalendarAvailabilityService {
 
     /**
-     * Sets the availability for the specified user. If any of the specified {@link CalendarAvailability} overlaps
-     * with any of the existing {@link CalendarAvailability} both blocks will be stored
+     * Sets the availability for the specified user. If any of the specified {@link Availability} overlaps
+     * with any of the existing {@link Availability} both blocks will be stored
      * 
      * @param session The {@link CalendarSession}
-     * @param availability A list with {@link CalendarAvailability} groupings to set
-     * @return A {@link SetResult} with the unique identifiers of the {@link CalendarAvailability} blocks and any
+     * @param availability A list with {@link Availability} groupings to set
+     * @return A {@link SetResult} with the unique identifiers of the {@link Availability} blocks and any
      *         warnings that occurred during the operation
      * @throws OXException if the availability cannot be set
      */
-    SetResult setAvailability(CalendarSession session, List<CalendarAvailability> availability) throws OXException;
+    SetResult setAvailability(CalendarSession session, List<Availability> availability) throws OXException;
 
     /**
-     * Gets the {@link CalendarAvailability} for the current user
+     * Gets the {@link Availability} for the current user
      * 
      * @param session the {@link CalendarSession}
-     * @return An unmodifiable {@link List} with {@link CalendarAvailability} blocks
+     * @return An unmodifiable {@link List} with {@link Availability} blocks
      * @throws OXException if an error is occurred
      */
-    List<CalendarAvailability> getAvailability(CalendarSession session) throws OXException;
+    List<Availability> getAvailability(CalendarSession session) throws OXException;
 
     /**
-     * Gets the {@link CalendarAvailability} for the current user in the specified interval
+     * Gets the {@link Availability} for the current user in the specified interval
      * 
      * @param session The {@link CalendarSession}
      * @param from The start date of the period to consider
      * @param until The end date of the period to consider
-     * @return An unmodifiable {@link List} with {@link CalendarAvailability} blocks for the specified user
+     * @return An unmodifiable {@link List} with {@link Availability} blocks for the specified user
      * @throws OXException if an error is occurred
      */
-    List<CalendarAvailability> getAvailability(CalendarSession session, Date from, Date until) throws OXException;
+    List<Availability> getAvailability(CalendarSession session, Date from, Date until) throws OXException;
 
     /**
      * Gets the {@link AvailableTime} for the specified user
@@ -119,66 +119,66 @@ public interface CalendarAvailabilityService {
     Map<Attendee, AvailableTime> getAvailableTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
-     * Gets the combined {@link CalendarAvailability} blocks for the specified {@link Attendee}s in the specified time interval,
+     * Gets the combined {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval,
      * 
      * @param session The calendar session
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link CalendarAvailability} for
+     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} for
      * @param from The start point in the time interval
      * @param until The end point in the time interval
-     * @return A {@link Map} with {@link CalendarAvailability} slots for the {@link Attendee}s
+     * @return A {@link Map} with {@link Availability} slots for the {@link Attendee}s
      * @throws OXException if an error is occurred
      */
-    Map<Attendee, List<CalendarAvailability>> getCombinedAvailableTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, List<Availability>> getCombinedAvailableTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
-     * Gets the {@link CalendarAvailability} information for the specified {@link CalendarUser}s in the specified
+     * Gets the {@link Availability} information for the specified {@link CalendarUser}s in the specified
      * interval.
      * 
      * @param session The {@link CalendarSession}
      * @param attendees The {@link List} of the {@link CalendarUser}s
      * @param from The start date of the interval
      * @param until The end date of the interval
-     * @return An unmodifiable {@link Map} with {@link CalendarAvailability} for the specified {@link CalendarUser}s
+     * @return An unmodifiable {@link Map} with {@link Availability} for the specified {@link CalendarUser}s
      * @throws OXException if an error is occurred
      */
-    Map<CalendarUser, List<CalendarAvailability>> getUserAvailability(CalendarSession session, List<CalendarUser> users, Date from, Date until) throws OXException;
+    Map<CalendarUser, List<Availability>> getUserAvailability(CalendarSession session, List<CalendarUser> users, Date from, Date until) throws OXException;
 
     /**
-     * Gets the {@link CalendarAvailability} information for the specified {@link Attendee}s in the specified
+     * Gets the {@link Availability} information for the specified {@link Attendee}s in the specified
      * interval.
      * 
      * @param session The {@link CalendarSession}
      * @param attendees The {@link List} of the {@link Attendee}s
      * @param from The start date of the interval
      * @param until The end date of the interval
-     * @return An unmodifiable {@link Map} with {@link CalendarAvailability} for the specified {@link Attendee}s
+     * @return An unmodifiable {@link Map} with {@link Availability} for the specified {@link Attendee}s
      * @throws OXException if an error is occurred
      */
-    Map<Attendee, List<CalendarAvailability>> getAttendeeAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, List<Availability>> getAttendeeAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
-     * Deletes the {@link CalendarAvailability} block with the specified identifier
+     * Deletes the {@link Availability} block with the specified identifier
      * 
      * @param session The {@link CalendarSession}
-     * @param availabilityId The {@link CalendarAvailability} unique identifier
-     * @throws OXException if the {@link CalendarAvailability} cannot be deleted
+     * @param availabilityId The {@link Availability} unique identifier
+     * @throws OXException if the {@link Availability} cannot be deleted
      */
     void deleteAvailability(CalendarSession session, String availabilityId) throws OXException;
 
     /**
-     * Deletes the {@link CalendarAvailability} blocks with the specified identifiers
+     * Deletes the {@link Availability} blocks with the specified identifiers
      * 
      * @param session The {@link CalendarSession}
-     * @param availabilityIds A {@link List} with the {@link CalendarAvailability} identifiers to delete
-     * @throws OXException if the {@link CalendarAvailability} blocks cannot be deleted
+     * @param availabilityIds A {@link List} with the {@link Availability} identifiers to delete
+     * @throws OXException if the {@link Availability} blocks cannot be deleted
      */
     void deleteAvailabilities(CalendarSession session, List<String> availabilityIds) throws OXException;
 
     /**
-     * Purges all {@link CalendarAvailability} blocks for the specified user
+     * Purges all {@link Availability} blocks for the specified user
      * 
      * @param session The {@link CalendarSession}
-     * @throws OXException if the {@link CalendarAvailability} blocks cannot be purged or any other error is occurred
+     * @throws OXException if the {@link Availability} blocks cannot be purged or any other error is occurred
      */
     void purgeAvailabilities(CalendarSession session) throws OXException;
 }

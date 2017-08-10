@@ -50,7 +50,7 @@
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
 import java.util.Date;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VAvailability;
@@ -63,7 +63,7 @@ import net.fortuna.ical4j.model.property.UtcProperty;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class LastModifiedMapping extends ICalUtcMapping<VAvailability, CalendarAvailability> {
+public class LastModifiedMapping extends ICalUtcMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link LastModifiedMapping}.
@@ -78,7 +78,7 @@ public class LastModifiedMapping extends ICalUtcMapping<VAvailability, CalendarA
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#getValue(java.lang.Object)
      */
     @Override
-    protected Date getValue(CalendarAvailability object) {
+    protected Date getValue(Availability object) {
         return object.getLastModified();
     }
 
@@ -88,7 +88,7 @@ public class LastModifiedMapping extends ICalUtcMapping<VAvailability, CalendarA
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalUtcMapping#setValue(java.lang.Object, java.util.Date)
      */
     @Override
-    protected void setValue(CalendarAvailability object, Date value) {
+    protected void setValue(Availability object, Date value) {
         object.setLastModified(value);
     }
 

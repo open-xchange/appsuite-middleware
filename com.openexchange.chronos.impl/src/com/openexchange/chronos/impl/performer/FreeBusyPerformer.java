@@ -71,8 +71,8 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -237,7 +237,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Get the available time for the attendees
         CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
-        Map<Attendee, List<CalendarAvailability>> availableTimes = availabilityService.getCombinedAvailableTime(session, attendees, from, until);
+        Map<Attendee, List<Availability>> availableTimes = availabilityService.getCombinedAvailableTime(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring free slot instances 
@@ -258,7 +258,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Iterate over all calendar availability blocks for all attendees
         for (Attendee attendee : attendees) {
-            List<CalendarAvailability> availableTime = availableTimes.get(attendee);
+            List<Availability> availableTime = availableTimes.get(attendee);
             // For each availability block and each calendar free slot create an equivalent free busy time slot
             List<FreeBusyTime> freeBusyTimes = availableTime.isEmpty() ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availableTime, timeZone);
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
@@ -290,13 +290,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
-    private void expandRecurringInstances(Date from, Date until, Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) throws OXException {
+    private void expandRecurringInstances(Date from, Date until, Map<Attendee, List<Availability>> availableTimes, TimeZone timeZone) throws OXException {
         for (Attendee attendee : availableTimes.keySet()) {
-            for (CalendarAvailability calendarAvailability : availableTimes.get(attendee)) {
-                List<CalendarFreeSlot> auxFreeSlot = new ArrayList<>();
+            for (Availability calendarAvailability : availableTimes.get(attendee)) {
+                List<Available> auxFreeSlot = new ArrayList<>();
                 Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
-                for (Iterator<CalendarFreeSlot> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
-                    CalendarFreeSlot freeSlot = iterator.next();
+                for (Iterator<Available> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                    Available freeSlot = iterator.next();
                     // No recurring free slot? Skip
                     if (!freeSlot.contains(FreeSlotField.rrule)) {
                         continue;
@@ -316,7 +316,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         // Determine the end of the occurrence's instance
                         Date endOfOccurrence = new Date(startOfOccurrence.getTime() + duration);
                         // Create the occurrence
-                        CalendarFreeSlot occ = freeSlot.clone();
+                        Available occ = freeSlot.clone();
                         occ.setStartTime(new DateTime(startOfOccurrence.getTime()));
                         occ.setEndTime(new DateTime(endOfOccurrence.getTime()));
                         // Add to the auxiliary
@@ -372,15 +372,15 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /**
      * Create an equivalent free busy time slot for each availability block and each calendar free slot in the
-     * specified {@link CalendarAvailability} blocks
+     * specified {@link Availability} blocks
      * 
-     * @param availableTime The {@link CalendarAvailability} blocks
+     * @param availableTime The {@link Availability} blocks
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
      */
-    private List<FreeBusyTime> calculateFreeBusyTimes(List<CalendarAvailability> availableTime, TimeZone timeZone) throws OXException {
+    private List<FreeBusyTime> calculateFreeBusyTimes(List<Availability> availableTime, TimeZone timeZone) throws OXException {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
-        for (CalendarAvailability availability : availableTime) {
+        for (Availability availability : availableTime) {
             // Get the availability's start/end times
             Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
@@ -393,7 +393,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             Date slotStartTime = startTime;
             Date slotEndTime = endTime;
             java.util.Collections.sort(availability.getCalendarFreeSlots(), Comparators.freeSlotDateTimeComparator);
-            for (CalendarFreeSlot calendarFreeSlot : availability.getCalendarFreeSlots()) {
+            for (Available calendarFreeSlot : availability.getCalendarFreeSlots()) {
                 // Get the slot's start/end times
                 slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
@@ -416,19 +416,19 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
-     * Adjusts (if necessary) the intervals of the specified {@link CalendarAvailability} blocks according to the specified
+     * Adjusts (if necessary) the intervals of the specified {@link Availability} blocks according to the specified
      * range
      * 
      * @param from The starting point of the interval
      * @param until The ending point of the interval
-     * @param availableTimes The {@link CalendarAvailability} blocks to adjust
+     * @param availableTimes The {@link Availability} blocks to adjust
      * @param timeZone The user's {@link TimeZone}
      */
-    private void adjustIntervals(Date from, Date until, Map<Attendee, List<CalendarAvailability>> availableTimes, TimeZone timeZone) {
-        for (List<CalendarAvailability> availabilities : availableTimes.values()) {
-            Iterator<CalendarAvailability> iterator = availabilities.iterator();
+    private void adjustIntervals(Date from, Date until, Map<Attendee, List<Availability>> availableTimes, TimeZone timeZone) {
+        for (List<Availability> availabilities : availableTimes.values()) {
+            Iterator<Availability> iterator = availabilities.iterator();
             while (iterator.hasNext()) {
-                CalendarAvailability availability = iterator.next();
+                Availability availability = iterator.next();
                 Date start = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
                 Date end = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
 
@@ -448,9 +448,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         availability.setEndTime(new DateTime(until.getTime()));
                     }
 
-                    Iterator<CalendarFreeSlot> freeSlotIterator = availability.getCalendarFreeSlots().iterator();
+                    Iterator<Available> freeSlotIterator = availability.getCalendarFreeSlots().iterator();
                     while (freeSlotIterator.hasNext()) {
-                        CalendarFreeSlot freeSlot = freeSlotIterator.next();
+                        Available freeSlot = freeSlotIterator.next();
                         Date fsStart = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
                         Date fsEnd = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getEndTime(), timeZone));
                         if (fsStart.after(until) || fsEnd.before(from)) {

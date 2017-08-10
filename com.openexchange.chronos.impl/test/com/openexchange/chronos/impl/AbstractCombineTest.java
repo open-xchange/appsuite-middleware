@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Before;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
@@ -70,7 +70,7 @@ public abstract class AbstractCombineTest {
 
     protected CalendarAvailabilityStorage storage;
     protected CalendarSession session;
-    protected List<CalendarAvailability> availabilities;
+    protected List<Availability> availabilities;
 
     /**
      * Initialises a new {@link AbstractCombineTest}.

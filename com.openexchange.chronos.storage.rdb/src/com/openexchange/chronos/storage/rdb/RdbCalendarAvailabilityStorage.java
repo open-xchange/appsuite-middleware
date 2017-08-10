@@ -54,8 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import com.google.common.collect.Lists;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.AvailabilityField;
@@ -119,7 +119,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailability(com.openexchange.chronos.CalendarAvailability)
      */
     @Override
-    public void insertCalendarAvailability(CalendarAvailability calendarAvailability) throws OXException {
+    public void insertCalendarAvailability(Availability calendarAvailability) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -127,7 +127,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             txPolicy.setAutoCommit(connection, false);
             int caAmount = insertCalendarAvailabilityItem(calendarAvailability, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
             int freeSlotsCount = 0;
-            for (List<CalendarFreeSlot> slots : Lists.partition(calendarAvailability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+            for (List<Available> slots : Lists.partition(calendarAvailability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
                 freeSlotsCount += insertCalendarAvailabilityItems(slots, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
             }
             txPolicy.commit(connection);
@@ -146,18 +146,18 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailabilities(java.util.List)
      */
     @Override
-    public void insertCalendarAvailabilities(List<CalendarAvailability> calendarAvailabilities) throws OXException {
+    public void insertCalendarAvailabilities(List<Availability> calendarAvailabilities) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            for (List<CalendarAvailability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
+            for (List<Availability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
                 updated += insertCalendarAvailabilityItems(chunk, CA_TABLE_NAME, calendarAvailabilityMapper, connection);
 
                 // Insert the free slots chunk-wise
-                for (CalendarAvailability availability : chunk) {
-                    for (List<CalendarFreeSlot> slots : Lists.partition(availability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
+                for (Availability availability : chunk) {
+                    for (List<Available> slots : Lists.partition(availability.getCalendarFreeSlots(), INSERT_CHUNK_SIZE)) {
                         updated += insertCalendarAvailabilityItems(slots, CA_FREE_SLOT_NAME, freeSlotMapper, connection);
                     }
                 }
@@ -197,7 +197,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
-    public void insertCalendarFreeSlot(CalendarFreeSlot freeSlot) throws OXException {
+    public void insertCalendarFreeSlot(Available freeSlot) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -218,7 +218,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public List<CalendarAvailability> loadCalendarAvailabilities(List<Integer> userIds) throws OXException {
+    public List<Availability> loadCalendarAvailabilities(List<Integer> userIds) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -237,7 +237,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailabilities(int)
      */
     @Override
-    public List<CalendarAvailability> loadCalendarAvailabilities(int userId) throws OXException {
+    public List<Availability> loadCalendarAvailabilities(int userId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -256,7 +256,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.lang.String)
      */
     @Override
-    public CalendarAvailability loadCalendarAvailability(String calendarAvailabilityId) throws OXException {
+    public Availability loadCalendarAvailability(String calendarAvailabilityId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -275,7 +275,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlot(java.lang.String, java.lang.String)
      */
     @Override
-    public CalendarFreeSlot loadCalendarFreeSlot(String calendarAvailabilityId, String freeSlotId) throws OXException {
+    public Available loadCalendarFreeSlot(String calendarAvailabilityId, String freeSlotId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -294,7 +294,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlots(java.lang.String)
      */
     @Override
-    public List<CalendarFreeSlot> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException {
+    public List<Available> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -411,15 +411,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link CalendarAvailability} blocks for the specified user
+     * Loads all {@link Availability} blocks for the specified user
      * 
      * @param A read-only {@link Connection} to the storage
      * @param userId The user identifier
-     * @return A {@link List} with all the {@link CalendarAvailability} blocks for the specified user
+     * @return A {@link List} with all the {@link Availability} blocks for the specified user
      * @throws OXException if the items cannot be loaded from the storage or any other error occurs
      * @throws SQLException if an SQL error is occurred
      */
-    private CalendarAvailability loadCalendarAvailability(Connection connection, String availabilityId) throws OXException, SQLException {
+    private Availability loadCalendarAvailability(Connection connection, String availabilityId) throws OXException, SQLException {
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND id=?;");
 
@@ -427,22 +427,22 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
-            CalendarAvailability availability = calendarAvailabilityMapper.fromResultSet(logExecuteQuery(stmt), mappedFields);
+            Availability availability = calendarAvailabilityMapper.fromResultSet(logExecuteQuery(stmt), mappedFields);
             availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
             return availability;
         }
     }
 
     /**
-     * Loads all {@link CalendarAvailability} blocks for the specified user
+     * Loads all {@link Availability} blocks for the specified user
      * 
      * @param A read-only {@link Connection} to the storage
      * @param userId The user identifier
-     * @return A {@link List} with all the {@link CalendarAvailability} blocks for the specified user
+     * @return A {@link List} with all the {@link Availability} blocks for the specified user
      * @throws OXException if the items cannot be loaded from the storage or any other error occurs
      * @throws SQLException if an SQL error is occurred
      */
-    private List<CalendarAvailability> loadCalendarAvailabilities(Connection connection, int userId) throws OXException, SQLException {
+    private List<Availability> loadCalendarAvailabilities(Connection connection, int userId) throws OXException, SQLException {
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_TABLE_NAME, calendarAvailabilityMapper).append(" AND user=?;");
 
@@ -450,9 +450,9 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, userId);
-            List<CalendarAvailability> availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+            List<Availability> availabilities = calendarAvailabilityMapper.listFromResultSet(logExecuteQuery(stmt), mappedFields);
 
-            for (CalendarAvailability availability : availabilities) {
+            for (Availability availability : availabilities) {
                 availability.setCalendarFreeSlots(loadCalendarFreeSlots(connection, availability.getId()));
             }
             return availabilities;
@@ -460,16 +460,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads the {@link CalendarFreeSlot} with the specified identifier
+     * Loads the {@link Available} with the specified identifier
      * 
      * @param connection The read-only {@link Connection} to the storage
      * @param availabilityId The calendar availability identifier
      * @param freeSlotId The free slot identifier
-     * @return The {@link CalendarFreeSlot
+     * @return The {@link Available
      * @throws OXException if the items cannot be loaded from the storage or any other error occurs
      * @throws SQLException if an SQL error is occurred
      */
-    private CalendarFreeSlot loadCalendarFreeSlot(Connection connection, String availabilityId, String freeSlotId) throws OXException, SQLException {
+    private Available loadCalendarFreeSlot(Connection connection, String availabilityId, String freeSlotId) throws OXException, SQLException {
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_FREE_SLOT_NAME, freeSlotMapper).append(" AND calendarAvailability=? AND id=?;");
 
@@ -484,15 +484,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link CalendarFreeSlot} items bound to the {@link CalendarAvailability} with the specified identifier
+     * Loads all {@link Available} items bound to the {@link Availability} with the specified identifier
      * 
      * @param connection The read-only {@link Connection}
-     * @param availabilityId The {@link CalendarAvailability} identifier
-     * @return A {@link List} with all {@link CalendarFreeSlot} items for the specified {@link CalendarAvailability} identifier
+     * @param availabilityId The {@link Availability} identifier
+     * @return A {@link List} with all {@link Available} items for the specified {@link Availability} identifier
      * @throws OXException if the items cannot be loaded from the storage or any other error occurs
      * @throws SQLException
      */
-    private List<CalendarFreeSlot> loadCalendarFreeSlots(Connection connection, String availabilityId) throws OXException, SQLException {
+    private List<Available> loadCalendarFreeSlots(Connection connection, String availabilityId) throws OXException, SQLException {
         FreeSlotField[] mappedFields = freeSlotMapper.getMappedFields();
         StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(CA_FREE_SLOT_NAME, freeSlotMapper).append(" AND calendarAvailability=?;");
 
@@ -506,14 +506,14 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link CalendarAvailability} blocks for the users with the specified identifiers
+     * Loads all {@link Availability} blocks for the users with the specified identifiers
      * 
      * @param connection The read-only {@link Connection} to the storage
      * @param userIds The {@link List} of user identifiers
-     * @return A {@link List} with the {@link CalendarAvailability} blocks of the specified users
+     * @return A {@link List} with the {@link Availability} blocks of the specified users
      * @throws OXException if an error is occurred
      */
-    private List<CalendarAvailability> loadCalendarAvailabilities(Connection connection, List<Integer> userIds) throws SQLException, OXException {
+    private List<Availability> loadCalendarAvailabilities(Connection connection, List<Integer> userIds) throws SQLException, OXException {
         // 1) Fetch all calendar availability items for the specified users
         AvailabilityField[] mappedFields = calendarAvailabilityMapper.getMappedFields();
         StringBuilder sb = new StringBuilder();
@@ -522,7 +522,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         sb.append(" WHERE cid=?");
         sb.append(" AND user IN (").append(CalendarAvailabilityMapper.getParameters(userIds.size())).append(");");
 
-        List<CalendarAvailability> availabilities = null;
+        List<Availability> availabilities = null;
         int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -533,14 +533,14 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         }
 
         // 2) Then fetch all free slots of the calendar availability items
-        for (CalendarAvailability ca : availabilities) {
+        for (Availability ca : availabilities) {
             ca.setCalendarFreeSlots(loadCalendarFreeSlots(ca.getId()));
         }
         return availabilities;
     }
 
     /**
-     * Deletes from the storage the {@link CalendarAvailability} item with the specified id and all {@link CalendarFreeSlot}s assigned to it.
+     * Deletes from the storage the {@link Availability} item with the specified id and all {@link Available}s assigned to it.
      * 
      * @param calendarAvailabilityId The identifier of the calendar availability item
      * @param connection The writeable connection
@@ -559,7 +559,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Deletes from the storage the {@link CalendarAvailability} item with the specified id and all {@link CalendarFreeSlot}s assigned to it.
+     * Deletes from the storage the {@link Availability} item with the specified id and all {@link Available}s assigned to it.
      * 
      * @param calendarAvailabilityId The identifier of the calendar availability item
      * @param connection The writeable connection
@@ -588,7 +588,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Deletes from the storage all {@link CalendarFreeSlot}s assigned to the {@link CalendarAvailability} with the specified id.
+     * Deletes from the storage all {@link Available}s assigned to the {@link Availability} with the specified id.
      * 
      * @param calendarAvailabilityId The identifier of the calendar availability item
      * @param connection The writeable connection
@@ -605,7 +605,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Purges all {@link CalendarAvailability} and {@link CalendarFreeSlot} items for the specified user
+     * Purges all {@link Availability} and {@link Available} items for the specified user
      * 
      * @param connection The writeable {@link Connection} to the storage
      * @param userId The user identifier

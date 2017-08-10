@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping;
 import net.fortuna.ical4j.model.Property;
@@ -61,7 +61,7 @@ import net.fortuna.ical4j.model.property.Clazz;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ClassificationMapping extends ICalTextMapping<VAvailability, CalendarAvailability> {
+public class ClassificationMapping extends ICalTextMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link ClassificationMapping}.
@@ -76,7 +76,7 @@ public class ClassificationMapping extends ICalTextMapping<VAvailability, Calend
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#getValue(java.lang.Object)
      */
     @Override
-    protected String getValue(CalendarAvailability object) {
+    protected String getValue(Availability object) {
         Classification value = object.getClassification();
         return value != null ? value.getValue() : null;
     }
@@ -87,7 +87,7 @@ public class ClassificationMapping extends ICalTextMapping<VAvailability, Calend
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalTextMapping#setValue(java.lang.Object, java.lang.String)
      */
     @Override
-    protected void setValue(CalendarAvailability object, String value) {
+    protected void setValue(Availability object, String value) {
         object.setClassification(value != null ? new Classification(value) : null);
     }
 

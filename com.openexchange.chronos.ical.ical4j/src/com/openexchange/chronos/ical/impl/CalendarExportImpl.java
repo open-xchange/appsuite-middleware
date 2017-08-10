@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
@@ -177,7 +177,7 @@ public class CalendarExportImpl implements CalendarExport {
      * @see com.openexchange.chronos.ical.CalendarExport#add(com.openexchange.chronos.CalendarAvailability)
      */
     @Override
-    public CalendarExport add(CalendarAvailability calendarAvailability) throws OXException {
+    public CalendarExport add(Availability calendarAvailability) throws OXException {
         vCalendar.add(exportAvailability(calendarAvailability));
         return this;
     }
@@ -268,13 +268,13 @@ public class CalendarExportImpl implements CalendarExport {
     }
 
     /**
-     * Exports the specified {@link CalendarAvailability} to a {@link VAvailability} component
+     * Exports the specified {@link Availability} to a {@link VAvailability} component
      * 
-     * @param availability The {@link CalendarAvailability} to export
+     * @param availability The {@link Availability} to export
      * @return The exported {@link VAvailability} component
      * @throws OXException if an error is occurred
      */
-    private VAvailability exportAvailability(CalendarAvailability availability) throws OXException {
+    private VAvailability exportAvailability(Availability availability) throws OXException {
         VAvailability vAvailability = mapper.exportAvailability(availability, parameters, warnings);
         ICalUtils.removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         // TODO: Track timezones of availability/available components

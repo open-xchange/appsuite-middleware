@@ -51,7 +51,7 @@ package com.openexchange.chronos.availability.json.mapper;
 
 import java.util.EnumMap;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -65,7 +65,7 @@ import com.openexchange.groupware.tools.mappings.json.StringMapping;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailabilityMapper extends DefaultJsonMapper<CalendarAvailability, AvailabilityField> {
+public class CalendarAvailabilityMapper extends DefaultJsonMapper<Availability, AvailabilityField> {
 
     private static final CalendarAvailabilityMapper INSTANCE = new CalendarAvailabilityMapper();
 
@@ -94,8 +94,8 @@ public class CalendarAvailabilityMapper extends DefaultJsonMapper<CalendarAvaila
      * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
      */
     @Override
-    public CalendarAvailability newInstance() {
-        return new CalendarAvailability();
+    public Availability newInstance() {
+        return new Availability();
     }
 
     /*
@@ -114,73 +114,73 @@ public class CalendarAvailabilityMapper extends DefaultJsonMapper<CalendarAvaila
      * @see com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper#createMappings()
      */
     @Override
-    protected EnumMap<AvailabilityField, ? extends JsonMapping<? extends Object, CalendarAvailability>> createMappings() {
-        EnumMap<AvailabilityField, JsonMapping<? extends Object, CalendarAvailability>> mappings = new EnumMap<AvailabilityField, JsonMapping<? extends Object, CalendarAvailability>>(AvailabilityField.class);
+    protected EnumMap<AvailabilityField, ? extends JsonMapping<? extends Object, Availability>> createMappings() {
+        EnumMap<AvailabilityField, JsonMapping<? extends Object, Availability>> mappings = new EnumMap<AvailabilityField, JsonMapping<? extends Object, Availability>>(AvailabilityField.class);
         // TODO: add mappings
-        mappings.put(AvailabilityField.id, new StringMapping<CalendarAvailability>("id", DataObject.OBJECT_ID) {
+        mappings.put(AvailabilityField.id, new StringMapping<Availability>("id", DataObject.OBJECT_ID) {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.id);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setId(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getId();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeId();
             }
         });
 
-        mappings.put(AvailabilityField.uid, new StringMapping<CalendarAvailability>("uid", Appointment.UID) {
+        mappings.put(AvailabilityField.uid, new StringMapping<Availability>("uid", Appointment.UID) {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.uid);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setUid(value);
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getUid();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeUid();
             }
         });
-        mappings.put(AvailabilityField.busytype, new StringMapping<CalendarAvailability>("busyType", 12) {
+        mappings.put(AvailabilityField.busytype, new StringMapping<Availability>("busyType", 12) {
 
             @Override
-            public boolean isSet(CalendarAvailability object) {
+            public boolean isSet(Availability object) {
                 return object.contains(AvailabilityField.busytype);
             }
 
             @Override
-            public void set(CalendarAvailability object, String value) throws OXException {
+            public void set(Availability object, String value) throws OXException {
                 object.setBusyType(BusyType.parseFromString(value));
             }
 
             @Override
-            public String get(CalendarAvailability object) {
+            public String get(Availability object) {
                 return object.getBusyType().getValue();
             }
 
             @Override
-            public void remove(CalendarAvailability object) {
+            public void remove(Availability object) {
                 object.removeBusyType();
             }
         });

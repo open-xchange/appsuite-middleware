@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 
 /**
  * {@link AvailabilityUtilsTest}
@@ -64,7 +64,7 @@ import com.openexchange.chronos.CalendarAvailability;
 public class AvailabilityUtilsTest {
 
     /** Base Interval: 17/11/2017 - 17/12/2017 */
-    CalendarAvailability base = new CalendarAvailability();
+    Availability base = new Availability();
 
     /**
      * Initialises a new {@link AvailabilityUtilsTest}.
@@ -87,7 +87,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testIntervalContained() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2017, 10, 18));
         b.setEndTime(new DateTime(2017, 10, 19));
 
@@ -100,7 +100,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testIntervalBefore() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2016, 0, 1));
         b.setEndTime(new DateTime(2016, 1, 1));
 
@@ -113,7 +113,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testIntervalAfter() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2018, 0, 1));
         b.setEndTime(new DateTime(2018, 1, 1));
 
@@ -126,7 +126,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testIntervalIntersectsStart() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2017, 10, 10));
         b.setEndTime(new DateTime(2017, 10, 20));
 
@@ -139,7 +139,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testIntervalIntersectsEnd() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2017, 11, 10));
         b.setEndTime(new DateTime(2017, 11, 20));
 
@@ -152,7 +152,7 @@ public class AvailabilityUtilsTest {
      */
     @Test
     public void testContained() {
-        CalendarAvailability b = new CalendarAvailability();
+        Availability b = new Availability();
         b.setStartTime(new DateTime(2017, 11, 5));
         b.setEndTime(new DateTime(2017, 11, 8));
 

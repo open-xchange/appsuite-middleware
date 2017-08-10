@@ -50,7 +50,7 @@
 package com.openexchange.chronos.ical.ical4j.mapping.availability;
 
 import java.util.List;
-import com.openexchange.chronos.CalendarAvailability;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
@@ -63,7 +63,7 @@ import net.fortuna.ical4j.model.property.Priority;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PriorityMapping extends AbstractICalMapping<VAvailability, CalendarAvailability> {
+public class PriorityMapping extends AbstractICalMapping<VAvailability, Availability> {
 
     /**
      * Initialises a new {@link PriorityMapping}.
@@ -78,7 +78,7 @@ public class PriorityMapping extends AbstractICalMapping<VAvailability, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#export(java.lang.Object, net.fortuna.ical4j.model.Component, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void export(CalendarAvailability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
+    public void export(Availability object, VAvailability component, ICalParameters parameters, List<OXException> warnings) {
         if (object.getPriority() >= 0 && object.getPriority() <= 9) {
             component.getProperties().add(new Priority(object.getPriority()));
         }
@@ -90,7 +90,7 @@ public class PriorityMapping extends AbstractICalMapping<VAvailability, Calendar
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalMapping#importICal(net.fortuna.ical4j.model.Component, java.lang.Object, com.openexchange.chronos.ical.ICalParameters, java.util.List)
      */
     @Override
-    public void importICal(VAvailability component, CalendarAvailability object, ICalParameters parameters, List<OXException> warnings) {
+    public void importICal(VAvailability component, Availability object, ICalParameters parameters, List<OXException> warnings) {
         Priority priority = (Priority) component.getProperty(Property.PRIORITY);
         if (priority != null) {
             object.setPriority(priority.getLevel());

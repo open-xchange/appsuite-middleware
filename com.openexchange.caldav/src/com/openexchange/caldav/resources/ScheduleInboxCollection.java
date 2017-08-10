@@ -197,7 +197,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
             ImportedCalendar importedIcal = iCalService.importICal(inputStream, iCalService.initParameters());
             // Check for already existing availability blocks...
             CalendarAvailabilityService service = getFactory().getService(CalendarAvailabilityService.class);
-            List<com.openexchange.chronos.CalendarAvailability> availabilities = service.getAvailability(calendarSession);
+            List<com.openexchange.chronos.Availability> availabilities = service.getAvailability(calendarSession);
             // ...purge the old ones...
             if (availabilities != null && availabilities.size() > 0) {
                 service.purgeAvailabilities(calendarSession);

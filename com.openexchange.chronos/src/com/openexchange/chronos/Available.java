@@ -57,17 +57,17 @@ import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.chronos.service.FreeSlotField;
 
 /**
- * {@link CalendarFreeSlot} - Defines an available time range within a {@link CalendarAvailability} component
+ * {@link Available} - Defines an available time range within a {@link Availability} component
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>
  */
-public class CalendarFreeSlot implements FieldAware, Cloneable {
+public class Available implements FieldAware, Cloneable {
 
     private String id;
 
     private int calendarUser;
-    private String calendarAvailabilityId;
+    private String availabilityId;
     private String uid;
     /** dtstamp */
     private Date creationTimestamp;
@@ -94,9 +94,9 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
     private final EnumSet<FreeSlotField> fields;
 
     /**
-     * Initialises a new {@link CalendarFreeSlot}.
+     * Initialises a new {@link Available}.
      */
-    public CalendarFreeSlot() {
+    public Available() {
         super();
         fields = EnumSet.noneOf(FreeSlotField.class);
     }
@@ -503,7 +503,7 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
      * @return The calendarAvailabilityId
      */
     public String getCalendarAvailabilityId() {
-        return calendarAvailabilityId;
+        return availabilityId;
     }
 
     /**
@@ -512,7 +512,7 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
      * @param calendarAvailabilityId The calendarAvailabilityId to set
      */
     public void setCalendarAvailabilityId(String calendarAvailabilityId) {
-        this.calendarAvailabilityId = calendarAvailabilityId;
+        this.availabilityId = calendarAvailabilityId;
         fields.add(FreeSlotField.calendarAvailabilityId);
     }
 
@@ -520,7 +520,7 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
      * Removes the calendar availability parent id
      */
     public void removeCalendarAvailabilityId() {
-        this.calendarAvailabilityId = null;
+        this.availabilityId = null;
         fields.remove(FreeSlotField.calendarAvailabilityId);
     }
 
@@ -592,15 +592,15 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
      * @see java.lang.Object#clone()
      */
     @Override
-    public CalendarFreeSlot clone() {
-        CalendarFreeSlot clone;
+    public Available clone() {
+        Available clone;
         try {
-            clone = (CalendarFreeSlot) super.clone();
+            clone = (Available) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
         if (contains(FreeSlotField.calendarAvailabilityId)) {
-            clone.setCalendarAvailabilityId(calendarAvailabilityId);
+            clone.setCalendarAvailabilityId(availabilityId);
         }
         if (contains(FreeSlotField.categories)) {
             clone.setCategories(categories);
@@ -651,7 +651,7 @@ public class CalendarFreeSlot implements FieldAware, Cloneable {
             clone.setUid(uid);
         }
         clone.setCalendarUser(calendarUser);
-        clone.setCalendarAvailabilityId(calendarAvailabilityId);
+        clone.setCalendarAvailabilityId(availabilityId);
 
         return clone;
     }

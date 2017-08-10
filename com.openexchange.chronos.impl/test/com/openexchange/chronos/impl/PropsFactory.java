@@ -54,8 +54,8 @@ import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.BusyType;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 
@@ -116,15 +116,15 @@ final class PropsFactory {
     }
 
     /**
-     * Creates a {@link CalendarFreeSlot} with the specified summary within the specified interval
+     * Creates a {@link Available} with the specified summary within the specified interval
      * 
      * @param summary The summary
      * @param from The starting point in the interval
      * @param until The ending point in the interval
-     * @return The {@link CalendarFreeSlot}
+     * @return The {@link Available}
      */
-    static CalendarFreeSlot createCalendarFreeSlot(String summary, DateTime from, DateTime until) {
-        CalendarFreeSlot cfs = new CalendarFreeSlot();
+    static Available createCalendarFreeSlot(String summary, DateTime from, DateTime until) {
+        Available cfs = new Available();
         cfs.setSummary(summary);
         cfs.setStartTime(from);
         cfs.setEndTime(until);
@@ -132,63 +132,63 @@ final class PropsFactory {
     }
 
     /**
-     * Creates a recurring {@link CalendarFreeSlot} with the specified summary with in the specified interval
+     * Creates a recurring {@link Available} with the specified summary with in the specified interval
      * 
      * @param summary The summary
      * @param from The starting point in the interval
      * @param until The ending point in the interval
      * @param recurrenceRule The recurrence rule as string
-     * @return The recurring {@link CalendarFreeSlot}
+     * @return The recurring {@link Available}
      */
-    static CalendarFreeSlot createRecurringCalendarFreeSlot(String summary, DateTime from, DateTime until, String recurrenceRule) {
-        CalendarFreeSlot cfs = createCalendarFreeSlot(summary, from, until);
+    static Available createRecurringCalendarFreeSlot(String summary, DateTime from, DateTime until, String recurrenceRule) {
+        Available cfs = createCalendarFreeSlot(summary, from, until);
         cfs.setRecurrenceRule(recurrenceRule);
         return cfs;
     }
 
     /**
-     * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
+     * Creates a {@link Availability} with the specified {@link BusyType} and the specified free slots
      * 
      * @param busyType The {@link BusyType} of the availability
      * @param freeSlots The free slots
-     * @return The {@link CalendarAvailability}
+     * @return The {@link Availability}
      */
-    static CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots) {
-        CalendarAvailability ca = new CalendarAvailability();
+    static Availability createCalendarAvailability(BusyType busyType, List<Available> freeSlots) {
+        Availability ca = new Availability();
         ca.setBusyType(busyType);
         ca.setCalendarFreeSlots(freeSlots);
         return ca;
     }
 
     /**
-     * Creates a {@link CalendarAvailability} with the specified {@link BusyType} and the specified free slots
+     * Creates a {@link Availability} with the specified {@link BusyType} and the specified free slots
      * 
      * @param busyType The {@link BusyType} of the availability
      * @param freeSlots The free slots
      * @param from The starting point of the interval
      * @param until The ending point of the interval
-     * @return The {@link CalendarAvailability}
+     * @return The {@link Availability}
      */
-    static CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until) {
-        CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots);
+    static Availability createCalendarAvailability(BusyType busyType, List<Available> freeSlots, DateTime from, DateTime until) {
+        Availability ca = createCalendarAvailability(busyType, freeSlots);
         ca.setStartTime(from);
         ca.setEndTime(until);
         return ca;
     }
 
     /**
-     * Creates a {@link CalendarAvailability} with in the specified interval,
+     * Creates a {@link Availability} with in the specified interval,
      * with the specified {@link BusyType}, the specified free slots and the specified priority
      * 
      * @param busyType The {@link BusyType}
      * @param freeSlots The free slots
-     * @param from The starting point of the {@link CalendarAvailability}'s interval
-     * @param until The ending point of the {@link CalendarAvailability}'s interval
-     * @param priority the priority of the {@link CalendarAvailability}
-     * @return The new {@link CalendarAvailability}
+     * @param from The starting point of the {@link Availability}'s interval
+     * @param until The ending point of the {@link Availability}'s interval
+     * @param priority the priority of the {@link Availability}
+     * @return The new {@link Availability}
      */
-    static CalendarAvailability createCalendarAvailability(BusyType busyType, List<CalendarFreeSlot> freeSlots, DateTime from, DateTime until, int priority) {
-        CalendarAvailability ca = createCalendarAvailability(busyType, freeSlots, from, until);
+    static Availability createCalendarAvailability(BusyType busyType, List<Available> freeSlots, DateTime from, DateTime until, int priority) {
+        Availability ca = createCalendarAvailability(busyType, freeSlots, from, until);
         ca.setPriority(priority);
         return ca;
     }

@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.CalendarAvailability;
-import com.openexchange.chronos.CalendarFreeSlot;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeSlotField;
@@ -82,22 +82,22 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
     ////////////////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
 
     /**
-     * Prepares the specified {@link List} of {@link CalendarAvailability} blocks for the storage.
+     * Prepares the specified {@link List} of {@link Availability} blocks for the storage.
      * <ul>
-     * <li>Assigns identifiers for the {@link CalendarAvailability} blocks (if no identifiers are present)</li>
-     * <li>Assigns identifiers for the {@link CalendarFreeSlot} blocks</li>
+     * <li>Assigns identifiers for the {@link Availability} blocks (if no identifiers are present)</li>
+     * <li>Assigns identifiers for the {@link Available} blocks</li>
      * </ul>
      * 
      * @param storage The {@link CalendarAvailabilityStorage} instance
-     * @param availabilities A {@link List} with {@link CalendarAvailability} blocks to prepare
-     * @return The {@link List} with the {@link CalendarAvailability} identifiers
+     * @param availabilities A {@link List} with {@link Availability} blocks to prepare
+     * @return The {@link List} with the {@link Availability} identifiers
      * @throws OXException if an error is occurred
      */
-    List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<CalendarAvailability> availabilities) throws OXException {
+    List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<Availability> availabilities) throws OXException {
         Date timeNow = new Date(System.currentTimeMillis());
 
         List<String> caIds = new ArrayList<>(availabilities.size());
-        for (CalendarAvailability availability : availabilities) {
+        for (Availability availability : availabilities) {
             String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextCalendarAvailabilityId();
             availability.setId(availabilityId);
             availability.setCalendarUser(session.getUserId());
@@ -115,7 +115,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
             caIds.add(availabilityId);
 
             // Prepare the free slots
-            for (CalendarFreeSlot freeSlot : availability.getCalendarFreeSlots()) {
+            for (Available freeSlot : availability.getCalendarFreeSlots()) {
                 freeSlot.setId(freeSlot.contains(FreeSlotField.id) ? freeSlot.getId() : storage.nextCalendarFreeSlotId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
                 freeSlot.setCalendarUser(session.getUserId());
