@@ -80,6 +80,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -208,10 +209,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void delete(final Context ctx) throws StorageException {
+        long sta = System.currentTimeMillis();
+
         // Delete filestores of the context
-        LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
-        Utils.removeFileStorages(ctx, true);
-        LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
+        {
+            long sts = System.currentTimeMillis();
+
+            LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
+            Utils.removeFileStorages(ctx, true);
+            LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
+
+            long dur = System.currentTimeMillis() - sts;
+            System.err.println("    removeFileStorages took " + dur);
+        }
 
         AdminCacheExtended adminCache = cache;
 
@@ -234,27 +244,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // Initialize connection to context-associated database schema
                     conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
 
-                    // Fetch tables which can contain context data and sort these tables magically by foreign keys
-                    LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-                    List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-                    LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
-
-                    // Sort the tables by references (foreign keys)
-                    List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
-                    LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
-
                     // Loop through tables and execute delete statements on each table (using transaction)
-                    deleteContextData(ctx, conForContext, sorted_tables, poolId, scheme);
+                    deleteContextData(ctx, conForContext, poolId, scheme);
                 } catch (PoolException e) {
                     LOG.error("Pool Error", e);
                     throw new StorageException(e);
-                } catch (StorageException st) {
-                    // Examine cause
-                    SQLException sqle = DBUtils.extractSqlException(st);
-                    if (!condition.isFailedTransactionRollback(sqle)) {
-                        LOG.error("Storage Error", st);
-                        throw st;
-                    }
                 } catch (SQLException sql) {
                     if (!condition.isFailedTransactionRollback(sql)) {
                         LOG.error("SQL Error", sql);
@@ -275,6 +269,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Delete context from ConfigDB
         try {
+            long sts = System.currentTimeMillis();
+
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 Connection conForConfigDB = null;
@@ -325,6 +321,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             } while (retryDelete(condition, ctx));
+
+            long dur = System.currentTimeMillis() - sts;
+            System.err.println("    deleteContextFromConfigDB took " + dur);
         } catch (SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
@@ -349,6 +348,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final Exception e) {
             LOG.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
         }
+
+        long dur = System.currentTimeMillis() - sta;
+        System.err.println("OXContextMySQLStorage.delete() took " + dur);
     }
 
     private boolean retryDelete(DBUtils.TransactionRollbackCondition condition, Context ctx) throws SQLException {
@@ -364,7 +366,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return retry;
     }
 
-    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables, int poolId, String scheme) throws StorageException {
+    private void deleteContextData(Context ctx, Connection con, int poolId, String scheme) throws SQLException {
         LOG.debug("Now deleting data for context {} from schema {} in database {}", ctx.getId(), scheme, Integer.valueOf(poolId));
 
         boolean rollback = false;
@@ -372,13 +374,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false);
             rollback = true;
 
-            fireDeleteEventAndDeleteTableData(ctx, con, sorted_tables);
+            fireDeleteEventAndAsyncDeleteTableData(ctx, con, poolId, scheme);
 
             // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
             con.commit();
             rollback = false;
-        } catch (SQLException e) {
-            throw new StorageException(e);
         } finally {
             if (rollback) {
                 rollback(con);
@@ -389,8 +389,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         LOG.debug("Data delete for context {} from schema {} in database {} completed!", ctx.getId(), scheme, Integer.valueOf(poolId));
     }
 
-    private void fireDeleteEventAndDeleteTableData(Context ctx, Connection con, List<TableObject> sorted_tables) throws SQLException {
+    private void fireDeleteEventAndAsyncDeleteTableData(Context ctx, Connection con, final int poolId, final String scheme) throws SQLException {
         // First delete everything with OSGi DeleteListener services.
+        long st = System.currentTimeMillis();
         try {
             DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
@@ -401,18 +402,65 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             LOG.error("Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.", e);
         }
+        long dur = System.currentTimeMillis() -st;
+        System.err.println("   fireDeleteEvent took " + dur);
 
-        // Now go through tables and delete the remainders
-        Integer contextId = ctx.getId();
+        // Now go through tables and delete the remainders (asynchronously)
+        ThreadPoolService threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        if (null == threadPool) {
+            deleteTablesData(selectionCriteria, ctx.getId(), con);
+        } else {
+            final AdminCacheExtended adminCache = cache;
+            final Integer contextId = ctx.getId();
+            final String selectionCriteria = this.selectionCriteria;
+            Callable<Void> task = new Callable<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    Connection conForContext = null;
+                    try {
+                        conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
+                        deleteTablesData(selectionCriteria, contextId, conForContext);
+                    } finally {
+                        try {
+                            adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                        } catch (PoolException e) {
+                            LOG.error("Pool Error", e);
+                        }
+                    }
+                    return null;
+                }
+            };
+            threadPool.submit(ThreadPools.task(task));
+        }
+    }
+
+    static void deleteTablesData(String selectionCriteria, Integer contextId, Connection conForContext) throws SQLException {
+        // Fetch tables which can contain context data and sort these tables magically by foreign keys
+        LOG.debug("Fetching table structure from database scheme for context {}", contextId);
+        List<TableObject> fetchTableObjects = fetchTableObjects(selectionCriteria, conForContext);
+        LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", contextId, contextId);
+
+        // Sort the tables by references (foreign keys)
+        List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
+        LOG.debug("Dependencies found and tables sorted for context {}", contextId);
+
+        StringBuilder stmtBuilder = new StringBuilder(64).append("DELETE FROM ");
+        int reslen = stmtBuilder.length();
+        for (int i = sorted_tables.size(); i-- > 0;) {
+            stmtBuilder.setLength(reslen);
+            deleteTableData(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
+        }
+    }
+
+    private static void deleteTableData(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) throws SQLException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            for (int i = sorted_tables.size(); i-- > 0;) {
-                String tableName = sorted_tables.get(i).getName();
-                LOG.debug("Deleting data from table {} for context {}", tableName, contextId);
-                stmt.addBatch("DELETE FROM " + tableName + " WHERE cid=" + contextId);
+            int rows = stmt.executeUpdate(stmtBuilder.append(tableName).append(" WHERE cid=").append(contextId).toString());
+            if (rows > 0) {
+                System.err.println("Dropped " + rows + " remaining row(s) from " + tableName);
             }
-            stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
         }
@@ -706,7 +754,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
              * 2. Fetch tables with cid column which could perhaps store data relevant for us
              */
             LOG.debug("Fetching table structure from database scheme!");
-            final List<TableObject> fetchTableObjects = fetchTableObjects(ox_db_write_con);
+            final List<TableObject> fetchTableObjects = fetchTableObjects(this.selectionCriteria, ox_db_write_con);
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Table structure fetched!");
 
@@ -1796,7 +1844,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         .put("SET", Types.CHAR)
         .build();
 
-    private List<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
+    private static List<TableObject> fetchTableObjects(String selectionCriteria, Connection ox_db_write_connection) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -1825,7 +1873,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 tco.setColumnSize((int) rs.getLong(4));
 
                 // if table has our criteria column, we should fetch data from it
-                if (columnName.equals(this.selectionCriteria)) {
+                if (columnName.equals(selectionCriteria)) {
                     tableObjects.add(to);
                 }
                 // add column to table
@@ -1838,13 +1886,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private List<TableObject> sortTableObjects(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+    private static List<TableObject> sortTableObjects(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
         findReferences(fetchTableObjects, ox_db_write_con);
         // thx http://de.wikipedia.org/wiki/Topologische_Sortierung :)
         return sortTablesByForeignKey(fetchTableObjects);
     }
 
-    private List<TableObject> sortTablesByForeignKey(List<TableObject> fetchTableObjects) {
+    private static List<TableObject> sortTablesByForeignKey(List<TableObject> fetchTableObjects) {
         List<TableObject> nastyOrder = new ArrayList<TableObject>(fetchTableObjects.size());
 
         List<TableObject> unsorted = new ArrayList<TableObject>(fetchTableObjects);
@@ -1870,7 +1918,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Finds references for each table
      */
-    private void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+    private static void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
         DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
         String dbCatalog = ox_db_write_con.getCatalog();
 
@@ -1905,7 +1953,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * remove no more needed element from list and remove the reference to removed element so that a new element exists which has now
      * references.
      */
-    private void removeAndSortNew(List<TableObject> unsorted, TableObject to) {
+    private static void removeAndSortNew(List<TableObject> unsorted, TableObject to) {
         unsorted.remove(to);
         for (int i = 0; i < unsorted.size(); i++) {
             TableObject tob = unsorted.get(i);
@@ -1916,7 +1964,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Returns -1 if not found else the position in the Vector where the object is located.
      */
-    private int tableListContainsObject(String table_name, List<TableObject> fetchTableObjects) {
+    private static int tableListContainsObject(String table_name, List<TableObject> fetchTableObjects) {
         int size = fetchTableObjects.size();
         int pos = -1;
         for (int v = 0; v < size; v++) {

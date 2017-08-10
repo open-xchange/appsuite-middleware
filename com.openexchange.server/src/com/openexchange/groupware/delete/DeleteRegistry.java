@@ -57,13 +57,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.internal.FolderStorageDeleteListener;
 import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
+import com.openexchange.group.internal.GroupDeleteListener;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.contact.ContactDeleteListener;
 import com.openexchange.groupware.delete.objectusagecount.ObjectUsageCountDeleteListener;
 import com.openexchange.groupware.filestore.FileStorageRemover;
+import com.openexchange.groupware.impl.id.SequenceContextDeleteListener;
 import com.openexchange.groupware.infostore.InfostoreDelete;
+import com.openexchange.groupware.ldap.UserContextDeleteListener;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
@@ -174,6 +177,7 @@ public final class DeleteRegistry {
             new TasksDelete(),
             new InfostoreDelete(),
             new ContactDeleteListener(),
+            new GroupDeleteListener(),
             ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class),
             /*
              * Delete user configuration & settings
@@ -204,7 +208,9 @@ public final class DeleteRegistry {
             new OutlookFolderDeleteListener(),
             new UserSettingServerDeleteListener(),
             new POP3DeleteListener(),
-            new MailAccountDeleteListener()
+            new MailAccountDeleteListener(),
+            new UserContextDeleteListener(),
+            new SequenceContextDeleteListener()
         };
     }
 
