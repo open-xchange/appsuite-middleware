@@ -76,27 +76,27 @@ import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Strings;
 
 /**
- * {@link CalendarFreeSlotMapper}
+ * {@link AvailableMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotField> {
+public class AvailableMapper extends DefaultDbMapper<Available, FreeSlotField> {
 
-    private static final CalendarFreeSlotMapper INSTANCE = new CalendarFreeSlotMapper();
+    private static final AvailableMapper INSTANCE = new AvailableMapper();
 
     /**
      * Gets the mapper instance
      *
      * @return The mapper instance
      */
-    public static CalendarFreeSlotMapper getInstance() {
+    public static AvailableMapper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initialises a new {@link CalendarFreeSlotMapper}
+     * Initialises a new {@link AvailableMapper}
      */
-    public CalendarFreeSlotMapper() {
+    public AvailableMapper() {
         super();
     }
 
