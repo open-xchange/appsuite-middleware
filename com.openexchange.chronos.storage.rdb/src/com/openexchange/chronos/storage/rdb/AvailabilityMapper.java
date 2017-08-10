@@ -76,27 +76,27 @@ import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Strings;
 
 /**
- * {@link CalendarAvailabilityMapper}
+ * {@link AvailabilityMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailabilityMapper extends DefaultDbMapper<Availability, AvailabilityField> {
+public class AvailabilityMapper extends DefaultDbMapper<Availability, AvailabilityField> {
 
-    private static final CalendarAvailabilityMapper INSTANCE = new CalendarAvailabilityMapper();
+    private static final AvailabilityMapper INSTANCE = new AvailabilityMapper();
 
     /**
      * Gets the mapper instance.
      *
      * @return The instance.
      */
-    public static CalendarAvailabilityMapper getInstance() {
+    public static AvailabilityMapper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initialises a new {@link CalendarAvailabilityMapper}.
+     * Initialises a new {@link AvailabilityMapper}.
      */
-    private CalendarAvailabilityMapper() {
+    private AvailabilityMapper() {
         super();
     }
 

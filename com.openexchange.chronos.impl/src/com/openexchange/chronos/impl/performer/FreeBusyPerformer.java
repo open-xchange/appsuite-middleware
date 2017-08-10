@@ -95,7 +95,7 @@ import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -295,10 +295,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             for (Availability calendarAvailability : availableTimes.get(attendee)) {
                 List<Available> auxFreeSlot = new ArrayList<>();
                 Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
-                for (Iterator<Available> iterator = calendarAvailability.getCalendarFreeSlots().iterator(); iterator.hasNext();) {
+                for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {
                     Available freeSlot = iterator.next();
                     // No recurring free slot? Skip
-                    if (!freeSlot.contains(FreeSlotField.rrule)) {
+                    if (!freeSlot.contains(AvailableField.rrule)) {
                         continue;
                     }
                     Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
@@ -325,7 +325,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     // Remove the "seed" free slot, and only retain its occurrences
                     iterator.remove();
                 }
-                calendarAvailability.getCalendarFreeSlots().addAll(auxFreeSlot);
+                calendarAvailability.getAvailable().addAll(auxFreeSlot);
             }
         }
     }
@@ -385,15 +385,15 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
             // Mark the entire block as busy if there are no free slots
-            if (availability.getCalendarFreeSlots().isEmpty()) {
+            if (availability.getAvailable().isEmpty()) {
                 freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
                 continue;
             }
 
             Date slotStartTime = startTime;
             Date slotEndTime = endTime;
-            java.util.Collections.sort(availability.getCalendarFreeSlots(), Comparators.freeSlotDateTimeComparator);
-            for (Available calendarFreeSlot : availability.getCalendarFreeSlots()) {
+            java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
+            for (Available calendarFreeSlot : availability.getAvailable()) {
                 // Get the slot's start/end times
                 slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
                 slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
@@ -448,7 +448,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                         availability.setEndTime(new DateTime(until.getTime()));
                     }
 
-                    Iterator<Available> freeSlotIterator = availability.getCalendarFreeSlots().iterator();
+                    Iterator<Available> freeSlotIterator = availability.getAvailable().iterator();
                     while (freeSlotIterator.hasNext()) {
                         Available freeSlot = freeSlotIterator.next();
                         Date fsStart = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));

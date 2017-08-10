@@ -57,7 +57,7 @@ import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
@@ -98,7 +98,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (Availability availability : availabilities) {
-            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextCalendarAvailabilityId();
+            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextAvailabilityId();
             availability.setId(availabilityId);
             availability.setCalendarUser(session.getUserId());
             availability.setLastModified(timeNow);
@@ -115,8 +115,8 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
             caIds.add(availabilityId);
 
             // Prepare the free slots
-            for (Available freeSlot : availability.getCalendarFreeSlots()) {
-                freeSlot.setId(freeSlot.contains(FreeSlotField.id) ? freeSlot.getId() : storage.nextCalendarFreeSlotId());
+            for (Available freeSlot : availability.getAvailable()) {
+                freeSlot.setId(freeSlot.contains(AvailableField.id) ? freeSlot.getId() : storage.nextAvailableId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);

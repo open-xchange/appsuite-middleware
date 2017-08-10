@@ -295,13 +295,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY uid (cid,user,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_free_slot",
-            "CREATE TABLE calendar_free_slot (" +
+        tablesByName.put("calendar_available",
+            "CREATE TABLE calendar_available (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) DEFAULT NULL," +
-                "calendarAvailability INT4 UNSIGNED NOT NULL," +
+                "availability INT4 UNSIGNED NOT NULL," +
                 "start datetime NOT NULL," +
                 "end datetime DEFAULT NULL," +
                 "startTimezone VARCHAR(255) DEFAULT NULL," +
@@ -319,7 +319,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,user,id)," +
-                "KEY calendar_availablity (cid,user,calendarAvailability)," +
+                "KEY calendar_availablity (cid,user,availability)," +
                 "KEY uid (cid,user,uid(767))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
@@ -330,8 +330,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_free_slot_sequence",
-            "CREATE TABLE calendar_free_slot_sequence (" +
+        tablesByName.put("calendar_available_sequence",
+            "CREATE TABLE calendar_available_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "PRIMARY KEY (cid)" +

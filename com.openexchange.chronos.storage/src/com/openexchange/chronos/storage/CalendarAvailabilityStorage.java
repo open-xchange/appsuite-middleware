@@ -71,7 +71,7 @@ public interface CalendarAvailabilityStorage {
      * @return The next unique event identifier
      * @throws OXException if the next identifier cannot be generated or any other error is occurred
      */
-    String nextCalendarAvailabilityId() throws OXException;
+    String nextAvailabilityId() throws OXException;
 
     /**
      * Generates the next unique identifier for inserting new {@link Available} data.
@@ -82,40 +82,40 @@ public interface CalendarAvailabilityStorage {
      * @return The next unique event identifier
      * @throws OXException if the next identifier cannot be generated or any other error is occurred
      */
-    String nextCalendarFreeSlotId() throws OXException;
+    String nextAvailableId() throws OXException;
 
     /**
      * Inserts the specified {@link Availability} block to the storage
      * 
-     * @param calendarAvailability The {@link Availability} to insert
+     * @param availability The {@link Availability} to insert
      * @throws OXException if the object cannot be inserted or any other error is occurred
      */
-    void insertCalendarAvailability(Availability calendarAvailability) throws OXException;
+    void insertAvailability(Availability availability) throws OXException;
 
     /**
      * Inserts the specified {@link List} of {@link Availability} objects to the storage
      * 
-     * @param calendarAvailabilities The {@link List} with the {@link Availability} objects
+     * @param availabilities The {@link List} with the {@link Availability} objects
      * @throws OXException if the objects cannot be inserted or any other error is occurred
      */
-    void insertCalendarAvailabilities(List<Availability> calendarAvailabilities) throws OXException;
+    void insertAvailabilities(List<Availability> availabilities) throws OXException;
 
     /**
      * Inserts the specified {@link Available}
      * 
-     * @param freeSlot The {@link Available} to insert
+     * @param available The {@link Available} to insert
      * @throws OXException if the object cannot be inserted to the storage or any other error is occurred
      */
-    void insertCalendarFreeSlot(Available freeSlot) throws OXException;
+    void insertAvailable(Available available) throws OXException;
 
     /**
      * Loads from the storage the {@link Availability} with the specified identifier
      * 
-     * @param calendarAvailabilityId The calendar availability identifier
+     * @param availabilityId The calendar availability identifier
      * @return The {@link Availability}
      * @throws OXException if an error is occurred
      */
-    Availability loadCalendarAvailability(String calendarAvailabilityId) throws OXException;
+    Availability loadAvailability(String availabilityId) throws OXException;
 
     /**
      * Loads the {@link Availability} information for the users with the specified identifiers in the specified interval.
@@ -124,7 +124,7 @@ public interface CalendarAvailabilityStorage {
      * @return A {@link List} with the {@link Availability} for each user
      * @throws OXException if the items cannot be retrieved
      */
-    List<Availability> loadCalendarAvailabilities(List<Integer> userIds) throws OXException;
+    List<Availability> loadAvailabilities(List<Integer> userIds) throws OXException;
 
     /**
      * Load all {@link Availability} blocks for the specified user
@@ -139,44 +139,44 @@ public interface CalendarAvailabilityStorage {
      * Loads from the storage the {@link Available}s for the {@link Availability}
      * with the specified identifier
      * 
-     * @param calendarAvailabilityId The calendar availability identifier
+     * @param availabilityId The calendar availability identifier
      * @return A {@link List} with all {@link Available}s bound to the {@link Availability}
      *         with the specified id
      * @throws OXException if an error is occurred
      */
-    List<Available> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException;
+    List<Available> loadAvailable(String availabilityId) throws OXException;
 
     /**
      * Loads from the storage the {@link Available} with the specified identifier bound
      * to the {@link Availability} with the specified identifier
      * 
      * @param calendarAvailabilityId The calendar availability identifier
-     * @param freeSlotId The free slot identifier
+     * @param availableId The {@link Available} identifier
      * @return The {@link Available}
      * @throws OXException if an error is occurred
      */
-    Available loadCalendarFreeSlot(String calendarAvailability, String freeSlotId) throws OXException;
+    Available loadAvailable(String availability, String availableId) throws OXException;
 
     /**
-     * Deletes the {@link Availability} and all free slots associated to it with the specified identifier
+     * Deletes the {@link Availability} and all {@link Available} blocks associated to it with the specified identifier
      * 
-     * @param calendarAvailabilityId The calendar availability identifier
+     * @param availabilityId The calendar availability identifier
      * @throws OXException if the object cannot be deleted
      */
-    void deleteCalendarAvailability(String calendarAvailabilityId) throws OXException;
+    void deleteAvailability(String availabilityId) throws OXException;
 
     /**
-     * Deletes the {@link Availability} blocks and all free slots associated to them
+     * Deletes the {@link Availability} blocks and all {@link Available} blocks associated to them
      * 
-     * @param calendarAvailabilityIds The calendar availability identifiers
+     * @param availabilityIds The calendar availability identifiers
      * @throws OXException if the objects cannot be deleted
      */
-    void deleteCalendarAvailabilities(List<String> calendarAvailabilityIds) throws OXException;
+    void deleteAvailabilities(List<String> availabilityIds) throws OXException;
 
     /**
-     * Purges all calendar availability blocks and free slots for the specified user
+     * Purges all {@link Availability} blocks and {@link Available} blocks for the specified user
      * 
      * @throws OXException if the objects cannot be purged
      */
-    void purgeCalendarAvailabilities(int userId) throws OXException;
+    void purgeAvailabilities(int userId) throws OXException;
 }

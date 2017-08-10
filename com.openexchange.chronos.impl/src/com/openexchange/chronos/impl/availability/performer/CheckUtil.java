@@ -57,7 +57,7 @@ import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.CalendarAvailabilityField;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.exception.OXException;
 
 /**
@@ -98,11 +98,11 @@ class CheckUtil {
             throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
         }
 
-        if (availability.getCalendarFreeSlots() == null) {
+        if (availability.getAvailable() == null) {
             return;
         }
-        for (Available freeSlot : availability.getCalendarFreeSlots()) {
-            checkMandatory(freeSlot, FreeSlotField.uid, FreeSlotField.dtstart);
+        for (Available freeSlot : availability.getAvailable()) {
+            checkMandatory(freeSlot, AvailableField.uid, AvailableField.dtstart);
             checkConstraints(freeSlot);
         }
     }
@@ -114,7 +114,7 @@ class CheckUtil {
      * @throws OXException if any of the constraints is violated
      */
     private static void checkConstraints(Available freeSlot) throws OXException {
-        if (freeSlot.contains(FreeSlotField.dtend) && freeSlot.contains(FreeSlotField.duration)) {
+        if (freeSlot.contains(AvailableField.dtend) && freeSlot.contains(AvailableField.duration)) {
             throw new OXException(31145, "The 'duration' field and 'end' field are mutually exclusive");
         }
     }

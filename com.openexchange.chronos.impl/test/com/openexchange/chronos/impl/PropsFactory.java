@@ -156,7 +156,7 @@ final class PropsFactory {
     static Availability createCalendarAvailability(BusyType busyType, List<Available> freeSlots) {
         Availability ca = new Availability();
         ca.setBusyType(busyType);
-        ca.setCalendarFreeSlots(freeSlots);
+        ca.setAvailable(freeSlots);
         return ca;
     }
 

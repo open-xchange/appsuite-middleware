@@ -65,7 +65,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.service.FreeSlotField;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -76,27 +76,27 @@ import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Strings;
 
 /**
- * {@link CalendarFreeSlotMapper}
+ * {@link AvailableMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotField> {
+public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> {
 
-    private static final CalendarFreeSlotMapper INSTANCE = new CalendarFreeSlotMapper();
+    private static final AvailableMapper INSTANCE = new AvailableMapper();
 
     /**
      * Gets the mapper instance
      *
      * @return The mapper instance
      */
-    public static CalendarFreeSlotMapper getInstance() {
+    public static AvailableMapper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initialises a new {@link CalendarFreeSlotMapper}
+     * Initialises a new {@link AvailableMapper}
      */
-    public CalendarFreeSlotMapper() {
+    public AvailableMapper() {
         super();
     }
 
@@ -116,8 +116,8 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
      * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
      */
     @Override
-    public FreeSlotField[] newArray(int size) {
-        return new FreeSlotField[size];
+    public AvailableField[] newArray(int size) {
+        return new AvailableField[size];
     }
 
     /*
@@ -126,13 +126,13 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
      * @see com.openexchange.groupware.tools.mappings.database.DefaultDbMapper#createMappings()
      */
     @Override
-    protected EnumMap<FreeSlotField, ? extends DbMapping<? extends Object, Available>> createMappings() {
-        EnumMap<FreeSlotField, DbMapping<? extends Object, Available>> mappings = new EnumMap<FreeSlotField, DbMapping<? extends Object, Available>>(FreeSlotField.class);
-        mappings.put(FreeSlotField.id, new IntegerMapping<Available>("id", "Free Slot ID") {
+    protected EnumMap<AvailableField, ? extends DbMapping<? extends Object, Available>> createMappings() {
+        EnumMap<AvailableField, DbMapping<? extends Object, Available>> mappings = new EnumMap<AvailableField, DbMapping<? extends Object, Available>>(AvailableField.class);
+        mappings.put(AvailableField.id, new IntegerMapping<Available>("id", "Available ID") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.id);
+                return object.contains(AvailableField.id);
             }
 
             @Override
@@ -151,11 +151,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
             }
 
         });
-        mappings.put(FreeSlotField.calendarAvailabilityId, new IntegerMapping<Available>("calendarAvailability", "Calendar Availability Parent ID") {
+        mappings.put(AvailableField.calendarAvailabilityId, new IntegerMapping<Available>("availability", "Availability Parent ID") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.calendarAvailabilityId);
+                return object.contains(AvailableField.calendarAvailabilityId);
             }
 
             @Override
@@ -173,11 +173,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeCalendarAvailabilityId();
             }
         });
-        mappings.put(FreeSlotField.user, new IntegerMapping<Available>("user", "Calendar User ID") {
+        mappings.put(AvailableField.user, new IntegerMapping<Available>("user", "Calendar User ID") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.user);
+                return object.contains(AvailableField.user);
             }
 
             @Override
@@ -195,11 +195,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeCalendarUser();
             }
         });
-        mappings.put(FreeSlotField.uid, new VarCharMapping<Available>("uid", "Free Slot UID") {
+        mappings.put(AvailableField.uid, new VarCharMapping<Available>("uid", "Available UID") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.uid);
+                return object.contains(AvailableField.uid);
             }
 
             @Override
@@ -218,11 +218,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
             }
 
         });
-        mappings.put(FreeSlotField.dtstart, new DateTimeMapping<Available>("start", "startTimezone", "allDay", "Start DateTime") {
+        mappings.put(AvailableField.dtstart, new DateTimeMapping<Available>("start", "startTimezone", "allDay", "Start DateTime") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.dtstart);
+                return object.contains(AvailableField.dtstart);
             }
 
             @Override
@@ -241,11 +241,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
             }
 
         });
-        mappings.put(FreeSlotField.dtend, new DefaultDbMultiMapping<DateTime, Available>(new String[] { "end", "endTimezone" }, "End date") {
+        mappings.put(AvailableField.dtend, new DefaultDbMultiMapping<DateTime, Available>(new String[] { "end", "endTimezone" }, "End date") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.dtend);
+                return object.contains(AvailableField.dtend);
             }
 
             @Override
@@ -298,11 +298,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 return 2;
             }
         });
-        mappings.put(FreeSlotField.created, new BigIntMapping<Available>("created", "Created") {
+        mappings.put(AvailableField.created, new BigIntMapping<Available>("created", "Created") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.created);
+                return object.contains(AvailableField.created);
             }
 
             @Override
@@ -321,11 +321,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeCreated();
             }
         });
-        mappings.put(FreeSlotField.lastModified, new BigIntMapping<Available>("modified", "Last Modified") {
+        mappings.put(AvailableField.lastModified, new BigIntMapping<Available>("modified", "Last Modified") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.lastModified);
+                return object.contains(AvailableField.lastModified);
             }
 
             @Override
@@ -343,11 +343,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeLastModified();
             }
         });
-        mappings.put(FreeSlotField.description, new VarCharMapping<Available>("description", "Description") {
+        mappings.put(AvailableField.description, new VarCharMapping<Available>("description", "Description") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.description);
+                return object.contains(AvailableField.description);
             }
 
             @Override
@@ -366,7 +366,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeDescription();
             }
         });
-        mappings.put(FreeSlotField.recurid, new BigIntMapping<Available>("recurrence", "Recurrence ID") {
+        mappings.put(AvailableField.recurid, new BigIntMapping<Available>("recurrence", "Recurrence ID") {
 
             @Override
             public void set(Available object, Long value) {
@@ -375,7 +375,7 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.recurid);
+                return object.contains(AvailableField.recurid);
             }
 
             @Override
@@ -389,11 +389,14 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(FreeSlotField.rrule, new VarCharMapping<Available>("rrule", "Recurrence Rule") {
+        /////////////////////////////////
+        // TODO: Add mapper for exDate //
+        /////////////////////////////////
+        mappings.put(AvailableField.rrule, new VarCharMapping<Available>("rrule", "Recurrence Rule") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.rrule);
+                return object.contains(AvailableField.rrule);
             }
 
             @Override
@@ -411,11 +414,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(FreeSlotField.summary, new VarCharMapping<Available>("summary", "Summary") {
+        mappings.put(AvailableField.summary, new VarCharMapping<Available>("summary", "Summary") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.summary);
+                return object.contains(AvailableField.summary);
             }
 
             @Override
@@ -433,11 +436,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeSummary();
             }
         });
-        mappings.put(FreeSlotField.categories, new VarCharMapping<Available>("categories", "Categories") {
+        mappings.put(AvailableField.categories, new VarCharMapping<Available>("categories", "Categories") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.categories);
+                return object.contains(AvailableField.categories);
             }
 
             @Override
@@ -467,11 +470,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeCategories();
             }
         });
-        mappings.put(FreeSlotField.comment, new VarCharMapping<Available>("comment", "Comment") {
+        mappings.put(AvailableField.comment, new VarCharMapping<Available>("comment", "Comment") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.comment);
+                return object.contains(AvailableField.comment);
             }
 
             @Override
@@ -501,11 +504,11 @@ public class CalendarFreeSlotMapper extends DefaultDbMapper<Available, FreeSlotF
                 object.removeComments();
             }
         });
-        mappings.put(FreeSlotField.extendedProperties, new ExtendedPropertiesMapping<Available>("extendedProperties", "Extended Properties") {
+        mappings.put(AvailableField.extendedProperties, new ExtendedPropertiesMapping<Available>("extendedProperties", "Extended Properties") {
 
             @Override
             public boolean isSet(Available object) {
-                return object.contains(FreeSlotField.extendedProperties);
+                return object.contains(AvailableField.extendedProperties);
             }
 
             @Override
