@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.mime.groupware.QuotaMode;
-import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
@@ -87,7 +86,7 @@ public final class MimeSnippetService implements QuotaAwareSnippetService {
     }
 
     @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
+    public MimeSnippetManagement getManagement(final Session session) throws OXException {
         return new MimeSnippetManagement(session, quotaProvider);
     }
 

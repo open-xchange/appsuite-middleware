@@ -63,9 +63,8 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.QuotaAwareSnippetManagement;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.mime.MimeSnippetManagement;
+import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
 
 /**
@@ -79,14 +78,14 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
     private static final String MODULE_ID = "mime_snippet";
     private static final String PROP_AMOUNT_LIMIT = "com.openexchange.snippet.quota.limit";
 
-    private final AtomicReference<SnippetService> snippetServiceRef;
+    private final AtomicReference<MimeSnippetService> snippetServiceRef;
 
     /**
      * Initializes a new {@link MimeSnippetQuotaProvider}.
      */
     public MimeSnippetQuotaProvider() {
         super();
-        this.snippetServiceRef = new AtomicReference<SnippetService>(null);
+        this.snippetServiceRef = new AtomicReference<MimeSnippetService>(null);
     }
 
     /**
@@ -94,7 +93,7 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
      *
      * @param quotaProvider The snippet service to set
      */
-    public void setSnippetService(SnippetService snippetService) {
+    public void setSnippetService(MimeSnippetService snippetService) {
         this.snippetServiceRef.set(snippetService);
     }
 
@@ -123,26 +122,20 @@ public class MimeSnippetQuotaProvider implements QuotaProvider {
     }
 
     private Quota optSizeQuota(Session session) throws OXException {
-        SnippetManagement snippetManagement = snippetServiceRef.get().getManagement(session);
-        if (!(snippetManagement instanceof QuotaAwareSnippetManagement)) {
-            // No storage quota
-            return null;
-        }
-
-        QuotaAwareSnippetManagement quotaAwareSnippetManagement = ((QuotaAwareSnippetManagement) snippetManagement);
-        if (false == quotaAwareSnippetManagement.hasQuota()) {
+        MimeSnippetManagement snippetManagement = snippetServiceRef.get().getManagement(session);
+        if (false == snippetManagement.hasQuota()) {
             // No storage quota
             return null;
         }
 
         // Retrieve size limit
-        long limit = quotaAwareSnippetManagement.getLimit();
+        long limit = snippetManagement.getLimit();
         if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_SIZE;
         }
 
         // Retrieve usage as well and return
-        return new Quota(QuotaType.SIZE, limit, quotaAwareSnippetManagement.getUsage());
+        return new Quota(QuotaType.SIZE, limit, snippetManagement.getUsage());
     }
 
     @Override
