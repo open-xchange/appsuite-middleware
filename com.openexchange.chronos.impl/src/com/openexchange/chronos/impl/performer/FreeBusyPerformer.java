@@ -392,7 +392,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             Date slotStartTime = startTime;
             Date slotEndTime = endTime;
-            java.util.Collections.sort(availability.getCalendarFreeSlots(), Comparators.freeSlotDateTimeComparator);
+            java.util.Collections.sort(availability.getCalendarFreeSlots(), Comparators.availableDateTimeComparator);
             for (Available calendarFreeSlot : availability.getCalendarFreeSlots()) {
                 // Get the slot's start/end times
                 slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));

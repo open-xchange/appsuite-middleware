@@ -78,6 +78,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @throws OXException
      */
     public void perform(List<String> availabilityIds) throws OXException {
-        storage.deleteCalendarAvailabilities(availabilityIds);
+        storage.deleteAvailabilities(availabilityIds);
     }
 }

@@ -92,7 +92,7 @@ public class GetPerformer extends AbstractPerformer {
      * @throws OXException if the {@link Availability} cannot be retrieved
      */
     public Availability perform(String calendarAvailabilityId) throws OXException {
-        return storage.loadCalendarAvailability(calendarAvailabilityId);
+        return storage.loadAvailability(calendarAvailabilityId);
     }
 
     /**
@@ -254,7 +254,7 @@ public class GetPerformer extends AbstractPerformer {
      * @throws OXException if an error is occurred
      */
     private <T extends CalendarUser> Map<T, List<Availability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
-        List<Availability> availabilities = storage.loadCalendarAvailabilities(new ArrayList<>(reverseLookup.keySet()));
+        List<Availability> availabilities = storage.loadAvailabilities(new ArrayList<>(reverseLookup.keySet()));
         Map<T, List<Availability>> map = new HashMap<>();
         for (Availability availability : availabilities) {
             T type = reverseLookup.get(availability.getCalendarUser());
@@ -504,7 +504,7 @@ public class GetPerformer extends AbstractPerformer {
      */
     private List<Available> combineSlots(List<Available> freeSlots) {
         // Sort by starting date
-        java.util.Collections.sort(freeSlots, Comparators.freeSlotDateTimeComparator);
+        java.util.Collections.sort(freeSlots, Comparators.availableDateTimeComparator);
 
         List<Available> combined = new ArrayList<>(freeSlots.size());
         Iterator<Available> iteratorA = freeSlots.iterator();
@@ -537,7 +537,7 @@ public class GetPerformer extends AbstractPerformer {
             combined.add(a);
         }
         // Sort by starting date
-        java.util.Collections.sort(combined, Comparators.freeSlotDateTimeComparator);
+        java.util.Collections.sort(combined, Comparators.availableDateTimeComparator);
         return combined;
     }
 }

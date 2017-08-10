@@ -98,7 +98,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (Availability availability : availabilities) {
-            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextCalendarAvailabilityId();
+            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextAvailabilityId();
             availability.setId(availabilityId);
             availability.setCalendarUser(session.getUserId());
             availability.setLastModified(timeNow);
@@ -116,7 +116,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
             // Prepare the free slots
             for (Available freeSlot : availability.getCalendarFreeSlots()) {
-                freeSlot.setId(freeSlot.contains(FreeSlotField.id) ? freeSlot.getId() : storage.nextCalendarFreeSlotId());
+                freeSlot.setId(freeSlot.contains(FreeSlotField.id) ? freeSlot.getId() : storage.nextAvailableId());
                 freeSlot.setCalendarAvailabilityId(availabilityId);
                 freeSlot.setCalendarUser(session.getUserId());
                 freeSlot.setLastModified(timeNow);

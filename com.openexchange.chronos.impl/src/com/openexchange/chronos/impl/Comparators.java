@@ -64,7 +64,7 @@ import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 public class Comparators {
 
     public static final Comparator<Availability> availabilityDateTimeComparator = new AvailabilityDateTimeComparator();
-    public static final Comparator<Available> freeSlotDateTimeComparator = new FreeSlotDateTimeComparator();
+    public static final Comparator<Available> availableDateTimeComparator = new FreeSlotDateTimeComparator();
     public static final Comparator<Availability> priorityComparator = new PriorityComparator();
     public static final Comparator<FreeBusyTime> freeBusyTimeDateTimeComparator = new FreeBusyTimeDateTimeComparator();
 

@@ -99,7 +99,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarAvailabilityId()
      */
     @Override
-    public String nextCalendarAvailabilityId() throws OXException {
+    public String nextAvailabilityId() throws OXException {
         return nextId("calendar_availability_sequence");
     }
 
@@ -109,7 +109,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
      */
     @Override
-    public String nextCalendarFreeSlotId() throws OXException {
+    public String nextAvailableId() throws OXException {
         return nextId("calendar_free_slot_sequence");
     }
 
@@ -119,7 +119,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailability(com.openexchange.chronos.CalendarAvailability)
      */
     @Override
-    public void insertCalendarAvailability(Availability calendarAvailability) throws OXException {
+    public void insertAvailability(Availability calendarAvailability) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -146,7 +146,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailabilities(java.util.List)
      */
     @Override
-    public void insertCalendarAvailabilities(List<Availability> calendarAvailabilities) throws OXException {
+    public void insertAvailabilities(List<Availability> calendarAvailabilities) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -176,7 +176,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailability(java.lang.String)
      */
     @Override
-    public void deleteCalendarAvailability(String calendarAvailabilityId) throws OXException {
+    public void deleteAvailability(String calendarAvailabilityId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -197,7 +197,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
-    public void insertCalendarFreeSlot(Available freeSlot) throws OXException {
+    public void insertAvailable(Available freeSlot) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -218,7 +218,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public List<Availability> loadCalendarAvailabilities(List<Integer> userIds) throws OXException {
+    public List<Availability> loadAvailabilities(List<Integer> userIds) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -256,7 +256,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.lang.String)
      */
     @Override
-    public Availability loadCalendarAvailability(String calendarAvailabilityId) throws OXException {
+    public Availability loadAvailability(String calendarAvailabilityId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -275,7 +275,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlot(java.lang.String, java.lang.String)
      */
     @Override
-    public Available loadCalendarFreeSlot(String calendarAvailabilityId, String freeSlotId) throws OXException {
+    public Available loadAvailable(String calendarAvailabilityId, String freeSlotId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -294,7 +294,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlots(java.lang.String)
      */
     @Override
-    public List<Available> loadCalendarFreeSlots(String calendarAvailabilityId) throws OXException {
+    public List<Available> loadAvailable(String calendarAvailabilityId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -313,7 +313,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailabilities(java.util.List)
      */
     @Override
-    public void deleteCalendarAvailabilities(List<String> calendarAvailabilityIds) throws OXException {
+    public void deleteAvailabilities(List<String> calendarAvailabilityIds) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -334,7 +334,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#purgeCalendarAvailabilities(int)
      */
     @Override
-    public void purgeCalendarAvailabilities(int userId) throws OXException {
+    public void purgeAvailabilities(int userId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
@@ -534,7 +534,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
         // 2) Then fetch all free slots of the calendar availability items
         for (Availability ca : availabilities) {
-            ca.setCalendarFreeSlots(loadCalendarFreeSlots(ca.getId()));
+            ca.setCalendarFreeSlots(loadAvailable(ca.getId()));
         }
         return availabilities;
     }
