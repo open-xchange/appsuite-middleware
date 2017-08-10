@@ -67,7 +67,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -89,11 +88,7 @@ import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -101,7 +96,6 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
@@ -124,7 +118,6 @@ import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.mime.groupware.QuotaMode;
 import com.openexchange.snippet.utils.SnippetUtils;
@@ -132,10 +125,10 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
-import com.openexchange.snippet.QuotaAwareSnippetManagement;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
+import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 
 /**
@@ -143,12 +136,11 @@ import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeSnippetManagement implements QuotaAwareSnippetManagement {
+public final class MimeSnippetManagement implements SnippetManagement {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
 
     private static final String PROP_QUOTA_MODE = "com.openexchange.snippet.filestore.quota.mode";
-    private static final String PROP_SIZE_LIMIT = "com.openexchange.snippet.filestore.quota.perUserLimit";
 
     private static volatile QuotaMode MODE;
 
@@ -157,7 +149,7 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
      *
      * @return The {@link QuotaMode}
      */
-    static QuotaMode getMode() {
+    public static QuotaMode getMode() {
         QuotaMode tmp = MODE;
         if (null == tmp) {
             synchronized (MimeSnippetManagement.class) {
@@ -181,6 +173,15 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
      * The file storage reference type identifier: <b><code>1</code></b>.
      */
     private static final int FS_TYPE = ReferenceType.FILE_STORAGE.getType();
+
+    /**
+     * Gets the file storage reference type identifier: <b><code>1</code></b>.
+     *
+     * @return The file storage reference type identifier: <b><code>1</code></b>.
+     */
+    public static int getFsType() {
+        return FS_TYPE;
+    }
 
     private static final class InputStreamProviderImpl implements InputStreamProvider {
 
@@ -303,25 +304,8 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
 
     @Override
     public int getOwnSnippetsCount() throws OXException {
-        final DatabaseService databaseService = getDatabaseService();
-        final int contextId = this.contextId;
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            final StringBuilder sql = new StringBuilder("SELECT COUNT(id) FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
-            stmt = con.prepareStatement(sql.toString());
-            int pos = 0;
-            stmt.setInt(++pos, contextId);
-            stmt.setInt(++pos, userId);
-            rs = stmt.executeQuery();
-            return rs.next() ? rs.getInt(1) : 0;
-        } catch (final SQLException e) {
-            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
-        }
+        AccountQuota quota = getQuota();
+        return (int) quota.getQuota(QuotaType.AMOUNT).getUsage();
     }
 
     @Override
@@ -649,9 +633,9 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
                 try {
                     mimeMessage.writeTo(fileHolder.asOutputStream());
                     size = fileHolder.getLength();
-                    if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
+                    if (null != quota) {
                         Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
-                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(size)) {
+                        if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(size))) {
                             backAfterRead = true;
                             throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
                         }
@@ -990,13 +974,11 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
             try {
                 updateMessage.writeTo(fileHolder.asOutputStream());
                 size = fileHolder.getLength();
-                if (null != quota && quota.hasQuota(QuotaType.SIZE)) {
-                    long difference = size - oldSize;
-                    if (difference > 0) {
-                        Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
-                        if (sizeQuota.isExceeded() || sizeQuota.willExceed(difference)) {
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
-                        }
+                long difference = size - oldSize;
+                if (difference > 0 && null != quota) {
+                    Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+                    if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(difference))) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
                     }
                 }
 
@@ -1291,122 +1273,6 @@ public final class MimeSnippetManagement implements QuotaAwareSnippetManagement 
         }
         final String ct = SnippetUtils.parseContentTypeFromMisc(misc);
         return new ContentType(ct).getSubType();
-    }
-
-    @Override
-    public boolean hasQuota() throws OXException {
-        return QuotaMode.DEDICATED.equals(getMode());
-    }
-
-    @Override
-    public long getLimit() throws OXException {
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-        }
-
-        // Get size limit property
-        long limit;
-        {
-            ConfigView configView = viewFactory.getView(userId, contextId);
-            ConfigProperty<String> property = configView.property(PROP_SIZE_LIMIT, String.class);
-            long def = 5242880;
-            if (property.isDefined()) {
-                limit = ConfigTools.parseBytes(property.get());
-            } else {
-                limit = def;
-            }
-        }
-
-        return limit <= Quota.UNLIMITED ? Quota.UNLIMITED : limit;
-    }
-
-    @Override
-    public long getUsage() throws OXException {
-        if (false == hasQuota()) {
-            return 0;
-        }
-
-        DatabaseService databaseService = getDatabaseService();
-
-        Map<String, String> reload = null;
-        long currentUsage = 0;
-        {
-            Connection con = databaseService.getReadOnly(contextId);
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = con.prepareStatement("SELECT id, size, refId FROM snippet WHERE cid=? AND user=? AND refType=" + FS_TYPE);
-                int pos = 0;
-                stmt.setInt(++pos, contextId);
-                stmt.setInt(++pos, userId);
-                rs = stmt.executeQuery();
-                if (false == rs.next()) {
-                    return 0;
-                }
-
-                do {
-                    long size = rs.getLong(2);
-                    if (rs.wasNull()) {
-                        if (reload == null) {
-                            reload = new HashMap<>();
-                        }
-                        String snippetId = rs.getString(1);
-                        String fileStoreLocation = rs.getString(3);
-                        reload.put(snippetId, fileStoreLocation);
-                    } else {
-                        currentUsage += size;
-                    }
-                } while (rs.next());
-            } catch (final SQLException e) {
-                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
-                databaseService.backReadOnly(contextId, con);
-            }
-        }
-
-        // Check if there are entries, which are required to be reloaded
-        if (null != reload) {
-            QuotaFileStorage quotaFileStorage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(contextId, Info.general());
-
-            Connection writeCon = databaseService.getWritable(contextId);
-            boolean onlyRead = true;
-            PreparedStatement stmt = null;
-            try {
-                stmt = writeCon.prepareStatement("UPDATE snippet SET size=? WHERE cid=? AND user=? AND id=? AND refType=" + FS_TYPE);
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, userId);
-
-                for (Map.Entry<String, String> entry : reload.entrySet()) {
-                    String id = entry.getKey();
-                    String fileId = entry.getValue();
-
-                    // Get current file size from file-storage & add to batch statement
-                    long fileSize = quotaFileStorage.getFileSize(fileId);
-                    stmt.setLong(1, fileSize);
-                    stmt.setString(4, id);
-                    stmt.addBatch();
-                    onlyRead = false;
-
-                    // Add to current usage as well
-                    currentUsage += fileSize;
-                }
-
-                stmt.executeBatch();
-            } catch (final SQLException e) {
-                throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(stmt);
-                if (onlyRead) {
-                    databaseService.backWritableAfterReading(contextId, writeCon);
-                } else {
-                    databaseService.backWritable(contextId, writeCon);
-                }
-            }
-        }
-
-        return currentUsage;
     }
 
 }
