@@ -189,25 +189,25 @@ public class Appointment2Event {
     public static String getColor(int colorLabel) {
         switch (colorLabel) {
             case 1:
-                return "lightblue"; // #9bceff ~ #ADD8E6
+                return "#CEE7FF"; //"lightblue"; // #9bceff ~ #ADD8E6
             case 2:
-                return "darkblue"; // #6ca0df ~ #00008B
+                return "#96BBE8"; // "darkblue"; // #6ca0df ~ #00008B
             case 3:
-                return "purple"; // #a889d6 ~ #800080
+                return "#C4AFE3"; // "purple"; // #a889d6 ~ #800080
             case 4:
-                return "pink"; // #e2b3e2 ~ #FFC0CB
+                return "#F0D8F0"; //"pink"; // #e2b3e2 ~ #FFC0CB
             case 5:
-                return "red"; // #e7a9ab ~ #FF0000
+                return "#F2D1D2"; // "red"; // #e7a9ab ~ #FF0000
             case 6:
-                return "orange"; // #ffb870 ~ FFA500
+                return "#FFD1A3"; // "orange"; // #ffb870 ~ FFA500
             case 7:
-                return "yellow"; // #f2de88 ~ #FFFF00
+                return "#F7EBB6"; // "yellow"; // #f2de88 ~ #FFFF00
             case 8:
-                return "lightgreen"; // #c2d082 ~ #90EE90
+                return "#D4DEA7"; // "lightgreen"; // #c2d082 ~ #90EE90
             case 9:
-                return "darkgreen"; // #809753 ~ #006400
+                return "#99AF6E"; // "darkgreen"; // #809753 ~ #006400
             case 10:
-                return "gray"; // #4d4d4d ~ #808080
+                return "#666666"; // "gray"; // #4d4d4d ~ #808080
             default:
                 return null;
         }
