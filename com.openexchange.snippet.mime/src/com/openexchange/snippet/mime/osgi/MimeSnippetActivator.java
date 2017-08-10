@@ -142,7 +142,6 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registerService(QuotaAwareSnippetService.class, snippetService, properties);
 
-            quotaProvider.setSnippetService(snippetService);
             registerService(QuotaProvider.class, quotaProvider);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.mime", e);
