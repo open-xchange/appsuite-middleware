@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.availability;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -191,8 +190,8 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailability(com.openexchange.chronos.service.CalendarSession, java.lang.String)
      */
     @Override
-    public void deleteAvailability(CalendarSession session, String availabilityId) throws OXException {
-        deleteAvailabilities(session, Collections.singletonList(availabilityId));
+    public void deleteAvailability(CalendarSession session) throws OXException {
+        purgeAvailabilities(session);
     }
 
     /*
@@ -201,12 +200,30 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#deleteAvailabilities(com.openexchange.chronos.service.CalendarSession, java.util.List)
      */
     @Override
-    public void deleteAvailabilities(CalendarSession session, final List<String> availabilityIds) throws OXException {
+    public void deleteAvailablesByUid(CalendarSession session, final List<String> availableUIds) throws OXException {
         new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
 
             @Override
             protected Void execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                new DeletePerformer(storage, session).perform(availabilityIds);
+                new DeletePerformer(storage, session).performByUid(availableUIds);
+                return null;
+            }
+
+        }.executeUpdate();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.CalendarAvailabilityService#deleteAvailablesById(com.openexchange.chronos.service.CalendarSession, java.util.List)
+     */
+    @Override
+    public void deleteAvailablesById(CalendarSession session, final List<Integer> availableIds) throws OXException {
+        new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
+
+            @Override
+            protected Void execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                new DeletePerformer(storage, session).performById(availableIds);
                 return null;
             }
 

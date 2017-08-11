@@ -213,6 +213,14 @@ public interface CalendarAvailabilityStorage {
     void deleteAvailableByUid(List<String> availableIds) throws OXException;
 
     /**
+     * Deletes from the storage all {@link Available} blocks with the specified identifiers
+     * 
+     * @param availableIds The {@link Available} identifiers
+     * @throws OXException if the blocks cannot be deleted
+     */
+    void deleteAvailableById(List<Integer> availableIds) throws OXException;
+
+    /**
      * Deletes from the storage all {@link Available} blocks for the specified users
      * 
      * @param userIds The user identifiers

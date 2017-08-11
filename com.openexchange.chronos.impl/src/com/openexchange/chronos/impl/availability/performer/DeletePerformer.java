@@ -74,10 +74,20 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the operation
      * 
-     * @param availabilityIds
+     * @param availableUids
      * @throws OXException
      */
-    public void perform(List<String> availabilityIds) throws OXException {
-        storage.deleteAvailabilities(availabilityIds);
+    public void performByUid(List<String> availableUids) throws OXException {
+        storage.deleteAvailableByUid(availableUids);
+    }
+
+    /**
+     * Performs the operation
+     * 
+     * @param availableIds
+     * @throws OXException
+     */
+    public void performById(List<Integer> availableIds) throws OXException {
+        storage.deleteAvailableById(availableIds);
     }
 }

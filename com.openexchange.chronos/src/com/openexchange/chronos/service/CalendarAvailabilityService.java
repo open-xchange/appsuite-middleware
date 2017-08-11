@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
@@ -136,22 +137,30 @@ public interface CalendarAvailabilityService {
     Map<Attendee, Availability> getAttendeeAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
-     * Deletes the {@link Availability} block with the specified identifier
+     * Deletes the {@link Availability} of the current user
      * 
      * @param session The {@link CalendarSession}
-     * @param availabilityId The {@link Availability} unique identifier
      * @throws OXException if the {@link Availability} cannot be deleted
      */
-    void deleteAvailability(CalendarSession session, String availabilityId) throws OXException;
+    void deleteAvailability(CalendarSession session) throws OXException;
 
     /**
-     * Deletes the {@link Availability} blocks with the specified identifiers
+     * Deletes the {@link Available} blocks with the specified unique identifiers
      * 
      * @param session The {@link CalendarSession}
-     * @param availabilityIds A {@link List} with the {@link Availability} identifiers to delete
+     * @param availableUids A {@link List} with {@link Available} unique identifiers
      * @throws OXException if the {@link Availability} blocks cannot be deleted
      */
-    void deleteAvailabilities(CalendarSession session, List<String> availabilityIds) throws OXException;
+    void deleteAvailablesByUid(CalendarSession session, List<String> availableUids) throws OXException;
+
+    /**
+     * Deletes the {@link Available} blocks with the specified identifiers
+     * 
+     * @param session The {@link CalendarSession}
+     * @param availableUids A {@link List} with {@link Available} identifiers
+     * @throws OXException if the {@link Availability} blocks cannot be deleted
+     */
+    void deleteAvailablesById(CalendarSession session, List<Integer> availableIds) throws OXException;
 
     /**
      * Purges all {@link Availability} blocks for the specified user
