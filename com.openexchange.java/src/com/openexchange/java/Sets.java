@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,38 +47,66 @@
  *
  */
 
-package com.openexchange.jslob.storage.db.groupware;
+package com.openexchange.java;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.jslob.storage.db.DBJSlobStorage;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
- * {@link JSlobDBDeleteListener}
+ * {@link Sets} - A utility class for <code>java.util.Set</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class JSlobDBDeleteListener implements DeleteListener {
-
-    private final DBJSlobStorage dbJSlobStorage;
+public class Sets {
 
     /**
-     * Initializes a new {@link JSlobDBDeleteListener}.
+     * Initializes a new {@link Sets}.
      */
-    public JSlobDBDeleteListener(final DBJSlobStorage dbJSlobStorage) {
+    private Sets() {
         super();
-        this.dbJSlobStorage = dbJSlobStorage;
     }
 
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            dbJSlobStorage.dropAllUserJSlobs(event.getId(), event.getContext().getContextId());
-        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            dbJSlobStorage.dropAllUsersJSlobs(event.getUserIds(), event.getContext().getContextId());
+    /**
+     * Generates consecutive subsets of a set, each of the same size (the final list may be smaller).
+     *
+     * @param original The set to return consecutive subsets of
+     * @param partitionSize The desired size for each subset
+     * @return A list of consecutive subsets
+     * @throws IllegalArgumentException if {@code partitionSize} is not positive
+     */
+    public static <T> List<Set<T>> partition(Set<T> original, int partitionSize) {
+        checkNotNull(original, "Set must not be null");
+        checkArgument(partitionSize > 0);
+        int total = original.size();
+        if (partitionSize >= total) {
+            return Collections.singletonList(original);
         }
+
+        // Create a list of sets to return.
+        List<Set<T>> result = new LinkedList<Set<T>>();
+
+        // Create an iterator for the original set.
+        Iterator<T> it = original.iterator();
+
+        // Create each new set.
+        Set<T> s = new LinkedHashSet<T>(partitionSize);
+        s.add(it.next());
+        for (int i = 1; i < total; i++) {
+            if ((i % partitionSize) == 0) {
+                result.add(s);
+                s = new LinkedHashSet<T>(partitionSize);
+            }
+            s.add(it.next());
+        }
+        result.add(s);
+        return result;
     }
 
 }

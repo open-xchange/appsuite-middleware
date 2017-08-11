@@ -2976,7 +2976,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int userId = user.getId().intValue();
 
                 {
-                    DeleteEvent delev = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, 0, ContextStorage.getInstance().getContext(contextId), destUser);
+                    DeleteEvent delev = DeleteEvent.createDeleteEventForUserDeletion(this, userId, 0, ContextStorage.getInstance().getContext(contextId), destUser);
                     DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 }
 

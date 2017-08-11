@@ -88,10 +88,12 @@ public class UserContextDeleteListener extends ContextDelete {
             stmt = writeCon.createStatement();
 
             stmt.addBatch("DELETE FROM login2user WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_setting_server WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM user_setting_mail WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM user_setting_admin WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM user_configuration WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM user_alias WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_attribute WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM user WHERE cid=" + ctx.getContextId());
 
             stmt.executeBatch();

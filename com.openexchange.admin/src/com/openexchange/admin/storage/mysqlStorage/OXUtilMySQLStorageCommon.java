@@ -76,6 +76,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.util.Tools;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -171,9 +172,20 @@ public class OXUtilMySQLStorageCommon {
                 return Collections.emptyList();
             }
 
+            // Schema name should match: <database-name> + '_' + <unique-number>
+            int beginIndex = name.length() + 1;
             List<String> schemas = new LinkedList<>();
             do {
-                schemas.add(result.getString(1));
+                String schemaName = result.getString(1);
+                try {
+                    int uniqueNum = Tools.getUnsignedInteger(schemaName.substring(beginIndex));
+                    if (uniqueNum > 0) {
+                        schemas.add(schemaName);
+                    }
+                } catch (RuntimeException e) {
+                    // Discard...
+                    LOG.debug("Failed to validate schema name: {}", schemaName, e);
+                }
             } while (result.next());
             return schemas;
         } catch (final SQLException e) {
