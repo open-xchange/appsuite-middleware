@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
-import com.openexchange.chronos.AvailableTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
@@ -84,19 +83,6 @@ public interface CalendarAvailabilityService {
      * @throws OXException if an error is occurred
      */
     Availability getAvailability(CalendarSession session) throws OXException;
-
-    /**
-     * Gets the {@link AvailableTime} for the specified {@link Attendee}s in the specified time interval
-     * 
-     * @param session The calendar session
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link AvailableTime} for
-     * @param from The start point in the time interval
-     * @param until The end point in the time interval
-     * @return A {@link Map} with {@link AvailableTime} slots for the {@link Attendee}s
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #getCombinedAvailability(CalendarSession, List, Date, Date)} instead.
-     */
-    Map<Attendee, AvailableTime> getAvailableTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Gets the combined {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval,

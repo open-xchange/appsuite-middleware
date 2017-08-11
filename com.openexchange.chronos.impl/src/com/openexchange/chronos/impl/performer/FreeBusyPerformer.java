@@ -237,13 +237,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Get the available time for the attendees
         CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
-        Map<Attendee, Availability> availableTimes = availabilityService.getAttendeeAvailability(session, attendees, from, until);
+        Map<Attendee, Availability> availabilityPerAttendee = availabilityService.getAttendeeAvailability(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
         // Expand any recurring available instances 
-        expandRecurringInstances(from, until, availableTimes, timeZone);
+        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
-        adjustIntervals(from, until, availableTimes, timeZone);
+        adjustIntervals(from, until, availabilityPerAttendee, timeZone);
 
         // Check for not existing users
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
@@ -258,7 +258,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Iterate over all calendar availability blocks for all attendees
         for (Attendee attendee : attendees) {
-            Availability availability = availableTimes.get(attendee);
+            Availability availability = availabilityPerAttendee.get(attendee);
             // For each availability block and each calendar free slot create an equivalent free busy time slot
             List<FreeBusyTime> freeBusyTimes = availability == null ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availability, timeZone);
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
