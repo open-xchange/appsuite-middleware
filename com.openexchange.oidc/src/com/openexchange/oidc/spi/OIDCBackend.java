@@ -124,6 +124,6 @@ public interface OIDCBackend {
 
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 
-    String getLogoutRequest(Session session) throws OXException;
+    String getLogoutFromIDPRequest(Session session) throws OXException;
 
 }

@@ -6,9 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
+import com.openexchange.oidc.tools.OIDCTools;
 
 public class LogoutService extends OIDCServlet{
 
@@ -24,7 +25,15 @@ public class LogoutService extends OIDCServlet{
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String state = req.getParameter("state");
-        this.provider.logoutCurrentUser(state);
+        if (req.getParameter(OIDCTools.TYPE) == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } else if (req.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {
+            try {
+                this.provider.logoutSSOUser(req, resp);
+            } catch (OXException e) {
+                // TODO QS-VS: Better exception handling
+                e.printStackTrace();
+            }
+        }
     }
 }

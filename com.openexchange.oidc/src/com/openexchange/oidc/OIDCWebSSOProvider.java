@@ -69,7 +69,7 @@ public interface OIDCWebSSOProvider {
 
     String authenticateUser(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException;
 
-    void logoutCurrentUser(String state);
-
     String getLogoutRedirectRequest(HttpServletRequest httpRequest) throws OXException;
+
+    void logoutSSOUser(HttpServletRequest req, HttpServletResponse resp) throws OXException;
 }

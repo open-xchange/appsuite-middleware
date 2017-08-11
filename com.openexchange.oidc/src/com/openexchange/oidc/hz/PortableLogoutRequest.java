@@ -12,7 +12,7 @@ public class PortableLogoutRequest extends AbstractCustomPortable {
 
     private static final String STATE = "state";
     private static final String DOMAINNAME = "domainname";
-    private static final String IDTOKEN = "idtoken";
+    private static final String SESSIONID = "sessionId";
     
     private LogoutRequestInfo delegate;
     
@@ -44,12 +44,12 @@ public class PortableLogoutRequest extends AbstractCustomPortable {
     public void writePortable(PortableWriter writer) throws IOException {
         writer.writeUTF(STATE, delegate.getState());
         writer.writeUTF(DOMAINNAME, delegate.getDomainName());
-        writer.writeUTF(IDTOKEN, delegate.getIDToken());
+        writer.writeUTF(SESSIONID, delegate.getSessionId());
     }
     
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        DefaultLogoutRequestInfo logoutRequestInfo = new DefaultLogoutRequestInfo(reader.readUTF(STATE), reader.readUTF(DOMAINNAME), reader.readUTF(IDTOKEN));
+        DefaultLogoutRequestInfo logoutRequestInfo = new DefaultLogoutRequestInfo(reader.readUTF(STATE), reader.readUTF(DOMAINNAME), reader.readUTF(SESSIONID));
         this.setDelegate(logoutRequestInfo);
     }
 }

@@ -1,17 +1,16 @@
 package com.openexchange.oidc.state;
 
-
 public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     
     private String state;
     private String domainName;
-    private String idToken;
+    private String sessionId;
     
-    public DefaultLogoutRequestInfo(String state, String domainName, String idToken) {
+    public DefaultLogoutRequestInfo(String state, String domainName, String sessionId) {
         super();
         this.state = state;
         this.domainName = domainName;
-        this.idToken = idToken;
+        this.sessionId = sessionId;
     }
 
     @Override
@@ -25,8 +24,8 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     }
 
     @Override
-    public String getIDToken() {
-        return this.idToken;
+    public String getSessionId() {
+        return this.sessionId;
     }
 
 }

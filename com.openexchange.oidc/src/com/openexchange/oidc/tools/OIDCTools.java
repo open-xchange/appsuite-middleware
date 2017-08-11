@@ -16,6 +16,12 @@ public class OIDCTools {
     public static final String LOGIN_ACTION = "loginAction";
 
     public static final String IDTOKEN = "idToken";
+
+    public static final String TYPE = "type";
+    
+    public static final String END = "end";
+
+    public static final String STATE = "state";
     
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {

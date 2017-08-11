@@ -17,5 +17,5 @@ public interface LogoutRequestInfo {
      */
     String getDomainName();
     
-    String getIDToken();
+    String getSessionId();
 }
