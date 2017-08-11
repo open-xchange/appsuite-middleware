@@ -47,103 +47,27 @@
  *
  */
 
-package com.openexchange.jsieve.commands;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
- * {@link MatchType}
+ * {@link ExtendedFieldTestCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-public enum MatchType {
-    is,
-    contains,
-    matches,
-
-    // regex match type
-    regex("regex"),
-
-    // relational match types
-    value("relational"),
-    ge("relational"),
-    le("relational"),
-
-    // Size match types
-    over,
-    under,
-
-    // simplified matcher
-    startswith,
-    endswith
-    ;
-
-    private String argumentName;
-    private String require;
-    private String notName;
-
+public interface ExtendedFieldTestCommandParser {
 
     /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType() {
-       this.argumentName = ":"+this.name();
-       this.require = "";
-       this.notName = "not "+this.name();
-    }
-
-    /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType(String require) {
-       this.argumentName = ":"+this.name();
-       this.require = require;
-       this.notName = "not "+this.name();
-    }
-
-    public String getArgumentName(){
-        return argumentName;
-    }
-
-    public String getRequire(){
-        return require;
-    }
-
-    public String getNotName(){
-        return notName;
-    }
-
-    /**
-     * Retrieves the name of the matcher if the given string is a "not name".
+     * Returns a map with additional fields containing possible values; similar to comparisons.
      *
-     * @param notName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNormalName(String notName){
-        for(MatchType type: MatchType.values()){
-            if(notName.equals(type.getNotName())){
-                return type.name();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the not name of the {@link MatchType} with the given argument name
+     * E.g. to specify possible values for arguments.
      *
-     * @param argumentName The name of the matcher
-     * @return The normal name or null
+     * @param capabilities The sieve capabilities
+     * @return A map of fields with possible values
      */
-    public static String getNotNameForArgumentName(String argumentName){
-        return MatchType.valueOf(argumentName.substring(1)).getNotName();
-    }
-
-    public static boolean containsMatchType(String matchTypeName) {
-        for (MatchType cmd : values()) {
-            if (cmd.name().equals(matchTypeName) || cmd.getNotName().equals(matchTypeName)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    public Map<String, Set<String>> getAddtionalFields(Set<String> capabilities);
 
 }

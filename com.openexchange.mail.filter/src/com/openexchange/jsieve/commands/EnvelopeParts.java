@@ -50,100 +50,12 @@
 package com.openexchange.jsieve.commands;
 
 /**
- * {@link MatchType}
+ * {@link EnvelopeParts}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-public enum MatchType {
-    is,
-    contains,
-    matches,
-
-    // regex match type
-    regex("regex"),
-
-    // relational match types
-    value("relational"),
-    ge("relational"),
-    le("relational"),
-
-    // Size match types
-    over,
-    under,
-
-    // simplified matcher
-    startswith,
-    endswith
-    ;
-
-    private String argumentName;
-    private String require;
-    private String notName;
-
-
-    /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType() {
-       this.argumentName = ":"+this.name();
-       this.require = "";
-       this.notName = "not "+this.name();
-    }
-
-    /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType(String require) {
-       this.argumentName = ":"+this.name();
-       this.require = require;
-       this.notName = "not "+this.name();
-    }
-
-    public String getArgumentName(){
-        return argumentName;
-    }
-
-    public String getRequire(){
-        return require;
-    }
-
-    public String getNotName(){
-        return notName;
-    }
-
-    /**
-     * Retrieves the name of the matcher if the given string is a "not name".
-     *
-     * @param notName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNormalName(String notName){
-        for(MatchType type: MatchType.values()){
-            if(notName.equals(type.getNotName())){
-                return type.name();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the not name of the {@link MatchType} with the given argument name
-     *
-     * @param argumentName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNotNameForArgumentName(String argumentName){
-        return MatchType.valueOf(argumentName.substring(1)).getNotName();
-    }
-
-    public static boolean containsMatchType(String matchTypeName) {
-        for (MatchType cmd : values()) {
-            if (cmd.name().equals(matchTypeName) || cmd.getNotName().equals(matchTypeName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+public enum EnvelopeParts {
+    from,
+    to,
 }

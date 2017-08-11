@@ -49,101 +49,53 @@
 
 package com.openexchange.jsieve.commands;
 
+import java.util.Arrays;
+import java.util.Set;
+
 /**
- * {@link MatchType}
+ * {@link Headers}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-public enum MatchType {
-    is,
-    contains,
-    matches,
+public enum Headers {
+    from("from"),
+    to("to"),
+    cc("cc"),
+    bcc("bcc"),
+    sender("sender"),
+    resent_from("resent-from"),
+    resent_to("resent-to");
 
-    // regex match type
-    regex("regex"),
-
-    // relational match types
-    value("relational"),
-    ge("relational"),
-    le("relational"),
-
-    // Size match types
-    over,
-    under,
-
-    // simplified matcher
-    startswith,
-    endswith
-    ;
-
-    private String argumentName;
-    private String require;
-    private String notName;
-
+    String[] neededCapabilities=null;
+    String name = name();
 
     /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType() {
-       this.argumentName = ":"+this.name();
-       this.require = "";
-       this.notName = "not "+this.name();
-    }
-
-    /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType(String require) {
-       this.argumentName = ":"+this.name();
-       this.require = require;
-       this.notName = "not "+this.name();
-    }
-
-    public String getArgumentName(){
-        return argumentName;
-    }
-
-    public String getRequire(){
-        return require;
-    }
-
-    public String getNotName(){
-        return notName;
-    }
-
-    /**
-     * Retrieves the name of the matcher if the given string is a "not name".
+     * Initializes a new {@link Headers}.
      *
-     * @param notName The name of the matcher
-     * @return The normal name or null
+     * @param capabilities The needed capabilities
      */
-    public static String getNormalName(String notName){
-        for(MatchType type: MatchType.values()){
-            if(notName.equals(type.getNotName())){
-                return type.name();
-            }
-        }
-        return null;
+    private Headers(String name, String... capabilities) {
+       this.neededCapabilities = capabilities;
+       this.name=name;
     }
 
     /**
-     * Retrieves the not name of the {@link MatchType} with the given argument name
-     *
-     * @param argumentName The name of the matcher
-     * @return The normal name or null
+     * Initializes a new {@link Headers}.
      */
-    public static String getNotNameForArgumentName(String argumentName){
-        return MatchType.valueOf(argumentName.substring(1)).getNotName();
+    private Headers(String name) {
+        this.name = name;
     }
 
-    public static boolean containsMatchType(String matchTypeName) {
-        for (MatchType cmd : values()) {
-            if (cmd.name().equals(matchTypeName) || cmd.getNotName().equals(matchTypeName)) {
-                return true;
-            }
+    public String getHeaderName(){
+        return name;
+    }
+
+    public boolean isValid(Set<String> capabilities){
+        if(neededCapabilities==null){
+            return true;
         }
-        return false;
+        return Arrays.asList(neededCapabilities).containsAll(capabilities);
     }
 
 }

@@ -50,18 +50,25 @@
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.AddressParts;
+import com.openexchange.jsieve.commands.Headers;
 import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.AddressTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.ExtendedFieldTestCommandParser;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -72,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
+public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser implements ExtendedFieldTestCommandParser{
 
     /**
      * Initializes a new {@link AddressTestCommandParser}.
@@ -150,5 +157,27 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
         }
         jsonObject.put(AddressTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
         jsonObject.put(AddressTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
+    }
+
+    @Override
+    public Map<String, Set<String>> getAddtionalFields(Set<String> capabilities) {
+        Map<String, Set<String>> result = new HashMap<>(2);
+        // add envelope parts
+        Set<String> parts = new HashSet<>();
+        for(Headers part: Headers.values()){
+            parts.add(part.getHeaderName());
+        }
+        result.put("headers", parts);
+
+        // add address parts
+        Set<String> addressParts = new HashSet<>();
+        for(AddressParts part: AddressParts.values()){
+            if(part.isValid(capabilities)){
+                addressParts.add(part.name());
+            }
+        }
+        result.put("parts", addressParts);
+
+        return result;
     }
 }
