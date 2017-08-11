@@ -237,10 +237,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Get the available time for the attendees
         CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
-        Map<Attendee, List<Availability>> availableTimes = availabilityService.getCombinedAvailableTime(session, attendees, from, until);
+        Map<Attendee, Availability> availableTimes = availabilityService.getAttendeeAvailability(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
-        // Expand any recurring free slot instances 
+        // Expand any recurring available instances 
         expandRecurringInstances(from, until, availableTimes, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availableTimes, timeZone);
@@ -258,9 +258,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         // Iterate over all calendar availability blocks for all attendees
         for (Attendee attendee : attendees) {
-            List<Availability> availableTime = availableTimes.get(attendee);
+            Availability availability = availableTimes.get(attendee);
             // For each availability block and each calendar free slot create an equivalent free busy time slot
-            List<FreeBusyTime> freeBusyTimes = availableTime.isEmpty() ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availableTime, timeZone);
+            List<FreeBusyTime> freeBusyTimes = availability == null ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availability, timeZone);
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
@@ -290,43 +290,42 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
-    private void expandRecurringInstances(Date from, Date until, Map<Attendee, List<Availability>> availableTimes, TimeZone timeZone) throws OXException {
+    private void expandRecurringInstances(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
         for (Attendee attendee : availableTimes.keySet()) {
-            for (Availability calendarAvailability : availableTimes.get(attendee)) {
-                List<Available> auxFreeSlot = new ArrayList<>();
-                Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
-                for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {
-                    Available freeSlot = iterator.next();
-                    // No recurring free slot? Skip
-                    if (!freeSlot.contains(AvailableField.rrule)) {
-                        continue;
-                    }
-                    Date slotStartTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
-                    Date slotEndTime = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getEndTime(), timeZone));
-                    RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(freeSlot.getRecurrenceRule(), freeSlot.getStartTime(), null));
-                    // Find out the duration of the "seed" free slot
-                    long duration = slotEndTime.getTime() - slotStartTime.getTime();
-                    while (recurrenceIterator.hasNext()) {
-                        long nextOccurrence = recurrenceIterator.next();
-                        Date startOfOccurrence = new Date(nextOccurrence);
-                        // We reached the availability's end? Stop
-                        if (startOfOccurrence.after(until) || startOfOccurrence.after(endTime)) {
-                            break;
-                        }
-                        // Determine the end of the occurrence's instance
-                        Date endOfOccurrence = new Date(startOfOccurrence.getTime() + duration);
-                        // Create the occurrence
-                        Available occ = freeSlot.clone();
-                        occ.setStartTime(new DateTime(startOfOccurrence.getTime()));
-                        occ.setEndTime(new DateTime(endOfOccurrence.getTime()));
-                        // Add to the auxiliary
-                        auxFreeSlot.add(occ);
-                    }
-                    // Remove the "seed" free slot, and only retain its occurrences
-                    iterator.remove();
+            Availability calendarAvailability = availableTimes.get(attendee);
+            List<Available> auxAvailable = new ArrayList<>();
+            Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
+            for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {
+                Available available = iterator.next();
+                // No recurring free slot? Skip
+                if (!available.contains(AvailableField.rrule)) {
+                    continue;
                 }
-                calendarAvailability.getAvailable().addAll(auxFreeSlot);
+                Date availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
+                Date availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
+                RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(available.getRecurrenceRule(), available.getStartTime(), null));
+                // Find out the duration of the "seed" free slot
+                long duration = availableEndTime.getTime() - availableStartTime.getTime();
+                while (recurrenceIterator.hasNext()) {
+                    long nextOccurrence = recurrenceIterator.next();
+                    Date startOfOccurrence = new Date(nextOccurrence);
+                    // We reached the availability's end? Stop
+                    if (startOfOccurrence.after(until) || startOfOccurrence.after(endTime)) {
+                        break;
+                    }
+                    // Determine the end of the occurrence's instance
+                    Date endOfOccurrence = new Date(startOfOccurrence.getTime() + duration);
+                    // Create the occurrence
+                    Available occ = available.clone();
+                    occ.setStartTime(new DateTime(startOfOccurrence.getTime()));
+                    occ.setEndTime(new DateTime(endOfOccurrence.getTime()));
+                    // Add to the auxiliary
+                    auxAvailable.add(occ);
+                }
+                // Remove the "seed" available, and only retain its occurrences
+                iterator.remove();
             }
+            calendarAvailability.getAvailable().addAll(auxAvailable);
         }
     }
 
@@ -371,46 +370,44 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     }
 
     /**
-     * Create an equivalent free busy time slot for each availability block and each calendar free slot in the
-     * specified {@link Availability} blocks
+     * Create an equivalent free busy time slot for each of the available blocks in the
+     * specified {@link Availability}
      * 
-     * @param availableTime The {@link Availability} blocks
+     * @param availability The {@link Availability} block
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
      */
-    private List<FreeBusyTime> calculateFreeBusyTimes(List<Availability> availableTime, TimeZone timeZone) throws OXException {
-        List<FreeBusyTime> freeBusyTimes = new ArrayList<>(availableTime.size());
-        for (Availability availability : availableTime) {
-            // Get the availability's start/end times
-            Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
-            Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
-            // Mark the entire block as busy if there are no free slots
-            if (availability.getAvailable().isEmpty()) {
-                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
-                continue;
-            }
+    private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) throws OXException {
+        List<FreeBusyTime> freeBusyTimes = new ArrayList<>();
+        // Get the availability's start/end times
+        Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
+        Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
+        // Mark the entire block as busy if there are no free slots
+        if (availability.getAvailable().isEmpty()) {
+            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
+            return freeBusyTimes;
+        }
 
-            Date slotStartTime = startTime;
-            Date slotEndTime = endTime;
-            java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
-            for (Available calendarFreeSlot : availability.getAvailable()) {
-                // Get the slot's start/end times
-                slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
-                slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
+        Date slotStartTime = startTime;
+        Date slotEndTime = endTime;
+        java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
+        for (Available calendarFreeSlot : availability.getAvailable()) {
+            // Get the slot's start/end times
+            slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
+            slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
 
-                // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
-                if (!slotStartTime.equals(startTime)) {
-                    // Create a split for the availability component with the equivalent BusyType
-                    freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
-                }
-                // Start from slot end time on the next iteration
-                startTime = slotEndTime;
+            // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
+            if (!slotStartTime.equals(startTime)) {
+                // Create a split for the availability component with the equivalent BusyType
+                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
             }
+            // Start from slot end time on the next iteration
+            startTime = slotEndTime;
+        }
 
-            //Create the last block
-            if (endTime.after(slotEndTime)) {
-                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
-            }
+        //Create the last block
+        if (endTime.after(slotEndTime)) {
+            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
         }
         return freeBusyTimes;
     }
@@ -424,48 +421,45 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param availableTimes The {@link Availability} blocks to adjust
      * @param timeZone The user's {@link TimeZone}
      */
-    private void adjustIntervals(Date from, Date until, Map<Attendee, List<Availability>> availableTimes, TimeZone timeZone) {
-        for (List<Availability> availabilities : availableTimes.values()) {
-            Iterator<Availability> iterator = availabilities.iterator();
-            while (iterator.hasNext()) {
-                Availability availability = iterator.next();
-                Date start = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
-                Date end = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
+    private void adjustIntervals(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) {
+        for (Iterator<Availability> iterator = availableTimes.values().iterator(); iterator.hasNext();) {
+            Availability availability = iterator.next();
+            Date start = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
+            Date end = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
 
-                // Discard all availability blocks that are outside the requested interval
-                if (start.after(until) || end.before(from)) {
-                    iterator.remove();
-                    continue;
+            // Discard all availability blocks that are outside the requested interval
+            if (start.after(until) || end.before(from)) {
+                iterator.remove();
+                continue;
+            }
+
+            // Check for any intersections
+            if (end.after(from) && start.before(until)) {
+                // Intersection detected; adjust the free slots as well
+                if (start.before(from)) {
+                    availability.setStartTime(new DateTime(from.getTime()));
+                }
+                if (end.after(until)) {
+                    availability.setEndTime(new DateTime(until.getTime()));
                 }
 
-                // Check for any intersections
-                if (end.after(from) && start.before(until)) {
-                    // Intersection detected; adjust the free slots as well
-                    if (start.before(from)) {
-                        availability.setStartTime(new DateTime(from.getTime()));
-                    }
-                    if (end.after(until)) {
-                        availability.setEndTime(new DateTime(until.getTime()));
+                Iterator<Available> availableIterator = availability.getAvailable().iterator();
+                while (availableIterator.hasNext()) {
+                    Available available = availableIterator.next();
+                    Date availableStart = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
+                    Date availableEnd = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
+                    if (availableStart.after(until) || availableEnd.before(from)) {
+                        availableIterator.remove();
+                        continue;
                     }
 
-                    Iterator<Available> freeSlotIterator = availability.getAvailable().iterator();
-                    while (freeSlotIterator.hasNext()) {
-                        Available freeSlot = freeSlotIterator.next();
-                        Date fsStart = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getStartTime(), timeZone));
-                        Date fsEnd = new Date(CalendarUtils.getDateInTimeZone(freeSlot.getEndTime(), timeZone));
-                        if (fsStart.after(until) || fsEnd.before(from)) {
-                            freeSlotIterator.remove();
-                            continue;
+                    // Intersection of available and range
+                    if (availableEnd.after(from) && availableStart.before(until)) {
+                        if (availableStart.before(from)) {
+                            available.setStartTime(new DateTime(from.getTime()));
                         }
-
-                        // Intersection of free slot and range
-                        if (fsEnd.after(from) && fsStart.before(until)) {
-                            if (fsStart.before(from)) {
-                                freeSlot.setStartTime(new DateTime(from.getTime()));
-                            }
-                            if (fsEnd.after(until)) {
-                                freeSlot.setEndTime(new DateTime(until.getTime()));
-                            }
+                        if (availableEnd.after(until)) {
+                            available.setEndTime(new DateTime(until.getTime()));
                         }
                     }
                 }
