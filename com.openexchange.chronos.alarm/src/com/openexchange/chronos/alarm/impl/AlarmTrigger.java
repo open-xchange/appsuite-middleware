@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm;
+package com.openexchange.chronos.alarm.impl;
 
 
 /**
@@ -60,8 +60,9 @@ public class AlarmTrigger {
 
     private Integer account;
     private String action;
-    private Integer alarm;
+    private String alarm;
     private Integer contextId;
+    private String eventId;
     private String recurrence;
     private Long time;
     private Integer userId;
@@ -71,6 +72,7 @@ public class AlarmTrigger {
     private boolean isActionSet=false;
     private boolean isAlarmSet=false;
     private boolean isContextIdSet=false;
+    private boolean isEventIdSet=false;
     private boolean isRecurrenceSet=false;
     private boolean isTimeSet=false;
     private boolean isUserIdSet=false;
@@ -114,6 +116,15 @@ public class AlarmTrigger {
      */
     public boolean containsAlarm() {
         return isAlarmSet;
+    }
+
+    /**
+     * Gets the isEventIdSet
+     *
+     * @return The isEventIdSet
+     */
+    public boolean containsEventId() {
+        return isEventIdSet;
     }
 
 
@@ -193,7 +204,7 @@ public class AlarmTrigger {
      *
      * @return The alarm
      */
-    public Integer getAlarm() {
+    public String getAlarm() {
         return alarm;
     }
 
@@ -206,6 +217,15 @@ public class AlarmTrigger {
      */
     public Integer getContextId() {
         return contextId;
+    }
+
+    /**
+     * Gets the eventId
+     *
+     * @return The eventId
+     */
+    public String getEventId() {
+        return eventId;
     }
 
 
@@ -283,6 +303,15 @@ public class AlarmTrigger {
 
 
     /**
+     * Removes the eventId
+     */
+    public void removeEventId() {
+        this.eventId=null;
+        this.isEventIdSet=false;
+    }
+
+
+    /**
      * Removes the recurrence
      */
     public void removeProcessed() {
@@ -354,7 +383,7 @@ public class AlarmTrigger {
      *
      * @param alarm The alarm to set
      */
-    public void setAlarm(Integer alarm) {
+    public void setAlarm(String alarm) {
         this.alarm = alarm;
         this.isAlarmSet=true;
     }
@@ -409,6 +438,16 @@ public class AlarmTrigger {
     public void setUserId(Integer userId) {
         this.userId = userId;
         this.isUserIdSet=true;
+    }
+
+    /**
+     * Sets the eventId
+     *
+     * @param eventId The eventId to set
+     */
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+        this.isEventIdSet=true;
     }
 
 

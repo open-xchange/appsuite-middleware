@@ -47,54 +47,25 @@
  *
  */
 
-package com.openexchange.chronos.alarm.storage;
+package com.openexchange.chronos.alarm.impl;
 
-import java.sql.Connection;
-import java.util.List;
-import com.openexchange.chronos.alarm.impl.AlarmTrigger;
-import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link AlarmTriggerStorage}
+ * {@link AlarmTriggerField}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
+public enum AlarmTriggerField {
 
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
-
-    /**
-     * @param contextId
-     * @param account
-     * @param fields
-     * @param con
-     * @return
-     * @throws OXException
-     */
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields, Connection con) throws OXException;
-
-    /**
-     * @param contextId
-     * @param account
-     * @param until
-     * @param fields
-     * @return
-     * @throws OXException
-     */
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
-
-
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds) throws OXException;
-
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds, Connection writeCon) throws OXException;
+    ACCOUNT,
+    ACTION,
+    ALARM_ID,
+    CONTEXT_ID,
+    EVENT_ID,
+    PROCESSED,
+    RECURRENCE,
+    TIME,
+    USER_ID
 
 }

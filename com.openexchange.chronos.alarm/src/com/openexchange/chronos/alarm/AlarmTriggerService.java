@@ -49,22 +49,19 @@
 
 package com.openexchange.chronos.alarm;
 
-
 /**
- * {@link AlarmTriggerField}
+ * {@link AlarmTriggerService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public enum AlarmTriggerField {
+public interface AlarmTriggerService {
 
-    ACCOUNT,
-    ACTION,
-    ALARM_ID,
-    CONTEXT_ID,
-    PROCESSED,
-    RECURRENCE,
-    TIME,
-    USER_ID
+    /**
+     * @param account
+     * @param contextId
+     * @param change
+     */
+    void handleChange(int account, int contextId, AlarmChange change);
 
 }

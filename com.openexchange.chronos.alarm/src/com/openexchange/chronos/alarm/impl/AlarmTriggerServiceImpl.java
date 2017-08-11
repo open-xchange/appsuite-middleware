@@ -47,125 +47,131 @@
  *
  */
 
-package com.openexchange.chronos.alarm;
+package com.openexchange.chronos.alarm.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.alarm.AlarmChange;
+import com.openexchange.chronos.alarm.AlarmTriggerService;
+import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CreateResult;
-import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AlarmCalendarHandler} handles all event changes and updates alarms accordingly
+ * {@link AlarmTriggerServiceImpl} handles all event changes and updates alarms accordingly
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmCalendarHandler implements CalendarHandler {
+public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmCalendarHandler.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmTriggerServiceImpl.class);
     private final AlarmTriggerStorage storage;
     private final RecurrenceService recurrenceService;
 
     /**
-     * Initializes a new {@link AlarmCalendarHandler}.
+     * Initializes a new {@link AlarmTriggerServiceImpl}.
      */
-    public AlarmCalendarHandler(AlarmTriggerStorage storage, RecurrenceService recurrenceService) {
+    public AlarmTriggerServiceImpl(AlarmTriggerStorage storage, RecurrenceService recurrenceService) {
         super();
         this.storage = storage;
         this.recurrenceService = recurrenceService;
     }
 
     @Override
-    public void handle(CalendarEvent event) {
+    public void handleChange(int account, int contextId, AlarmChange change) {
         try {
-            handleCreate(event);
-            handleDelete(event);
-            handleUpdate(event);
+
+            switch (change.getType()) {
+                case CREATE:
+                    handleCreate(account, contextId, change);
+                    break;
+                case DELETE:
+                    break;
+                case UPDATE:
+                    break;
+                default:
+                    break;
+            }
         } catch (OXException e) {
             LOG.error("Error while handling calendar result for alarm generation", e);
         }
+
     }
 
-    private void handleCreate(CalendarEvent event) throws OXException {
-        int contextId = event.getContextId();
-        List<CreateResult> creations = event.getCreations();
-        if (creations != null && !creations.isEmpty()) {
+    private void handleCreate(int account, int contextId, AlarmChange create) throws OXException {
+        createAlarms(contextId, account, create.getAlarmsPerAttendee(), create.getNewEvent());
+    }
 
-            for (CreateResult createResult : creations) {
-                //TODO: get internal user attendees & create triggers for their alarms
-                //                createAlarms(contextId, event.getCalendarUser(), createResult.getCreatedEvent());
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
+    private void createAlarms(Integer contextId, Integer account, Map<Integer, List<Alarm>> alarmsPerAttendee, EventSeriesWrapper eventWrapper) throws OXException {
+        Event event = eventWrapper.getEvent();
+        for(Integer userId: alarmsPerAttendee.keySet()){
+
+            List<Alarm> alarms = alarmsPerAttendee.get(userId);
+            if(alarms==null || alarms.isEmpty()){
+                continue;
             }
-        }
-
-    }
-
-    private void createAlarms(Integer contextId, Integer calUser, Event eve) throws OXException {
-        if (eve.containsAlarms()) {
-            for (Alarm alarm : eve.getAlarms()) {
+            for (Alarm alarm : alarms) {
                 AlarmTrigger trigger = new AlarmTrigger();
-                trigger.setAccount(0);
-                trigger.setUserId(calUser);
+                trigger.setAccount(account);
+                trigger.setUserId(userId);
                 trigger.setContextId(contextId);
                 trigger.setAction(alarm.getAction().getValue());
                 trigger.setProcessed(false);
-                trigger.setAlarm(alarm.getId());
+                trigger.setAlarm(String.valueOf(alarm.getId()));
+                trigger.setEventId(event.getId());
 
-                if (eve.containsRecurrenceRule()) {
+                if (event.containsRecurrenceRule()) {
+
                     long[] exceptions = null;
-                    if (eve.containsDeleteExceptionDates()) {
-                        SortedSet<RecurrenceId> deleteExceptionDates = eve.getDeleteExceptionDates();
-                        exceptions = new long[deleteExceptionDates.size()];
+                    if (eventWrapper.getExceptions() != null) {
+                        exceptions = new long[eventWrapper.getExceptions().size()];
                         int x = 0;
-                        for (RecurrenceId id : deleteExceptionDates) {
-                            exceptions[x++] = id.getValue().getTimestamp();
+                        for (RecurrenceId recurrenceId : eventWrapper.getExceptions()) {
+                            exceptions[x++] = recurrenceId.getValue().getTimestamp();
                         }
                     }
-                    RecurrenceData data = new DefaultRecurrenceData(eve.getRecurrenceRule(), eve.getStartDate(), exceptions);
+                    RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
                     RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
                     trigger.setRecurrence(String.valueOf(iterateRecurrenceIds.next().getValue().getTimestamp()));
                 }
-                trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), eve, TimeZone.getTimeZone("UTC")).getTime());
+                trigger.setTime(AlarmUtils.getNextTriggerTime(event, alarm, new Date(), UTC, recurrenceService, eventWrapper.getExceptions()).getTime());
                 storage.insertAlarmTrigger(trigger);
             }
+
         }
+
     }
 
-    private void handleDelete(CalendarEvent event) throws OXException {
-        int contextId = event.getContextId();
-        List<DeleteResult> deletions = event.getDeletions();
-        if (deletions != null && !deletions.isEmpty()) {
-
-            List<Integer> alarmsToDelete = new ArrayList<>(deletions.size());
-            for (DeleteResult deleteResult : deletions) {
-                EventID eve = deleteResult.getEventID();
-                //TODO: delete all triggers by event id / recurrence id
-            }
-            if (alarmsToDelete.size() > 0) {
-                storage.deleteAlarmTriggers(contextId, 0, alarmsToDelete);
-            }
-        }
-    }
+//    private void handleDelete(CalendarResult result) throws OXException {
+//        int contextId = result.getSession().getContextId();
+//        List<DeleteResult> deletions = result.getDeletions();
+//        if (deletions != null && !deletions.isEmpty()) {
+//
+//            List<EventID> alarmsToDelete = new ArrayList<>(deletions.size());
+//            for (DeleteResult deleteResult : deletions) {
+//                alarmsToDelete.add(deleteResult.getEventID());
+//            }
+//            if (alarmsToDelete.size() > 0) {
+//                storage.deleteAlarmTriggers(contextId, 0, alarmsToDelete);
+//            }
+//        }
+//    }
 
     /**
      * A set of fields which is relevant for the update operation
@@ -180,35 +186,28 @@ public class AlarmCalendarHandler implements CalendarHandler {
         RELEVANT_FIELDS.add(EventField.RECURRENCE_RULE);
     }
 
-    private void handleUpdate(CalendarEvent event) throws OXException {
-        int contextId = event.getContextId();
-        List<UpdateResult> updates = event.getUpdates();
-        if (updates != null && !updates.isEmpty()) {
-
-            for (UpdateResult updateResult : updates) {
-
-                //TODO: don't expect individual alarms to be contained in results
-
-                Event eve = updateResult.getUpdate();
-                Set<EventField> updatedFields = updateResult.getUpdatedFields();
-                if (Collections.disjoint(updatedFields, RELEVANT_FIELDS)) {
-                    // Ignore updates which doesn't influence alarms
-                    continue;
-                }
-
-                // First delete all old trigger
-                Event old = updateResult.getOriginal();
-                List<Integer> triggerToDelete = new ArrayList<>(old.getAlarms().size());
-                for (Alarm oldAlarm : old.getAlarms()) {
-                    triggerToDelete.add(oldAlarm.getId());
-                }
-                storage.deleteAlarmTriggers(contextId, 0, triggerToDelete);
-
-                // Then create new alarms from scratch
-                //                createAlarms(contextId, event.getCalendarUser(), eve);
-
-            }
-        }
-    }
+//    private void handleUpdate(CalendarResult result) throws OXException {
+//        int contextId = result.getSession().getContextId();
+//        List<UpdateResult> updates = result.getUpdates();
+//        if (updates != null && !updates.isEmpty()) {
+//
+//            for (UpdateResult updateResult : updates) {
+//                Event eve = updateResult.getUpdate();
+//                Set<EventField> updatedFields = updateResult.getUpdatedFields();
+//                if (Collections.disjoint(updatedFields, RELEVANT_FIELDS)) {
+//                    // Ignore updates which doesn't influence alarms
+//                    continue;
+//                }
+//
+//                // First delete all old trigger
+//                Event old = updateResult.getOriginal();
+//                storage.deleteAlarmTriggers(contextId, 0, Collections.singletonList(new EventID(old.getFolderId(), old.getId(), old.getRecurrenceId())));
+//
+//                // Then create new alarms from scratch
+//                createAlarms(contextId, result.getCalendarUser(), eve);
+//
+//            }
+//        }
+//    }
 
 }

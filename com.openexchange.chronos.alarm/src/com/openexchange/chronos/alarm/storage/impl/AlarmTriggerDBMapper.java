@@ -50,8 +50,8 @@
 package com.openexchange.chronos.alarm.storage.impl;
 
 import java.util.EnumMap;
-import com.openexchange.chronos.alarm.AlarmTrigger;
-import com.openexchange.chronos.alarm.AlarmTriggerField;
+import com.openexchange.chronos.alarm.impl.AlarmTrigger;
+import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -129,6 +129,29 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
+        mappings.put(AlarmTriggerField.EVENT_ID, new VarCharMapping<AlarmTrigger>("eventId", "Event ID") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, String value) {
+                alarmTrigger.setEventId(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsEventId();
+            }
+
+            @Override
+            public String get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getEventId();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeEventId();
+            }
+        });
+
         mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>("account", "Account") {
 
             @Override
@@ -152,10 +175,10 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>("alarm", "Alarm ID") {
+        mappings.put(AlarmTriggerField.ALARM_ID, new VarCharMapping<AlarmTrigger>("alarm", "Alarm ID") {
 
             @Override
-            public void set(AlarmTrigger alarmTrigger, Integer value) {
+            public void set(AlarmTrigger alarmTrigger, String value) {
                 alarmTrigger.setAlarm(value);
             }
 
@@ -165,7 +188,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public Integer get(AlarmTrigger alarmTrigger) {
+            public String get(AlarmTrigger alarmTrigger) {
                 return alarmTrigger.getAlarm();
             }
 

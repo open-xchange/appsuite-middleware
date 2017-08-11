@@ -255,8 +255,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
             "CREATE TABLE calendar_alarm_trigger (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
-                "alarm INT4 UNSIGNED NOT NULL," +
+                "alarm VARCHAR(128) NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
+                "eventId VARCHAR(128) NOT NULL," +
                 "triggerDate BIGINT(20) NOT NULL," +
                 "action VARCHAR(32) NOT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +

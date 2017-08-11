@@ -47,54 +47,120 @@
  *
  */
 
-package com.openexchange.chronos.alarm.storage;
+package com.openexchange.chronos.alarm;
 
-import java.sql.Connection;
 import java.util.List;
-import com.openexchange.chronos.alarm.impl.AlarmTrigger;
-import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 
 /**
- * {@link AlarmTriggerStorage}
+ * {@link EventSeriesWrapper}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
+public class EventSeriesWrapper {
 
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
+    private boolean isSeries;
+    private boolean isException;
+    private Event event;
+    List<RecurrenceId> exceptions;
 
     /**
-     * @param contextId
-     * @param account
-     * @param fields
-     * @param con
-     * @return
-     * @throws OXException
+     * Initializes a new {@link EventSeriesWrapper}.
+     * @param isSeries
+     * @param isException
+     * @param event
+     * @param exceptions
      */
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields, Connection con) throws OXException;
+    public EventSeriesWrapper(boolean isSeries, boolean isException, Event event, List<RecurrenceId> exceptions) {
+        super();
+        this.isSeries = isSeries;
+        this.isException = isException;
+        this.event = event;
+        this.exceptions = exceptions;
+    }
+
 
     /**
-     * @param contextId
-     * @param account
-     * @param until
-     * @param fields
-     * @return
-     * @throws OXException
+     * Gets the isSeries
+     *
+     * @return The isSeries
      */
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
+    public boolean isSeries() {
+        return isSeries;
+    }
 
 
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds) throws OXException;
+    /**
+     * Sets the isSeries
+     *
+     * @param isSeries The isSeries to set
+     */
+    public void setSeries(boolean isSeries) {
+        this.isSeries = isSeries;
+    }
 
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds, Connection writeCon) throws OXException;
+
+    /**
+     * Gets the isException
+     *
+     * @return The isException
+     */
+    public boolean isException() {
+        return isException;
+    }
+
+
+    /**
+     * Sets the isException
+     *
+     * @param isException The isException to set
+     */
+    public void setException(boolean isException) {
+        this.isException = isException;
+    }
+
+
+    /**
+     * Gets the event
+     *
+     * @return The event
+     */
+    public Event getEvent() {
+        return event;
+    }
+
+
+    /**
+     * Sets the event
+     *
+     * @param event The event to set
+     */
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+
+    /**
+     * Gets the exceptions
+     *
+     * @return The exceptions
+     */
+    public List<RecurrenceId> getExceptions() {
+        return exceptions;
+    }
+
+
+    /**
+     * Sets the exceptions
+     *
+     * @param exceptions The exceptions to set
+     */
+    public void setExceptions(List<RecurrenceId> exceptions) {
+        this.exceptions = exceptions;
+    }
+
+
 
 }

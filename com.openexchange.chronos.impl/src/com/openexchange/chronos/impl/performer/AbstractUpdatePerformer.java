@@ -74,6 +74,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.alarm.AlarmTriggerService;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -82,6 +83,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -523,4 +525,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return event;
     }
 
+    protected AlarmTriggerService getTriggerService(){
+        return Services.getService(AlarmTriggerService.class);
+    }
 }
