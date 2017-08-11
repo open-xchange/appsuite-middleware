@@ -58,6 +58,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -298,12 +299,13 @@ public final class UpdateExecutor {
     }
 
     private final void removeContexts() throws OXException {
-        Connection con = Database.get(poolId, schema);
+        DatabaseService databaseService = Database.getDatabaseService();
+        Connection con = databaseService.getReadOnly();
         try {
-            int[] contextIds = Database.getDatabaseService().getContextsInSchema(con, poolId, schema);
+            int[] contextIds = databaseService.getContextsInSchema(con, poolId, schema);
             ContextStorage.getInstance().invalidateContexts(contextIds);
         } finally {
-            Database.back(poolId, con);
+            databaseService.backReadOnly(con);
         }
     }
 }

@@ -50,6 +50,10 @@
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -64,7 +68,7 @@ public class CheckCountsConsistency extends ContextAbstraction {
 
     /**
      * Entry point
-     * 
+     *
      * @param args The command line arguments
      */
     public static void main(final String args[]) {
@@ -73,7 +77,7 @@ public class CheckCountsConsistency extends ContextAbstraction {
 
     /**
      * Initialises a new {@link CheckCountsConsistency}.
-     * 
+     *
      * @param args The command line arguments
      */
     public CheckCountsConsistency(final String[] args) {
@@ -85,11 +89,41 @@ public class CheckCountsConsistency extends ContextAbstraction {
             parser.ownparse(args);
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-
-            // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
-            oxres.checkCountsConsistency(true, true, auth);
+            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            Runnable runnbable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        oxres.checkCountsConsistency(true, true, auth);
+                    } catch (Exception e) {
+                        errorRef.set(e);
+                    }
+                }
+            };
+            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            new Thread(ft, "Open-Xchange Counts Consistency Checker").start();
+
+            // Await termination
+            System.out.print("Checking consistency for counters. This may take a while");
+            int c = 56;
+            while (false == ft.isDone()) {
+                System.out.print(".");
+                if (c++ >= 76) {
+                    c = 0;
+                    System.out.println();
+                }
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            }
+            System.out.println();
+
+            // Check for error
+            Exception error = errorRef.get();
+            if (null != error) {
+                throw error;
+            }
 
             System.out.println("Counts successfully checked");
             sysexit(0);
@@ -98,11 +132,6 @@ public class CheckCountsConsistency extends ContextAbstraction {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.console.context.ContextAbstraction#getObjectName()
-     */
     @Override
     protected String getObjectName() {
         return "counts consistency";

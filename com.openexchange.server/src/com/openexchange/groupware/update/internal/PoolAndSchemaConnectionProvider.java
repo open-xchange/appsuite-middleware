@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import java.sql.Connection;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -106,7 +107,13 @@ public class PoolAndSchemaConnectionProvider extends AbstractConnectionProvider 
 
     @Override
     public int[] getContextsInSameSchema() throws OXException {
-        return databaseService.getContextsInSchema(getConnection(), poolId, schema);
+        DatabaseService databaseService = Database.getDatabaseService();
+        Connection con = databaseService.getReadOnly();
+        try {
+            return databaseService.getContextsInSchema(con, poolId, schema);
+        } finally {
+            databaseService.backReadOnly(con);
+        }
     }
 
 }

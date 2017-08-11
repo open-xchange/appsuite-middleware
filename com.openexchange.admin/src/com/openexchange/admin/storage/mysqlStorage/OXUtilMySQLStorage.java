@@ -3081,7 +3081,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 if (serversIds.isEmpty()) {
                     throw new StorageException("No such server registered: " + serverId);
                 }
-                onlyOneServerRegistered = serversIds.size() == 1 && serverId == serversIds.get(0).intValue();
+                if (serversIds.size() == 1) {
+                    if (serverId != serversIds.get(0).intValue()) {
+                        // This node does not belong to registered server
+                        for (Filestore store : stores) {
+                            store.setSize(L(toMB(l(store.getSize()))));
+                            store.setCurrentContexts(Integer.valueOf(0));
+                            store.setUsed(L(0));
+                        }
+                        return;
+                    }
+                    onlyOneServerRegistered = true;
+                } else {
+                    onlyOneServerRegistered = false;
+                }
 
                 allFilledPoolsAndSchemas = getAllFilledPoolsAndSchemasForFilestoreUsage(con);
             } catch (PoolException e) {
@@ -3110,7 +3123,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             void addForEntity(long usage) {
-                this.usage.addAndGet(usage);
+                if (usage > 0) {
+                    this.usage.addAndGet(usage);
+                }
                 entities.incrementAndGet();
             }
 
@@ -3195,14 +3210,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     fsUsage = id2usage.putIfAbsent(filestoreId, newUsage);
                                     if (null != fsUsage) {
                                         // Another thread inserted usage in the meantime
-                                        if (usage > 0) {
-                                            fsUsage.addForEntity(usage);
-                                        }
-                                    }
-                                } else {
-                                    if (usage > 0) {
                                         fsUsage.addForEntity(usage);
                                     }
+                                } else {
+                                    fsUsage.addForEntity(usage);
                                 }
                             }
                         } catch (SQLException e) {

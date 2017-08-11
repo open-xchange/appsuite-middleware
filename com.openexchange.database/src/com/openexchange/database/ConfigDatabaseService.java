@@ -137,13 +137,23 @@ public interface ConfigDatabaseService {
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one.
-     * @param con connection to the config database
+     *
+     * @param con A connection to the config database
      * @param contextId identifier of a context.
-     * @return all contexts having their data in the same schema and on the same database.
-     * @throws OXException if some problem occurs.
+     * @return All contexts having their data in the same schema and on the same database.
+     * @throws OXException If contexts cannot be returned
      */
     int[] getContextsInSameSchema(Connection con, int contextId) throws OXException;
 
+    /**
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+     *
+     * @param con A connection to the config database
+     * @param poolId The identifier of the database host, on which the schema resides
+     * @param schema The name of the schema
+     * @return All contexts having their data in the same schema and on the same database.
+     * @throws OXException If contexts cannot be returned
+     */
     int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException;
 
     /**
