@@ -51,7 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
