@@ -49,19 +49,65 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.List;
+import java.util.Map;
+import com.openexchange.session.Session;
+
 /**
- * {@link CalendarHandler}
+ * {@link CalendarEvent}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarHandler {
+public interface CalendarEvent extends TimestampedResult {
 
     /**
-     * Handles a calendar event resulting from a performed calendar operation.
+     * Gets the identifier of the context the event originates in.
      *
-     * @param event The calendar event
+     * @return The context identifier
      */
-    void handle(CalendarEvent event);
+    int getContextId();
+
+    /**
+     * Gets the identifier of the calendar account the event originates in.
+     *
+     * @return The account identifier
+     */
+    int getAccountId();
+
+    /**
+     * Gets the client session if available.
+     *
+     * @return The session, or <code>null</code> if not available
+     */
+    Session getSession();
+
+    /**
+     * Gets a map holding the identifiers of all folders that are affected by the event, associated to the corresponding user identifier.
+     *
+     * @return The identifiers of the affected folders for each user
+     */
+    Map<Integer, List<String>> getAffectedFoldersPerUser();
+
+    /**
+     * Gets the delete results.
+     *
+     * @return The delete results, or an empty list if there are none
+     */
+    List<DeleteResult> getDeletions();
+
+    /**
+     * Gets the update results.
+     *
+     * @return The update results, or an empty list if there are none
+     */
+    List<UpdateResult> getUpdates();
+
+    /**
+     * Gets the create results.
+     *
+     * @return The create results, or an empty list if there are none
+     */
+    List<CreateResult> getCreations();
 
 }

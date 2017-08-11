@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolderView;
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,6 +73,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -113,7 +115,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.folder = folder;
         this.calendarUserId = getCalendarUserId(folder);
         this.timestamp = new Date();
-        this.result = new InternalCalendarResult(session, calendarUserId, folder.getID());
+        this.result = new InternalCalendarResult(session, calendarUserId, folder);
     }
 
     /**
@@ -187,8 +189,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
         /*
-         * add appropriate delete results
+         * track deletion in result
          */
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addPlainDeletion(timestamp.getTime(), getEventID(originalEvent));
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
     }
@@ -233,7 +236,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * 'touch' event & track calendar results
          */
         touch(id);
-        Event updatedEvent = loadEventData(id, false);
+        Event updatedEvent = loadEventData(id);
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
     }
@@ -313,8 +317,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * track results
          */
-        Event createdException = loadEventData(exceptionEvent.getId(), false);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+        Event createdException = loadEventData(exceptionEvent.getId());
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
         result.addPlainCreation(createdException);
         result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalMasterEvent.getId(), recurrenceId));
@@ -358,40 +362,34 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Loads all data for a specific event, including attendees, attachments and alarms.
+     * Loads all non user-specific data for a specific event, including attendees and attachments.
      * <p/>
-     * The parent folder identifier is set based on {@link AbstractUpdatePerformer#folder}
+     * No <i>userization</i> of the event is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
+     * event data is loaded from the storage.
      *
      * @param id The identifier of the event to load
      * @return The event data
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
      */
     protected Event loadEventData(String id) throws OXException {
-        return loadEventData(id, true);
-    }
-
-    /**
-     * Loads all data for a specific event, including attendees, attachments and alarms.
-     * <p/>
-     * The parent folder identifier is optionally set based on {@link AbstractUpdatePerformer#folder}
-     *
-     * @param id The identifier of the event to load
-     * @param applyFolderId <code>true</code> to take over the parent folder identifier representing the view on the event, <code>false</code>, otherwise
-     * @return The event data
-     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
-     */
-    protected Event loadEventData(String id, boolean applyFolderId) throws OXException {
         Event event = storage.getEventStorage().loadEvent(id, null);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
-        event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, EventField.values());
-        if (applyFolderId) {
-            event.setFolderId(folder.getID());
-        }
-        return event;
+        return new UnmodifiableEvent(storage.getUtilities().loadAdditionalEventData(-1, event, null));
     }
 
+    /**
+     * Loads all non user-specific data for a collection of exceptions of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exceptions from
+     * @param recurrenceIds The recurrence identifiers of the exceptions to load
+     * @return The event exception data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_RECURRENCE_NOT_FOUND}
+     */
     protected List<Event> loadExceptionData(String seriesId, Collection<RecurrenceId> recurrenceIds) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIds && 0 < recurrenceIds.size()) {
@@ -403,21 +401,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 exceptions.add(exception);
             }
         }
-        return storage.getUtilities().loadAdditionalEventData(calendarUserId, exceptions, EventField.values());
+        return storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
     }
 
-    protected Event loadExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
-        Event changeException = optExceptionData(seriesId, recurrenceId);
-        if (null == changeException) {
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, String.valueOf(recurrenceId));
-        }
-        return changeException;
-    }
-
+    /**
+     * Optionally loads all non user-specific data for a specific exception of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exception from
+     * @param recurrenceId The recurrence identifier of the exception to load
+     * @return The event exception data, or <code>null</code> if not found
+     */
     protected Event optExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
         Event changeException = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
         if (null != changeException) {
-            changeException = storage.getUtilities().loadAdditionalEventData(calendarUserId, changeException, null);
+            changeException = storage.getUtilities().loadAdditionalEventData(-1, changeException, null);
         }
         return changeException;
     }
@@ -489,4 +489,38 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected Event userize(Event event) throws OXException {
         return userize(event, calendarUserId);
     }
+
+    /**
+     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
+     * via {@link #calendarUserId}. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * <li>taking over the user's personal list of alarm for the event</li>
+     * </ul>
+     *
+     * @param event The event to userize from the current calendar user's point of view
+     * @param alarms The alarms to take over
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    protected Event userize(Event event, List<Alarm> alarms) throws OXException {
+        event = userize(event, calendarUserId);
+        if (null == alarms && null != event.getAlarms() || null != alarms && null == event.getAlarms()) {
+            final List<Alarm> userizedAlarms = alarms;
+            event = new DelegatingEvent(event) {
+
+                @Override
+                public List<Alarm> getAlarms() {
+                    return userizedAlarms;
+                }
+            };
+        }
+        return event;
+    }
+
 }

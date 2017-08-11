@@ -115,7 +115,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * load original event data & attendee
          */
-        Event originalEvent = loadEventData(objectId, false);
+        Event originalEvent = loadEventData(objectId);
         attendee = session.getEntityResolver().prepare(attendee);
         Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
         /*
@@ -200,16 +200,16 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         storage.getAttendeeStorage().updateAttendee(originalEvent.getId(), attendeeUpdate);
         touch(originalEvent.getId());
-        Event updatedEvent = loadEventData(originalEvent.getId(), false);
+        Event updatedEvent = loadEventData(originalEvent.getId());
         result.addPlainUpdate(originalEvent, updatedEvent);
         result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
              */
-            Event originalMasterEvent = loadEventData(originalEvent.getSeriesId(), false);
+            Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
             touch(originalEvent.getSeriesId());
-            Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId(), false);
+            Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
             result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
             result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
         }
@@ -250,8 +250,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * track results
                  */
-                Event createdException = loadEventData(exceptionEvent.getId(), false);
-                Event updatedMasterEvent = loadEventData(originalEvent.getId(), false);
+                Event createdException = loadEventData(exceptionEvent.getId());
+                Event updatedMasterEvent = loadEventData(originalEvent.getId());
                 result.addPlainCreation(createdException);
                 result.addUserizedCreation(userize(createdException));
                 result.addPlainUpdate(originalEvent, updatedMasterEvent);

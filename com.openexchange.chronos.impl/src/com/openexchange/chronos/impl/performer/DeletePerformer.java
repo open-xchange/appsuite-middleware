@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -100,16 +101,16 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the deletion of an event.
      *
-     * @param objectID The identifier of the event to delete
+     * @param objectId The identifier of the event to delete
      * @param recurrenceId The recurrence identifier of the occurrence to delete, or <code>null</code> if no specific occurrence is targeted
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The result
      */
-    public InternalCalendarResult perform(String objectID, RecurrenceId recurrenceId, long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, long clientTimestamp) throws OXException {
         /*
          * load plain original event data
          */
-        Event originalEvent = loadEventData(objectID, false);
+        Event originalEvent = loadEventData(objectId);
         /*
          * check current session user's permissions
          */
@@ -278,7 +279,11 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
-            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+            /*
+             * track update of master in result
+             */
+            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+            result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
             result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
             result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
         } else {
@@ -319,7 +324,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * update the series master accordingly
          */
-        addDeleteExceptionDate(loadEventData(seriesId, false), recurrenceId);
+        addDeleteExceptionDate(loadEventData(seriesId), recurrenceId);
     }
 
     /**
@@ -336,11 +341,12 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         String seriesId = originalExceptionEvent.getSeriesId();
         delete(originalExceptionEvent, originalAttendee);
         /*
-         * 'touch' the series master accordingly
+         * 'touch' the series master accordingly & track result
          */
         Event originalMasterEvent = loadEventData(seriesId);
         touch(seriesId);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
         result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
         result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
     }

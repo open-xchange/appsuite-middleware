@@ -72,6 +72,7 @@ import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -383,8 +384,9 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private InternalCalendarResult notifyHandlers(InternalCalendarResult result) {
+        CalendarEvent calendarEvent = result.getCalendarEvent();
         for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(result.getPlainResult());
+            handler.handle(calendarEvent);
         }
         return result;
     }

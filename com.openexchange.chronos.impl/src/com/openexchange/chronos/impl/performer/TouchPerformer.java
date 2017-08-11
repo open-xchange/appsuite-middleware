@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -85,9 +86,10 @@ public class TouchPerformer extends AbstractUpdatePerformer {
         /*
          * 'touch' event & track results
          */
-        Event originalEvent = loadEventData(id, false);
+        Event originalEvent = loadEventData(id);
         touch(id);
-        Event updatedEvent = loadEventData(id, false);
+        Event updatedEvent = loadEventData(id);
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
         result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
         return result;

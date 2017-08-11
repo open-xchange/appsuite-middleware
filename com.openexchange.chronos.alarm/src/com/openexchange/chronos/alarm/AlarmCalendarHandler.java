@@ -64,10 +64,11 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -96,23 +97,24 @@ public class AlarmCalendarHandler implements CalendarHandler {
     }
 
     @Override
-    public void handle(CalendarResult result) {
+    public void handle(CalendarEvent event) {
         try {
-            handleCreate(result);
-            handleDelete(result);
-            handleUpdate(result);
+            handleCreate(event);
+            handleDelete(event);
+            handleUpdate(event);
         } catch (OXException e) {
             LOG.error("Error while handling calendar result for alarm generation", e);
         }
     }
 
-    private void handleCreate(CalendarResult result) throws OXException {
-        int contextId = result.getSession().getContextId();
-        List<CreateResult> creations = result.getCreations();
+    private void handleCreate(CalendarEvent event) throws OXException {
+        int contextId = event.getContextId();
+        List<CreateResult> creations = event.getCreations();
         if (creations != null && !creations.isEmpty()) {
 
             for (CreateResult createResult : creations) {
-                createAlarms(contextId, result.getCalendarUser(), createResult.getCreatedEvent());
+                //TODO: get internal user attendees & create triggers for their alarms
+                //                createAlarms(contextId, event.getCalendarUser(), createResult.getCreatedEvent());
             }
         }
 
@@ -149,19 +151,15 @@ public class AlarmCalendarHandler implements CalendarHandler {
         }
     }
 
-    private void handleDelete(CalendarResult result) throws OXException {
-        int contextId = result.getSession().getContextId();
-        List<DeleteResult> deletions = result.getDeletions();
+    private void handleDelete(CalendarEvent event) throws OXException {
+        int contextId = event.getContextId();
+        List<DeleteResult> deletions = event.getDeletions();
         if (deletions != null && !deletions.isEmpty()) {
 
             List<Integer> alarmsToDelete = new ArrayList<>(deletions.size());
-            for (DeleteResult createResult : deletions) {
-                Event eve = createResult.getDeletedEvent();
-                if (eve.containsAlarms()) {
-                    for (Alarm alarm : eve.getAlarms()) {
-                        alarmsToDelete.add(alarm.getId());
-                    }
-                }
+            for (DeleteResult deleteResult : deletions) {
+                EventID eve = deleteResult.getEventID();
+                //TODO: delete all triggers by event id / recurrence id
             }
             if (alarmsToDelete.size() > 0) {
                 storage.deleteAlarmTriggers(contextId, 0, alarmsToDelete);
@@ -182,12 +180,15 @@ public class AlarmCalendarHandler implements CalendarHandler {
         RELEVANT_FIELDS.add(EventField.RECURRENCE_RULE);
     }
 
-    private void handleUpdate(CalendarResult result) throws OXException {
-        int contextId = result.getSession().getContextId();
-        List<UpdateResult> updates = result.getUpdates();
+    private void handleUpdate(CalendarEvent event) throws OXException {
+        int contextId = event.getContextId();
+        List<UpdateResult> updates = event.getUpdates();
         if (updates != null && !updates.isEmpty()) {
 
             for (UpdateResult updateResult : updates) {
+
+                //TODO: don't expect individual alarms to be contained in results
+
                 Event eve = updateResult.getUpdate();
                 Set<EventField> updatedFields = updateResult.getUpdatedFields();
                 if (Collections.disjoint(updatedFields, RELEVANT_FIELDS)) {
@@ -204,7 +205,7 @@ public class AlarmCalendarHandler implements CalendarHandler {
                 storage.deleteAlarmTriggers(contextId, 0, triggerToDelete);
 
                 // Then create new alarms from scratch
-                createAlarms(contextId, result.getCalendarUser(), eve);
+                //                createAlarms(contextId, event.getCalendarUser(), eve);
 
             }
         }

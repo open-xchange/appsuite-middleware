@@ -50,11 +50,13 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -138,9 +140,14 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
-        Event createdEvent = loadEventData(newEvent.getId(), false);
+        /*
+         * track creation & return result
+         */
+        Event createdEvent = loadEventData(newEvent.getId());
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
         result.addPlainCreation(createdEvent);
-        result.addUserizedCreation(userize(createdEvent));
+        List<Alarm> alarms = null != event.getAlarms() && 0 < event.getAlarms().size() ? storage.getAlarmStorage().loadAlarms(createdEvent, calendarUserId) : null;
+        result.addUserizedCreation(userize(createdEvent, alarms));
         return result;
     }
 
