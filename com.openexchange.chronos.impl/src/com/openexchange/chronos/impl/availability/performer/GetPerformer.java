@@ -96,19 +96,6 @@ public class GetPerformer extends AbstractGetPerformer {
     }
 
     /**
-     * Retrieves a {@link List} with {@link Availability} blocks in the specified range
-     * 
-     * @param from The starting point in the interval
-     * @param until The ending point in the interval
-     * @return a {@link List} with {@link Availability} blocks in the specified range
-     * @throws OXException if an error occurs
-     */
-    public List<Availability> performInRange(Date from, Date until) throws OXException {
-        // TODO: adjust ranges
-        return storage.loadCalendarAvailabilities(session.getUserId());
-    }
-
-    /**
      * Retrieves a {@link Map} of {@link Availability} blocks for the specified {@link Attendee}s in the specified interval
      * 
      * @param attendees the {@link List} of {@link Attendee}s to fetch the availability for
@@ -117,7 +104,7 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return a {@link Map} of {@link Availability} blocks for the specified {@link Attendee}s in the specified interval
      * @throws OXException if an error is occurred
      */
-    public Map<Attendee, List<Availability>> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, Availability> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Prepare the attendees
         attendees = session.getEntityResolver().prepare(attendees);
         // Filter the external ones
@@ -143,7 +130,7 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return a {@link Map} of {@link Availability} blocks for the specified {@link CalendarUser}s in the specified interval
      * @throws OXException if an error is occurred
      */
-    public Map<CalendarUser, List<Availability>> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
+    public Map<CalendarUser, Availability> performForUsers(List<CalendarUser> users, Date from, Date until) throws OXException {
         // Create a reverse lookup index and filter internal users
         Map<Integer, CalendarUser> reverseLookup = new HashMap<>();
         List<Integer> filtered = new ArrayList<>();
@@ -214,10 +201,10 @@ public class GetPerformer extends AbstractGetPerformer {
      */
     public Map<Attendee, List<Availability>> getCombinedAvailableTimes(List<Attendee> attendees, Date from, Date until) throws OXException {
         Map<Attendee, List<Availability>> availableTimes = new HashMap<>();
-        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        Map<Attendee, Availability> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
         for (Attendee attendee : attendees) {
-            List<Availability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
-            availableTimes.put(attendee, combine(calendarAvailabilities));
+            Availability calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            availableTimes.put(attendee, java.util.Collections.singletonList(calendarAvailabilities));
         }
         return availableTimes;
     }
@@ -244,10 +231,10 @@ public class GetPerformer extends AbstractGetPerformer {
      */
     public Map<Attendee, AvailableTime> getAvailableTime(List<Attendee> attendees, Date from, Date until) throws OXException {
         Map<Attendee, AvailableTime> availableTimes = new HashMap<>();
-        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
+        Map<Attendee, Availability> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
         for (Attendee attendee : attendees) {
-            List<Availability> calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
-            availableTimes.put(attendee, getAvailableTime(attendee.getEntity(), calendarAvailabilities));
+            Availability calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
+            availableTimes.put(attendee, getAvailableTime(attendee.getEntity(), java.util.Collections.singletonList(calendarAvailabilities)));
         }
         return availableTimes;
     }
@@ -263,14 +250,18 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return A {@link Map} of {@link Availability} blocks for the specified users in the specified interval
      * @throws OXException if an error is occurred
      */
-    private <T extends CalendarUser> Map<T, List<Availability>> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
-        List<Availability> availabilities = storage.loadAvailabilities(new ArrayList<>(reverseLookup.keySet()));
-        Map<T, List<Availability>> map = new HashMap<>();
-        for (Availability availability : availabilities) {
-            T type = reverseLookup.get(availability.getCalendarUser());
-            Collections.put(map, type, availability);
+    private <T extends CalendarUser> Map<T, Availability> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
+        List<Available> available = storage.loadAvailable(new ArrayList<>(reverseLookup.keySet()));
+        Map<T, List<Available>> map = new HashMap<>();
+        for (Available a : available) {
+            T type = reverseLookup.get(a.getCalendarUser());
+            Collections.put(map, type, a);
         }
-        return map;
+        Map<T, Availability> availabilities = new HashMap<>();
+        for (T t : map.keySet()) {
+            availabilities.put(t, prepareForDelivery(map.get(t)));
+        }
+        return availabilities;
     }
 
     /**

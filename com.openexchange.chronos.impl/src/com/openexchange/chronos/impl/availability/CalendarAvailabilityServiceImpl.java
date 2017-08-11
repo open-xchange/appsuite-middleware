@@ -121,23 +121,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#getAvailableTime(com.openexchange.chronos.service.CalendarSession)
-     */
-    @Override
-    public AvailableTime getAvailableTime(CalendarSession session) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<AvailableTime>(session) {
-
-            @Override
-            protected AvailableTime execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                return new GetPerformer(storage, session).getAvailableTime();
-            }
-
-        }.executeQuery();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.chronos.service.CalendarAvailabilityService#getAvailableTime(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
      */
     @Override
@@ -147,23 +130,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
             @Override
             protected Map<Attendee, AvailableTime> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
                 return new GetPerformer(storage, session).getAvailableTime(attendees, from, until);
-            }
-
-        }.executeQuery();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession, java.util.Date, java.util.Date)
-     */
-    @Override
-    public List<Availability> getAvailability(CalendarSession session, final Date from, final Date until) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<List<Availability>>(session) {
-
-            @Override
-            protected List<Availability> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                return new GetPerformer(storage, session).performInRange(from, until);
             }
 
         }.executeQuery();
@@ -209,11 +175,11 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.service.CalendarAvailabilityService#getUserAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<CalendarUser, List<Availability>> getUserAvailability(CalendarSession session, final List<CalendarUser> users, final Date from, final Date until) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<Map<CalendarUser, List<Availability>>>(session) {
+    public Map<CalendarUser, Availability> getUserAvailability(CalendarSession session, final List<CalendarUser> users, final Date from, final Date until) throws OXException {
+        return new AbstractCalendarAvailabilityStorageOperation<Map<CalendarUser, Availability>>(session) {
 
             @Override
-            protected Map<CalendarUser, List<Availability>> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+            protected Map<CalendarUser, Availability> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
                 return new GetPerformer(storage, session).performForUsers(users, from, until);
             }
 
@@ -226,11 +192,11 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.availability.CalendarAvailabilityService#getAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
      */
     @Override
-    public Map<Attendee, List<Availability>> getAttendeeAvailability(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, List<Availability>>>(session) {
+    public Map<Attendee, Availability> getAttendeeAvailability(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
+        return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, Availability>>(session) {
 
             @Override
-            protected Map<Attendee, List<Availability>> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+            protected Map<Attendee, Availability> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
                 return new GetPerformer(storage, session).performForAttendees(attendees, from, until);
             }
 

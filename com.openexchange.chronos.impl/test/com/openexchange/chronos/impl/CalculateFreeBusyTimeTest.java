@@ -67,9 +67,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
@@ -136,7 +136,8 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
 
         // Mock the GetPerformer
         getPerformer = mock(GetPerformer.class);
-        when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
+        // FIXME: The performer should return a single availability per attendee
+        //when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
         when(getPerformer.getCombinedAvailableTimes(attendees, from, until)).thenCallRealMethod();
     }
 
