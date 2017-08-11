@@ -51,10 +51,7 @@ package com.openexchange.groupware.tasks.database;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -66,6 +63,7 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveUselessExternalParticipants} clears table task_eparticipant because it does not contain any useful information anymore after
@@ -95,24 +93,28 @@ public final class RemoveUselessExternalParticipants extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        Connection con = service.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         Statement stmt = null;
         try {
-            startTransaction(con);
+            con.setAutoCommit(false);
+            rollback = true;
+
             stmt = con.createStatement();
             stmt.execute("DELETE FROM del_task_eparticipant");
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            autocommit(con);
-            service.backForUpdateTask(contextID, con);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
     }
 }

@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
@@ -100,17 +98,12 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        // Get required service
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
         // Initialize connection
-        int contextId = params.getContextId();
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
 
         // Start task processing
         boolean restoreAutocommit = false;
         boolean rollback = false;
-        boolean modified = false;
         try {
             if (Tools.existsPrimaryKey(con, "user_attribute", new String[] {"cid", "id", "name"})) {
                 // PRIMARY KEY already changed
@@ -122,7 +115,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             rollback = true;
 
             doPerform(con);
-            modified = true;
 
             con.commit();
             rollback = false;
@@ -136,11 +128,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
             if (restoreAutocommit) {
                 autocommit(con);
-            }
-            if (modified) {
-                dbService.backForUpdateTask(contextId, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, con);
             }
         }
     }

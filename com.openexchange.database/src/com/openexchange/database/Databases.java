@@ -252,9 +252,7 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.rollback();
-            }
+            con.rollback();
         } catch (SQLException e) {
             LOG.error("", e);
         }
@@ -270,9 +268,7 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.setAutoCommit(true);
-            }
+            con.setAutoCommit(true);
         } catch (SQLException e) {
             LOG.error("", e);
         }

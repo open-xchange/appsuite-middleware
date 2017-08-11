@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.internal;
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.rollback;
-import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -121,12 +120,12 @@ public class SchemaStoreImpl extends SchemaStore {
             }
             @Override
             public SchemaUpdateState load() throws OXException {
-                return loadSchema(con);
+                return loadSchema(poolId, schemaName, con);
             }
         });
     }
 
-    static SchemaUpdateState loadSchema(Connection con) throws OXException {
+    static SchemaUpdateState loadSchema(int poolId, String schemaName, Connection con) throws OXException {
         final SchemaUpdateState retval;
         boolean rollback = false;
         try {
@@ -134,7 +133,7 @@ public class SchemaStoreImpl extends SchemaStore {
             rollback = true;
 
             checkForTable(con);
-            retval = loadSchemaStatus(con);
+            retval = loadSchemaStatus(poolId, schemaName, con);
 
             con.commit();
             rollback = false;
@@ -170,8 +169,8 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void lockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
-        int poolId = Database.resolvePool(contextId, true);
+    public void lockSchema(Schema schema, boolean background) throws OXException {
+        int poolId = schema.getPoolId();
 
         Cache cache = this.cache;
         CacheKey key = null;
@@ -183,7 +182,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 LOG.error("", e);
             }
         }
-        lockSchemaDB(schema, contextId, background, poolId);
+        lockSchemaDB(schema, background);
         if (null != cache && null != key) {
             try {
                 cache.remove(key);
@@ -193,14 +192,14 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void lockSchemaDB(Schema schema, int contextId, boolean background, int poolId) throws OXException {
-        Connection con = Database.get(contextId, true);
+    private static void lockSchemaDB(Schema schema, boolean background) throws OXException {
+        Connection con = Database.get(schema.getPoolId(), schema.getSchema());
         boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN
             rollback = true;
             // Insert lock
-            insertLock(con, schema, background ? BACKGROUND : LOCKED, poolId);
+            insertLock(con, schema, background ? BACKGROUND : LOCKED, schema.getPoolId());
             // Everything went fine. Schema is marked as locked
             con.commit();
             rollback = false;
@@ -213,7 +212,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            Database.back(schema.getPoolId(), con);
         }
     }
 
@@ -285,19 +284,18 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException {
-        int poolId = Database.resolvePool(contextId, true);
+    public boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException {
         Cache cache = this.cache;
         CacheKey key = null;
         if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
+            key = cache.newCacheKey(schema.getPoolId(), schema.getSchema());
             try {
                 cache.remove(key);
             } catch (final OXException e) {
                 LOG.error("", e);
             }
         }
-        boolean refreshed = tryRefreshLock(contextId, background);
+        boolean refreshed = tryRefreshLock(schema, background);
         if (null != cache && null != key) {
             try {
                 cache.remove(key);
@@ -308,13 +306,14 @@ public class SchemaStoreImpl extends SchemaStore {
         return refreshed;
     }
 
-    private static boolean tryRefreshLock(int contextId, boolean background) throws OXException {
-        Connection con = Database.get(contextId, true);
+    private static boolean tryRefreshLock(Schema schema, boolean background) throws OXException {
+        int poolId = schema.getPoolId();
+        Connection con = Database.get(poolId, schema.getSchema());
         try {
             // Refresh lock
             return tryRefreshLock(con, background ? BACKGROUND : LOCKED);
         } finally {
-            Database.back(contextId, true, con);
+            Database.back(poolId, con);
         }
     }
 
@@ -334,19 +333,18 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
-        final int poolId = Database.resolvePool(contextId, true);
+    public void unlockSchema(final Schema schema, final boolean background) throws OXException {
         Cache cache = this.cache;
         CacheKey key = null;
         if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
+            key = cache.newCacheKey(schema.getPoolId(), schema.getSchema());
             try {
                 cache.remove(key);
             } catch (final OXException e) {
                 LOG.error("", e);
             }
         }
-        unlockSchemaDB(schema, contextId, background);
+        unlockSchemaDB(schema, background);
         if (null != cache && null != key) {
             try {
                 cache.remove(key);
@@ -356,8 +354,9 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void unlockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
-        Connection con = Database.get(contextId, true);
+    private static void unlockSchemaDB(Schema schema, boolean background) throws OXException {
+        int poolId = schema.getPoolId();
+        Connection con = Database.get(poolId, schema.getSchema());
         boolean rollback = false;
         try {
             // End of update process, so unlock schema
@@ -377,7 +376,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            Database.back(poolId, con);
         }
     }
 
@@ -415,15 +414,14 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * @param con connection to the master in transaction mode.
      */
-    private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
+    private static SchemaUpdateState loadSchemaStatus(int poolId, String schemaName, Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
         retval.setBlockingUpdatesRunning(false);
         retval.setBackgroundUpdatesRunning(false);
         loadUpdateTasks(con, retval);
-        retval.setGroupwareCompatible(true);
-        retval.setAdminCompatible(true);
         retval.setServer(Database.getServerName());
-        retval.setSchema(con.getCatalog());
+        retval.setSchema(schemaName);
+        retval.setPoolId(poolId);
         return retval;
     }
 

@@ -50,17 +50,15 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveInconsistentLocksUpdateTasks} removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
@@ -81,40 +79,35 @@ public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
-        int rows = 0;
         try {
-            con = dbService.getForUpdateTask(params.getContextId());
             con.setAutoCommit(false);
+            rollback = true;
 
             String SQL = "DELETE l FROM infostore_lock AS l INNER JOIN infostore AS i ON l.cid=i.cid and l.entity=i.id WHERE "
                 + "i.folder_id NOT IN (SELECT fuid FROM oxfolder_permissions AS fp WHERE fp.cid=l.cid AND fp.permission_id=l.userid AND owp!=0) AND "
                 + "l.entity NOT IN (SELECT object_id FROM object_permission AS op WHERE op.cid=l.cid AND op.permission_id=l.userid AND op.folder_id=i.folder_id AND op.bits=2);";
 
             stmt = con.prepareStatement(SQL);
-            rows = stmt.executeUpdate();
+            stmt.executeUpdate();
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (rows > 0) {
-                dbService.backForUpdateTask(params.getContextId(), con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(params.getContextId(), con);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
+            DBUtils.autocommit(con);
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { ObjectPermissionCreateTableTask.class.getName(), com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore.class.getName() };

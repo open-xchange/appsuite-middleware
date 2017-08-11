@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.database;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.ExtendedColumnCreationTask;
 import com.openexchange.tools.update.Column;
 
@@ -60,8 +59,8 @@ import com.openexchange.tools.update.Column;
  */
 public class SubscriptionsCreatedAndLastModifiedColumn extends ExtendedColumnCreationTask {
 
-    public SubscriptionsCreatedAndLastModifiedColumn(DatabaseService dbService) {
-        super(dbService);
+    public SubscriptionsCreatedAndLastModifiedColumn() {
+        super();
     }
 
     @Override

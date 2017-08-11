@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateIndexUpdateTask;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CreateIndexOnContextAttributesTask}
@@ -67,10 +65,5 @@ public class CreateIndexOnContextAttributesTask extends CreateIndexUpdateTask {
     @Override
     public String[] getDependencies() {
         return new String[]{AllowTextInValuesOfDynamicContextAttributesTask.class.getName()};
-    }
-
-    @Override
-    public DatabaseService getDatabaseService() {
-        return ServerServiceRegistry.getInstance().getService(DatabaseService.class);
     }
 }

@@ -136,7 +136,7 @@ public class UpdaterImpl extends Updater {
     @Override
     public void unblock(String schemaName, int poolId, int contextId) throws OXException {
         SchemaUpdateState schema = SchemaStore.getInstance().getSchema(poolId, schemaName);
-        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
+        SchemaStore.getInstance().unlockSchema(schema, false);
     }
 
     @Override

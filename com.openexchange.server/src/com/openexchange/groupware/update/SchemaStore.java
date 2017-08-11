@@ -89,32 +89,29 @@ public abstract class SchemaStore {
      * Marks given schema as locked due to a start of an update process.
      *
      * @param schema the schema
-     * @param contextId unique context identifier
      * @param background <code>false</code> if blocking tasks are executed.
      * @throws OXException
      */
-    public abstract void lockSchema(Schema schema, int contextId, boolean background) throws OXException;
+    public abstract void lockSchema(Schema schema, boolean background) throws OXException;
 
     /**
      * Marks given schema as unlocked to release this schema from an update process.
      *
      * @param schema the schema
-     * @param contextId the unique context identifier
      * @param background <code>false</code> if blocking tasks finished.
      * @throws OXException
      */
-    public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws OXException;
+    public abstract void unlockSchema(Schema schema, boolean background) throws OXException;
 
     /**
      * Tries to refresh the schema lock (resetting time stamp to current time).
      *
      * @param schema The schema whose lock is supposed to be refreshed
-     * @param contextId The context identifier
      * @param background <code>false</code> if blocking tasks are in progress; otherwise <code>true</code>.
      * @return <code>true</code> if the lock was successfully refreshed; otherwise <code>false</code>
      * @throws OXException If refresh fails
      */
-    public abstract boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException;
+    public abstract boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException;
 
     public final Schema getSchema(final Context ctx) throws OXException {
         return getSchema(ctx.getContextId());
@@ -147,8 +144,8 @@ public abstract class SchemaStore {
 
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;
 
-    public final void addExecutedTask(final int contextId, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
-        Connection con = Database.get(contextId, true);
+    public final void addExecutedTask(String taskName, boolean success, int poolId, String schema) throws OXException {
+        Connection con = Database.get(poolId, schema);
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
@@ -165,7 +162,7 @@ public abstract class SchemaStore {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            Database.back(poolId, con);
         }
     }
 

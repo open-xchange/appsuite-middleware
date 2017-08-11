@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -67,11 +66,8 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class OAuthCreateTableTask extends UpdateTaskAdapter {
 
-    private final DatabaseService dbService;
-
-    public OAuthCreateTableTask(final DatabaseService dbService) {
+    public OAuthCreateTableTask() {
         super();
-        this.dbService = dbService;
     }
 
     @Override
@@ -81,13 +77,7 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
         try {
             try {
@@ -101,7 +91,6 @@ public class OAuthCreateTableTask extends UpdateTaskAdapter {
             }
         } finally {
             closeSQLStuff(null, stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 }
