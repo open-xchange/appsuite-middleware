@@ -47,49 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.provider.userized.groupware;
+package com.openexchange.folderstorage.folderproperty.osgi;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.folderproperty.sql.CreateUserPropertyFolderTask;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * {@link CreateUserizedFolderTable}
+ * {@link FolderPropertyStorageActivator}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class CreateUserizedFolderTable extends AbstractCreateTableImpl {
-
-    private final static String TABLE_NAME = "oxfolder_userized";
+public class FolderPropertyStorageActivator extends HousekeepingActivator {
 
     @Override
-    public String[] requiredTables() {
-        return new String[] {};
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class };
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[] { TABLE_NAME };
-    }
+    protected void startBundle() throws Exception {
+        // Register CreateUserPropertyFolderTask
+        DatabaseService dbService = getService(DatabaseService.class);
+        if (null == dbService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final CreateUserPropertyFolderTask task = new CreateUserPropertyFolderTask(dbService);
 
-    @Override
-    protected String[] getCreateStatements() {
-        return new String[] { buildTable() };
-    }
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-    private String buildTable() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("CREATE TABLE ");
-        builder.append(TABLE_NAME);
-        builder.append(" (");
-        builder.append("cid INT(10) UNSIGNED NOT NULL,");
-        builder.append("fuid INT(10) UNSIGNED NOT NULL,");
-        builder.append("userid INT(10) UNSIGNED NOT NULL,");
-        builder.append("name VARCHAR(255) NOT NULL,");
-        builder.append("value VARCHAR(255) NOT NULL,");
-        builder.append("PRIMARY KEY (cid, userid, fuid, name)");
-        builder.append(");");
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(task);
+            }
 
-        return builder.toString();
+        });
+
     }
 
 }

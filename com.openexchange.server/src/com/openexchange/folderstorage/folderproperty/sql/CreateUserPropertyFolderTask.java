@@ -47,25 +47,25 @@
  *
  */
 
-package com.openexchange.chronos.provider.userized.groupware;
+package com.openexchange.folderstorage.folderproperty.sql;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
 
 /**
- * {@link CreateUserizedFolderTask}
+ * {@link CreateUserPropertyFolderTask}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class CreateUserizedFolderTask extends CreateTableUpdateTask {
+public class CreateUserPropertyFolderTask extends CreateTableUpdateTask {
 
     /**
-     * Initializes a new {@link CreateUserizedFolderTask}.
+     * Initializes a new {@link CreateUserPropertyFolderTask}.
      * 
+     * @param databaseService The {@link DatabaseService} to get the connection from
      */
-    public CreateUserizedFolderTask(DatabaseService databaseService) {
-        super(new CreateUserizedFolderTable(), new String[0], databaseService);
+    public CreateUserPropertyFolderTask(DatabaseService databaseService) {
+        super(new CreateUserPropertyFolderTable(), new String[0], databaseService);
     }
-
 }

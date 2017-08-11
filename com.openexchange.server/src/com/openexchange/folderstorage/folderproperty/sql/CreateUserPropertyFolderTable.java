@@ -47,52 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.provider.userized.folder;
+package com.openexchange.folderstorage.folderproperty.sql;
+
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link UserizedFolderField}
+ * {@link CreateUserPropertyFolderTable}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum UserizedFolderField {
+public class CreateUserPropertyFolderTable extends AbstractCreateTableImpl {
 
-    /** Additional undefined property */
-    ADDITIONAL(""),
-    
-    /** Alternative user color */
-    USER_COLOR("userColor"),
+    private final static String TABLE_NAME = "oxfolder_user_property";
 
-    /** Alternative folder description */
-    USER_DESCRIPTION("userDescription"),
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
+    }
 
-    /** Alternative folder name */
-    USER_NAME("userName"),
+    @Override
+    public String[] tablesToCreate() {
+        return new String[] { TABLE_NAME };
+    }
 
-    /** If the folder is subscribed */
-    SUBSCRIBED("subscribded"),
-
-    /** If the folder is synchronized */
-    SYNC("sync"),
-
-    ;
-
-    private final String propertyName;
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[] { buildUserPropertyFolderTable() };
+    }
 
     /**
-     * Initializes a new {@link UserizedFolderField}.
+     * Build the {@value #TABLE_NAME} table
      * 
+     * @return SQL <code>CREATE TABLE</code> command
      */
-    private UserizedFolderField(String propertyName) {
-        this.propertyName = propertyName;
+    private String buildUserPropertyFolderTable() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CREATE TABLE ");
+        builder.append(TABLE_NAME);
+        builder.append(" (");
+        builder.append("cid INT(10) UNSIGNED NOT NULL,");
+        builder.append("fuid INT(10) UNSIGNED NOT NULL,");
+        builder.append("userid INT(10) UNSIGNED NOT NULL,");
+        builder.append("name VARCHAR(512) NOT NULL,");
+        builder.append("value BLOB NOT NULL,");
+        builder.append("PRIMARY KEY (cid, fuid, userid, name)");
+        builder.append(") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        return builder.toString();
     }
-
-    public String getPropertName() {
-        return propertyName;
-    }
-
-    public boolean equalsField(String key) {
-        return propertyName.equals(key);
-    }
-
 }
