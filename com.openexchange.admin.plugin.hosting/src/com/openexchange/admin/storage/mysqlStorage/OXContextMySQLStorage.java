@@ -214,14 +214,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Delete filestores of the context
         {
-            long sts = System.currentTimeMillis();
-
             LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
             Utils.removeFileStorages(ctx, true);
             LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
-
-            long dur = System.currentTimeMillis() - sts;
-            System.err.println("    removeFileStorages took " + dur);
         }
 
         AdminCacheExtended adminCache = cache;
@@ -292,8 +287,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Delete context from ConfigDB
         try {
-            long sts = System.currentTimeMillis();
-
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
                 Connection conForConfigDB = null;
@@ -344,9 +337,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             } while (retryDelete(condition, ctx));
-
-            long dur = System.currentTimeMillis() - sts;
-            System.err.println("    deleteContextFromConfigDB took " + dur);
         } catch (SQLException sql) {
             throw new StorageException(sql.toString(), sql);
         }
