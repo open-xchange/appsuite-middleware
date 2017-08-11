@@ -217,6 +217,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String sendLoginRequestToServer(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OIDCTokenResponse tokenResponse) throws OXException {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(httpRequest, tokenResponse);
+        authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
             authInfo.getContextId(),

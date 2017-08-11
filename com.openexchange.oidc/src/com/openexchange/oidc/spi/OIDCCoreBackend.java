@@ -89,7 +89,6 @@ public class OIDCCoreBackend extends AbstractOIDCBackend{
         int userId = resolvedMail.getUserID();
         AuthenticationInfo resultInfo = new AuthenticationInfo(contextId, userId);
         resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
-        resultInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         return resultInfo;
     }
 
