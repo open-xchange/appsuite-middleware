@@ -207,7 +207,7 @@ public class DeleteEvent extends EventObject {
      * @param id the object's ID
      * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
      *            <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, or <code>{@value #TYPE_CONTEXT}</code>
-     * @param type The object's subtype, or <code>0</code> if not specified
+     * @param subType The object's subtype, or <code>0</code> if not specified
      * @param ctx the context
      * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context admin
      *        (default), or <code>0</code> to not reassign at all
