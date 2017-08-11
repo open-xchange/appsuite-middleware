@@ -76,6 +76,7 @@ import com.openexchange.folderstorage.cache.osgi.CacheFolderStorageActivator;
 import com.openexchange.folderstorage.calendar.osgi.CalendarFolderStorageActivator;
 import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivator;
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
+import com.openexchange.folderstorage.folderproperty.osgi.FolderPropertyStorageActivator;
 import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
@@ -261,7 +262,7 @@ public final class FolderStorageActivator implements BundleActivator {
             }
 
             // Start other activators
-            activators = new ArrayList<BundleActivator>(8);
+            activators = new ArrayList<BundleActivator>(9);
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
             activators.add(new MessagingFolderStorageActivator()); // Messaging impl
@@ -270,6 +271,7 @@ public final class FolderStorageActivator implements BundleActivator {
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
+            activators.add(new FolderPropertyStorageActivator()); // Folder property activator
             BundleActivator activator = null;
             for (final Iterator<BundleActivator> iter = activators.iterator(); iter.hasNext();) {
                 try {
