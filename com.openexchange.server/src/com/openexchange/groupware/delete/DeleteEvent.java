@@ -108,11 +108,12 @@ public class DeleteEvent extends EventObject {
      *
      * @param source The source object, which invokes the deletion
      * @param contextId The context identifier
+     * @param userIds The identifiers of the remaining users in the context
      * @return The delete event
      * @throws OXException If context cannot be loaded for given identifier
      */
-    public static DeleteEvent createDeleteEventForContextDeletion(Object source, int contextId) throws OXException {
-        return new DeleteEvent(source, contextId, TYPE_CONTEXT, 0, ContextStorage.getInstance().getContext(contextId), null);
+    public static DeleteEvent createDeleteEventForContextDeletion(Object source, int contextId, List<Integer> userIds) throws OXException {
+        return new DeleteEvent(source, contextId, TYPE_CONTEXT, 0, ContextStorage.getInstance().getContext(contextId), null, userIds);
     }
 
     /**
@@ -120,10 +121,11 @@ public class DeleteEvent extends EventObject {
      *
      * @param source The source object, which invokes the deletion
      * @param context The context
+     * @param userIds The identifiers of the remaining users in the context
      * @return The delete event
      */
-    public static DeleteEvent createDeleteEventForContextDeletion(Object source, Context context) {
-        return new DeleteEvent(source, context.getContextId(), TYPE_CONTEXT, 0, context, null);
+    public static DeleteEvent createDeleteEventForContextDeletion(Object source, Context context, List<Integer> userIds) {
+        return new DeleteEvent(source, context.getContextId(), TYPE_CONTEXT, 0, context, null, userIds);
     }
 
     /**
@@ -163,7 +165,20 @@ public class DeleteEvent extends EventObject {
      * @return The delete event
      */
     public static DeleteEvent createDeleteEventForUserDeletion(Object source, int userId, int subType, Context context, Integer destUserID) {
-        return new DeleteEvent(source, userId, TYPE_USER, subType, context, destUserID);
+        return new DeleteEvent(source, userId, TYPE_USER, subType, context, destUserID, null);
+    }
+
+    /**
+     * Creates a delete event for group deletion.
+     *
+     * @param source The source object, which invokes the deletion
+     * @param groupId The group identifier
+     * @param contextId The context identifier
+     * @return The delete event
+     * @throws OXException If context cannot be loaded
+     */
+    public static DeleteEvent createDeleteEventForGroupDeletion(Object source, int groupId, int contextId) throws OXException {
+        return new DeleteEvent(source, groupId, TYPE_GROUP, 0, ContextStorage.getInstance().getContext(contextId), null, null);
     }
 
     /**
@@ -175,7 +190,20 @@ public class DeleteEvent extends EventObject {
      * @return The delete event
      */
     public static DeleteEvent createDeleteEventForGroupDeletion(Object source, int groupId, Context context) {
-        return new DeleteEvent(source, groupId, TYPE_GROUP, 0, context, null);
+        return new DeleteEvent(source, groupId, TYPE_GROUP, 0, context, null, null);
+    }
+
+    /**
+     * Creates a delete event for resource deletion.
+     *
+     * @param source The source object, which invokes the deletion
+     * @param resourceId The resource identifier
+     * @param contextId The context identifier
+     * @return The delete event
+     * @throws OXException If context cannot be loaded
+     */
+    public static DeleteEvent createDeleteEventForResourceDeletion(Object source, int resourceId, int contextId) throws OXException {
+        return new DeleteEvent(source, resourceId, TYPE_RESOURCE, 0, ContextStorage.getInstance().getContext(contextId), null, null);
     }
 
     /**
@@ -187,7 +215,7 @@ public class DeleteEvent extends EventObject {
      * @return The delete event
      */
     public static DeleteEvent createDeleteEventForResourceDeletion(Object source, int resourceId, Context context) {
-        return new DeleteEvent(source, resourceId, TYPE_RESOURCE, 0, context, null);
+        return new DeleteEvent(source, resourceId, TYPE_RESOURCE, 0, context, null, null);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -198,7 +226,7 @@ public class DeleteEvent extends EventObject {
     protected int subType;
     protected Integer destUserID;
     private transient Session session;
-    private List<Integer> userIds;
+    private final List<Integer> userIds;
 
     /**
      * Initializes a new {@link DeleteEvent}.
@@ -211,25 +239,16 @@ public class DeleteEvent extends EventObject {
      * @param ctx the context
      * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context admin
      *        (default), or <code>0</code> to not reassign at all
+     * @param The user identifiers in case of context deletion
      */
-    private DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID) {
+    private DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID, List<Integer> userIds) {
         super(source);
         this.id = id;
         this.type = type;
         this.subType = subType;
         this.ctx = ctx;
         this.destUserID = destUserID;
-    }
-
-    /**
-     * Sets the user identifiers
-     *
-     * @param userIds The user identifiers to set
-     * @return This instance
-     */
-    public DeleteEvent setUserIds(List<Integer> userIds) {
         this.userIds = userIds;
-        return this;
     }
 
     /**

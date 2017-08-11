@@ -416,7 +416,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // First delete everything with OSGi DeleteListener services.
         long st = System.currentTimeMillis();
         try {
-            DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue()).setUserIds(userIds);
+            DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue(), userIds);
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
         } catch (Exception e) {
             SQLException sqle = DBUtils.extractSqlException(e);
@@ -472,11 +472,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         int reslen = stmtBuilder.length();
         for (int i = sorted_tables.size(); i-- > 0;) {
             stmtBuilder.setLength(reslen);
-            deleteTableData(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
+            deleteTableDataSafe(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
         }
     }
 
-    private static void deleteTableData(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) throws SQLException {
+    private static void deleteTableDataSafe(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -484,6 +484,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (rows > 0) {
                 System.err.println("Dropped " + rows + " remaining row(s) from " + tableName);
             }
+        } catch (Exception e) {
+            LOG.warn("Failed to cleanse possible remaining entries from table '{}' for context {}", tableName, contextId, e);
         } finally {
             closeSQLStuff(stmt);
         }
