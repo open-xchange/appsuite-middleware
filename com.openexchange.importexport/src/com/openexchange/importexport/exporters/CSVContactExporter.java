@@ -195,19 +195,20 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+    public boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
-                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                return false;
             }
             for (String objectId : batchEntry.getValue()) {
                 try {
                     Integer.parseInt(objectId);
                 } catch (NumberFormatException e) {
-                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                    return false;
                 }
             }
         }
+        return true;
     }
 
     @Override
@@ -282,7 +283,9 @@ public class CSVContactExporter implements Exporter {
 
     @Override
     public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        canExportBatch(sessObj, format, batchIds, optionalParams);
+        if (!canExportBatch(sessObj, format, batchIds, optionalParams)) {
+            throw ImportExportExceptionCodes.COULD_NOT_VALIDATE_OBJECT.create();
+        }
 
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
@@ -376,12 +379,12 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) {
         return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
     @Override
-    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) {
         return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }

@@ -68,7 +68,7 @@ public final class ExportDefaultFileNames implements LocalizableStrings {
     /**
      * The default file name for an ical appointment export, when using batch data
      */
-    public static final String ICAL_APPOINTMENT_NAME = "Appointment";
+    public static final String ICAL_APPOINTMENT_NAME = "Appointments";
     
     /**
      * The default file name for an ical task export, when using batch data

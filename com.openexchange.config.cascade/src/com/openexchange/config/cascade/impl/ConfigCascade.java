@@ -91,7 +91,7 @@ public class ConfigCascade implements ConfigViewFactory {
             this.path = new AtomicReference<List<ConfigProviderService>>(path);
         }
 
-        synchronized void setSearchPath(String... searchPath) {
+        void setSearchPath(String... searchPath) {
             this.searchPath.set(searchPath);
             this.path.set(null); // Enforce re-initialization
         }

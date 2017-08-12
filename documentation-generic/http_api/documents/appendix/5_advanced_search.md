@@ -7,13 +7,14 @@ in a wrapping JSON object with the field `filter`, like `{"filter":[search term]
 term is in prefix notation, meaning the operator is written before its operands: `[">", 5, 2]` represents the condition
 "5 > 2".
 
+## Operators 
+
 There are two kinds of search operators, comparison operators and logic operators.
 
-## Comparison operators
+### Comparison operators
 
-Comparison operators have exactly two operands. Each operand can either be a field name or a constant. A field name is a JSON object
-with the member `field` specifying the field name, e.g. `{"field":"first_name"}`. The available field names depend on the module
-that implements the search. Primitive JSON types are interpreted as constants. Arrays are not valid operands for comparison operators!
+Comparison operators compare two operands with one another. The exception is the "isNull" operator which has only one operand which must be a field name.
+The following operators are available: 
 
 | Operator | Description |
 |:---------|:------------|
@@ -23,18 +24,46 @@ that implements the search. Primitive JSON types are interpreted as constants. A
 | "<=" | smaller or equal | 
 | ">=" | greater or equal |
 | "<>" | unequal |
+| "isNull" | is NULL |
 
 
-## Logic operators
+### Logic operators
 
-The logic operator "not" has exactly one operand, the other logic operators can have any number of operands. Each operand must be an
-array representing a nested search expression.
+Logic operators combine search expressions. Whereby the logic operator "not" has exactly one operand, the other logic operators can have any number of operands. 
+Each operand must be an array representing a nested search expression.
 
 | Operator |
 |:---------|
 | "not"    |
 | "and"    |
 | "or"     |
+
+## Operands
+
+Each operator needs one or more operands. There are different types of operands:
+
+* Constant
+* Field
+* Attachment
+* Header
+
+### Constant
+
+Primitive JSON types are interpreted as constants, but arrays are not valid operands for comparison operators!
+
+### Field
+
+A field operand is a JSON object with the member `field` specifying the field name, e.g. `{"field":"first_name"}`. 
+The available field names depend on the module that implements the search.
+
+### Attachment
+
+A attachment operand is a JSON object with the member `attachment` specifying the attachment name, e.g. `{"attachment":"somedocument.txt"}`. 
+The attachment search is only available in case the `FILENAME_SEARCH` capability is included in the list of supported_capabilities of the folder. 
+
+### Header
+
+A header operand is a JSON object with the member `header` specifying the header name, e.g. `{"header":"From"}`. 
 
 
 ## Examples
