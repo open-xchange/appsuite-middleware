@@ -64,6 +64,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -284,8 +285,10 @@ public final class UpdateTaskToolkit {
         ResultSet rs = null;
         try {
             // Grab database schemas
-            stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema" + (null == optSchema ? "" : " WHERE schemaname=?"));
-            if (null != optSchema) {
+            if (null == optSchema) {
+                stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema");
+            } else {
+                stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema WHERE schemaname=?");
                 stmt.setString(1, optSchema);
             }
             rs = stmt.executeQuery();
@@ -296,7 +299,7 @@ public final class UpdateTaskToolkit {
 
             List<SchemaInfo> l = new LinkedList<>();
             do {
-                l.add(new SchemaInfo(rs.getInt(1), rs.getString(2)));
+                l.add(SchemaInfo.valueOf(rs.getInt(1), rs.getString(2)));
             } while (rs.next());
             return l;
         } catch (SQLException e) {
@@ -314,7 +317,7 @@ public final class UpdateTaskToolkit {
      *
      * @param schemaName The schema name to look-up
      * @return The schema information
-     * @throws OXException If schema information cannot be returned (no or multiple schemas found)
+     * @throws OXException If schema information cannot be returned (none or multiple schemas found)
      */
     public static SchemaInfo getInfoBySchemaName(String schemaName) throws OXException {
         List<SchemaInfo> schemas = getAllSchemas(schemaName);
@@ -359,89 +362,6 @@ public final class UpdateTaskToolkit {
 
     private static SchemaUpdateState getSchema(final SchemaInfo schemaInfo) throws OXException {
         return SchemaStore.getInstance().getSchema(schemaInfo.getPoolId(), schemaInfo.getSchema());
-    }
-
-    /**
-     * Wraps a pool identifier and schema name tuple.
-     */
-    public static final class SchemaInfo {
-
-        private final int poolId;
-        private final String schema;
-        private int hash = 0;
-
-        /**
-         * Initializes a new {@link SchemaInfo}.
-         *
-         * @param poolId The identifier of the database pool, in which the schema resides
-         * @param schema The schema name
-         */
-        public SchemaInfo(int poolId, String schema) {
-            super();
-            this.poolId = poolId;
-            this.schema = schema;
-        }
-
-        /**
-         * Gets the identifier of the database pool, in which the schema resides
-         *
-         * @return The pool identifier
-         */
-        public int getPoolId() {
-            return poolId;
-        }
-
-        /**
-         * Gets the schema name
-         *
-         * @return The schema name
-         */
-        public String getSchema() {
-            return schema;
-        }
-
-        @Override
-        public int hashCode() {
-            // Not thread-safe, but does not matter
-            int result = hash;
-            if (result == 0) {
-                result = 31 * 1 + poolId;
-                result = 31 * result + ((schema == null) ? 0 : schema.hashCode());
-                this.hash = result;
-            }
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof SchemaInfo)) {
-                return false;
-            }
-            SchemaInfo other = (SchemaInfo) obj;
-            if (poolId != other.poolId) {
-                return false;
-            }
-            if (schema == null) {
-                if (other.schema != null) {
-                    return false;
-                }
-            } else if (!schema.equals(other.schema)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder(32);
-            builder.append("[poolId=").append(poolId).append(", ");
-            builder.append("schema=").append(schema);
-            builder.append("]");
-            return builder.toString();
-        }
     }
 
 }

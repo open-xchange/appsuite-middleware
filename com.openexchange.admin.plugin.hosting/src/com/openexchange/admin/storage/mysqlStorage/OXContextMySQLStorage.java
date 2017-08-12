@@ -80,7 +80,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -124,6 +123,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -139,9 +139,12 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.groupware.AmountQuotas;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -227,8 +230,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             int poolId;
             String scheme;
             try {
-                poolId = adminCache.getDBPoolIdForContextId(ctx.getId().intValue());
-                scheme = adminCache.getSchemeForContextId(ctx.getId().intValue());
+                SchemaInfo schemaInfo = adminCache.getSchemaInfoForContextId(ctx.getId().intValue());
+                poolId = schemaInfo.getPoolId();
+                scheme = schemaInfo.getSchema();
             } catch (PoolException e) {
                 throw new StorageException(e);
             }
@@ -237,11 +241,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
+                SubmittingRunnable<Void> pendingInvocation = null;
                 Connection conForContext = null;
                 try {
                     // Initialize connection to context-associated database schema
                     conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
 
+                    // Determine remaining users (if not done already)
                     if (null == userIds) {
                         PreparedStatement stmt = null;
                         ResultSet rs = null;
@@ -263,7 +269,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
 
                     // Loop through tables and execute delete statements on each table (using transaction)
-                    deleteContextData(ctx, conForContext, userIds, poolId, scheme);
+                    pendingInvocation = deleteContextData(ctx, conForContext, userIds, poolId, scheme);
                 } catch (PoolException e) {
                     LOG.error("Pool Error", e);
                     throw new StorageException(e);
@@ -274,11 +280,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 } finally {
                     // Needs to be pushed back here, because in the "deleteContextFromConfigDB()" the connection is "reset" in the pool.
-                    try {
-                        adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
-                    } catch (PoolException e) {
-                        LOG.error("Pool Error", e);
+                    if (null != conForContext) {
+                        try {
+                            adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                        } catch (PoolException e) {
+                            LOG.error("Pool Error", e);
+                        }
                     }
+                }
+
+                if (null != pendingInvocation) {
+                    pendingInvocation.run();
                 }
             } while (retryDelete(condition, ctx));
         } catch (SQLException sql) {
@@ -379,30 +391,63 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return retry;
     }
 
-    private void deleteContextData(Context ctx, Connection con, List<Integer> userIds, int poolId, String scheme) throws SQLException {
+    private SubmittingRunnable<Void> deleteContextData(Context ctx, final Connection conForContext, List<Integer> userIds, final int poolId, final String scheme) throws SQLException {
         LOG.debug("Now deleting data for context {} from schema {} in database {}", ctx.getId(), scheme, Integer.valueOf(poolId));
 
-        boolean rollback = false;
-        try {
-            con.setAutoCommit(false);
-            rollback = true;
+        ThreadPoolService threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class);
 
-            fireDeleteEventAndAsyncDeleteTableData(ctx, con, userIds, poolId, scheme);
+        // Initiate transaction & fire delete event
+        {
+            boolean rollback = false;
+            try {
+                conForContext.setAutoCommit(false);
+                rollback = true;
 
-            // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
-            con.commit();
-            rollback = false;
-        } finally {
-            if (rollback) {
-                rollback(con);
+                fireDeleteEventAndOptionallyDeleteTableData(ctx, conForContext, userIds, null == threadPool);
+
+                // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
+                conForContext.commit();
+                rollback = false;
+            } finally {
+                if (rollback) {
+                    rollback(conForContext);
+                }
+                autocommit(conForContext);
             }
-            autocommit(con);
         }
 
-        LOG.debug("Data delete for context {} from schema {} in database {} completed!", ctx.getId(), scheme, Integer.valueOf(poolId));
+        if (null == threadPool) {
+            LOG.debug("Data delete for context {} from schema {} in database {} completed!", ctx.getId(), scheme, Integer.valueOf(poolId));
+            return null;
+        }
+
+        // Create a task to hard-cleanse from tables and pushing back used connection to pool
+        final AdminCacheExtended adminCache = cache;
+        final Integer contextId = ctx.getId();
+        final String selectionCriteria = this.selectionCriteria;
+        AbstractTask<Void> task = new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                Connection conForContext = null;
+                try {
+                    conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
+                    deleteTablesData(selectionCriteria, contextId, conForContext, false);
+                    LOG.debug("Data delete for context {} from schema {} in database {} completed!", contextId, scheme, Integer.valueOf(poolId));
+                } finally {
+                    try {
+                        adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                    } catch (PoolException e) {
+                        LOG.error("Pool Error", e);
+                    }
+                }
+                return null;
+            }
+        };
+        return new SubmittingRunnable<Void>(task, threadPool);
     }
 
-    private void fireDeleteEventAndAsyncDeleteTableData(Context ctx, Connection con, List<Integer> userIds, final int poolId, final String scheme) throws SQLException {
+    private void fireDeleteEventAndOptionallyDeleteTableData(Context ctx, Connection con, List<Integer> userIds, boolean deleteTablesData) throws SQLException {
         // First delete everything with OSGi DeleteListener services.
         long st = System.currentTimeMillis();
         try {
@@ -418,37 +463,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         long dur = System.currentTimeMillis() -st;
         System.err.println("   fireDeleteEvent took " + dur);
 
-        // Now go through tables and delete the remainders (asynchronously)
-        ThreadPoolService threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        if (null == threadPool) {
-            deleteTablesData(selectionCriteria, ctx.getId(), con);
-        } else {
-            final AdminCacheExtended adminCache = cache;
-            final Integer contextId = ctx.getId();
-            final String selectionCriteria = this.selectionCriteria;
-            Callable<Void> task = new Callable<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    Connection conForContext = null;
-                    try {
-                        conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
-                        deleteTablesData(selectionCriteria, contextId, conForContext);
-                    } finally {
-                        try {
-                            adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
-                        } catch (PoolException e) {
-                            LOG.error("Pool Error", e);
-                        }
-                    }
-                    return null;
-                }
-            };
-            threadPool.submit(ThreadPools.task(task));
+        // Now go through tables and delete the remainders (if desired)
+        if (deleteTablesData) {
+            deleteTablesData(selectionCriteria, ctx.getId(), con, true);
         }
     }
 
-    static void deleteTablesData(String selectionCriteria, Integer contextId, Connection conForContext) throws SQLException {
+    static void deleteTablesData(String selectionCriteria, Integer contextId, Connection conForContext, boolean failOnError) throws SQLException {
         // Fetch tables which can contain context data and sort these tables magically by foreign keys
         LOG.debug("Fetching table structure from database scheme for context {}", contextId);
         List<TableObject> fetchTableObjects = fetchTableObjects(selectionCriteria, conForContext);
@@ -462,11 +483,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         int reslen = stmtBuilder.length();
         for (int i = sorted_tables.size(); i-- > 0;) {
             stmtBuilder.setLength(reslen);
-            deleteTableDataSafe(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
+            if (failOnError) {
+                deleteTableData(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
+            } else {
+                deleteTableDataSafe(sorted_tables.get(i).getName(), contextId, stmtBuilder, conForContext);
+            }
         }
     }
 
     private static void deleteTableDataSafe(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) {
+        try {
+            deleteTableData(tableName, contextId, stmtBuilder, con);
+        } catch (Exception e) {
+            LOG.warn("Failed to remove possibly remaining entries from table '{}' during deletion of context {}", tableName, contextId, e);
+        }
+    }
+
+    private static void deleteTableData(String tableName, Integer contextId, StringBuilder stmtBuilder, Connection con) throws SQLException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -474,8 +507,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (rows > 0) {
                 System.err.println("Dropped " + rows + " remaining row(s) from " + tableName);
             }
-        } catch (Exception e) {
-            LOG.warn("Failed to cleanse possible remaining entries from table '{}' for context {}", tableName, contextId, e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -3467,5 +3498,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class SubmittingRunnable<V> implements Runnable {
+
+        private final Task<V> task;
+        private final ThreadPoolService threadPool;
+
+        /**
+         * Initializes a new {@link SubmittingRunnable}.
+         */
+        SubmittingRunnable(Task<V> task, ThreadPoolService threadPool) {
+            super();
+            this.task = task;
+            this.threadPool = threadPool;
+        }
+
+        @Override
+        public void run() {
+            threadPool.submit(task, CallerRunsBehavior.<V> getInstance());
+        }
+
     }
 }

@@ -87,6 +87,12 @@ public final class Server {
     }
     private static volatile Integer serverId;
 
+    /**
+     * Gets the identifier of the registered server matching the configured <code>SERVER_NAME</code> property.
+     *
+     * @return The server identifier
+     * @throws OXException If there is no such registered server matching configured <code>SERVER_NAME</code> property
+     */
     public static int getServerId() throws OXException {
         // Load if not yet done
         Integer tmp = serverId;
@@ -109,7 +115,13 @@ public final class Server {
         return iServerId;
     }
 
-    public static final void start(final ConfigurationService service) throws OXException {
+    /**
+     * Initializes the server name using given configuration service.
+     *
+     * @param service The configuration service to use
+     * @throws OXException If <code>SERVER_NAME</code> configuration property is missing
+     */
+    public static final void start(ConfigurationService service) throws OXException {
         final String tmp = service.getProperty(PROPERTY_NAME);
         if (null == tmp || tmp.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
@@ -117,6 +129,12 @@ public final class Server {
         serverName = tmp;
     }
 
+    /**
+     * Gets the configured server name (see <code>SERVER_NAME</code> property in 'system.properties' file)
+     *
+     * @return The server name
+     * @throws OXException If server name is absent
+     */
     public static String getServerName() throws OXException {
         final String tmp = Server.serverName;
         if (null == tmp) {

@@ -117,15 +117,59 @@ public interface ConfigDatabaseService {
      */
     void backForUpdateTaskAfterReading(Connection con);
 
+    /**
+     * Lists all identifiers of the contexts associated with specified database pool.
+     *
+     * @param poolId The identifier of the database pool
+     * @return All identifiers of associated contexts
+     * @throws OXException If context identifiers cannot be returned
+     */
     int[] listContexts(int poolId) throws OXException;
 
+    /**
+     * Gets the identifier of the registered server matching the configured <code>SERVER_NAME</code> property.
+     *
+     * @return The server identifier
+     * @throws OXException If there is no such registered server matching configured <code>SERVER_NAME</code> property
+     */
     int getServerId() throws OXException;
 
+    /**
+     * Gets the configured server name (see <code>SERVER_NAME</code> property in 'system.properties' file)
+     *
+     * @return The server name
+     * @throws OXException If server name is absent
+     */
     String getServerName() throws OXException;
 
+    /**
+     * Gets the database pool for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the database pool
+     * @return The identifier of the database pool associated with the context
+     * @throws OXException If an error occurs trying to determine the database pool
+     * @see #getSchemaInfo(int)
+     */
     int getWritablePool(int contextId) throws OXException;
 
+    /**
+     * Gets the schema name for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the schema name
+     * @return The schema name
+     * @throws OXException If an error occurs trying to determine the schema name
+     * @see #getSchemaInfo(int)
+     */
     String getSchemaName(int contextId) throws OXException;
+
+    /**
+     * Gets the schema information (pool identifier and schema name) for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the schema information
+     * @return The schema information (pool identifier and schema name) for the context
+     * @throws OXException If an error occurs trying to determine the schema information
+     */
+    SchemaInfo getSchemaInfo(int contextId) throws OXException;
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one.

@@ -53,6 +53,7 @@ import java.sql.Connection;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
+import com.openexchange.database.SchemaInfo;
 
 public class AdminCacheExtended extends AdminCache {
 
@@ -112,6 +113,13 @@ public class AdminCacheExtended extends AdminCache {
      */
     public String getSchemeForContextId(final int context_id) throws PoolException{
         return pool.getSchemeForContextId(context_id);
+    }
+
+    /**
+     * ONLY USE IF YOU EXACTLY KNOW FOR WHAT THIS METHOD IS!!!
+     */
+    public SchemaInfo getSchemaInfoForContextId(final int context_id) throws PoolException{
+        return pool.getSchemaInfoForContextId(context_id);
     }
 
     @Override

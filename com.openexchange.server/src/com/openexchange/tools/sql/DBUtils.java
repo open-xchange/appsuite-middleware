@@ -586,6 +586,28 @@ public final class DBUtils {
     }
 
     /**
+     * Extracts possibly nested reference of specified exception type.
+     *
+     * @param clazz The exception's type
+     * @param exception The parental exception to extract from
+     * @return The reference or <code>null</code>
+     */
+    public static <E extends Exception> E extractException(Class<E> clazz, Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (clazz.isInstance(exception)) {
+            return (E) exception;
+        }
+
+        Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractException(clazz, (Exception) cause);
+    }
+
+    /**
      * Checks for retry condition for a failed transaction roll-back.
      */
     public static final class TransactionRollbackCondition {
