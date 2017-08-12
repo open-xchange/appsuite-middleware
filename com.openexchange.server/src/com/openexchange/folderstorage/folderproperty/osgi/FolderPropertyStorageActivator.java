@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.folderproperty.osgi;
 import java.util.Arrays;
 import java.util.Collection;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.folderproperty.FolderPropertyStorageServiceTracker;
 import com.openexchange.folderstorage.folderproperty.sql.CreateUserPropertyFolderTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -88,6 +90,9 @@ public class FolderPropertyStorageActivator extends HousekeepingActivator {
             }
 
         });
+
+        //Register FolderStorageRegisty
+        track(FolderStorage.class, new FolderPropertyStorageServiceTracker(context));
 
     }
 

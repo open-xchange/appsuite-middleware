@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.database.Databases;
@@ -66,6 +67,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.folderproperty.exception.FolderPropertyExceptionCodes;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.ldap.User;
 
@@ -150,8 +152,8 @@ public class FolderPropertyStorage implements FolderStorage {
 
     @Override
     public boolean containsFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException {
-        // If empty no folder exists. Ignore StorageType (Not relevant for folder)
-        return false == isEmpty(treeId, folderId, storageParameters);
+        // Ignore StorageType (Not relevant for folder)
+        return containsFolder(treeId, folderId, storageParameters);
     }
 
     @Override
@@ -166,28 +168,25 @@ public class FolderPropertyStorage implements FolderStorage {
 
     @Override
     public Folder prepareFolder(String treeId, Folder folder, StorageParameters storageParameters) throws OXException {
+        // Nothing to do
         return folder;
     }
 
     @Override
     public Folder getFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
-        // Get the folder from other storage, get properties for the folder, return
-        
-        
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<Folder> getFolders(String treeId, List<String> folderIds, StorageParameters storageParameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
     @Override
     public Folder getFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<String> folderIds = new LinkedList<>();
+        folderIds.add(folderId);
+        return getFolders(treeId, folderIds, storageType, storageParameters).get(0);
+    }
+
+    @Override
+    public List<Folder> getFolders(String treeId, List<String> folderIds, StorageParameters storageParameters) throws OXException {
+        return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
     @Override
@@ -275,21 +274,21 @@ public class FolderPropertyStorage implements FolderStorage {
     }
 
     @Override
-    public boolean startTransaction(StorageParameters parameters, boolean modify) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean startTransaction(StorageParameters storageParameters, boolean modify) throws OXException {
+        nullCheck(storageParameters);
+        TransactionManager.getTransactionManager(storageParameters).transactionStarted(this);
+        return true;
     }
 
     @Override
-    public void commitTransaction(StorageParameters params) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void commitTransaction(StorageParameters storageParameters) throws OXException {
+        nullCheck(storageParameters);
+        TransactionManager.getTransactionManager(storageParameters).commit();
     }
 
     @Override
-    public void rollback(StorageParameters params) {
-        // TODO Auto-generated method stub
-
+    public void rollback(StorageParameters storageParameters) {
+        TransactionManager.getTransactionManager(storageParameters).rollback();
     }
 
     /**
@@ -302,6 +301,18 @@ public class FolderPropertyStorage implements FolderStorage {
     private Connection getConnection(StorageParameters storageParameters) throws OXException {
         TransactionManager.initTransaction(storageParameters);
         return TransactionManager.getTransactionManager(storageParameters).getConnection();
+    }
+
+    /**
+     * Checks if {@link StorageParameters} are <code>null</code>
+     * 
+     * @param storageParameters The {@link StorageParameters}
+     * @throws OXException If the storageParameters are <code>null</code>
+     */
+    private void nullCheck(StorageParameters storageParameters) throws OXException {
+        if (null == storageParameters) {
+            throw FolderPropertyExceptionCodes.MISSING_STORAGE_PARAMETERS.create();
+        }
     }
 
 }
