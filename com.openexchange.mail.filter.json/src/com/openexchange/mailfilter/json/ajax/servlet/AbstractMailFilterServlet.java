@@ -170,7 +170,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
             checkMailfilterAvailable(session);
 
@@ -194,10 +194,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
-            if(false == SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                // MW-810 Don't log SES-206 as error
-                LOG.error("", e);
-            }
+            LOG.error("", e);
             response.setException(e);
         }
         /*
@@ -242,7 +239,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
             checkMailfilterAvailable(session);
 
@@ -263,10 +260,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
-            if(false == SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                // MW-810 Don't log SES-206 as error
-                LOG.error("", e);
-            }
+            LOG.error("", e);
             response.setException(e);
         }
         /*
