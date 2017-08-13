@@ -112,7 +112,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
         final ServerSession session = getSessionObject(req);
         if (null == session) {
-            final OXException e = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            final OXException e = SessionExceptionCodes.SESSION_EXPIRED.create(req.getParameter(PARAMETER_SESSION));
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
             return;
         }

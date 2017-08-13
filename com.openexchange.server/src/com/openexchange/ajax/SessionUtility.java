@@ -380,13 +380,13 @@ public final class SessionUtility {
     }
 
     /**
-     * Checks whether passed exception indicates an IP check error.
+     * Checks whether passed exception indicates an session expired error.
      *
      * @param e The exception to check
-     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     * @return <code>true</code> if passed exception indicates an session expired error; otherwise <code>false</code>
      */
-    public static boolean isIpCheckError(final OXException e) {
-        final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
+    public static boolean isSessionExpiredError(final OXException e) {
+        final SessionExceptionCodes code = SessionExceptionCodes.SESSION_EXPIRED;
         return (code.equals(e)) && code.getCategory().equals(e.getCategory());
     }
 
@@ -497,8 +497,6 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
@@ -521,8 +519,6 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
@@ -547,8 +543,6 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
@@ -676,8 +670,8 @@ public final class SessionUtility {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
-            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
-            oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
+            final OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), null == secret ? "null" : secret);
             throw oxe;
         }
     }

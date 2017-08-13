@@ -147,7 +147,7 @@ public class SAMLLoginTools {
      * @param session The session
      * @param cookieHash The cookie hash to look up the secret cookie
      * @param loginConfiguration The login configuration
-     * @throws {@link SessionExceptionCodes#WRONG_CLIENT_IP} or {@link SessionExceptionCodes#WRONG_SESSION_SECRET}
+     * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
     public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, LoginConfiguration loginConfiguration) throws OXException {
         // IP check
@@ -157,7 +157,7 @@ public class SAMLLoginTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash);
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
     }
 
