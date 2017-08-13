@@ -50,6 +50,7 @@
 package com.openexchange.push.malpoll;
 
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -73,6 +74,16 @@ public final class MALPollDeleteListener implements DeleteListener {
             MALPollPushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId);
 
             MALPollDBUtility.deleteUserData(contextId, userId);
+        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            int contextId = event.getContext().getContextId();
+            List<Integer> userIds = event.getUserIds();
+            if (null != userIds) {
+                for (Integer userId : userIds) {
+                    MALPollPushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId.intValue());
+                }
+            }
+
+            MALPollDBUtility.deleteContextData(contextId);
         }
     }
 }
