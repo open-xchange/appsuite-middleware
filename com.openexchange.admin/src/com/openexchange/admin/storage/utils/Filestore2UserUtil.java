@@ -81,6 +81,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -900,10 +901,16 @@ public class Filestore2UserUtil {
     }
 
     private static void insertEntries(Set<FilestoreEntry> allEntries, Connection con) throws SQLException {
+        for (Set<FilestoreEntry> entries : Sets.partition(allEntries, 50)) {
+            doInsertEntries(entries, con);
+        }
+    }
+
+    private static void doInsertEntries(Set<FilestoreEntry> entries, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT IGNORE INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
-            for (FilestoreEntry filestoreEntry : allEntries) {
+            for (FilestoreEntry filestoreEntry : entries) {
                 stmt.setInt(1, filestoreEntry.cid);
                 stmt.setInt(2, filestoreEntry.user);
                 stmt.setInt(3, filestoreEntry.filestoreId);
