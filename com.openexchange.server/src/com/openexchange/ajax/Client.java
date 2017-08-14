@@ -115,7 +115,12 @@ public enum Client {
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD", "The client identifier for WebDav vCard");
+    WEBDAV_VCARD("WEBDAV_VCARD", "The client identifier for WebDav vCard"),
+    
+    /**
+     * The client for Provisioning API: <code>"provisioning-api"</code>
+     */
+    PROVISIONING("provisioning-api", "The client identifier for Provisioning API");
 
     private final String clientId;
     private final String description;
