@@ -98,8 +98,6 @@ public class OIDCActivator extends HousekeepingActivator{
         this.oidcFeature.open();
         //register default oidc backend if configured
         if (config.startDefaultBackend()) {
-            //TODO QS-VS: remove
-            System.out.println("Start default backend");
             context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
     }

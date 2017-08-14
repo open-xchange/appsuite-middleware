@@ -168,7 +168,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String hostname = this.getDomainName(request);
         Map<String, String> additionalClientInformation = new HashMap<>();
 
-        AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo(state, hostname, deepLink, nonce, additionalClientInformation, uiClientID);
+        AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo.Builder(state.getValue())
+            .domainName(hostname)
+            .deepLink(deepLink)
+            .nonce(nonce.getValue())
+            .additionalClientInformation(additionalClientInformation)
+            .uiClientID(uiClientID)
+            .build();
         this.stateManagement.addAuthenticationRequest(authenticationRequestInfo);
     }
 
@@ -304,8 +310,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
         Session session = this.extractSessionFromRequest(request);
         String logoutRequest = this.backend.getBackendConfig().getRedirectURILogout();
-        // TODO QS-VS: switch to either a) terminate cookies locally and redirect to OX logout handler 
-        // or b) prepare OIDC single logout redirect
         if (this.backend.getBackendConfig().isSSOLogout()) {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), this.getDomainName(request), session.getSessionID()));

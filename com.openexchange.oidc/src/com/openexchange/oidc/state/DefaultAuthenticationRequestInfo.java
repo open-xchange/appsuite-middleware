@@ -49,8 +49,6 @@
 package com.openexchange.oidc.state;
 
 import java.util.Map;
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
  * Default implementation of the AuthenticationRequestInfo.
@@ -67,13 +65,12 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
     private Map<String, String> additionalClientInformation;
     private String uiClientID;
 
-    //TODO QS-VS: Builder pattern
-    public DefaultAuthenticationRequestInfo(State state, String domainName, String deepLink, Nonce nonce, Map<String, String> additionalClientInformation, String uiClientID) {
+    public DefaultAuthenticationRequestInfo(String state, String domainName, String deepLink, String nonce, Map<String, String> additionalClientInformation, String uiClientID) {
         super();
-        this.state = state.getValue();
+        this.state = state;
         this.domainName = domainName;
         this.deepLink = deepLink;
-        this.nonce = nonce.getValue();
+        this.nonce = nonce;
         this.additionalClientInformation = additionalClientInformation;
         this.uiClientID = uiClientID;
     }
@@ -106,6 +103,54 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
     @Override
     public String getUiClientID() {
         return this.uiClientID;
+    }
+    
+    public static class Builder {
+        private String state;
+        private String domainName;
+        private String deepLink;
+        private String nonce;
+        private Map<String, String> additionalClientInformation;
+        private String uiClientID;
+        
+        public Builder(String state) {
+            this.state = state;
+        }
+        
+        public Builder domainName(String domainName) {
+            this.domainName = domainName;
+            return this;
+        }
+        
+        public Builder deepLink(String deepLink) {
+            this.deepLink = deepLink;
+            return this;
+        }
+        
+        public Builder nonce(String nonce) {
+            this.nonce = nonce;
+            return this;
+        }
+        
+        public Builder additionalClientInformation(Map<String, String> additionalClientInformation) {
+            this.additionalClientInformation = additionalClientInformation;
+            return this;
+        }
+        
+        public Builder uiClientID(String uiClientID) {
+            this.uiClientID = uiClientID;
+            return this;
+        }
+        
+        public DefaultAuthenticationRequestInfo build() {
+            return new DefaultAuthenticationRequestInfo(
+                this.state, 
+                this.domainName, 
+                this.deepLink, 
+                this.nonce, 
+                this.additionalClientInformation, 
+                this.uiClientID);
+        }
     }
     
 }

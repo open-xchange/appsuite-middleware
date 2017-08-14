@@ -51,7 +51,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
     }
     
-    //TODO QS-VS: optimize function
     private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
         if (Strings.isEmpty(sessionToken)) {
@@ -88,21 +87,20 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         
         LoginResult result = loginUser(request, context, user, reservation.getState());
 
-        Session session = result.getSession();
-        
-        session.setParameter(OIDCTools.IDTOKEN, idToken);
-        
-        // Add session log properties
-        LogProperties.putSessionProperties(session);
-
-        // Add headers and cookies from login result
-        LoginServlet.addHeadersAndCookies(result, response);
-
-        // Store session
-        SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
-        LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
+        Session session = performSessionAdditions(result, request, response, idToken);
         
         sendRedirect(session, request, response);
+    }
+    
+    private Session performSessionAdditions(LoginResult loginResult, HttpServletRequest request, HttpServletResponse response, String idToken) throws OXException {
+        Session session = loginResult.getSession();
+        session.setParameter(OIDCTools.IDTOKEN, idToken);
+        
+        LoginServlet.addHeadersAndCookies(loginResult, response);
+
+        SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
+        LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
+        return session;
     }
 
     private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state) throws OXException {

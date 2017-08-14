@@ -7,12 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.openid.connect.sdk.Nonce;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
+import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo.Builder;
 
 public class PortableAuthenticationRequest extends AbstractCustomPortable {
 
@@ -70,8 +69,13 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        DefaultAuthenticationRequestInfo authenticationInfo = new DefaultAuthenticationRequestInfo(new State(reader.readUTF(STATE)), 
-            reader.readUTF(DOMAINNAME), reader.readUTF(DEEPLINK), new Nonce(reader.readUTF(NONCE)), this.getMapFromArray(reader.readUTFArray(UI_CLIENT_INFORMATION)), reader.readUTF(UI_CLIENT_ID));
+        DefaultAuthenticationRequestInfo authenticationInfo = new Builder(reader.readUTF(STATE))
+        .domainName(reader.readUTF(DOMAINNAME))
+        .deepLink(reader.readUTF(DEEPLINK))
+        .nonce(reader.readUTF(NONCE))
+        .additionalClientInformation(this.getMapFromArray(reader.readUTFArray(UI_CLIENT_INFORMATION)))
+        .uiClientID(reader.readUTF(UI_CLIENT_ID))
+        .build();
         this.setDelegate(authenticationInfo);
     }
 
