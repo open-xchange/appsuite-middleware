@@ -2424,39 +2424,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int[] getAll(final Context ctx) throws StorageException {
+    public int[] getAll(Context ctx) throws StorageException {
         int context_id = ctx.getId().intValue();
         Connection read_ox_con = null;
-        PreparedStatement stmt = null;
         try {
-            List<Integer> list = new LinkedList<>();
             read_ox_con = cache.getConnectionForContext(context_id);
-            stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '%' OR con.field01 LIKE '%');");
-
-            stmt.setInt(1, context_id);
-            final ResultSet rs3 = stmt.executeQuery();
-            while (rs3.next()) {
-                list.add(Integer.valueOf(rs3.getInt("userid")));
-            }
-            rs3.close();
-
-            int[] retval = new int[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                retval[i] = list.get(i).intValue();
-            }
-
-            return retval;
-        } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            return getAll(ctx, read_ox_con);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
-            log.error("", e);
-            throw e;
         } finally {
-            Databases.closeSQLStuff(stmt);
             if (read_ox_con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
@@ -2464,6 +2441,41 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    @Override
+    public int[] getAll(Context ctx, Connection read_ox_con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = read_ox_con.prepareStatement("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '%' OR con.field01 LIKE '%')");
+            stmt.setInt(1, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+
+            List<Integer> list = new LinkedList<>();
+            while (rs.next()) {
+                list.add(Integer.valueOf(rs.getInt(1)));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            Iterator<Integer> iter = list.iterator();
+            int size = list.size();
+            int[] retval = new int[size];
+            for (int i = 0; i < size; i++) {
+                retval[i] = iter.next().intValue();
+            }
+            return retval;
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -1540,44 +1540,55 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             return;
         }
 
-        PreparedStatement stmtinsertattribute = null;
-        PreparedStatement stmtdelattribute = null;
+        PreparedStatement insertStmt = null;
+        PreparedStatement deleteStmt = null;
         try {
             int contextId = ctx.getId().intValue();
-
-            stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
-            stmtinsertattribute.setInt(2, contextId);
-
-            stmtdelattribute = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
-            stmtdelattribute.setInt(1, contextId);
 
             for (Map.Entry<String, Map<String, String>> ns : ctx.getUserAttributes().entrySet()) {
                 String namespace = ns.getKey();
                 for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
                     String name = namespace + "/" + pair.getKey();
                     String value = pair.getValue();
-                    if (value != null) {
-                        stmtinsertattribute.setString(1, value);
-                        stmtinsertattribute.setString(3, name);
-                        stmtinsertattribute.setString(4, value);
-                        stmtinsertattribute.executeUpdate();
+                    if (value == null) {
+                        if (null == deleteStmt) {
+                            deleteStmt = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
+                            deleteStmt.setInt(1, contextId);
+                        }
+                        deleteStmt.setString(2, name);
+                        deleteStmt.addBatch();
                     } else {
-                        stmtdelattribute.setString(2, name);
-                        stmtdelattribute.executeUpdate();
+                        if (null == insertStmt) {
+                            insertStmt = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
+                            insertStmt.setInt(2, contextId);
+                        }
+                        insertStmt.setString(1, value);
+                        insertStmt.setString(3, name);
+                        insertStmt.setString(4, value);
+                        insertStmt.addBatch();
                     }
                 }
             }
 
+            if (null != deleteStmt) {
+                deleteStmt.executeBatch();
+                Databases.closeSQLStuff(deleteStmt);
+                deleteStmt = null;
+            }
+            if (null != insertStmt) {
+                insertStmt.executeBatch();
+                Databases.closeSQLStuff(insertStmt);
+                insertStmt = null;
+            }
+
             {
                 // Invalidate caches
-                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
                         Cache lCache = cacheService.getCache("UserSettingMail");
-                        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-                        int[] contextUserIds = oxu.getAll(ctx);
-                        for (int userId : contextUserIds) {
-                            lCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), userId));
+                        for (int userId : OXUserStorageInterface.getInstance().getAll(ctx, oxCon)) {
+                            lCache.remove(cacheService.newCacheKey(contextId, userId));
                         }
                     } catch (final Exception e) {
                         LOG.error("", e);
@@ -1585,7 +1596,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
         } finally {
-            Databases.closeSQLStuff(stmtinsertattribute, stmtdelattribute);
+            Databases.closeSQLStuff(insertStmt, deleteStmt);
         }
     }
 
@@ -2450,95 +2461,71 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void change(final Context ctx) throws StorageException {
-        Connection configCon = null;
-        boolean rollback = false;
-        try {
-            // Change login mappings in configdb
-            {
-                Set<String> loginMappings = ctx.getLoginMappings();
-                if (null != loginMappings) {
-                    // Fetch connection
-                    configCon = cache.getWriteConnectionForConfigDB();
-                    configCon.setAutoCommit(false);
-                    rollback = true;
-                    changeLoginMappingsForContext(loginMappings, ctx, configCon);
-                }
-            }
-
-            // Change context name in configdb
-            {
-                // first check if name is set and has a valid value
-                if (ctx.getName() != null) {
-                    // Fetch connection (if not done already)
-                    if (null == configCon) {
-                        configCon = cache.getWriteConnectionForConfigDB();
-                        configCon.setAutoCommit(false);
-                        rollback = true;
-                    }
-                    String name = ctx.getName().trim();
-                    if (name.length() > 0) {
-                        changeNameForContext(name, ctx, configCon);
-                    }
-                }
-            }
-
-            // Change quota size in config db
-            {
-                if (ctx.getMaxQuota() != null) {
-                    // Fetch connection (if not done already)
-                    if (null == configCon) {
-                        configCon = cache.getWriteConnectionForConfigDB();
-                        configCon.setAutoCommit(false);
-                        rollback = true;
-                    }
-                    long quota_max_temp = ctx.getMaxQuota().longValue();
-                    changeQuotaForContext(quota_max_temp, ctx, configCon);
-                }
-            }
-
-            // Change storage data
-            {
-                if (ctx.getFilestoreId() != null) {
-                    // Fetch connection (if not done already)
-                    if (null == configCon) {
-                        configCon = cache.getWriteConnectionForConfigDB();
-                        configCon.setAutoCommit(false);
-                        rollback = true;
-                    }
-                    changeStorageDataImpl(ctx.getFilestoreId().intValue(), ctx, configCon);
-                }
-            }
-
-            // commit changes to db
-            if (null != configCon) {
-                configCon.commit();
-                rollback = false;
-            }
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            if (rollback) {
-                rollback(configCon);
-            }
-            autocommit(configCon);
-            if (null != configCon) {
-                try {
-                    cache.pushWriteConnectionForConfigDB(configCon);
-                } catch (final PoolException e) {
-                    LOG.error("Error pushing configdb connection to pool!", e);
-                }
-            }
-        }
-
-        if (ctx.isUserAttributesset()) {
-            Connection oxCon = null;
+        {
+            Connection configCon = null;
+            boolean rollback = false;
             try {
-                oxCon = cache.getConnectionForContext(i(ctx.getId()));
-                updateDynamicAttributes(oxCon, ctx);
+                // Change login mappings in configdb
+                {
+                    Set<String> loginMappings = ctx.getLoginMappings();
+                    if (null != loginMappings) {
+                        // Fetch connection
+                        configCon = cache.getWriteConnectionForConfigDB();
+                        configCon.setAutoCommit(false);
+                        rollback = true;
+                        changeLoginMappingsForContext(loginMappings, ctx, configCon);
+                    }
+                }
+
+                // Change context name in configdb
+                {
+                    // first check if name is set and has a valid value
+                    if (ctx.getName() != null) {
+                        // Fetch connection (if not done already)
+                        if (null == configCon) {
+                            configCon = cache.getWriteConnectionForConfigDB();
+                            configCon.setAutoCommit(false);
+                            rollback = true;
+                        }
+                        String name = ctx.getName().trim();
+                        if (name.length() > 0) {
+                            changeNameForContext(name, ctx, configCon);
+                        }
+                    }
+                }
+
+                // Change quota size in config db
+                {
+                    if (ctx.getMaxQuota() != null) {
+                        // Fetch connection (if not done already)
+                        if (null == configCon) {
+                            configCon = cache.getWriteConnectionForConfigDB();
+                            configCon.setAutoCommit(false);
+                            rollback = true;
+                        }
+                        long quota_max_temp = ctx.getMaxQuota().longValue();
+                        changeQuotaForContext(quota_max_temp, ctx, configCon);
+                    }
+                }
+
+                // Change storage data
+                {
+                    if (ctx.getFilestoreId() != null) {
+                        // Fetch connection (if not done already)
+                        if (null == configCon) {
+                            configCon = cache.getWriteConnectionForConfigDB();
+                            configCon.setAutoCommit(false);
+                            rollback = true;
+                        }
+                        changeStorageDataImpl(ctx.getFilestoreId().intValue(), ctx, configCon);
+                    }
+                }
+
+                // commit changes to db
+                if (null != configCon) {
+                    configCon.commit();
+                    rollback = false;
+                }
             } catch (final PoolException e) {
                 LOG.error("Pool Error", e);
                 throw new StorageException(e);
@@ -2546,6 +2533,43 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("SQL Error", e);
                 throw new StorageException(e);
             } finally {
+                if (rollback) {
+                    rollback(configCon);
+                }
+                autocommit(configCon);
+                if (null != configCon) {
+                    try {
+                        cache.pushWriteConnectionForConfigDB(configCon);
+                    } catch (final PoolException e) {
+                        LOG.error("Error pushing configdb connection to pool!", e);
+                    }
+                }
+            }
+        }
+
+        if (ctx.isUserAttributesset()) {
+            Connection oxCon = null;
+            boolean rollback = false;
+            try {
+                oxCon = cache.getConnectionForContext(i(ctx.getId()));
+                oxCon.setAutoCommit(false);
+                rollback = true;
+
+                updateDynamicAttributes(oxCon, ctx);
+
+                oxCon.commit();
+                rollback = false;
+            } catch (final PoolException e) {
+                LOG.error("Pool Error", e);
+                throw new StorageException(e);
+            } catch (final SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                if (rollback) {
+                    rollback(oxCon);
+                }
+                autocommit(oxCon);
                 if (null != oxCon) {
                     try {
                         cache.pushConnectionForContext(i(ctx.getId()), oxCon);
