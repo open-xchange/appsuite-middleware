@@ -87,8 +87,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
         /* (non-Javadoc)
          * @see java.lang.Enum#toString()
          */
-        @Override
-        public String toString() {
+        public String getName() {
             return m_typeName;
         }
 
@@ -97,7 +96,20 @@ public class ImageFormat implements Comparable<ImageFormat> {
          * @return
          */
         public static ImageType createFrom(final String typeName) {
-            return (StringUtils.isNotEmpty(typeName) ? valueOf(typeName.toUpperCase()) : ImageType.JPG);
+            ImageType ret = ImageType.JPG;
+
+            if (StringUtils.isNotBlank(typeName)) {
+                String lookUp = typeName.trim().toLowerCase();
+
+                for (final ImageType imageType : ImageType.values()) {
+                    if (lookUp.equals(imageType.getName())) {
+                        ret = imageType;
+                        break;
+                    }
+                }
+            }
+
+            return ret;
         }
 
         // - Members -----------------------------------------------------------
@@ -145,8 +157,8 @@ public class ImageFormat implements Comparable<ImageFormat> {
         super();
 
         m_type = imageType;
-        m_width = width;
-        m_height = height;
+        m_width = (width > 0) ? width : -1;
+        m_height = (height > 0) ? height : -1;
         m_scaleType = (null != scaleType) ? scaleType : ScaleType.CONTAIN;
         m_quality = (quality > 0) ? quality : (((ImageType.JPG == imageType) ? 75 : 7));
     }
@@ -170,7 +182,10 @@ public class ImageFormat implements Comparable<ImageFormat> {
     public int compareTo(ImageFormat other) {
         int ret = m_type.compareTo(other.m_type);
 
-        if (0 == ret) {
+        // imageType and scaleType must match to  check
+        // sort order based on quaulity and used area
+
+        if ((0 == ret) && (0 == (ret = m_scaleType.compareTo(other.m_scaleType)))) {
             final long area1 = Math.abs((long) getWidth() * getHeight());
             final long area2 = Math.abs((long) other.getWidth() * other.getHeight());
 
@@ -190,8 +205,8 @@ public class ImageFormat implements Comparable<ImageFormat> {
     public String getKey() {
         return new StringBuilder(m_type.toString()).append(':').
             append(m_width).append('x').
-            append(m_height).append('-').
-            append(m_scaleType.toString().toLowerCase()).append('@').
+            append(m_height).append('~').
+            append(m_scaleType.getKeyword()).append('@').
             append(m_quality).toString();
     }
 
@@ -255,17 +270,15 @@ public class ImageFormat implements Comparable<ImageFormat> {
     public static ImageFormat[] parseImageFormats(final String imageFormatsStr) {
         final ArrayList<ImageFormat> imageFormatList = new ArrayList<>();
 
-        if (StringUtils.isNotEmpty(imageFormatsStr)) {
-            final String[] imageFormatStr = imageFormatsStr.split("[,;]");
+        final String[] imageFormatStr = imageFormatsStr.split("[,;]");
 
-            for (String curImageFormatStr : imageFormatStr) {
-                final ImageFormat curImageFormat = parseImageFormat(curImageFormatStr);
+        for (String curImageFormatStr : imageFormatStr) {
+            final ImageFormat curImageFormat = parseImageFormat(curImageFormatStr);
 
-                if (null != curImageFormat) {
-                    imageFormatList.add(curImageFormat);
-                }
-
+            if (null != curImageFormat) {
+                imageFormatList.add(curImageFormat);
             }
+
         }
 
         return imageFormatList.toArray(new ImageFormat[imageFormatList.size()]);
@@ -281,29 +294,27 @@ public class ImageFormat implements Comparable<ImageFormat> {
         if (StringUtils.isNotEmpty(imageFormatStr)) {
             final String curFormatStr = imageFormatStr.trim();
 
-            int colPos = curFormatStr.indexOf(':');
-            int crossPos = curFormatStr.indexOf('x', colPos);
-            int minusPos = curFormatStr.indexOf('-', crossPos);
-            int atPos = curFormatStr.lastIndexOf('@', minusPos);
-            final boolean hasCol = (colPos > -1);
+            int extentsPos = curFormatStr.indexOf(':');
+            int crossPos = curFormatStr.indexOf('x', extentsPos);
+            int scalePos = curFormatStr.indexOf('~', crossPos);
+            int qualityPos = curFormatStr.indexOf('@', scalePos);
+            final boolean hasFormat = (extentsPos > -1);
 
-            if (minusPos < 0) {
-                minusPos = curFormatStr.length();
+            if (scalePos < 0) {
+                scalePos = curFormatStr.length();
             }
 
-            if (atPos < 0) {
-                atPos = curFormatStr.length();
+            if (qualityPos < 0) {
+                qualityPos = curFormatStr.length();
             }
 
-            // read format from beginning to occurrence of colon, if existing (default: "jpg"
-            String format = hasCol ? curFormatStr.substring(0, colPos).toLowerCase() : "jpg";
-
-            if (StringUtils.isBlank(format)) {
-                format = "jpg";
-            }
+            // read image format from beginning to occurrence of colon, if existing (default: "jpg")
+            ImageType imageType = hasFormat ?
+                ImageType.createFrom(curFormatStr.substring(0, extentsPos).toLowerCase()) :
+                    ImageType.JPG;
 
             // read extents after colon or from 0 and to minusPos or atPos (default: -1x-1)
-            String extentStr = curFormatStr.substring(hasCol ? (colPos + 1) : 0, Math.min(minusPos, atPos));
+            String extentStr = curFormatStr.substring(hasFormat ? (extentsPos + 1) : 0, Math.min(scalePos, qualityPos));
 
             crossPos = extentStr.indexOf('x');
 
@@ -323,7 +334,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
                     }
                 }
             } catch (NumberFormatException e) {
-                LOG.error(e.getMessage());
+                // ok, default is taken
             }
 
             // read scale type, possible values:
@@ -331,8 +342,8 @@ public class ImageFormat implements Comparable<ImageFormat> {
             // default: "contain"
             ScaleType scaleType = ScaleType.CONTAIN;
 
-            if ((minusPos > -1) && (minusPos < (atPos -1))) {
-                final String readType = curFormatStr.substring(minusPos + 1, atPos).trim().toLowerCase();
+            if ((scalePos > -1) && (scalePos < (qualityPos -1))) {
+                final String readType = curFormatStr.substring(scalePos + 1, qualityPos).trim().toLowerCase();
 
                 if (readType.startsWith("cov")) {
                     scaleType = readType.contains("crop") ? ScaleType.COVER_AND_CROP : ScaleType.COVER;
@@ -342,17 +353,19 @@ public class ImageFormat implements Comparable<ImageFormat> {
             }
 
             // read quality
-            int quality = format.equals("jpg") ? 75 : 7;
+            int quality = (ImageType.JPG == imageType) ? 75 : 7;
 
-            if ((atPos < (curFormatStr.length() - 1)) && ((atPos > minusPos) || (minusPos == curFormatStr.length()))) {
+            if (qualityPos < (curFormatStr.length() - 1)) {
                 try {
-                    quality = Integer.valueOf(curFormatStr.substring(atPos + 1)).intValue();
+                    quality = Integer.valueOf(curFormatStr.substring(qualityPos + 1)).intValue();
                 } catch (NumberFormatException e) {
-                    LOG.error(e.getMessage());
+                    // ok, default is taken
                 }
             }
 
-            ret = new ImageFormat(ImageType.createFrom(format), width, height, scaleType, quality);
+            ret = new ImageFormat(imageType, width, height, scaleType, quality);
+        } else {
+            ret = new ImageFormat();
         }
 
         return ret;
