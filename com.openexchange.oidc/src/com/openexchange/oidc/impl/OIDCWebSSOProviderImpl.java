@@ -297,12 +297,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return (OIDCTokenResponse) tokenResponse;
     }
 
-    private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        LoginPerformer.getInstance().doLogout(session.getSessionID());
-        SessionUtility.removeOXCookies(session, request, response);
-        SessionUtility.removeJSESSIONID(request, response);
-    }
-
     @Override
     public String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
         Session session = this.extractSessionFromRequest(request);
@@ -351,5 +345,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String sessionId = loginRequestInfo.getSessionId();
         //logout user
         this.logoutCurrentUser(getSessionFromId(sessionId), request, response);
+    }
+    
+    private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        LoginPerformer.getInstance().doLogout(session.getSessionID());
+        SessionUtility.removeOXCookies(session, request, response);
+        SessionUtility.removeJSESSIONID(request, response);
     }
 }

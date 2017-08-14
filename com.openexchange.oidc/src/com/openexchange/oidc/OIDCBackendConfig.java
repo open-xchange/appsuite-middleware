@@ -97,7 +97,7 @@ public interface OIDCBackendConfig {
     
     String getLogoutEndpoint();
     
-    String getRedirectURIPostLogout();
+    String getRedirectURIPostSSOLogout();
 
     boolean isSSOLogout();
 

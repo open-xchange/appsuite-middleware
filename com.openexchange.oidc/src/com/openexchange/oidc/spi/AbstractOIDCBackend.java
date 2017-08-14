@@ -228,7 +228,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN.create(e);
         }
 
-        URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostLogout());
+        URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostSSOLogout());
         LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
         return logoutRequest.toURI().toString();
     }

@@ -71,7 +71,7 @@ public enum OIDCBackendProperty implements Property {
     responseType(OIDCProperty.PREFIX, "code"), 
     userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     logoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    redirectURIPostLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    redirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     ssoLogout(OIDCProperty.PREFIX, false), 
     redirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
     
