@@ -70,7 +70,7 @@ public class NewAction extends AbstractAccountAction {
 
     /**
      * Initialises a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(ServiceLookup services) {
@@ -85,7 +85,7 @@ public class NewAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         CalendarAccountService service = getOptionalService(CalendarAccountService.class);
-        CalendarAccount account = service.insertAccount(session, providerId, session.getUserId(), data.asMap());
+        CalendarAccount account = service.insertAccount(session, providerId, data.asMap());
         return new AJAXRequestResult(account.getAccountId());
     }
 

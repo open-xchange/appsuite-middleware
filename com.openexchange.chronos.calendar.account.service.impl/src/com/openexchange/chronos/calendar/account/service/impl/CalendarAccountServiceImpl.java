@@ -118,7 +118,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(account.getAccountId()));
         } else if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == account.getAccountId() && !hasDefaultAccountRights) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
-        } else if (account.getLastModified().getTime() > timestamp) {
+        } else if (null != account.getLastModified() && account.getLastModified().getTime() > timestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(account.getAccountId()), timestamp, account.getLastModified().getTime());
         } else {
             return account;

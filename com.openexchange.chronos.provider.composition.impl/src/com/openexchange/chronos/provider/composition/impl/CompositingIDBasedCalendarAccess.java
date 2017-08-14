@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
@@ -253,9 +254,9 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     @Override
     public List<Event> getEventsOfUser() throws OXException {
         try {
-        return withUniqueIDs(getGroupwareAccess(CalendarAccount.DEFAULT_ACCOUNT).getEventsOfUser(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
-            throw withUniqueIDs(e, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
     }
 
@@ -273,20 +274,20 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     @Override
     public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         try {
-            UpdatesResult updatesResult = getGroupwareAccess(CalendarAccount.DEFAULT_ACCOUNT).getUpdatedEventsOfUser(updatedSince);
-            return new IDManglingUpdatesResult(updatesResult, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            UpdatesResult updatesResult = getGroupwareAccess(DEFAULT_ACCOUNT).getUpdatedEventsOfUser(updatedSince);
+            return new IDManglingUpdatesResult(updatesResult, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
-            throw withUniqueIDs(e, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
     }
 
     @Override
     public CalendarFolder getDefaultFolder() throws OXException {
         try {
-            GroupwareCalendarFolder defaultFolder = getGroupwareAccess(CalendarAccount.DEFAULT_ACCOUNT).getDefaultFolder();
-            return withUniqueID(defaultFolder, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            GroupwareCalendarFolder defaultFolder = getGroupwareAccess(DEFAULT_ACCOUNT).getDefaultFolder();
+            return withUniqueID(defaultFolder, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
-            throw withUniqueIDs(e, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
     }
 
@@ -514,8 +515,8 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      *
      * @return The calendar accounts
      */
-    private List<CalendarAccount> getAccounts() throws OXException {        
-        return services.getService(CalendarAccountService.class).loadAccounts(session); 
+    private List<CalendarAccount> getAccounts() throws OXException {
+        return services.getService(CalendarAccountService.class).loadAccounts(session);
     }
 
     /**

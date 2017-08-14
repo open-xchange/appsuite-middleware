@@ -60,6 +60,9 @@ import java.util.Map;
  */
 public class DefaultCalendarAccount implements CalendarAccount {
 
+    /** auto-generated serialVersionUID */
+    private static final long serialVersionUID = 1289630763948196626L;
+
     private final String providerId;
     private final int accountId;
     private final int userId;

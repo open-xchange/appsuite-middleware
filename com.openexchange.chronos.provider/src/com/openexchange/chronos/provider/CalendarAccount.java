@@ -63,7 +63,7 @@ import java.util.Map;
 public interface CalendarAccount extends Serializable{
 
     /** The default <i>internal</i> calendar provider account */
-    public static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
+    static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
 
     /**
      * Gets the account's identifier.
