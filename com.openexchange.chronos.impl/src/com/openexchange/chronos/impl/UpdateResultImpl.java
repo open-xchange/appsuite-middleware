@@ -78,4 +78,9 @@ public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
         return updatedItem.getTimestamp();
     }
 
+    @Override
+    public String toString() {
+        return "UpdateResultImpl [originalItem=" + originalItem + ", updatedItem=" + updatedItem + ", updatedFields=" + updatedFields + "]";
+    }
+
 }

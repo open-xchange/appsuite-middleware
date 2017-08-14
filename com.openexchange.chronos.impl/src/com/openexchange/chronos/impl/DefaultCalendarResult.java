@@ -128,4 +128,9 @@ public class DefaultCalendarResult implements CalendarResult {
         return null == creations ? Collections.<CreateResult> emptyList() : Collections.unmodifiableList(creations);
     }
 
+    @Override
+    public String toString() {
+        return "DefaultCalendarResult [session=" + session + ", calendarUserId=" + calendarUserId + ", folderId=" + folderId + ", creations=" + creations + ", updates=" + updates + ", deletions=" + deletions + "]";
+    }
+
 }

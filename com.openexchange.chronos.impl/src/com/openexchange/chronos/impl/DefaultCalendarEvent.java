@@ -136,4 +136,9 @@ public class DefaultCalendarEvent implements CalendarEvent {
         return Math.max(Utils.getMaximumTimestamp(creations), Math.max(Utils.getMaximumTimestamp(deletions), Utils.getMaximumTimestamp(updates)));
     }
 
+    @Override
+    public String toString() {
+        return "DefaultCalendarEvent [contextId=" + contextId + ", accountId=" + accountId + ", creations=" + creations + ", updates=" + updates + ", deletions=" + deletions + "]";
+    }
+
 }

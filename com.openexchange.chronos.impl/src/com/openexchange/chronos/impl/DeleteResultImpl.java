@@ -84,4 +84,10 @@ public class DeleteResultImpl implements DeleteResult {
     public EventID getEventID() {
         return eventID;
     }
+
+    @Override
+    public String toString() {
+        return "DeleteResult [eventID=" + eventID + "]";
+    }
+
 }

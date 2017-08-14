@@ -82,4 +82,9 @@ public class CreateResultImpl implements CreateResult {
         return createdEvent.getTimestamp();
     }
 
+    @Override
+    public String toString() {
+        return "CreateResult [createdEvent=" + createdEvent + "]";
+    }
+
 }
