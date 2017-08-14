@@ -94,42 +94,42 @@ public class InitService extends OIDCServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        String flow = httpRequest.getParameter("flow");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String flow = request.getParameter("flow");
         if (!validateFlow(flow)) {
-            httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         try {
-            String redirectURI = this.getRedirectURI(flow, httpRequest);
-            buildResponse(httpResponse, redirectURI, httpRequest.getParameter("redirect"));
+            String redirectURI = this.getRedirectURI(flow, request, response);
+            buildResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
             //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
             if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
                 LOG.debug(e.getLocalizedMessage());
-                httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
         }
     }
 
-    private String getRedirectURI(String flow, HttpServletRequest httpRequest) throws OXException {
+    private String getRedirectURI(String flow, HttpServletRequest request, HttpServletResponse response) throws OXException {
         String redirectUri = "";
         if (flow.equals("login")) {
-            redirectUri = provider.getLoginRedirectRequest(httpRequest);
+            redirectUri = provider.getLoginRedirectRequest(request);
         } else if (flow.equals("logout")) {
-            redirectUri = provider.getLogoutRedirectRequest(httpRequest);
+            redirectUri = provider.getLogoutRedirectRequest(request, response);
         }
         return redirectUri;
     }
 
-    private void buildResponse(HttpServletResponse httpResponse, String redirectURI, String respondWithRedirect) throws IOException {
+    private void buildResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
         if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
-            httpResponse.sendRedirect(redirectURI);
+            response.sendRedirect(redirectURI);
         } else {
-            httpResponse.setStatus(HttpServletResponse.SC_OK);
-            httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
-            httpResponse.setContentType("application/json");
-            PrintWriter writer = httpResponse.getWriter();
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setCharacterEncoding(Charsets.UTF_8_NAME);
+            response.setContentType("application/json");
+            PrintWriter writer = response.getWriter();
             writer.write("{\"redirect\":\"" + redirectURI + "\"}");
             writer.flush();
         }

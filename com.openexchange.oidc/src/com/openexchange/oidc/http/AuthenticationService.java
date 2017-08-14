@@ -17,9 +17,9 @@ public class AuthenticationService extends OIDCServlet{
     }
     
     @Override
-    protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            this.provider.authenticateUser(httpRequest, httpResponse);
+            this.provider.authenticateUser(request, response);
         } catch (OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

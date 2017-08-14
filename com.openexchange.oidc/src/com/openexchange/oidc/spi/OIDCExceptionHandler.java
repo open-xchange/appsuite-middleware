@@ -60,8 +60,8 @@ import com.openexchange.exception.OXException;
  */
 public interface OIDCExceptionHandler {
     
-    void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
+    void handleAuthnResponseFailed(HttpServletRequest request, HttpServletResponse response, OXException exception);
 
-    void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception);
+    void handleLogoutResponseFailed(HttpServletRequest request, HttpServletResponse response, OXException exception);
 
 }

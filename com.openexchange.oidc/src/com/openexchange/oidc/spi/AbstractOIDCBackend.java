@@ -129,8 +129,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
     
     @Override
-    public HTTPRequest getHttpRequest(HTTPRequest httpRequest) {
-        return httpRequest;
+    public HTTPRequest getHttpRequest(HTTPRequest request) {
+        return request;
     }
     
     @Override
@@ -175,7 +175,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
     
     @Override
-    public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest) {
+    public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest request) {
         return requestBuilder.build();
     }
     

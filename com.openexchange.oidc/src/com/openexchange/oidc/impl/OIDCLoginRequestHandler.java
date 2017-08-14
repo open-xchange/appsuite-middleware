@@ -52,41 +52,41 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     }
     
     //TODO QS-VS: optimize function
-    private void performLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException, OXException {
-        String sessionToken = req.getParameter(OIDCTools.SESSION_TOKEN);
+    private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
+        String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
         if (Strings.isEmpty(sessionToken)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         
         SessionReservationService sessionReservationService = Services.getService(SessionReservationService.class);
         Reservation reservation = sessionReservationService.removeReservation(sessionToken);
         if (null == reservation) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
         
         String idToken = reservation.getState().get(OIDCTools.IDTOKEN);
         if (Strings.isEmpty(idToken)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.getContext(reservation.getContextId());
         if (!context.isEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         UserService userService = Services.getService(UserService.class);
         User user = userService.getUser(reservation.getUserId(), context);
         if (!user.isMailEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
         
-        LoginResult result = loginUser(req, context, user, reservation.getState());
+        LoginResult result = loginUser(request, context, user, reservation.getState());
 
         Session session = result.getSession();
         
@@ -96,17 +96,17 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         LogProperties.putSessionProperties(session);
 
         // Add headers and cookies from login result
-        LoginServlet.addHeadersAndCookies(result, resp);
+        LoginServlet.addHeadersAndCookies(result, response);
 
         // Store session
-        SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
-        LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), this.loginConfiguration);
+        SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
+        LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
         
-        sendRedirect(session, req, resp);
+        sendRedirect(session, request, response);
     }
 
-    private LoginResult loginUser(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> state) throws OXException {
-        final LoginRequest loginRequest = backend.getLoginRequest(httpRequest, user.getId(), context.getContextId(), loginConfiguration);
+    private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state) throws OXException {
+        final LoginRequest loginRequest = backend.getLoginRequest(request, user.getId(), context.getContextId(), loginConfiguration);
 
         //TODO QS-VS: Wirft eine Exception: Missing parameter in user's mail config: Session password not set.
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
@@ -144,11 +144,11 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         };
     }
     
-    private void sendRedirect(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+    private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response) throws IOException {
 //        String uiWebPath = this.loginConfiguration.getUiWebPath();
         //TODO QS-VS: Load UI-Webpath from where??
         String uiWebPath = "/appsuite/ui";
-        httpResponse.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
+        response.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
     }
 
 }

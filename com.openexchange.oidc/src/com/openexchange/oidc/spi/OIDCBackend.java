@@ -102,7 +102,7 @@ public interface OIDCBackend {
      */
     OIDCExceptionHandler getExceptionHandler();
 
-    HTTPRequest getHttpRequest(HTTPRequest httpRequest);
+    HTTPRequest getHttpRequest(HTTPRequest request);
 
     ClientAuthentication getClientAuthentication();
 
@@ -112,7 +112,7 @@ public interface OIDCBackend {
 
     JWSAlgorithm getJWSAlgorithm() throws OXException;
 
-    AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest httpRequest);
+    AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest request);
 
     IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException;
 
@@ -120,7 +120,7 @@ public interface OIDCBackend {
 
     LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
-    AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest httpRequest, OIDCTokenResponse tokenResponse) throws OXException;
+    AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException;
 
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 
