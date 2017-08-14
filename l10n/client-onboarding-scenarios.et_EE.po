@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-27 14:06+0000\n"
-"PO-Revision-Date: 2017-04-12 05:35+0000\n"
-"Last-Translator: marko <marko.toom@gmail.com>\n"
+"POT-Creation-Date: 2017-07-20 13:17+0000\n"
+"PO-Revision-Date: 2017-07-24 07:53+0000\n"
+"Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: et_EE\n"
 "MIME-Version: 1.0\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1491975334.000000\n"
+"X-POOTLE-MTIME: 1500882789.000000\n"
 
 # Drive Application
 msgid "Drive Application"
-msgstr "Rakendus Drive"
+msgstr "Rakendus Failid"
 
 # Synchronize your files with our Drive application.
 msgid "Synchronize your files with our Drive application."
-msgstr "Sünkroniseerige oma faile meie rakenduse Drive abil."
+msgstr "Sünkroniseerige oma faile meie rakenduse Failid abil."
 
 # Mail + Calendar + Address Book
 msgid "Mail + Calendar + Address Book"
@@ -41,19 +41,19 @@ msgstr ""
 
 # Drive App
 msgid "Drive App"
-msgstr "Rakendus Drive"
+msgstr "Rakendus Failid"
 
 # Synchronize your files with our Drive App.
 msgid "Synchronize your files with our Drive App."
-msgstr "Sünkroniseerige oma failid meie rakenduse Drive abil."
+msgstr "Sünkroniseerige oma failid meie rakenduse Failid abil."
 
 # Mail App
 msgid "Mail App"
-msgstr "Rakendus Mail"
+msgstr "Rakendus E-post"
 
 # Synchronize your Mail with our Mail App.
 msgid "Synchronize your Mail with our Mail App."
-msgstr "Sünkroniseerige oma e-post meie rakenduse Mail abil."
+msgstr "Sünkroniseerige oma e-post meie rakenduse E-post abil."
 
 # Calendar + Address Book
 msgid "Calendar + Address Book"
