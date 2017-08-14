@@ -52,7 +52,6 @@ package com.openexchange.mail.filter.json.v2.actions;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +66,7 @@ import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.mail.filter.json.v2.Action;
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistService;
 import com.openexchange.mail.filter.json.v2.config.OptionsProperty;
+import com.openexchange.mail.filter.json.v2.config.Blacklist;
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.BasicGroup;
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.Field;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
@@ -89,12 +89,14 @@ import com.openexchange.tools.session.ServerSession;
 public class ConfigMailFilterAction extends AbstractMailFilterAction{
 
     public static final Action ACTION = Action.CONFIG;
+    MailFilterBlacklistService blacklistService;
 
     /**
      * Initializes a new {@link ConfigMailFilterAction}.
      */
     public ConfigMailFilterAction(ServiceLookup services) {
         super(services);
+        this.blacklistService = new MailFilterBlacklistService(services);
     }
 
     @Override
@@ -102,7 +104,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         final Credentials credentials = new Credentials(session);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final Set<String> capabilities = mailFilterService.getCapabilities(credentials);
-        final MultiKeyMap blacklists = MailFilterBlacklistService.getInstance().getBlacklists(credentials);
+        final Blacklist blacklists = blacklistService.getBlacklists(credentials.getUserid(), credentials.getContextid());
 
         try {
             final JSONObject result = getTestAndActionObjects(capabilities, blacklists);
@@ -117,12 +119,12 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
      * Fills up the config object filtered by blacklisted elements.
      *
      * @param hashSet A set of sieve capabilities
-     * @param blacklists A map of blacklisted elements
-     * @return
+     * @param blacklists A {@link Blacklist} containing mail filter elements which shouldn't be exposed to clients
+     * @return A json object containing the test and action objects
      * @throws JSONException
      * @throws OXException
      */
-    private JSONObject getTestAndActionObjects(final Set<String> capabilities, MultiKeyMap blacklists) throws JSONException, OXException {
+    private JSONObject getTestAndActionObjects(final Set<String> capabilities, Blacklist blacklists) throws JSONException, OXException {
         final JSONObject retval = new JSONObject();
         retval.put("tests", getTestArray(capabilities, blacklists));
         retval.put("actioncmds", getActionArray(capabilities, blacklists));
@@ -145,30 +147,23 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private JSONArray getTestArray(final Set<String> capabilities, MultiKeyMap blacklists) throws OXException, JSONException {
+    private JSONArray getTestArray(final Set<String> capabilities, Blacklist blacklists) throws OXException, JSONException {
         TestCommandParserRegistry service = services.getService(TestCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, TestCommandParser<TestCommand>> map = service.getCommandParsers();
-        Set<String> basicTestBlacklist = (Set<String>) blacklists.get(BasicGroup.tests, null, null);
-        Set<String> basicComparisonBlacklist = (Set<String>) blacklists.get(BasicGroup.comparisons, null, null);
         for (Map.Entry<String, TestCommandParser<TestCommand>> entry : map.entrySet()) {
             TestCommandParser<TestCommand> parser = entry.getValue();
-            if ((null == basicTestBlacklist || !basicTestBlacklist.contains(entry.getKey())) && parser.isCommandSupported(capabilities)) {
+            if (!blacklists.isBlacklisted(BasicGroup.tests, entry.getKey()) && parser.isCommandSupported(capabilities)) {
                 ITestCommand command = parser.getCommand();
                 final JSONObject object = new JSONObject();
                 final JSONArray comparison = new JSONArray();
                 object.put("id", entry.getKey());
                 final List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
-                    Set<String> subComparisonBlackList = null;
-                    if(blacklists.containsKey(BasicGroup.tests, entry.getKey(), Field.comparisons )) {
-                        subComparisonBlackList = (Set<String>) blacklists.get(BasicGroup.tests, entry.getKey(), Field.comparisons);
-                    }
                     for (final JSONMatchType matchtype : jsonMatchTypes) {
                         final String value = matchtype.getRequired();
-                        if ((null == basicComparisonBlacklist || !basicComparisonBlacklist.contains(matchtype.getJsonName())) && matchtype.getVersionRequirement()<=2 && ("".equals(value) || capabilities.contains(value))) {
-                            if(null == subComparisonBlackList || !subComparisonBlackList.contains(matchtype.getJsonName())){
+                        if (!blacklists.isBlacklisted(BasicGroup.tests, entry.getKey(), Field.comparisons, matchtype.getJsonName()) && !blacklists.isBlacklisted(BasicGroup.comparisons, matchtype.getJsonName())) {
+                            if(matchtype.getVersionRequirement() <= 2 && ("".equals(value) || capabilities.contains(value))) {
                                 comparison.put(matchtype.getJsonName());
                             }
                         }
@@ -185,8 +180,8 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
                     for(String key: addtionalFields.keySet()){
                         Field ele = Field.getFieldByName(key);
                         Set<String> listToAdd = addtionalFields.get(key);
-                        if(blacklists.containsKey(BasicGroup.tests, entry.getKey(), ele)){
-                            Set<String> eleBlacklist = (Set<String>) blacklists.get(BasicGroup.tests, entry.getKey(), ele);
+                        Set<String> eleBlacklist = blacklists.get(BasicGroup.tests, entry.getKey(), ele);
+                        if (eleBlacklist != null) {
                             listToAdd.removeAll(eleBlacklist);
                         }
                         if(!listToAdd.isEmpty()){
@@ -202,17 +197,15 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         return testarray;
     }
 
-    @SuppressWarnings("unchecked")
-    private JSONArray getActionArray(final Set<String> capabilities, MultiKeyMap blacklists) throws OXException, JSONException {
+    private JSONArray getActionArray(final Set<String> capabilities, Blacklist blacklists) throws OXException, JSONException {
 
         ActionCommandParserRegistry service = services.getService(ActionCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
-        Set<String> basicActionBlacklist = (Set<String>) blacklists.get(BasicGroup.actions, null, null);
         Map<String, ActionCommandParser<ActionCommand>> map = service.getCommandParsers();
         for (Map.Entry<String, ActionCommandParser<ActionCommand>> entry : map.entrySet()) {
             ActionCommandParser<ActionCommand> parser = entry.getValue();
 
-            if ((basicActionBlacklist == null || !basicActionBlacklist.contains(entry.getKey())) && parser.isCommandSupported(capabilities)) {
+            if (!blacklists.isBlacklisted(BasicGroup.actions, entry.getKey()) && parser.isCommandSupported(capabilities)) {
                 final JSONObject object = new JSONObject();
                 object.put("id", entry.getKey());
                 testarray.put(object);

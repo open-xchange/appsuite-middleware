@@ -50,9 +50,10 @@
 package com.openexchange.mail.filter.json.v2.config;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -62,7 +63,6 @@ import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.B
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.Field;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
-import com.openexchange.mailfilter.Credentials;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -74,39 +74,32 @@ import com.openexchange.server.ServiceLookup;
 public class MailFilterBlacklistService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterBlacklistService.class);
-    ServiceLookup services;
-    private static MailFilterBlacklistService instance;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link MailFilterBlacklistService}.
      */
-    private MailFilterBlacklistService(ServiceLookup serviceLookup) {
+    public MailFilterBlacklistService(ServiceLookup serviceLookup) {
         super();
         this.services = serviceLookup;
     }
 
-    public static void init(ServiceLookup serviceLookup){
-        if(instance==null){
-            instance = new MailFilterBlacklistService(serviceLookup);
-        }
-    }
-
-    public static MailFilterBlacklistService getInstance(){
-        if(instance==null){
-            throw new IllegalStateException("MailFilterBlacklistService has not been initialized!");
-        }
-        return instance;
-    }
-
-    public MultiKeyMap getBlacklists(Credentials credentials) {
-        MultiKeyMap result = new MultiKeyMap();
+    /**
+     * Returns a blacklist, which contains all blacklisted element for the given user
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The blacklist
+     */
+    public Blacklist getBlacklists(int userId, int contextId) {
+        Map<String, Set<String>> result = new HashMap<>();
         LeanConfigurationService config = services.getService(LeanConfigurationService.class);
 
 
         for(BasicGroup base : BasicGroup.values()){
             // Create Basic MailFilterBlacklistType
             MailFilterBlacklistProperty property = new MailFilterBlacklistProperty(base);
-            String blacklistString = config.getProperty(credentials.getUserid(), credentials.getContextid(), property);
+            String blacklistString = config.getProperty(userId, contextId, property);
             if(blacklistString!=null){
                 addBlacklist(property, blacklistString, result);
             }
@@ -117,20 +110,24 @@ public class MailFilterBlacklistService {
         for(String key: testRegistry.getCommandParsers().keySet()){
             for(Field element: Field.values()){
                 MailFilterBlacklistProperty property = new MailFilterBlacklistProperty(BasicGroup.tests, key, element);
-                String blacklistString = config.getProperty(credentials.getUserid(), credentials.getContextid(), property);
+                String blacklistString = config.getProperty(userId, contextId, property);
                 if(blacklistString!=null){
                     addBlacklist(property, blacklistString, result);
                 }
             }
         }
 
-        return result;
+        return new Blacklist(result);
     }
 
-    private void addBlacklist(MailFilterBlacklistProperty key, String blacklist, MultiKeyMap result){
+    private void addBlacklist(MailFilterBlacklistProperty key, String blacklist, Map<String, Set<String>> result) {
         if (!Strings.isEmpty(blacklist)) {
             String[] blacklists = Strings.splitByComma(blacklist);
-            result.put(key.getBase(), key.getSub(), key.getField(), validateBlacklist(key, blacklists));
+            if (key.getField() != null) {
+                result.put(Blacklist.key(key.getBase(), key.getSub(), key.getField()), validateBlacklist(key, blacklists));
+            } else {
+                result.put(key.getBase().name(), validateBlacklist(key, blacklists));
+            }
         }
     }
 

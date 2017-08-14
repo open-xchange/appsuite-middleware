@@ -63,7 +63,6 @@ import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.registry.ActionCommandRegistry;
 import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mail.filter.json.v2.actions.MailFilterActionFactory;
-import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistService;
 import com.openexchange.mail.filter.json.v2.json.RuleParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandParserRegistry;
@@ -123,7 +122,6 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        MailFilterBlacklistService.init(this);
         registerTestCommandParserRegistry();
         registerActionCommandParserRegistry();
 
