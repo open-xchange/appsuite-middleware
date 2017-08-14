@@ -246,6 +246,45 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether one calendar user equals another, by comparing all properties of the calendar users.
+     *
+     * @param user1 The first calendar user to check
+     * @param user2 The second calendar user to check
+     * @return <code>true</code> if the objects are <i>equal</i>, i.e. all properties are equal in both user references, <code>false</code>, otherwise
+     */
+    public static boolean equals(CalendarUser user1, CalendarUser user2) {
+        if (null == user1) {
+            return null == user2;
+        }
+        if (null == user2) {
+            return false;
+        }
+        if (user1.getCn() == null) {
+            if (user2.getCn() != null)
+                return false;
+        } else if (!user1.getCn().equals(user2.getCn()))
+            return false;
+        if (user1.getEMail() == null) {
+            if (user2.getEMail() != null)
+                return false;
+        } else if (!user1.getEMail().equals(user2.getEMail()))
+            return false;
+        if (user1.getEntity() != user2.getEntity())
+            return false;
+        if (user1.getSentBy() == null) {
+            if (user2.getSentBy() != null)
+                return false;
+        } else if (!user1.getSentBy().equals(user2.getSentBy()))
+            return false;
+        if (user1.getUri() == null) {
+            if (user2.getUri() != null)
+                return false;
+        } else if (!user1.getUri().equals(user2.getUri()))
+            return false;
+        return true;
+    }
+
+    /**
      * Looks up a specific internal attendee in a collection of attendees based on its entity identifier.
      *
      * @param attendees The attendees to search
