@@ -54,7 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -84,12 +84,16 @@ public class DeleteAction extends AbstractAccountAction {
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
+        //Is it neccessary to check for last modification on delete? Maybe you dont want to delete the newer version
+        String timestamp = requestData.getParameter(CalendarParameters.PARAMETER_TIMESTAMP);
+        if (Strings.isEmpty(timestamp)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(CalendarParameters.PARAMETER_TIMESTAMP);
+        }
         JSONArray data = requestData.getData(JSONArray.class);
-        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
-        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
+        CalendarAccountService service = getOptionalService(CalendarAccountService.class);
         try {
             for (int i = 0; i < data.length(); i++) {
-                service.deleteAccount(data.getInt(i));
+                service.deleteAccount(session, data.getInt(i), Long.parseLong(timestamp));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -60,6 +61,9 @@ import java.util.Map;
  * @since v7.10.0
  */
 public interface CalendarAccount extends Serializable{
+
+    /** The default <i>internal</i> calendar provider account */
+    public static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
 
     /**
      * Gets the account's identifier.

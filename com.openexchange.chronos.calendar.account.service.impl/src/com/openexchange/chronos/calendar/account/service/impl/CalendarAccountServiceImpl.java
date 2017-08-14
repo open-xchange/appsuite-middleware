@@ -49,16 +49,19 @@
 
 package com.openexchange.chronos.calendar.account.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.calendar.account.service.osgi.Services;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
+import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 
 /**
  * {@link CalendarAccountServiceImpl}
@@ -68,81 +71,78 @@ import com.openexchange.exception.OXException;
  */
 public class CalendarAccountServiceImpl implements CalendarAccountService {
 
-    //Maybe put the default account in a central position
-    /** The default <i>internal</i> calendar provider account */
-    private static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
-
-    private final CalendarAccountStorage storage;
-    //Maybe use session instead
-    private final int userId;
-
     /**
      * Initializes a new {@link CalendarAccountServiceImpl}.
-     * @param calendarAccountStorage The calendar account storage
-     * @param userId The userId of the sessions user
      */
-    public CalendarAccountServiceImpl(CalendarAccountStorage calendarAccountStorage, int userId) {
+    public CalendarAccountServiceImpl() {
         super();
-        this.storage = calendarAccountStorage;
-        this.userId = userId;
     }
 
     @Override
-    public int insertAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException {
-        return storage.insertAccount(providerId, userId, configuration);
+    public CalendarAccount insertAccount(Session session, String providerId, int userId, Map<String, Object> configuration) throws OXException {
+        return loadCalendarAccount(getCalendarAccountStorage(session).insertAccount(providerId, userId, configuration), session);
     }
 
     @Override
-    public void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException {
-        if (DEFAULT_ACCOUNT.getAccountId() == id) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
-        } else if (accountPermissionCheck(id)) {
-            storage.updateAccount(id, configuration, timestamp);
+    public CalendarAccount updateAccount(Session session, int id, Map<String, Object> configuration, long timestamp) throws OXException {
+        verifyAccountAction(session, loadCalendarAccount(id, session), timestamp, false);
+        getCalendarAccountStorage(session).updateAccount(id, configuration, timestamp);
+        return loadCalendarAccount(id, session);
+    }
+
+    @Override
+    public void deleteAccount(Session session, int id, long timestamp) throws OXException {
+        verifyAccountAction(session, loadCalendarAccount(id, session), timestamp, false);
+        getCalendarAccountStorage(session).deleteAccount(id);
+    }
+
+    @Override
+    public CalendarAccount loadAccount(Session session, int id) throws OXException {
+        CalendarAccount account = loadCalendarAccount(id, session);
+        return verifyAccountAction(session, account, account.getLastModified().getTime(), true);
+    }
+
+    @Override
+    public List<CalendarAccount> loadAccounts(Session session) throws OXException {
+        List<CalendarAccount> accounts = getCalendarAccountStorage(session).loadAccounts(session.getUserId());
+        accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
+        return accounts;
+    }
+
+    private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, long timestamp, boolean hasDefaultAccountRights) throws OXException {
+        if (null == account || session.getUserId() != account.getUserId()) {
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(account.getAccountId()));
+        } else if (CalendarAccount.DEFAULT_ACCOUNT.getUserId() == account.getAccountId() && !hasDefaultAccountRights) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+        } else if (account.getLastModified().getTime() > timestamp) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(account.getAccountId(), timestamp, account.getLastModified().getTime());
         } else {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
+            return account;
         }
     }
 
-    @Override
-    public void deleteAccount(int id) throws OXException {
-        if (DEFAULT_ACCOUNT.getAccountId() == id) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
-        } else if (accountPermissionCheck(id)) {
-            storage.deleteAccount(id);
+    private CalendarAccount  loadCalendarAccount(int id, Session session) throws OXException {
+        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
+            return CalendarAccount.DEFAULT_ACCOUNT;
         } else {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
+            return getCalendarAccountStorage(session).loadAccount(id);
         }
     }
 
-    @Override
-    public CalendarAccount loadAccount(int id) throws OXException {
-        if (DEFAULT_ACCOUNT.getAccountId() == id) {
-            return DEFAULT_ACCOUNT;
-        } else if (accountPermissionCheck(id)) {
-            return storage.loadAccount(id);
-        } else {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id));
+    private CalendarAccountStorage getCalendarAccountStorage(Session session) throws OXException {
+        CalendarAccountStorageFactory storageFactory = Services.getOptionalService(CalendarAccountStorageFactory.class);
+        if (null == storageFactory) {
+            throw ServiceExceptionCode.absentService(CalendarAccountStorageFactory.class);
         }
+        return storageFactory.create(getContext(session.getContextId()));
     }
 
-    @Override
-    public List<CalendarAccount> loadAccounts(int userId) throws OXException {
-        if (this.userId == userId) {
-            List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-            accounts.add(DEFAULT_ACCOUNT);
-            accounts.addAll(storage.loadAccounts(userId));
-            return accounts;
-        } else {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+    private Context getContext(int contextId) throws OXException {
+        ContextService service = Services.getService(ContextService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
         }
-    }
-
-    private boolean accountPermissionCheck(int accId) throws OXException {
-        CalendarAccount account = storage.loadAccount(accId);
-        if (null == account || userId != account.getUserId()) {
-            return false;
-        }
-        return true;
+        return service.getContext(contextId);
     }
 
 }

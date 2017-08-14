@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -90,9 +89,8 @@ public class GetAction extends AbstractAccountAction {
         if (Strings.isEmpty(accountId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
-        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
-        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
-        CalendarAccount account = service.loadAccount(Integer.parseInt(accountId));
+        CalendarAccountService service = getOptionalService(CalendarAccountService.class);
+        CalendarAccount account = service.loadAccount(session, Integer.parseInt(accountId));
         Map<String, Object> configuration = account.getConfiguration();
         JSONObject resp = new JSONObject(configuration.size());
         try {

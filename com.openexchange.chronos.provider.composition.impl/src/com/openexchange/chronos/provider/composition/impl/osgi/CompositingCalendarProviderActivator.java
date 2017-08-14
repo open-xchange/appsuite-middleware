@@ -52,7 +52,7 @@ package com.openexchange.chronos.provider.composition.impl.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccessFactory;
@@ -81,7 +81,7 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarAccountServiceFactory.class };
+        return new Class<?>[] { CalendarAccountService.class };
     }
 
     @Override
