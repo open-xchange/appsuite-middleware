@@ -47,81 +47,63 @@
  *
  */
 
-package com.openexchange.passwordchange.history.groupware;
+package com.openexchange.passwordchange.history.handler;
 
-import java.util.LinkedList;
-import java.util.List;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link PasswordChangeClients} - Well known clients
+ * {@link PasswordChangeHistoryProperties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum PasswordChangeClients {
+public enum PasswordChangeHistoryProperties implements Property {
 
-    /** Password changes transmitted through the App Suite UI */
-    APP_SUITE("open-xchange-appsuite", "App Suite UI", "appsuite", "app_suite"),
+    /**
+     * The property that indicates if a password change should be recorded into a history.
+     * If set to <code>true</code> a history is saved.
+     * If set to <code>false</code> no history is saved.
+     *
+     * Default is <code>false</code>.
+     */
+    ENABLE("enable", Boolean.FALSE),
 
-    /** Password changes made by the Provisioning Interface */
-    PROVISIONING("provisioning-api", "Provisioning API", "provisioning")
+    /**
+     * The handler that takes care of the password change history.
+     * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
+     *
+     * Default is "default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
+     */
+    HANDLER("handler", "default"),
+
+    /**
+     * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
+     * for a specific user.
+     *
+     * Default is <code>10</code>.
+     */
+    LIMIT("limit", Integer.valueOf(10))
 
     ;
 
-    private final String       identifier;
-    private final String       displayName;
-    private final List<String> matchers;
+    private final String fqn;
+    private final Object defaultValue;
 
-    /**
-     * 
-     * Initializes a new {@link PasswordChangeClients}.
-     * 
-     * @param identifier The identifier written to a client
-     * @param displayName The human readable name of the client
-     * @param matchers The possible strings to match a client with
-     */
-    private PasswordChangeClients(String identifier, String displayName, String... matchers) {
-        this.identifier = identifier;
-        this.displayName = displayName;
-        this.matchers = new LinkedList<>();
-        for (String matcher : matchers) {
-            this.matchers.add(matcher);
+    private PasswordChangeHistoryProperties(String name, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.fqn = "com.openexchange.passwordchange.history." + name;
+    }
+
+    @Override
+    public String getFQPropertyName() {
+        return fqn;
+    }
+
+    @Override
+    public <T> T getDefaultValue(Class<T> clazz) {
+        if (defaultValue.getClass().isAssignableFrom(clazz)) {
+            return clazz.cast(defaultValue);
         }
-        this.matchers.add(identifier);
-    }
-
-    /**
-     * Get the name the database uses to save the data
-     * 
-     * @return The identifier
-     */
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * Get a more human readable version of the identifier
-     * 
-     * @return A human readable representing the identifier
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Matches a string to well known client
-     * 
-     * @param toMatch The string to match to a client
-     * @return A {@link PasswordChangeClients} or <code>null</code>
-     */
-    public static PasswordChangeClients match(String toMatch) {
-        for (PasswordChangeClients client : PasswordChangeClients.values()) {
-            for (String matcher : client.matchers) {
-                if (matcher.equalsIgnoreCase(toMatch) || matcher.contains(toMatch)) {
-                    return client;
-                }
-            }
-        }
-        return null;
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
     }
 }

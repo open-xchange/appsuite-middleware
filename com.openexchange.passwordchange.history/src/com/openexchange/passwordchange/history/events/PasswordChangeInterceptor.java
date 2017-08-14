@@ -50,11 +50,11 @@
 package com.openexchange.passwordchange.history.events;
 
 import java.util.Map;
+import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.history.groupware.PasswordChangeClients;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.server.ServiceLookup;
@@ -103,7 +103,7 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
                 @Override
                 public void run() {
-                    helper.recordChange(contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
+                    helper.recordChange(contextID, userID, null, Client.PROVISIONING.getClientId());
                 }
             });
         }

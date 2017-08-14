@@ -7,7 +7,8 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Description: The Open-Xchange password-change history bundle that tracks changes of passwords. 
 Bundle-Activator: com.openexchange.passwordchange.history.osgi.PasswordChangeHistoryActivator
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.config.cascade,
  com.openexchange.config.lean,
  com.openexchange.database,
  com.openexchange.databaseold,
@@ -30,5 +31,4 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.service.event,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.25"
-Export-Package: com.openexchange.passwordchange.history.groupware,
- com.openexchange.passwordchange.history.handler
+Export-Package: com.openexchange.passwordchange.history.handler
