@@ -2709,27 +2709,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         PreparedStatement prep = null;
         try {
-            // ok , now check if a context with this name the client wants
-            // to change already exists
-            // BUT exclude the name of the current context, because this
-            // context can of course be renamed to the same
-            // name as it had before the update :)
-
-            prep = configdb_con.prepareStatement("SELECT cid FROM context WHERE name = ? AND cid !=?");
-            prep.setString(1, name);
-            prep.setInt(2, ctx.getId().intValue());
-            final ResultSet rs = prep.executeQuery();
-            if (rs.next()) {
-                // context with the name already exists in the system,
-                final String err_msg = "A context with context name \"" + name + "\" already exists in the system!";
-                LOG.error(err_msg);
-                // throw error
-                throw new SQLException(err_msg);
-            }
-            rs.close();
-            prep.close();
-
-            // if we reach here, update the table
             prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
             prep.setString(1, name);
             prep.setInt(2, ctx.getId().intValue());
@@ -2738,7 +2717,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             Databases.closeSQLStuff(prep);
         }
-
     }
 
     private void changeStorageDataImpl(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
