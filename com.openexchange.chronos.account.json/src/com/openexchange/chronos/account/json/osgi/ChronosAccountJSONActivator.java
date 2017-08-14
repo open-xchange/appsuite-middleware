@@ -63,12 +63,12 @@ public class ChronosAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { CalendarAccountService.class };
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarAccountService.class };
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override

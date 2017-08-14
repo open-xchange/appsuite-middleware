@@ -85,9 +85,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle {}", context.getBundle());
-            //Still using service class, needed to access context service in CalendarAccountServiceImpl
-            Services.set(this);
-            registerService(CalendarAccountService.class, new com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl());
+            registerService(CalendarAccountService.class, new com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl(this));
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -97,7 +95,6 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
-        Services.set(null);
         super.stopBundle();
     }
 

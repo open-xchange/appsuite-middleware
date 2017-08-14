@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -61,6 +62,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
+@SingletonService
 public interface CalendarAccountService {
 
     /**
@@ -73,7 +75,7 @@ public interface CalendarAccountService {
      * @return The loaded calendar account, or <code>null</code> if not found
      * @throws OXException if a database error occurs
      */
-    CalendarAccount insertAccount(Session session, String providerId, int userId, Map<String, Object> configuration) throws OXException;
+    CalendarAccount insertAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException;
 
     /**
      * Updates an existing calendar account and checks for permissions.

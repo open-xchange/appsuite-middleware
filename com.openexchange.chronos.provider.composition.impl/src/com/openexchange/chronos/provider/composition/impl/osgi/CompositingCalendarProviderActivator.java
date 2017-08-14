@@ -76,12 +76,12 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { CalendarAccountService.class };
     }
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarAccountService.class };
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override

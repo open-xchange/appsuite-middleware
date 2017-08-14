@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.calendar.account.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.chronos.calendar.account.service.osgi.Services;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
@@ -61,6 +61,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -71,16 +72,18 @@ import com.openexchange.session.Session;
  */
 public class CalendarAccountServiceImpl implements CalendarAccountService {
 
+    private final ServiceLookup serviceLookup;
     /**
      * Initializes a new {@link CalendarAccountServiceImpl}.
      */
-    public CalendarAccountServiceImpl() {
+    public CalendarAccountServiceImpl(ServiceLookup serviceLookup) {
         super();
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public CalendarAccount insertAccount(Session session, String providerId, int userId, Map<String, Object> configuration) throws OXException {
-        return loadCalendarAccount(getCalendarAccountStorage(session).insertAccount(providerId, userId, configuration), session);
+    public CalendarAccount insertAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException {
+        return loadCalendarAccount(getCalendarAccountStorage(session).insertAccount(providerId, session.getUserId(), configuration), session);
     }
 
     @Override
@@ -104,7 +107,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
 
     @Override
     public List<CalendarAccount> loadAccounts(Session session) throws OXException {
-        List<CalendarAccount> accounts = getCalendarAccountStorage(session).loadAccounts(session.getUserId());
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        accounts.addAll(getCalendarAccountStorage(session).loadAccounts(session.getUserId()));
         accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
         return accounts;
     }
@@ -112,10 +116,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, long timestamp, boolean hasDefaultAccountRights) throws OXException {
         if (null == account || session.getUserId() != account.getUserId()) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(account.getAccountId()));
-        } else if (CalendarAccount.DEFAULT_ACCOUNT.getUserId() == account.getAccountId() && !hasDefaultAccountRights) {
+        } else if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == account.getAccountId() && !hasDefaultAccountRights) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         } else if (account.getLastModified().getTime() > timestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(account.getAccountId(), timestamp, account.getLastModified().getTime());
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(account.getAccountId()), timestamp, account.getLastModified().getTime());
         } else {
             return account;
         }
@@ -130,7 +134,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     private CalendarAccountStorage getCalendarAccountStorage(Session session) throws OXException {
-        CalendarAccountStorageFactory storageFactory = Services.getOptionalService(CalendarAccountStorageFactory.class);
+        CalendarAccountStorageFactory storageFactory = serviceLookup.getOptionalService(CalendarAccountStorageFactory.class);
         if (null == storageFactory) {
             throw ServiceExceptionCode.absentService(CalendarAccountStorageFactory.class);
         }
@@ -138,11 +142,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     private Context getContext(int contextId) throws OXException {
-        ContextService service = Services.getService(ContextService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(ContextService.class);
-        }
-        return service.getContext(contextId);
+        return serviceLookup.getService(ContextService.class).getContext(contextId);
     }
 
 }

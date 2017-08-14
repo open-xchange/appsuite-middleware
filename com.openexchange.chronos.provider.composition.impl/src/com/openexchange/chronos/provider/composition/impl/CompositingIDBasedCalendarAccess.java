@@ -96,7 +96,6 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -515,12 +514,8 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      *
      * @return The calendar accounts
      */
-    private List<CalendarAccount> getAccounts() throws OXException {
-        CalendarAccountService service = services.getOptionalService(CalendarAccountService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(CalendarAccountService.class);
-        }
-        return service.loadAccounts(session); 
+    private List<CalendarAccount> getAccounts() throws OXException {        
+        return services.getService(CalendarAccountService.class).loadAccounts(session); 
     }
 
     /**
@@ -530,10 +525,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      * @return The calendar account
      */
     private CalendarAccount getAccount(int accountId) throws OXException {
-        CalendarAccountService service = services.getOptionalService(CalendarAccountService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(CalendarAccountService.class);
-        }
+        CalendarAccountService service = services.getService(CalendarAccountService.class);
         return service.loadAccount(session, accountId);
     }
 
