@@ -299,6 +299,7 @@ public final class SessionUtility {
                     return true;
                 } catch (final OXException e) {
                     // Verification of public session failed
+                    LOG.debug("Verification of public session failed", e);
                 }
 
                 // Look-up failed
@@ -344,6 +345,7 @@ public final class SessionUtility {
                 return true;
             } catch (final OXException e) {
                 // Verification of public session failed
+                LOG.debug("Verification of public session failed", e);
             }
         }
 

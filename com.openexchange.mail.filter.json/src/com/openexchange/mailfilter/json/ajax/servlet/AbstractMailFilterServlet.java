@@ -194,7 +194,11 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error("", e);
+            if (SessionExceptionCodes.hasPrefix(e)) {
+                LOG.debug("", e);
+            } else {
+                LOG.error("", e);
+            }
             response.setException(e);
         }
         /*
@@ -260,7 +264,11 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             final AbstractAction action = getAction();
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error("", e);
+            if (SessionExceptionCodes.hasPrefix(e)) {
+                LOG.debug("", e);
+            } else {
+                LOG.error("", e);
+            }
             response.setException(e);
         }
         /*
