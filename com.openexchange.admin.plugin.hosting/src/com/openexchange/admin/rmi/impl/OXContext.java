@@ -475,8 +475,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e1;
         }
 
-        long st = System.currentTimeMillis();
-
         final BasicAuthenticator basicAuthenticator = new BasicAuthenticator(context);
         basicAuthenticator.doAuthentication(auth);
 
@@ -529,9 +527,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             LOGGER.error("", e);
             throw e;
         }
-
-        long dur = System.currentTimeMillis() - st;
-        System.err.println("OXContext.delete() took " + dur);
     }
 
     @Override

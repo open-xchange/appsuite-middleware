@@ -213,8 +213,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void delete(final Context ctx) throws StorageException {
-        long sta = System.currentTimeMillis();
-
         // Delete filestores of the context
         {
             LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
@@ -373,9 +371,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final Exception e) {
             LOG.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
         }
-
-        long dur = System.currentTimeMillis() - sta;
-        System.err.println("OXContextMySQLStorage.delete() took " + dur);
     }
 
     private boolean retryDelete(DBUtils.TransactionRollbackCondition condition, Context ctx) throws SQLException {
@@ -449,7 +444,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private void fireDeleteEventAndOptionallyDeleteTableData(Context ctx, Connection con, List<Integer> userIds, boolean deleteTablesData) throws SQLException {
         // First delete everything with OSGi DeleteListener services.
-        long st = System.currentTimeMillis();
         try {
             DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue(), userIds);
             DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
@@ -460,8 +454,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             LOG.error("Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.", e);
         }
-        long dur = System.currentTimeMillis() -st;
-        System.err.println("   fireDeleteEvent took " + dur);
 
         // Now go through tables and delete the remainders (if desired)
         if (deleteTablesData) {
@@ -503,10 +495,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            int rows = stmt.executeUpdate(stmtBuilder.append(tableName).append(" WHERE cid=").append(contextId).toString());
-            if (rows > 0) {
-                System.err.println("Dropped " + rows + " remaining row(s) from " + tableName);
-            }
+            stmt.executeUpdate(stmtBuilder.append(tableName).append(" WHERE cid=").append(contextId).toString());
         } finally {
             closeSQLStuff(stmt);
         }
