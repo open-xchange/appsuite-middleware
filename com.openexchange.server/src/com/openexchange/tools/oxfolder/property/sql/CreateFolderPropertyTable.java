@@ -89,10 +89,10 @@ public class CreateFolderPropertyTable extends AbstractCreateTableImpl {
         builder.append("cid INT(10) UNSIGNED NOT NULL,");
         builder.append("fuid INT(10) UNSIGNED NOT NULL,");
         builder.append("userid INT(10) UNSIGNED NOT NULL,");
-        builder.append("name VARCHAR(512) NOT NULL,");
-        builder.append("value BLOB NOT NULL,");
+        builder.append("name VARCHAR(128) NOT NULL,");
+        builder.append("value VARCHAR(512) NOT NULL,");
         builder.append("PRIMARY KEY (cid, fuid, userid, name)");
-        builder.append(") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        builder.append(")ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         return builder.toString();
     }
 
