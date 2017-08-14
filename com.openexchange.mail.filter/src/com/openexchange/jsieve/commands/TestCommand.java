@@ -253,7 +253,8 @@ public class TestCommand extends Command {
 
         /**
          * <p>Specifies the addressparts ':user' and ':detail' as described
-         * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
+         * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a> in addition to the
+         * standard addressparts (see #{@link TestCommand.Commands#standardAddressPart())}.</p>
          *
          * @return A {@link Hashtable} with the subaddress addressparts
          */
