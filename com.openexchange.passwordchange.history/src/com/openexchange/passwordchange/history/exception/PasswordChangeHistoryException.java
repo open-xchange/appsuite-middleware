@@ -62,20 +62,29 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum PasswordChangeHistoryException implements OXExceptionCode {
 
+    /**
+     * Password change history for user %1$s in context %1$s is disabled
+     */
     DISABLED("Password change history for user %1$s in context %1$s is disabled", Category.CATEGORY_PERMISSION_DENIED, 101),
-
-    MISSING_CONFIGURATION("Handler for user %1$s in context %1$s is not configured. Therefor no history is created.", Category.CATEGORY_CONFIGURATION, 102),
-
-    MISSING_HANDLER("The handler %1$s was not found in the register.", Category.CATEGORY_SERVICE_DOWN, 103)
+    /**
+     * Handler for user %1$s in context %1$s is not configured. Therefore no history is created.
+     */
+    MISSING_CONFIGURATION("Handler for user %1$s in context %1$s is not configured. Therefore no history is created.", Category.CATEGORY_CONFIGURATION, 102),
+    /**
+     * The handler %1$s was not found in the registry
+     */
+    MISSING_HANDLER("The handler %1$s was not found in the registry.", Category.CATEGORY_SERVICE_DOWN, 103),
+    /**
+     * SQL error: %1$s
+     */
+    SQL_ERROR("SQL error: %1$s", Category.CATEGORY_ERROR, 104)
 
     ;
 
     private static final String PREFIX = "HCE";
 
     private final String message;
-
     private final Category category;
-
     private final int number;
 
     private PasswordChangeHistoryException(final String message, final Category category, final int number) {

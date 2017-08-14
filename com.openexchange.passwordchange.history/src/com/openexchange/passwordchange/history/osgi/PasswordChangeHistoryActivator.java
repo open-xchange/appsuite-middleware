@@ -76,7 +76,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
- * 
+ *
  * {@link PasswordChangeHistoryActivator} - Activator for PasswordChangeHistory bundle
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -102,10 +102,10 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
     protected void startBundle() throws Exception {
         LOG.info("Starting PasswordChangeHistory bundle");
 
-        // Register a password change registry  
+        // Register a password change registry
         PasswordChangeHandlerRegistryImpl registry = new PasswordChangeHandlerRegistryImpl(context);
         PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
-        registry.register(defaultHandler.getSymbolicName(), defaultHandler);
+        registry.register(defaultHandler);
         track(PasswordHistoryHandler.class, registry);
         openTrackers();
         registerService(PasswordChangeHandlerRegistry.class, registry);

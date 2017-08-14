@@ -55,13 +55,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
@@ -102,21 +106,17 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) {
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) throws OXException {
         return listPasswordChanges(userID, contextID, null);
     }
 
     @Override
-    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames) {
-        List<PasswordChangeInfo> retval = new LinkedList<>();
-        Connection con = null;
+    public List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames) throws OXException {
+        DatabaseService dbService = getService(DatabaseService.class);
+        Connection con = dbService.getReadOnly(contextID);
         PreparedStatement stmt = null;
-        DatabaseService dbService = null;
+        ResultSet set = null;
         try {
-            // Get services
-            dbService = getService(DatabaseService.class);
-            con = dbService.getReadOnly(contextID);
-
             StringBuilder builder = new StringBuilder(GET_DATA);
             if (null == fieldNames || fieldNames.isEmpty()) {
                 // Default is ID ascending
@@ -133,50 +133,42 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 //Remove last ','
                 builder.deleteCharAt(builder.length() - 1);
             }
-            builder.append(";");
 
             // Get data
             stmt = con.prepareStatement(builder.toString());
+            builder = null;
             stmt.setInt(1, contextID);
             stmt.setInt(2, userID);
-            stmt.execute();
-            ResultSet set = stmt.getResultSet();
-            if (null == set) {
-                return retval;
+            set = stmt.executeQuery();
+            if (false == set.next()) {
+                return Collections.emptyList();
             }
-            try {
-                // Convert data
-                while (set.next()) {
-                    long created = set.getLong(1);
-                    String client = set.getString(2);
-                    String ip = set.getString(3);
 
-                    retval.add(new PasswordChangeInfoImpl(created, client, ip));
-                }
-            } catch (SQLException e) {
-                LOG.debug("Error while getting password history from DB. Reason: {}", e.getCause(), e);
-            }
-        } catch (Exception e) {
-            LOG.warn("Could not get password history. Cause: {}\nMessage: {} ", e.getCause(), e.getMessage(), e);
+            // Convert data
+            List<PasswordChangeInfo> retval = new LinkedList<>();
+            do {
+                long created = set.getLong(1);
+                String client = set.getString(2);
+                String ip = set.getString(3);
+                retval.add(new PasswordChangeInfoImpl(created, client, ip));
+            } while (set.next());
+            return retval;
+        } catch (SQLException e) {
+            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
-            if (null != dbService) {
-                dbService.backReadOnly(contextID, con);
-            }
+            Databases.closeSQLStuff(set, stmt);
+            dbService.backReadOnly(contextID, con);
         }
-        return retval;
 
     }
 
     @Override
-    public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) {
-        Connection con = null;
+    public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) throws OXException {
+        DatabaseService dbService = getService(DatabaseService.class);
+        // Get writable connection
+        Connection con = dbService.getWritable(contextID);
         PreparedStatement stmt = null;
-        DatabaseService dbService = null;
         try {
-            // Get writable connection
-            dbService = getService(DatabaseService.class);
-            con = dbService.getWritable(contextID);
 
             // Write info
             stmt = con.prepareStatement(INSERT_DATA);
@@ -189,78 +181,69 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 stmt.setString(4, info.getIP());
             }
             stmt.setLong(5, System.currentTimeMillis());
-            stmt.execute();
-        } catch (Exception e) {
-            LOG.warn("Could not save password history. Error: {}", e.getMessage(), e);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (null != dbService) {
-                dbService.backWritable(contextID, con);
-            }
+            dbService.backWritable(contextID, con);
         }
 
         // Clean up data too
-        try {
-            final ConfigViewFactory casscade = getService(ConfigViewFactory.class);
-            if (null == casscade) {
-                LOG.warn("Could not get config to delete password history.");
-            } else {
-                Integer limit = null;
-                try {
-                    limit = casscade.getView(userID, contextID).get(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
-                } catch (Exception e) {
-                    // Nothing configured. Go with standard value
-                    LOG.debug("Error while getting com.openexchange.passwordchange.history.limit for user {}", userID, e);
-                }
-                if (null == limit) {
-                    limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
-                }
-
-                clear(userID, contextID, limit.intValue());
+        ConfigViewFactory casscade = getService(ConfigViewFactory.class);
+        ConfigView view = casscade.getView(userID, contextID);
+        ComposedConfigProperty<Integer> property = view.property(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
+        Integer limit;
+        if (property.isDefined()) {
+            limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
+        } else {
+            limit = property.get();
+            if (null == limit) {
+                limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
             }
-        } catch (Exception e) {
-            LOG.warn("Could not clear password change history for " + userID + " in context " + contextID, e);
         }
+
+        clear(userID, contextID, limit.intValue());
     }
 
     @Override
-    public void clear(int userID, int contextID, int limit) {
-        Connection con = null;
+    public void clear(int userID, int contextID, int limit) throws OXException {
+        // Get writable connection
+        DatabaseService dbService = getService(DatabaseService.class);
+        Connection con = dbService.getWritable(contextID);
+
         PreparedStatement stmt = null;
-        DatabaseService dbService = null;
+        ResultSet rs = null;
         try {
-            // Get writable connection
-            dbService = getService(DatabaseService.class);
-            con = dbService.getWritable(contextID);
             if (limit <= 0) {
                 stmt = con.prepareStatement(CLEAR_FOR_USER);
                 stmt.setInt(1, contextID);
                 stmt.setInt(2, userID);
-                stmt.execute();
+                stmt.executeUpdate();
             } else {
                 // Get entries
                 stmt = con.prepareStatement(GET_HISTORY_ID);
                 stmt.setInt(1, contextID);
                 stmt.setInt(2, userID);
-                stmt.execute();
-                ResultSet set = stmt.getResultSet();
+                rs = stmt.executeQuery();
                 List<Integer> data = new LinkedList<>(); // Oldest values have smaller IDs, so we should be fine only using the IDs
-                while (set.next()) {
-                    data.add(set.getInt(1));
+                while (rs.next()) {
+                    data.add(Integer.valueOf(rs.getInt(1)));
                 }
-                Databases.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(rs, stmt);
 
                 if (data.size() > limit) {
                     // Sort & delete the first until limit triggers
                     Collections.sort(data);
 
-                    final int batchSize = 100;
+                    int batchSize = 100;
                     int count = 0;
-
                     stmt = con.prepareStatement(CLEAR_FOR_ID);
-                    for (int i = 0; i < data.size() - limit; i++) {
+                    Iterator<Integer> iter = data.iterator();
+                    int len = data.size() - limit;
+                    for (int i = 0; i < len; i++) {
                         stmt.setInt(1, contextID);
-                        stmt.setInt(2, data.get(i));
+                        stmt.setInt(2, iter.next().intValue());
                         stmt.addBatch();
 
                         // Just in case we have many entries to delete
@@ -271,19 +254,17 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                     stmt.executeBatch();
                 }
             }
-        } catch (Exception e) {
-            LOG.warn("Could not delete password histroy.", e);
+        } catch (SQLException e) {
+            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
-            if (null != dbService) {
-                dbService.backWritable(contextID, con);
-            }
+            Databases.closeSQLStuff(rs, stmt);
+            dbService.backWritable(contextID, con);
         }
     }
 
     /**
      * Get a specific service
-     * 
+     *
      * @param clazz The class of the service
      * @return The service
      * @throws OXException In case service can not be loaded
@@ -298,7 +279,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     /**
      * Get the corresponding table name
-     * 
+     *
      * @param field The field name from REST client
      * @return A string representing a table field name
      */

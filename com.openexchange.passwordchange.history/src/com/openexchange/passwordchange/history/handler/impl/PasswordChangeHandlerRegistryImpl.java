@@ -51,6 +51,7 @@ package com.openexchange.passwordchange.history.handler.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -69,7 +70,7 @@ import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistry {
 
     private static final org.slf4j.Logger       LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryImpl.class);
-    private Map<String, PasswordHistoryHandler> handler;
+    private final ConcurrentMap<String, PasswordHistoryHandler> handlers;
     private final BundleContext                 context;
 
     /**
@@ -77,59 +78,68 @@ public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomiz
      */
     public PasswordChangeHandlerRegistryImpl(BundleContext context) {
         super();
-        this.handler = new ConcurrentHashMap<>();
+        this.handlers = new ConcurrentHashMap<>();
         this.context = context;
     }
 
     /**
      * Register a new {@link PasswordHistoryHandler}
-     * 
-     * @param symbolicName The name to search the handler forÏ‚
+     *
      * @param handler The actual handler
+     * @return <code>true</code> if successfully added to this registry; otherwise <code>false</code>
      */
-    public void register(String symbolicName, PasswordHistoryHandler handler) {
-        if (false == Strings.isEmpty(symbolicName) || null != handler) {
-            this.handler.put(symbolicName, handler);
-        } else {
-            LOG.debug("Could not add PasswordHistoryHandler for name {}", symbolicName);
+    public boolean register(PasswordHistoryHandler handler) {
+        if (null == handler) {
+            return false;
         }
+
+        String symbolicName = handler.getSymbolicName();
+        if (Strings.isEmpty(symbolicName)) {
+            LOG.debug("Could not add PasswordHistoryHandler for name {}", symbolicName);
+            return false;
+        }
+
+        return null == this.handlers.putIfAbsent(symbolicName, handler);
     }
 
     /**
      * Unregister a {@link PasswordHistoryHandler}
-     * 
+     *
      * @param symbolicName The name of the {@link PasswordHistoryHandler}
      */
     public void unregister(String symbolicName) {
         if (false == Strings.isEmpty(symbolicName)) {
             LOG.debug("Try to remove PasswordChangeTracker with name {}", symbolicName);
-            this.handler.remove(symbolicName);
+            this.handlers.remove(symbolicName);
         }
     }
 
     @Override
     public Map<String, PasswordHistoryHandler> getHandlers() {
-        return this.handler;
+        return this.handlers;
     }
 
     @Override
     public PasswordHistoryHandler getHandler(String symbolicName) {
         if (false == Strings.isEmpty(symbolicName)) {
-            return this.handler.get(symbolicName);
+            return this.handlers.get(symbolicName);
         }
         return null;
     }
 
+    // ----------------------------------------------------- ServiceTracker stuff ----------------------------------------------------------
+
     @Override
     public PasswordHistoryHandler addingService(ServiceReference<PasswordHistoryHandler> reference) {
-        PasswordHistoryHandler tracker = context.getService(reference);
-        try {
-            register(tracker.getSymbolicName(), tracker);
-        } catch (Exception e) {
-            LOG.warn("Could not add service. Reason: {}", e.getClass(), e);
-            context.ungetService(reference);
+        PasswordHistoryHandler handler = context.getService(reference);
+        boolean added = register(handler);
+        if (added) {
+            return handler;
         }
-        return tracker;
+
+        LOG.warn("Could not add {}. A handler with that symbolic name '{}' already exists", handler.getClass().getName(), handler.getSymbolicName());
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
