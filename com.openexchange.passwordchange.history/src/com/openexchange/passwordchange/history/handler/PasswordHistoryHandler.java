@@ -51,6 +51,7 @@ package com.openexchange.passwordchange.history.handler;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
@@ -64,45 +65,47 @@ public interface PasswordHistoryHandler {
 
     /**
      * List the current data stored in the database
-     * 
+     *
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
      * @return {@link List} of all available password change events (~ the history)
+     * @throws OXException If password change events cannot be returned
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) throws OXException;
 
     /**
      * List the current data stored in the database
-     * 
+     *
      * @param userID The ID of the user to list the password changes for
      * @param contextID The context ID of the user
      * @param fieldNames The field names that should be sorted with the corresponding {@link SortOrder}. Caller has to make sure that the order of elements is predictable.
      * @return {@link List} of all available password change events (~ the history)
+     * @throws OXException If password change events cannot be returned
      */
-    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames) throws OXException;
 
     /**
      * Adds a new set of information to the database
-     * 
+     *
      * @param userID The ID of the user to track the password changes for
      * @param contextID The context ID of the user
      * @param info The {@link PasswordChangeInfo} to be added
      */
-    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info);
+    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) throws OXException;
 
     /**
      * Clears the PasswordChange informations for a specific user
-     * 
+     *
      * @param userID The ID of the user to clear recorded password changes for
      * @param contextID The context ID of the user
      * @param limit The limit of entries to store in the DB. If current entries exceed the limitation the oldest
      *            entries get deleted. If set to <code>0</code> all entries will be deleted
      */
-    void clear(int userID, int contextID, int limit);
+    void clear(int userID, int contextID, int limit) throws OXException;
 
     /**
      * Get the name the {@link PasswordHistoryHandler} should be registered to
-     * 
+     *
      * @return The name of the implementation
      */
     String getSymbolicName();
