@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
@@ -99,7 +100,9 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -348,6 +351,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
     
     private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        SessionUtility.checkIP(session, request.getRemoteAddr());
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
+        if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
+        }
         LoginPerformer.getInstance().doLogout(session.getSessionID());
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);
