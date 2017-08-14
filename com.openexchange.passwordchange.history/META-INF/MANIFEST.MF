@@ -27,8 +27,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.threadpool,
  com.openexchange.tools.update,
  com.openexchange.user,
- org.osgi.framework;version="1.8.0",
+ org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.7.25"
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.passwordchange.history.handler
