@@ -22,4 +22,4 @@ Import-Package: com.openexchange.auth,
  org.json,
  org.osgi.framework,
  org.slf4j;version="1.7.25"
-Bundle-Activator: com.openexchange.passwordchange.history.rest.osgi.PasswordChangeHistoryRESTActivator
+Bundle-Activator: com.openexchange.passwordchange.history.rest.osgi.PasswordChangeRestActivator
