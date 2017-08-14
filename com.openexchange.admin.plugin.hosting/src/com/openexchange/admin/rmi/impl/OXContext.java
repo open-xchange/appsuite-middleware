@@ -111,6 +111,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
@@ -340,12 +341,20 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         Set<String> loginMappings = null; // used for invalidating old login mappings in the cache
         try {
-            if (!tool.existsContext(ctx)) {
-                throw new NoSuchContextException();
-            }
-
-            if (ctx.getName() != null && tool.existsContextName(ctx)) {
-                throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
+            if (ctx.getName() == null) {
+                if (!tool.existsContext(ctx)) {
+                    throw new NoSuchContextException();
+                }
+            } else if (Strings.isEmpty(ctx.getName())) {
+                ctx.setName(null);
+                if (!tool.existsContext(ctx)) {
+                    throw new NoSuchContextException();
+                }
+            } else {
+                if (false == tool.checkContextName(ctx)) {
+                    // Holds the same name
+                    ctx.setName(null);
+                }
             }
 
             // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system

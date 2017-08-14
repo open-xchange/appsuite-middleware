@@ -82,6 +82,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
@@ -2435,6 +2436,54 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsContextName(final String contextName) throws StorageException {
         final Context ctx = new Context(-1, contextName);
         return existsContextName(ctx);
+    }
+
+    @Override
+    public boolean checkContextName(Context ctx) throws NoSuchContextException, InvalidDataException, StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            int contextId = ctx.getId().intValue();
+            String name = ctx.getName();
+            prep_check = con.prepareStatement("SELECT cid, name FROM context WHERE name=? OR cid=?");
+            prep_check.setString(1, name);
+            prep_check.setInt(2, contextId);
+            rs = prep_check.executeQuery();
+
+            String foundName = null;
+            while (rs.next()) {
+                int cid = rs.getInt(1);
+                if (cid != contextId) {
+                    throw new InvalidDataException("Context " + name + " already exists!");
+                }
+                foundName = rs.getString(2);
+            }
+
+            if (null == foundName) {
+                throw new NoSuchContextException();
+            }
+            return !name.equalsIgnoreCase(foundName);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
     }
 
     @Override
