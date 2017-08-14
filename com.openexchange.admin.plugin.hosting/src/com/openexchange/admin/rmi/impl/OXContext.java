@@ -58,11 +58,11 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -320,17 +320,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public void change(final Context ctx, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx);
-        } catch (final InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
+        } catch (final InvalidDataException x) {
+            LOGGER.error("Context is invalid", x);
+            throw x;
         }
         validateloginmapping(ctx);
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -1257,11 +1256,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     private void validateloginmapping(final Context ctx) throws InvalidDataException {
-        final HashSet<String> loginMappings = ctx.getLoginMappings();
-        final String login_regexp = ClientAdminThreadExtended.cache.getProperties().getProp("CHECK_CONTEXT_LOGIN_MAPPING_REGEXP", "[$%\\.+a-zA-Z0-9_-]");
+        Set<String> loginMappings = ctx.getLoginMappings();
         if (null != loginMappings) {
-            for (final String mapping : loginMappings) {
-                final String illegal = mapping.replaceAll(login_regexp, "");
+            String login_regexp = ClientAdminThreadExtended.cache.getProperties().getProp("CHECK_CONTEXT_LOGIN_MAPPING_REGEXP", "[$%\\.+a-zA-Z0-9_-]");
+            Pattern pattern = Pattern.compile(login_regexp);
+            for (String mapping : loginMappings) {
+                String illegal = pattern.matcher(mapping).replaceAll("");
                 if (illegal.length() > 0) {
                     throw new InvalidDataException("Illegal chars: \"" + illegal + "\"" + " in login mapping");
                 }

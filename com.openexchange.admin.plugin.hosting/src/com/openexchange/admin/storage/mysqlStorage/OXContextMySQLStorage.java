@@ -2698,7 +2698,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private void changeNameForContext(final Context ctx, final Connection configdb_con) throws SQLException {
         // first check if name is set and has a valid name
-        if (ctx.getName() == null || ctx.getName().trim().length() <= 0) {
+        if (ctx.getName() == null) {
+            return;
+        }
+
+        String name = ctx.getName().trim();
+        if (name.length() == 0) {
             return;
         }
 
@@ -2711,12 +2716,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // name as it had before the update :)
 
             prep = configdb_con.prepareStatement("SELECT cid FROM context WHERE name = ? AND cid !=?");
-            prep.setString(1, ctx.getName().trim());
+            prep.setString(1, name);
             prep.setInt(2, ctx.getId().intValue());
             final ResultSet rs = prep.executeQuery();
             if (rs.next()) {
                 // context with the name already exists in the system,
-                final String err_msg = "A context with context name \"" + ctx.getName().trim() + "\" already exists in the system!";
+                final String err_msg = "A context with context name \"" + name + "\" already exists in the system!";
                 LOG.error(err_msg);
                 // throw error
                 throw new SQLException(err_msg);
@@ -2726,7 +2731,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // if we reach here, update the table
             prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
-            prep.setString(1, ctx.getName().trim());
+            prep.setString(1, name);
             prep.setInt(2, ctx.getId().intValue());
             prep.executeUpdate();
             prep.close();
