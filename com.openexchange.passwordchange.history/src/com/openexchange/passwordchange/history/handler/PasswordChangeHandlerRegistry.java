@@ -65,7 +65,7 @@ public interface PasswordChangeHandlerRegistry {
      * 
      * @return The {@link PasswordHistoryHandler} registered
      */
-    public Map<String, PasswordHistoryHandler> getHandlers();
+    Map<String, PasswordHistoryHandler> getHandlers();
 
     /**
      * Get a specific {@link PasswordHistoryHandler} with given name
@@ -73,6 +73,6 @@ public interface PasswordChangeHandlerRegistry {
      * @param symbolicName The name of the {@link PasswordHistoryHandler}
      * @return The {@link PasswordHistoryHandler} or <code>null</code>
      */
-    public PasswordHistoryHandler getHandler(String symbolicName);
+    PasswordHistoryHandler getHandler(String symbolicName);
 
 }
