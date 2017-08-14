@@ -57,7 +57,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
 import static com.openexchange.tools.oxfolder.property.sql.CreateFolderPropertyTable.TABLE_NAME;
 
@@ -80,12 +82,15 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
     private final static String INSERT      = "INSERT INTO " + TABLE_NAME + " (cid,fuid,userid,name,value) VALUES (?,?,?,?,?);";
     private final static String UPDATE      = "UPDATE " + TABLE_NAME + " SET value=? WHERE cid=? AND fuid=? AND userid=? AND name=?;";
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link FolderPropertyStorageImpl}.
      * 
      */
-    public FolderPropertyStorageImpl() {
+    public FolderPropertyStorageImpl(ServiceLookup service) {
         super();
+        this.services = service;
     }
 
     @Override
@@ -95,7 +100,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         PreparedStatement stmt = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getWritable(contextId);
 
             // Prepare statement
@@ -123,7 +128,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         PreparedStatement stmt = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getWritable(contextId);
 
             // Prepare statement
@@ -153,7 +158,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         PreparedStatement stmt = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getReadOnly(contextId);
 
             // Prepare statement
@@ -186,7 +191,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         PreparedStatement stmt = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getReadOnly(contextId);
 
             // Prepare statement
@@ -220,7 +225,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         PreparedStatement stmt = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getReadOnly(contextId);
 
             // Prepare statement
@@ -256,7 +261,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         DatabaseService dbService = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getReadOnly(contextId);
             connection.setAutoCommit(false);
             PreparedStatement stmt = null;
@@ -306,7 +311,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         DatabaseService dbService = null;
         try {
             // Acquire connection
-            dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            dbService = getService(DatabaseService.class);
             connection = dbService.getWritable(contextId);
             connection.setAutoCommit(false);
             PreparedStatement stmt = null;
@@ -344,5 +349,13 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
         Map<String, String> map = new HashMap<>(1);
         map.put(key, value);
         updateFolderProperties(folderId, contextId, userId, map);
+    }
+
+    private <T> T getService(Class<T> clazz) throws OXException {
+        T service = this.services.getService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
+        return service;
     }
 }

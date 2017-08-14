@@ -92,7 +92,7 @@ public class FolderPropertyActivator extends HousekeepingActivator {
         });
 
         // Register FolderPropertyStorage 
-        registerService(FolderPropertyStorage.class, new FolderPropertyStorageImpl());
+        registerService(FolderPropertyStorage.class, new FolderPropertyStorageImpl(this));
     }
 
 }
