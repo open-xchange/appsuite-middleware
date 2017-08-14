@@ -51,11 +51,12 @@ package com.openexchange.logback.extensions.logstash;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -111,7 +112,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     private String peerId;
     private Future<?> task;
-
+    private Future<?> connectionOverwatch;
     private Future<Socket> connectorTask;
     private volatile Socket socket;
     private int reconnectionDelay;
@@ -261,6 +262,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
         if (connectorTask != null) {
             connectorTask.cancel(true);
         }
+        connectionOverwatch.cancel(true);
         REF.set(null);
         super.stop();
     }
@@ -346,6 +348,9 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             encoder.init(oos);
             logInfo("Dispatching events...");
             while (true) {
+                if (connectionOverwatch.isDone()) {
+                    throw new IOException("Remote peer " + peerId + " closed the connection.");
+                }
                 event = queue.take();
                 encoder.doEncode(event);
                 oos.flush();
@@ -501,14 +506,16 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * @return A socket
      * @throws ExecutionException
      * @throws InterruptedException
-     * @throws SocketException
+     * @throws IOException
      */
-    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException, SocketException {
+    private Socket waitForConnectorToReturnASocket() throws InterruptedException, ExecutionException, IOException {
         logInfo("Trying to connect to " + peerId + "...");
         Socket s = connectorTask.get();
         s.setKeepAlive(keepAlive.booleanValue());
         logInfo("Connection established to " + peerId + ".");
         connectorTask = null;
+        // Guard the input stream
+        connectionOverwatch = getContext().getExecutorService().submit(new ConnectionOverwatch(s.getInputStream()));
         return s;
     }
 
@@ -756,4 +763,46 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     public int getEventsInQueue() {
         return queue.size();
     }
+
+    //////////////////////// NESTED CLASSES ////////////////////////////
+    
+    /**
+     * {@link ConnectionOverwatch}
+     */
+    private class ConnectionOverwatch implements Runnable {
+
+        private final InputStream inputStream;
+
+        /**
+         * Initialises a new {@link ConnectionOverwatch}.
+         * 
+         * @param inputStream The {@link InputStream} to guard
+         */
+        public ConnectionOverwatch(InputStream inputStream) {
+            super();
+            this.inputStream = inputStream;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    if (inputStream.read() == -1) {
+                        break;
+                    }
+                } catch (SocketTimeoutException e) {
+                    // Ignore, we retry
+                } catch (Exception e) {
+                    logError("An unexpected error occurred: ", e);
+                    break;
+                }
+            }
+        }
+    }
+
 }
