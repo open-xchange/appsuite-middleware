@@ -2453,27 +2453,67 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection configCon = null;
         boolean rollback = false;
         try {
-            // Fetch connection
-            configCon = cache.getWriteConnectionForConfigDB();
-
-            configCon.setAutoCommit(false);
-            rollback = true;
-
             // Change login mappings in configdb
-            changeLoginMappingsForContext(ctx, configCon);
+            {
+                Set<String> loginMappings = ctx.getLoginMappings();
+                if (null != loginMappings) {
+                    // Fetch connection
+                    configCon = cache.getWriteConnectionForConfigDB();
+                    configCon.setAutoCommit(false);
+                    rollback = true;
+                    changeLoginMappingsForContext(loginMappings, ctx, configCon);
+                }
+            }
 
             // Change context name in configdb
-            changeNameForContext(ctx, configCon);
+            {
+                // first check if name is set and has a valid value
+                if (ctx.getName() != null) {
+                    // Fetch connection (if not done already)
+                    if (null == configCon) {
+                        configCon = cache.getWriteConnectionForConfigDB();
+                        configCon.setAutoCommit(false);
+                        rollback = true;
+                    }
+                    String name = ctx.getName().trim();
+                    if (name.length() > 0) {
+                        changeNameForContext(name, ctx, configCon);
+                    }
+                }
+            }
 
             // Change quota size in config db
-            changeQuotaForContext(ctx, configCon);
+            {
+                if (ctx.getMaxQuota() != null) {
+                    // Fetch connection (if not done already)
+                    if (null == configCon) {
+                        configCon = cache.getWriteConnectionForConfigDB();
+                        configCon.setAutoCommit(false);
+                        rollback = true;
+                    }
+                    long quota_max_temp = ctx.getMaxQuota().longValue();
+                    changeQuotaForContext(quota_max_temp, ctx, configCon);
+                }
+            }
 
             // Change storage data
-            changeStorageDataImpl(ctx, configCon);
+            {
+                if (ctx.getFilestoreId() != null) {
+                    // Fetch connection (if not done already)
+                    if (null == configCon) {
+                        configCon = cache.getWriteConnectionForConfigDB();
+                        configCon.setAutoCommit(false);
+                        rollback = true;
+                    }
+                    changeStorageDataImpl(ctx.getFilestoreId().intValue(), ctx, configCon);
+                }
+            }
 
             // commit changes to db
-            configCon.commit();
-            rollback = false;
+            if (null != configCon) {
+                configCon.commit();
+                rollback = false;
+            }
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -2576,42 +2616,31 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void changeQuotaForContext(final Context ctx, final Connection configdb_con) throws SQLException {
+    private void changeQuotaForContext(long quota_max_temp, Context ctx, Connection configdb_con) throws SQLException {
+        if (quota_max_temp != -1) {
+            quota_max_temp = quota_max_temp << 20;
+        }
 
-        // check if max quota is set in context
-        if (ctx.getMaxQuota() != null) {
+        PreparedStatement prep = null;
+        try {
+            prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
+            prep.setLong(1, quota_max_temp);
+            prep.setInt(2, ctx.getId().intValue());
+            prep.executeUpdate();
 
-            long quota_max_temp = ctx.getMaxQuota().longValue();
-            if (quota_max_temp != -1) {
-                quota_max_temp = quota_max_temp << 20;
-            }
-
-            PreparedStatement prep = null;
             try {
-                prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
-                prep.setLong(1, quota_max_temp);
-                prep.setInt(2, ctx.getId().intValue());
-                prep.executeUpdate();
-
-                try {
-                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                    Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                    qfsCache.invalidateGroup(ctx.getId().toString());
-                } catch (Exception e) {
-                    LOG.error("Failed to invalidate caches. Restart recommended.", e);
-                }
-            } finally {
-                Databases.closeSQLStuff(prep);
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
+                qfsCache.invalidateGroup(ctx.getId().toString());
+            } catch (Exception e) {
+                LOG.error("Failed to invalidate caches. Restart recommended.", e);
             }
+        } finally {
+            Databases.closeSQLStuff(prep);
         }
     }
 
-    private void changeLoginMappingsForContext(final Context ctx, final Connection con) throws SQLException, StorageException {
-        Set<String> loginMappings = ctx.getLoginMappings();
-        if (null == loginMappings) {
-            return;
-        }
-
+    private void changeLoginMappingsForContext(Set<String> loginMappings, Context ctx, Connection con) throws SQLException, StorageException {
         // add always the context name
         if (ctx.getName() != null) {
             // a new context Name has been specified
@@ -2696,17 +2725,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void changeNameForContext(final Context ctx, final Connection configdb_con) throws SQLException {
-        // first check if name is set and has a valid name
-        if (ctx.getName() == null) {
-            return;
-        }
-
-        String name = ctx.getName().trim();
-        if (name.length() == 0) {
-            return;
-        }
-
+    private void changeNameForContext(String name, Context ctx, Connection configdb_con) throws SQLException {
         PreparedStatement prep = null;
         try {
             prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
@@ -2719,60 +2738,58 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void changeStorageDataImpl(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
-        if (ctx.getFilestoreId() != null) {
-            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
-            final int context_id = ctx.getId().intValue();
+    private void changeStorageDataImpl(int filestoreId, Context ctx, Connection configdb_write_con) throws SQLException, StorageException {
+        OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+        Filestore filestore = oxutil.getFilestore(filestoreId, false);
+        int context_id = ctx.getId().intValue();
 
-            PreparedStatement prep = null;
-            ResultSet rs = null;
-            try {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
 
-                if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
-                    prep = configdb_write_con.prepareStatement("SELECT context.filestore_id FROM context WHERE context.cid = ?");
-                    prep.setInt(1, context_id);
-                    rs = prep.executeQuery();
-                    int oldFilestoreId = rs.next() ? rs.getInt(1) : 0;
-                    closeSQLStuff(rs, prep);
-                    rs = null;
-                    prep = null;
+            if (filestore.getId() != null && -1 != filestore.getId().intValue()) {
+                prep = configdb_write_con.prepareStatement("SELECT context.filestore_id FROM context WHERE context.cid = ?");
+                prep.setInt(1, context_id);
+                rs = prep.executeQuery();
+                int oldFilestoreId = rs.next() ? rs.getInt(1) : 0;
+                closeSQLStuff(rs, prep);
+                rs = null;
+                prep = null;
 
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
-                    prep.setInt(1, filestore.getId().intValue());
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    closeSQLStuff(prep);
-                    prep = null;
-
-                    if (oldFilestoreId != 0) {
-                        prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
-                        prep.setInt(1, oldFilestoreId);
-                        prep.executeUpdate();
-                        closeSQLStuff(prep);
-                        prep = null;
-                    }
-
-                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
-                    prep.setInt(1, filestore.getId().intValue());
-                    prep.executeUpdate();
-                    closeSQLStuff(prep);
-                    prep = null;
-                }
-
-                String filestore_name = ctx.getFilestore_name();
-                if (null != filestore_name) {
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
-                    prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    closeSQLStuff(prep);
-                    prep = null;
-                }
-
-            } finally {
+                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
+                prep.setInt(1, filestore.getId().intValue());
+                prep.setInt(2, context_id);
+                prep.executeUpdate();
                 closeSQLStuff(prep);
+                prep = null;
+
+                if (oldFilestoreId != 0) {
+                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                    prep.setInt(1, oldFilestoreId);
+                    prep.executeUpdate();
+                    closeSQLStuff(prep);
+                    prep = null;
+                }
+
+                prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+                prep.setInt(1, filestore.getId().intValue());
+                prep.executeUpdate();
+                closeSQLStuff(prep);
+                prep = null;
             }
+
+            String filestore_name = ctx.getFilestore_name();
+            if (null != filestore_name) {
+                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
+                prep.setString(1, filestore_name);
+                prep.setInt(2, context_id);
+                prep.executeUpdate();
+                closeSQLStuff(prep);
+                prep = null;
+            }
+
+        } finally {
+            closeSQLStuff(prep);
         }
     }
 
