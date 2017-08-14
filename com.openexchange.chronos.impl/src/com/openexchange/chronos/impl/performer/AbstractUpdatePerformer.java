@@ -174,13 +174,15 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions
          */
-        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()));
+            for (Event changeException : loadExceptionData(originalEvent.getSeriesId())) {
+                delete(changeException);
+            }
         }
         /*
          * delete event data from storage
          */
+        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         String id = originalEvent.getId();
         Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
@@ -379,6 +381,28 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
         return new UnmodifiableEvent(storage.getUtilities().loadAdditionalEventData(-1, event, null));
+    }
+
+    /**
+     * Loads all non user-specific data for a all exceptions of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exceptions from
+     * @return The event exception data
+     */
+    protected List<Event> loadExceptionData(String seriesId) throws OXException {
+        List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
+        if (0 < exceptions.size()) {
+            exceptions = storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
+            List<Event> unmodifiableExceptions = new ArrayList<Event>(exceptions.size());
+            for (Event exception : exceptions) {
+                unmodifiableExceptions.add(new UnmodifiableEvent(exception));
+            }
+            exceptions = unmodifiableExceptions;
+        }
+        return exceptions;
     }
 
     /**

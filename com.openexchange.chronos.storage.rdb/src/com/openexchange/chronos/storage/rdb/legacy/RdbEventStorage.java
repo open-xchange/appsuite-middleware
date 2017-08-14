@@ -245,6 +245,19 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public List<Event> loadExceptions(String seriesID, EventField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectExceptions(connection, context.getContextId(), asInt(seriesID), fields);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void insertEvent(Event event) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -423,6 +436,25 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 return resultSet.next() ? readEvent(connection, resultSet, mappedFields, null) : null;
             }
         }
+    }
+
+    private List<Event> selectExceptions(Connection connection, int contextID, int seriesID, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
+        String sql = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM prg_dates ")
+            .append("WHERE cid=? AND intfield02=? AND intfield01<>intfield02;")
+        .toString();
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, seriesID);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(connection, resultSet, mappedFields, null));
+                }
+            }
+        }
+        return events;
     }
 
     private Event readEvent(Connection connection, ResultSet resultSet, EventField[] fields, String columnLabelPrefix) throws SQLException, OXException {

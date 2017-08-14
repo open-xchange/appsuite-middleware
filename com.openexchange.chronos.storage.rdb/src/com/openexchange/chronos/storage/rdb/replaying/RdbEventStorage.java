@@ -122,6 +122,11 @@ public class RdbEventStorage implements EventStorage {
     }
 
     @Override
+    public List<Event> loadExceptions(String seriesId, EventField[] fields) throws OXException {
+        return delegate.loadExceptions(seriesId, fields);
+    }
+
+    @Override
     public List<Event> searchEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException {
         return delegate.searchEvents(searchTerm, searchOptions, fields);
     }

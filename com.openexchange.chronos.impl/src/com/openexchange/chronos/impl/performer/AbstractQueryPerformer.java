@@ -90,7 +90,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -319,12 +318,8 @@ public abstract class AbstractQueryPerformer {
      * @return The recurrence identifiers in a sorted set, or an empty set if there are none
      */
     protected SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId))
-            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-        ;
         EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesId, fields);
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 

@@ -208,6 +208,19 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public List<Event> loadExceptions(String seriesId, EventField[] fields) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectExceptions(connection, seriesId, fields);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void insertEvent(Event event) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -535,6 +548,26 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
             }
         }
+    }
+
+    private List<Event> selectExceptions(Connection connection, String seriesId, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
+        String sql = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM calendar_event ")
+            .append("WHERE cid=? AND account=? AND series=? AND id<>series;")
+        .toString();
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            stmt.setInt(3, asInt(seriesId));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, null));
+                }
+            }
+        }
+        return events;
     }
 
     private List<Event> selectEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {
