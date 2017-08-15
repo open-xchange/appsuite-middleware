@@ -73,7 +73,7 @@ public class PasswordChangeHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHelper.class);
 
-    private final ServiceLookup                 service;
+    private final ServiceLookup                        service;
     private final PasswordChangeHandlerRegistryService registry;
 
     /**
@@ -160,7 +160,7 @@ public class PasswordChangeHelper {
         }
 
         // Handler name
-        String handlerName = view.get(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
+        String handlerName;
         {
             ComposedConfigProperty<String> handlerNameProperty = view.property(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
             if (handlerNameProperty.isDefined()) {
