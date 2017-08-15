@@ -54,6 +54,9 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link PasswordChangeEventListener} Listens to password change event created in {@link com.openexchange.passwordchange.BasicPasswordChangeService#perform(com.openexchange.passwordchange.PasswordChangeEvent)} (in propagate)
@@ -65,7 +68,10 @@ public class PasswordChangeEventListener implements EventHandler {
 
     private static final String TOPIC = "com/openexchange/passwordchange";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeEventListener.class);
+
     final PasswordChangeHelper helper;
+    final ServiceLookup        service;
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.
@@ -76,6 +82,7 @@ public class PasswordChangeEventListener implements EventHandler {
     public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
         super();
         this.helper = new PasswordChangeHelper(service, registry);
+        this.service = service;
     }
 
     /**
@@ -97,6 +104,22 @@ public class PasswordChangeEventListener implements EventHandler {
         int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
         String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+
+        // Don't track guests
+        UserService userService = service.getService(UserService.class);
+        if (null == userService) {
+            LOG.error("Couldn't load UserService and therefore can't record PasswordChangeHistroy");
+            return;
+        }
+        try {
+            User user = userService.getUser(userID, contextID);
+            if (user.isGuest()) {
+                LOG.debug("No PasswordChangehistory for guests");
+                return;
+            }
+        } catch (OXException e) {
+            LOG.error("Couldn't record PasswordChangeHistory", e);
+        }
 
         // Process tracking
         helper.recordChangeSafe(contextID, userID, ipAdderess, session.getClient());
