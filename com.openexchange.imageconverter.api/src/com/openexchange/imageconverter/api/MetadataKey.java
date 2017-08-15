@@ -264,7 +264,7 @@ public enum MetadataKey {
      * @param name
      * @param id
      */
-    private MetadataKey(@NonNull final MetadataGroup metadataGroup, @NonNull final String name, @NonNull final int id) {
+    private MetadataKey(@NonNull final MetadataGroup metadataGroup, @NonNull final String name, final int id) {
         m_dataGroup = metadataGroup;
         m_name = name;
         m_id = id;
@@ -295,9 +295,9 @@ public enum MetadataKey {
 
     // - Members -----------------------------------------------------------
 
-    private MetadataGroup m_dataGroup = null;
+    private final MetadataGroup m_dataGroup;
 
-    private String m_name = null;
+    private final String m_name ;
 
-    private int m_id = 0;
+    private final int m_id;
 }

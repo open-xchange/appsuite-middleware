@@ -66,6 +66,8 @@ public class MetadataImage implements Closeable {
      */
     @SuppressWarnings("unused")
     private MetadataImage() {
+        m_imageStm = null;
+        m_metadata = null;
     }
 
     /**
@@ -112,7 +114,7 @@ public class MetadataImage implements Closeable {
 
     // - Members ---------------------------------------------------------------
 
-    private InputStream m_imageStm = null;
+    private final InputStream m_imageStm;
 
-    private IMetadata m_metadata = null;
+    private final IMetadata m_metadata;
 }

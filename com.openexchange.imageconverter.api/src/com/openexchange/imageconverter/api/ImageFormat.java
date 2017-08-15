@@ -114,7 +114,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
 
         // - Members -----------------------------------------------------------
 
-        private String m_typeName = null;
+        private final String m_typeName;
     }
 
     /**
