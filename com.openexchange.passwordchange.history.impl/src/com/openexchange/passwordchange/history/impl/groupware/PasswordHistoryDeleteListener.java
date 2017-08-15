@@ -51,7 +51,6 @@ package com.openexchange.passwordchange.history.impl.groupware;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
@@ -89,23 +88,34 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        UserService userService = null;
 
         // Only context and user are relevant
         switch (event.getType()) {
             case DeleteEvent.TYPE_CONTEXT:
                 // Get users in context and remove password for them
-                UserService userService = service.getService(UserService.class);
+                userService = service.getService(UserService.class);
                 if (null == userService) {
                     throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
                 }
-                Context ctx = userService.getContext(event.getId());
-                for (User user : userService.getUser(ctx)) {
-                    helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
+                for (User user : userService.getUser(event.getContext())) {
+                    if (false == user.isGuest()) {
+                        helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
+                    }
                 }
+
                 break;
 
             case DeleteEvent.TYPE_USER:
-                helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
+                userService = service.getService(UserService.class);
+                if (null == userService) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+                }
+                User user = userService.getUser(event.getId(), event.getContext());
+                if (false == user.isGuest()) {
+                    helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
+                }
+
                 break;
 
             default:
