@@ -47,59 +47,37 @@
  *
  */
 
-package com.openexchange.passwordchange.history.events;
+package com.openexchange.passwordchange.history;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
 
 /**
- * {@link PasswordChangeEventListener} Listens to password change event created in {@link com.openexchange.passwordchange.BasicPasswordChangeService#perform(com.openexchange.passwordchange.PasswordChangeEvent)} (in propagate)
+ * {@link PasswordChangeInfo} - The information provided and written to the database considering the password change.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeEventListener implements EventHandler {
-
-    private static final String TOPIC = "com/openexchange/passwordchange";
-
-    final PasswordChangeHelper helper;
+public interface PasswordChangeInfo {
 
     /**
-     * Initializes a new {@link PasswordChangeEventListener}.
+     * Get the value of the date when the password got changed on
      * 
-     * @param service The {@link ServiceLookup} to get services from
-     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
+     * @return The value as <code>long</code>
      */
-    public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
-        super();
-        this.helper = new PasswordChangeHelper(service, registry);
-    }
+    long getCreated();
 
     /**
-     * Gets the topic of interest.
-     *
-     * @return The topic
+     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
+     * 
+     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
      */
-    public String getTopic() {
-        return TOPIC;
-    }
+    String getClient();
 
-    @Override
-    public void handleEvent(Event event) {
-        if (false == TOPIC.equals(event.getTopic())) {
-            return;
-        }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
-        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+    /**
+     * Get the IP-address the changed request was sent from
+     * 
+     * @return The IP-address or <code>null</code>
+     */
+    String getIP();
 
-        // Process tracking
-        helper.recordChange(contextID, userID, ipAdderess, session.getClient());
-    }
 }

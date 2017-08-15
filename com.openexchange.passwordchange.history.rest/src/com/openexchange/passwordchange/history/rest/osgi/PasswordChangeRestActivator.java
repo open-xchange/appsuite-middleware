@@ -52,7 +52,7 @@ package com.openexchange.passwordchange.history.rest.osgi;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
 
 /**

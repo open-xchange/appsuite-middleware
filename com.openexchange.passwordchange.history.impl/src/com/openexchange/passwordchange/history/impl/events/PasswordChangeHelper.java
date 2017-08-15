@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.passwordchange.history.events;
+package com.openexchange.passwordchange.history.impl.events;
 
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHistoryProperties;
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.impl.PasswordChangeInfoImpl;
+import com.openexchange.passwordchange.history.impl.exception.PasswordChangeHistoryException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 

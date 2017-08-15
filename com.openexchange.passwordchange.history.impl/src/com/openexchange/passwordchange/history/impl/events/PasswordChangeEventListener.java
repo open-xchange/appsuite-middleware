@@ -47,21 +47,58 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history.impl.events;
+
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link SortOrder} The types of different sorting for {@link PasswordChangeInfo}s
+ * {@link PasswordChangeEventListener} Listens to password change event created in {@link com.openexchange.passwordchange.BasicPasswordChangeService#perform(com.openexchange.passwordchange.PasswordChangeEvent)} (in propagate)
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum SortOrder {
+public class PasswordChangeEventListener implements EventHandler {
 
-    /** Sort by newest entries first. */
-    DESC,
+    private static final String TOPIC = "com/openexchange/passwordchange";
 
-    /** Sort by oldest entries first */
-    ASC
+    final PasswordChangeHelper helper;
 
-    ;
+    /**
+     * Initializes a new {@link PasswordChangeEventListener}.
+     * 
+     * @param service The {@link ServiceLookup} to get services from
+     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
+     */
+    public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+        super();
+        this.helper = new PasswordChangeHelper(service, registry);
+    }
+
+    /**
+     * Gets the topic of interest.
+     *
+     * @return The topic
+     */
+    public String getTopic() {
+        return TOPIC;
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        if (false == TOPIC.equals(event.getTopic())) {
+            return;
+        }
+        // Read values
+        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
+        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
+        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
+        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+
+        // Process tracking
+        helper.recordChange(contextID, userID, ipAdderess, session.getClient());
+    }
 }

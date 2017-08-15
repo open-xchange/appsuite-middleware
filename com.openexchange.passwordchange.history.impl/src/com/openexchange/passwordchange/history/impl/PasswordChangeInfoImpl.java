@@ -47,63 +47,90 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history.impl;
 
-import com.openexchange.config.lean.Property;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
 
 /**
- * {@link PasswordChangeHistoryProperties}
+ * {@link PasswordChangeInfoImpl} - Implementation of {@link PasswordChangeInfo}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum PasswordChangeHistoryProperties implements Property {
+public class PasswordChangeInfoImpl implements PasswordChangeInfo {
+
+    private final long   created;
+    private final String client;
+    private final String ip;
 
     /**
-     * The property that indicates if a password change should be recorded into a history.
-     * If set to <code>true</code> a history is saved.
-     * If set to <code>false</code> no history is saved.
+     * Initializes a new {@link PasswordChangeInfoImpl}.
      *
-     * Default is <code>false</code>.
+     * @param created The time when the password change was made
+     * @param client The client that did the change
+     * @param ip The optional IP of the client
      */
-    ENABLE("enable", Boolean.FALSE),
-
-    /**
-     * The handler that takes care of the password change history.
-     * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
-     *
-     * Default is "default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
-     */
-    HANDLER("handler", "default"),
-
-    /**
-     * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
-     * for a specific user.
-     *
-     * Default is <code>10</code>.
-     */
-    LIMIT("limit", Integer.valueOf(10))
-
-    ;
-
-    private final String fqn;
-    private final Object defaultValue;
-
-    private PasswordChangeHistoryProperties(String name, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        this.fqn = "com.openexchange.passwordchange.history." + name;
+    public PasswordChangeInfoImpl(long created, String client, String ip) {
+        super();
+        this.created = created;
+        this.client = client;
+        this.ip = ip;
     }
 
     @Override
-    public String getFQPropertyName() {
-        return fqn;
+    public long getCreated() {
+        return created;
     }
 
     @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (defaultValue.getClass().isAssignableFrom(clazz)) {
-            return clazz.cast(defaultValue);
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public String getIP() {
+        return ip;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 61;
+        int result = 1;
+        result = prime * result + (int) (created ^ (created >>> 32));
+        result = prime * result + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + ((ip == null) ? 0 : ip.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PasswordChangeInfoImpl other = (PasswordChangeInfoImpl) obj;
+        if (created != other.created) {
+            return false;
+        }
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
+        if (ip == null) {
+            if (other.ip != null) {
+                return false;
+            }
+        } else if (!ip.equals(other.ip)) {
+            return false;
+        }
+        return true;
     }
 }

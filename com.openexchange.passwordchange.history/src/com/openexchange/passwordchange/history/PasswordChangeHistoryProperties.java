@@ -47,18 +47,63 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history;
+
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link SortField} - Fields to sort the output by
+ * {@link PasswordChangeHistoryProperties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum SortField {
-    /** The time the password change was made */
-    DATE,
+public enum PasswordChangeHistoryProperties implements Property {
 
-    /** The ID of which client did the password change */
-    CLIENT_ID
+    /**
+     * The property that indicates if a password change should be recorded into a history.
+     * If set to <code>true</code> a history is saved.
+     * If set to <code>false</code> no history is saved.
+     *
+     * Default is <code>false</code>.
+     */
+    ENABLE("enable", Boolean.FALSE),
+
+    /**
+     * The handler that takes care of the password change history.
+     * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
+     *
+     * Default is "default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
+     */
+    HANDLER("handler", "default"),
+
+    /**
+     * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
+     * for a specific user.
+     *
+     * Default is <code>10</code>.
+     */
+    LIMIT("limit", Integer.valueOf(10))
+
+    ;
+
+    private final String fqn;
+    private final Object defaultValue;
+
+    private PasswordChangeHistoryProperties(String name, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.fqn = "com.openexchange.passwordchange.history." + name;
+    }
+
+    @Override
+    public String getFQPropertyName() {
+        return fqn;
+    }
+
+    @Override
+    public <T> T getDefaultValue(Class<T> clazz) {
+        if (defaultValue.getClass().isAssignableFrom(clazz)) {
+            return clazz.cast(defaultValue);
+        }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+    }
 }

@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history;
 
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 
 /**
  * {@link PasswordHistoryHandler} - Defines the operations need to be done to for a password change history
