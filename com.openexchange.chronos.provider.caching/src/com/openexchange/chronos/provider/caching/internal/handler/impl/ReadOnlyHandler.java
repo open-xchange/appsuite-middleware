@@ -53,19 +53,18 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link DatabaseHandler}
+ * The {@link ReadOnlyHandler} will be used for searching persisted events.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class DatabaseHandler extends AbstractHandler {
+public class ReadOnlyHandler extends AbstractHandler {
 
-    public DatabaseHandler(CachingCalendarAccess cachedCalendarAccess) {
+    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 
@@ -75,18 +74,17 @@ public class DatabaseHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException {
-        return search(eventIds);
-    }
-
-    @Override
     public List<Event> getPersistedEvents(String folderId) throws OXException {
         return searchInternal(folderId, true);
     }
 
     @Override
-    public void persist(EventUpdates diff) throws OXException {}
+    public void persist(EventUpdates diff) throws OXException {
+        // do not persist anything
+    }
 
     @Override
-    public void updateLastUpdated() throws OXException {}
+    public void updateLastUpdated() throws OXException {
+        // ignore update 
+    }
 }

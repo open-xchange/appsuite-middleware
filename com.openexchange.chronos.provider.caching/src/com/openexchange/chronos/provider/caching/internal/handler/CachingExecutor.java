@@ -50,13 +50,13 @@
 package com.openexchange.chronos.provider.caching.internal.handler;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.EventID;
@@ -64,7 +64,7 @@ import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CachingExecutor}
+ * The {@link CachingExecutor} ensures a generic execution of the caching process based on the provided {@link CachingHandler}.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -80,51 +80,40 @@ public class CachingExecutor {
     public CachingExecutor(CachingCalendarAccess cachingCalendarAccess, CachingHandler cachingHandler) {
         this.cachingCalendarAccess = cachingCalendarAccess;
         this.cachingHandler = cachingHandler;
-
     }
 
-    public List<Event> doIt(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
+    public Event cacheAndGet(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         List<Event> externalEvents = cachingHandler.getExternalEvents(folderId);
         List<Event> persistedEvents = cachingHandler.getPersistedEvents(folderId);
 
         EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            Event search = cachingHandler.search(folderId, eventId, recurrenceId);
-            if (search == null) {
-                return Collections.emptyList();
-            }
-            return Collections.singletonList(search);
+        if (!diff.isEmpty()) {
+            cachingHandler.persist(diff);
         }
-
-        cachingHandler.persist(diff);
         cachingHandler.updateLastUpdated();
 
         Event search = cachingHandler.search(folderId, eventId, recurrenceId);
         if (search == null) {
-            return Collections.emptyList();
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
-        return Collections.singletonList(search);
+        return search;
     }
 
-    public List<Event> doIt(String folderId) throws OXException {
+    public List<Event> cacheAndGet(String folderId) throws OXException {
         List<Event> externalEvents = cachingHandler.getExternalEvents(folderId);
         List<Event> persistedEvents = cachingHandler.getPersistedEvents(folderId);
 
         EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            return cachingHandler.search(folderId);
+        if (!diff.isEmpty()) {
+            cachingHandler.persist(diff);
         }
-
-        cachingHandler.persist(diff);
         cachingHandler.updateLastUpdated();
 
         return cachingHandler.search(folderId);
     }
 
-    public List<Event> doIt(List<EventID> eventIds) throws OXException {
-        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
+    public List<Event> cacheAndGet(List<EventID> eventIds) throws OXException {
+        final Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
 
         List<Event> externalEvents = new ArrayList<>();
         for (String folderId : sortEventIDsPerFolderId.keySet()) {
@@ -134,15 +123,18 @@ public class CachingExecutor {
             }
         }
 
-        List<Event> persistedEvents = cachingHandler.getPersistedEvents(eventIds);
-
-        EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            return cachingHandler.search(eventIds);
+        List<Event> persistedEvents = new ArrayList<>();
+        for (String folderId : sortEventIDsPerFolderId.keySet()) {
+            List<Event> persistedEventsForFolder = cachingHandler.getPersistedEvents(folderId);
+            if (persistedEventsForFolder != null && !persistedEventsForFolder.isEmpty()) {
+                persistedEvents.addAll(persistedEventsForFolder);
+            }
         }
 
-        cachingHandler.persist(diff);
+        EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
+        if (!diff.isEmpty()) {
+            cachingHandler.persist(diff);
+        }
         cachingHandler.updateLastUpdated();
 
         return cachingHandler.search(eventIds);

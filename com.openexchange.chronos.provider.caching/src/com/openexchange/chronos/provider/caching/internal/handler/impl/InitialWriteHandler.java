@@ -57,7 +57,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -67,25 +66,20 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link InitialInsertHandler}
+ * The {@link InitialWriteHandler} will be used for the initial caching of {@link Event}s
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class InitialInsertHandler extends AbstractHandler {
+public class InitialWriteHandler extends AbstractHandler {
 
-    public InitialInsertHandler(CachingCalendarAccess cachedCalendarAccess) {
+    public InitialWriteHandler(CachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 
     @Override
     public List<Event> getExternalEvents(String folderId) throws OXException {
         return getAndPrepareExtEvents(folderId);
-    }
-
-    @Override
-    public List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException {
-        return Collections.emptyList();
     }
 
     @Override
@@ -102,18 +96,18 @@ public class InitialInsertHandler extends AbstractHandler {
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            createAsync(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
+            create(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;
         } catch (SQLException e) {
             if (DBUtils.isTransactionRollbackException(e)) {
-                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e, e.getMessage());
+                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e.getMessage(), e);
             }
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage(), e);
         } finally {
-            if (null != writeConnection) {
-                if (false == committed) {
+            if (writeConnection != null) {
+                if (!committed) {
                     Databases.rollback(writeConnection);
                     Databases.autocommit(writeConnection);
                     dbService.backWritableAfterReading(context, writeConnection);
@@ -124,5 +118,4 @@ public class InitialInsertHandler extends AbstractHandler {
             }
         }
     }
-
 }

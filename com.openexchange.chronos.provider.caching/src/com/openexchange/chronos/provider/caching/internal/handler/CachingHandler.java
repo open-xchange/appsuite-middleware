@@ -53,32 +53,87 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CachingHandler}
+ * The {@link CachingHandler} defines the general caching workflow that will be invoked for each request.<br>
+ * <br>
+ * There should be one implementation for each available {@link ProcessingType} that will be returned from the {@link CachingHandlerFactory}.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 public interface CachingHandler {
 
+    /**
+     * Returns a list of {@link Event}s for the underlying account
+     * 
+     * @param folderId The folder id of the account
+     * @return A list of {@link Event}s
+     * @throws OXException
+     */
     List<Event> getExternalEvents(String folderId) throws OXException;
 
-    List<Event> getPersistedEvents(List<EventID> eventIds) throws OXException;
-
+    /**
+     * Returns the currently persisted {@link Event}s identified by the given folder identifier
+     * 
+     * @param folderId The folder identifier to get {@link Event}s for
+     * @return A list of {@link Event}s
+     * @throws OXException
+     */
     List<Event> getPersistedEvents(String folderId) throws OXException;
 
+    /**
+     * Persists the given {@link EventUpdates}
+     * 
+     * @param diff The {@link EventUpdate} diff to persist
+     * @throws OXException
+     */
     void persist(EventUpdates diff) throws OXException;
 
+    /**
+     * Returns the requested events (if available)
+     * 
+     * @param eventIds The requested {@link Event}s
+     * @return A list of the requested {@link Event}s if available
+     * @throws OXException
+     */
     List<Event> search(List<EventID> eventIds) throws OXException;
 
+    /**
+     * Returns the events for given folder (if available)
+     * 
+     * @param folderId The folder containing the {@link Event}s
+     * @return A list of the requested {@link Event}s if available
+     * @throws OXException
+     */
     List<Event> search(String folderId) throws OXException;
 
+    /**
+     * Returns a dedicated {@link Event} (if available)
+     * 
+     * @param folderId The folder id of the event
+     * @param eventId The event id
+     * @param recurrenceId The recurrence id of the {@link Event}
+     * @return The desired {@link Event}
+     * @throws OXException
+     */
     Event search(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
 
+    /**
+     * Allows to handle errors (cleanups) if an {@link OXException} occurred
+     * 
+     * @param e The occurred {@link OXException}
+     * @throws OXException
+     */
     void handleExceptions(OXException e) throws OXException;
 
+    /**
+     * Updates the last modified timestamp of the account
+     * 
+     * @throws OXException
+     */
     void updateLastUpdated() throws OXException;
 }

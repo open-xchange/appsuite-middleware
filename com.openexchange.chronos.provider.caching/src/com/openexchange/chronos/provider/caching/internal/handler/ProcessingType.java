@@ -51,9 +51,10 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 
 /**
- * {@link ProcessingType} defines some types of processing based on the given l
+ * {@link ProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -66,12 +67,12 @@ public enum ProcessingType {
     INITIAL_INSERT,
 
     /**
-     * Indicates that there has already been a processing ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
      */
     UPDATE,
 
     /**
-     * Indicates that there has already been a processing ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
      */
     READ_DB
 

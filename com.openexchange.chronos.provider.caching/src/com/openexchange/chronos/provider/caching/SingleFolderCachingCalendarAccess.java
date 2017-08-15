@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
@@ -68,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  *
- * {@link SingleFolderCachingCalendarAccess}
+ * The {@link SingleFolderCachingCalendarAccess} is a default implementation for single folder usage that only requires to do the {@link Event} retrieval by implementing {@link #getEvents()}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -82,14 +81,14 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     /**
      * Initializes a new {@link SingleFolderCachingCalendarAccess}.
      *
-     * @param session
-     * @param account The calendar account
-     * @param parameters The calendar parameters
+     * @param session The user session
+     * @param account The user calendar account
+     * @param parameters The calendar parameters (for the given request)
      * @throws OXException
      */
     protected SingleFolderCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        this.folder = prepareFolder(account, parameters);
+        this.folder = prepareFolder(account);
     }
 
     @Override
@@ -103,12 +102,18 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return Collections.singletonList(folder);
     }
 
-    abstract public List<Event> getEvents() throws OXException;
+    /**
+     * Returns a list of {@link Event}s by querying the underlying calendar.
+     * 
+     * @return The external events associated with the calendar account
+     * @throws OXException
+     */
+    public abstract List<Event> getEvents() throws OXException;
 
     @Override
     public final List<Event> getEvents(String folderId) throws OXException {
+        checkFolderId(folderId);
         List<Event> events = new ArrayList<Event>();
-        checkFolderId(this.folder.getId());
         for (Event event : getEvents()) {
             event.setFolderId(this.folder.getId());
             events.add(event);
@@ -135,14 +140,6 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }
 
-    protected Date getFrom() {
-        return getParameters().get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-    }
-
-    protected Date getUntil() {
-        return getParameters().get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-    }
-
     protected String checkFolderId(String folderId) throws OXException {
         if (false == folder.getId().equals(folderId)) {
             throw OXException.notFound(folderId);
@@ -150,7 +147,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return folderId;
     }
 
-    private static CalendarFolder prepareFolder(CalendarAccount account, CalendarParameters parameters) {
+    private static CalendarFolder prepareFolder(CalendarAccount account) {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(FOLDER_ID);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));

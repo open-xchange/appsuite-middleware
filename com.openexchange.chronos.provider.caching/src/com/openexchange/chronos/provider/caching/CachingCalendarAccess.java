@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * A caching {@link CalendarAccess} implementation that provides generic caching (based on the database) for external events.<br>
+ * A caching {@link CalendarAccess} implementation that provides generic database caching for external events.<br>
  * <br>
  * Some abstract methods have to be implemented from the underlying implementation to retrieve data and some configurations (for instance the refresh interval to define after which period the external provider should be contacted)
  *
@@ -79,14 +79,28 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class CachingCalendarAccess implements CalendarAccess {
 
+    /**
+     * The key for persisting the last update timestamp
+     */
     public static final String LAST_UPDATE = "lastUpdate";
 
+    /**
+     * The key for persisting the last update timestamp that will be used if a roll back to the previous configuration is required
+     */
     public static final String PREVIOUS_LAST_UPDATE = "previousLastUpdate";
 
     private final ServerSession session;
     private final CalendarAccount account;
     private final CalendarParameters parameters;
 
+    /**
+     * Initializes a new {@link CachingCalendarAccess}.
+     * 
+     * @param session The user session
+     * @param account The user calendar account
+     * @param parameters The calendar parameters (for the given request)
+     * @throws OXException
+     */
     public CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
@@ -94,14 +108,14 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     }
 
     /**
-     * Defines the refresh interval in minutes
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar
      * 
-     * @return The interval to update imported {@link Event}s in {@link TimeUnit#MINUTES}
+     * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
     public abstract int getRefreshInterval();
 
     /**
-     * Returns the requested list of {@link Event}s by querying the underlying calendar.
+     * Returns a list of {@link Event}s by querying the underlying calendar for the given folder id.
      * 
      * @param folderId The identifier of the folder to get the events from
      * @return The events
@@ -114,11 +128,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            List<Event> doIt = new CachingExecutor(this, cachingHandler).doIt(folderId, eventId, recurrenceId);
-            if (doIt != null && !doIt.isEmpty()) {
-                return doIt.get(0);
-            }
-            return new Event(); //FIXME how to handle empty search results?
+            return new CachingExecutor(this, cachingHandler).cacheAndGet(folderId, eventId, recurrenceId);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
@@ -131,7 +141,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            return new CachingExecutor(this, cachingHandler).doIt(eventIDs);
+            return new CachingExecutor(this, cachingHandler).cacheAndGet(eventIDs);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
@@ -144,7 +154,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
         try {
-            return new CachingExecutor(this, cachingHandler).doIt(folderId);
+            return new CachingExecutor(this, cachingHandler).cacheAndGet(folderId);
         } catch (OXException e) {
             cachingHandler.handleExceptions(e);
             throw e;
@@ -199,7 +209,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
      * <br>
      * This might be overridden to enhance the configuration by parameters of the underlying implementation.
      * 
-     * @param configuration - The configuration to persist
+     * @param configuration The configuration to persist
      * @throws OXException
      */
     public void saveConfig(Map<String, Object> configuration) throws OXException {
