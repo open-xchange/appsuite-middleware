@@ -470,7 +470,7 @@ public class AlarmUtils extends CalendarUtils {
      * @param exceptions A list of {@link RecurrenceId} exceptions which should be skipped.
      * @return The next trigger time, or <code>null</code> if there is none
      */
-    public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService, List<RecurrenceId> exceptions) throws OXException {
+    public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService, Set<RecurrenceId> exceptions) throws OXException {
         if (null == startDate) {
             startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }

@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.alarm;
 
-import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 
@@ -61,66 +61,31 @@ import com.openexchange.chronos.RecurrenceId;
  */
 public class EventSeriesWrapper {
 
-    private boolean isSeries;
-    private boolean isException;
     private Event event;
-    List<RecurrenceId> exceptions;
+    Set<RecurrenceId> exceptions;
 
     /**
      * Initializes a new {@link EventSeriesWrapper}.
-     * @param isSeries
-     * @param isException
      * @param event
      * @param exceptions
      */
-    public EventSeriesWrapper(boolean isSeries, boolean isException, Event event, List<RecurrenceId> exceptions) {
+    public EventSeriesWrapper(Event event, Set<RecurrenceId> exceptions) {
         super();
-        this.isSeries = isSeries;
-        this.isException = isException;
         this.event = event;
         this.exceptions = exceptions;
     }
 
-
     /**
-     * Gets the isSeries
-     *
-     * @return The isSeries
+     * Initializes a new {@link EventSeriesWrapper}.
+     * 
+     * @param event
+     * @param exceptions
      */
-    public boolean isSeries() {
-        return isSeries;
+    public EventSeriesWrapper(Event event) {
+        super();
+        this.event = event;
+        this.exceptions = null;
     }
-
-
-    /**
-     * Sets the isSeries
-     *
-     * @param isSeries The isSeries to set
-     */
-    public void setSeries(boolean isSeries) {
-        this.isSeries = isSeries;
-    }
-
-
-    /**
-     * Gets the isException
-     *
-     * @return The isException
-     */
-    public boolean isException() {
-        return isException;
-    }
-
-
-    /**
-     * Sets the isException
-     *
-     * @param isException The isException to set
-     */
-    public void setException(boolean isException) {
-        this.isException = isException;
-    }
-
 
     /**
      * Gets the event
@@ -147,7 +112,7 @@ public class EventSeriesWrapper {
      *
      * @return The exceptions
      */
-    public List<RecurrenceId> getExceptions() {
+    public Set<RecurrenceId> getExceptions() {
         return exceptions;
     }
 
@@ -157,7 +122,7 @@ public class EventSeriesWrapper {
      *
      * @param exceptions The exceptions to set
      */
-    public void setExceptions(List<RecurrenceId> exceptions) {
+    public void setExceptions(Set<RecurrenceId> exceptions) {
         this.exceptions = exceptions;
     }
 

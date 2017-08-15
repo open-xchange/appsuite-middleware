@@ -51,6 +51,7 @@ package com.openexchange.chronos.alarm;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.EventField;;
 
@@ -64,7 +65,7 @@ public class AlarmChange {
 
     private EventSeriesWrapper oldEvent;
     private EventSeriesWrapper newEvent;
-    private List<EventField> changedFields;
+    private Set<EventField> changedFields;
     private Map<Integer, List<Alarm>> alarmsPerAttendee;
     private Type type;
 
@@ -74,11 +75,11 @@ public class AlarmChange {
         UPDATE
     }
 
-    public static AlarmChange newCreate(EventSeriesWrapper event, List<EventField> setFields, Map<Integer, List<Alarm>> alarmsPerAttendee ){
-        return new AlarmChange(Type.CREATE, null, event, setFields, alarmsPerAttendee);
+    public static AlarmChange newCreate(EventSeriesWrapper event, Map<Integer, List<Alarm>> alarmsPerAttendee) {
+        return new AlarmChange(Type.CREATE, null, event, null, alarmsPerAttendee);
     }
 
-    public static AlarmChange newUpdate(EventSeriesWrapper oldEventSeriesWrapper, EventSeriesWrapper newEventSeriesWrapper, List<EventField> changedFields, Map<Integer, List<Alarm>> alarmsPerAttendee){
+    public static AlarmChange newUpdate(EventSeriesWrapper oldEventSeriesWrapper, EventSeriesWrapper newEventSeriesWrapper, Set<EventField> changedFields, Map<Integer, List<Alarm>> alarmsPerAttendee) {
         return new AlarmChange(Type.UPDATE, oldEventSeriesWrapper, newEventSeriesWrapper, changedFields, alarmsPerAttendee);
     }
 
@@ -86,7 +87,7 @@ public class AlarmChange {
         return new AlarmChange(Type.DELETE, event, null, null, null);
     }
 
-    private AlarmChange(Type type, EventSeriesWrapper oldEventSeriesWrapper, EventSeriesWrapper newEventSeriesWrapper, List<EventField> changedFields, Map<Integer, List<Alarm>> alarmsPerAttendee) {
+    private AlarmChange(Type type, EventSeriesWrapper oldEventSeriesWrapper, EventSeriesWrapper newEventSeriesWrapper, Set<EventField> changedFields, Map<Integer, List<Alarm>> alarmsPerAttendee) {
         super();
         this.oldEvent = oldEventSeriesWrapper;
         this.newEvent = newEventSeriesWrapper;
@@ -140,7 +141,7 @@ public class AlarmChange {
      *
      * @return The changedFields
      */
-    public List<EventField> getChangedFields() {
+    public Set<EventField> getChangedFields() {
         return changedFields;
     }
 
@@ -150,7 +151,7 @@ public class AlarmChange {
      *
      * @param changedFields The changedFields to set
      */
-    public void setChangedFields(List<EventField> changedFields) {
+    public void setChangedFields(Set<EventField> changedFields) {
         this.changedFields = changedFields;
     }
 

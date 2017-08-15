@@ -62,11 +62,21 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.alarm.AlarmChange;
+import com.openexchange.chronos.alarm.AlarmTriggerService;
+import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -279,10 +289,11 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
             Consistency.setModified(timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
+            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+            updateAlarmTrigger(originalMasterEvent, updatedMasterEvent, deleteExceptionDates);
             /*
              * track update of master in result
              */
-            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
             result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
             result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
             result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
@@ -292,6 +303,29 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             delete(originalMasterEvent);
         }
+    }
+
+    private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent, Set<RecurrenceId> deleteExceptionDates) throws OXException {
+        AlarmTriggerService triggerService = getTriggerService();
+
+        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
+
+        EventSeriesWrapper old;
+        if (originalMasterEvent.getDeleteExceptionDates() != null) {
+            Set<RecurrenceId> exceptions = new HashSet<>(originalMasterEvent.getDeleteExceptionDates());
+            exceptions.addAll(changeExceptionDates);
+            old = new EventSeriesWrapper(originalMasterEvent, exceptions);
+        } else {
+            Set<RecurrenceId> exceptions = new HashSet<>(changeExceptionDates);
+            old = new EventSeriesWrapper(originalMasterEvent, exceptions);
+        }
+
+        Set<RecurrenceId> exceptions = new HashSet<>(deleteExceptionDates);
+        exceptions.addAll(changeExceptionDates);
+        EventSeriesWrapper updatedEvent = new EventSeriesWrapper(updatedMasterEvent, exceptions);
+        Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(originalMasterEvent);
+
+        triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(old, updatedEvent, Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee));
     }
 
     /**

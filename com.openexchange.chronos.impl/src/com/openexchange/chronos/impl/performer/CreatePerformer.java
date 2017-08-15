@@ -150,14 +150,18 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         Event createdEvent = loadEventData(newEvent.getId());
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
-        AlarmTriggerService alarmTriggerService = getTriggerService();
-        Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<>();
-        alarmsPerAttendee.put(calendarUserId, event.getAlarms());
-        alarmTriggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(event.containsRecurrenceRule(), false, event, null), null, alarmsPerAttendee));
+        insertAlarmTrigger(newEvent);
         result.addPlainCreation(createdEvent);
         List<Alarm> alarms = null != event.getAlarms() && 0 < event.getAlarms().size() ? storage.getAlarmStorage().loadAlarms(createdEvent, calendarUserId) : null;
         result.addUserizedCreation(userize(createdEvent, alarms));
         return result;
+    }
+
+    private void insertAlarmTrigger(Event newEvent) {
+        AlarmTriggerService alarmTriggerService = getTriggerService();
+        Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<>();
+        alarmsPerAttendee.put(calendarUserId, newEvent.getAlarms());
+        alarmTriggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(newEvent), alarmsPerAttendee));
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {
