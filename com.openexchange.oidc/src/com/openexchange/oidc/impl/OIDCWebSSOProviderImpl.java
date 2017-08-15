@@ -204,10 +204,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return hostname;
     }
 
-    //TODO QS-VS: Bessere Strukturierung der Methode
     @Override
-    public String authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException{
-        String redirectionString = "";
+    public void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException{
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(request.getParameter("state"));
 
         if (storedRequestInformation == null) {
@@ -225,8 +223,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        return redirectionString;
     }
 
     private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse) throws OXException {

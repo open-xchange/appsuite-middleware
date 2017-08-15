@@ -224,7 +224,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         try {
             idToken = JWTParser.parse((String) session.getParameter(OIDCTools.IDTOKEN));
         } catch (ParseException e) {
-            //TODO QS-VS: Eventuell das Token mit rausgeben?
             throw OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN.create(e);
         }
 

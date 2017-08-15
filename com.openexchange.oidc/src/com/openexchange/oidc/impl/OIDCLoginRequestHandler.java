@@ -15,7 +15,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
@@ -84,7 +83,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        
+        //TODO QS-VS: Entweder autologin oder normales login
         LoginResult result = loginUser(request, context, user, reservation.getState());
 
         Session session = performSessionAdditions(result, request, response, idToken);
