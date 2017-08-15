@@ -1,0 +1,30 @@
+/chronos/accounts?action=new:
+  put:
+    operationId: createAccount
+    tags:
+      - Chronos
+    summary: Creates a calendar account for a calendar provider.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: providerId
+        type: string
+        description: Calendar provider identifier
+        required: true
+      - in: body
+        name: body
+        description: A JSON object describing the calendar account to update.
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: |
+          'A JSON object containing the newly created calendar account, if it was created successfully.
+          If the calendar account could not be created due to conflicts, the response body is an object with the
+          field `conflicts`, which informations about the conflict. In case of errors the responsible fields
+          in the response are filled (see [Error handling](#error-handling)).'
+        schema:
+          $ref: "#/definitions/ChronosCalendarResultResponse"
