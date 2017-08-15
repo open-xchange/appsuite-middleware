@@ -50,28 +50,30 @@
 package com.openexchange.passwordchange.history;
 
 import java.util.Map;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * 
+ *
  * {@link PasswordChangeHandlerRegistryService} - Registry to get available {@link PasswordHistoryHandler}s from
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+@SingletonService
 public interface PasswordChangeHandlerRegistryService {
 
     /**
-     * Get all available {@link PasswordHistoryHandler}
-     * 
-     * @return The {@link PasswordHistoryHandler} registered
+     * Get all available {@link PasswordHistoryHandler handlers}
+     *
+     * @return The registered {@link PasswordHistoryHandler handlers}
      */
     Map<String, PasswordHistoryHandler> getHandlers();
 
     /**
-     * Get a specific {@link PasswordHistoryHandler} with given name
-     * 
-     * @param symbolicName The name of the {@link PasswordHistoryHandler}
-     * @return The {@link PasswordHistoryHandler} or <code>null</code>
+     * Get a specific {@link PasswordHistoryHandler handler} for given name
+     *
+     * @param symbolicName The name of the handler
+     * @return The {@link PasswordHistoryHandler handler} or <code>null</code>
      */
     PasswordHistoryHandler getHandler(String symbolicName);
 
