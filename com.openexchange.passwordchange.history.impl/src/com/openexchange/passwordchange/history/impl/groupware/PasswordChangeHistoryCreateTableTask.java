@@ -85,7 +85,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
         sb.append("ip VARCHAR(45) NULL DEFAULT NULL,");
         sb.append("PRIMARY KEY (id),");
         sb.append("INDEX context_and_user (cid, uid)");
-        sb.append(");");
+        sb.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
         return sb.toString();
     }
 
@@ -98,7 +98,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     /**
      * Creates the table
-     * 
+     *
      * @param tablename The table name
      * @param sqlCreate The command to create the table
      * @param contextId The context to operate on
