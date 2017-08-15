@@ -73,7 +73,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
@@ -120,7 +120,7 @@ public class PasswordChangeHistoryREST {
             }
 
             // Get services
-            PasswordChangeHandlerRegistry registry = getService(PasswordChangeHandlerRegistry.class);
+            PasswordChangeHandlerRegistryService registry = getService(PasswordChangeHandlerRegistryService.class);
             ConfigViewFactory config = getService(ConfigViewFactory.class);
             ConfigView view = config.getView(userID, contextID);
 

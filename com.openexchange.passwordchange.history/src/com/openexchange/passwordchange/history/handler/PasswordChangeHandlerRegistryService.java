@@ -53,12 +53,12 @@ import java.util.Map;
 
 /**
  * 
- * {@link PasswordChangeHandlerRegistry} - Registry to get available {@link PasswordHistoryHandler}s from
+ * {@link PasswordChangeHandlerRegistryService} - Registry to get available {@link PasswordHistoryHandler}s from
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeHandlerRegistry {
+public interface PasswordChangeHandlerRegistryService {
 
     /**
      * Get all available {@link PasswordHistoryHandler}

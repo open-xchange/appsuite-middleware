@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -79,9 +79,9 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
      * Initializes a new {@link PasswordChangeInterceptor}.
      * 
      * @param service The {@link ServiceLookup} to get services from
-     * @param registry The {@link PasswordChangeHandlerRegistry} to get the {@link PasswordHistoryHandler} from
+     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
+    public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
         super();
         this.helper = new PasswordChangeHelper(service, registry);
         this.service = service;

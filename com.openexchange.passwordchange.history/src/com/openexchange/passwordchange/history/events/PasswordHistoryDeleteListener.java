@@ -55,7 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -78,9 +78,9 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
      * Initializes a new {@link PasswordHistoryDeleteListener}.
      * 
      * @param service The {@link ServiceLookup} to get services from
-     * @param registry The {@link PasswordChangeHandlerRegistry} to get the {@link PasswordHistoryHandler} from
+     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordHistoryDeleteListener(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
+    public PasswordHistoryDeleteListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
         super();
         this.service = service;
         this.helper = new PasswordChangeHelper(service, registry);

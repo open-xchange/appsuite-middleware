@@ -57,26 +57,26 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
 
 /**
- * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistry} as an {@link ServiceTrackerCustomizer}
+ * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistryService} as an {@link ServiceTrackerCustomizer}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 @SingletonService
-public class PasswordChangeHandlerRegistryImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistry {
+public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistryService {
 
-    private static final org.slf4j.Logger       LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryImpl.class);
+    private static final org.slf4j.Logger       LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryServiceImpl.class);
     private final ConcurrentMap<String, PasswordHistoryHandler> handlers;
     private final BundleContext                 context;
 
     /**
      * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
      */
-    public PasswordChangeHandlerRegistryImpl(BundleContext context) {
+    public PasswordChangeHandlerRegistryServiceImpl(BundleContext context) {
         super();
         this.handlers = new ConcurrentHashMap<>();
         this.context = context;
