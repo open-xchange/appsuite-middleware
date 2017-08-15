@@ -67,12 +67,12 @@ import javax.ws.rs.core.Response.Status;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Client;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
@@ -255,11 +255,10 @@ public class PasswordChangeHistoryREST {
      * @throws JSONException
      */
     private void putOptionalReadable(JSONObject data, String convertee) throws JSONException {
-        for(Client client : Client.values()) {
-            if(client.getClientId().equals(convertee)) {
-                data.put("client_description", client.getDescription());
-                return;
-            }
+        PasswordChangeClients client = PasswordChangeClients.match(convertee);
+        if (null != client) {
+            data.put("client_name", client.getDisplayName());
+            return;
         }
     }
 }
