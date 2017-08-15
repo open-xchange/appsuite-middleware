@@ -59,7 +59,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -71,6 +70,7 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
+import static com.openexchange.chronos.impl.Utils.isInFolder;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -114,6 +114,7 @@ import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
@@ -180,14 +181,34 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         return result;
     }
 
+    /**
+     * Tracks suitable results for an updated event, which includes adding a <i>plain</i> update for the modified event data, as well as
+     * an update, deletion or creation from the acting user's point of view.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
     private void trackUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        /*
+         * track affected folders and add a 'plain' event update
+         */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
-        if (isAttendee(originalEvent, calendarUserId)) {
-            result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
-        } else {
-            //TODO: check
-            result.addUserizedCreation(userize(updatedEvent));
+        /*
+         * check whether original and updated event are visible in actual folder view & add corresponding result
+         */
+        if (isInFolder(originalEvent, folder)) {
+            if (isInFolder(updatedEvent, folder)) {
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+            } else {
+                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+            }
+        } else if (isInFolder(updatedEvent, folder)) {
+            /*
+             * possible for attendee being added to an existing event, so that it shows up in the new attendee's folder
+             * afterwards (after #needsExistenceCheckInTargetFolder() was false)
+             */
+            result.addUserizedCreation(updatedEvent);
         }
     }
 
@@ -368,7 +389,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         /*
-         * ensure to 'touch' original event in case not already done & track update result
+         * ensure to 'touch' original event in case not already done
          */
         if (wasUpdated) {
             if (null == eventUpdate) {
