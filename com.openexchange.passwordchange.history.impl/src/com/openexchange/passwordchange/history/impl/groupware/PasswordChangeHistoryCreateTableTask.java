@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.groupware;
+package com.openexchange.passwordchange.history.impl.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.osgi;
+package com.openexchange.passwordchange.history.impl.osgi;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,33 +63,33 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.events.PasswordChangeEventListener;
-import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
-import com.openexchange.passwordchange.history.events.PasswordHistoryDeleteListener;
-import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.handler.impl.PasswordChangeHandlerRegistryServiceImpl;
-import com.openexchange.passwordchange.history.handler.impl.RdbPasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.impl.PasswordChangeHandlerRegistryServiceImpl;
+import com.openexchange.passwordchange.history.impl.RdbPasswordHistoryHandler;
+import com.openexchange.passwordchange.history.impl.events.PasswordChangeEventListener;
+import com.openexchange.passwordchange.history.impl.events.PasswordChangeInterceptor;
+import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryCreateTableTask;
+import com.openexchange.passwordchange.history.impl.groupware.PasswordHistoryDeleteListener;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 
 /**
  *
- * {@link PasswordChangeHistoryActivator} - Activator for PasswordChangeHistory bundle
+ * {@link PasswordChangeHistoryImplActivator} - Activator for PasswordChangeHistory bundle
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeHistoryActivator extends HousekeepingActivator {
+public final class PasswordChangeHistoryImplActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryImplActivator.class);
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * Initializes a new {@link PasswordChangeHistoryImplActivator}
      */
-    public PasswordChangeHistoryActivator() {
+    public PasswordChangeHistoryImplActivator() {
         super();
     }
 

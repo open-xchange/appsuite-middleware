@@ -56,8 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.java.Charsets;
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.handler.impl.PasswordChangeInfoImpl;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.rest.AbstractRestTest;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.restclient.invoker.ApiClient;
@@ -117,7 +116,24 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
         final String client = filter(data, "client_id");
         final Long created = Long.valueOf(filter(data, "date"));
 
-        return new PasswordChangeInfoImpl(created, client, ip);
+        return new PasswordChangeInfo() {
+
+            @Override
+            public long getCreated() {
+                return created;
+            }
+
+            @Override
+            public String getClient() {
+                return client;
+            }
+
+            @Override
+            public String getIP() {
+                return ip;
+            }
+
+        };
     }
 
     private String filter(JSONObject data, String name) throws Exception {

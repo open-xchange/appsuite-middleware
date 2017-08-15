@@ -47,69 +47,83 @@
  *
  */
 
-package com.openexchange.passwordchange.history.events;
+package com.openexchange.passwordchange.history.impl.events;
 
-import java.sql.Connection;
+import java.util.Map;
+import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.AbstractUserServiceInterceptor;
 
 /**
- * 
- * {@link PasswordHistoryDeleteListener} - Listener to delete all password change history entries on deletion of user or context
+ * {@link PasswordChangeInterceptor} - Provisioning based password changes will call this interceptor
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordHistoryDeleteListener implements DeleteListener {
+public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
-    private final ServiceLookup        service;
-    private final PasswordChangeHelper helper;
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
+
+    final ServiceLookup        service;
+    final PasswordChangeHelper helper;
 
     /**
      * 
-     * Initializes a new {@link PasswordHistoryDeleteListener}.
+     * Initializes a new {@link PasswordChangeInterceptor}.
      * 
      * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordHistoryDeleteListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+    public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
         super();
-        this.service = service;
         this.helper = new PasswordChangeHelper(service, registry);
+        this.service = service;
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+    public int getRanking() {
+        return 10;
+    }
 
-        // Only context and user are relevant
-        switch (event.getType()) {
-            case DeleteEvent.TYPE_CONTEXT:
-                // Get users in context and remove password for them
-                UserService userService = service.getService(UserService.class);
-                if (null == userService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+    @Override
+    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        // Check if password was changed
+        if (null != user.getUserPassword()) {
+            final int contextID = context.getContextId();
+            final int userID = user.getId();
+            // so password was changed..
+            service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
+
+                @Override
+                public void run() {
+                    helper.recordChange(contextID, userID, null, Client.PROVISIONING.getClientId());
                 }
-                Context ctx = userService.getContext(event.getId());
-                for (User user : userService.getUser(ctx)) {
-                    helper.clearFor(event.getContext().getContextId(), user.getId(), -1);
-                }
-                break;
-
-            case DeleteEvent.TYPE_USER:
-                helper.clearFor(event.getContext().getContextId(), event.getId(), -1);
-                break;
-
-            default:
-                // Ignore all other
-                return;
+            });
         }
+    }
+
+    @Override
+    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
+        final int contextID = context.getContextId();
+        final int userID = user.getId();
+        // Clear DB after deletion of user
+        service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    helper.clearFor(contextID, userID, 0);
+                } catch (Exception e) {
+                    // In case view can not be loaded
+                    LOG.error("Could not delete password chage history for {} in context {}. Reason: {}", String.valueOf(userID), String.valueOf(contextID), e);
+                }
+            }
+        });
     }
 }

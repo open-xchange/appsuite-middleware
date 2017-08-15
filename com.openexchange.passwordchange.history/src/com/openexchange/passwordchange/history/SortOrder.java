@@ -47,90 +47,21 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler.impl;
-
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
+package com.openexchange.passwordchange.history;
 
 /**
- * {@link PasswordChangeInfoImpl} - Implementation of {@link PasswordChangeInfo}
+ * {@link SortOrder} The types of different sorting for {@link PasswordChangeInfo}s
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class PasswordChangeInfoImpl implements PasswordChangeInfo {
+public enum SortOrder {
 
-    private final long   created;
-    private final String client;
-    private final String ip;
+    /** Sort by newest entries first. */
+    DESC,
 
-    /**
-     * Initializes a new {@link PasswordChangeInfoImpl}.
-     *
-     * @param created The time when the password change was made
-     * @param client The client that did the change
-     * @param ip The optional IP of the client
-     */
-    public PasswordChangeInfoImpl(long created, String client, String ip) {
-        super();
-        this.created = created;
-        this.client = client;
-        this.ip = ip;
-    }
+    /** Sort by oldest entries first */
+    ASC
 
-    @Override
-    public long getCreated() {
-        return created;
-    }
-
-    @Override
-    public String getClient() {
-        return client;
-    }
-
-    @Override
-    public String getIP() {
-        return ip;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 61;
-        int result = 1;
-        result = prime * result + (int) (created ^ (created >>> 32));
-        result = prime * result + ((client == null) ? 0 : client.hashCode());
-        result = prime * result + ((ip == null) ? 0 : ip.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        PasswordChangeInfoImpl other = (PasswordChangeInfoImpl) obj;
-        if (created != other.created) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
-            }
-        } else if (!client.equals(other.client)) {
-            return false;
-        }
-        if (ip == null) {
-            if (other.ip != null) {
-                return false;
-            }
-        } else if (!ip.equals(other.ip)) {
-            return false;
-        }
-        return true;
-    }
+    ;
 }

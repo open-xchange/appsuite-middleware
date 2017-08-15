@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.exception;
+package com.openexchange.passwordchange.history.impl.exception;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;

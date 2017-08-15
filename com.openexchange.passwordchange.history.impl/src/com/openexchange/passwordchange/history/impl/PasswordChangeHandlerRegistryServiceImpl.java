@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler.impl;
+package com.openexchange.passwordchange.history.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,8 +57,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 
 /**
  * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistryService} as an {@link ServiceTrackerCustomizer}

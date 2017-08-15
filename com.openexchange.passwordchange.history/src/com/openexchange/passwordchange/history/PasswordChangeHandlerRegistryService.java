@@ -47,37 +47,32 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
+package com.openexchange.passwordchange.history;
 
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
+import java.util.Map;
 
 /**
- * {@link PasswordChangeInfo} - The information provided and written to the database considering the password change.
+ * 
+ * {@link PasswordChangeHandlerRegistryService} - Registry to get available {@link PasswordHistoryHandler}s from
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeInfo {
+public interface PasswordChangeHandlerRegistryService {
 
     /**
-     * Get the value of the date when the password got changed on
+     * Get all available {@link PasswordHistoryHandler}
      * 
-     * @return The value as <code>long</code>
+     * @return The {@link PasswordHistoryHandler} registered
      */
-    long getCreated();
+    Map<String, PasswordHistoryHandler> getHandlers();
 
     /**
-     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
+     * Get a specific {@link PasswordHistoryHandler} with given name
      * 
-     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
+     * @param symbolicName The name of the {@link PasswordHistoryHandler}
+     * @return The {@link PasswordHistoryHandler} or <code>null</code>
      */
-    String getClient();
-
-    /**
-     * Get the IP-address the changed request was sent from
-     * 
-     * @return The IP-address or <code>null</code>
-     */
-    String getIP();
+    PasswordHistoryHandler getHandler(String symbolicName);
 
 }

@@ -47,32 +47,18 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler;
-
-import java.util.Map;
+package com.openexchange.passwordchange.history;
 
 /**
- * 
- * {@link PasswordChangeHandlerRegistryService} - Registry to get available {@link PasswordHistoryHandler}s from
+ * {@link SortField} - Fields to sort the output by
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface PasswordChangeHandlerRegistryService {
+public enum SortField {
+    /** The time the password change was made */
+    DATE,
 
-    /**
-     * Get all available {@link PasswordHistoryHandler}
-     * 
-     * @return The {@link PasswordHistoryHandler} registered
-     */
-    Map<String, PasswordHistoryHandler> getHandlers();
-
-    /**
-     * Get a specific {@link PasswordHistoryHandler} with given name
-     * 
-     * @param symbolicName The name of the {@link PasswordHistoryHandler}
-     * @return The {@link PasswordHistoryHandler} or <code>null</code>
-     */
-    PasswordHistoryHandler getHandler(String symbolicName);
-
+    /** The ID of which client did the password change */
+    CLIENT_ID
 }

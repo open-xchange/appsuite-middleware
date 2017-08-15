@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history.handler.impl;
+package com.openexchange.passwordchange.history.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,12 +65,12 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHistoryProperties;
-import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.handler.SortField;
-import com.openexchange.passwordchange.history.handler.SortOrder;
+import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.SortField;
+import com.openexchange.passwordchange.history.SortOrder;
+import com.openexchange.passwordchange.history.impl.exception.PasswordChangeHistoryException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
