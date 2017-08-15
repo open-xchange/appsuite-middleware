@@ -54,7 +54,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.exception.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.handler.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
@@ -73,16 +73,16 @@ public class PasswordChangeHelper {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHelper.class);
 
     private final ServiceLookup                 service;
-    private final PasswordChangeHandlerRegistry registry;
+    private final PasswordChangeHandlerRegistryService registry;
 
     /**
      * 
      * Initializes a new {@link PasswordChangeHelper}.
      * 
      * @param service The {@link ServiceLookup} to get services from
-     * @param registry The {@link PasswordChangeHandlerRegistry} to get the {@link PasswordHistoryHandler} from
+     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordChangeHelper(ServiceLookup service, PasswordChangeHandlerRegistry registry) {
+    public PasswordChangeHelper(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
         super();
         this.service = service;
         this.registry = registry;
@@ -165,7 +165,7 @@ public class PasswordChangeHelper {
 
         if (null == registry) {
             LOG.debug("Could not get PasswordChangeTrackerRegistry");
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(PasswordChangeHandlerRegistry.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(PasswordChangeHandlerRegistryService.class.getName());
         }
 
         PasswordHistoryHandler handler = registry.getHandler(handlerName);

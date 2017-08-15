@@ -90,8 +90,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?);";
 
-    private static final org.slf4j.Logger LOG           = org.slf4j.LoggerFactory.getLogger(RdbPasswordHistoryHandler.class);
-    private static final String           SYMBOLIC_NAME = "default";
+    private static final String SYMBOLIC_NAME = "default";
 
     private final ServiceLookup service;
 

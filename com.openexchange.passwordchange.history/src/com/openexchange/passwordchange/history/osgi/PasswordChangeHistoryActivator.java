@@ -67,9 +67,9 @@ import com.openexchange.passwordchange.history.events.PasswordChangeEventListene
 import com.openexchange.passwordchange.history.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.events.PasswordHistoryDeleteListener;
 import com.openexchange.passwordchange.history.groupware.PasswordChangeHistoryCreateTableTask;
-import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistry;
+import com.openexchange.passwordchange.history.handler.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.handler.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.handler.impl.PasswordChangeHandlerRegistryImpl;
+import com.openexchange.passwordchange.history.handler.impl.PasswordChangeHandlerRegistryServiceImpl;
 import com.openexchange.passwordchange.history.handler.impl.RdbPasswordHistoryHandler;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -103,12 +103,12 @@ public final class PasswordChangeHistoryActivator extends HousekeepingActivator 
         LOG.info("Starting PasswordChangeHistory bundle");
 
         // Register a password change registry
-        PasswordChangeHandlerRegistryImpl registry = new PasswordChangeHandlerRegistryImpl(context);
+        PasswordChangeHandlerRegistryServiceImpl registry = new PasswordChangeHandlerRegistryServiceImpl(context);
         PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
         registry.register(defaultHandler);
         track(PasswordHistoryHandler.class, registry);
         openTrackers();
-        registerService(PasswordChangeHandlerRegistry.class, registry);
+        registerService(PasswordChangeHandlerRegistryService.class, registry);
 
         // Register event for password change
         PasswordChangeEventListener handler = new PasswordChangeEventListener(this, registry);
