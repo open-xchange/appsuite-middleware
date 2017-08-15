@@ -175,10 +175,10 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.ALARM_ID, new VarCharMapping<AlarmTrigger>("alarm", "Alarm ID") {
+        mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>("alarm", "Alarm ID") {
 
             @Override
-            public void set(AlarmTrigger alarmTrigger, String value) {
+            public void set(AlarmTrigger alarmTrigger, Integer value) {
                 alarmTrigger.setAlarm(value);
             }
 
@@ -188,7 +188,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public String get(AlarmTrigger alarmTrigger) {
+            public Integer get(AlarmTrigger alarmTrigger) {
                 return alarmTrigger.getAlarm();
             }
 

@@ -137,7 +137,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, assignedfields);
                 stmt.setInt(parameterIndex++, trigger.getContextId());
                 stmt.setInt(parameterIndex++, trigger.getAccount());
-                stmt.setString(parameterIndex++, trigger.getAlarm());
+                stmt.setInt(parameterIndex++, trigger.getAlarm());
                 logExecuteUpdate(stmt);
             }
         } catch (SQLException e) {

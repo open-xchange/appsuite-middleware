@@ -60,7 +60,7 @@ public class AlarmTrigger {
 
     private Integer account;
     private String action;
-    private String alarm;
+    private Integer alarm;
     private Integer contextId;
     private String eventId;
     private String recurrence;
@@ -204,7 +204,7 @@ public class AlarmTrigger {
      *
      * @return The alarm
      */
-    public String getAlarm() {
+    public Integer getAlarm() {
         return alarm;
     }
 
@@ -383,7 +383,7 @@ public class AlarmTrigger {
      *
      * @param alarm The alarm to set
      */
-    public void setAlarm(String alarm) {
+    public void setAlarm(Integer alarm) {
         this.alarm = alarm;
         this.isAlarmSet=true;
     }

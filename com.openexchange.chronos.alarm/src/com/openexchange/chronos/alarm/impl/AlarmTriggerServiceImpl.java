@@ -138,7 +138,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
                 trigger.setContextId(contextId);
                 trigger.setAction(alarm.getAction().getValue());
                 trigger.setProcessed(false);
-                trigger.setAlarm(String.valueOf(alarm.getId()));
+                trigger.setAlarm(alarm.getId());
                 trigger.setEventId(event.getId());
 
                 if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
