@@ -200,13 +200,13 @@ public class ICalExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
-    
+
     @Override
     public boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
                 return false;
-            }            
+            }
             for (String objectId : batchEntry.getValue()) {
                 try {
                     Integer.parseInt(objectId);
@@ -243,7 +243,7 @@ public class ICalExporter implements Exporter {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getBatchExportFileName(session, batchIds)+ Format.ICAL.getExtension()+"\"");
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getBatchExportFileName(session, batchIds)+ Format.ICAL.getExtension()+"\"");
                     requestData.removeCachingHeader();
                     for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
                         FolderObject folder = getFolder(session, batchEntry.getKey());
@@ -316,7 +316,7 @@ public class ICalExporter implements Exporter {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getFolderExportFileName(session, folderID) + Format.ICAL.getExtension()+"\"");
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getFolderExportFileName(session, folderID) + Format.ICAL.getExtension()+"\"");
                     requestData.removeCachingHeader();
 
                     if (FolderObject.CALENDAR == folder.getModule()) {
