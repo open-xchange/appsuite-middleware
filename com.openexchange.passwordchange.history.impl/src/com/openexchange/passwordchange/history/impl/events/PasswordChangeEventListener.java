@@ -69,7 +69,7 @@ public class PasswordChangeEventListener implements EventHandler {
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.
-     * 
+     *
      * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
@@ -99,6 +99,6 @@ public class PasswordChangeEventListener implements EventHandler {
         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
 
         // Process tracking
-        helper.recordChange(contextID, userID, ipAdderess, session.getClient());
+        helper.recordChangeSafe(contextID, userID, ipAdderess, session.getClient());
     }
 }

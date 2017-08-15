@@ -65,12 +65,12 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
-import com.openexchange.passwordchange.history.impl.exception.PasswordChangeHistoryException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -83,12 +83,12 @@ import com.openexchange.server.ServiceLookup;
 public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
-    private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?;";
+    private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?";
 
-    private static final String CLEAR_FOR_ID   = "DELETE FROM user_password_history WHERE cid=? AND id=?;";
-    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?;";
+    private static final String CLEAR_FOR_ID   = "DELETE FROM user_password_history WHERE id=?";
+    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
 
-    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?);";
+    private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?)";
 
     private static final String SYMBOLIC_NAME = "default";
 
@@ -125,11 +125,11 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 // User send fields
                 for (SortField field : fieldNames.keySet()) {
                     builder.append(fieldToTable(field));
-                    builder.append(" ");
+                    builder.append(' ');
                     builder.append(fieldNames.get(field));
-                    builder.append(",");
+                    builder.append(',');
                 }
-                //Remove last ','
+                // Remove last ','
                 builder.deleteCharAt(builder.length() - 1);
             }
 
@@ -164,6 +164,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     @Override
     public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) throws OXException {
         DatabaseService dbService = getService(DatabaseService.class);
+        ConfigViewFactory casscade = getService(ConfigViewFactory.class);
+
         // Get writable connection
         Connection con = dbService.getWritable(contextID);
         PreparedStatement stmt = null;
@@ -189,7 +191,6 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
         }
 
         // Clean up data too
-        ConfigViewFactory casscade = getService(ConfigViewFactory.class);
         ConfigView view = casscade.getView(userID, contextID);
         ComposedConfigProperty<Integer> property = view.property(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
@@ -231,7 +232,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 }
                 Databases.closeSQLStuff(rs, stmt);
 
-                if (data.size() > limit) {
+                int len = data.size() - limit;
+                if (len > 0) {
                     // Sort & delete the first until limit triggers
                     Collections.sort(data);
 
@@ -239,10 +241,8 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                     int count = 0;
                     stmt = con.prepareStatement(CLEAR_FOR_ID);
                     Iterator<Integer> iter = data.iterator();
-                    int len = data.size() - limit;
-                    for (int i = 0; i < len; i++) {
-                        stmt.setInt(1, contextID);
-                        stmt.setInt(2, iter.next().intValue());
+                    for (int i = len; i-- > 0;) {
+                        stmt.setInt(1, iter.next().intValue());
                         stmt.addBatch();
 
                         // Just in case we have many entries to delete
