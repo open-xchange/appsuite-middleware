@@ -235,7 +235,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "event INT4 UNSIGNED NOT NULL," +
+                "event VARCHAR(128) NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) DEFAULT NULL," +
                 "relatedTo VARCHAR(767) DEFAULT NULL," +
@@ -250,12 +250,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY event_user (cid,account,event,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-
         tablesByName.put("calendar_alarm_trigger",
             "CREATE TABLE calendar_alarm_trigger (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
-                "alarm VARCHAR(128) NOT NULL," +
+                "alarm INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "eventId VARCHAR(128) NOT NULL," +
                 "triggerDate BIGINT(20) NOT NULL," +
@@ -267,6 +266,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
         );
 
         // Calendar Availability Tables
+        /*
         tablesByName.put("calendar_availability",
             "CREATE TABLE calendar_availability (" +
                 "cid INT4 UNSIGNED NOT NULL," +
@@ -338,6 +338,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
+        */
         return tablesByName; //@formatter:on
     }
 
