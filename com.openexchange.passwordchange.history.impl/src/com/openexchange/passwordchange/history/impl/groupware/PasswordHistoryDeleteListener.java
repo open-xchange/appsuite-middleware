@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
- * 
+ *
  * {@link PasswordHistoryDeleteListener} - Listener to delete all password change history entries on deletion of user or context
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -75,9 +75,9 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
     private final PasswordChangeHelper helper;
 
     /**
-     * 
+     *
      * Initializes a new {@link PasswordHistoryDeleteListener}.
-     * 
+     *
      * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
@@ -100,12 +100,12 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
                 }
                 Context ctx = userService.getContext(event.getId());
                 for (User user : userService.getUser(ctx)) {
-                    helper.clearFor(event.getContext().getContextId(), user.getId(), -1);
+                    helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
                 }
                 break;
 
             case DeleteEvent.TYPE_USER:
-                helper.clearFor(event.getContext().getContextId(), event.getId(), -1);
+                helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
                 break;
 
             default:

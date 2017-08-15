@@ -57,6 +57,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
@@ -74,9 +75,9 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     final PasswordChangeHelper helper;
 
     /**
-     * 
+     *
      * Initializes a new {@link PasswordChangeInterceptor}.
-     * 
+     *
      * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
@@ -97,12 +98,14 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         if (null != user.getUserPassword()) {
             final int contextID = context.getContextId();
             final int userID = user.getId();
-            // so password was changed..
-            service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
+            // so password was changed..
+            ThreadPoolService threadPool = service.getService(ThreadPoolService.class);
+            threadPool.submit(new AbstractTask<Void>() {
                 @Override
-                public void run() {
-                    helper.recordChange(contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
+                public Void call() {
+                    helper.recordChangeSafe(contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
+                    return null;
                 }
             });
         }
@@ -112,18 +115,16 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     public void afterDelete(Context context, User user, Contact contactData) throws OXException {
         final int contextID = context.getContextId();
         final int userID = user.getId();
-        // Clear DB after deletion of user
-        service.getService(ThreadPoolService.class).getFixedExecutor(1).submit(new Runnable() {
 
+        // Clear DB after deletion of user
+        ThreadPoolService threadPool = service.getService(ThreadPoolService.class);
+        threadPool.submit(new AbstractTask<Void>() {
             @Override
-            public void run() {
-                try {
-                    helper.clearFor(contextID, userID, 0);
-                } catch (Exception e) {
-                    // In case view can not be loaded
-                    LOG.error("Could not delete password chage history for {} in context {}. Reason: {}", String.valueOf(userID), String.valueOf(contextID), e);
-                }
+            public Void call() {
+                helper.clearSafeFor(contextID, userID, 0);
+                return null;
             }
         });
     }
+
 }
