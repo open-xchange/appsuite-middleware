@@ -32,7 +32,7 @@ properties:
         Possible values:
         <ul>
           <li><code>context</code> - The quota of the filestore will be used.</li>
-          <li><code>independent</code> - Snippets doesn't influence filestore quota. Instead an own quota is used (See [[com.openexchange.snippet.filestore.quota.perUserLimit]]) </li>
+          <li><code>dedicated</code> - Snippets doesn't influence filestore quota. Instead an own quota is used (See [[com.openexchange.snippet.filestore.quota.perUserLimit]]) </li>
         </ul>
 
       defaultValue: context
