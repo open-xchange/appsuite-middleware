@@ -49,44 +49,60 @@
 
 package com.openexchange.contact.vcard;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link UnitTests}
+ * {@link Bug55090Test}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    AddressTest.class,
-    DistributionListTest.class,
-    BasicTest.class,
-    RoundtripTest.class,
-    UpdateTest.class,
-    WarningsTest.class,
-    ColorLabelTest.class,
-    EmptyTest.class,
-    ImportIteratorTest.class,
-    RemoveImageTest.class,
-    Bug13557Test.class,
-    Bug14349Test.class,
-    Bug14350Test.class,
-    Bug15008Test.class,
-    Bug15229Test.class,
-    Bug15241Test.class,
-    Bug18226Test.class,
-    Bug21656Test.class,
-    Bug55090Test.class,
-    Bug6823Test.class,
-    Bug6962Test.class,
-    Bug7106Test.class,
-    Bug7248Test.class,
-    Bug7249Test.class,
-    Bug7250Test.class,
-    Bug7719Test.class,
+public class Bug55090Test extends VCardTest {
 
-})
-public class UnitTests {
+    /**
+     * Initializes a new {@link Bug55090Test}.
+     */
+    public Bug55090Test() {
+        super();
+    }
+
+         @Test
+     public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "FN:test\n" +
+            "PHOTO;VALUE=URL;TYPE=PNG:file:///opt/open-xchange/etc/none.png\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertNull(contact.getImageContentType());
+        assertNull(contact.getImage1());
+
+        vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "FN:test\n" +
+            "PHOTO;VALUE=URL;TYPE=PNG:http://localhost:8009\n" +
+            "END:VCARD"
+        ;
+        contact = getMapper().importVCard(parse(vCard), null, null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertNull(contact.getImageContentType());
+        assertNull(contact.getImage1());
+    }
 
 }
