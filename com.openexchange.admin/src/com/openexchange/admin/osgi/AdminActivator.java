@@ -99,11 +99,13 @@ import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.RankingAwareRegistryServiceTrackerCustomizer;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -162,6 +164,8 @@ public class AdminActivator extends HousekeepingActivator {
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
         track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
+        track(QuotaAwareSnippetService.class, new RankingAwareRegistryServiceTrackerCustomizer<QuotaAwareSnippetService>(context, AdminServiceRegistry.getInstance(), QuotaAwareSnippetService.class));
+
         // Plugin interfaces
         {
             final int defaultRanking = 100;

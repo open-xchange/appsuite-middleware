@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +77,7 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.internal.Services;
+import com.openexchange.snippet.utils.internal.Services;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**

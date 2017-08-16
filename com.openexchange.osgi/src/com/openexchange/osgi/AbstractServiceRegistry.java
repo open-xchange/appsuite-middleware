@@ -90,6 +90,10 @@ public class AbstractServiceRegistry {
 
     /**
      * Adds a service bound to given class to this service registry.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Any existing service associated with specified service's class is replaced.
+     * </div>
      *
      * @param clazz The service's class
      * @param service The service itself

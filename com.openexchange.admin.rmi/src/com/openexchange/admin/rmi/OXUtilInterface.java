@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.RecalculationScope;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -573,4 +574,29 @@ public interface OXUtilInterface extends Remote {
      * @throws InvalidCredentialsException
      */
     public Database createSchema(final Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException;
+
+    /**
+     * Recalculates the filestore usage for the given context. If the userId is given, then the personal filestore of this user is recalculated.
+     *
+     * @param contextId The id of the context
+     * @param userId The optional id of the user
+     * @param auth Credentials for authenticating against server.
+     * @throws InvalidCredentialsException In case the credentials are wrong
+     * @throws StorageException In case the usage couldn't be recalculated
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidDataException If the data sent within the method contained invalid data
+     */
+    public void recalculateFilestoreUsage(Integer contextId, Integer userId, Credentials auth) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException;
+
+    /**
+     * Recalculates the filestore usage for a given scope or for all filestores in case the scope is <code>null</code>.
+     *
+     * @param scope The scope
+     * @param optContextId An optional context identifier to limit the calculation to that context
+     * @param auth Credentials for authenticating against server.
+     * @throws InvalidCredentialsException In case the credentials are wrong
+     * @throws StorageException In case the usage couldn't be recalculated
+     * @throws RemoteException General RMI Exception
+     */
+    public void recalculateFilestoreUsage(RecalculationScope scope, Integer optContextId, Credentials auth) throws InvalidCredentialsException, StorageException, RemoteException;
 }

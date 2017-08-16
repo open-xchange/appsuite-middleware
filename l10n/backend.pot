@@ -4620,6 +4620,12 @@ msgid ""
 "delete some signatures in order to create new ones."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
+msgid ""
+"The storage limit for signatures is %1$s MB. Delete old signatures to be "
+"able to store a new one."
+msgstr ""
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
