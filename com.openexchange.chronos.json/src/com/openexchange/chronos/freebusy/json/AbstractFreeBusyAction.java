@@ -155,7 +155,7 @@ public abstract class AbstractFreeBusyAction implements AJAXActionService {
      * @return The initialized free-busy access
      */
     protected IDBasedFreeBusyAccess initFreeBusyAccess(AJAXRequestData requestData) throws OXException {
-        IDBasedFreeBusyAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createFreebusyAccess(requestData.getSession());
+        IDBasedFreeBusyAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createFreeBusyAccess(requestData.getSession());
         Set<String> requiredParameters = getRequiredParameters();
         Set<String> optionalParameters = getOptionalParameters();
         Set<String> parameters = new HashSet<String>();
