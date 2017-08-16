@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,6 +92,16 @@ public class GetAction extends AbstractAccountAction {
         }
         CalendarAccountService service = getService(CalendarAccountService.class);
         CalendarAccount account = service.loadAccount(session, Integer.parseInt(accountId));
+        JSONObject resp1 = new JSONObject();
+        try {
+            resp1.put("id", account.getAccountId());
+            resp1.put("provider", account.getProviderId());
+            resp1.put("lastModification", account.getLastModified().getTime());
+        } catch (JSONException e1) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e1);
+        }
+        
+        //TODO: Add the configuration again
         Map<String, Object> configuration = account.getConfiguration();
         JSONObject resp = new JSONObject(configuration.size());
         try {
@@ -98,9 +109,9 @@ public class GetAction extends AbstractAccountAction {
                 resp.put(key, configuration.get(key));
             }
         } catch (JSONException e) {
-            // should not happen
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-        return new AJAXRequestResult(resp);
+        return new AJAXRequestResult(resp1);
     }
 
 }
