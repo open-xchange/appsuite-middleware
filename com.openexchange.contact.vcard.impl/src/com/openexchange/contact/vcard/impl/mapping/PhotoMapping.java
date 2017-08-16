@@ -56,6 +56,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -407,7 +408,7 @@ public class PhotoMapping extends AbstractMapping {
      * @return A file holder containing the downloaded image, or <code>null</code> if no valid image could be loaded
      */
     private static ThresholdFileHolder loadImageFromURL(String urlString, VCardParameters parameters, List<OXException> warnings) throws IOException, OXException {
-        URL url = null;
+        URL url;
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
@@ -429,6 +430,17 @@ public class PhotoMapping extends AbstractMapping {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
                 return null;
             }
+
+            try {
+                InetAddress inetAddress = InetAddress.getByName(url.getHost());
+                if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                    addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                    return null;
+                }
+            } catch (UnknownHostException e) {
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                return null;
+            }
         }
         /*
          * download to file holder
@@ -438,6 +450,9 @@ public class PhotoMapping extends AbstractMapping {
         InputStream inputStream = null;
         try {
             URLConnection urlConnnection = url.openConnection();
+            if (urlConnnection instanceof HttpURLConnection) {
+                ((HttpURLConnection) urlConnnection).setInstanceFollowRedirects(false);
+            }
             urlConnnection.setConnectTimeout(2500);
             urlConnnection.setReadTimeout(2500);
             urlConnnection.connect();
