@@ -88,36 +88,36 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        UserService userService = null;
-
         // Only context and user are relevant
         switch (event.getType()) {
             case DeleteEvent.TYPE_CONTEXT:
-                // Get users in context and remove password for them
-                userService = service.getService(UserService.class);
-                if (null == userService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-                }
-                for (User user : userService.getUser(event.getContext())) {
-                    if (false == user.isGuest()) {
-                        helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
+                {
+                    // Get users in context and remove password for them
+                    UserService userService = service.getService(UserService.class);
+                    if (null == userService) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+                    }
+                    for (User user : userService.getUser(event.getContext())) {
+                        if (false == user.isGuest()) {
+                            helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
+                        }
                     }
                 }
 
                 break;
-
             case DeleteEvent.TYPE_USER:
-                userService = service.getService(UserService.class);
-                if (null == userService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-                }
-                User user = userService.getUser(event.getId(), event.getContext());
-                if (false == user.isGuest()) {
-                    helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
+                {
+                    UserService userService = service.getService(UserService.class);
+                    if (null == userService) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+                    }
+                    User user = userService.getUser(event.getId(), event.getContext());
+                    if (false == user.isGuest()) {
+                        helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
+                    }
                 }
 
                 break;
-
             default:
                 // Ignore all other
                 return;
