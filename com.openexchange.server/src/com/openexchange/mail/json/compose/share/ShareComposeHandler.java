@@ -506,6 +506,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             String id = entry.getKey();
             try {
                 ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
+                if (null != encodedThumbnail) {
+                    encodedThumbnail.automanaged();
+                }
                 previews.put(id, encodedThumbnail);
             } catch (InterruptedException | TimeoutException e) {
                 LOG.debug(e.getMessage(), e);
@@ -677,7 +680,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                         InputStream in = null;
                         try {
                             in = preview.getThumbnail();
-                            encodedThumbnail = new ThresholdFileHolder();
+                            encodedThumbnail = new ThresholdFileHolder(false);
                             encodedThumbnail.write(in);
                         } finally {
                             Streams.close(in);
@@ -697,7 +700,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
             try {
                 ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
-                ThresholdFileHolder transformedImage = new ThresholdFileHolder();
+                ThresholdFileHolder transformedImage = new ThresholdFileHolder(false);
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
                 return transformedImage;
             } catch (IOException e) {
@@ -709,7 +712,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
             ThresholdFileHolder fileHolder = null;
             try {
-                fileHolder = new ThresholdFileHolder();
+                fileHolder = new ThresholdFileHolder(false);
                 fileHolder.write(audioFile);
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");
