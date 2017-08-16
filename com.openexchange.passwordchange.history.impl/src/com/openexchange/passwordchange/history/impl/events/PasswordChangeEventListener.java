@@ -99,29 +99,31 @@ public class PasswordChangeEventListener implements EventHandler {
         if (false == TOPIC.equals(event.getTopic())) {
             return;
         }
-        // Read values
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
-        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
 
         // Don't track guests
         UserService userService = service.getService(UserService.class);
         if (null == userService) {
-            LOG.error("Couldn't load UserService and therefore can't record PasswordChangeHistroy");
+            LOG.error("Couldn't load UserService and therefore cannot record password change");
             return;
         }
+
+        // Read user/context identifier
+        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
+        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
         try {
             User user = userService.getUser(userID, contextID);
             if (user.isGuest()) {
-                LOG.debug("No PasswordChangehistory for guests");
+                LOG.debug("No password change recording for guests");
                 return;
             }
         } catch (OXException e) {
-            LOG.error("Couldn't record PasswordChangeHistory", e);
+            LOG.error("Couldn't load user and therefore cannot record password change", e);
+            return;
         }
 
         // Process tracking
+        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
+        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
         helper.recordChangeSafe(contextID, userID, ipAdderess, session.getClient());
     }
 }
