@@ -445,11 +445,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 attachmentsControl.finish();
             }
-            if (null != previewImages) {
-                if (rollback) {
-                    for (ThresholdFileHolder tfh : previewImages.values()) {
-                        tfh.close();
-                    }
+            if (rollback && null != previewImages) {
+                for (ThresholdFileHolder tfh : previewImages.values()) {
+                    tfh.close();
                 }
             }
         }
