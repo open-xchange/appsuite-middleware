@@ -638,7 +638,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                         Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                         if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(size))) {
                             backAfterRead = true;
-                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(bytesToReadableString(sizeQuota.getLimit()));
                         }
                     }
                     file = fileStorage.saveNewFile(fileHolder.getClosingStream());
@@ -703,8 +703,18 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private int toMB(long bytes){
-        return (int) Math.floor(bytes / 1048576);
+    private String bytesToReadableString(long bytes) {
+        int x = 0;
+        double tmp = bytes;
+        while (tmp > 1024) {
+            x++;
+            tmp = tmp / 1024;
+        }
+
+        StringBuilder builder = new StringBuilder(String.valueOf(Integer.valueOf((int) Math.floor(tmp))));
+        builder.append(" ");
+        builder.append(Arrays.asList("B", "KB", "MB", "GB", "TB").get(x));
+        return builder.toString();
     }
 
     @Override
@@ -979,7 +989,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 if (difference > 0 && null != quota) {
                     Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                     if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(difference))) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(toMB(sizeQuota.getLimit())));
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(bytesToReadableString(sizeQuota.getLimit())));
                     }
                 }
 
