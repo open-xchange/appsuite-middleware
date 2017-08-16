@@ -76,9 +76,6 @@ import com.openexchange.folderstorage.UserizedFolder;
  */
 public class InternalCalendarResult {
 
-    /** The fixed identifier for the internal calendar provider */
-    private static final int ACCOUNT_ID = 0;
-
     private final CalendarSession session;
     private final int calendarUserId;
     private final Set<String> affectedFolderIds;
@@ -289,7 +286,7 @@ public class InternalCalendarResult {
      * @return The calendar event
      */
     public CalendarEvent getCalendarEvent() {
-        return new DefaultCalendarEvent(session.getContextId(), ACCOUNT_ID, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
     }
 
     /**

@@ -111,11 +111,11 @@ abstract class AbstractCalendarStorageOperation<T> extends AbstractStorageOperat
     protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
         if (session.getConfig().isReplayToLegacyStorage()) {
             return Services.getService(ReplayingCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        } else if (session.getConfig().isUseLegacyStorage()) {
-            return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        } else {
-            return Services.getService(CalendarStorageFactory.class).create(context, 0, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
         }
+        if (session.getConfig().isUseLegacyStorage()) {
+            return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        }
+        return Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
     @Override

@@ -88,6 +88,7 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -130,6 +131,9 @@ import com.openexchange.user.UserService;
  * @since v7.10.0
  */
 public class Utils {
+
+    /** The fixed identifier for the internal calendar provider */
+    public static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
@@ -700,7 +704,7 @@ public class Utils {
     }
 
     /**
-     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected 
+     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected
      * by a change in this folder.
      *
      * @param folder The folder to get the affected user identifiers for
@@ -720,7 +724,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.", 
+                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
                             I(permission.getEntity()), I(folder.getObjectID()), e);
                     }
                 } else {
@@ -732,7 +736,7 @@ public class Utils {
     }
 
     /**
-     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected 
+     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected
      * by a change in this folder.
      *
      * @param folder The folder to get the affected user identifiers for
@@ -752,7 +756,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.", 
+                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
                             I(permission.getEntity()), folder.getID(), e);
                     }
                 } else {
