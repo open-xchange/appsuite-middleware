@@ -84,6 +84,10 @@ public enum AddressParts {
         // default constructor
     }
 
+    public String getSieveArgument() {
+        return ":" + name();
+    }
+
     public boolean isValid(Set<String> capabilities){
         if(neededCapabilities==null){
             return true;

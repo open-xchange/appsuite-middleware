@@ -229,9 +229,9 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
-            standard_address_part.put(AddressParts.localpart.name(), AddressParts.localpart.getNeededCapabilities());
-            standard_address_part.put(AddressParts.domain.name(), AddressParts.domain.getNeededCapabilities());
-            standard_address_part.put(AddressParts.all.name(), AddressParts.all.getNeededCapabilities());
+            standard_address_part.put(AddressParts.localpart.getSieveArgument(), AddressParts.localpart.getNeededCapabilities());
+            standard_address_part.put(AddressParts.domain.getSieveArgument(), AddressParts.domain.getNeededCapabilities());
+            standard_address_part.put(AddressParts.all.getSieveArgument(), AddressParts.all.getNeededCapabilities());
             // Add further extensions here...
             return standard_address_part;
         }
@@ -261,7 +261,7 @@ public class TestCommand extends Command {
         private static Hashtable<String, String> addressParts() {
             final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
             for(AddressParts part: AddressParts.values()){
-                standard_address_parts.put(part.name(), part.getNeededCapabilities());
+                standard_address_parts.put(part.getSieveArgument(), part.getNeededCapabilities());
             }
             return standard_address_parts;
         }
