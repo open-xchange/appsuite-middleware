@@ -275,7 +275,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
                 }
                 Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
-                triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee));
+                triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
 
                 touch(originalEvent.getId());
                 trackUpdate(originalEvent, updatedMasterEvent);
@@ -413,7 +413,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
             AlarmTriggerService triggerService = getTriggerService();
             Event alarmTriggerEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-            alarmTriggerEvent = EventMapper.getInstance().copy(eventData, alarmTriggerEvent, (EventField[]) null);
+            alarmTriggerEvent = EventMapper.getInstance().copy(eventData, alarmTriggerEvent, eventUpdate == null ? (EventField[]) null : eventUpdate.getUpdatedFields().toArray(new EventField[eventUpdate.getUpdatedFields().size()]));
+            alarmTriggerEvent.setId(originalEvent.getId());
             alarmTriggerEvent.setFolderId(folder.getID());
             SortedSet<RecurrenceId> exceptions = null;
             if (alarmTriggerEvent.getSeriesId() != null) {
@@ -424,7 +425,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
             Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(alarmTriggerEvent);
             Set<EventField> changedField = eventUpdate == null ? Collections.singleton(EventField.ALARMS) : eventUpdate.getUpdatedFields();
-            triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(alarmTriggerEvent, exceptions), changedField, alarmsPerAttendee));
+            triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(alarmTriggerEvent, exceptions), changedField, alarmsPerAttendee), storage.getAlarmTriggerStorage());
         }
         return wasUpdated;
     }

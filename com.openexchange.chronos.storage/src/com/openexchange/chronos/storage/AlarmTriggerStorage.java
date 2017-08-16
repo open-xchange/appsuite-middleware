@@ -47,12 +47,9 @@
  *
  */
 
-package com.openexchange.chronos.alarm.storage;
+package com.openexchange.chronos.storage;
 
-import java.sql.Connection;
 import java.util.List;
-import com.openexchange.chronos.alarm.impl.AlarmTrigger;
-import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
@@ -64,37 +61,30 @@ import com.openexchange.exception.OXException;
  */
 public interface AlarmTriggerStorage {
 
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException;
-
-    /**
-     * @param contextId
-     * @param account
-     * @param fields
-     * @param con
-     * @return
-     * @throws OXException
-     */
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields, Connection con) throws OXException;
-
-    /**
-     * @param contextId
-     * @param account
-     * @param until
-     * @param fields
-     * @return
-     * @throws OXException
-     */
     List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
 
+    /**
+     * Inserts the alarm trigger
+     *
+     * @param trigger The {@link AlarmTrigger}
+     * @throws OXException
+     */
+    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
 
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds) throws OXException;
+    /**
+     * Updates the alarm trigger
+     *
+     * @param trigger The updated {@link AlarmTrigger}
+     * @throws OXException
+     */
+    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
 
-    void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds, Connection writeCon) throws OXException;
+    /**
+     * Deletes the given alarm triggers
+     *
+     * @param alarmIds A list of alarm ids
+     * @throws OXException
+     */
+    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
 
 }

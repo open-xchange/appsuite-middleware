@@ -90,6 +90,13 @@ public interface CalendarStorage {
     AttendeeStorage getAttendeeStorage();
 
     /**
+     * Gets the alarm trigger storage
+     *
+     * @return The alarm trigger storage
+     */
+    AlarmTriggerStorage getAlarmTriggerStorage();
+
+    /**
      * Gets additional storage utilities.
      *
      * @return The storage utilities

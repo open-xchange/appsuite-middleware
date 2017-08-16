@@ -47,11 +47,11 @@
  *
  */
 
-package com.openexchange.chronos.alarm.storage.impl;
+package com.openexchange.chronos.storage.rdb;
 
 import java.util.EnumMap;
-import com.openexchange.chronos.alarm.impl.AlarmTrigger;
-import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
+import com.openexchange.chronos.storage.AlarmTrigger;
+import com.openexchange.chronos.storage.AlarmTriggerField;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -106,29 +106,6 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.CONTEXT_ID, new IntegerMapping<AlarmTrigger>("cid", "Context ID") {
-
-            @Override
-            public void set(AlarmTrigger alarmTrigger, Integer value) {
-                alarmTrigger.setContextId(value);
-            }
-
-            @Override
-            public boolean isSet(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.containsContextId();
-            }
-
-            @Override
-            public Integer get(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.getContextId();
-            }
-
-            @Override
-            public void remove(AlarmTrigger alarmTrigger) {
-                alarmTrigger.removesContextId();
-            }
-        });
-
         mappings.put(AlarmTriggerField.EVENT_ID, new VarCharMapping<AlarmTrigger>("eventId", "Event ID") {
 
             @Override
@@ -149,29 +126,6 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             @Override
             public void remove(AlarmTrigger alarmTrigger) {
                 alarmTrigger.removeEventId();
-            }
-        });
-
-        mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>("account", "Account") {
-
-            @Override
-            public void set(AlarmTrigger alarmTrigger, Integer value) {
-                alarmTrigger.setAccount(value);
-            }
-
-            @Override
-            public boolean isSet(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.containsAccount();
-            }
-
-            @Override
-            public Integer get(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.getAccount();
-            }
-
-            @Override
-            public void remove(AlarmTrigger alarmTrigger) {
-                alarmTrigger.removeAccount();
             }
         });
 

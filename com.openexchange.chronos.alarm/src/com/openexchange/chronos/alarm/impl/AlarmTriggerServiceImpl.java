@@ -63,13 +63,14 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.alarm.AlarmChange;
 import com.openexchange.chronos.alarm.AlarmTriggerService;
 import com.openexchange.chronos.alarm.EventSeriesWrapper;
-import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.AlarmTrigger;
+import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.exception.OXException;
 
 /**
@@ -81,49 +82,47 @@ import com.openexchange.exception.OXException;
 public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmTriggerServiceImpl.class);
-    private final AlarmTriggerStorage storage;
     private final RecurrenceService recurrenceService;
 
     /**
      * Initializes a new {@link AlarmTriggerServiceImpl}.
      */
-    public AlarmTriggerServiceImpl(AlarmTriggerStorage storage, RecurrenceService recurrenceService) {
+    public AlarmTriggerServiceImpl(RecurrenceService recurrenceService) {
         super();
-        this.storage = storage;
         this.recurrenceService = recurrenceService;
     }
 
     @Override
-    public void handleChange(int account, int contextId, AlarmChange change) {
+    public void handleChange(AlarmChange change, AlarmTriggerStorage storage) {
         try {
 
             switch (change.getType()) {
                 case CREATE:
-                    handleCreate(account, contextId, change);
+                    handleCreate(change, storage);
                     break;
                 case DELETE:
-                    handleDelete(account, contextId, change);
+                    handleDelete(change, storage);
                     break;
                 case UPDATE:
-                    handleUpdate(account, contextId, change);
+                    handleUpdate(change, storage);
                     break;
                 default:
                     break;
             }
-            LOG.info("Processed {} change for event with id {}.", change.getType(), change.getOldEvent() != null ? change.getOldEvent().getEvent().getId() : change.getNewEvent().getEvent().getId());
+            LOG.debug("Processed {} change for event with id {}.", change.getType(), change.getOldEvent() != null ? change.getOldEvent().getEvent().getId() : change.getNewEvent().getEvent().getId());
         } catch (OXException e) {
             LOG.error("Error while handling calendar result for alarm generation", e);
         }
 
     }
 
-    private void handleCreate(int account, int contextId, AlarmChange create) throws OXException {
-        createAlarms(contextId, account, create.getAlarmsPerAttendee(), create.getNewEvent());
+    private void handleCreate(AlarmChange create, AlarmTriggerStorage storage) throws OXException {
+        createAlarms(create.getAlarmsPerAttendee(), create.getNewEvent(), storage);
     }
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    private void createAlarms(Integer contextId, Integer account, Map<Integer, List<Alarm>> alarmsPerAttendee, EventSeriesWrapper eventWrapper) throws OXException {
+    private void createAlarms(Map<Integer, List<Alarm>> alarmsPerAttendee, EventSeriesWrapper eventWrapper, AlarmTriggerStorage storage) throws OXException {
         Event event = eventWrapper.getEvent();
         for(Integer userId: alarmsPerAttendee.keySet()){
 
@@ -133,9 +132,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
             }
             for (Alarm alarm : alarms) {
                 AlarmTrigger trigger = new AlarmTrigger();
-                trigger.setAccount(account);
                 trigger.setUserId(userId);
-                trigger.setContextId(contextId);
                 trigger.setAction(alarm.getAction().getValue());
                 trigger.setProcessed(false);
                 trigger.setAlarm(alarm.getId());
@@ -169,7 +166,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
     }
 
-    private void handleDelete(int account, int contextId, AlarmChange deletion) throws OXException {
+    private void handleDelete(AlarmChange deletion, AlarmTriggerStorage storage) throws OXException {
 
         EventSeriesWrapper deletedEvent = deletion.getOldEvent();
         EventID eventID = null;
@@ -178,7 +175,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
         } else {
             eventID = new EventID(deletedEvent.getEvent().getFolderId(), deletedEvent.getEvent().getId());
         }
-        storage.deleteAlarmTriggers(contextId, 0, Collections.singletonList(eventID));
+        storage.deleteAlarmTriggers(Collections.singletonList(eventID));
     }
 
     /**
@@ -194,7 +191,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
         RELEVANT_FIELDS.add(EventField.RECURRENCE_RULE);
     }
 
-    private void handleUpdate(int account, int contextId, AlarmChange update) throws OXException {
+    private void handleUpdate(AlarmChange update, AlarmTriggerStorage storage) throws OXException {
 
         Set<EventField> updatedFields = update.getChangedFields();
         if (Collections.disjoint(updatedFields, RELEVANT_FIELDS)) {
@@ -204,10 +201,10 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
         // First delete all old trigger
         Event old = update.getOldEvent().getEvent();
-        storage.deleteAlarmTriggers(contextId, 0, Collections.singletonList(new EventID(old.getFolderId(), old.getId(), old.getRecurrenceId())));
+        storage.deleteAlarmTriggers(Collections.singletonList(new EventID(old.getFolderId(), old.getId(), old.getRecurrenceId())));
 
         // Then create new alarms from scratch
-        createAlarms(contextId, account, update.getAlarmsPerAttendee(), update.getNewEvent());
+        createAlarms(update.getAlarmsPerAttendee(), update.getNewEvent(), storage);
 
     }
 

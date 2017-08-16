@@ -161,7 +161,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         AlarmTriggerService alarmTriggerService = getTriggerService();
         Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<>();
         alarmsPerAttendee.put(calendarUserId, newEvent.getAlarms());
-        alarmTriggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(newEvent), alarmsPerAttendee));
+        alarmTriggerService.handleChange(AlarmChange.newCreate(new EventSeriesWrapper(newEvent), alarmsPerAttendee), storage.getAlarmTriggerStorage());
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {

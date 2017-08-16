@@ -325,7 +325,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         EventSeriesWrapper updatedEvent = new EventSeriesWrapper(updatedMasterEvent, exceptions);
         Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(originalMasterEvent);
 
-        triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(old, updatedEvent, Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee));
+        triggerService.handleChange(AlarmChange.newUpdate(old, updatedEvent, Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
     }
 
     /**

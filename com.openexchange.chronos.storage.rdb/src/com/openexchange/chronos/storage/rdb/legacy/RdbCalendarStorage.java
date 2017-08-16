@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
+import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -95,6 +96,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
         attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
+
         this.storageUtilities = new RdbCalendarStorageUtilities(this);
     }
 
@@ -145,6 +147,11 @@ public class RdbCalendarStorage implements CalendarStorage {
             warnings.putAll(attachmentStorage.getAndFlushWarnings());
         }
         return warnings;
+    }
+
+    @Override
+    public AlarmTriggerStorage getAlarmTriggerStorage() {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm.impl;
+package com.openexchange.chronos.storage;
 
 
 /**

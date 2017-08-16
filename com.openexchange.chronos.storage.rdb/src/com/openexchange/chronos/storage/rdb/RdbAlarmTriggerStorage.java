@@ -47,68 +47,76 @@
  *
  */
 
-package com.openexchange.chronos.alarm.storage.impl;
+package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.alarm.impl.AlarmTrigger;
-import com.openexchange.chronos.alarm.impl.AlarmTriggerField;
-import com.openexchange.chronos.alarm.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.chronos.storage.AlarmTrigger;
+import com.openexchange.chronos.storage.AlarmTriggerField;
+import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.database.Databases;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link AlarmTriggerStorageImpl}
+ * {@link RdbAlarmTriggerStorage}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
+public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerStorage {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlarmTriggerStorageImpl.class);
-    private final ServiceLookup services;
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAlarmTriggerStorage.class);
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
+    private final int accountId;
 
     /**
-     * Initializes a new {@link AlarmTriggerStorageImpl}.
+     * Initializes a new {@link RdbAlarmTriggerStorage}.
+     *
+     * @param context
+     * @param accountId
+     * @param dbProvider
+     * @param txPolicy
      */
-    public AlarmTriggerStorageImpl(ServiceLookup lookup) {
-        super();
-        this.services = lookup;
-
+    protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, dbProvider, txPolicy);
+        this.accountId = accountId;
     }
 
     @Override
     public void insertAlarmTrigger(AlarmTrigger trigger) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Connection writeCon = dbService.getWritable(trigger.getContextId());
+        Connection writeCon = dbProvider.getWriteConnection(context);
+        int updated = 0;
         try {
-            insertAlarmTrigger(trigger, writeCon);
+            txPolicy.setAutoCommit(writeCon, false);
+            updated = insertAlarmTrigger(trigger, writeCon);
+            txPolicy.commit(writeCon);
+        } catch (SQLException e) {
+            throw asOXException(e);
         } finally {
-            dbService.backWritable(trigger.getContextId(), writeCon);
+            release(writeCon, updated);
         }
     };
 
-    @Override
-    public void insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
+    private int insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
 
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
-            String sql = new StringBuilder().append("INSERT INTO calendar_alarm_trigger (").append(MAPPER.getColumns(mappedFields)).append(") VALUES (").append(MAPPER.getParameters(mappedFields)).append(");").toString();
+            String sql = new StringBuilder().append("INSERT INTO calendar_alarm_trigger (cid, account, ").append(MAPPER.getColumns(mappedFields)).append(") VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(");").toString();
             try (PreparedStatement stmt = writeCon.prepareStatement(sql)) {
                 int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, accountId);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, mappedFields);
-                logExecuteUpdate(stmt);
+                return logExecuteUpdate(stmt);
             }
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -117,17 +125,20 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
 
     @Override
     public void updateAlarmTrigger(AlarmTrigger trigger) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Connection writeCon = dbService.getWritable(trigger.getContextId());
+        Connection writeCon = dbProvider.getWriteConnection(context);
+        int updated = 0;
         try {
-            insertAlarmTrigger(trigger, writeCon);
+            txPolicy.setAutoCommit(writeCon, false);
+            updateAlarmTrigger(trigger, writeCon);
+            txPolicy.commit(writeCon);
+        } catch (SQLException e) {
+            throw asOXException(e);
         } finally {
-            dbService.backWritable(trigger.getContextId(), writeCon);
+            release(writeCon, updated);
         }
     };
 
-    @Override
-    public void updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
+    private int updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
 
         try {
             AlarmTriggerField[] assignedfields = MAPPER.getAssignedFields(trigger);
@@ -135,10 +146,10 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
             try (PreparedStatement stmt = writeCon.prepareStatement(sql)) {
                 int parameterIndex = 1;
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, assignedfields);
-                stmt.setInt(parameterIndex++, trigger.getContextId());
-                stmt.setInt(parameterIndex++, trigger.getAccount());
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, accountId);
                 stmt.setInt(parameterIndex++, trigger.getAlarm());
-                logExecuteUpdate(stmt);
+                return logExecuteUpdate(stmt);
             }
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -147,19 +158,18 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[]) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = dbProvider.getReadConnection(context);
         try {
             return getAlarmTriggers(contextId, account, until, fields, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            dbProvider.releaseReadConnection(context, con);
         }
     }
 
-    @Override
-    public List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[], Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[], Connection con) throws OXException {
         try {
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(fields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND triggerDate<? ORDER BY triggerDate");
+            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields(fields);
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
@@ -180,54 +190,22 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
         }
     };
 
-    /**
-     * Logs & executes a prepared statement's SQL update.
-     *
-     * @param stmt The statement to execute the SQL update from
-     * @return The number of affected rows
-     */
-    protected static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeUpdate();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
-            return rowCount;
-        }
-    }
-
-    /**
-     * Logs & executes a prepared statement's SQL query.
-     *
-     * @param stmt The statement to execute the SQL query from
-     * @return The result set
-     */
-    protected static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
-        if (false == LOG.isDebugEnabled()) {
-            return stmt.executeQuery();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
-            return resultSet;
-        }
-    }
-
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField[] fields) throws SQLException, OXException {
         return MAPPER.fromResultSet(resultSet, fields);
     }
 
     @Override
-    public void deleteAlarmTriggers(int contextId, int accountId, List<EventID> alarmIds) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Connection writeCon = dbService.getWritable(contextId);
+    public void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException {
+        Connection writeCon = dbProvider.getWriteConnection(context);
+        int deleted = 0;
         try {
-            deleteAlarmTriggers(contextId, accountId, alarmIds, writeCon);
+            txPolicy.setAutoCommit(writeCon, false);
+            deleted = deleteAlarmTriggers(context.getContextId(), accountId, alarmIds, writeCon);
+            txPolicy.commit(writeCon);
+        } catch (SQLException e) {
+            throw asOXException(e);
         } finally {
-            dbService.backReadOnly(contextId, writeCon);
+            release(writeCon, deleted);
         }
 
     }
@@ -235,8 +213,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
     private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId IN (";
     private static final String SQL_DELETE_RECURRENCE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId=? AND recurrence=?;";
 
-    @Override
-    public void deleteAlarmTriggers(int contextId, int accountId, List<EventID> eventIds, Connection writeCon) throws OXException {
+    private int deleteAlarmTriggers(int contextId, int accountId, List<EventID> eventIds, Connection writeCon) throws OXException {
 
         // divide into basic deletes and recurrence delete operations
         List<EventID> recurrence = new ArrayList<>();
@@ -249,6 +226,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
             }
         }
 
+        int deleted = 0;
         // Delete basic
         if (!basic.isEmpty()) {
             PreparedStatement prepareStatement = null;
@@ -262,7 +240,7 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
                 for (EventID eventId : basic) {
                     prepareStatement.setInt(++x, Integer.valueOf(eventId.getObjectID()));
                 }
-                prepareStatement.executeUpdate();
+                deleted += logExecuteUpdate(prepareStatement);
             } catch (SQLException e) {
                 throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
             } finally {
@@ -283,13 +261,17 @@ public class AlarmTriggerStorageImpl implements AlarmTriggerStorage {
                     stmt.setString(++x, String.valueOf(eventId.getRecurrenceID().getValue().getTimestamp()));
                     stmt.addBatch();
                 }
-                stmt.executeBatch();
+                int[] executeBatch = stmt.executeBatch();
+                for (int del : executeBatch) {
+                    deleted += del;
+                }
             } catch (SQLException e) {
                 throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
             } finally {
                 Databases.closeSQLStuff(stmt);
             }
         }
+        return deleted;
     }
 
 }

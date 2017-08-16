@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import com.openexchange.chronos.storage.AlarmStorage;
+import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -126,6 +127,11 @@ public class RdbCalendarStorage implements CalendarStorage {
         warnings.putAll(delegate.getAndFlushWarnings());
         warnings.putAll(legacyDelegate.getAndFlushWarnings());
         return warnings;
+    }
+
+    @Override
+    public AlarmTriggerStorage getAlarmTriggerStorage() {
+        return delegate.getAlarmTriggerStorage();
     }
 
 }

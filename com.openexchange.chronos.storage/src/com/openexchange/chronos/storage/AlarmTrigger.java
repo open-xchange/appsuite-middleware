@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm.impl;
+package com.openexchange.chronos.storage;
 
 
 /**
@@ -58,26 +58,23 @@ package com.openexchange.chronos.alarm.impl;
  */
 public class AlarmTrigger {
 
-    private Integer account;
     private String action;
     private Integer alarm;
-    private Integer contextId;
     private String eventId;
     private String recurrence;
     private Long time;
     private Integer userId;
     private Boolean processed;
 
-    private boolean isAccountSet=false;
+    private final boolean isAccountSet=false;
     private boolean isActionSet=false;
     private boolean isAlarmSet=false;
-    private boolean isContextIdSet=false;
+    private final boolean isContextIdSet=false;
     private boolean isEventIdSet=false;
     private boolean isRecurrenceSet=false;
     private boolean isTimeSet=false;
     private boolean isUserIdSet=false;
     private boolean isProcessedSet=false;
-
 
     /**
      * Initializes a new {@link AlarmTrigger}.
@@ -85,7 +82,6 @@ public class AlarmTrigger {
     public AlarmTrigger() {
         super();
     }
-
 
     /**
      * Gets the isAccountSet
@@ -96,8 +92,6 @@ public class AlarmTrigger {
         return isAccountSet;
     }
 
-
-
     /**
      * Gets the isActionSet
      *
@@ -106,8 +100,6 @@ public class AlarmTrigger {
     public boolean containsAction() {
         return isActionSet;
     }
-
-
 
     /**
      * Gets the isalarmSet
@@ -138,11 +130,9 @@ public class AlarmTrigger {
         return isContextIdSet;
     }
 
-
     public boolean containsProcessed() {
         return isProcessedSet;
     }
-
 
     /**
      * Gets the isRecurrenceSet
@@ -153,8 +143,6 @@ public class AlarmTrigger {
         return isRecurrenceSet;
     }
 
-
-
     /**
      * Gets the isTimeSet
      *
@@ -163,8 +151,6 @@ public class AlarmTrigger {
     public boolean containsTime() {
         return isTimeSet;
     }
-
-
 
     /**
      * Gets the isUserIdSet
@@ -175,19 +161,6 @@ public class AlarmTrigger {
         return isUserIdSet;
     }
 
-
-
-    /**
-     * Gets the account
-     *
-     * @return The account
-     */
-    public Integer getAccount() {
-        return account;
-    }
-
-
-
     /**
      * Gets the action
      *
@@ -197,8 +170,6 @@ public class AlarmTrigger {
         return action;
     }
 
-
-
     /**
      * Gets the alarm
      *
@@ -206,17 +177,6 @@ public class AlarmTrigger {
      */
     public Integer getAlarm() {
         return alarm;
-    }
-
-
-
-    /**
-     * Gets the contextId
-     *
-     * @return The contextId
-     */
-    public Integer getContextId() {
-        return contextId;
     }
 
     /**
@@ -228,8 +188,6 @@ public class AlarmTrigger {
         return eventId;
     }
 
-
-
     /**
      * Whether the alarm is processed or not
      *
@@ -238,7 +196,6 @@ public class AlarmTrigger {
     public Boolean isProcessed() {
         return processed;
     }
-
 
     /**
      * Gets the recurrence
@@ -249,8 +206,6 @@ public class AlarmTrigger {
         return recurrence;
     }
 
-
-
     /**
      * Gets the time
      *
@@ -259,8 +214,6 @@ public class AlarmTrigger {
     public Long getTime() {
         return time;
     }
-
-
 
     /**
      * Gets the userId
@@ -271,18 +224,6 @@ public class AlarmTrigger {
         return userId;
     }
 
-
-
-    /**
-     * Removes the account
-     */
-    public void removeAccount() {
-        this.account=null;
-        this.isAccountSet=false;
-    }
-
-
-
     /**
      * Removes the action
      */
@@ -290,8 +231,6 @@ public class AlarmTrigger {
         this.action=null;
         this.isActionSet=false;
     }
-
-
 
     /**
      * Removes the alarm
@@ -301,7 +240,6 @@ public class AlarmTrigger {
         this.isAlarmSet=false;
     }
 
-
     /**
      * Removes the eventId
      */
@@ -309,7 +247,6 @@ public class AlarmTrigger {
         this.eventId=null;
         this.isEventIdSet=false;
     }
-
 
     /**
      * Removes the recurrence
@@ -327,18 +264,6 @@ public class AlarmTrigger {
         this.isRecurrenceSet=false;
     }
 
-
-
-    /**
-     * Removes the context id
-     */
-    public void removesContextId() {
-        this.contextId=null;
-        this.isContextIdSet=false;
-    }
-
-
-
     /**
      * Removes the user id
      */
@@ -347,25 +272,12 @@ public class AlarmTrigger {
         this.isTimeSet=false;
     }
 
-
-
     /**
      * Removes the user id
      */
     public void removeUserId() {
         this.userId=null;
         this.isUserIdSet=false;
-    }
-
-
-    /**
-     * Sets the account
-     *
-     * @param account The account to set
-     */
-    public void setAccount(Integer account) {
-        this.account = account;
-        this.isAccountSet=true;
     }
 
     /**
@@ -388,17 +300,6 @@ public class AlarmTrigger {
         this.isAlarmSet=true;
     }
 
-
-    /**
-     * Sets the contextId
-     *
-     * @param contextId The contextId to set
-     */
-    public void setContextId(Integer contextId) {
-        this.contextId = contextId;
-        this.isContextIdSet=true;
-    }
-
     /**
      * Sets the processed
      *
@@ -408,7 +309,6 @@ public class AlarmTrigger {
         this.processed = processed;
         this.isProcessedSet=true;
     }
-
 
     /**
      * Sets the recurrence
@@ -449,7 +349,5 @@ public class AlarmTrigger {
         this.eventId = eventId;
         this.isEventIdSet=true;
     }
-
-
 
 }

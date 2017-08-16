@@ -69,20 +69,49 @@ public class AlarmChange {
     private Map<Integer, List<Alarm>> alarmsPerAttendee;
     private Type type;
 
+    /**
+     *
+     * {@link Type}s of alarm changes
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.0
+     */
     public enum Type {
         CREATE,
         DELETE,
         UPDATE
     }
 
+    /**
+     * Creates an {@link AlarmChange} for a newly created event
+     *
+     * @param event The created event
+     * @param alarmsPerAttendee A map of alarms per attendee
+     * @return The {@link AlarmChange}
+     */
     public static AlarmChange newCreate(EventSeriesWrapper event, Map<Integer, List<Alarm>> alarmsPerAttendee) {
         return new AlarmChange(Type.CREATE, null, event, null, alarmsPerAttendee);
     }
 
+    /**
+     * Creates an {@link AlarmChange} for a updated event
+     *
+     * @param oldEventSeriesWrapper The original event
+     * @param newEventSeriesWrapper The updated event
+     * @param changedFields A set of changed fields
+     * @param alarmsPerAttendee A map of alarms per attendee
+     * @return The {@link AlarmChange}
+     */
     public static AlarmChange newUpdate(EventSeriesWrapper oldEventSeriesWrapper, EventSeriesWrapper newEventSeriesWrapper, Set<EventField> changedFields, Map<Integer, List<Alarm>> alarmsPerAttendee) {
         return new AlarmChange(Type.UPDATE, oldEventSeriesWrapper, newEventSeriesWrapper, changedFields, alarmsPerAttendee);
     }
 
+    /**
+     * Creates an {@link AlarmChange} for a deleted event.
+     *
+     * @param event The deleted event
+     * @return The {@link AlarmChange}
+     */
     public static AlarmChange newDelete(EventSeriesWrapper event){
         return new AlarmChange(Type.DELETE, event, null, null, null);
     }

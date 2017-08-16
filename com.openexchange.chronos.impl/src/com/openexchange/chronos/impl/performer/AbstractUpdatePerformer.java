@@ -199,7 +199,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
         // Delete alarm triggers
         AlarmTriggerService triggerService = getTriggerService();
-        triggerService.handleChange(0, session.getContextId(), AlarmChange.newDelete(new EventSeriesWrapper(originalEvent)));
+        triggerService.handleChange(AlarmChange.newDelete(new EventSeriesWrapper(originalEvent)), storage.getAlarmTriggerStorage());
         /*
          * track deletion in result
          */
@@ -261,7 +261,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 exceptions.addAll(originalEvent.getDeleteExceptionDates());
             }
         }
-        triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedEvent, exceptions), Collections.singleton(EventField.ATTENDEES), alarmsPerAttendee));
+        triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedEvent, exceptions), Collections.singleton(EventField.ATTENDEES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
 
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
@@ -355,14 +355,13 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     private void removeAlarmTrigger(Event original, Event createdException, Event updatedMasterEvent) throws OXException {
         AlarmTriggerService triggerService = getTriggerService();
         Map<Integer, List<Alarm>> alarmsPerAttendeeException = storage.getAlarmStorage().loadAlarms(createdException);
-        triggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(createdException), alarmsPerAttendeeException));
+        triggerService.handleChange(AlarmChange.newCreate(new EventSeriesWrapper(createdException), alarmsPerAttendeeException), storage.getAlarmTriggerStorage());
         Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
         if (updatedMasterEvent.getDeleteExceptionDates() != null) {
             exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
         }
-        //        triggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(createdException, exceptions), alarmsPerAttendee));
-        triggerService.handleChange(0, session.getContextId(), AlarmChange.newUpdate(new EventSeriesWrapper(original), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee));
+        triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(original), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
     }
 
     /**

@@ -54,7 +54,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 
 /**
- * {@link EventSeriesWrapper}
+ * {@link EventSeriesWrapper} wraps an event and its exceptions.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
@@ -62,7 +62,7 @@ import com.openexchange.chronos.RecurrenceId;
 public class EventSeriesWrapper {
 
     private Event event;
-    Set<RecurrenceId> exceptions;
+    private Set<RecurrenceId> exceptions;
 
     /**
      * Initializes a new {@link EventSeriesWrapper}.
@@ -77,7 +77,7 @@ public class EventSeriesWrapper {
 
     /**
      * Initializes a new {@link EventSeriesWrapper}.
-     * 
+     *
      * @param event
      * @param exceptions
      */

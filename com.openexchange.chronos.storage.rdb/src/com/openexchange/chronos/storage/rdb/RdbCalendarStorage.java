@@ -57,6 +57,7 @@ import java.util.TreeMap;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
+import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -80,6 +81,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
+    private final RdbAlarmTriggerStorage alarmTriggerStorage;
     private final com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage attachmentStorage;
     private final RdbCalendarStorageUtilities storageUtilities;
 
@@ -101,6 +103,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, accountId, dbProvider, txPolicy);
         attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
         storageUtilities = new RdbCalendarStorageUtilities(this);
     }
@@ -174,6 +177,11 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         return null;
+    }
+
+    @Override
+    public AlarmTriggerStorage getAlarmTriggerStorage() {
+        return alarmTriggerStorage;
     }
 
 }
