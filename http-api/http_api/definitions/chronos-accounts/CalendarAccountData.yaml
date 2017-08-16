@@ -2,4 +2,11 @@ type: object
 properties:
   id:
     type: string
-    description: ID of a newly created contact.
+    description: ID of a newly created calendar account.
+  provider:
+    type: string
+    description: The provider for the calendar account.
+  lastModified:
+    type: integer
+    format: int64
+    description: The last modification date.
