@@ -233,21 +233,36 @@ public class APIResponseRenderer implements ResponseRenderer {
         try {
             if (plainJson) {
                 ResponseWriter.write(response, writer, localeFrom(req));
-            } else if (expectsJsCallback(req)) {
+                // Successfully written...
+                return true;
+            }
+
+            if (expectsJsCallback(req)) {
                 // Regular HTML call-back...
                 writeJsCallback(response, action, writer, req, resp);
-            } else if (req.getParameter(JSONP) != null) {
-                resp.setContentType("text/javascript");
-                final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
+                // Successfully written...
+                return true;
+            }
+
+            String jsonp = req.getParameter(JSONP);
+            if (false == Strings.isEmpty(jsonp)) {
+                String callback = AJAXUtility.sanitizeParam(jsonp);
+                if (false == validateCallbackName(Strings.asciiLowerCase(callback))) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid call-back name");
+                    return true;
+                }
+
                 // Write: <call> + "(" + <json> + ")"
-                writer.write(call);
+                resp.setContentType("text/javascript");
+                writer.write(callback);
                 writer.write('(');
                 ResponseWriter.write(response, writer, localeFrom(req));
                 writer.write(')');
-            } else {
-                ResponseWriter.write(response, writer, localeFrom(req));
+                // Successfully written...
+                return true;
             }
 
+            ResponseWriter.write(response, writer, localeFrom(req));
             // Successfully written...
             return true;
         } catch (JSONException e) {
@@ -259,6 +274,23 @@ public class APIResponseRenderer implements ResponseRenderer {
             }
         }
         return false;
+    }
+
+    /**
+     * Validates specified call-back name.
+     *
+     * @param lowerCaseCallback The call-back name (in lower-case) to validate
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    private static boolean validateCallbackName(String lowerCaseCallback) {
+        int length = lowerCaseCallback.length();
+        for (int i = length; i-- > 0;) {
+            char ch = lowerCaseCallback.charAt(i);
+            if (('a' > ch || 'z' < ch) && ('0' > ch || '9' < ch) && '-' != ch && '_' != ch && '$' != ch) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -299,10 +331,6 @@ public class APIResponseRenderer implements ResponseRenderer {
      * @throws JSONException If a JSON error occurs
      */
     public static void writeJsCallback(Response response, String action, Writer writer, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_HTML);
-        resp.setHeader("Content-Disposition", "inline");
-
         String callback = req.getParameter(CALLBACK);
         if (callback == null) {
             callback = action;
@@ -312,7 +340,14 @@ public class APIResponseRenderer implements ResponseRenderer {
             }
         }
         callback = AJAXUtility.sanitizeParam(callback);
+        if (false == validateCallbackName(Strings.asciiLowerCase(callback))) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid call-back name");
+            return;
+        }
 
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_HTML);
+        resp.setHeader("Content-Disposition", "inline");
         writer.write(JS_FRAGMENT_PART1);
         writer.write(callback);
         writer.write(JS_FRAGMENT_PART2);
@@ -463,4 +498,5 @@ public class APIResponseRenderer implements ResponseRenderer {
         }
 
     }
+
 }
