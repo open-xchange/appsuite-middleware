@@ -95,7 +95,12 @@ public final class PasswordChangeHistoryImplActivator extends HousekeepingActiva
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ThreadPoolService.class, DatabaseService.class, UserService.class };
+        return new Class<?>[] { ConfigViewFactory.class, UserService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -103,24 +108,26 @@ public final class PasswordChangeHistoryImplActivator extends HousekeepingActiva
         LOG.info("Starting PasswordChangeHistory bundle");
 
         // Register a password change registry
-        PasswordChangeHandlerRegistryServiceImpl registry = new PasswordChangeHandlerRegistryServiceImpl(context);
+        PasswordChangeHandlerRegistryServiceImpl registry = new PasswordChangeHandlerRegistryServiceImpl(context, getService(ConfigViewFactory.class), getService(UserService.class));
         PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
         registry.register(defaultHandler);
         track(PasswordHistoryHandler.class, registry);
+        trackService(ThreadPoolService.class);
+        trackService(DatabaseService.class);
         openTrackers();
         registerService(PasswordChangeHandlerRegistryService.class, registry);
 
         // Register event for password change
-        PasswordChangeEventListener handler = new PasswordChangeEventListener(this, registry);
+        PasswordChangeEventListener handler = new PasswordChangeEventListener(registry);
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(EventConstants.EVENT_TOPIC, handler.getTopic());
         registerService(EventHandler.class, handler, properties);
 
         // Register interceptor
-        registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor(this, registry));
+        registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor(registry, this));
 
         // Register DeleteListener to handle user/context deletions
-        registerService(DeleteListener.class, new PasswordHistoryDeleteListener(this, registry));
+        registerService(DeleteListener.class, new PasswordHistoryDeleteListener(registry, getService(UserService.class)));
 
         // Register UpdateTask
         registerService(CreateTableService.class, new PasswordChangeHistoryCreateTableTask());

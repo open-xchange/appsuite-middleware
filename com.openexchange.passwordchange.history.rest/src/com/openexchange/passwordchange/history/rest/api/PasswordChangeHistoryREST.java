@@ -68,13 +68,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
+import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.SortField;
@@ -99,50 +97,32 @@ public class PasswordChangeHistoryREST {
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
-     * 
+     *
      * @param service The {@link ServiceLookup} to get services from
-     * @throws Exception
      */
-    public PasswordChangeHistoryREST(ServiceLookup service) throws OXException {
+    public PasswordChangeHistoryREST(ServiceLookup service) {
         super();
         this.service = service;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextID, @PathParam("user-id") int userID, @QueryParam("limit") int limit, @QueryParam("sort") String sort) {
+    public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId, @QueryParam("limit") int limit, @QueryParam("sort") String sort) {
         try {
             // Check for access
-            Object retval = checkAccess(contextID, auth);
+            Object retval = checkAccess(contextId, auth);
             if (null != retval) {
                 // Return error response
                 return retval;
             }
 
-            // Get services
+            // Get handler from registry
             PasswordChangeHandlerRegistryService registry = getService(PasswordChangeHandlerRegistryService.class);
-            ConfigViewFactory config = getService(ConfigViewFactory.class);
-            ConfigView view = config.getView(userID, contextID);
-
-            // Check if feature is enabled for user and which handler to get
-            Boolean enable = view.get(PasswordChangeHistoryProperties.ENABLE.getFQPropertyName(), Boolean.class);
-            if (false == enable) {
-                // No fall back. Resource for the user not available. In other terms the user can not see the feature.
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
-            // Get handler
-            String symbolicName = view.get(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
-            if (Strings.isEmpty(symbolicName)) {
-                //Fall back to default
-                LOG.debug("Using default value to identify password change handler.");
-                symbolicName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
-            }
-            PasswordHistoryHandler handler = registry.getHandler(symbolicName);
+            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
 
             // Filter field "sort" information an get data
             Map<SortField, SortOrder> fields = getFields(sort);
-            List<PasswordChangeInfo> history = handler.listPasswordChanges(userID, contextID, fields);
+            List<PasswordChangeInfo> history = handler.listPasswordChanges(userId, contextId, fields);
 
             // Check data
             if (history.size() == 0) {
@@ -164,15 +144,22 @@ public class PasswordChangeHistoryREST {
                 entries.add(i++, data);
             }
             return entries;
+        } catch (OXException e) {
+            if (PasswordChangeHistoryException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeHistoryException.DISABLED.equals(e)) {
+                // No fall back. Resource for the user not available. In other terms the user can not see the feature.
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
+            return Response.serverError().build();
         } catch (Exception e) {
-            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userID, contextID, e);
+            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
             return Response.serverError().build();
         }
     }
 
     /**
      * Matches REST field names to data field names for sorting
-     * 
+     *
      * @param sort The unparsed field names
      * @param fieldNames The field names to sort by
      * @return A set of data field. Can be empty
@@ -208,7 +195,7 @@ public class PasswordChangeHistoryREST {
 
     /**
      * Get a specific service and throws {@link HistoryRestException#MISSING_SERVICE} if it can't be loaded
-     * 
+     *
      * @param clazz The service to load
      * @return The service instance
      */
@@ -222,7 +209,7 @@ public class PasswordChangeHistoryREST {
 
     /**
      * Check if access should be granted
-     * 
+     *
      * @param contextID The context ID to authenticated against
      * @param auth The Base64 decoded authentication string
      * @return <code>null</code> if everything is fine or a {@link Response} with error code.
@@ -249,7 +236,7 @@ public class PasswordChangeHistoryREST {
 
     /**
      * Check if client is "well known" and convert into readable if so
-     * 
+     *
      * @param data The {@link JSONObject} to put the data in
      * @param convertee The identifier that might be known
      * @throws JSONException

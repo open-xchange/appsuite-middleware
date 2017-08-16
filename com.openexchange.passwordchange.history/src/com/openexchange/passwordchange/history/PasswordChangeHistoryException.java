@@ -77,7 +77,11 @@ public enum PasswordChangeHistoryException implements OXExceptionCode {
     /**
      * SQL error: %1$s
      */
-    SQL_ERROR("SQL error: %1$s", Category.CATEGORY_ERROR, 104)
+    SQL_ERROR("SQL error: %1$s", Category.CATEGORY_ERROR, 104),
+    /**
+     * No password change recording allowed for a guest user
+     */
+    DENIED_FOR_GUESTS("No password change recording allowed for a guest user", Category.CATEGORY_PERMISSION_DENIED, 105)
 
     ;
 
