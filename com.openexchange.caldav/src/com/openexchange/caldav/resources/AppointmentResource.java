@@ -690,7 +690,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             applyReminderProperties(appointment);
             applyPrivateComments(appointment);
             applyAttachments(appointment);
-            if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+            if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent()) && false == DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(getUserAgent())) {
                 appointment.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
             }
             changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
@@ -720,7 +720,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                     applyAttachments(changeException);
                 }
-                if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+                if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent()) && false == DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(getUserAgent())) {
                     changeException.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
                 }
                 icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);

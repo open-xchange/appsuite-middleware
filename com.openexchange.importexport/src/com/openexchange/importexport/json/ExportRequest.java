@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,7 +96,7 @@ public class ExportRequest {
             try {
                 batchIds = extractBatchArrayFromRequest((JSONArray) data);
             } catch (JSONException e) {
-                throw ImportExportExceptionCodes.COULD_NOT_PARSE_JSON_BODY.create(e);
+                throw AjaxExceptionCodes.JSON_ERROR.create(e);
             }
         } else {
             String value = request.getParameter("body");
@@ -104,7 +105,7 @@ public class ExportRequest {
                 try{
                     batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
                 } catch (JSONException e) {
-                    throw ImportExportExceptionCodes.COULD_NOT_PARSE_JSON_BODY.create(e);
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }
             } else {
                 batchIds = null;
@@ -113,7 +114,6 @@ public class ExportRequest {
                 }
             }
         }
-
 
         String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
         if (colStr != null) {

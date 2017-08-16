@@ -204,7 +204,7 @@ public class VCardExporter implements Exporter {
         Contact.YOMI_FIRST_NAME,
         Contact.YOMI_LAST_NAME
     };
-    
+
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -237,21 +237,22 @@ public class VCardExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
-    
+
     @Override
-    public void canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+    public boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
-                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-            }            
+                return false;
+            }
             for (String objectId : batchEntry.getValue()) {
                 try {
-                    Integer.parseInt(objectId);                    
+                    Integer.parseInt(objectId);
                 } catch (NumberFormatException e) {
-                    throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, objectId);
+                    return false;
                 }
             }
         }
+        return true;
     }
 
     @Override
@@ -266,13 +267,15 @@ public class VCardExporter implements Exporter {
 
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
       if (null != batchIds) {
-          canExportBatch(session, format, batchIds, optionalParams);
+          if (!canExportBatch(session, format, batchIds, optionalParams)) {
+              throw ImportExportExceptionCodes.COULD_NOT_VALIDATE_OBJECT.create();
+          }
       } else {
           if (!canExport(session, format, folder, optionalParams)) {
               throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
           }
       }
-        
+
       boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -282,9 +285,9 @@ public class VCardExporter implements Exporter {
               if (null != out) {
                   requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                   if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getFolderExportFileName(session, folder) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getFolderExportFileName(session, folder) + Format.VCARD.getExtension()+"\"");
                   } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension()+"\"");
                   } else {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }
@@ -449,12 +452,12 @@ public class VCardExporter implements Exporter {
     }
 
     @Override
-    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
+    public String getFolderExportFileName(ServerSession sessionObj, String folder) {
         return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
     }
 
     @Override
-    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) {
         return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
     }
 }
