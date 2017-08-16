@@ -50,10 +50,12 @@
 package com.openexchange.tools.oxfolder.property;
 
 import java.util.Map;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 
 /**
- * {@link FolderPropertyStorage}
+ * {@link FolderPropertyStorage} - Storage to get user-specific properties per folder
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -61,13 +63,15 @@ import com.openexchange.folderstorage.Folder;
 public interface FolderPropertyStorage {
 
     /**
-     * Deletes all user-specific properties for a given folder.
+     * Deletes all given user-specific properties for a given folder.
      * 
      * @param folderId The ID of the folder
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
+     * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperties(int folderId, int contextId, int userId);
+    void deleteFolderProperties(int folderId, int contextId, int userId, Set<String> propertyKeys) throws OXException;
 
     /**
      * Deletes a single property for a user from a folder.
@@ -76,8 +80,9 @@ public interface FolderPropertyStorage {
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperty(int folderId, int contextId, int userId, String key);
+    void deleteFolderProperty(int folderId, int contextId, int userId, String key) throws OXException;
 
     /**
      * Check if a folder has user-specific properties and therefore exits
@@ -87,8 +92,9 @@ public interface FolderPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @return <code>true</code> if user-specific folder properties exists,
      *         <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean exists(int folderId, int contextId, int userId);
+    boolean exists(int folderId, int contextId, int userId) throws OXException;
 
     /**
      * Get a {@link Map} with user-specific properties for the folder
@@ -98,8 +104,9 @@ public interface FolderPropertyStorage {
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
      * @return The {@link Folder} or <code>null</code>
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    Map<String, String> getFolderProperties(int treeId, int folderId, int contextId, int userId);
+    Map<String, String> getFolderProperties(int treeId, int folderId, int contextId, int userId) throws OXException;
 
     /**
      * Get an user-specific property from a folder
@@ -109,8 +116,9 @@ public interface FolderPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @return The value of the property or <code>null</code>
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    String getFolderProperty(int folderId, int contextId, int userId, String key);
+    String getFolderProperty(int folderId, int contextId, int userId, String key) throws OXException;
 
     /**
      * Insert user-specific values for a folder into the database.
@@ -120,8 +128,9 @@ public interface FolderPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
      * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean insertFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties);
+    boolean insertFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties) throws OXException;
 
     /**
      * Insert user-specific values for a folder into the database.
@@ -132,8 +141,9 @@ public interface FolderPropertyStorage {
      * @param key The name of the property
      * @param value The value to of the property
      * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean insertFolderProperty(int folderId, int contextId, int userId, String key, String value);
+    boolean insertFolderProperty(int folderId, int contextId, int userId, String key, String value) throws OXException;
 
     /**
      * Updates a specific property on the folder
@@ -142,8 +152,9 @@ public interface FolderPropertyStorage {
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    void updateFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties);
+    void updateFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties) throws OXException;
 
     /**
      * Updates a specific property on the folder
@@ -153,7 +164,8 @@ public interface FolderPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @param value The value to update the property to
+     * @throws OXException In case of missing service or no connection could be obtained
      */
-    void updateFolderProperty(int folderId, int contextId, int userId, String key, String value);
+    void updateFolderProperty(int folderId, int contextId, int userId, String key, String value) throws OXException;
 
 }
