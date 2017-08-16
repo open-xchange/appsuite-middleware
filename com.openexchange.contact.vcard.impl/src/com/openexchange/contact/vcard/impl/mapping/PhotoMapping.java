@@ -56,18 +56,22 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.vcard.VCardParameters;
@@ -81,6 +85,7 @@ import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Base64;
@@ -97,6 +102,25 @@ public class PhotoMapping extends AbstractMapping {
 
     private static final String X_ABCROP_RECTANGLE = "X-ABCROP-RECTANGLE";
     private static final byte[] PHOTO_PLACEHOLDER = "X-OX-IMAGE1".getBytes(Charsets.US_ASCII);
+
+    private static final String LOCAL_HOST_NAME;
+    private static final String LOCAL_HOST_ADDRESS;
+
+    static {
+        // Host name initialization
+        String localHostName;
+        String localHostAddress;
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            localHostName = localHost.getCanonicalHostName();
+            localHostAddress = localHost.getHostAddress();
+        } catch (final UnknownHostException e) {
+            localHostName = "localhost";
+            localHostAddress = "127.0.0.1";
+        }
+        LOCAL_HOST_NAME = localHostName;
+        LOCAL_HOST_ADDRESS = localHostAddress;
+    }
 
     /**
      * Initializes a new {@link PhotoMapping}.
@@ -203,9 +227,9 @@ public class PhotoMapping extends AbstractMapping {
                     Streams.close(fileHolder);
                 }
             } catch (IOException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
             } catch (OXException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
             }
         }
         if (null != imageData && null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < imageData.length) {
@@ -371,6 +395,9 @@ public class PhotoMapping extends AbstractMapping {
         return null != parameters && null != parameters.getSession() ? parameters.getSession().getSessionID() : null;
     }
 
+    private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
+    private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
+
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
@@ -384,8 +411,22 @@ public class PhotoMapping extends AbstractMapping {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+            addConversionWarning(warnings, e, "PHOTO", "Invalid URL");
             return null;
+        }
+        /*
+         * check URL validity
+         */
+        {
+            String protocol = url.getProtocol();
+            if (null == protocol || false == ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+            }
+
+            String host = Strings.asciiLowerCase(url.getHost());
+            if (null == host || DENIED_HOSTS.contains(host)) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+            }
         }
         /*
          * download to file holder
@@ -411,7 +452,7 @@ public class PhotoMapping extends AbstractMapping {
          * check image validity
          */
         if (false == isValidImage(fileHolder)) {
-            addConversionWarning(warnings, "PHOTO", "image downloaded from" + urlString + " appears not to be valid, skipping import.");
+            addConversionWarning(warnings, "PHOTO", "image downloaded from \"" + urlString + "\" appears not to be valid, skipping import.");
             Streams.close(fileHolder);
             return null;
         }
