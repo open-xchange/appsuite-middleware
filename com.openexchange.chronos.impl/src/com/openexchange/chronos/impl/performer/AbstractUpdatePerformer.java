@@ -356,7 +356,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         AlarmTriggerService triggerService = getTriggerService();
         Map<Integer, List<Alarm>> alarmsPerAttendeeException = storage.getAlarmStorage().loadAlarms(createdException);
         triggerService.handleChange(0, session.getContextId(), AlarmChange.newCreate(new EventSeriesWrapper(createdException), alarmsPerAttendeeException));
-        Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(createdException);
+        Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
         if (updatedMasterEvent.getDeleteExceptionDates() != null) {
             exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());

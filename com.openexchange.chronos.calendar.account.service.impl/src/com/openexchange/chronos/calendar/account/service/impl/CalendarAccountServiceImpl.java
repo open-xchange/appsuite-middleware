@@ -102,6 +102,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     @Override
     public CalendarAccount loadAccount(Session session, int id) throws OXException {
         CalendarAccount account = loadCalendarAccount(id, session);
+        if (account == null || account.getLastModified() == null) {
+            return null;
+        }
         return verifyAccountAction(session, account, account.getLastModified().getTime(), true);
     }
 
