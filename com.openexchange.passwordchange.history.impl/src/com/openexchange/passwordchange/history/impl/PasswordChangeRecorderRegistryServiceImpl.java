@@ -61,24 +61,22 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.user.UserService;
 
 /**
- * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistryService} as an {@link ServiceTrackerCustomizer}
+ * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeRecorderRegistryService} as an {@link ServiceTrackerCustomizer}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-@SingletonService
-public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistryService {
+public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTrackerCustomizer<PasswordChangeRecorder, PasswordChangeRecorder>, PasswordChangeRecorderRegistryService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRecorderRegistryServiceImpl.class);
 
-    private final ConcurrentMap<String, PasswordHistoryHandler> handlers;
+    private final ConcurrentMap<String, PasswordChangeRecorder> recorders;
     private final BundleContext context;
     private final ConfigViewFactory viewFactory;
     private final UserService userService;
@@ -86,65 +84,65 @@ public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerC
     /**
      * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
      */
-    public PasswordChangeHandlerRegistryServiceImpl(BundleContext context, ConfigViewFactory viewFactory, UserService userService) {
+    public PasswordChangeRecorderRegistryServiceImpl(BundleContext context, ConfigViewFactory viewFactory, UserService userService) {
         super();
         this.viewFactory = viewFactory;
         this.userService = userService;
-        this.handlers = new ConcurrentHashMap<>();
+        this.recorders = new ConcurrentHashMap<>();
         this.context = context;
     }
 
     /**
-     * Register a new {@link PasswordHistoryHandler}
+     * Register a new {@link PasswordChangeRecorder}
      *
-     * @param handler The actual handler
+     * @param recorder The actual recorder
      * @return <code>true</code> if successfully added to this registry; otherwise <code>false</code>
      */
-    public boolean register(PasswordHistoryHandler handler) {
-        if (null == handler) {
+    public boolean register(PasswordChangeRecorder recorder) {
+        if (null == recorder) {
             return false;
         }
 
-        String symbolicName = handler.getSymbolicName();
+        String symbolicName = recorder.getSymbolicName();
         if (Strings.isEmpty(symbolicName)) {
-            LOG.debug("Could not add PasswordHistoryHandler for name {}", symbolicName);
+            LOG.debug("Could not add recorder for name {}", symbolicName);
             return false;
         }
 
-        return null == this.handlers.putIfAbsent(symbolicName, handler);
+        return null == this.recorders.putIfAbsent(symbolicName, recorder);
     }
 
     /**
-     * Unregister a {@link PasswordHistoryHandler}
+     * Unregister a {@link PasswordChangeRecorder}
      *
-     * @param symbolicName The name of the {@link PasswordHistoryHandler}
+     * @param symbolicName The name of the {@link PasswordChangeRecorder}
      */
     public void unregister(String symbolicName) {
         if (false == Strings.isEmpty(symbolicName)) {
-            LOG.debug("Try to remove PasswordChangeTracker with name {}", symbolicName);
-            this.handlers.remove(symbolicName);
+            LOG.debug("Try to remove recorder with name {}", symbolicName);
+            this.recorders.remove(symbolicName);
         }
     }
 
     @Override
-    public Map<String, PasswordHistoryHandler> getHandlers() {
-        return this.handlers;
+    public Map<String, PasswordChangeRecorder> getRecorders() {
+        return this.recorders;
     }
 
     @Override
-    public PasswordHistoryHandler getHandler(String symbolicName) {
+    public PasswordChangeRecorder getRecorder(String symbolicName) {
         if (false == Strings.isEmpty(symbolicName)) {
-            return this.handlers.get(symbolicName);
+            return this.recorders.get(symbolicName);
         }
         return null;
     }
 
     @Override
-    public PasswordHistoryHandler getHandlerForUser(int userId, int contextId) throws OXException {
+    public PasswordChangeRecorder getRecorderForUser(int userId, int contextId) throws OXException {
         // Check user
         User user = userService.getUser(userId, contextId);
         if (user.isGuest()) {
-            throw PasswordChangeHistoryException.DENIED_FOR_GUESTS.create();
+            throw PasswordChangeRecorderException.DENIED_FOR_GUESTS.create();
         }
 
         // Load config and get according tracker
@@ -153,64 +151,64 @@ public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerC
         // Enabled
         Boolean enabled;
         {
-            ComposedConfigProperty<Boolean> enabledProperty = view.property(PasswordChangeHistoryProperties.ENABLE.getFQPropertyName(), Boolean.class);
+            ComposedConfigProperty<Boolean> enabledProperty = view.property(PasswordChangeRecorderProperties.ENABLE.getFQPropertyName(), Boolean.class);
             if (enabledProperty.isDefined()) {
                 enabled = enabledProperty.get();
             } else {
-                enabled = PasswordChangeHistoryProperties.ENABLE.getDefaultValue(Boolean.class);
+                enabled = PasswordChangeRecorderProperties.ENABLE.getDefaultValue(Boolean.class);
             }
         }
         if (null == enabled || !enabled.booleanValue()) {
-            throw PasswordChangeHistoryException.DISABLED.create(userId, contextId);
+            throw PasswordChangeRecorderException.DISABLED.create(userId, contextId);
         }
 
-        // Handler name
-        String handlerName;
+        // Recorder name
+        String recorderName;
         {
-            ComposedConfigProperty<String> handlerNameProperty = view.property(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
-            if (handlerNameProperty.isDefined()) {
-                handlerName = handlerNameProperty.get();
+            ComposedConfigProperty<String> recorderNameProperty = view.property(PasswordChangeRecorderProperties.RECORDER.getFQPropertyName(), String.class);
+            if (recorderNameProperty.isDefined()) {
+                recorderName = recorderNameProperty.get();
             } else {
-                handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
+                recorderName = PasswordChangeRecorderProperties.RECORDER.getDefaultValue(String.class);
             }
         }
-        if (Strings.isEmpty(handlerName)) {
-            handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
-            LOG.debug("No PasswordChangeTracker found. Falling back to default value");
+        if (Strings.isEmpty(recorderName)) {
+            recorderName = PasswordChangeRecorderProperties.RECORDER.getDefaultValue(String.class);
+            LOG.debug("No recorder found. Falling back to default value");
         }
 
-        PasswordHistoryHandler handler = getHandler(handlerName);
-        if (null == handler) {
-            // If no tracker available, there should be no tracking
-            LOG.debug("Could not load {} for user {} in context {}", handlerName, userId, contextId);
-            throw PasswordChangeHistoryException.MISSING_HANDLER.create(handlerName);
+        PasswordChangeRecorder recorder = getRecorder(recorderName);
+        if (null == recorder) {
+            // If no recorder available, there should be no tracking
+            LOG.debug("Could not load {} for user {} in context {}", recorderName, userId, contextId);
+            throw PasswordChangeRecorderException.MISSING_RECORDER.create(recorderName);
         }
-        return handler;
+        return recorder;
     }
 
     // ----------------------------------------------------- ServiceTracker stuff ----------------------------------------------------------
 
     @Override
-    public PasswordHistoryHandler addingService(ServiceReference<PasswordHistoryHandler> reference) {
-        PasswordHistoryHandler handler = context.getService(reference);
-        boolean added = register(handler);
+    public PasswordChangeRecorder addingService(ServiceReference<PasswordChangeRecorder> reference) {
+        PasswordChangeRecorder recorder = context.getService(reference);
+        boolean added = register(recorder);
         if (added) {
-            return handler;
+            return recorder;
         }
 
-        LOG.warn("Could not add {}. A handler with that symbolic name '{}' already exists", handler.getClass().getName(), handler.getSymbolicName());
+        LOG.warn("Could not add {}. A recorder with symbolic name '{}' already exists", recorder.getClass().getName(), recorder.getSymbolicName());
         context.ungetService(reference);
         return null;
     }
 
     @Override
-    public void modifiedService(ServiceReference<PasswordHistoryHandler> reference, PasswordHistoryHandler service) {
+    public void modifiedService(ServiceReference<PasswordChangeRecorder> reference, PasswordChangeRecorder recorder) {
         // Ignore
     }
 
     @Override
-    public void removedService(ServiceReference<PasswordHistoryHandler> reference, PasswordHistoryHandler service) {
-        unregister(service.getSymbolicName());
+    public void removedService(ServiceReference<PasswordChangeRecorder> reference, PasswordChangeRecorder recorder) {
+        unregister(recorder.getSymbolicName());
         context.ungetService(reference);
     }
 }

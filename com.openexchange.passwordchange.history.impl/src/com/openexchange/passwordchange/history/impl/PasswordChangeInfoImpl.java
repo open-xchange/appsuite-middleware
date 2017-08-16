@@ -59,7 +59,7 @@ import com.openexchange.passwordchange.history.PasswordChangeInfo;
  */
 public class PasswordChangeInfoImpl implements PasswordChangeInfo {
 
-    private final long   created;
+    private final long created;
     private final String client;
     private final String ip;
 
@@ -97,8 +97,8 @@ public class PasswordChangeInfoImpl implements PasswordChangeInfo {
         final int prime = 61;
         int result = 1;
         result = prime * result + (int) (created ^ (created >>> 32));
-        result = prime * result + ((client == null) ? 0 : client.hashCode());
         result = prime * result + ((ip == null) ? 0 : ip.hashCode());
+        result = prime * result + ((client == null) ? 0 : client.hashCode());
         return result;
     }
 
@@ -117,18 +117,18 @@ public class PasswordChangeInfoImpl implements PasswordChangeInfo {
         if (created != other.created) {
             return false;
         }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
-            }
-        } else if (!client.equals(other.client)) {
-            return false;
-        }
         if (ip == null) {
             if (other.ip != null) {
                 return false;
             }
         } else if (!ip.equals(other.ip)) {
+            return false;
+        }
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
             return false;
         }
         return true;
