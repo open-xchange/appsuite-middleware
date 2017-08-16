@@ -83,7 +83,6 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 
 /**
  *
@@ -105,7 +104,6 @@ public class UpdateAttendeeAction extends ChronosAction {
     }
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_TIMESTAMP);
 
     private static final String ATTENDEE = "attendee";
     private static final String ALARMS_FIELD = "alarms";
@@ -115,15 +113,10 @@ public class UpdateAttendeeAction extends ChronosAction {
         return OPTIONAL_PARAMETERS;
     }
 
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
+        long clientTimestamp = parseClientTimestamp(requestData);
         Object data = requestData.getData();
         if (data instanceof JSONObject) {
             Attendee attendee = null;
@@ -146,7 +139,8 @@ public class UpdateAttendeeAction extends ChronosAction {
             EventID eventID = parseIdParameter(requestData);
             CalendarResult updateAttendeeResult;
             try {
-                updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee);
+                updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
+                clientTimestamp = updateAttendeeResult.getTimestamp();
             } catch (OXException e) {
                 if (isConflict(e)) {
                     return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
@@ -176,8 +170,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                     }
                     try {
                         // Update calendar session with new timestamp
-                        calendarAccess.getSession().setParameter(PARAMETER_TIMESTAMP, updateAttendeeResult.getTimestamp());
-                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(eventID, toUpdate);
+                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(eventID, toUpdate, clientTimestamp);
                         results = new ArrayList<>(2);
                         results.add(updateAttendeeResult);
                         results.add(updateAlarmResult);

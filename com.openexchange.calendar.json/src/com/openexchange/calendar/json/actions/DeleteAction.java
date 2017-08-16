@@ -52,7 +52,6 @@ package com.openexchange.calendar.json.actions;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -156,19 +155,13 @@ public final class DeleteAction extends ChronosAction {
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
     }
 
-    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMESTAMP);
-
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
-
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
+        long clientTimestamp = parseClientTimestamp(request);
         long timestamp = 0L;
         for (EventID id : requestedIDs) {
-            CalendarResult result = session.getCalendarService().deleteEvent(session, id);
+            CalendarResult result = session.getCalendarService().deleteEvent(session, id, clientTimestamp);
             timestamp = getLatestTimestamp(timestamp, result.getTimestamp());
         }
         return new AJAXRequestResult(new JSONArray(0), new Date(timestamp), "json");

@@ -154,14 +154,7 @@ public final class UpdateAction extends ChronosAction {
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
     }
 
-    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMESTAMP);
-
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
-
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
 
     @Override
     protected Set<String> getOptionalParameters() {
@@ -171,6 +164,7 @@ public final class UpdateAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         EventID eventID = new EventID(request.checkParameter(AJAXServlet.PARAMETER_INFOLDER), request.checkParameter(AJAXServlet.PARAMETER_ID));
+        long clientTimestamp = parseClientTimestamp(request);
         JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setContext(request.getSession().getContext());
@@ -185,7 +179,7 @@ public final class UpdateAction extends ChronosAction {
             /*
              * move event first
              */
-            CalendarResult result = session.getCalendarService().moveEvent(session, eventID, asString(appointment.getParentFolderID()));
+            CalendarResult result = session.getCalendarService().moveEvent(session, eventID, asString(appointment.getParentFolderID()), clientTimestamp);
             if (1 == jsonObject.length() && CalendarFields.FOLDER_ID.equals(jsonObject.keys().next())) {
                 JSONObject resultObject = new JSONObject(1);
                 if (0 < result.getUpdates().size()) {
@@ -193,7 +187,7 @@ public final class UpdateAction extends ChronosAction {
                 }
                 return new AJAXRequestResult(resultObject, new Date(result.getTimestamp()), "json");
             }
-            session.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
+            clientTimestamp = result.getTimestamp();
             eventID = new EventID(asString(appointment.getParentFolderID()), eventID.getObjectID(), eventID.getRecurrenceID());
         }
         /*
@@ -201,7 +195,7 @@ public final class UpdateAction extends ChronosAction {
          */
         CalendarResult result;
         try {
-            result = session.getCalendarService().updateEvent(session, eventID, event);
+            result = session.getCalendarService().updateEvent(session, eventID, event, clientTimestamp);
         } catch (OXException e) {
             if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
                 return getAppointmentConflictResult(getEventConverter(session), CalendarUtils.extractEventConflicts(e));

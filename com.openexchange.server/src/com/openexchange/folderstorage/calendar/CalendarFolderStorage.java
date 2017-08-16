@@ -61,7 +61,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -132,10 +131,6 @@ public class CalendarFolderStorage implements FolderStorage {
              */
             IDBasedCalendarAccess calendarAccess = accessFactory.createAccess(parameters.getSession());
             if (parameters.putParameterIfAbsent(FOLDER_TYPE, PARAMETER_ACCESS, calendarAccess)) {
-                /*
-                 * convert storage to calendar parameters
-                 */
-                calendarAccess.set(CalendarParameters.PARAMETER_TIMESTAMP, parameters.getTimeStamp());
                 /*
                  * enqueue in managed transaction if possible, otherwise signal that we started the transaction ourselves
                  */
@@ -247,10 +242,10 @@ public class CalendarFolderStorage implements FolderStorage {
     public void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         Date timeStamp = storageParameters.getTimeStamp();
-        if (null != timeStamp) {
-            calendarAccess.set(CalendarParameters.PARAMETER_TIMESTAMP, timeStamp);
+        if (null == timeStamp) {
+            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
         }
-        calendarAccess.deleteFolder(folderId);
+        calendarAccess.deleteFolder(folderId, timeStamp.getTime());
     }
 
     @Override
@@ -361,14 +356,14 @@ public class CalendarFolderStorage implements FolderStorage {
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         Date timeStamp = storageParameters.getTimeStamp();
-        if (null != timeStamp) {
-            calendarAccess.set(CalendarParameters.PARAMETER_TIMESTAMP, timeStamp);
+        if (null == timeStamp) {
+            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
         }
         /*
          * update folder
          */
         GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
-        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate);
+        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timeStamp.getTime());
         /*
          * take over updated identifiers in passed folder reference
          */

@@ -335,7 +335,7 @@ public class EventResource extends DAVObjectResource<Event> {
         try {
             CalendarSession calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
             calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-            calendarSession.getCalendarService().moveEvent(calendarSession, eventID, targetCollection.folderID);
+            calendarSession.getCalendarService().moveEvent(calendarSession, eventID, targetCollection.folderID, object.getTimestamp());
         } catch (OXException e) {
             throw getProtocolException(e);
         }
@@ -420,10 +420,8 @@ public class EventResource extends DAVObjectResource<Event> {
             eventIDs = Collections.singletonList(new EventID(event.getFolderId(), event.getId()));
         }
         CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(event.getTimestamp()));
-
-        for(EventID id: eventIDs){
-            calendarSession.getCalendarService().deleteEvent(calendarSession, id);
+        for (EventID id: eventIDs){
+            calendarSession.getCalendarService().deleteEvent(calendarSession, id, event.getTimestamp());
         }
     }
 
@@ -433,18 +431,18 @@ public class EventResource extends DAVObjectResource<Event> {
         }
         CalendarSession calendarSession = getCalendarSession();
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(object.getTimestamp()));
+        long clientTimestamp = object.getTimestamp();
         caldavImport = EventPatches.Incoming.applyAll(this, caldavImport);
         if (null != caldavImport.getEvent() && false == Tools.isPhantomMaster(object)) {
             /*
              * update event
              */
             EventID eventID = new EventID(parent.folderID, object.getId());
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent());
+            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent(), clientTimestamp);
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
+            clientTimestamp = result.getTimestamp();
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         /*
@@ -452,11 +450,11 @@ public class EventResource extends DAVObjectResource<Event> {
          */
         for (Event changeException : caldavImport.getChangeExceptions()) {
             EventID eventID = new EventID(parent.folderID, object.getId(), changeException.getRecurrenceId());
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException);
+            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException, clientTimestamp);
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
+            clientTimestamp = result.getTimestamp();
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
     }
@@ -480,19 +478,19 @@ public class EventResource extends DAVObjectResource<Event> {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
         }
         Event createdEvent = result.getCreations().get(0).getCreatedEvent();
-        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
+        long clientTimestamp = result.getTimestamp();
         calendarSession.getEntityResolver().trackAttendeeUsage(result);
         /*
          * create exceptions
          */
         for (Event changeException : caldavImport.getChangeExceptions()) {
             EventID eventID = new EventID(createdEvent.getFolderId(), createdEvent.getId(), changeException.getRecurrenceId());
-            result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException);
+            result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException, clientTimestamp);
             if (result.getCreations().isEmpty()) {
                 LOG.warn("{}: No exception created.", getUrl());
                 throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
             }
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(result.getTimestamp()));
+            clientTimestamp = result.getTimestamp();
             calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         return createdEvent;
@@ -606,9 +604,9 @@ public class EventResource extends DAVObjectResource<Event> {
              * try to perform an update of the existing event with the imported data from the client
              */
             LOG.info("Event {} already exists (id {}), trying again as update.", caldavImport.getUID(), conflictingId);
-            calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(System.currentTimeMillis())); //TODO timestamp from where?
+            long clientTimestamp = System.currentTimeMillis(); //TODO timestamp from where?
             EventID eventID = new EventID(parent.folderID, conflictingId);
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent());
+            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent(), clientTimestamp);
             if (0 < result.getUpdates().size()) {
                 return Boolean.FALSE;
             }

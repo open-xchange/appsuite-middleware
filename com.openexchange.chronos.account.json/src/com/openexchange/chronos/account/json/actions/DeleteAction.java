@@ -51,10 +51,10 @@ package com.openexchange.chronos.account.json.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -71,7 +71,7 @@ public class DeleteAction extends AbstractAccountAction {
 
     /**
      * Initialises a new {@link DeleteAction}.
-     * 
+     *
      * @param services
      */
     public DeleteAction(ServiceLookup services) {
@@ -85,9 +85,9 @@ public class DeleteAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         //Is it neccessary to check for last modification on delete? Maybe you dont want to delete the newer version
-        String timestamp = requestData.getParameter(CalendarParameters.PARAMETER_TIMESTAMP);
+        String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         if (Strings.isEmpty(timestamp)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(CalendarParameters.PARAMETER_TIMESTAMP);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_TIMESTAMP);
         }
         JSONArray data = requestData.getData(JSONArray.class);
         CalendarAccountService service = getOptionalService(CalendarAccountService.class);

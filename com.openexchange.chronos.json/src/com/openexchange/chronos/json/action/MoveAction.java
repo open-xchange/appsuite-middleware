@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
@@ -75,14 +74,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class MoveAction extends ChronosAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
-
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
-
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
 
     @Override
     protected Set<String> getOptionalParameters() {
@@ -100,9 +92,10 @@ public class MoveAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        long clientTimestamp = parseClientTimestamp(requestData);
         String targetFolderId = requestData.requireParameter("targetFolder");
         try {
-            CalendarResult moveResult = calendarAccess.moveEvent(parseIdParameter(requestData), targetFolderId);
+            CalendarResult moveResult = calendarAccess.moveEvent(parseIdParameter(requestData), targetFolderId, clientTimestamp);
             return new AJAXRequestResult(moveResult, new Date(moveResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             if (isConflict(e)) {

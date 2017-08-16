@@ -304,15 +304,15 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param event The event data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event) throws OXException;
+    CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event, long clientTimestamp) throws OXException;
 
     /**
      * <i>Touches</i> an existing event by setting a new, current last modification timestamp.
@@ -330,43 +330,35 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param folderId The identifier of the folder to move the event to
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The move result
      */
-    CalendarResult moveEvent(CalendarSession session, EventID eventID, String folderId) throws OXException;
+    CalendarResult moveEvent(CalendarSession session, EventID eventID, String folderId, long clientTimestamp) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
 
     /**
-     * Delete a existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
+     * Delete an existing event.
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The delete result
      */
-    CalendarResult deleteEvent(CalendarSession session, EventID eventID) throws OXException;
+    CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
 
 }

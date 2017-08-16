@@ -70,7 +70,6 @@ import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -142,16 +141,14 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public void deleteFolder(String folderId) throws OXException {
-        Date timestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Date.class);
-        getFolderService().deleteFolder(TREE_ID, folderId, timestamp, session.getSession(), initDecorator());
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        getFolderService().deleteFolder(TREE_ID, folderId, new Date(clientTimestamp), session.getSession(), initDecorator());
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder) throws OXException {
-        Date timestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Date.class);
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         Folder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
-        getFolderService().updateFolder(storageFolder, timestamp, session.getSession(), initDecorator());
+        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
@@ -204,23 +201,23 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public CalendarResult updateEvent(EventID eventID, Event event) throws OXException {
-        return getCalendarService().updateEvent(session, eventID, event);
+    public CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException {
+        return getCalendarService().updateEvent(session, eventID, event, clientTimestamp);
     }
 
     @Override
-    public CalendarResult moveEvent(EventID eventID, String folderId) throws OXException {
-        return getCalendarService().moveEvent(session, eventID, folderId);
+    public CalendarResult moveEvent(EventID eventID, String folderId, long clientTimestamp) throws OXException {
+        return getCalendarService().moveEvent(session, eventID, folderId, clientTimestamp);
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException {
-        return getCalendarService().updateAttendee(session, eventID, attendee);
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
     }
 
     @Override
-    public CalendarResult deleteEvent(EventID eventID) throws OXException {
-        return getCalendarService().deleteEvent(session, eventID);
+    public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
+        return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
     }
 
     /**

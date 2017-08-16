@@ -109,6 +109,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class ChronosAction extends AppointmentAction {
 
+    /** A client timestamp / sequence number that can be considered larger than all others */
+    protected static final long DISTANT_FUTURE = Long.MAX_VALUE;
+
     protected final ServiceLookup serviceLookup;
 
     /**
@@ -349,6 +352,27 @@ public abstract class ChronosAction extends AppointmentAction {
         return new EventID(folderId, objectId);
     }
 
+    protected long parseClientTimestamp(AppointmentAJAXRequest request) throws OXException {
+        String parameter = request.checkParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+        try {
+            return Long.parseLong(parameter.trim());
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TIMESTAMP, parameter);
+        }
+    }
+
+    protected long optClientTimestamp(AppointmentAJAXRequest request, long fallbackTimestamp) throws OXException {
+        String parameter = request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
+        if (null == parameter) {
+            return fallbackTimestamp;
+        }
+        try {
+            return Long.parseLong(parameter.trim());
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TIMESTAMP, parameter);
+        }
+    }
+
     /**
      * Gets a list of required parameter names that will be evaluated. If missing in the request, an appropriate exception is thrown. By
      * default, an empty list is returned.
@@ -402,8 +426,6 @@ public abstract class ChronosAction extends AppointmentAction {
         }
         try {
             switch (parameter) {
-                case AJAXServlet.PARAMETER_TIMESTAMP:
-                    return new AbstractMap.SimpleEntry<String, Long>(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(value));
                 case AJAXServlet.PARAMETER_START:
                     long longValue = Long.parseLong(value);
                     Date date = Long.MIN_VALUE == longValue ? new Date(longValue) : request.applyTimeZone2Date(longValue);

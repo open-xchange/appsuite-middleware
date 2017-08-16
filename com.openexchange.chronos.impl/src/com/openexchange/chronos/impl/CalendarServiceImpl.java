@@ -274,7 +274,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final Event event) throws OXException {
+    public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final Event event, final long clientTimestamp) throws OXException {
         /*
          * update event & notify handlers
          */
@@ -282,8 +282,6 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-                long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
@@ -317,7 +315,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final String folderId) throws OXException {
+    public CalendarResult moveEvent(CalendarSession session, final EventID eventID, final String folderId, final long clientTimestamp) throws OXException {
         /*
          * move event
          */
@@ -325,8 +323,6 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-                long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
                 return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
             }
@@ -339,7 +335,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateAttendee(CalendarSession session, final EventID eventID, final Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(CalendarSession session, final EventID eventID, final Attendee attendee, final long clientTimestamp) throws OXException {
         /*
          * update attendee
          */
@@ -347,7 +343,6 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Long clientTimestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
                 return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
 
@@ -361,7 +356,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult deleteEvent(CalendarSession session, final EventID eventID) throws OXException {
+    public CalendarResult deleteEvent(CalendarSession session, final EventID eventID, final long clientTimestamp) throws OXException {
         /*
          * delete event
          */
@@ -369,10 +364,8 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
-                long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-
-                return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
+                return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
 
             }
         }.executeUpdate();

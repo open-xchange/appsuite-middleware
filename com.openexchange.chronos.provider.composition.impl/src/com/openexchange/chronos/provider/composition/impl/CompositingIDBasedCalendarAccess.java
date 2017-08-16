@@ -253,11 +253,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult updateEvent(EventID eventID, Event event) throws OXException {
+    public CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateEvent(getRelativeId(eventID), withRelativeID(event));
+            CalendarResult result = calendarAccess.updateEvent(getRelativeId(eventID), withRelativeID(event), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -265,11 +265,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult moveEvent(EventID eventID, String targetFolderId) throws OXException {
+    public CalendarResult moveEvent(EventID eventID, String targetFolderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.moveEvent(getRelativeId(eventID), getRelativeFolderId(targetFolderId));
+            CalendarResult result = calendarAccess.moveEvent(getRelativeId(eventID), getRelativeFolderId(targetFolderId), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -277,11 +277,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee);
+            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -289,11 +289,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult deleteEvent(EventID eventID) throws OXException {
+    public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID));
+            CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -301,22 +301,22 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public void deleteFolder(String folderId) throws OXException {
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
         GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        calendarAccess.deleteFolder(getRelativeFolderId(folderId));
+            calendarAccess.deleteFolder(getRelativeFolderId(folderId), clientTimestamp);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder) throws OXException {
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
         GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder));
+            folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
         return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

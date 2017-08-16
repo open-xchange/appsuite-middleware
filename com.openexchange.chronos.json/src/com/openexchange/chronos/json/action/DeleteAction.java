@@ -49,14 +49,11 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,8 +81,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class DeleteAction extends ChronosAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAMETER_TIMESTAMP);
-
     private static final String FOLDER_ID_FIELD = "folderId";
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";
@@ -100,13 +95,8 @@ public class DeleteAction extends ChronosAction {
     }
 
     @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
-
-    @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
+        long clientTimestamp = parseClientTimestamp(requestData);
         Object data = requestData.getData();
         if (data == null || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
@@ -123,7 +113,7 @@ public class DeleteAction extends ChronosAction {
             CalendarResult deleteEvent = null;
             for (EventID id : eventIDs) {
                 try {
-                    deleteEvent = calendarAccess.deleteEvent(id);
+                    deleteEvent = calendarAccess.deleteEvent(id, clientTimestamp);
                 } catch (OXException e) {
                     if (errors == null) {
                         errors = new HashMap<>();
