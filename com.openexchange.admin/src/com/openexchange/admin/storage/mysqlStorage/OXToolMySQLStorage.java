@@ -1865,7 +1865,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 // it can only happen, when a schema has not been initialized correctly!
                 log.debug("FATAL: this error must not happen", e);
             }
-            log.error("Error in checking/updating schema", e);
+            log.error("Error while checking/updating schema", e);
             throw new StorageException(e.toString(), e);
         }
     }
