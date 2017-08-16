@@ -66,7 +66,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.SortField;

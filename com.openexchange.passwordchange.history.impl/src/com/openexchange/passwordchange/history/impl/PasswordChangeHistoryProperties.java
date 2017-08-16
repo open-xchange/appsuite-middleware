@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordchange.history;
+package com.openexchange.passwordchange.history.impl;
 
 import com.openexchange.config.lean.Property;
 

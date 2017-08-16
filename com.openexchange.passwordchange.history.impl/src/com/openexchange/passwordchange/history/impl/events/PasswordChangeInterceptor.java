@@ -71,20 +71,19 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
 
-    final ServiceLookup        service;
-    final PasswordChangeHelper helper;
+    private final ServiceLookup services;
+    final PasswordChangeHandlerRegistryService registry;
 
     /**
-     *
      * Initializes a new {@link PasswordChangeInterceptor}.
      *
-     * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
+     * @param services The {@link ServiceLookup} to get services from
      */
-    public PasswordChangeInterceptor(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+    public PasswordChangeInterceptor(PasswordChangeHandlerRegistryService registry, ServiceLookup services) {
         super();
-        this.helper = new PasswordChangeHelper(service, registry);
-        this.service = service;
+        this.registry = registry;
+        this.services = services;
     }
 
     @Override
@@ -96,15 +95,15 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // Check if password was changed
         if (null != user.getUserPassword()) {
-            final int contextID = context.getContextId();
-            final int userID = user.getId();
+            final int contextId = context.getContextId();
+            final int userId = user.getId();
 
             // so password was changed..
-            ThreadPoolService threadPool = service.getService(ThreadPoolService.class);
+            ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
             threadPool.submit(new AbstractTask<Void>() {
                 @Override
                 public Void call() {
-                    helper.recordChangeSafe(contextID, userID, null, PasswordChangeClients.PROVISIONING.getIdentifier());
+                    PasswordChangeHelper.recordChangeSafe(contextId, userId, null, PasswordChangeClients.PROVISIONING.getIdentifier(), registry);
                     return null;
                 }
             });
@@ -113,15 +112,15 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
 
     @Override
     public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        final int contextID = context.getContextId();
-        final int userID = user.getId();
+        final int contextId = context.getContextId();
+        final int userId = user.getId();
 
         // Clear DB after deletion of user
-        ThreadPoolService threadPool = service.getService(ThreadPoolService.class);
+        ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
         threadPool.submit(new AbstractTask<Void>() {
             @Override
             public Void call() {
-                helper.clearSafeFor(contextID, userID, 0);
+                PasswordChangeHelper.clearSafeFor(contextId, userId, 0, registry);
                 return null;
             }
         });

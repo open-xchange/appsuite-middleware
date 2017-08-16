@@ -50,6 +50,7 @@
 package com.openexchange.passwordchange.history;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -76,5 +77,15 @@ public interface PasswordChangeHandlerRegistryService {
      * @return The {@link PasswordHistoryHandler handler} or <code>null</code>
      */
     PasswordHistoryHandler getHandler(String symbolicName);
+
+    /**
+     * Get the suitable {@link PasswordHistoryHandler handler} for given user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The {@link PasswordHistoryHandler handler}
+     * @throws OXException If there is no suitable handler for given user
+     */
+    PasswordHistoryHandler getHandlerForUser(int userId, int contextId) throws OXException;
 
 }

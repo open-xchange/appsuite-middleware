@@ -57,8 +57,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeHelper;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -70,20 +68,18 @@ import com.openexchange.user.UserService;
  */
 public class PasswordHistoryDeleteListener implements DeleteListener {
 
-    private final ServiceLookup        service;
-    private final PasswordChangeHelper helper;
+    private final PasswordChangeHandlerRegistryService registry;
+    private final UserService userService;
 
     /**
-     *
      * Initializes a new {@link PasswordHistoryDeleteListener}.
      *
-     * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordHistoryDeleteListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+    public PasswordHistoryDeleteListener(PasswordChangeHandlerRegistryService registry, UserService userService) {
         super();
-        this.service = service;
-        this.helper = new PasswordChangeHelper(service, registry);
+        this.registry = registry;
+        this.userService = userService;
     }
 
     @Override
@@ -93,13 +89,9 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
             case DeleteEvent.TYPE_CONTEXT:
                 {
                     // Get users in context and remove password for them
-                    UserService userService = service.getService(UserService.class);
-                    if (null == userService) {
-                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-                    }
                     for (User user : userService.getUser(event.getContext())) {
                         if (false == user.isGuest()) {
-                            helper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1);
+                            PasswordChangeHelper.clearSafeFor(event.getContext().getContextId(), user.getId(), -1, registry);
                         }
                     }
                 }
@@ -107,13 +99,9 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
                 break;
             case DeleteEvent.TYPE_USER:
                 {
-                    UserService userService = service.getService(UserService.class);
-                    if (null == userService) {
-                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
-                    }
                     User user = userService.getUser(event.getId(), event.getContext());
                     if (false == user.isGuest()) {
-                        helper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1);
+                        PasswordChangeHelper.clearSafeFor(event.getContext().getContextId(), event.getId(), -1, registry);
                     }
                 }
 
@@ -123,4 +111,5 @@ public class PasswordHistoryDeleteListener implements DeleteListener {
                 return;
         }
     }
+
 }

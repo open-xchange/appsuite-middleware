@@ -49,18 +49,12 @@
 
 package com.openexchange.passwordchange.history.impl.events;
 
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
 import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryProperties;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.passwordchange.history.impl.PasswordChangeInfoImpl;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -73,9 +67,6 @@ public class PasswordChangeHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHelper.class);
 
-    private final ServiceLookup                        service;
-    private final PasswordChangeHandlerRegistryService registry;
-
     /**
      *
      * Initializes a new {@link PasswordChangeHelper}.
@@ -83,103 +74,49 @@ public class PasswordChangeHelper {
      * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordChangeHelper(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+    private PasswordChangeHelper(PasswordChangeHandlerRegistryService registry) {
         super();
-        this.service = service;
-        this.registry = registry;
-
     }
 
     /**
      * Calls the according tracker for a user if the feature is available and saves the data
      *
-     * @param service To lookup needed services
-     * @param registry The registry to get the handler from
-     * @param contextID The context of the user
-     * @param userID The ID representing the user. For this user the password change will be recorded
+     * @param contextId The context of the user
+     * @param userId The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
      * @param client The calling resource. E.g. {@link PasswordChangeInfo#PROVISIONING}
+     * @param registry The handler registry
      */
-    public void recordChangeSafe(int contextID, int userID, final String ipAddress, final String client) {
+    public static void recordChangeSafe(int contextId, int userId, String ipAddress, String client, PasswordChangeHandlerRegistryService registry) {
         try {
-            PasswordHistoryHandler handler = loadHandler(contextID, userID);
+            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
             PasswordChangeInfo info = new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress);
-            handler.trackPasswordChange(userID, contextID, info);
+            handler.trackPasswordChange(userId, contextId, info);
+        } catch (OXException e) {
+            if (PasswordChangeHistoryException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeHistoryException.DISABLED.equals(e)) {
+                LOG.debug("No password change recording for user {} in context {}", userId, contextId, e);
+            } else {
+                LOG.error("Failed password change recording for user {} in context {}", userId, contextId, e);
+            }
         } catch (Exception e) {
-            LOG.debug("Error while tracking password change for user {} in context {}. Reason: {}", userID, contextID, e.getMessage(), e);
+            LOG.error("Failed password change recording for user {} in context {}", userId, contextId, e);
         }
     }
 
     /**
      * Clears the password change history for a specific user
      *
-     * @param service To lookup needed services
-     * @param registry The registry to get the handler from
-     * @param contextID The context of the user
-     * @param userID The ID of the user
+     * @param contextId The context of the user
+     * @param userId The ID of the user
      * @param limit see {@link PasswordHistoryHandler#clear(int, int, int)}
      */
-    public void clearSafeFor(int contextID, int userID, int limit) {
+    public static void clearSafeFor(int contextId, int userId, int limit, PasswordChangeHandlerRegistryService registry) {
         try {
-            PasswordHistoryHandler handler = loadHandler(contextID, userID);
-            handler.clear(userID, contextID, limit);
+            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
+            handler.clear(userId, contextId, limit);
         } catch (Exception e) {
-            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userID, contextID, e.getMessage(), e);
+            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userId, contextId, e.getMessage(), e);
         }
     }
 
-    /**
-     * Get the handler for the specified user in a specific context
-     *
-     * @param contextID The ID of the context
-     * @param userID The ID of the user
-     * @return A {@link PasswordHistoryHandler} for the user
-     * @throws OXException In case a service is missing or some properties aren't configured (well)
-     */
-    private PasswordHistoryHandler loadHandler(int contextID, int userID) throws OXException {
-        // Load config and get according tracker
-        ConfigViewFactory casscade = service.getService(ConfigViewFactory.class);
-        if (null == casscade) {
-            LOG.warn("Could not get config.");
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-        }
-        ConfigView view = casscade.getView(userID, contextID);
-
-        // Enabled
-        Boolean enabled;
-        {
-            ComposedConfigProperty<Boolean> enabledProperty = view.property(PasswordChangeHistoryProperties.ENABLE.getFQPropertyName(), Boolean.class);
-            if (enabledProperty.isDefined()) {
-                enabled = enabledProperty.get();
-            } else {
-                enabled = PasswordChangeHistoryProperties.ENABLE.getDefaultValue(Boolean.class);
-            }
-        }
-        if (null == enabled || !enabled.booleanValue()) {
-            throw PasswordChangeHistoryException.DISABLED.create(userID, contextID);
-        }
-
-        // Handler name
-        String handlerName;
-        {
-            ComposedConfigProperty<String> handlerNameProperty = view.property(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
-            if (handlerNameProperty.isDefined()) {
-                handlerName = handlerNameProperty.get();
-            } else {
-                handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
-            }
-        }
-        if (Strings.isEmpty(handlerName)) {
-            handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
-            LOG.debug("No PasswordChangeTracker found. Falling back to default value");
-        }
-
-        PasswordHistoryHandler handler = registry.getHandler(handlerName);
-        if (null == handler) {
-            // If no tracker available, there should be no tracking
-            LOG.debug("Could not load {} for user {} in context {}", handlerName, userID, contextID);
-            throw PasswordChangeHistoryException.MISSING_HANDLER.create(handlerName);
-        }
-        return handler;
-    }
 }

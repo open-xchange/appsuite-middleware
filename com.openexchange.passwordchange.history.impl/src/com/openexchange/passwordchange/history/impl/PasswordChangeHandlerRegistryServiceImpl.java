@@ -55,10 +55,17 @@ import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
 import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeHandlerRegistryService} as an {@link ServiceTrackerCustomizer}
@@ -69,15 +76,20 @@ import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 @SingletonService
 public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerCustomizer<PasswordHistoryHandler, PasswordHistoryHandler>, PasswordChangeHandlerRegistryService {
 
-    private static final org.slf4j.Logger       LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHandlerRegistryServiceImpl.class);
+
     private final ConcurrentMap<String, PasswordHistoryHandler> handlers;
-    private final BundleContext                 context;
+    private final BundleContext context;
+    private final ConfigViewFactory viewFactory;
+    private final UserService userService;
 
     /**
      * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
      */
-    public PasswordChangeHandlerRegistryServiceImpl(BundleContext context) {
+    public PasswordChangeHandlerRegistryServiceImpl(BundleContext context, ConfigViewFactory viewFactory, UserService userService) {
         super();
+        this.viewFactory = viewFactory;
+        this.userService = userService;
         this.handlers = new ConcurrentHashMap<>();
         this.context = context;
     }
@@ -125,6 +137,55 @@ public class PasswordChangeHandlerRegistryServiceImpl implements ServiceTrackerC
             return this.handlers.get(symbolicName);
         }
         return null;
+    }
+
+    @Override
+    public PasswordHistoryHandler getHandlerForUser(int userId, int contextId) throws OXException {
+        // Check user
+        User user = userService.getUser(userId, contextId);
+        if (user.isGuest()) {
+            throw PasswordChangeHistoryException.DENIED_FOR_GUESTS.create();
+        }
+
+        // Load config and get according tracker
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        // Enabled
+        Boolean enabled;
+        {
+            ComposedConfigProperty<Boolean> enabledProperty = view.property(PasswordChangeHistoryProperties.ENABLE.getFQPropertyName(), Boolean.class);
+            if (enabledProperty.isDefined()) {
+                enabled = enabledProperty.get();
+            } else {
+                enabled = PasswordChangeHistoryProperties.ENABLE.getDefaultValue(Boolean.class);
+            }
+        }
+        if (null == enabled || !enabled.booleanValue()) {
+            throw PasswordChangeHistoryException.DISABLED.create(userId, contextId);
+        }
+
+        // Handler name
+        String handlerName;
+        {
+            ComposedConfigProperty<String> handlerNameProperty = view.property(PasswordChangeHistoryProperties.HANDLER.getFQPropertyName(), String.class);
+            if (handlerNameProperty.isDefined()) {
+                handlerName = handlerNameProperty.get();
+            } else {
+                handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
+            }
+        }
+        if (Strings.isEmpty(handlerName)) {
+            handlerName = PasswordChangeHistoryProperties.HANDLER.getDefaultValue(String.class);
+            LOG.debug("No PasswordChangeTracker found. Falling back to default value");
+        }
+
+        PasswordHistoryHandler handler = getHandler(handlerName);
+        if (null == handler) {
+            // If no tracker available, there should be no tracking
+            LOG.debug("Could not load {} for user {} in context {}", handlerName, userId, contextId);
+            throw PasswordChangeHistoryException.MISSING_HANDLER.create(handlerName);
+        }
+        return handler;
     }
 
     // ----------------------------------------------------- ServiceTracker stuff ----------------------------------------------------------

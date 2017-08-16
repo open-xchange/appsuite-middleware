@@ -52,11 +52,8 @@ package com.openexchange.passwordchange.history.impl.events;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.passwordchange.history.PasswordHistoryHandler;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link PasswordChangeEventListener} Listens to password change event created in {@link com.openexchange.passwordchange.BasicPasswordChangeService#perform(com.openexchange.passwordchange.PasswordChangeEvent)} (in propagate)
@@ -70,19 +67,16 @@ public class PasswordChangeEventListener implements EventHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeEventListener.class);
 
-    final PasswordChangeHelper helper;
-    final ServiceLookup        service;
+    private final PasswordChangeHandlerRegistryService registry;
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.
      *
-     * @param service The {@link ServiceLookup} to get services from
      * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    public PasswordChangeEventListener(ServiceLookup service, PasswordChangeHandlerRegistryService registry) {
+    public PasswordChangeEventListener(PasswordChangeHandlerRegistryService registry) {
         super();
-        this.helper = new PasswordChangeHelper(service, registry);
-        this.service = service;
+        this.registry = registry;
     }
 
     /**
@@ -100,30 +94,12 @@ public class PasswordChangeEventListener implements EventHandler {
             return;
         }
 
-        // Don't track guests
-        UserService userService = service.getService(UserService.class);
-        if (null == userService) {
-            LOG.error("Couldn't load UserService and therefore cannot record password change");
-            return;
-        }
-
         // Read user/context identifier
-        int contextID = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userID = (int) event.getProperty("com.openexchange.passwordchange.userId");
-        try {
-            User user = userService.getUser(userID, contextID);
-            if (user.isGuest()) {
-                LOG.debug("No password change recording for guests");
-                return;
-            }
-        } catch (OXException e) {
-            LOG.error("Couldn't load user and therefore cannot record password change", e);
-            return;
-        }
-
-        // Process tracking
-        String ipAdderess = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
+        int contextId = (int) event.getProperty("com.openexchange.passwordchange.contextId");
+        int userId = (int) event.getProperty("com.openexchange.passwordchange.userId");
+        String ipAddress = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-        helper.recordChangeSafe(contextID, userID, ipAdderess, session.getClient());
+
+        PasswordChangeHelper.recordChangeSafe(contextId, userId, ipAddress, session.getClient(), registry);
     }
 }
