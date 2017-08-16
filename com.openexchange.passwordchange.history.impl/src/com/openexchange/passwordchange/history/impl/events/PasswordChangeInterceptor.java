@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -72,15 +72,15 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeInterceptor.class);
 
     private final ServiceLookup services;
-    final PasswordChangeHandlerRegistryService registry;
+    final PasswordChangeRecorderRegistryService registry;
 
     /**
      * Initializes a new {@link PasswordChangeInterceptor}.
      *
-     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
+     * @param registry The {@link PasswordChangeRecorderRegistryService} to get the {@link PasswordChangeRecorder} from
      * @param services The {@link ServiceLookup} to get services from
      */
-    public PasswordChangeInterceptor(PasswordChangeHandlerRegistryService registry, ServiceLookup services) {
+    public PasswordChangeInterceptor(PasswordChangeRecorderRegistryService registry, ServiceLookup services) {
         super();
         this.registry = registry;
         this.services = services;

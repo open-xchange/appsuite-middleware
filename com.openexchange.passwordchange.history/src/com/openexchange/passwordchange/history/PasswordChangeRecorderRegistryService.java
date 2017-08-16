@@ -47,63 +47,49 @@
  *
  */
 
-package com.openexchange.passwordchange.history.impl;
+package com.openexchange.passwordchange.history;
 
-import com.openexchange.config.lean.Property;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link PasswordChangeHistoryProperties}
+ *
+ * {@link PasswordChangeRecorderRegistryService} - Registry to get available {@link PasswordChangeRecorder}s from
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum PasswordChangeHistoryProperties implements Property {
+@SingletonService
+public interface PasswordChangeRecorderRegistryService {
 
     /**
-     * The property that indicates if a password change should be recorded into a history.
-     * If set to <code>true</code> a history is saved.
-     * If set to <code>false</code> no history is saved.
+     * Gets all available {@link PasswordChangeRecorder recorders}
      *
-     * Default is <code>false</code>.
+     * @return The registered recorders
      */
-    ENABLE("enable", Boolean.FALSE),
+    Map<String, PasswordChangeRecorder> getRecorders();
 
     /**
-     * The handler that takes care of the password change history.
-     * It has to be registered as {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler} before usage.
+     * Gets a specific {@link PasswordChangeRecorder recorder} for given name
      *
-     * Default is "default" for the shipped version {@link com.openexchange.passwordchange.history.tracker.impl.RdbPasswordHistoryHandler}.
+     * @param symbolicName The name of the recorders
+     * @return The recorder or <code>null</code>
      */
-    HANDLER("handler", "default"),
+    PasswordChangeRecorder getRecorder(String symbolicName);
 
     /**
-     * The count of entries to be saved within the {@link com.openexchange.passwordchange.history.tracker.PasswordHistoryHandler}
-     * for a specific user.
+     * Gets the suitable {@link PasswordChangeRecorder recorder} for given user.
+     * <p>
+     * Throws {@link PasswordChangeRecorderException#DENIED_FOR_GUESTS} in case specified user appears to be a guest user.<br>
+     * Throws {@link PasswordChangeRecorderException#DISABLED} in case password change recording is disabled for given user.
      *
-     * Default is <code>10</code>.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The recorder
+     * @throws OXException If there is no suitable recorder for given user
      */
-    LIMIT("limit", Integer.valueOf(10))
+    PasswordChangeRecorder getRecorderForUser(int userId, int contextId) throws OXException;
 
-    ;
-
-    private final String fqn;
-    private final Object defaultValue;
-
-    private PasswordChangeHistoryProperties(String name, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        this.fqn = "com.openexchange.passwordchange.history." + name;
-    }
-
-    @Override
-    public String getFQPropertyName() {
-        return fqn;
-    }
-
-    @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (defaultValue.getClass().isAssignableFrom(clazz)) {
-            return clazz.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-    }
 }

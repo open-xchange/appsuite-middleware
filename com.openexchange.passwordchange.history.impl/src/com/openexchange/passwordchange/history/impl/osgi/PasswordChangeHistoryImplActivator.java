@@ -63,10 +63,10 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
-import com.openexchange.passwordchange.history.impl.PasswordChangeHandlerRegistryServiceImpl;
-import com.openexchange.passwordchange.history.impl.RdbPasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.impl.PasswordChangeRecorderRegistryServiceImpl;
+import com.openexchange.passwordchange.history.impl.RdbPasswordChangeRecorder;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeEventListener;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeInterceptor;
 import com.openexchange.passwordchange.history.impl.groupware.PasswordChangeHistoryCreateTableTask;
@@ -108,20 +108,20 @@ public final class PasswordChangeHistoryImplActivator extends HousekeepingActiva
         LOG.info("Starting PasswordChangeHistory bundle");
 
         // Register a password change registry
-        PasswordChangeHandlerRegistryServiceImpl registry = new PasswordChangeHandlerRegistryServiceImpl(context, getService(ConfigViewFactory.class), getService(UserService.class));
-        PasswordHistoryHandler defaultHandler = new RdbPasswordHistoryHandler(this);
-        registry.register(defaultHandler);
-        track(PasswordHistoryHandler.class, registry);
+        PasswordChangeRecorderRegistryServiceImpl registry = new PasswordChangeRecorderRegistryServiceImpl(context, getService(ConfigViewFactory.class), getService(UserService.class));
+        PasswordChangeRecorder defaultRecorder = new RdbPasswordChangeRecorder(this);
+        registry.register(defaultRecorder);
+        track(PasswordChangeRecorder.class, registry);
         trackService(ThreadPoolService.class);
         trackService(DatabaseService.class);
         openTrackers();
-        registerService(PasswordChangeHandlerRegistryService.class, registry);
+        registerService(PasswordChangeRecorderRegistryService.class, registry);
 
         // Register event for password change
-        PasswordChangeEventListener handler = new PasswordChangeEventListener(registry);
+        PasswordChangeEventListener eventHandler = new PasswordChangeEventListener(registry);
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(EventConstants.EVENT_TOPIC, handler.getTopic());
-        registerService(EventHandler.class, handler, properties);
+        properties.put(EventConstants.EVENT_TOPIC, eventHandler.getTopic());
+        registerService(EventHandler.class, eventHandler, properties);
 
         // Register interceptor
         registerService(UserServiceInterceptor.class, new PasswordChangeInterceptor(registry, this));

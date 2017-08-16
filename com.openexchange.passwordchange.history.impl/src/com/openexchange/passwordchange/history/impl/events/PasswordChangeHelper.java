@@ -50,12 +50,11 @@
 package com.openexchange.passwordchange.history.impl.events;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.passwordchange.history.impl.PasswordChangeInfoImpl;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link PasswordChangeHelper} - Utility class to save or clear password changes history.
@@ -68,13 +67,9 @@ public class PasswordChangeHelper {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHelper.class);
 
     /**
-     *
      * Initializes a new {@link PasswordChangeHelper}.
-     *
-     * @param service The {@link ServiceLookup} to get services from
-     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
      */
-    private PasswordChangeHelper(PasswordChangeHandlerRegistryService registry) {
+    private PasswordChangeHelper() {
         super();
     }
 
@@ -85,15 +80,14 @@ public class PasswordChangeHelper {
      * @param userId The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
      * @param client The calling resource. E.g. {@link PasswordChangeInfo#PROVISIONING}
-     * @param registry The handler registry
+     * @param registry The recorder registry
      */
-    public static void recordChangeSafe(int contextId, int userId, String ipAddress, String client, PasswordChangeHandlerRegistryService registry) {
+    public static void recordChangeSafe(int contextId, int userId, String ipAddress, String client, PasswordChangeRecorderRegistryService registry) {
         try {
-            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
-            PasswordChangeInfo info = new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress);
-            handler.trackPasswordChange(userId, contextId, info);
+            PasswordChangeRecorder recorder = registry.getRecorderForUser(userId, contextId);
+            recorder.trackPasswordChange(userId, contextId, new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress));
         } catch (OXException e) {
-            if (PasswordChangeHistoryException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeHistoryException.DISABLED.equals(e)) {
+            if (PasswordChangeRecorderException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeRecorderException.DISABLED.equals(e)) {
                 LOG.debug("No password change recording for user {} in context {}", userId, contextId, e);
             } else {
                 LOG.error("Failed password change recording for user {} in context {}", userId, contextId, e);
@@ -108,14 +102,21 @@ public class PasswordChangeHelper {
      *
      * @param contextId The context of the user
      * @param userId The ID of the user
-     * @param limit see {@link PasswordHistoryHandler#clear(int, int, int)}
+     * @param limit see {@link PasswordChangeRecorder#clear(int, int, int)}
+     * @param registry The recorder registry
      */
-    public static void clearSafeFor(int contextId, int userId, int limit, PasswordChangeHandlerRegistryService registry) {
+    public static void clearSafeFor(int contextId, int userId, int limit, PasswordChangeRecorderRegistryService registry) {
         try {
-            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
-            handler.clear(userId, contextId, limit);
+            PasswordChangeRecorder recorder = registry.getRecorderForUser(userId, contextId);
+            recorder.clear(userId, contextId, limit);
+        } catch (OXException e) {
+            if (PasswordChangeRecorderException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeRecorderException.DISABLED.equals(e)) {
+                LOG.debug("No password change recording for user {} in context {}", userId, contextId, e);
+            } else {
+                LOG.error("Error while deleting password change history for user {} in context {}.", userId, contextId, e);
+            }
         } catch (Exception e) {
-            LOG.debug("Error while deleting password change history for user {} in context {}. Reason: {}", userId, contextId, e.getMessage(), e);
+            LOG.error("Error while deleting password change history for user {} in context {}.", userId, contextId, e);
         }
     }
 

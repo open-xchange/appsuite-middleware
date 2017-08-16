@@ -65,21 +65,21 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RdbPasswordHistoryHandler} - Default {@link PasswordHistoryHandler}
+ * {@link RdbPasswordChangeRecorder} - Default {@link PasswordChangeRecorder}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
+public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
 
     private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?";
@@ -93,7 +93,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
 
     private final ServiceLookup service;
 
-    public RdbPasswordHistoryHandler(ServiceLookup service) {
+    public RdbPasswordChangeRecorder(ServiceLookup service) {
         super();
         this.service = service;
     }
@@ -152,7 +152,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             } while (set.next());
             return retval;
         } catch (SQLException e) {
-            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
+            throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(set, stmt);
             dbService.backReadOnly(contextID, con);
@@ -163,7 +163,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
     @Override
     public void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) throws OXException {
         DatabaseService dbService = getService(DatabaseService.class);
-        ConfigViewFactory casscade = getService(ConfigViewFactory.class);
+        ConfigViewFactory cascade = getService(ConfigViewFactory.class);
 
         // Get writable connection
         Connection con = dbService.getWritable(contextID);
@@ -183,22 +183,22 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
             stmt.setLong(5, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
+            throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(contextID, con);
         }
 
         // Clean up data too
-        ConfigView view = casscade.getView(userID, contextID);
-        ComposedConfigProperty<Integer> property = view.property(PasswordChangeHistoryProperties.LIMIT.getFQPropertyName(), Integer.class);
+        ConfigView view = cascade.getView(userID, contextID);
+        ComposedConfigProperty<Integer> property = view.property(PasswordChangeRecorderProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
         if (property.isDefined()) {
-            limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
+            limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
         } else {
             limit = property.get();
             if (null == limit) {
-                limit = PasswordChangeHistoryProperties.LIMIT.getDefaultValue(Integer.class);
+                limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
             }
         }
 
@@ -253,7 +253,7 @@ public class RdbPasswordHistoryHandler implements PasswordHistoryHandler {
                 }
             }
         } catch (SQLException e) {
-            throw PasswordChangeHistoryException.SQL_ERROR.create(e, e.getMessage());
+            throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backWritable(contextID, con);

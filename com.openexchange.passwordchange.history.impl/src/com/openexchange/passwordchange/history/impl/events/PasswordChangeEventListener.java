@@ -51,8 +51,8 @@ package com.openexchange.passwordchange.history.impl.events;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.session.Session;
 
 /**
@@ -67,14 +67,14 @@ public class PasswordChangeEventListener implements EventHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeEventListener.class);
 
-    private final PasswordChangeHandlerRegistryService registry;
+    private final PasswordChangeRecorderRegistryService registry;
 
     /**
      * Initializes a new {@link PasswordChangeEventListener}.
      *
-     * @param registry The {@link PasswordChangeHandlerRegistryService} to get the {@link PasswordHistoryHandler} from
+     * @param registry The {@link PasswordChangeRecorderRegistryService} to get the {@link PasswordChangeRecorder} from
      */
-    public PasswordChangeEventListener(PasswordChangeHandlerRegistryService registry) {
+    public PasswordChangeEventListener(PasswordChangeRecorderRegistryService registry) {
         super();
         this.registry = registry;
     }

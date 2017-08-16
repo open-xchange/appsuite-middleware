@@ -49,43 +49,65 @@
 
 package com.openexchange.passwordchange.history;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 
 /**
- *
- * {@link PasswordChangeHandlerRegistryService} - Registry to get available {@link PasswordHistoryHandler}s from
+ * {@link PasswordChangeRecorder} - Provides methods to retrieve and record password changes.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-@SingletonService
-public interface PasswordChangeHandlerRegistryService {
+public interface PasswordChangeRecorder {
 
     /**
-     * Get all available {@link PasswordHistoryHandler handlers}
+     * List the current data stored in the database
      *
-     * @return The registered {@link PasswordHistoryHandler handlers}
+     * @param userID The ID of the user to list the password changes for
+     * @param contextID The context ID of the user
+     * @return {@link List} of all available password change events (~ the history)
+     * @throws OXException If password change events cannot be returned
      */
-    Map<String, PasswordHistoryHandler> getHandlers();
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID) throws OXException;
 
     /**
-     * Get a specific {@link PasswordHistoryHandler handler} for given name
+     * List the current data stored in the database
      *
-     * @param symbolicName The name of the handler
-     * @return The {@link PasswordHistoryHandler handler} or <code>null</code>
+     * @param userID The ID of the user to list the password changes for
+     * @param contextID The context ID of the user
+     * @param fieldNames The field names that should be sorted with the corresponding {@link SortOrder}. Caller has to make sure that the order of elements is predictable.
+     * @return {@link List} of all available password change events (~ the history)
+     * @throws OXException If password change events cannot be returned
      */
-    PasswordHistoryHandler getHandler(String symbolicName);
+    List<PasswordChangeInfo> listPasswordChanges(int userID, int contextID, Map<SortField, SortOrder> fieldNames) throws OXException;
 
     /**
-     * Get the suitable {@link PasswordHistoryHandler handler} for given user
+     * Adds a new set of information to the database
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link PasswordHistoryHandler handler}
-     * @throws OXException If there is no suitable handler for given user
+     * @param userID The ID of the user to track the password changes for
+     * @param contextID The context ID of the user
+     * @param info The {@link PasswordChangeInfo} to be added
      */
-    PasswordHistoryHandler getHandlerForUser(int userId, int contextId) throws OXException;
+    void trackPasswordChange(int userID, int contextID, PasswordChangeInfo info) throws OXException;
 
+    /**
+     * Clears the PasswordChange informations for a specific user
+     *
+     * @param userID The ID of the user to clear recorded password changes for
+     * @param contextID The context ID of the user
+     * @param limit The limit of entries to store in the DB. If current entries exceed the limitation the oldest
+     *            entries get deleted. If set to <code>0</code> all entries will be deleted
+     */
+    void clear(int userID, int contextID, int limit) throws OXException;
+
+    /**
+     * Get the name the {@link PasswordChangeRecorder} should be registered to
+     *
+     * @return The name of the implementation
+     */
+    String getSymbolicName();
 }

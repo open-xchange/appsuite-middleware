@@ -49,6 +49,7 @@
 
 package com.openexchange.passwordchange.history.rest.api;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,10 +72,10 @@ import com.openexchange.auth.Authenticator;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
-import com.openexchange.passwordchange.history.PasswordChangeHandlerRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeHistoryException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.PasswordHistoryHandler;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
@@ -116,27 +117,28 @@ public class PasswordChangeHistoryREST {
                 return retval;
             }
 
-            // Get handler from registry
-            PasswordChangeHandlerRegistryService registry = getService(PasswordChangeHandlerRegistryService.class);
-            PasswordHistoryHandler handler = registry.getHandlerForUser(userId, contextId);
+            // Get recorder from registry
+            PasswordChangeRecorderRegistryService registry = getService(PasswordChangeRecorderRegistryService.class);
+            PasswordChangeRecorder recorder = registry.getRecorderForUser(userId, contextId);
 
             // Filter field "sort" information an get data
             Map<SortField, SortOrder> fields = getFields(sort);
-            List<PasswordChangeInfo> history = handler.listPasswordChanges(userId, contextId, fields);
+            List<PasswordChangeInfo> history = recorder.listPasswordChanges(userId, contextId, fields);
 
             // Check data
-            if (history.size() == 0) {
-                return new JSONArray();
+            int size = history.size();
+            if (size == 0) {
+                return new JSONArray(0);
             }
 
             // Build response
-            JSONArray entries = new JSONArray();
+            JSONArray entries = new JSONArray(size);
             int i = 0;
             for (PasswordChangeInfo info : history) {
                 if (limit > 0 && i >= limit) {
                     break;
                 }
-                JSONObject data = new JSONObject();
+                JSONObject data = new JSONObject(8);
                 data.put("date", info.getCreated());
                 data.put("client_id", info.getClient());
                 putOptionalReadable(data, info.getClient());
@@ -145,7 +147,7 @@ public class PasswordChangeHistoryREST {
             }
             return entries;
         } catch (OXException e) {
-            if (PasswordChangeHistoryException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeHistoryException.DISABLED.equals(e)) {
+            if (PasswordChangeRecorderException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeRecorderException.DISABLED.equals(e)) {
                 // No fall back. Resource for the user not available. In other terms the user can not see the feature.
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
@@ -165,28 +167,27 @@ public class PasswordChangeHistoryREST {
      * @return A set of data field. Can be empty
      */
     private Map<SortField, SortOrder> getFields(String sort) {
-        Map<SortField, SortOrder> retval = new LinkedHashMap<>();
         if (Strings.isEmpty(sort)) {
-            return retval;
+            return Collections.emptyMap();
         }
 
-        String[] splitted = sort.split(",");
-
-        for (String split : splitted) {
-            if (false == Strings.isEmpty(split)) {
+        String[] fields = Strings.splitByComma(sort);
+        Map<SortField, SortOrder> retval = new LinkedHashMap<>(fields.length);
+        for (String field : fields) {
+            if (false == Strings.isEmpty(field)) {
                 boolean desc = false;
-                if (split.startsWith("-")) {
-                    split = split.substring(1);
+                if (field.startsWith("-")) {
+                    field = field.substring(1);
                     desc = true;
                 }
                 // Check field names
-                if (split.equals("client_id")) {
+                if (field.equals("client_id")) {
                     retval.put(SortField.CLIENT_ID, desc ? SortOrder.DESC : SortOrder.ASC);
-                } else if (split.equals("date")) {
+                } else if (field.equals("date")) {
                     retval.put(SortField.DATE, desc ? SortOrder.DESC : SortOrder.ASC);
                 } else {
                     // Not supported
-                    throw new BadRequestException("Can't match field " + split);
+                    throw new BadRequestException("Can't match field " + field);
                 }
             }
         }

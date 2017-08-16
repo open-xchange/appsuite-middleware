@@ -47,42 +47,64 @@
  *
  */
 
-package com.openexchange.passwordchange.history.rest.osgi;
+package com.openexchange.passwordchange.history.impl;
 
-import com.openexchange.auth.Authenticator;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
+import com.openexchange.config.lean.Property;
+import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 
 /**
- * 
- * {@link PasswordChangeHistoryActivator}
+ * {@link PasswordChangeRecorderProperties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class PasswordChangeRestActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
+public enum PasswordChangeRecorderProperties implements Property {
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * The property that indicates if a password change should be recorded into a history.
+     * <p>
+     * If set to <code>true</code> a history is saved.<br>
+     * If set to <code>false</code> no history is saved.
+     * <p>
+     * Default is <code>false</code>.
      */
-    public PasswordChangeRestActivator() {
-        super();
+    ENABLE("enable", Boolean.FALSE),
+
+    /**
+     * The recorder that takes care of the password change history.<br>
+     * It has to be registered as {@link PasswordChangeRecorder} before usage.
+     * <p>
+     * Default is <code>"default"</code> for the shipped version.
+     */
+    RECORDER("recorder", "default"),
+
+    /**
+     * The number of entries to be saved within the {@link PasswordChangeRecorder} for a certain user.
+     * <p>
+     * Default is <code>10</code>.
+     */
+    LIMIT("limit", Integer.valueOf(10))
+
+    ;
+
+    private final String fqn;
+    private final Object defaultValue;
+
+    private PasswordChangeRecorderProperties(String name, Object defaultValue) {
+        this.defaultValue = defaultValue;
+        this.fqn = "com.openexchange.passwordchange.history." + name;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordChangeRecorderRegistryService.class, Authenticator.class };
+    public String getFQPropertyName() {
+        return fqn;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("Starting PasswordChangeRest bundle");
-
-        // Register the different services for this bundle
-        registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
+    public <T> T getDefaultValue(Class<T> clazz) {
+        if (defaultValue.getClass().isAssignableFrom(clazz)) {
+            return clazz.cast(defaultValue);
+        }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
     }
 }

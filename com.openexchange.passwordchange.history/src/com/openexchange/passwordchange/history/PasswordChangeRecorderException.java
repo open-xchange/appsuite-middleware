@@ -55,25 +55,25 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link PasswordChangeHistoryException} - Exception for PasswordChangeHistory bundle
+ * {@link PasswordChangeRecorderException} - Exception for PasswordChangeHistory bundle
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public enum PasswordChangeHistoryException implements OXExceptionCode {
+public enum PasswordChangeRecorderException implements OXExceptionCode {
 
     /**
      * Password change history for user %1$s in context %1$s is disabled
      */
     DISABLED("Password change history for user %1$s in context %1$s is disabled", Category.CATEGORY_PERMISSION_DENIED, 101),
     /**
-     * Handler for user %1$s in context %1$s is not configured. Therefore no history is created.
+     * Recorder for user %1$s in context %1$s is not configured. Therefore no history is created.
      */
-    MISSING_CONFIGURATION("Handler for user %1$s in context %1$s is not configured. Therefore no history is created.", Category.CATEGORY_CONFIGURATION, 102),
+    MISSING_CONFIGURATION("Recorder for user %1$s in context %1$s is not configured. Therefore no history is created.", Category.CATEGORY_CONFIGURATION, 102),
     /**
-     * The handler %1$s was not found in the registry
+     * The recorder %1$s was not found in the registry
      */
-    MISSING_HANDLER("The handler %1$s was not found in the registry.", Category.CATEGORY_SERVICE_DOWN, 103),
+    MISSING_RECORDER("The recorder %1$s was not found in the registry.", Category.CATEGORY_SERVICE_DOWN, 103),
     /**
      * SQL error: %1$s
      */
@@ -91,7 +91,7 @@ public enum PasswordChangeHistoryException implements OXExceptionCode {
     private final Category category;
     private final int number;
 
-    private PasswordChangeHistoryException(final String message, final Category category, final int number) {
+    private PasswordChangeRecorderException(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
