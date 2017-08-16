@@ -415,11 +415,13 @@ public class PhotoMapping extends AbstractMapping {
             String protocol = url.getProtocol();
             if (null == protocol || false == ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                return null;
             }
 
             String host = Strings.asciiLowerCase(url.getHost());
             if (null == host || DENIED_HOSTS.contains(host)) {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                return null;
             }
         }
         /*
