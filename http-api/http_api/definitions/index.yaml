@@ -180,9 +180,9 @@ ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
 # Module: chronos-accounts
 ChronosCalendarAccountData:
-  $ref: ./contacts/CalendarAccountData.yaml
+  $ref: ./chronos-accounts/CalendarAccountData.yaml
 ChronosCalendarAccountResponse:
-  $ref: ./contacts/CalendarAccountResponse.yaml
+  $ref: ./chronos-accounts/CalendarAccountResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
