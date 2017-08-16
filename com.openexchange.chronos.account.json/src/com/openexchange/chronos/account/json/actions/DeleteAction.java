@@ -84,13 +84,12 @@ public class DeleteAction extends AbstractAccountAction {
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
-        //Is it neccessary to check for last modification on delete? Maybe you dont want to delete the newer version
         String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         if (Strings.isEmpty(timestamp)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_TIMESTAMP);
         }
         JSONArray data = requestData.getData(JSONArray.class);
-        CalendarAccountService service = getOptionalService(CalendarAccountService.class);
+        CalendarAccountService service = getService(CalendarAccountService.class);
         try {
             for (int i = 0; i < data.length(); i++) {
                 service.deleteAccount(session, data.getInt(i), Long.parseLong(timestamp));

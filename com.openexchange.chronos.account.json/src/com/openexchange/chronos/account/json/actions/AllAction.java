@@ -87,7 +87,7 @@ public class AllAction extends AbstractAccountAction {
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
-        CalendarAccountService service = getOptionalService(CalendarAccountService.class);
+        CalendarAccountService service = getService(CalendarAccountService.class);
         List<CalendarAccount> accounts = service.loadAccounts(session);
         JSONArray resp = new JSONArray(accounts.size());
         try {

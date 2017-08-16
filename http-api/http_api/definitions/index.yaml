@@ -178,6 +178,11 @@ ChronosFreeBusyHasResponse:
   $ref: ./chronos/FreeBusyHasResponse.yaml
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
+# Module: chronos-accounts
+ChronosCalendarAccountData:
+  $ref: ./contacts/CalendarAccountData.yaml
+ChronosCalendarAccountResponse:
+  $ref: ./contacts/CalendarAccountResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

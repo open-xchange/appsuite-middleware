@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -58,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,9 +86,13 @@ public class NewAction extends AbstractAccountAction {
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
-        CalendarAccountService service = getOptionalService(CalendarAccountService.class);
+        CalendarAccountService service = getService(CalendarAccountService.class);
         CalendarAccount account = service.insertAccount(session, providerId, data.asMap());
-        return new AJAXRequestResult(account.getAccountId());
+        try {
+            return new AJAXRequestResult(new JSONObject(1).put("id", account.getAccountId()), "json");
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
     }
 
 }

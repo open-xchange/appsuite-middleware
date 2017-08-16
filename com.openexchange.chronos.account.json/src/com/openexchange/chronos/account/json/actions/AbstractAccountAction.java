@@ -82,11 +82,11 @@ abstract class AbstractAccountAction implements AJAXActionService {
      * @return The service
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+    <S extends Object> S getService(final Class<? extends S> clazz) {
         if (null == services) {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.account.json\" not started?");
         }
-        return services.getOptionalService(clazz);
+        return services.getService(clazz);
     }
 
 }
