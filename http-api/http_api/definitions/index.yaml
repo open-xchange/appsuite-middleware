@@ -179,9 +179,9 @@ ChronosFreeBusyHasResponse:
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
 # Module: chronos-accounts
-ChronosCalendarAccountData:
+CalendarAccountData:
   $ref: ./chronos-accounts/CalendarAccountData.yaml
-ChronosCalendarAccountResponse:
+CalendarAccountResponse:
   $ref: ./chronos-accounts/CalendarAccountResponse.yaml
 # Module: mail
 MailCountResponse:
