@@ -98,7 +98,9 @@ public class GetAction extends AbstractAccountAction implements CalendarAccountF
         try {
             response.put(ID, JSONCoercion.coerceToJSON(account.getAccountId()));
             response.put(PROVIDER, JSONCoercion.coerceToJSON(account.getProviderId()));
-            response.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+            if (null != account.getLastModified()) {
+                response.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+            }
             response.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

@@ -94,7 +94,9 @@ public class AllAction extends AbstractAccountAction implements CalendarAccountF
                 JSONObject obj = new JSONObject();
                 obj.put(ID, JSONCoercion.coerceToJSON(account.getAccountId()));
                 obj.put(PROVIDER, JSONCoercion.coerceToJSON(account.getProviderId()));
-                obj.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+                if (null != account.getLastModified()) {
+                    obj.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+                }
                 obj.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
                 response.add(0, obj);
             }

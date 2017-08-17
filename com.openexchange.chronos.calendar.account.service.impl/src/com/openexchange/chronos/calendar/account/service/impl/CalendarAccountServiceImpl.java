@@ -101,11 +101,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
 
     @Override
     public CalendarAccount loadAccount(Session session, int id) throws OXException {
-        CalendarAccount account = loadCalendarAccount(id, session);
-        if (account == null || account.getLastModified() == null) {
-            return null;
+        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
+            return CalendarAccount.DEFAULT_ACCOUNT;
         }
-        return verifyAccountAction(session, account, account.getLastModified().getTime(), true);
+        return verifyAccountAction(session, loadCalendarAccount(id, session), true);
     }
 
     @Override
@@ -116,12 +115,16 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
         return accounts;
     }
 
-    private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, long timestamp, boolean hasDefaultAccountRights) throws OXException {
+    private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, boolean hasDefaultAccountRights) throws OXException {
+        return verifyAccountAction(session, account, null, hasDefaultAccountRights);
+    }
+
+    private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, Long timestamp, boolean hasDefaultAccountRights) throws OXException {
         if (null == account || session.getUserId() != account.getUserId()) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(account.getAccountId()));
         } else if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == account.getAccountId() && !hasDefaultAccountRights) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
-        } else if (null != account.getLastModified() && account.getLastModified().getTime() > timestamp) {
+        } else if (null != account.getLastModified() && null != timestamp && account.getLastModified().getTime() > timestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(account.getAccountId()), timestamp, account.getLastModified().getTime());
         } else {
             return account;
@@ -129,11 +132,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     private CalendarAccount  loadCalendarAccount(int id, Session session) throws OXException {
-        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
-            return CalendarAccount.DEFAULT_ACCOUNT;
-        } else {
-            return getCalendarAccountStorage(session).loadAccount(id);
-        }
+        return getCalendarAccountStorage(session).loadAccount(id);
     }
 
     private CalendarAccountStorage getCalendarAccountStorage(Session session) throws OXException {
