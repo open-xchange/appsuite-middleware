@@ -119,6 +119,9 @@ case "${BNAME}" in
     "listdatabase")
     ACTION="util.database.ListDatabase"
     ;;
+    "recalculatefilestoreusage")
+    ACTION="util.filestore.RecalculateFilestoreUsage"
+    ;;
     "listfilestore")
     ACTION="util.filestore.ListFilestore"
     ;;

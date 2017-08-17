@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.utils;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
@@ -84,8 +84,12 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.Attachment;
+import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
-import com.openexchange.snippet.internal.Services;
+import com.openexchange.snippet.DefaultSnippet;
+import com.openexchange.snippet.SnippetExceptionCodes;
+import com.openexchange.snippet.utils.internal.Services;
 import com.openexchange.version.Version;
 
 /**
@@ -402,7 +406,7 @@ public class SnippetProcessor {
         if (isEmpty(content)) {
             return;
         }
-        
+
         boolean isSignature = "signature".equalsIgnoreCase(snippet.getType());
 
         MaxImageProps maxImageProps = getMaxImageProps();

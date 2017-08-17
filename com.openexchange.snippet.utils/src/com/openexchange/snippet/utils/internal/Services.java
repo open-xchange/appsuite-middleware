@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.snippet.internal;
+package com.openexchange.snippet.utils.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
