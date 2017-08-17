@@ -49,14 +49,19 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -65,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class UpdateAction extends AbstractAccountAction {
+public class UpdateAction extends AbstractAccountAction implements CalendarAccountFields{
 
     /**
      * Initialises a new {@link UpdateAction}.
@@ -89,7 +94,17 @@ public class UpdateAction extends AbstractAccountAction {
         CalendarAccountService service = getService(CalendarAccountService.class);
         CalendarAccount account = service.loadAccount(session, Integer.parseInt(accountId));
         // Updates
-        service.updateAccount(session, Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
-        return new AJAXRequestResult();
+        account = service.updateAccount(session, Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
+
+        JSONObject response = new JSONObject();
+        try {
+            response.put(ID, JSONCoercion.coerceToJSON(account.getAccountId()));
+            response.put(PROVIDER, JSONCoercion.coerceToJSON(account.getProviderId()));
+            response.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+            response.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+        return new AJAXRequestResult(response);
     }
 }

@@ -10,9 +10,11 @@
         name: providerId
         type: string
         description: Calendar provider identifier
-        required: true
+        required: false
     responses:
       200:
         description: |
           A JSON object describing the calendar accounts. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CalendarAccountsResponse"

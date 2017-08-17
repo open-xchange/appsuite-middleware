@@ -183,6 +183,8 @@ CalendarAccountData:
   $ref: ./chronos-accounts/CalendarAccountData.yaml
 CalendarAccountResponse:
   $ref: ./chronos-accounts/CalendarAccountResponse.yaml
+CalendarAccountsResponse:
+  $ref: ./chronos-accounts/CalendarAccountsResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

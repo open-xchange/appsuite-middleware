@@ -50,18 +50,18 @@
 package com.openexchange.chronos.account.json.actions;
 
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class AllAction extends AbstractAccountAction {
+public class AllAction extends AbstractAccountAction implements CalendarAccountFields{
 
     /**
      * Initialises a new {@link AllAction}.
@@ -83,26 +83,25 @@ public class AllAction extends AbstractAccountAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (Strings.isEmpty(providerId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
-        }
+//        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
+        //implement another Method for optional providers, loadAccounts(session, providerId)
         CalendarAccountService service = getService(CalendarAccountService.class);
         List<CalendarAccount> accounts = service.loadAccounts(session);
-        JSONArray resp = new JSONArray(accounts.size());
+
+        JSONArray response = new JSONArray(accounts.size());
         try {
             for (CalendarAccount account : accounts) {
-                Map<String, Object> config = account.getConfiguration();
-                JSONObject acc = new JSONObject(config.size());
-                for (String key : config.keySet()) {
-                    acc.put(key, config.get(key));
-                }
-                resp.add(0, acc);
+                JSONObject obj = new JSONObject();
+                obj.put(ID, JSONCoercion.coerceToJSON(account.getAccountId()));
+                obj.put(PROVIDER, JSONCoercion.coerceToJSON(account.getProviderId()));
+                obj.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
+                obj.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
+                response.add(0, obj);
             }
         } catch (JSONException e) {
-            // should not happen
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-        return new AJAXRequestResult(resp);
+        return new AJAXRequestResult(response);
     }
 
 }
