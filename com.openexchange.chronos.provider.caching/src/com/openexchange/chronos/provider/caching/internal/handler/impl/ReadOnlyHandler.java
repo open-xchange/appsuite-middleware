@@ -74,17 +74,17 @@ public class ReadOnlyHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getPersistedEvents(String folderId) throws OXException {
-        return searchInternal(folderId, true);
+    public List<Event> getExistingEvents(String folderId) throws OXException {
+        return getExistingEventsInFolder(folderId);
     }
 
     @Override
-    public void persist(EventUpdates diff) throws OXException {
+    public void persist(String folderId, EventUpdates diff) throws OXException {
         // do not persist anything
     }
 
     @Override
-    public void updateLastUpdated() throws OXException {
+    public void updateLastUpdated(String folderId) {
         // ignore update 
     }
 }

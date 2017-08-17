@@ -83,12 +83,12 @@ public class InitialWriteHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getPersistedEvents(String folderId) throws OXException {
+    public List<Event> getExistingEvents(String folderId) throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    public void persist(EventUpdates diff) throws OXException {
+    public void persist(String folderId, EventUpdates diff) throws OXException {
         boolean committed = false;
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection writeConnection = null;
@@ -96,7 +96,7 @@ public class InitialWriteHandler extends AbstractHandler {
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            create(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
+            create(folderId, initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;

@@ -49,62 +49,35 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 
 /**
- * The {@link CachingHandler} defines the general caching workflow that will be invoked for each request.<br>
- * <br>
- * There should be one implementation for each available {@link FolderProcessingType} that will be returned from the {@link CachingHandlerFactory}.
+ * {@link FolderProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public interface CachingHandler {
+public enum FolderProcessingType {
 
     /**
-     * Returns a list of {@link Event}s for the underlying account. Returned fields depend on the feeds ical file.
-     * 
-     * @param folderId The folder id of the account
-     * @return A list of {@link Event}s
-     * @throws OXException
+     * Indicates that it is the first processing for the given {@link CalendarAccount}.
      */
-    List<Event> getExternalEvents(String folderId) throws OXException;
+    INITIAL_INSERT,
 
     /**
-     * Returns the currently persisted {@link Event}s identified by the given folder identifier with all available fields.
-     * 
-     * @param folderId The folder identifier to get {@link Event}s for
-     * @return A list of {@link Event}s
-     * @throws OXException
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
      */
-    List<Event> getExistingEvents(String folderId) throws OXException;
+    UPDATE,
 
     /**
-     * Persists the given {@link EventUpdates}
-     * 
-     * @param folderId The folder identifier to persist the {@link Event}s for
-     * @param diff The {@link EventUpdate} diff to persist
-     * @throws OXException
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
      */
-    void persist(String folderId, EventUpdates diff) throws OXException;
+    READ_DB,
 
     /**
-     * Allows to handle errors (cleanups) if an {@link OXException} occurred.
-     * 
-     * @param folderId The folder id
-     * @param e The occurred {@link OXException}
-     * @throws OXException
+     * Indicates that the folder has been removed
      */
-    void handleExceptions(String folderId, OXException e);
-
-    /**
-     * Updates the last modified timestamp of the account.
-     * 
-     * @param folderId The folder id
-     */
-    void updateLastUpdated(String folderId);
+    DELETE
 }

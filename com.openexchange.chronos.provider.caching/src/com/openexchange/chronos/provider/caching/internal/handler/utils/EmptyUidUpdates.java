@@ -47,33 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler;
+package com.openexchange.chronos.provider.caching.internal.handler.utils;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.EventUpdates;
 
 /**
- * {@link ProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
+ * {@link EmptyUidUpdates}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public enum ProcessingType {
+public class EmptyUidUpdates implements EventUpdates {
 
-    /**
-     * Indicates that it is the first processing for the given {@link CalendarAccount}.
-     */
-    INITIAL_INSERT,
+    private List<Event> addedItems;
+    private List<Event> removedItems;
 
-    /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
-     */
-    UPDATE,
+    public EmptyUidUpdates(List<Event> removedItems, List<Event> addedItems) {
+        this.addedItems = addedItems;
+        this.removedItems = removedItems;
+    }
 
-    /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
-     */
-    READ_DB
+    @Override
+    public List<Event> getAddedItems() {
+        return this.addedItems;
+    }
+
+    @Override
+    public List<Event> getRemovedItems() {
+        return removedItems;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.addedItems.isEmpty() && this.removedItems.isEmpty();
+    }
+
+    @Override
+    public List<EventUpdate> getUpdatedItems() {
+        return Collections.emptyList();
+    }
 
 }

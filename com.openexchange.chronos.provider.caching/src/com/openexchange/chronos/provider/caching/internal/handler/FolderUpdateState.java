@@ -49,62 +49,70 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import com.openexchange.annotation.Nullable;
 
 /**
- * The {@link CachingHandler} defines the general caching workflow that will be invoked for each request.<br>
- * <br>
- * There should be one implementation for each available {@link FolderProcessingType} that will be returned from the {@link CachingHandlerFactory}.
+ * {@link FolderUpdateState}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public interface CachingHandler {
+public class FolderUpdateState implements Comparable<FolderUpdateState> {
+
+    private final String folderId;
+    private final Long lastUpdated;
+    private final Long previousLastUpdated;
+    private final Integer refreshInterval;
+    private final FolderProcessingType currentType;
+
+    public FolderUpdateState(String folderId, @Nullable Long lastUpdated, @Nullable Long previouslastUpdated, @Nullable Integer refreshInterval, FolderProcessingType type) {
+        this.folderId = folderId;
+        this.lastUpdated = lastUpdated;
+        this.previousLastUpdated = previouslastUpdated;
+        this.currentType = type;
+        this.refreshInterval = refreshInterval;
+    }
 
     /**
-     * Returns a list of {@link Event}s for the underlying account. Returned fields depend on the feeds ical file.
-     * 
-     * @param folderId The folder id of the account
-     * @return A list of {@link Event}s
-     * @throws OXException
+     * Gets the lastUpdated
+     *
+     * @return The lastUpdated
      */
-    List<Event> getExternalEvents(String folderId) throws OXException;
+    public @Nullable Long getLastUpdated() {
+        return lastUpdated;
+    }
 
     /**
-     * Returns the currently persisted {@link Event}s identified by the given folder identifier with all available fields.
-     * 
-     * @param folderId The folder identifier to get {@link Event}s for
-     * @return A list of {@link Event}s
-     * @throws OXException
+     * Gets the currentType
+     *
+     * @return The currentType
      */
-    List<Event> getExistingEvents(String folderId) throws OXException;
+    public FolderProcessingType getType() {
+        return currentType;
+    }
 
     /**
-     * Persists the given {@link EventUpdates}
-     * 
-     * @param folderId The folder identifier to persist the {@link Event}s for
-     * @param diff The {@link EventUpdate} diff to persist
-     * @throws OXException
+     * Gets the folderId
+     *
+     * @return The folderId
      */
-    void persist(String folderId, EventUpdates diff) throws OXException;
+    public String getFolderId() {
+        return folderId;
+    }
 
-    /**
-     * Allows to handle errors (cleanups) if an {@link OXException} occurred.
-     * 
-     * @param folderId The folder id
-     * @param e The occurred {@link OXException}
-     * @throws OXException
-     */
-    void handleExceptions(String folderId, OXException e);
+    @Override
+    public int compareTo(FolderUpdateState o) {
+        if (this.folderId.equals(o.getFolderId())) {
+            return 0;
+        }
+        return 1;
+    }
 
-    /**
-     * Updates the last modified timestamp of the account.
-     * 
-     * @param folderId The folder id
-     */
-    void updateLastUpdated(String folderId);
+    public Integer getRefreshInterval() {
+        return refreshInterval;
+    }
+
+    public Long getPreviousLastUpdated() {
+        return previousLastUpdated;
+    }
 }
