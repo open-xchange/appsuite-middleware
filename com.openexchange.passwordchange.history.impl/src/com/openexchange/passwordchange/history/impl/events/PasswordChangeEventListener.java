@@ -63,9 +63,8 @@ import com.openexchange.session.Session;
  */
 public class PasswordChangeEventListener implements EventHandler {
 
+    /** The topic the event listens to */
     private static final String TOPIC = "com/openexchange/passwordchange";
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeEventListener.class);
 
     private final PasswordChangeRecorderRegistryService registry;
 

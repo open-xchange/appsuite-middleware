@@ -99,14 +99,18 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
             final int userId = user.getId();
 
             // so password was changed..
-            ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
-            threadPool.submit(new AbstractTask<Void>() {
-                @Override
-                public Void call() {
-                    PasswordChangeHelper.recordChangeSafe(contextId, userId, null, PasswordChangeClients.PROVISIONING.getIdentifier(), registry);
-                    return null;
-                }
-            });
+            ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+            if (null == threadPool) {
+                PasswordChangeHelper.recordChangeSafe(contextId, userId, null, PasswordChangeClients.PROVISIONING.getIdentifier(), registry);
+            } else {                
+                threadPool.submit(new AbstractTask<Void>() {
+                    @Override
+                    public Void call() {
+                        PasswordChangeHelper.recordChangeSafe(contextId, userId, null, PasswordChangeClients.PROVISIONING.getIdentifier(), registry);
+                        return null;
+                    }
+                });
+            }
         }
     }
 
@@ -116,14 +120,18 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
         final int userId = user.getId();
 
         // Clear DB after deletion of user
-        ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
-        threadPool.submit(new AbstractTask<Void>() {
-            @Override
-            public Void call() {
-                PasswordChangeHelper.clearSafeFor(contextId, userId, 0, registry);
-                return null;
-            }
-        });
+        ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
+        if (null == threadPool) {
+            PasswordChangeHelper.clearSafeFor(contextId, userId, 0, registry);
+        } else {            
+            threadPool.submit(new AbstractTask<Void>() {
+                @Override
+                public Void call() {
+                    PasswordChangeHelper.clearSafeFor(contextId, userId, 0, registry);
+                    return null;
+                }
+            });
+        }
     }
 
 }

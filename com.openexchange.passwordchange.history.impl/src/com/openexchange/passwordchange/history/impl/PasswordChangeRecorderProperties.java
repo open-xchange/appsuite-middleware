@@ -68,7 +68,7 @@ public enum PasswordChangeRecorderProperties implements Property {
      * <p>
      * Default is <code>false</code>.
      */
-    ENABLE("enable", Boolean.FALSE),
+    ENABLE("enabled", Boolean.FALSE),
 
     /**
      * The recorder that takes care of the password change history.<br>

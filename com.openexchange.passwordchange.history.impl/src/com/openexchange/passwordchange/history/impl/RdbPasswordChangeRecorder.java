@@ -55,10 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.collect.Lists;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -81,11 +83,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdbPasswordChangeRecorder.class);
+
     private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?";
 
-    private static final String CLEAR_FOR_ID   = "DELETE FROM user_password_history WHERE id=?";
-    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
+    private static final String CLEAR_FOR_ID_IN = "DELETE FROM user_password_history WHERE id IN (";
+    private static final String CLEAR_FOR_USER  = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?)";
 
@@ -189,7 +193,7 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
             dbService.backWritable(contextID, con);
         }
 
-        // Clean up data too
+        // Clean up data, too
         ConfigView view = cascade.getView(userID, contextID);
         ComposedConfigProperty<Integer> property = view.property(PasswordChangeRecorderProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
@@ -202,7 +206,11 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
             }
         }
 
-        clear(userID, contextID, limit.intValue());
+        try {
+            clear(userID, contextID, limit.intValue());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to clear obsolete password change records from storage", e);
+        }
     }
 
     @Override
@@ -210,6 +218,7 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
         // Get writable connection
         DatabaseService dbService = getService(DatabaseService.class);
         Connection con = dbService.getWritable(contextID);
+        boolean modified = true;
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -233,30 +242,56 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
 
                 int len = data.size() - limit;
                 if (len > 0) {
-                    // Sort & delete the first until limit triggers
-                    Collections.sort(data);
+                    boolean rollback = false;
+                    try {
+                        Databases.startTransaction(con);
+                        rollback = true;
 
-                    int batchSize = 100;
-                    int count = 0;
-                    stmt = con.prepareStatement(CLEAR_FOR_ID);
-                    Iterator<Integer> iter = data.iterator();
-                    for (int i = len; i-- > 0;) {
-                        stmt.setInt(1, iter.next().intValue());
-                        stmt.addBatch();
+                        // Sort & delete the first until limit triggers
+                        Collections.sort(data);
+                        data = data.subList(0, len);
 
-                        // Just in case we have many entries to delete
-                        if (++count % batchSize == 0) {
-                            stmt.executeBatch();
+                        if (len <= 100) {
+                            stmt = con.prepareStatement(Databases.getIN(CLEAR_FOR_ID_IN, len));
+                            int pos = 1;
+                            for (Integer id : data) {
+                                stmt.setInt(pos++, id.intValue());
+                            }
+                            stmt.executeUpdate();
+                            Databases.closeSQLStuff(stmt);
+                        } else {
+                            for (List<Integer> chunk : Lists.partition(data, 100)) {
+                                stmt = con.prepareStatement(Databases.getIN(CLEAR_FOR_ID_IN, chunk.size()));
+                                int pos = 1;
+                                for (Integer id : chunk) {
+                                    stmt.setInt(pos++, id.intValue());
+                                }
+                                stmt.executeUpdate();
+                                Databases.closeSQLStuff(stmt);
+                            }
                         }
+
+                        con.commit();
+                        rollback = false;
+                    } finally {
+                        if (rollback) {
+                            Databases.rollback(con);
+                        }
+                        Databases.autocommit(con);
                     }
-                    stmt.executeBatch();
+                } else {
+                    modified = false;
                 }
             }
         } catch (SQLException e) {
             throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-            dbService.backWritable(contextID, con);
+            if (modified) {
+                dbService.backWritable(contextID, con);
+            } else {
+                dbService.backWritableAfterReading(contextID, con);
+            }
         }
     }
 
