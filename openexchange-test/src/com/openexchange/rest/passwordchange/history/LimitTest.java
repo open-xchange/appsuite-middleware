@@ -54,7 +54,7 @@ import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.junit.Test;
-import com.openexchange.passwordchange.history.rest.api.PasswordChangeHistoryREST;
+import com.openexchange.admin.rest.passwordchange.history.api.PasswordChangeHistoryREST;
 
 /**
  * {@link LimitTest}
