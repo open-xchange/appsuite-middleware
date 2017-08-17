@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventConflict;
@@ -80,7 +81,7 @@ public class IDMangling {
     /** The fixed prefix used to quickly identify calendar folder identifiers. */
     private static final String CAL_PREFIX = "cal";
 
-    /** A set of fixed root folder identifiers excluded from ID mangling */
+    /** A set of fixed root folder identifiers excluded from ID mangling for the default account */
     private static final Set<String> ROOT_FOLDER_IDS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         null, // no parent
         "0",  // com.openexchange.folderstorage.FolderStorage.ROOT_ID
@@ -267,7 +268,7 @@ public class IDMangling {
      * @return The unique folder identifier
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (ROOT_FOLDER_IDS.contains(relativeFolderId)) {
+        if (null == relativeFolderId || CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId && ROOT_FOLDER_IDS.contains(relativeFolderId)) {
             return relativeFolderId;
         }
         return mangleFolderId(accountId, relativeFolderId);
