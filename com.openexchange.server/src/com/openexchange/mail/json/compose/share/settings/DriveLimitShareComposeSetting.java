@@ -52,30 +52,31 @@ package com.openexchange.mail.json.compose.share.settings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link ForceAutoDeleteShareComposeSetting}
+ * Setting that defines the max. size of all uploaded files (sum) for a new Drive Mail.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.4
  */
-public class ForceAutoDeleteShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
+public class DriveLimitShareComposeSetting extends AbstractShareComposeSetting<Long> {
 
     /**
-     * Initializes a new {@link ForceAutoDeleteShareComposeSetting}.
+     * Initializes a new {@link DriveLimitShareComposeSetting}.
      */
-    public ForceAutoDeleteShareComposeSetting(ShareComposeHandler shareComposeHandler) {
-        super("forceAutoDelete", shareComposeHandler);
+    public DriveLimitShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("driveLimit", shareComposeHandler);
     }
 
     @Override
-    protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_FORCE_AUTO_DELETE, false, session));
+    protected Long getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        return MailUploadQuotaChecker.getUploadQuotaChecker(Module.MAIL.getFolderConstant(), session, ctx).getQuotaMax();
     }
 
 }

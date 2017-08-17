@@ -53,29 +53,29 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link ForceAutoDeleteShareComposeSetting}
+ * This setting is used to set the expiry date options. 'd' means day, 'w' means week,
+ * 'M' means month (notice the capital 'M' the small m stands for minutes) and 'y' stands for year.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.4
  */
-public class ForceAutoDeleteShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
+public class ExpiryDatesShareComposeSetting extends AbstractShareComposeSetting<String[]> {
 
     /**
-     * Initializes a new {@link ForceAutoDeleteShareComposeSetting}.
+     * Initializes a new {@link ExpiryDatesShareComposeSetting}.
      */
-    public ForceAutoDeleteShareComposeSetting(ShareComposeHandler shareComposeHandler) {
-        super("forceAutoDelete", shareComposeHandler);
+    public ExpiryDatesShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("expiryDates", shareComposeHandler);
     }
 
     @Override
-    protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_FORCE_AUTO_DELETE, false, session));
+    protected String[] getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        return getExpiryDates(session);
     }
 
 }
