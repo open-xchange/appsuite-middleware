@@ -3114,27 +3114,42 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         class Usage {
 
             private final AtomicLong usage;
-            private final AtomicInteger entities;
+            private final AtomicInteger users;
+            private final AtomicInteger contexts;
 
-            Usage(long initialUsage) {
+            Usage(long initialUsage, boolean forContext) {
                 super();
                 this.usage = new AtomicLong(initialUsage);
-                this.entities = new AtomicInteger(1);
+                if (forContext) {
+                    this.contexts = new AtomicInteger(1);
+                    this.users = new AtomicInteger(0);
+                } else {
+                    this.contexts = new AtomicInteger(0);
+                    this.users = new AtomicInteger(1);
+                }
             }
 
-            void addForEntity(long usage) {
+            void addForEntity(long usage, boolean forContext) {
                 if (usage > 0) {
                     this.usage.addAndGet(usage);
                 }
-                entities.incrementAndGet();
+                if (forContext) {
+                    contexts.incrementAndGet();
+                } else {
+                    users.incrementAndGet();
+                }
             }
 
             long getUsage() {
                 return usage.get();
             }
 
-            int getEntities() {
-                return entities.get();
+            int getNumContexts() {
+                return contexts.get();
+            }
+
+            int getNumUsers() {
+                return users.get();
             }
         }
         final ConcurrentMap<Integer, Usage> id2usage = new ConcurrentHashMap<>(stores.size());
@@ -3196,9 +3211,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                 long usage = rs.getLong(3);
 
                                 Integer filestoreId;
+                                boolean forContext = true;
                                 if (userId > 0) {
                                     // User-associated file storage usage
                                     filestoreId = user2filestore.get(new UserId(userId, contextId));
+                                    forContext = false;
                                 } else {
                                     // Context-associated file storage usage
                                     filestoreId = context2filestore.get(Integer.valueOf(contextId));
@@ -3206,14 +3223,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
                                 Usage fsUsage = id2usage.get(filestoreId);
                                 if (null == fsUsage) {
-                                    Usage newUsage = new Usage(usage);
+                                    Usage newUsage = new Usage(usage, forContext);
                                     fsUsage = id2usage.putIfAbsent(filestoreId, newUsage);
                                     if (null != fsUsage) {
                                         // Another thread inserted usage in the meantime
-                                        fsUsage.addForEntity(usage);
+                                        fsUsage.addForEntity(usage, forContext);
                                     }
                                 } else {
-                                    fsUsage.addForEntity(usage);
+                                    fsUsage.addForEntity(usage, forContext);
                                 }
                             }
                         } catch (SQLException e) {
@@ -3317,9 +3334,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             if (null == fsUsage) {
                 store.setCurrentContexts(Integer.valueOf(0));
                 store.setUsed(L(0));
+                store.setReserved(L(0));
             } else {
-                store.setCurrentContexts(Integer.valueOf(fsUsage.getEntities()));
+                store.setCurrentContexts(Integer.valueOf(fsUsage.getNumContexts() + fsUsage.getNumUsers()));
                 store.setUsed(L(toMB(fsUsage.getUsage())));
+                store.setReserved(L((getAverageFilestoreSpaceForContext() * fsUsage.getNumContexts()) + (getAverageFilestoreSpaceForUser() * fsUsage.getNumUsers())));
             }
         }
     }
