@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -157,9 +158,20 @@ public class EnvelopeTestCommandParser extends AbstractSimplifiedMatcherAwareCom
         if (command.getAddressPart() != null) {
             jsonObject.put(EnvelopeTestField.addresspart.name(), command.getAddressPart().substring(1));
         }
-        jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(EnvelopeTestField.headers.name(), new JSONArray(toLowerCase((List<String>) command.getArguments().get(command.getTagArguments().size()))));
         jsonObject.put(EnvelopeTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
 
+    }
+
+    private List<String> toLowerCase(List<String> data) {
+        data.replaceAll(new UnaryOperator<String>() {
+
+            @Override
+            public String apply(String t) {
+                return t.toLowerCase();
+            }
+        });
+        return data;
     }
 
     @Override

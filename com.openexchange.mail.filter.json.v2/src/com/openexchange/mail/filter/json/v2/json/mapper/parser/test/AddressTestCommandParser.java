@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser implements ExtendedFieldTestCommandParser{
+public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser implements ExtendedFieldTestCommandParser {
 
     /**
      * Initializes a new {@link AddressTestCommandParser}.
@@ -94,8 +95,8 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
 
         String matcher = CommandParserJSONUtil.getString(jsonObject, AddressTestField.comparison.name(), Commands.ADDRESS.getCommandName());
         String normalizedMatcher = MatchType.getNormalName(matcher);
-        if(normalizedMatcher != null){
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
+        if (normalizedMatcher != null) {
+            if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)) {
                 handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
             } else {
                 argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
@@ -107,7 +108,7 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
             }
             return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
         } else {
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
+            if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)) {
                 handleSimplifiedMatcher(matcher, argList, jsonObject);
             } else {
                 argList.add(ArgumentUtil.createTagArgument(matcher));
@@ -122,7 +123,7 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
     }
 
     @Override
-    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException {
         StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
         if (data.hasAndNotNull(AddressTestField.addresspart.name())) {
             argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(data, AddressTestField.addresspart.name(), Commands.ADDRESS.getCommandName())));
@@ -136,7 +137,7 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size()+1);
+        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size() + 1);
         String matchType = command.getMatchType();
         MatchType type;
         if (matchType == null) {
@@ -146,7 +147,7 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
             matchType = matchType.substring(1);
             type = MatchType.valueOf(matchType);
             type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
-            if(transformToNotMatcher){
+            if (transformToNotMatcher) {
                 jsonObject.put(AddressTestField.comparison.name(), type.getNotName());
             } else {
                 jsonObject.put(AddressTestField.comparison.name(), type.name());
@@ -155,8 +156,19 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
         if (command.getAddressPart() != null) {
             jsonObject.put(AddressTestField.addresspart.name(), command.getAddressPart().substring(1));
         }
-        jsonObject.put(AddressTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(AddressTestField.headers.name(), new JSONArray(toLowerCase((List) command.getArguments().get(command.getTagArguments().size()))));
         jsonObject.put(AddressTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));
+    }
+
+    private List<String> toLowerCase(List<String> data) {
+        data.replaceAll(new UnaryOperator<String>() {
+
+            @Override
+            public String apply(String t) {
+                return t.toLowerCase();
+            }
+        });
+        return data;
     }
 
     @Override
@@ -164,15 +176,15 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
         Map<String, Set<String>> result = new HashMap<>(2);
         // add envelope parts
         Set<String> parts = new HashSet<>();
-        for(Headers part: Headers.values()){
+        for (Headers part : Headers.values()) {
             parts.add(part.getHeaderName());
         }
         result.put("headers", parts);
 
         // add address parts
         Set<String> addressParts = new HashSet<>();
-        for(AddressParts part: AddressParts.values()){
-            if(part.isValid(capabilities)){
+        for (AddressParts part : AddressParts.values()) {
+            if (part.isValid(capabilities)) {
                 addressParts.add(part.name());
             }
         }
