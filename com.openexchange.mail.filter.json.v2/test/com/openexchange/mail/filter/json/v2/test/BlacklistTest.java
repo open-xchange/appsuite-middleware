@@ -47,89 +47,76 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.config;
+package com.openexchange.mail.filter.json.v2.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Test;
+import com.openexchange.mail.filter.json.v2.config.Blacklist;
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.BasicGroup;
 import com.openexchange.mail.filter.json.v2.config.MailFilterBlacklistProperty.Field;
 
 /**
- * {@link Blacklist} is a collection of blacklisted mail filter elements for a single user
+ * {@link BlacklistTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class Blacklist {
-
-    private final Map<String, Set<String>> blackmap;
+public class BlacklistTest {
 
     /**
-     * Initializes a new {@link Blacklist}.
+     * Initializes a new {@link BlacklistTest}.
      */
-    public Blacklist(Map<String, Set<String>> blackmap) {
+    public BlacklistTest() {
         super();
-        this.blackmap = blackmap;
     }
 
-    /**
-     * Checks if the the value is blacklisted for the given {@link BasicGroup}
-     *
-     * @param basic The {@link BasicGroup} to check
-     * @param value The value
-     * @return true if the blacklist of the {@link BasicGroup} contains the given value, otherwise false.
-     */
-    public boolean isBlacklisted(BasicGroup basic, String value) {
-        if (blackmap.containsKey(basic.name())) {
-            return blackmap.get(basic.name()).contains(value);
-        }
-        return false;
+    private static final Map<String, Set<String>> MAP = new HashMap<>();
+
+    static {
+        MAP.put(Blacklist.key(BasicGroup.tests, "from", Field.comparisons), Collections.singleton("is"));
+        MAP.put(Blacklist.key(BasicGroup.tests, "address", Field.headers), Collections.singleton("from"));
+        MAP.put(BasicGroup.actions.name(), Collections.singleton("keep"));
+        MAP.put(BasicGroup.tests.name(), Collections.singleton("envelope"));
+        MAP.put(BasicGroup.comparisons.name(), Collections.singleton("not is"));
     }
 
-    /**
-     * Checks if the the value is blacklisted for the given {@link BasicGroup}, element and {@link Field}
-     *
-     * @param basic The {@link BasicGroup}
-     * @param element The element of the {@link BasicGroup}
-     * @param field The {@link Field} of the element
-     * @param value The value
-     * @return true if the blacklist of the specific {@link Field} contains the given value, otherwise false.
-     */
-    public boolean isBlacklisted(BasicGroup basic, String element, Field field, String value) {
-        String key = key(basic, element, field);
-        if (blackmap.containsKey(key)) {
-            return blackmap.get(key).contains(value);
-        }
-        return false;
-    }
+    @Test
+    public void testBlacklist() {
+        Blacklist blacklist = new Blacklist(MAP);
 
-    private static final String DOT = ".";
+        // Test basic groups
+        assertTrue(blacklist.isBlacklisted(BasicGroup.actions, "keep"));
+        assertTrue(blacklist.isBlacklisted(BasicGroup.tests, "envelope"));
+        assertTrue(blacklist.isBlacklisted(BasicGroup.comparisons, "not is"));
 
-    /**
-     * Creates a key which is used by this Blacklist
-     *
-     * @param basic The {@link BasicGroup}
-     * @param element The element
-     * @param field The {@link Field}
-     * @return The key for this triplet
-     */
-    public static String key(BasicGroup basic, String element, Field field) {
-        return basic.name() + DOT + element + DOT + field.name();
-    }
+        assertFalse(blacklist.isBlacklisted(BasicGroup.actions, "redirect"));
+        assertFalse(blacklist.isBlacklisted(BasicGroup.tests, "true"));
+        assertFalse(blacklist.isBlacklisted(BasicGroup.comparisons, "regex"));
 
-    /**
-     * Returns a single blacklist
-     *
-     * @param basic The {@link BasicGroup}
-     * @param element The element name of the {@link BasicGroup}
-     * @param field The {@link Field}
-     * @return A set of blacklisted values or null
-     */
-    public Set<String> get(BasicGroup basic, String element, Field field) {
-        if (element == null) {
-            return blackmap.get(basic.name());
-        }
-        return blackmap.get(key(basic, element, field));
+        // Tests subgroups
+        assertTrue(blacklist.isBlacklisted(BasicGroup.tests, "from", Field.comparisons, "is"));
+        assertTrue(blacklist.isBlacklisted(BasicGroup.tests, "address", Field.headers, "from"));
+
+        assertFalse(blacklist.isBlacklisted(BasicGroup.tests, "from", Field.comparisons, "regex"));
+
+        // Test get
+        Set<String> fromBlacklist = blacklist.get(BasicGroup.tests, "from", Field.comparisons);
+        assertNotNull(fromBlacklist);
+        assertTrue(fromBlacklist.contains("is"));
+
+        Set<String> testBlacklist = blacklist.get(BasicGroup.tests, null, null);
+        assertNotNull(testBlacklist);
+        assertTrue(testBlacklist.contains("envelope"));
+
+        Set<String> nullBlacklist = blacklist.get(BasicGroup.tests, "to", Field.comparisons);
+        assertNull(nullBlacklist);
     }
 
 }
