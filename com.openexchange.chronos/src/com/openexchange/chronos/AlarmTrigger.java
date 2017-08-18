@@ -62,6 +62,7 @@ public class AlarmTrigger {
     private String action;
     private Integer alarm;
     private String eventId;
+    private String folder;
     private String recurrence;
     private Long time;
     private Integer userId;
@@ -79,6 +80,7 @@ public class AlarmTrigger {
     private boolean isTimeSet=false;
     private boolean isUserIdSet=false;
     private boolean isProcessedSet=false;
+    private boolean isFolderSet = false;
 
     /**
      * Initializes a new {@link AlarmTrigger}.
@@ -188,6 +190,42 @@ public class AlarmTrigger {
      */
     public String getEventId() {
         return eventId;
+    }
+
+    /**
+     * Gets the folder
+     *
+     * @return The folder
+     */
+    public String getFolder() {
+        return folder;
+    }
+
+    /**
+     * Sets the folder
+     *
+     * @param folder The folder to set
+     */
+    public void setFolder(String folder) {
+        this.folder = folder;
+        this.isFolderSet = true;
+    }
+
+    /**
+     * Gets the isFolderSet
+     *
+     * @return The isFolderSet
+     */
+    public boolean containsFolder() {
+        return isFolderSet;
+    }
+
+    /**
+     * Removes the folder
+     */
+    public void removeFolder() {
+        this.folder = null;
+        this.isFolderSet = false;
     }
 
     /**

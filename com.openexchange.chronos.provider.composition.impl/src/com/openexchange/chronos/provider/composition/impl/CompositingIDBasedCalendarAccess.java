@@ -364,12 +364,12 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger(long until) throws OXException {
+    public List<AlarmTrigger> getAlarmTrigger() throws OXException {
         List<CalendarAccount> accounts = getAccounts();
         List<AlarmTrigger> result = new ArrayList<>();
         for (CalendarAccount account : accounts) {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(account.getAccountId());
-            result.addAll(calendarAccess.getAlarmTrigger(until));
+            result.addAll(calendarAccess.getAlarmTrigger());
         }
         return result;
     }

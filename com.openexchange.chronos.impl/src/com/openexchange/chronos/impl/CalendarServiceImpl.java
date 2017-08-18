@@ -81,6 +81,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -386,12 +387,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, final long until) throws OXException {
+    public List<AlarmTrigger> getAlarmTrigger(CalendarSession session) throws OXException {
         return new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
-
             @Override
             protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return storage.getAlarmTriggerStorage().getAlarmTriggers(session.getUserId(), until);
+                return storage.getAlarmTriggerStorage().getAlarmTriggers(session.getUserId(), new SearchOptions(session));
             }
         }.executeQuery();
     }

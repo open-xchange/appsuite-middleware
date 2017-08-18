@@ -92,6 +92,10 @@ public enum AlarmTriggerField {
     /**
      * The user id
      */
-    USER_ID
+    USER_ID,
+    /**
+     * The folder of the event
+     */
+    FOLDER
 
 }

@@ -257,6 +257,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "alarm INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "eventId VARCHAR(128) NOT NULL," +
+                "folder VARCHAR(255) NOT NULL,"+
                 "triggerDate BIGINT(20) NOT NULL," +
                 "action VARCHAR(32) NOT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +

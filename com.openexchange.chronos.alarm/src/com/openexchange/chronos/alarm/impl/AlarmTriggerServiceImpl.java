@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -172,6 +173,18 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
                         trigger.setRecurrence(String.valueOf(event.getRecurrenceId().getValue().getTimestamp()));
                     }
                     trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), event, UTC).getTime());
+                }
+
+                // Set proper folder id
+                for (Attendee att : event.getAttendees()) {
+                    if (att.getEntity() == userId) {
+                        trigger.setFolder(att.getFolderID());
+                        break;
+                    }
+                }
+
+                if (!trigger.containsFolder()) {
+                    // TODO throw proper exception
                 }
 
                 storage.insertAlarmTrigger(trigger);

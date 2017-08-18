@@ -54,14 +54,13 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
-import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 
 /**
@@ -174,29 +173,6 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.CONTEXT_ID, new IntegerMapping<AlarmTrigger>(ChronosAlarmJsonFields.CONTEXT, null) {
-
-            @Override
-            public boolean isSet(AlarmTrigger object) {
-                return object.containsContextId();
-            }
-
-            @Override
-            public void set(AlarmTrigger object, Integer value) throws OXException {
-                object.setContextId(value);
-            }
-
-            @Override
-            public Integer get(AlarmTrigger object) {
-                return object.getContextId();
-            }
-
-            @Override
-            public void remove(AlarmTrigger object) {
-                object.removeContextId();
-            }
-        });
-
         mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>(ChronosAlarmJsonFields.ACCOUNT, null) {
 
             @Override
@@ -266,30 +242,30 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.PROCESSED, new BooleanMapping<AlarmTrigger>(ChronosAlarmJsonFields.PROCESSED, null) {
+        mappings.put(AlarmTriggerField.FOLDER, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.FOLDER, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
-                return object.containsProcessed();
+                return object.containsFolder();
             }
 
             @Override
-            public void set(AlarmTrigger object, Boolean value) throws OXException {
-                object.setProcessed(value);
+            public void set(AlarmTrigger object, String value) throws OXException {
+                object.setFolder(value);
             }
 
             @Override
-            public Boolean get(AlarmTrigger object) {
-                return object.isProcessed();
+            public String get(AlarmTrigger object) {
+                return object.getFolder();
             }
 
             @Override
             public void remove(AlarmTrigger object) {
-                object.removeProcessed();
+                object.removeFolder();
             }
         });
 
-        mappings.put(AlarmTriggerField.TIME, new LongMapping<AlarmTrigger>(ChronosAlarmJsonFields.TIME, null) {
+        mappings.put(AlarmTriggerField.TIME, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.TIME, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -297,13 +273,15 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
 
             @Override
-            public void set(AlarmTrigger object, Long value) throws OXException {
-                object.setTime(value);
+            public void set(AlarmTrigger object, String value) throws OXException {
+                DateTime dateTime = DateTime.parse("UTC", value);
+                object.setTime(dateTime.getTimestamp());
             }
 
             @Override
-            public Long get(AlarmTrigger object) {
-                return object.getTime();
+            public String get(AlarmTrigger object) {
+                DateTime result = new DateTime(object.getTime());
+                return result.toString();
             }
 
             @Override

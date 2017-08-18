@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,11 +67,11 @@ public interface AlarmTriggerStorage {
      * Lists alarm triggers for the given user from now until the given time in ascending order
      *
      * @param user The user id
-     * @param until The range
+     * @param options The search options
      * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException;
+    List<AlarmTrigger> getAlarmTriggers(int user, SearchOptions options) throws OXException;
 
     /**
      * Inserts the alarm trigger

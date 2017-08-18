@@ -363,9 +363,18 @@ public interface CalendarService {
     CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
 
     /**
-     * @return
+     * Retrieves upcoming alarm triggers.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger(CalendarSession session, long until) throws OXException;
+    List<AlarmTrigger> getAlarmTrigger(CalendarSession session) throws OXException;
 
 }

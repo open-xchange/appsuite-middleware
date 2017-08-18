@@ -129,6 +129,29 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
+        mappings.put(AlarmTriggerField.FOLDER, new VarCharMapping<AlarmTrigger>("folder", "Folder") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, String value) {
+                alarmTrigger.setFolder(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsFolder();
+            }
+
+            @Override
+            public String get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getFolder();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeFolder();
+            }
+        });
+
         mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>("alarm", "Alarm ID") {
 
             @Override

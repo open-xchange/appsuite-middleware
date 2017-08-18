@@ -313,11 +313,15 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Retrieves all upcoming alarm triggers until the given time.
-     *
-     * @param until The time limit
+     * 
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
      * @return A list of upcoming alarm triggers
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger(long until) throws OXException;
+    List<AlarmTrigger> getAlarmTrigger() throws OXException;
 
 }

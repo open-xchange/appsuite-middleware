@@ -60,15 +60,33 @@ import com.openexchange.chronos.AlarmTrigger;
 public class ChronosAlarmJsonFields {
 
     /**
-     * The action of the alrm. See {@link AlarmTrigger#getAction()}
+     * The action of the alarm. See {@link AlarmTrigger#getAction()}
      */
     public static final String ACTION = "action";
+    /**
+     * The alarm id of the alarm. See {@link AlarmTrigger#getAlarm()}
+     */
     public static final String ALARM = "alarmId";
-    public static final String CONTEXT = "contextId";
+
+    /**
+     * The calendar account. See {@link AlarmTrigger#getAccount()}
+     */
     public static final String ACCOUNT = "account";
+    /**
+     * The event id. See {@link AlarmTrigger#getEventId()}
+     */
     public static final String EVENT_ID = "eventId";
+    /**
+     * The recurrence id. See {@link AlarmTrigger#getRecurrence()}
+     */
     public static final String RECURRENCE = "recurrence";
+    /**
+     * The datetime of the alarm. See {@link AlarmTrigger#getTime()}
+     */
     public static final String TIME = "time";
-    public static final String PROCESSED = "processed";
+    /**
+     * The folder of the event. See {@link AlarmTrigger#getFolder()}
+     */
+    public static final String FOLDER = "folder";
 
 }

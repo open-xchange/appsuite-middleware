@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.alarm.json;
 
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.AlarmTrigger;
@@ -67,6 +69,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class UntilAction extends ChronosAction {
 
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeEnd");
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("rangeStart");
+
     /**
      * Initializes a new {@link UntilAction}.
      * @param services
@@ -76,10 +81,18 @@ public class UntilAction extends ChronosAction {
     }
 
     @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        String parameter = requestData.getParameter("until");
-        long until = Long.valueOf(parameter);
-        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger(until);
+        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger();
         return new AJAXRequestResult(alarmTrigger, AlarmTriggerConverter.INPUT_FORMAT);
     }
 

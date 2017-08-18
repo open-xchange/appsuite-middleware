@@ -212,6 +212,18 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
 
-    List<AlarmTrigger> getAlarmTrigger(long until) throws OXException;
+    /**
+     * Retrieves upcoming alarm trigger.
+     * 
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     *
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger() throws OXException;
 
 }

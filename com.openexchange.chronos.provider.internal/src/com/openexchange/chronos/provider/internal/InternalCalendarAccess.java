@@ -310,8 +310,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger(long until) throws OXException {
-        return getCalendarService().getAlarmTrigger(session, until);
+    public List<AlarmTrigger> getAlarmTrigger() throws OXException {
+        return getCalendarService().getAlarmTrigger(session);
     }
 
 }

@@ -412,10 +412,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 touch(originalEvent.getId());
             }
             AlarmTriggerService triggerService = getTriggerService();
-            Event alarmTriggerEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-            alarmTriggerEvent = EventMapper.getInstance().copy(eventData, alarmTriggerEvent, eventUpdate == null ? (EventField[]) null : eventUpdate.getUpdatedFields().toArray(new EventField[eventUpdate.getUpdatedFields().size()]));
-            alarmTriggerEvent.setId(originalEvent.getId());
-            alarmTriggerEvent.setFolderId(folder.getID());
+            Event alarmTriggerEvent = loadEventData(originalEvent.getId());
             SortedSet<RecurrenceId> exceptions = null;
             if (alarmTriggerEvent.getSeriesId() != null) {
                 exceptions = getChangeExceptionDates(alarmTriggerEvent.getSeriesId());

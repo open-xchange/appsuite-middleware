@@ -59,6 +59,7 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -158,25 +159,26 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException {
+    public List<AlarmTrigger> getAlarmTriggers(int user, SearchOptions options) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(user, until, con);
+            return getAlarmTriggers(user, options.getFrom() != null ? options.getFrom().getTime() : System.currentTimeMillis(), options.getUntil().getTime(), con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
     }
 
-    private List<AlarmTrigger> getAlarmTriggers(int user, long until, Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int user, Long from, Long until, Connection con) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate>? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, user);
+                stmt.setLong(parameterIndex++, from);
                 stmt.setLong(parameterIndex++, until);
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
