@@ -61,6 +61,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String EVENT_NOT_FOUND_MSG = "The requested event was not found.";
 
+    public static final String FOLDER_NOT_FOUND_MSG = "The requested folder was not found.";
+
     public static final String ATTENDEE_NOT_FOUND_MSG = "The requested attendee was not found.";
 
     public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";

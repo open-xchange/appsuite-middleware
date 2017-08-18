@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.chronos,
  com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,

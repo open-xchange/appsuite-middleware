@@ -62,9 +62,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -495,11 +497,14 @@ public class CalendarUtils {
      * @return The object identifiers
      */
     public static String[] getObjectIDs(List<Event> events) {
-        String[] objectIDs = new String[events.size()];
-        for (int i = 0; i < events.size(); i++) {
-            objectIDs[i] = events.get(i).getId();
+        if (null == events || 0 == events.size()) {
+            return new String[0];
         }
-        return objectIDs;
+        Set<String> objectIDs = new HashSet<String>(events.size());
+        for (Event event : events) {
+            objectIDs.add(event.getId());
+        }
+        return objectIDs.toArray(new String[objectIDs.size()]);
     }
 
     /**

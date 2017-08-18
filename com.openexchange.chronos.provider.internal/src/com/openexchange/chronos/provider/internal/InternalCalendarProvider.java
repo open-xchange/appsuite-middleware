@@ -92,4 +92,9 @@ public class InternalCalendarProvider implements CalendarProvider {
         return new InternalCalendarAccess(calendarSession);
     }
 
+    @Override
+    public void initialize(Session session, CalendarAccount account) throws OXException {
+        // nothing to do
+    }
+
 }

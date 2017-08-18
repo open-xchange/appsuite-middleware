@@ -56,6 +56,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.DATA_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDER_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
@@ -117,6 +118,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Account not found [account %1$d]</li>
      */
     ACCOUNT_NOT_FOUND("Account not found [account %1$d]", ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4044),
+    /**
+     * <li>The requested folder was not found.</li>
+     * <li>Folder not found [folder %1$s]</li>
+     */
+    FOLDER_NOT_FOUND("Folder not found [folder %1$s]", FOLDER_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4045),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>

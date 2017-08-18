@@ -49,32 +49,28 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
-import static com.openexchange.chronos.provider.birthdays.Services.getService;
-import java.util.ArrayList;
-import java.util.Calendar;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.DelegatingEvent;
+import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.RecurrenceIterator;
-import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
@@ -82,18 +78,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Autoboxing;
-import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BirthdaysCalendarAccess}
@@ -101,26 +96,45 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarAccess implements CalendarAccess {
+public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess {
 
-    private final Session session;
-    private final CalendarFolder folder;
-    private final CalendarAccount account;
-    private final CalendarParameters parameters;
+    /** Search term to query for contacts having a birthday */
+    private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
+        .addSearchTerm(new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.BIRTHDAY)));
+
+    private final ServerSession session;
+    private final ServiceLookup services;
+    private final EventConverter eventConverter;
 
     /**
-     * Initializes a new {@link BirthdaysCalendarAccess}.
+     * Initializes a new {@link BirthdaysCalendarAccess2}.
      *
+     * @param services A service lookup reference
      * @param session The session
-     * @param folder The calendar folder
+     * @param account The underlying calendar account
      * @param parameters Additional calendar parameters
      */
-    public BirthdaysCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super();
+    public BirthdaysCalendarAccess(ServiceLookup services, ServerSession session, CalendarAccount account, CalendarParameters parameters) {
+        super(account, parameters, prepareFolder(session, account));
+        this.services = services;
         this.session = session;
-        this.account = account;
-        this.folder = new DefaultCalendarFolder("0", "Birthdays");
-        this.parameters = parameters;
+        this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
+    }
+
+    /**
+     * (Re-)initializes the birthdays calendar access.
+     */
+    public void initialize() throws OXException {
+        /*
+         * clean up any existing alarm remnants & insert new default alarms if configured
+         */
+        AlarmHelper alarmHelper = getAlarmHelper();
+        alarmHelper.deleteAllAlarms();
+        if (alarmHelper.hasDefaultAlarms()) {
+            List<Contact> contacts = getBirthdayContacts();
+            List<Event> seriesMasters = eventConverter.getSeriesMasters(contacts, null, null, getTimeZone());
+            alarmHelper.insertDefaultAlarms(seriesMasters);
+        }
     }
 
     @Override
@@ -129,191 +143,126 @@ public class BirthdaysCalendarAccess implements CalendarAccess {
     }
 
     @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        return Collections.singletonList(folder);
-    }
-
-    @Override
-    public CalendarFolder getFolder(String folderId) throws OXException {
-        if (false == folder.getId().equals(folderId)) {
-            throw OXException.notFound(folderId);
-        }
-        return folder;
-    }
-
-    @Override
-    public Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        if (false == folder.getId().equals(folderId)) {
-            throw OXException.notFound(folderId);
-        }
-        int[] decodedId = decodeId(eventId);
-        Contact contact = getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
-        Event birthdaySeries = getBirthdaySeries(contact);
-        if (null == recurrenceId) {
-            return birthdaySeries;
-        }
-        RecurrenceIterator<Event> iterator = getService(RecurrenceService.class).iterateEventOccurrences(birthdaySeries, getFrom(), getUntil());
-        if (false == iterator.hasNext()) {
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
-        }
-        return addAge(iterator.next(), contact, iterator.getPosition() - 1);
-    }
-
-    @Override
-    public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        List<Event> events = new ArrayList<Event>();
-        for (EventID eventID : eventIDs) {
-            events.add(getEvent(eventID.getFolderID(), eventID.getObjectID(), eventID.getRecurrenceID()));
-        }
-        return events;
-    }
-
-    @Override
-    public List<Event> getEventsInFolder(String folderId) throws OXException {
-        if (false == folder.getId().equals(folderId)) {
-            throw OXException.notFound(folderId);
-        }
-        List<Event> events = new ArrayList<Event>();
-        CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-        SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
-        isNullTerm.addOperand(new ContactFieldOperand(ContactField.BIRTHDAY));
-        notTerm.addSearchTerm(isNullTerm);
-        SearchIterator<Contact> searchIterator = null;
+    protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+        Contact contact;
         try {
-            searchIterator = getService(ContactService.class).searchContacts(session, notTerm);
-            while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                Event birthdaySeries = getBirthdaySeries(contact);
-                RecurrenceIterator<Event> iterator = getService(RecurrenceService.class).iterateEventOccurrences(birthdaySeries, getFrom(), getUntil());
-                while (iterator.hasNext()) {
-                    events.add(addAge(iterator.next(), contact, iterator.getPosition() - 1));
-                }
-            }
-        } finally {
-            SearchIterators.close(searchIterator);
+            int[] decodedId = eventConverter.decodeEventId(eventId);
+            contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+        } catch (IllegalArgumentException | OXException e) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(e, eventId);
         }
-        return events;
+        Event event = null == recurrenceId ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, recurrenceId);
+        return postProcess(event);
+    }
+
+    @Override
+    protected List<Event> getEvents() throws OXException {
+        List<Contact> contacts = getBirthdayContacts();
+        if (isResolveOccurrences()) {
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
+        } else {
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+        }
     }
 
     @Override
     public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+        // no change exceptions possible
+        checkFolderId(folderId);
         return Collections.emptyList();
     }
 
     @Override
     public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
-        if (false == folder.getId().equals(folderId)) {
-            throw OXException.notFound(folderId);
+        checkFolderId(folderId);
+        String[] ignore = parameters.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
+        List<Event> newAndModifiedEvents = null;
+        if (false == contains(ignore, "changed")) {
+            SearchTerm<?> searchTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN)
+                .addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED))
+                .addOperand(new ConstantOperand<Date>(new Date(updatedSince)))
+            ;
+            List<Contact> contacts = searchBirthdayContacts(searchTerm);
+            newAndModifiedEvents = postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
         }
-        CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
-        SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
-        isNullTerm.addOperand(new ContactFieldOperand(ContactField.BIRTHDAY));
-        notTerm.addSearchTerm(isNullTerm);
-        SingleSearchTerm lastModifiedTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN);
-        lastModifiedTerm.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
-        lastModifiedTerm.addOperand(new ConstantOperand<Date>(new Date(updatedSince)));
-        CompositeSearchTerm andTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        andTerm.addSearchTerm(notTerm);
-        andTerm.addSearchTerm(lastModifiedTerm);
-        final List<Event> events = new ArrayList<Event>();
-        SearchIterator<Contact> searchIterator = null;
-        try {
-            searchIterator = getService(ContactService.class).searchContacts(session, andTerm);
-            while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                Event birthdaySeries = getBirthdaySeries(contact);
-                RecurrenceIterator<Event> iterator = getService(RecurrenceService.class).iterateEventOccurrences(birthdaySeries, getFrom(), getUntil());
-                while (iterator.hasNext()) {
-                    events.add(addAge(iterator.next(), contact, iterator.getPosition() - 1));
-                }
-            }
-        } finally {
-            SearchIterators.close(searchIterator);
+        List<Event> deletedEvents = null;
+        if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
+            //TODO: also consider deleted contacts in all visible contact folders (don't know if they had a birthday)? also consider contacts with removed birthday property?
         }
-        return new DefaultUpdatesResult(events, null);
+        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
 
-    private Date getFrom() {
-        return parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-    }
-
-    private Date getUntil() {
-        return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-    }
-
-    private Event getBirthdaySeries(Contact contact) throws OXException {
-        Event event = new Event();
-        event.setFolderId(folder.getId());
-        event.setId(encodeId(contact));
-        event.setSeriesId(event.getId());
-        event.setSummary(getSummary(contact, 0));
-        //        event.setCreatedBy(contact.getCreatedBy());
-        //        event.setCreated(contact.getCreationDate());
-        //        event.setModifiedBy(contact.getModifiedBy());
-        //        event.setLastModified(contact.getLastModified());
-        event.setRecurrenceRule("FREQ=YEARLY");
-        event.setTransp(TimeTransparency.TRANSPARENT);
-        event.setUid(contact.getUid());
-        Attendee attendee = new Attendee();
-        attendee.setCuType(CalendarUserType.INDIVIDUAL);
-        attendee.setCn(contact.getDisplayName());
-        attendee.setUri(CalendarUtils.getURI(contact.getEmail1()));
-        if (0 < contact.getInternalUserId()) {
-            attendee.setEntity(contact.getInternalUserId());
+    private Event postProcess(Event event) throws OXException {
+        if (contains(getFields(), EventField.ALARMS)) {
+            event = getAlarmHelper().applyAlarms(event);
         }
-        attendee.setPartStat(ParticipationStatus.ACCEPTED);
-        event.setAttendees(Collections.singletonList(attendee));
-
-        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, contact.getBirthday());
-        CalendarUtils.truncateTime(calendar);
-        event.setStartDate(new DateTime(calendar.getTimeInMillis()).toAllDay());
-        calendar.add(Calendar.DATE, 1);
-        event.setEndDate(new DateTime(calendar.getTimeInMillis()).toAllDay());
         return event;
     }
 
-    private Event addAge(Event birthdayOccurrence, final Contact contact, final int age) throws OXException {
-        if (0 < age) {
-            final String summary = getSummary(contact, age);
-            return new DelegatingEvent(birthdayOccurrence) {
-
-                @Override
-                public String getSummary() {
-                    return summary;
-                }
-            };
+    private List<Event> postProcess(List<Event> events) throws OXException {
+        if (contains(getFields(), EventField.ALARMS)) {
+            events = getAlarmHelper().applyAlarms(events);
         }
-        return birthdayOccurrence;
+        return sortEvents(events, new SearchOptions(parameters), getTimeZone());
     }
 
-    private String getSummary(Contact contact, int age) throws OXException {
-        Locale locale = ServerSessionAdapter.valueOf(session).getUser().getLocale();
-        StringHelper stringHelper = StringHelper.valueOf(locale);
-        String name = contact.getDisplayName();
-        if (0 < age) {
-            return String.format(stringHelper.getString(BirthdaysCalendarStrings.EVENT_SUMMARY_WITH_AGE), name, Autoboxing.I(age));
+    private List<Event> sortEvents(List<Event> events, SearchOptions searchOptions, TimeZone timeZone) throws OXException {
+        if (null == events || 2 > events.size() || null == searchOptions || SearchOptions.EMPTY.equals(searchOptions) ||
+            null == searchOptions.getSortOrders() || 0 == searchOptions.getSortOrders().length) {
+            return events;
+        }
+        Collections.sort(events, services.getService(CalendarUtilities.class).getComparator(searchOptions.getSortOrders(), timeZone));
+        return events;
+    }
+
+    private List<Contact> getBirthdayContacts() throws OXException {
+        return searchBirthdayContacts(null);
+    }
+
+    private List<Contact> searchBirthdayContacts(SearchTerm<?> searchTerm) throws OXException {
+        if (null == searchTerm) {
+            searchTerm = HAS_BIRTHDAY_TERM;
         } else {
-            return String.format(stringHelper.getString(BirthdaysCalendarStrings.EVENT_SUMMARY), name);
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(HAS_BIRTHDAY_TERM).addSearchTerm(searchTerm);
         }
-    }
-
-    private static int[] decodeId(String eventId) {
-        String[] splitted = Strings.splitByDelimNotInQuotes(eventId, '-');
-        if (null == splitted || 2 > splitted.length) {
-            throw new IllegalArgumentException(eventId);
-        }
-        int folderId, contactId;
+        SearchIterator<Contact> searchIterator = null;
         try {
-            folderId = Integer.parseInt(splitted[0]);
-            contactId = Integer.parseInt(splitted[1]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(eventId, e);
+            return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm));
+        } finally {
+            SearchIterators.close(searchIterator);
         }
-        return new int[] { folderId, contactId };
     }
 
-    private static String encodeId(Contact contact) {
-        return contact.getParentFolderID() + "-" + contact.getObjectID();
+    private AlarmHelper getAlarmHelper() {
+        return new AlarmHelper(services, session.getContext(), account);
+    }
+
+    private boolean isResolveOccurrences() {
+        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.TRUE).booleanValue();
+    }
+
+    private EventField[] getFields() {
+        return parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, EventField.values());
+    }
+
+    private TimeZone getTimeZone() throws OXException {
+        TimeZone timeZone = null != parameters ? parameters.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class) : null;
+        return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+    }
+
+    private static CalendarFolder prepareFolder(ServerSession session, CalendarAccount account) {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(FOLDER_ID);
+        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
+        StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
+        folder.setName(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
+        folder.setTransparency(TimeTransparency.TRANSPARENT);
+        Map<String, Object> config = account.getConfiguration();
+        if (null != config) {
+            folder.setColor((String) config.get("color"));
+            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+        }
+        return folder;
     }
 
 }

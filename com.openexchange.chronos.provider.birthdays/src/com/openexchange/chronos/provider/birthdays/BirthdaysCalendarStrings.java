@@ -76,6 +76,12 @@ public class BirthdaysCalendarStrings implements LocalizableStrings {
     public static final String EVENT_SUMMARY = "\ud83c\udf82 %1$s";
 
     /**
+     * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
+     * replaced by the contact's birthday in its localized medium date format.
+     */
+    public static final String EVENT_DESCRIPTION = "* %1$s";
+
+    /**
      * The event summary displayed for the n-th birthday of a contact, with the first parameter being replaced by the contact's display
      * name, and the second one with the contact's age. <code>\ud83c\udf82</code> is the <i>birthday cake</i> character
      * (<code>U+1F382</code>).

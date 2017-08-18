@@ -60,6 +60,7 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -74,7 +75,8 @@ import com.openexchange.java.util.TimeZones;
  */
 public abstract class SingleFolderCalendarAccess implements CalendarAccess {
 
-    private static final String FOLDER_ID = "0";
+    /** The constant folder identifier for single folder calendar accesses */
+    public static final String FOLDER_ID = "0";
 
     protected final CalendarFolder folder;
     protected final CalendarParameters parameters;
@@ -83,14 +85,25 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     /**
      * Initializes a new {@link SingleFolderCalendarAccess}.
      *
+     * @param parameters The calendar parameters
      * @param account The calendar account
-     * @param parameters The calendar paramters
      */
     protected SingleFolderCalendarAccess(CalendarAccount account, CalendarParameters parameters) {
+        this(account, parameters, prepareFolder(account));
+    }
+
+    /**
+     * Initializes a new {@link SingleFolderCalendarAccess}.
+     *
+     * @param parameters The calendar parameters
+     * @param account The calendar account
+     * @param folder The folder to use
+     */
+    protected SingleFolderCalendarAccess(CalendarAccount account, CalendarParameters parameters, CalendarFolder folder) {
         super();
-        this.folder = prepareFolder(account, parameters);
-        this.parameters = parameters;
         this.account = account;
+        this.parameters = parameters;
+        this.folder = folder;
     }
 
     @Override
@@ -145,7 +158,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
         List<Event> events = new ArrayList<Event>();
         for (Event event : getEvents()) {
             if (CalendarUtils.isInRange(event, getFrom(), getUntil(), TimeZones.UTC)) {
-                event.setFolderId(folderId);
+                //                event.setFolderId(folderId);
                 events.add(event);
             }
         }
@@ -168,12 +181,12 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
 
     protected String checkFolderId(String folderId) throws OXException {
         if (false == folder.getId().equals(folderId)) {
-            throw OXException.notFound(folderId);
+            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(folderId);
         }
         return folderId;
     }
 
-    private static CalendarFolder prepareFolder(CalendarAccount account, CalendarParameters parameters) {
+    private static CalendarFolder prepareFolder(CalendarAccount account) {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(FOLDER_ID);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));

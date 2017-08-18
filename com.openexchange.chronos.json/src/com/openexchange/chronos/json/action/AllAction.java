@@ -104,13 +104,11 @@ public class AllAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         String folderId = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         List<Event> events = null != folderId ? calendarAccess.getEventsInFolder(folderId) : calendarAccess.getEventsOfUser();
-        long timeStamp=0;
-        for(Event event: events){
-            if(event.getLastModified().getTime()>timeStamp){
-                timeStamp = event.getLastModified().getTime();
-            }
+        long timestamp = 0L;
+        for (Event event : events) {
+            timestamp = Math.max(timestamp, event.getTimestamp());
         }
-        return new AJAXRequestResult(events, new Date(timeStamp), EventResultConverter.INPUT_FORMAT);
+        return new AJAXRequestResult(events, new Date(timestamp), EventResultConverter.INPUT_FORMAT);
     }
 
 }
