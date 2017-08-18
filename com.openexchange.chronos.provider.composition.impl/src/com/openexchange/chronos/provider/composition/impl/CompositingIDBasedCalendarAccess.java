@@ -371,6 +371,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(account.getAccountId());
             result.addAll(calendarAccess.getAlarmTrigger());
         }
+
+        for (AlarmTrigger trigger : result) {
+            trigger.setFolder(getUniqueFolderId(trigger.getAccount(), trigger.getFolder()));
+        }
         return result;
     }
 
