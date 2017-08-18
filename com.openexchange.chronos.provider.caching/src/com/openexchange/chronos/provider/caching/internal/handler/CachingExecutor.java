@@ -110,11 +110,11 @@ public class CachingExecutor {
 
                 EventUpdates diff = null;
                 boolean containsUID = containsUid(externalEvents);
-                if (!containsUID) {
+                if (containsUID) {
+                    diff = generateEventDiff(existingEvents, externalEvents);
+                } else {
                     //FIXME generate reproducible UID for upcoming refreshes
                     diff = new EmptyUidUpdates(existingEvents, externalEvents);
-                } else {
-                    diff = generateEventDiff(existingEvents, externalEvents);
                 }
 
                 if (!diff.isEmpty()) {
@@ -135,6 +135,12 @@ public class CachingExecutor {
         }
     }
 
+    /**
+     * Returns if all provided {@link Event}s do contain a UID
+     * 
+     * @param events A list of {@link Event}s to check for the UID
+     * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
+     */
     private boolean containsUid(List<Event> events) {
         for (Event event : events) {
             if (!event.containsUid()) {
