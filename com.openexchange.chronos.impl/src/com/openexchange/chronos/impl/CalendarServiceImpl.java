@@ -125,7 +125,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> getChangeExceptions(CalendarSession session, final String folderID, final String objectID) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -136,7 +136,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public long getSequenceNumber(CalendarSession session, final String folderID) throws OXException {
-        return new AbstractCalendarStorageOperation<Long>(session) {
+        return new InternalCalendarStorageOperation<Long>(session) {
 
             @Override
             protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -147,7 +147,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public String resolveByUID(CalendarSession session, final String uid) throws OXException {
-        return new AbstractCalendarStorageOperation<String>(session) {
+        return new InternalCalendarStorageOperation<String>(session) {
 
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -158,7 +158,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public String resolveByFilename(CalendarSession session, final String filename) throws OXException {
-        return new AbstractCalendarStorageOperation<String>(session) {
+        return new InternalCalendarStorageOperation<String>(session) {
 
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -169,7 +169,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final String pattern) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -180,7 +180,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final List<SearchFilter> filters, final List<String> queries) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -191,7 +191,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public Event getEvent(CalendarSession session, final String folderID, final EventID eventId) throws OXException {
-        return new AbstractCalendarStorageOperation<Event>(session) {
+        return new InternalCalendarStorageOperation<Event>(session) {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -202,7 +202,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> getEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -213,7 +213,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> getEventsInFolder(CalendarSession session, final String folderID) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -224,7 +224,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<Event> getEventsOfUser(final CalendarSession session) throws OXException {
-        return new AbstractCalendarStorageOperation<List<Event>>(session) {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -235,7 +235,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final String folderID, final long updatedSince) throws OXException {
-        return new AbstractCalendarStorageOperation<UpdatesResult>(session) {
+        return new InternalCalendarStorageOperation<UpdatesResult>(session) {
 
             @Override
             protected UpdatesResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -246,7 +246,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public UpdatesResult getUpdatedEventsOfUser(CalendarSession session, final long updatedSince) throws OXException {
-        return new AbstractCalendarStorageOperation<UpdatesResult>(session) {
+        return new InternalCalendarStorageOperation<UpdatesResult>(session) {
 
             @Override
             protected UpdatesResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -260,7 +260,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * insert event & notify handlers
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -279,7 +279,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update event & notify handlers
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -300,7 +300,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * touch event & notify handlers
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -320,7 +320,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * move event
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -340,7 +340,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update attendee
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -361,7 +361,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * delete event
          */
-        InternalCalendarResult result = new AbstractCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
@@ -387,7 +387,7 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, final long until) throws OXException {
-        return new AbstractCalendarStorageOperation<List<AlarmTrigger>>(session) {
+        return new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
 
             @Override
             protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
