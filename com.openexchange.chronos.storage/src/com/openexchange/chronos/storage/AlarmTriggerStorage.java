@@ -54,14 +54,24 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AlarmTriggerStorage}
+ * {@link AlarmTriggerStorage} is a storage for alarm triggers.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public interface AlarmTriggerStorage {
 
-    List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField[] fields) throws OXException;
+    /**
+     * Lists alarm triggers for the given user from now until the given time in ascending order
+     *
+     * @param contextId The context id
+     * @param user The user id
+     * @param until The range
+     * @param fields The requested fields
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTriggers(int contextId, int user, long until, AlarmTriggerField[] fields) throws OXException;
 
     /**
      * Inserts the alarm trigger

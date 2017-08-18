@@ -66,8 +66,9 @@ public class EventSeriesWrapper {
 
     /**
      * Initializes a new {@link EventSeriesWrapper}.
-     * @param event
-     * @param exceptions
+     * 
+     * @param event The event
+     * @param exceptions A set if exceptions
      */
     public EventSeriesWrapper(Event event, Set<RecurrenceId> exceptions) {
         super();
@@ -76,10 +77,9 @@ public class EventSeriesWrapper {
     }
 
     /**
-     * Initializes a new {@link EventSeriesWrapper}.
+     * Initializes a new {@link EventSeriesWrapper} without exceptions.
      *
-     * @param event
-     * @param exceptions
+     * @param event The event
      */
     public EventSeriesWrapper(Event event) {
         super();

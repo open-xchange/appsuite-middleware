@@ -56,7 +56,14 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.EventField;;
 
 /**
- * {@link AlarmChange}
+ * {@link AlarmChange} is a wrapper for informations for an alarm change.
+ *
+ * It can be created by using of the following methods:
+ * <ul>
+ * <li> {@link #newCreate(EventSeriesWrapper, Map)}</li>
+ * <li> {@link #newUpdate(EventSeriesWrapper, EventSeriesWrapper, Set, Map)}</li>
+ * <li> {@link #newDelete(EventSeriesWrapper)}</li>
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0

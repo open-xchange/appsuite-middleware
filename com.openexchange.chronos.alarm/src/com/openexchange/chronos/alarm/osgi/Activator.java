@@ -16,6 +16,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        // register the AlarmTriggerService
         registerService(AlarmTriggerService.class, new AlarmTriggerServiceImpl(getService(RecurrenceService.class)));
     }
 

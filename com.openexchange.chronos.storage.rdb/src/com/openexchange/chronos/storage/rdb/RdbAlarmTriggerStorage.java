@@ -67,7 +67,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link RdbAlarmTriggerStorage}
+ * {@link RdbAlarmTriggerStorage} is an implementation of the {@link AlarmTriggerStorage}
+ * which uses a sql database to store alarm triggers.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
@@ -81,10 +82,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     /**
      * Initializes a new {@link RdbAlarmTriggerStorage}.
      *
-     * @param context
-     * @param accountId
-     * @param dbProvider
-     * @param txPolicy
+     * @param context The context id
+     * @param accountId The account id
+     * @param dbProvider A db provider
+     * @param txPolicy The transaction policy
      */
     protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
@@ -157,25 +158,25 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[]) throws OXException {
+    public List<AlarmTrigger> getAlarmTriggers(int contextId, int user, long until, AlarmTriggerField fields[]) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(contextId, account, until, fields, con);
+            return getAlarmTriggers(contextId, user, until, fields, con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
     }
 
-    private List<AlarmTrigger> getAlarmTriggers(int contextId, int account, long until, AlarmTriggerField fields[], Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int contextId, int user, long until, AlarmTriggerField fields[], Connection con) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields(fields);
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND triggerDate<? ORDER BY triggerDate");
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, contextId);
-                stmt.setInt(parameterIndex++, account);
+                stmt.setInt(parameterIndex++, user);
                 stmt.setLong(parameterIndex++, until);
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {

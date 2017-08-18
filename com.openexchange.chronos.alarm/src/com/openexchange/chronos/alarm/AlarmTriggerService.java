@@ -52,7 +52,7 @@ package com.openexchange.chronos.alarm;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 
 /**
- * {@link AlarmTriggerService} provides
+ * {@link AlarmTriggerService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
@@ -63,7 +63,7 @@ public interface AlarmTriggerService {
      * Handles {@link AlarmChange}s
      *
      * @param change The {@link AlarmChange} to handle
-     * @param storage The alarm trigger storage
+     * @param storage The alarm trigger storage to use
      */
     void handleChange(AlarmChange change, AlarmTriggerStorage storage);
 

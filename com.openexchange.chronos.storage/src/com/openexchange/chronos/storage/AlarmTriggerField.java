@@ -51,21 +51,47 @@ package com.openexchange.chronos.storage;
 
 
 /**
- * {@link AlarmTriggerField}
+ * {@link AlarmTriggerField} contains the available fields of the {@link AlarmTrigger}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public enum AlarmTriggerField {
-
+    /**
+     * The calendar account id
+     */
     ACCOUNT,
+    /**
+     * The alarm action
+     */
     ACTION,
+    /**
+     * The id of the alarm
+     */
     ALARM_ID,
+    /**
+     * The context id
+     */
     CONTEXT_ID,
+    /**
+     * The id of the event the alarm belongs to
+     */
     EVENT_ID,
+    /**
+     * A flag indicating whether the trigger is already triggered or not
+     */
     PROCESSED,
+    /**
+     * The recurrence id
+     */
     RECURRENCE,
+    /**
+     * The trigger time
+     */
     TIME,
+    /**
+     * The user id
+     */
     USER_ID
 
 }

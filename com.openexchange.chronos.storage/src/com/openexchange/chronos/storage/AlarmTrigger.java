@@ -51,7 +51,8 @@ package com.openexchange.chronos.storage;
 
 
 /**
- * {@link AlarmTrigger}
+ * {@link AlarmTrigger}s contain the information about when an alarm will be triggered.
+ * It also tracks whether this trigger was already triggered or not.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0

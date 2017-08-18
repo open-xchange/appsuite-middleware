@@ -116,13 +116,28 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
     }
 
+    /**
+     * Handles newly created alarms
+     *
+     * @param create The {@link AlarmChange} of type {@link AlarmChange.Type#CREATE}
+     * @param storage The {@link AlarmTriggerStorage} to use
+     * @throws OXException
+     */
     private void handleCreate(AlarmChange create, AlarmTriggerStorage storage) throws OXException {
-        createAlarms(create.getAlarmsPerAttendee(), create.getNewEvent(), storage);
+        createAlarmTriggers(create.getAlarmsPerAttendee(), create.getNewEvent(), storage);
     }
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    private void createAlarms(Map<Integer, List<Alarm>> alarmsPerAttendee, EventSeriesWrapper eventWrapper, AlarmTriggerStorage storage) throws OXException {
+    /**
+     * Creates new alarm triggers
+     *
+     * @param alarmsPerAttendee A map of alarms per attendee
+     * @param eventWrapper The newly created event
+     * @param storage The {@link AlarmTriggerStorage} to use
+     * @throws OXException
+     */
+    private void createAlarmTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, EventSeriesWrapper eventWrapper, AlarmTriggerStorage storage) throws OXException {
         Event event = eventWrapper.getEvent();
         for(Integer userId: alarmsPerAttendee.keySet()){
 
@@ -166,6 +181,13 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
 
     }
 
+    /**
+     * Handles deleted alarms
+     *
+     * @param deletion The {@link AlarmChange} of type {@link AlarmChange.Type#DELETE}
+     * @param storage The {@link AlarmTriggerStorage} to use
+     * @throws OXException
+     */
     private void handleDelete(AlarmChange deletion, AlarmTriggerStorage storage) throws OXException {
 
         EventSeriesWrapper deletedEvent = deletion.getOldEvent();
@@ -191,6 +213,13 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
         RELEVANT_FIELDS.add(EventField.RECURRENCE_RULE);
     }
 
+    /**
+     * Handles updated alarms
+     *
+     * @param update The {@link AlarmChange} of type {@link AlarmChange.Type#UPDATE}
+     * @param storage The {@link AlarmTriggerStorage} to use
+     * @throws OXException
+     */
     private void handleUpdate(AlarmChange update, AlarmTriggerStorage storage) throws OXException {
 
         Set<EventField> updatedFields = update.getChangedFields();
@@ -204,7 +233,7 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
         storage.deleteAlarmTriggers(Collections.singletonList(new EventID(old.getFolderId(), old.getId(), old.getRecurrenceId())));
 
         // Then create new alarms from scratch
-        createAlarms(update.getAlarmsPerAttendee(), update.getNewEvent(), storage);
+        createAlarmTriggers(update.getAlarmsPerAttendee(), update.getNewEvent(), storage);
 
     }
 
