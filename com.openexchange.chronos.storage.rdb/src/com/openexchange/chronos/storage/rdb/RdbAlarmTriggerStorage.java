@@ -55,10 +55,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.storage.AlarmTrigger;
-import com.openexchange.chronos.storage.AlarmTriggerField;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -158,30 +158,30 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTriggers(int contextId, int user, long until, AlarmTriggerField fields[]) throws OXException {
+    public List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(contextId, user, until, fields, con);
+            return getAlarmTriggers(user, until, con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
     }
 
-    private List<AlarmTrigger> getAlarmTriggers(int contextId, int user, long until, AlarmTriggerField fields[], Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int user, long until, Connection con) throws OXException {
         try {
-            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields(fields);
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
+            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
-                stmt.setInt(parameterIndex++, contextId);
+                stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, user);
                 stmt.setLong(parameterIndex++, until);
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
-                        alrmTriggers.add(readTrigger(resultSet, fields));
+                        alrmTriggers.add(readTrigger(resultSet, mappedFields));
                     }
                 }
             }
@@ -192,7 +192,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     };
 
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField[] fields) throws SQLException, OXException {
-        return MAPPER.fromResultSet(resultSet, fields);
+        AlarmTrigger result = MAPPER.fromResultSet(resultSet, fields);
+        result.setAccount(accountId);
+        result.setContextId(context.getContextId());
+        return result;
     }
 
     @Override

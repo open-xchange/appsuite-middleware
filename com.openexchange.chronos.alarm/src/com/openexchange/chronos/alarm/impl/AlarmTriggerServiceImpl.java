@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -69,7 +70,6 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.AlarmTrigger;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.exception.OXException;
 

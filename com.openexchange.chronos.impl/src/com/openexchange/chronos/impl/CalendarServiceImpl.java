@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import java.util.Map.Entry;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
@@ -382,5 +383,16 @@ public class CalendarServiceImpl implements CalendarService {
             handler.handle(calendarEvent);
         }
         return result;
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, final long until) throws OXException {
+        return new AbstractCalendarStorageOperation<List<AlarmTrigger>>(session) {
+
+            @Override
+            protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return storage.getAlarmTriggerStorage().getAlarmTriggers(session.getUserId(), until);
+            }
+        }.executeQuery();
     }
 }

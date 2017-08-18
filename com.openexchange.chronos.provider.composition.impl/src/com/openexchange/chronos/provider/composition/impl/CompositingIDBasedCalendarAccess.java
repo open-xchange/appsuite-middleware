@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -304,7 +305,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
             calendarAccess.deleteFolder(getRelativeFolderId(folderId), clientTimestamp);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -315,9 +316,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
             folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
-        return getUniqueFolderId(accountId, folderId);
+            return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
@@ -327,9 +328,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public String createFolder(String parentFolderId, CalendarFolder folder) throws OXException {
         int accountId = getAccountId(parentFolderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        String folderId = calendarAccess.createFolder(getRelativeFolderId(parentFolderId), withRelativeID(folder));
-        return getUniqueFolderId(accountId, folderId);
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            String folderId = calendarAccess.createFolder(getRelativeFolderId(parentFolderId), withRelativeID(folder));
+            return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
@@ -360,6 +361,17 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             com.openexchange.tools.arrays.Collections.put(idsPerAccountId, accountId, relativeEventId);
         }
         return idsPerAccountId;
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTrigger(long until) throws OXException {
+        List<CalendarAccount> accounts = getAccounts();
+        List<AlarmTrigger> result = new ArrayList<>();
+        for (CalendarAccount account : accounts) {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(account.getAccountId());
+            result.addAll(calendarAccess.getAlarmTrigger(until));
+        }
+        return result;
     }
 
 }

@@ -47,53 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.alarm.json;
 
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.json.action.ChronosAction;
+import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AlarmTriggerStorage} is a storage for alarm triggers.
+ * {@link UntilAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
+public class UntilAction extends ChronosAction {
 
     /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
-     *
-     * @param user The user id
-     * @param until The range
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
+     * Initializes a new {@link UntilAction}.
+     * @param services
      */
-    List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException;
+    protected UntilAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Inserts the alarm trigger
-     *
-     * @param trigger The {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        String parameter = requestData.getParameter("until");
+        long until = Long.valueOf(parameter);
+        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger(until);
+        return new AJAXRequestResult(alarmTrigger, AlarmTriggerConverter.INPUT_FORMAT);
+    }
 
-    /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    /**
-     * Deletes the given alarm triggers
-     *
-     * @param alarmIds A list of alarm ids
-     * @throws OXException
-     */
-    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
 
 }

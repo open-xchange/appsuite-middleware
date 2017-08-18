@@ -47,53 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos;
 
-import java.util.List;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link AlarmTriggerStorage} is a storage for alarm triggers.
+ * {@link AlarmTriggerField} contains the available fields of the {@link AlarmTrigger}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
-
+public enum AlarmTriggerField {
     /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
-     *
-     * @param user The user id
-     * @param until The range
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
+     * The calendar account id
      */
-    List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException;
-
+    ACCOUNT,
     /**
-     * Inserts the alarm trigger
-     *
-     * @param trigger The {@link AlarmTrigger}
-     * @throws OXException
+     * The alarm action
      */
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
+    ACTION,
     /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
+     * The id of the alarm
      */
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
+    ALARM_ID,
     /**
-     * Deletes the given alarm triggers
-     *
-     * @param alarmIds A list of alarm ids
-     * @throws OXException
+     * The context id
      */
-    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
+    CONTEXT_ID,
+    /**
+     * The id of the event the alarm belongs to
+     */
+    EVENT_ID,
+    /**
+     * A flag indicating whether the trigger is already triggered or not
+     */
+    PROCESSED,
+    /**
+     * The recurrence id
+     */
+    RECURRENCE,
+    /**
+     * The trigger time
+     */
+    TIME,
+    /**
+     * The user id
+     */
+    USER_ID
 
 }

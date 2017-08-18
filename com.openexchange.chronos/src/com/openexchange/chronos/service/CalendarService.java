@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -360,5 +361,11 @@ public interface CalendarService {
      * @return The delete result
      */
     CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * @return
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger(CalendarSession session, long until) throws OXException;
 
 }

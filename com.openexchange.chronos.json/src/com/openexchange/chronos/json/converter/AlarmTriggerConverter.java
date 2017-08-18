@@ -47,53 +47,70 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.json.converter;
 
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AlarmTriggerStorage} is a storage for alarm triggers.
+ * {@link AlarmTriggerConverter}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
+public class AlarmTriggerConverter implements ResultConverter {
 
-    /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
-     *
-     * @param user The user id
-     * @param until The range
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
-     */
-    List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException;
+    public static final String INPUT_FORMAT = "alarm_trigger";
 
-    /**
-     * Inserts the alarm trigger
-     *
-     * @param trigger The {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
+    @Override
+    public String getInputFormat() {
+        return INPUT_FORMAT;
+    }
 
-    /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
 
-    /**
-     * Deletes the given alarm triggers
-     *
-     * @param alarmIds A list of alarm ids
-     * @throws OXException
-     */
-    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object resultObject = result.getResultObject();
+
+        if (resultObject instanceof List) {
+            @SuppressWarnings("unchecked") List<AlarmTrigger> triggers = (List<AlarmTrigger>) resultObject;
+
+            try {
+                JSONArray json = new JSONArray(triggers.size());
+                for (AlarmTrigger trigger : triggers) {
+                    json.put(toJSON(trigger, session));
+                }
+                result.setResultObject(json, "json");
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private JSONObject toJSON(AlarmTrigger trigger, ServerSession session) throws JSONException, OXException {
+        return AlarmTriggerMapper.getInstance().serialize(trigger, AlarmTriggerMapper.getInstance().getAssignedFields(trigger), "UTC", session);
+
+    }
 
 }

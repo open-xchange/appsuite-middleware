@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
@@ -306,6 +307,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
         return getFreeBusyService().checkForConflicts(session, event, attendees);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTrigger(long until) throws OXException {
+        return getCalendarService().getAlarmTrigger(session, until);
     }
 
 }

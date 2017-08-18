@@ -47,51 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.json.converter;
 
+import com.openexchange.chronos.AlarmTrigger;
 
 /**
- * {@link AlarmTriggerField} contains the available fields of the {@link AlarmTrigger}
+ * {@link ChronosAlarmJsonFields} contains all fields which are used by the {@link AlarmTriggerMapper}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public enum AlarmTriggerField {
+public class ChronosAlarmJsonFields {
+
     /**
-     * The calendar account id
+     * The action of the alrm. See {@link AlarmTrigger#getAction()}
      */
-    ACCOUNT,
-    /**
-     * The alarm action
-     */
-    ACTION,
-    /**
-     * The id of the alarm
-     */
-    ALARM_ID,
-    /**
-     * The context id
-     */
-    CONTEXT_ID,
-    /**
-     * The id of the event the alarm belongs to
-     */
-    EVENT_ID,
-    /**
-     * A flag indicating whether the trigger is already triggered or not
-     */
-    PROCESSED,
-    /**
-     * The recurrence id
-     */
-    RECURRENCE,
-    /**
-     * The trigger time
-     */
-    TIME,
-    /**
-     * The user id
-     */
-    USER_ID
+    public static final String ACTION = "action";
+    public static final String ALARM = "alarmId";
+    public static final String CONTEXT = "contextId";
+    public static final String ACCOUNT = "account";
+    public static final String EVENT_ID = "eventId";
+    public static final String RECURRENCE = "recurrence";
+    public static final String TIME = "time";
+    public static final String PROCESSED = "processed";
 
 }

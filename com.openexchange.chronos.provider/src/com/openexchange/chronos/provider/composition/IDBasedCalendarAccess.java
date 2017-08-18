@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition;
 
 import java.util.List;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -309,5 +310,14 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Retrieves all upcoming alarm triggers until the given time.
+     *
+     * @param until The time limit
+     * @return A list of upcoming alarm triggers
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger(long until) throws OXException;
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.List;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -210,5 +211,7 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    List<AlarmTrigger> getAlarmTrigger(long until) throws OXException;
 
 }

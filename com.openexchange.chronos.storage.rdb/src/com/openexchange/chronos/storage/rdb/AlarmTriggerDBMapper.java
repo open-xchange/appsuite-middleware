@@ -50,8 +50,8 @@
 package com.openexchange.chronos.storage.rdb;
 
 import java.util.EnumMap;
-import com.openexchange.chronos.storage.AlarmTrigger;
-import com.openexchange.chronos.storage.AlarmTriggerField;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;

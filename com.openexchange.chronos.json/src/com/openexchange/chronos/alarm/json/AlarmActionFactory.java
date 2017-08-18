@@ -47,53 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.alarm.json;
 
-import java.util.List;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.service.EventID;
+import java.util.Collection;
+import java.util.Collections;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AlarmTriggerStorage} is a storage for alarm triggers.
+ * {@link AlarmActionFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface AlarmTriggerStorage {
+public class AlarmActionFactory implements AJAXActionServiceFactory {
+
+    private final ImmutableMap<String, AJAXActionService> actions;
 
     /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
-     *
-     * @param user The user id
-     * @param until The range
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
+     * Initializes a new {@link AlarmActionFactory}.
      */
-    List<AlarmTrigger> getAlarmTriggers(int user, long until) throws OXException;
+    public AlarmActionFactory(ServiceLookup services) {
+        super();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("until", new UntilAction(services));
+        this.actions = actions.build();
+    }
 
-    /**
-     * Inserts the alarm trigger
-     *
-     * @param trigger The {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Collections.unmodifiableCollection(actions.values());
+    }
 
-    /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
-     */
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    /**
-     * Deletes the given alarm triggers
-     *
-     * @param alarmIds A list of alarm ids
-     * @throws OXException
-     */
-    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
+    }
 
 }
