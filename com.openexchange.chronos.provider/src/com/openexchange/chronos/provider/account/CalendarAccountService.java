@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 public interface CalendarAccountService {
 
     /**
-     * Inserts a new calendar account and checks for permissions.
+     * Creates a new calendar account and checks for permissions.
      * 
      * @param session The current user session
      * @param providerId The identifier of the corresponding calendar provider
@@ -75,7 +75,7 @@ public interface CalendarAccountService {
      * @return The loaded calendar account, or <code>null</code> if not found
      * @throws OXException if a database error occurs
      */
-    CalendarAccount insertAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException;
+    CalendarAccount createAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException;
 
     /**
      * Updates an existing calendar account and checks for permissions.
@@ -100,22 +100,32 @@ public interface CalendarAccountService {
     void deleteAccount(Session session, int id, long timestamp) throws OXException;
 
     /**
-     * Loads an existing calendar account and checks for permissions.
+     * Gets an existing calendar account and checks for permissions.
      * 
      * @param session The current user session
      * @param id The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
      * @throws OXException if permission check fails
      */
-    CalendarAccount loadAccount(Session session, int id) throws OXException;
+    CalendarAccount getAccount(Session session, int id) throws OXException;
 
     /**
-     * Loads a list of all calendar accounts stored for a specific user and checks for permissions.
+     * Gets a list of all calendar accounts stored for a specific user and checks for permissions.
      * 
      * @param session The current user session
      * @return The accounts, or an empty list if none were found
      * @throws OXException if permission check fails
      */
-    List<CalendarAccount> loadAccounts(Session session) throws OXException;
+    List<CalendarAccount> getAccounts(Session session) throws OXException;
+
+    /**
+     * Gets a list of all calendar accounts stored for s specific user and provider, also checks for permissions
+     * 
+     * @param session The current user session
+     * @param providerId The providerId to search with
+     * @return The accounts, or an empty list if none were found
+     * @throws OXException if permission check fails
+     */
+    List<CalendarAccount> getAccounts(Session session, String providerId) throws OXException;
 
 }

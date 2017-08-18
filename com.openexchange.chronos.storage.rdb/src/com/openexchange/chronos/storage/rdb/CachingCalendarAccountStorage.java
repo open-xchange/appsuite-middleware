@@ -83,8 +83,8 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public int insertAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException {
-        return delegate.insertAccount(providerId, userId, configuration);
+    public int createAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException {
+        return delegate.createAccount(providerId, userId, configuration);
     }
 
     @Override
@@ -100,10 +100,10 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public CalendarAccount loadAccount(int id) throws OXException {
+    public CalendarAccount getAccount(int id) throws OXException {
         final CacheService cacheService = getCacheService();
         if (null == cacheService) {
-            return delegate.loadAccount(id);
+            return delegate.getAccount(id);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
         final Object obj = cache.get(newCacheKey(cacheService, id));
@@ -111,7 +111,7 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
             return (CalendarAccount) obj;
         }
         
-        final CalendarAccount calendarAccount = delegate.loadAccount(id);
+        final CalendarAccount calendarAccount = delegate.getAccount(id);
         if (null != calendarAccount) {
             cache.put(newCacheKey(cacheService, id), calendarAccount, false);
         }
@@ -120,13 +120,29 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public List<CalendarAccount> loadAccounts(int userId) throws OXException {
+    public List<CalendarAccount> getAccounts(int userId) throws OXException {
         final CacheService cacheService = getCacheService();
         if (null == cacheService) {
-            return delegate.loadAccounts(userId);
+            return delegate.getAccounts(userId);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        List<CalendarAccount> calendarAccountList = delegate.loadAccounts(userId);
+        List<CalendarAccount> calendarAccountList = delegate.getAccounts(userId);
+        for (CalendarAccount calendarAccount : calendarAccountList) {
+            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId()))) {
+                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId()), calendarAccount, false);
+            }
+        }
+        return calendarAccountList;
+    }
+
+    @Override
+    public List<CalendarAccount> getAccounts(int userId, String providerId) throws OXException {
+        final CacheService cacheService = getCacheService();
+        if (null == cacheService) {
+            return delegate.getAccounts(userId, providerId);
+        }
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        List<CalendarAccount> calendarAccountList = delegate.getAccounts(userId, providerId);
         for (CalendarAccount calendarAccount : calendarAccountList) {
             if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId()))) {
                 cache.put(newCacheKey(cacheService, calendarAccount.getAccountId()), calendarAccount, false);

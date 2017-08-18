@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +61,7 @@ import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -83,11 +85,14 @@ public class AllAction extends AbstractAccountAction implements CalendarAccountF
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-//        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        //implement another Method for optional providers, loadAccounts(session, providerId)
+        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
         CalendarAccountService service = getService(CalendarAccountService.class);
-        List<CalendarAccount> accounts = service.loadAccounts(session);
-
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        if (!Strings.isEmpty(providerId)) {
+            accounts.addAll(service.getAccounts(session, providerId));
+        } else {
+            accounts.addAll(service.getAccounts(session));
+        }
         JSONArray response = new JSONArray(accounts.size());
         try {
             for (CalendarAccount account : accounts) {

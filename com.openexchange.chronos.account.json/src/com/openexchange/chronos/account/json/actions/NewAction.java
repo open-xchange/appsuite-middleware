@@ -89,7 +89,7 @@ public class NewAction extends AbstractAccountAction implements CalendarAccountF
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         CalendarAccountService service = getService(CalendarAccountService.class);
-        CalendarAccount account = service.insertAccount(session, providerId, data.asMap());
+        CalendarAccount account = service.createAccount(session, providerId, data.asMap());
         try {
             return new AJAXRequestResult(new JSONObject(1).put(ID, JSONCoercion.coerceToJSON(account.getAccountId())), FORMAT);
         } catch (JSONException e) {

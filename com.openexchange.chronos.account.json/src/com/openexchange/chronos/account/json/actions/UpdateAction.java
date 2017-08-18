@@ -92,7 +92,7 @@ public class UpdateAction extends AbstractAccountAction implements CalendarAccou
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
         CalendarAccountService service = getService(CalendarAccountService.class);
-        CalendarAccount account = service.loadAccount(session, Integer.parseInt(accountId));
+        CalendarAccount account = service.getAccount(session, Integer.parseInt(accountId));
         // Updates
         account = service.updateAccount(session, Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
 

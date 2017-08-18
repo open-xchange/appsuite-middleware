@@ -256,7 +256,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar accounts
      */
     protected List<CalendarAccount> getAccounts() throws OXException {
-        return services.getService(CalendarAccountService.class).loadAccounts(session);
+        return services.getService(CalendarAccountService.class).getAccounts(session);
     }
 
     /**
@@ -267,7 +267,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected CalendarAccount getAccount(int accountId) throws OXException {
         CalendarAccountService service = services.getService(CalendarAccountService.class);
-        return service.loadAccount(session, accountId);
+        return service.getAccount(session, accountId);
     }
 
     @Override

@@ -82,8 +82,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     @Override
-    public CalendarAccount insertAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException {
-        return loadCalendarAccount(getCalendarAccountStorage(session).insertAccount(providerId, session.getUserId(), configuration), session);
+    public CalendarAccount createAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException {
+        return loadCalendarAccount(getCalendarAccountStorage(session).createAccount(providerId, session.getUserId(), configuration), session);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     @Override
-    public CalendarAccount loadAccount(Session session, int id) throws OXException {
+    public CalendarAccount getAccount(Session session, int id) throws OXException {
         if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
             return CalendarAccount.DEFAULT_ACCOUNT;
         }
@@ -108,10 +108,21 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     @Override
-    public List<CalendarAccount> loadAccounts(Session session) throws OXException {
+    public List<CalendarAccount> getAccounts(Session session) throws OXException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        accounts.addAll(getCalendarAccountStorage(session).loadAccounts(session.getUserId()));
+        accounts.addAll(getCalendarAccountStorage(session).getAccounts(session.getUserId()));
         accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
+        return accounts;
+    }
+
+    @Override
+    public List<CalendarAccount> getAccounts(Session session, String providerId) throws OXException {
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
+            accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
+        } else {
+            accounts.addAll(getCalendarAccountStorage(session).getAccounts(session.getUserId(), providerId));
+        }
         return accounts;
     }
 
@@ -132,7 +143,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     }
 
     private CalendarAccount  loadCalendarAccount(int id, Session session) throws OXException {
-        return getCalendarAccountStorage(session).loadAccount(id);
+        return getCalendarAccountStorage(session).getAccount(id);
     }
 
     private CalendarAccountStorage getCalendarAccountStorage(Session session) throws OXException {
