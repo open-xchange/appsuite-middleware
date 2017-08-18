@@ -63,7 +63,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -166,16 +165,6 @@ public class CalendarConfigImpl implements CalendarConfig {
         return getConfigValue("com.openexchange.chronos.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    @Override
-    public boolean isCollectEmailAddresses() {
-        try {
-            return getUserConfiguration().isCollectEmailAddresses();
-        } catch (OXException e) {
-            LOG.warn("Error getting user configuration to query if collection of e-mail addresses is enabled, assuming \"false\"");
-            return false;
-        }
-    }
-
     private OXFolderAccess getFolderAccess() throws OXException {
         Connection connection = optConnection();
         Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
@@ -199,10 +188,6 @@ public class CalendarConfigImpl implements CalendarConfig {
             LOG.warn("Error getting \"{}\", falling back to \"{}\"", property, defaultValue);
             return defaultValue;
         }
-    }
-
-    private UserConfiguration getUserConfiguration() throws OXException {
-        return ServerSessionAdapter.valueOf(session.getSession()).getUserConfiguration();
     }
 
 }

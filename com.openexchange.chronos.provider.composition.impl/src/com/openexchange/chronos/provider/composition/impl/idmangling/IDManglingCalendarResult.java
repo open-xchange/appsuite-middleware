@@ -52,10 +52,10 @@ package com.openexchange.chronos.provider.composition.impl.idmangling;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.session.Session;
 
 /**
  * {@link IDManglingCalendarResult}
@@ -81,7 +81,7 @@ public class IDManglingCalendarResult implements CalendarResult {
     }
 
     @Override
-    public CalendarSession getSession() {
+    public Session getSession() {
         return delegate.getSession();
     }
 

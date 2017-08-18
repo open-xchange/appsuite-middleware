@@ -295,7 +295,7 @@ public class InternalCalendarResult {
      * @return The calendar result
      */
     public CalendarResult getUserizedResult() {
-        return new DefaultCalendarResult(session, calendarUserId, folder.getID(), userizedCreations, userizedUpdates, userizedDeletions);
+        return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getID(), userizedCreations, userizedUpdates, userizedDeletions);
     }
 
     private Map<Integer, List<String>> getAffectedFoldersPerUser() {

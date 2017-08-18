@@ -79,7 +79,6 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
@@ -100,8 +99,10 @@ import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -404,15 +405,15 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public void trackAttendeeUsage(CalendarResult result) {
+        Session session = result.getSession();
         List<Attendee> attendees = getAddedAttendees(result);
-        if (null == attendees || attendees.isEmpty()) {
+        if (null == attendees || attendees.isEmpty() || null == session) {
             return;
         }
         /*
          * build increment arguments for the use count service for all added attendees
          */
-        CalendarSession session = result.getSession();
-        boolean collectEmailAddresses = session.getConfig().isCollectEmailAddresses();
+        boolean collectEmailAddresses = isCollectEmailAddresses(session);
         List<IncrementArguments> incrementArguments = getUseCountIncrementArguments(session, attendees, collectEmailAddresses);
         if (0 < incrementArguments.size()) {
             ObjectUseCountService useCountService = Services.getService(ObjectUseCountService.class);
@@ -424,7 +425,7 @@ public class DefaultEntityResolver implements EntityResolver {
                  */
                 try {
                     for (IncrementArguments arguments : incrementArguments) {
-                        useCountService.incrementObjectUseCount(session.getSession(), arguments);
+                        useCountService.incrementObjectUseCount(session, arguments);
                     }
                 } catch (OXException e) {
                     LOG.warn("Error incrementing object use count", e);
@@ -442,7 +443,7 @@ public class DefaultEntityResolver implements EntityResolver {
                 if (null == contactCollectorService) {
                     LOG.debug("{} not available, skipping use count incrementation.", ContactCollectorService.class);
                 } else {
-                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session.getSession());
+                    contactCollectorService.memorizeAddresses(collectibleAddresses, true, session);
                 }
             }
         }
@@ -780,7 +781,7 @@ public class DefaultEntityResolver implements EntityResolver {
      * @param skipExternals <code>true</code> to only consider <i>internal</i> attendees, <code>false</code>, otherwise
      * @return The increment arguments, or an empty list if no suitable attendees contained
      */
-    private List<IncrementArguments> getUseCountIncrementArguments(CalendarSession session, List<Attendee> attendees, boolean skipExternals) {
+    private List<IncrementArguments> getUseCountIncrementArguments(Session session, List<Attendee> attendees, boolean skipExternals) {
         if (null == attendees || 0 == attendees.size()) {
             return Collections.emptyList();
         }
@@ -811,6 +812,20 @@ public class DefaultEntityResolver implements EntityResolver {
             }
         }
         return argumentsList;
+    }
+
+    /**
+     * Gets a value indicating whether collection of e-mail addresses is enabled or not.
+     *
+     * @return <code>true</code> if collecting e-mail address is enabled, <code>false</code>, otherwise
+     */
+    private boolean isCollectEmailAddresses(Session session) {
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserConfiguration().isCollectEmailAddresses();
+        } catch (OXException e) {
+            LOG.warn("Error getting user configuration to query if collection of e-mail addresses is enabled, assuming \"false\"");
+            return false;
+        }
     }
 
     /**

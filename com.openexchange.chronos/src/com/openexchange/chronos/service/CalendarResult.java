@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.session.Session;
 
 /**
  * {@link CalendarResult}
@@ -60,11 +61,11 @@ import java.util.List;
 public interface CalendarResult extends TimestampedResult {
 
     /**
-     * Gets the underlying calendar session.
+     * Gets the client session.
      *
-     * @return The calendar session
+     * @return The client session
      */
-    CalendarSession getSession();
+    Session getSession();
 
     /**
      * Gets the the actual target calendar user based on the folder view the action has been performed in. This is either the current

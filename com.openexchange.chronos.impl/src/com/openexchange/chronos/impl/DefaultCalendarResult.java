@@ -52,10 +52,10 @@ package com.openexchange.chronos.impl;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultCalendarResult}
@@ -65,7 +65,7 @@ import com.openexchange.chronos.service.UpdateResult;
  */
 public class DefaultCalendarResult implements CalendarResult {
 
-    private final CalendarSession session;
+    private final Session session;
     private final int calendarUserId;
     private final String folderId;
 
@@ -76,14 +76,14 @@ public class DefaultCalendarResult implements CalendarResult {
     /**
      * Initializes a new {@link DefaultCalendarResult}.
      *
-     * @param session The calendar session
+     * @param session The session
      * @param calendarUserId The actual calendar user
      * @param folderId The identifier of the targeted calendar folder
      * @param creations The create results, or <code>null</code> if there are none
      * @param deletions The delete results, or <code>null</code> if there are none
      * @param updates The update results, or <code>null</code> if there are none
      */
-    public DefaultCalendarResult(CalendarSession session, int calendarUserId, String folderId, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
+    public DefaultCalendarResult(Session session, int calendarUserId, String folderId, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
         super();
         this.session = session;
         this.calendarUserId = calendarUserId;
@@ -94,7 +94,7 @@ public class DefaultCalendarResult implements CalendarResult {
     }
 
     @Override
-    public CalendarSession getSession() {
+    public Session getSession() {
         return session;
     }
 
