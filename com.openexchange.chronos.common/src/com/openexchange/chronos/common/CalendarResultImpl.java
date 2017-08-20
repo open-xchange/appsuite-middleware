@@ -1,3 +1,4 @@
+package com.openexchange.chronos.common;
 ///*
 // *
 // *    OPEN-XCHANGE legal information

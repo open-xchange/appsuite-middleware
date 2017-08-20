@@ -55,13 +55,11 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -134,12 +132,6 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
             }
         }
         return events;
-    }
-
-    @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
-        checkFolderId(folderId);
-        return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }
 
     protected String checkFolderId(String folderId) throws OXException {

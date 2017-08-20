@@ -47,47 +47,25 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.provider.extensions;
 
-import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
+import java.util.List;
+import com.openexchange.chronos.provider.CalendarAccess;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DeleteResultImpl}
+ * {@link WarningsAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteResultImpl implements DeleteResult {
-
-    private final long timestamp;
-    private final EventID eventID;
+public interface WarningsAware extends CalendarAccess {
 
     /**
-     * Initializes a new {@link DeleteResultImpl}.
+     * Gets a list of warnings that occurred while processing the calendar request.
      *
-     * @param timestamp The timestamp
-     * @param eventID The identifier of the deleted event
+     * @return The warnings, or <code>null</code> or an empty list if there were none
      */
-    public DeleteResultImpl(long timestamp, EventID eventID) {
-        super();
-        this.timestamp = timestamp;
-        this.eventID = eventID;
-    }
-
-    @Override
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    @Override
-    public EventID getEventID() {
-        return eventID;
-    }
-
-    @Override
-    public String toString() {
-        return "DeleteResult [eventID=" + eventID + "]";
-    }
+    List<OXException> getWarnings();
 
 }

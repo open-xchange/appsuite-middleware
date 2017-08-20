@@ -93,7 +93,6 @@ import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -589,22 +588,6 @@ public class Utils {
             list.add(itrerator.next());
         }
         return list;
-    }
-
-    /**
-     * Gets the maximum timestamp in a list of timestamped results.
-     *
-     * @param results The results to determine the maximum timestamp for
-     * @return The maximum timestamp, or <code>0</code> if the supplied list is <code>null</code> or empty
-     */
-    public static long getMaximumTimestamp(List<? extends TimestampedResult> results) {
-        long timestamp = 0L;
-        if (null != results) {
-            for (TimestampedResult result : results) {
-                timestamp = Math.max(timestamp, result.getTimestamp());
-            }
-        }
-        return timestamp;
     }
 
     /**

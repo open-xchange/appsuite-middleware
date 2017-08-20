@@ -184,6 +184,24 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the calendar access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's calendar access, an appropriate exception is thrown.
+     *
+     * @param accountId The identifier to get the calendar access for
+     * @return The calendar access for the specified account
+     */
+    protected <T extends CalendarAccess> T getAccess(int accountId, Class<T> extensionClass) throws OXException {
+        CalendarAccess access = getAccess(accountId);
+        try {
+            return extensionClass.cast(access);
+        } catch (ClassCastException e) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, getAccount(accountId).getProviderId());
+        }
+    }
+
+    /**
      * Gets the groupware calendar access for a specific account. The account is connected implicitly and remembered to be closed during
      * {@link #finish()} implicitly, if not already done.
      *
@@ -191,11 +209,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The groupware calendar access for the specified account
      */
     protected GroupwareCalendarAccess getGroupwareAccess(int accountId) throws OXException {
-        CalendarAccess access = getAccess(accountId);
-        if (false == GroupwareCalendarAccess.class.isInstance(access)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getAccount(accountId).getProviderId());
-        }
-        return (GroupwareCalendarAccess) access;
+        return getAccess(accountId, GroupwareCalendarAccess.class);
     }
 
     /**
@@ -211,6 +225,24 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the calendar access implementing a specific extension for a specific account. The account is connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     * <p/>
+     * If the extension is not provided by the account's calendar access, an appropriate exception is thrown.
+     *
+     * @param account The account to get the calendar access for
+     * @return The calendar access for the specified account
+     */
+    protected <T extends CalendarAccess> T getAccess(CalendarAccount account, Class<T> extensionClass) throws OXException {
+        CalendarAccess access = getAccess(account);
+        try {
+            return extensionClass.cast(access);
+        } catch (ClassCastException e) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, account.getProviderId());
+        }
+    }
+
+    /**
      * Gets the groupware calendar access for a specific account. The account is connected implicitly and remembered to be closed during
      * {@link #finish()} implicitly, if not already done.
      *
@@ -218,11 +250,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The groupware calendar access for the specified account
      */
     protected GroupwareCalendarAccess getGroupwareAccess(CalendarAccount account) throws OXException {
-        CalendarAccess access = getAccess(account);
-        if (false == GroupwareCalendarAccess.class.isInstance(access)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getAccount(account.getAccountId()).getProviderId());
-        }
-        return (GroupwareCalendarAccess) access;
+        return getAccess(account, GroupwareCalendarAccess.class);
     }
 
     /**

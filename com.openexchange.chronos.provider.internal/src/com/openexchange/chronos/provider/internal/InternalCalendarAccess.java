@@ -68,6 +68,7 @@ import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
@@ -96,7 +97,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware {
 
     private final CalendarSession session;
 
@@ -159,6 +160,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         folderToCreate.setParentID(parentFolderId);
         FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
         return response.getResponse();
+    }
+
+    @Override
+    public long getSequenceNumber(String folderId) throws OXException {
+        return getCalendarService().getSequenceNumber(session, folderId);
     }
 
     @Override

@@ -50,10 +50,13 @@
 package com.openexchange.chronos.provider.composition;
 
 import java.util.List;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -169,6 +172,8 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
+     * <p/>
+     * <b>Note:</b> Only available for {@link SyncAware} calendar providers.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
@@ -303,6 +308,20 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
 
     /**
+     * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding
+     * event.
+     * <p/>
+     * <b>Note:</b> Only available for {@link PersonalAlarmAware} calendar providers.
+     * <p/>
+     *
+     * @param eventID The identifier of the event to update the alarms for
+     * @param alarms The updated list of alarms to apply, or <code>null</code> to remove any previously stored alarms
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
+     */
+    CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
+
+    /**
      * Deletes an existing event.
      *
      * @param eventID The identifier of the event to delete
@@ -313,7 +332,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Retrieves all upcoming alarm triggers until the given time.
-     * 
+     *
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>

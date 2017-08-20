@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common;
 
+import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
@@ -110,7 +111,7 @@ public class DefaultCalendarResult implements CalendarResult {
 
     @Override
     public long getTimestamp() {
-        return Math.max(Utils.getMaximumTimestamp(creations), Math.max(Utils.getMaximumTimestamp(deletions), Utils.getMaximumTimestamp(updates)));
+        return Math.max(getMaximumTimestamp(creations), Math.max(getMaximumTimestamp(deletions), getMaximumTimestamp(updates)));
     }
 
     @Override

@@ -59,11 +59,9 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 
@@ -121,7 +119,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     public Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         checkFolderId(folderId);
         Event event = getEvent(eventId, recurrenceId);
-        event.setFolderId(folderId);
+        //        event.setFolderId(folderId);
         return event;
     }
 
@@ -163,12 +161,6 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
             }
         }
         return events;
-    }
-
-    @Override
-    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
-        checkFolderId(folderId);
-        return new DefaultUpdatesResult(Collections.<Event> emptyList(), Collections.<Event> emptyList());
     }
 
     protected Date getFrom() {

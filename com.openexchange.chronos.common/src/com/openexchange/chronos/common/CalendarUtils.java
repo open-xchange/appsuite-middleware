@@ -101,6 +101,7 @@ import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.java.Strings;
@@ -1405,6 +1406,22 @@ public class CalendarUtils {
      */
     public static EventID getEventID(Event event) {
         return new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId());
+    }
+
+    /**
+     * Gets the maximum timestamp in a list of timestamped results.
+     *
+     * @param results The results to determine the maximum timestamp for
+     * @return The maximum timestamp, or <code>0</code> if the supplied list is <code>null</code> or empty
+     */
+    public static long getMaximumTimestamp(List<? extends TimestampedResult> results) {
+        long timestamp = 0L;
+        if (null != results) {
+            for (TimestampedResult result : results) {
+                timestamp = Math.max(timestamp, result.getTimestamp());
+            }
+        }
+        return timestamp;
     }
 
 }

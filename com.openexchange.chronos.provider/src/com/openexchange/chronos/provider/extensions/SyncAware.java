@@ -47,103 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.extensions;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CalendarAccess}
+ * {@link SyncAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarAccess {
+public interface SyncAware extends CalendarAccess {
 
     /**
-     * Closes the calendar access.
-     */
-    void close();
-
-    /**
-     * Gets a specific calendar folder.
-     *
-     * @param folderId The identifier of the calendar folder to get
-     * @return The calendar folder
-     */
-    CalendarFolder getFolder(String folderId) throws OXException;
-
-    /**
-     * Gets a list of all visible calendar folders.
-     *
-     * @return A list of all visible calendar folders.
-     */
-    List<CalendarFolder> getVisibleFolders() throws OXException;
-
-    /**
-     * Gets a specific event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * </ul>
-     *
-     * @param folderId The identifier of the folder representing the current user's calendar view
-     * @param eventId The identifier of the event to get
-     * @param recurrenceId The recurrence identifier of the event occurrence to get from an event series, or <code>null</code> to not get
-     *            a specific occurrence
-     * @return The event
-     */
-    Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException;
-
-    /**
-     * Gets a list of events.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * </ul>
-     *
-     * @param eventIDs A list of the identifiers of the events to get
-     * @return The events
-     */
-    List<Event> getEvents(List<EventID> eventIDs) throws OXException;
-
-    /**
-     * Gets all change exceptions of a recurring event series.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * </ul>
-     *
-     * @param folderId The identifier of the folder representing the current user's calendar view
-     * @param seriesId The identifier of the series to get the change exceptions for
-     * @return The change exceptions, or an empty list if there are none
-     */
-    List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException;
-
-    /**
-     * Gets all events in a specific calendar folder.
+     * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
      * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
-     * @param folderId The identifier of the folder to get the events from
-     * @return The events
+     * @param folderId The fully qualified identifier of the folder to get the updated events from
+     * @param updatedSince The timestamp since when the updates should be retrieved
+     * @return The updates result yielding lists of new/modified and deleted events
      */
-    List<Event> getEventsInFolder(String folderId) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
+
+    /**
+     * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
+     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
+     *
+     * @param folderId The identifier of the folder to get the sequence number for
+     * @return The sequence number
+     */
+    long getSequenceNumber(String folderId) throws OXException;
 
 }

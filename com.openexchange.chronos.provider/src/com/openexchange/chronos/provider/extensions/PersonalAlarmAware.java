@@ -47,40 +47,32 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.provider.extensions;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
-import com.openexchange.chronos.service.UpdateResult;
+import java.util.List;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.provider.CalendarAccess;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link UpdateResultImpl}
+ * {@link PersonalAlarmAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
+public interface PersonalAlarmAware extends CalendarAccess {
 
     /**
-     * Initializes a new {@link UpdateResultImpl}.
+     * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding
+     * event.
      *
-     * @param originalEvent The original event
-     * @param updatedEvent The updated event
+     * @param eventID The identifier of the event to update the alarms for
+     * @param alarms The updated list of alarms to apply, or <code>null</code> to remove any previously stored alarms
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
      */
-    public UpdateResultImpl(Event originalEvent, Event updatedEvent) throws OXException {
-        super(originalEvent, updatedEvent, true, (EventField[]) null);
-    }
-
-    @Override
-    public long getTimestamp() {
-        return updatedItem.getTimestamp();
-    }
-
-    @Override
-    public String toString() {
-        return "UpdateResultImpl [originalItem=" + originalItem + ", updatedItem=" + updatedItem + ", updatedFields=" + updatedFields + "]";
-    }
+    CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
 }

@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -74,6 +75,8 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
@@ -184,7 +187,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-            UpdatesResult updatesResult = getAccess(accountId).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
+            UpdatesResult updatesResult = getAccess(accountId, SyncAware.class).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
             return new IDManglingUpdatesResult(updatesResult, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -283,6 +286,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
             CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee, clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            PersonalAlarmAware calendarAccess = getAccess(accountId, PersonalAlarmAware.class);
+            CalendarResult result = calendarAccess.updateAlarms(getRelativeId(eventID), alarms, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

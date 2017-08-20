@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,7 @@ public class DefaultCalendarEvent implements CalendarEvent {
 
     @Override
     public long getTimestamp() {
-        return Math.max(Utils.getMaximumTimestamp(creations), Math.max(Utils.getMaximumTimestamp(deletions), Utils.getMaximumTimestamp(updates)));
+        return Math.max(getMaximumTimestamp(creations), Math.max(getMaximumTimestamp(deletions), getMaximumTimestamp(updates)));
     }
 
     @Override

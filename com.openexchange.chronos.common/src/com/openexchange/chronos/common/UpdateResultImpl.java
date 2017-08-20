@@ -47,44 +47,40 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common;
 
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CreateResultImpl}
+ * {@link UpdateResultImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CreateResultImpl implements CreateResult {
-
-    private final Event createdEvent;
+public class UpdateResultImpl extends EventUpdateImpl implements UpdateResult {
 
     /**
-     * Initializes a new {@link CreateResultImpl}.
+     * Initializes a new {@link UpdateResultImpl}.
      *
-     * @param createdEvent The created event
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
      */
-    public CreateResultImpl(Event createdEvent) {
-        super();
-        this.createdEvent = createdEvent;
-    }
-
-    @Override
-    public Event getCreatedEvent() {
-        return createdEvent;
+    public UpdateResultImpl(Event originalEvent, Event updatedEvent) throws OXException {
+        super(originalEvent, updatedEvent, true, (EventField[]) null);
     }
 
     @Override
     public long getTimestamp() {
-        return createdEvent.getTimestamp();
+        return updatedItem.getTimestamp();
     }
 
     @Override
     public String toString() {
-        return "CreateResult [createdEvent=" + createdEvent + "]";
+        return "UpdateResultImpl [originalItem=" + originalItem + ", updatedItem=" + updatedItem + ", updatedFields=" + updatedFields + "]";
     }
 
 }
