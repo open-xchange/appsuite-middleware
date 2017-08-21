@@ -108,8 +108,13 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
             {
                 boolean logstash = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
                 if (logstash) {
-                    final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
-                    managementService.registerMBean(logstashConfName, LogstashSocketAppender.getInstance());
+                    LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+                    if (null == logstashSocketAppender) {
+                        LOGGER.warn("Logstash socket appender has been enabled, but not initialized. Please ensure bundle \"logback-extensions\" is orderly started");
+                    } else {
+                        final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                        managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                    }
                 }
             }
             return managementService;
