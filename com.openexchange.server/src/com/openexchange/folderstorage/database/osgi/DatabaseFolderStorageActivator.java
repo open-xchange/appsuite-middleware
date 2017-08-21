@@ -80,6 +80,8 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(FolderPropertyStorage.class);
+        openTrackers();
         try {
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
@@ -89,7 +91,6 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
             org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorageActivator.class).error("", e);
             throw e;
         }
-        trackService(FolderPropertyStorage.class);
     }
 
 }

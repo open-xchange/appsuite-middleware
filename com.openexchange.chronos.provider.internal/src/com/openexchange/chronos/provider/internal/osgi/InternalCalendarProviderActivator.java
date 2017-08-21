@@ -81,6 +81,8 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(FolderPropertyStorage.class);
+        openTrackers();
         try {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
             Services.setServiceLookup(this);
@@ -89,7 +91,6 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
             getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
         }
-        trackService(FolderPropertyStorage.class);
     }
 
     @Override
