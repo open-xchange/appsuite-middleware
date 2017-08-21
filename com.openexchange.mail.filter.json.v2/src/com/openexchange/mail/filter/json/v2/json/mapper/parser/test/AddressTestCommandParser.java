@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -161,14 +160,11 @@ public class AddressTestCommandParser extends AbstractSimplifiedMatcherAwareComm
     }
 
     private List<String> toLowerCase(List<String> data) {
-        data.replaceAll(new UnaryOperator<String>() {
-
-            @Override
-            public String apply(String t) {
-                return t.toLowerCase();
-            }
-        });
-        return data;
+        List<String> result = new ArrayList<>(data.size());
+        for(String str: data){
+            result.add(str.toLowerCase());
+        }
+        return result;
     }
 
     @Override
