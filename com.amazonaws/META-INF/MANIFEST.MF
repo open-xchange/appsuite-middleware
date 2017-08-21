@@ -4,7 +4,7 @@ Bundle-Name: Amazon Web Services
 Bundle-SymbolicName: com.amazonaws
 Bundle-Version: 1.10.2
 Bundle-Vendor: Amazon Web Services, Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/aws-java-sdk-1.10.2.jar,
  lib/joda-time-2.8.1.jar

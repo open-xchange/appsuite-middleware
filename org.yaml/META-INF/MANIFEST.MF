@@ -5,7 +5,7 @@ Bundle-Description: YAML 1.1 parser and emitter for Java
 Bundle-SymbolicName: org.yaml.snakeyaml
 Bundle-Version: 1.17
 Bundle-Vendor: http://www.snakeyaml.org/
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/snakeyaml-1.17.jar
 Eclipse-BuddyPolicy: registered
 Export-Package: org.yaml.snakeyaml;version="1.17",

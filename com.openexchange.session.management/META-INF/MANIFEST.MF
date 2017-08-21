@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Session Management
 Bundle-SymbolicName: com.openexchange.session.management
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: ch.qos.logback.classic,
  com.google.common.annotations,
  com.google.common.base,

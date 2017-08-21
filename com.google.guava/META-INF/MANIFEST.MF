@@ -4,7 +4,7 @@ Bundle-Name: Google Common library
 Bundle-SymbolicName: com.google.guava
 Bundle-Version: 19.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: lib/guava-19.0.jar,
  lib/j2objc-annotations-1.1.jar
