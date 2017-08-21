@@ -56,6 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -88,6 +89,7 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
             org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorageActivator.class).error("", e);
             throw e;
         }
+        trackService(FolderPropertyStorage.class);
     }
 
 }

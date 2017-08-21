@@ -57,6 +57,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
 
 /**
  * {@link InternalCalendarProviderActivator}
@@ -88,6 +89,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
             getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
         }
+        trackService(FolderPropertyStorage.class);
     }
 
     @Override

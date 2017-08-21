@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -98,6 +99,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.10.0
  */
 public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware {
+    
+    /** The logger */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InternalCalendarAccess.class);
 
     private final CalendarSession session;
 
@@ -118,8 +122,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public GroupwareCalendarFolder getDefaultFolder() throws OXException {
-        return getCalendarFolder(getFolderService().getDefaultFolder(
-            ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator()));
+        Folder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(folder, session.getContextId(), session.getUserId(), false));
     }
 
     @Override
@@ -139,7 +143,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
-        return getCalendarFolder(getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator()));
+        Folder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(folder, session.getContextId(), session.getUserId(), true));
     }
 
     @Override
@@ -290,7 +295,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.length);
         for (UserizedFolder userizedFolder : folders) {
-            calendarFolders.add(getCalendarFolder(userizedFolder));
+            calendarFolders.add(getCalendarFolder(userizedFolder, getFolderProperties(userizedFolder, userizedFolder.getContext().getContextId(), userizedFolder.getUser().getId(), true)));
         }
         return calendarFolders;
     }
@@ -318,6 +323,40 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public List<AlarmTrigger> getAlarmTrigger() throws OXException {
         return getCalendarService().getAlarmTrigger(session);
+    }
+    
+    /**
+     * Get user specific properties for the folder
+     * 
+     * @param folder The {@link Folder}
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user the folder belongs to
+     * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
+     * @return {@link Collections#emptyMap()} or a {@link Map} with user-specific properties
+     */
+    private static Map<String, String> getFolderProperties(Folder folder, int contextId, int userId, boolean loadOwner) {
+        Map<String, String> properties;
+        FolderPropertyStorage fps = Services.optService(FolderPropertyStorage.class);
+        if (null != fps) {
+            try {
+                properties = fps.getFolderProperties(Integer.valueOf(folder.getID()).intValue(), contextId, userId);
+                // Check if we can fall-back to owner properties
+                if (loadOwner && folder.getCreatedBy() != userId) {
+                    // Try to load owner properties
+                    Map<String, String> ownerProperties = fps.getFolderProperties(Integer.valueOf(folder.getID()).intValue(), contextId, folder.getCreatedBy());
+                    for (String key : ownerProperties.keySet()) {
+                        if (false == properties.containsKey(key)) {
+                            properties.put(key, ownerProperties.get(key));
+                        }
+                    }
+                }
+                return properties;
+            } catch (OXException e) {
+                LOGGER.error("Could not get user properties for folder {}", folder.getID(), e);
+            }
+        }
+        properties = Collections.emptyMap();
+        return properties;
     }
 
 }

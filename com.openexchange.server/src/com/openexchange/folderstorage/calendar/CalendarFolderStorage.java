@@ -228,7 +228,7 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void createFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder);
+        GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder, null);
         String folderID = calendarAccess.createFolder(folder.getParentID(), folderToCreate);
         folder.setID(folderID);
     }
@@ -362,7 +362,7 @@ public class CalendarFolderStorage implements FolderStorage {
         /*
          * update folder
          */
-        GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
+        GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder, null);
         String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timeStamp.getTime());
         /*
          * take over updated identifiers in passed folder reference

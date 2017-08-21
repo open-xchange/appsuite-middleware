@@ -167,6 +167,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
+import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -1011,27 +1012,38 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
+        Folder retFolder = folder;
         /*
          * Owner
          */
         final int owner = folder.getCreatedBy();
-        if (owner < 0) {
-            return folder;
-        }
-        /*
-         * Check shared...
-         */
-        if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
-            try {
-                return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
-            } catch (final OXException e) {
-                if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                    return getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
+        if (owner >= 0) {
+            /*
+             * Check shared...
+             */
+            if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
+                try {
+                    retFolder = getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+                } catch (final OXException e) {
+                    if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                        retFolder = getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
+                    }
+                    throw e;
                 }
-                throw e;
             }
         }
-        return folder;
+        // XXX Demo purpose
+        FolderPropertyStorage fps = services.getOptionalService(FolderPropertyStorage.class);
+        if (null != fps) {
+            Integer folderId = Integer.valueOf(folder.getID());
+            Map<String, String> properties = fps.getFolderProperties(folderId.intValue(), storageParameters.getContextId(), storageParameters.getUserId());
+            if (null != properties && false == properties.isEmpty()) {
+                Map<String, Object> meta = new HashMap<>(properties.size());
+                meta.putAll(properties);
+                retFolder.setMeta(meta);
+            }
+        }
+        return retFolder;
     }
 
     @Override

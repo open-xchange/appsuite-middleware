@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,7 @@ public class CalendarFolderConverter {
             meta.put("color", color);
             meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
         }
+        folder.setMeta(meta);
         return folder;
     }
 
@@ -133,6 +135,7 @@ public class CalendarFolderConverter {
             meta.put("color", color);
             meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
         }
+        meta.putAll(calendarFolder.getUserProperties()); // XXX For demo purpose
         folder.setMeta(meta);
         return folder;
     }
@@ -199,9 +202,10 @@ public class CalendarFolderConverter {
      * Gets a groupware calendar folder representing the supplied userized folder.
      *
      * @param folder The userized folder as used by the folder service
+     * @param properties The additional user-specific properties for the folder
      * @return The groupware calendar folder
      */
-    public static GroupwareCalendarFolder getCalendarFolder(Folder folder) {
+    public static GroupwareCalendarFolder getCalendarFolder(Folder folder, Map<String, String> properties) {
         DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
         calendarFolder.setCreatedBy(folder.getCreatedBy());
         calendarFolder.setCreationDate(folder.getCreationDate());
@@ -224,6 +228,10 @@ public class CalendarFolderConverter {
                 calendarFolder.setColor(Appointment2Event.getColor(((Integer) colorLabelValue).intValue()));
             }
         }
+        if (null == properties) {
+            properties = Collections.emptyMap();
+        }
+        calendarFolder.setUserProperties(properties); // TODO Add additional meta data?
         return calendarFolder;
     }
 
