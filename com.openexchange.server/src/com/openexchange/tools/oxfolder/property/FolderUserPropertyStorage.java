@@ -54,12 +54,12 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link FolderPropertyStorage} - Storage to get user-specific properties per folder
+ * {@link FolderUserPropertyStorage} - Storage to get user-specific properties per folder
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface FolderPropertyStorage {
+public interface FolderUserPropertyStorage {
 
     /**
      * Deletes all given user-specific properties for a given folder.

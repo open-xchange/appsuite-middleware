@@ -167,7 +167,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
-import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -1033,7 +1033,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             }
         }
         // XXX Demo purpose
-        FolderPropertyStorage fps = services.getOptionalService(FolderPropertyStorage.class);
+        FolderUserPropertyStorage fps = services.getOptionalService(FolderUserPropertyStorage.class);
         if (null != fps) {
             Integer folderId = Integer.valueOf(folder.getID());
             Map<String, String> properties = fps.getFolderProperties(folderId.intValue(), storageParameters.getContextId(), storageParameters.getUserId());

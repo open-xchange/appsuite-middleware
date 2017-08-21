@@ -90,7 +90,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -337,7 +337,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
      */
     private static Map<String, String> getFolderProperties(Folder folder, int contextId, int userId, boolean loadOwner) {
         Map<String, String> properties;
-        FolderPropertyStorage fps = Services.optService(FolderPropertyStorage.class);
+        FolderUserPropertyStorage fps = Services.optService(FolderUserPropertyStorage.class);
         if (null != fps) {
             try {
                 properties = fps.getFolderProperties(Integer.valueOf(folder.getID()).intValue(), contextId, userId);

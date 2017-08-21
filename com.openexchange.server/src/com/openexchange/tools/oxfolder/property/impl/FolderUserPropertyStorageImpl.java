@@ -64,19 +64,19 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import static com.openexchange.tools.oxfolder.property.sql.CreateFolderPropertyTable.TABLE_NAME;
 
 /**
- * {@link FolderPropertyStorageImpl}
+ * {@link FolderUserPropertyStorageImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 
-public class FolderPropertyStorageImpl implements FolderPropertyStorage {
+public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderPropertyStorageImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderUserPropertyStorageImpl.class);
 
     private final static String GET         = "SELECT name, value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=?;";
     private final static String GET_PROP    = "SELECT value FROM " + TABLE_NAME + " WHERE cid=? AND fuid=? AND userid=? AND name=? LIMIT 1;";
@@ -89,10 +89,10 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link FolderPropertyStorageImpl}.
+     * Initializes a new {@link FolderUserPropertyStorageImpl}.
      * 
      */
-    public FolderPropertyStorageImpl(ServiceLookup service) {
+    public FolderUserPropertyStorageImpl(ServiceLookup service) {
         super();
         this.services = service;
     }

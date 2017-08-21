@@ -56,17 +56,17 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.oxfolder.property.FolderPropertyStorage;
-import com.openexchange.tools.oxfolder.property.impl.FolderPropertyStorageImpl;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyStorageImpl;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderPropertyTask;
 
 /**
- * {@link FolderPropertyActivator}
+ * {@link FolderUserPropertyActivator}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class FolderPropertyActivator extends HousekeepingActivator {
+public class FolderUserPropertyActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -91,8 +91,8 @@ public class FolderPropertyActivator extends HousekeepingActivator {
 
         });
 
-        // Register FolderPropertyStorage 
-        registerService(FolderPropertyStorage.class, new FolderPropertyStorageImpl(this));
+        // Register FolderUserPropertyStorage 
+        registerService(FolderUserPropertyStorage.class, new FolderUserPropertyStorageImpl(this));
     }
 
 }
