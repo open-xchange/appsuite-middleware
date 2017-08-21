@@ -52,7 +52,6 @@ package com.openexchange.tools.oxfolder.property;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Folder;
 
 /**
  * {@link FolderPropertyStorage} - Storage to get user-specific properties per folder
@@ -99,14 +98,13 @@ public interface FolderPropertyStorage {
     /**
      * Get a {@link Map} with user-specific properties for the folder
      * 
-     * @param treeeId The ID of the tree the folder is in
      * @param folderId The ID of the folder
      * @param contextId The context ID of the user
      * @param userId The ID of the user the user-specific folder belongs to
-     * @return The {@link Folder} or <code>null</code>
+     * @return The folder properties. Might be empty
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    Map<String, String> getFolderProperties(int treeId, int folderId, int contextId, int userId) throws OXException;
+    Map<String, String> getFolderProperties(int folderId, int contextId, int userId) throws OXException;
 
     /**
      * Get an user-specific property from a folder

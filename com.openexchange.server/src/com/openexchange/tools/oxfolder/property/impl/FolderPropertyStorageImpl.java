@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -183,7 +184,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
     }
 
     @Override
-    public Map<String, String> getFolderProperties(int treeId, int folderId, int contextId, int userId) throws OXException {
+    public Map<String, String> getFolderProperties(int folderId, int contextId, int userId) throws OXException {
         Connection connection = null;
         DatabaseService dbService = null;
         PreparedStatement stmt = null;
@@ -214,7 +215,7 @@ public class FolderPropertyStorageImpl implements FolderPropertyStorage {
                 dbService.backReadOnly(contextId, connection);
             }
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
