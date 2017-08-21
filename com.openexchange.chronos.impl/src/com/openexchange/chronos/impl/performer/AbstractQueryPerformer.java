@@ -290,6 +290,11 @@ public abstract class AbstractQueryPerformer {
                 public String getFolderId() {
                     return folderView;
                 }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
             };
         }
         return anonymizeIfNeeded(session, event);
