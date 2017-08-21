@@ -59,6 +59,7 @@ import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -69,8 +70,11 @@ import com.openexchange.server.ServiceLookup;
  */
 public class UntilAction extends ChronosAction {
 
+    private static final String ACTIONS_PARAM = "actions";
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeEnd");
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("rangeStart");
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("rangeStart", ACTIONS_PARAM);
+
+    private static final Set<String> DEFAULT_ACTIONS = unmodifiableSet("DISPLAY", "AUDIO");
 
     /**
      * Initializes a new {@link UntilAction}.
@@ -92,7 +96,20 @@ public class UntilAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger();
+
+        String parameter = requestData.getParameter(ACTIONS_PARAM);
+        Set<String> actions = null;
+        if(parameter!=null){
+            String[] splitByComma = Strings.splitByComma(parameter);
+            for(int x=0; x<splitByComma.length; x++){
+                splitByComma[x]=splitByComma[x].toUpperCase();
+            }
+            actions = unmodifiableSet(splitByComma);
+        } else {
+            actions = DEFAULT_ACTIONS;
+        }
+
+        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger(actions);
         return new AJAXRequestResult(alarmTrigger, AlarmTriggerConverter.INPUT_FORMAT);
     }
 

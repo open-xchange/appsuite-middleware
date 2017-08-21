@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
@@ -379,12 +380,12 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger() throws OXException {
+    public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
         List<CalendarAccount> accounts = getAccounts();
         List<AlarmTrigger> result = new ArrayList<>();
         for (CalendarAccount account : accounts) {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(account.getAccountId());
-            result.addAll(calendarAccess.getAlarmTrigger());
+            result.addAll(calendarAccess.getAlarmTrigger(actions));
         }
 
         for (AlarmTrigger trigger : result) {

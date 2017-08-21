@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
@@ -338,9 +339,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * </ul>
+     * @param actions The actions to retrieve
      * @return A list of upcoming alarm triggers
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger() throws OXException;
+    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
 
 }
