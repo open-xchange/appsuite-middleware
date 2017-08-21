@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -214,16 +215,17 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
 
     /**
      * Retrieves upcoming alarm trigger.
-     * 
+     *
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * </ul>
      *
+     * @param actions The actions to retrieve
      * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger() throws OXException;
+    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
 
 }

@@ -249,7 +249,7 @@ public abstract class ChronosAction implements AJAXActionService {
             case "sendInternalNotifications":
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
             default:
-                throw new IllegalArgumentException("unknown paramter: " + parameter);
+                return null;
         }
     }
 

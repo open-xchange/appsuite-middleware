@@ -580,6 +580,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 public List<Alarm> getAlarms() {
                     return userizedAlarms;
                 }
+
+                @Override
+                public boolean containsAlarms() {
+                    return true;
+                }
             };
         }
         return event;

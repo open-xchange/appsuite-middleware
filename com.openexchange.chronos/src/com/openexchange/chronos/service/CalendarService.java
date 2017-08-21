@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -372,9 +373,10 @@ public interface CalendarService {
      * </ul>
      *
      * @param session The calendar session
+     * @param actions The actions to retrieve
      * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger(CalendarSession session) throws OXException;
+    List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
 
 }
