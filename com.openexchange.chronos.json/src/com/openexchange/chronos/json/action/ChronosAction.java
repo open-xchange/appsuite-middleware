@@ -49,42 +49,15 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.dmfs.rfc5545.DateTime;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.json.converter.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.SortOrder;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -93,11 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class ChronosAction implements AJAXActionService {
-
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
-
-    final ServiceLookup services;
+public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Initializes a new {@link AbstractDriveShareAction}.
@@ -105,8 +74,7 @@ public abstract class ChronosAction implements AJAXActionService {
      * @param services A service lookup reference
      */
     protected ChronosAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     @Override
@@ -124,56 +92,6 @@ public abstract class ChronosAction implements AJAXActionService {
      * @return The request result
      */
     protected abstract AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException;
-
-    /**
-     * Gets a list of required parameter names that will be evaluated. If missing in the request, an appropriate exception is thrown. By
-     * default, an empty list is returned.
-     *
-     * @return The list of required parameters
-     */
-    protected Set<String> getRequiredParameters() {
-        return Collections.emptySet();
-    }
-
-    /**
-     * Gets a list of parameter names that will be evaluated if set, but are not required to fulfill the request. By default, an empty
-     * list is returned.
-     *
-     * @return The list of optional parameters
-     */
-    protected Set<String> getOptionalParameters() {
-        return Collections.emptySet();
-    }
-
-    protected <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
-        return com.openexchange.osgi.Tools.requireService(clazz, services);
-    }
-
-    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) {
-        RecurrenceId recurrenceId = null != optRecurrenceId ? new DefaultRecurrenceId(optRecurrenceId) : null;
-        return new EventID(folderId, objectId, recurrenceId);
-    }
-
-    protected EventID parseIdParameter(AJAXRequestData requestData) throws OXException {
-        String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
-        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        String optRecurrenceId = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
-        return getEventID(folderId, objectId, optRecurrenceId);
-    }
-
-    protected RecurrenceId parseRecurrenceIdParameter(AJAXRequestData requestData) {
-        String value = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
-        return null != value ? new DefaultRecurrenceId(value) : null;
-    }
-
-    protected long parseClientTimestamp(AJAXRequestData requestData) throws OXException {
-        String parameter = requestData.checkParameter(AJAXServlet.PARAMETER_TIMESTAMP);
-        try {
-            return Long.parseLong(parameter.trim());
-        } catch (NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TIMESTAMP, parameter);
-        }
-    }
 
     /**
      * Initializes the calendar access for a request and parses all known parameters supplied by the client, throwing an appropriate
@@ -196,83 +114,6 @@ public abstract class ChronosAction implements AJAXActionService {
             }
         }
         return calendarAccess;
-    }
-
-    /**
-     * Retrieves the given parameter as an Entry object
-     *
-     * @param request The request
-     * @param parameter The parameter name
-     * @param required Defines if the parameter is required
-     * @return The parameter or null if it isn't required
-     * @throws OXException if the parameter is required and can't be found or if the parameter can't be parsed
-     */
-    protected static Entry<String, ?> parseParameter(AJAXRequestData request, String parameter, boolean required) throws OXException {
-        String value = request.getParameter(parameter);
-        if (Strings.isEmpty(value)) {
-            if (false == required) {
-                return null;
-            }
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameter);
-        }
-        try {
-            return parseParameter(parameter, value);
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, value);
-        }
-    }
-
-    private static Entry<String, ?> parseParameter(String parameter, String value) throws IllegalArgumentException {
-        switch (parameter) {
-            case "rangeStart":
-                DateTime startTime = DateTime.parse(TimeZones.UTC, value);
-                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(startTime.getTimestamp()));
-            case "rangeEnd":
-                DateTime endTime = DateTime.parse(TimeZones.UTC, value);
-                return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(endTime.getTimestamp()));
-            case "expand":
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(value));
-            case PARAMETER_IGNORE_CONFLICTS:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
-            case PARAMETER_ORDER_BY:
-                EventField mappedField = EventMapper.getInstance().getMappedField(value);
-                if (mappedField == null) {
-                    mappedField = EventField.valueOf(value.toUpperCase());
-                }
-                return new AbstractMap.SimpleEntry<String, EventField>(PARAMETER_ORDER_BY, mappedField);
-            case PARAMETER_ORDER:
-                return new AbstractMap.SimpleEntry<String, SortOrder.Order>(PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
-            case PARAMETER_FIELDS:
-                return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
-            case PARAMETER_INCLUDE_PRIVATE:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
-            case "sendInternalNotifications":
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
-            default:
-                return null;
-        }
-    }
-
-    private static EventField[] parseFields(String value){
-        if(Strings.isEmpty(value)){
-            return new EventField[0];
-        }
-
-        String[] splitByColon = Strings.splitByComma(value);
-        EventField[] fields = new EventField[splitByColon.length];
-        int x=0;
-        for(String str: splitByColon){
-            EventField mappedField = EventMapper.getInstance().getMappedField(str);
-            if (mappedField == null) {
-                mappedField = EventField.valueOf(str.toUpperCase());
-            }
-            fields[x++] = mappedField;
-        }
-        return fields;
-    }
-
-    protected boolean isConflict(OXException e){
-        return Category.CATEGORY_CONFLICT.equals(e.getCategory()) && (CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.EVENT_CONFLICTS.equals(e));
     }
 
 }

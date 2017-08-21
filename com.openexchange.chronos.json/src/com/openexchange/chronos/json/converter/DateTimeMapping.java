@@ -97,7 +97,7 @@ public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O>
             return JSONObject.NULL;
         }
         JSONObject result = new JSONObject();
-        if (value.getTimeZone() != null) {
+        if (value.getTimeZone() != null && value.getTimeZone()!=TimeZone.getTimeZone("UTC")) {
             result.put(TIME_ZONE, value.getTimeZone().getID());
         }
         result.put(VALUE, value.toString());

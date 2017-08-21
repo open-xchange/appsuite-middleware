@@ -160,6 +160,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 } else {
                     toUpdate = updates.get(0).getUpdate();
                 }
+                toUpdate = EventMapper.getInstance().copy(toUpdate, null, (EventField[]) null);
                 Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
                 try {
                     if (parseParameter == null) {
@@ -183,7 +184,11 @@ public class UpdateAttendeeAction extends ChronosAction {
 
             }
             if (results != null) {
-                return new AJAXRequestResult(results, new Date(results.get(results.size() - 1).getTimestamp()), MultipleCalendarResultConverter.INPUT_FORMAT);
+                long timestamp = 0L;
+                for (CalendarResult result : results) {
+                    timestamp = Math.max(timestamp, result.getTimestamp());
+                }
+                return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
             } else {
                 AJAXRequestResult ajaxRequestResult = new AJAXRequestResult(updateAttendeeResult, new Date(updateAttendeeResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
                 if (warnings != null) {

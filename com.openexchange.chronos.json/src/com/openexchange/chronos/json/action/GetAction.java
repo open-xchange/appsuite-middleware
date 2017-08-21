@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -90,7 +91,7 @@ public class GetAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         Event event = calendarAccess.getEvent(parseIdParameter(requestData));
-        return new AJAXRequestResult(event, event.getLastModified(), EventResultConverter.INPUT_FORMAT);
+        return new AJAXRequestResult(event, new Date(event.getTimestamp()), EventResultConverter.INPUT_FORMAT);
     }
 
 }

@@ -223,6 +223,9 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         // Create three overlapping events
         createEvent("first", first, first + TimeUnit.HOURS.toMillis(1), users);
         ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp, null, null, null, null, null, false, true);
+        assertNull(updates.getErrorDesc(), updates.getError());
+        assertNotNull(updates.getData());
+        assertEquals(1, updates.getData().getNewAndModified().size());
         String newEventId = updates.getData().getNewAndModified().get(0).getId();
         AttendeeAndAlarm body = new AttendeeAndAlarm();
         Attendee att = new Attendee();
@@ -231,9 +234,14 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setPartStat("ACCEPTED");
         body.setAttendee(att);
         ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        assertNull(updateAttendee.getErrorDesc(), updateAttendee.getError());
+        assertNotNull(updateAttendee.getData());
 
         createEvent("second", second, second + TimeUnit.HOURS.toMillis(1), users);
         updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee.getTimestamp(), null, null, null, null, null, false, true);
+        assertNull(updates.getErrorDesc(), updates.getError());
+        assertNotNull(updates.getData());
+        assertEquals(1, updates.getData().getNewAndModified().size());
         newEventId = updates.getData().getNewAndModified().get(0).getId();
         body = new AttendeeAndAlarm();
         att = new Attendee();
@@ -242,9 +250,14 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setPartStat("TENTATIVE");
         body.setAttendee(att);
         ChronosCalendarResultResponse updateAttendee2 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        assertNull(updateAttendee2.getErrorDesc(), updateAttendee2.getError());
+        assertNotNull(updateAttendee2.getData());
 
         createEvent("third", third, third + TimeUnit.HOURS.toMillis(1), users);
         updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee2.getTimestamp(), null, null, null, null, null, false, true);
+        assertNull(updates.getErrorDesc(), updates.getError());
+        assertNotNull(updates.getData());
+        assertEquals(1, updates.getData().getNewAndModified().size());
         newEventId = updates.getData().getNewAndModified().get(0).getId();
         body = new AttendeeAndAlarm();
         att = new Attendee();
@@ -252,10 +265,12 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("DECLINED");
         body.setAttendee(att);
-        secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        ChronosCalendarResultResponse updateAttendee3 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        assertNull(updateAttendee3.getErrorDesc(), updateAttendee3.getError());
+        assertNotNull(updateAttendee3.getData());
 
         ChronosFreebusyApi secondUserFreeBusyApi = new ChronosFreebusyApi(client);
-        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, getZuluDateTime(first).getValue(), getZuluDateTime(nextWeek).getValue(), Integer.toString(users[1].getUserId()));
+        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, getZuluDateTime(first - TimeUnit.HOURS.toMillis(5)).getValue(), getZuluDateTime(nextWeek).getValue(), Integer.toString(users[1].getUserId()));
         logoutClient(client);
         assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
         assertNotNull(freeBusy.getData());
