@@ -51,6 +51,8 @@ package com.openexchange.imageconverter.api;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.imagetransformation.ScaleType;
 
@@ -59,6 +61,12 @@ import com.openexchange.imagetransformation.ScaleType;
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
  * @since v7.8.3
+ */
+/**
+ * {@link ImageFormat}
+ *
+ * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+ * @since v7.8.4
  */
 public class ImageFormat implements Comparable<ImageFormat> {
 
@@ -89,6 +97,14 @@ public class ImageFormat implements Comparable<ImageFormat> {
          */
         public String getShortName() {
             return m_shortName;
+        }
+
+        /**
+         * @param other
+         * @return
+         */
+        public long getAbsDistance(final ImageType other) {
+            return ((null != other) ? ((other == this) ? 0 : 1) : Long.MAX_VALUE);
         }
 
         /**
@@ -161,11 +177,11 @@ public class ImageFormat implements Comparable<ImageFormat> {
         // imageType, scaleType, autoRotate and shrinkOnly must match to  check;
         // sort order based on: used area => quality
         if ((null != other) &&
+            (0 == (ret = Long.compare(getUsedArea(), other.getUsedArea()))) &&
             (0 == (ret = m_imageType.compareTo(other.m_imageType))) &&
-            (0 == (ret = Boolean.compare(m_autoRotate, other.m_autoRotate))) &&
-            (0 == (ret = Boolean.compare(m_shrinkOnly, other.m_shrinkOnly))) &&
             (0 == (ret = m_scaleType.compareTo(other.m_scaleType))) &&
-            (0 == (ret = Long.compare(Math.abs((long) getWidth() * getHeight()), Math.abs((long) other.getWidth() * other.getHeight()))))) {
+            (0 == (ret = Boolean.compare(m_shrinkOnly, other.m_shrinkOnly))) &&
+            (0 == (ret = Boolean.compare(m_autoRotate, other.m_autoRotate)))) {
 
             ret = Integer.compare(getQuality(), other.getQuality());
         }
@@ -333,6 +349,33 @@ public class ImageFormat implements Comparable<ImageFormat> {
     }
 
     /**
+     * @return
+     */
+    public long getUsedArea() {
+        return Math.abs((long) getWidth() * getHeight());
+    }
+
+    /**
+     * @param other
+     * @return
+     */
+    public long getAbsDistance(final ImageFormat other) {
+        long ret = Long.MAX_VALUE;
+
+        if (null != other) {
+            final long areaDistance = 32 * Math.abs(getUsedArea() - other.getUsedArea());
+            final long imageTypeDistance =  16 * getImageType().getAbsDistance(other.getImageType());
+            final long scaleTypeDistance =  4 * implGetAbsDistance(getScaleType(), other.getScaleType());
+            final long shrinkOnlyDistance = 2 * implGetAbsDistance(isShrinkOnly(), other.isShrinkOnly());
+            final long autoRotateDistance = implGetAbsDistance(isAutoRotate(), other.isAutoRotate());
+
+            ret = areaDistance | imageTypeDistance | scaleTypeDistance | shrinkOnlyDistance | autoRotateDistance;
+        }
+
+        return ret;
+    }
+
+    /**
      * @param formatShortName
      * @param autoRotate
      * @param width
@@ -477,6 +520,47 @@ public class ImageFormat implements Comparable<ImageFormat> {
         }
 
         return ret;
+    }
+
+    // - Implementation --------------------------------------------------------
+
+    /**
+     * @param first
+     * @param second
+     * @return
+     */
+    private static long implGetAbsDistance(final boolean first, final boolean second) {
+        return ((first == second) ? 0 : 1);
+    }
+
+    /**
+     * @param first
+     * @param second
+     * @return
+     */
+    private static long implGetAbsDistance(final ScaleType first, final ScaleType second) {
+        long ret = Long.MAX_VALUE;
+
+        if ((null != first) && (null != second)) {
+            ret = Math.abs(SCALETYPE_DISTANCE_VALUE.get(first).longValue() - SCALETYPE_DISTANCE_VALUE.get(second).longValue());
+        }
+
+        return ret;
+    }
+
+    // - Static members --------------------------------------------------------
+
+    /**
+     * SCALETYPE_DISTANCE_VALUE
+     */
+    final private static Map<ScaleType, Long> SCALETYPE_DISTANCE_VALUE = new HashMap<>(ScaleType.values().length);
+
+    static {
+        SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
+        SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
+        SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN_FORCE_DIMENSION, Long.valueOf(2));
+        SCALETYPE_DISTANCE_VALUE.put(ScaleType.COVER, Long.valueOf(4));
+        SCALETYPE_DISTANCE_VALUE.put(ScaleType.COVER_AND_CROP, Long.valueOf(5));
     }
 
     // - Members ---------------------------------------------------------------
