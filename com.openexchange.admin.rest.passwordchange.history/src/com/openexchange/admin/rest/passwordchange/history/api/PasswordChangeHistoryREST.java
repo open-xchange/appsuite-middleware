@@ -153,7 +153,11 @@ public class PasswordChangeHistoryREST {
             }
             LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
             return Response.serverError().build();
+        } catch (BadRequestException e) {
+            // SortField unknown; 400
+            return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (Exception e) {
+            //Unknown error; 500
             LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
             return Response.serverError().build();
         }
@@ -228,7 +232,8 @@ public class PasswordChangeHistoryREST {
                     authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextID, true);
                     return null;
                 } catch (OXException e) {
-                    // Fall through
+                    // Invalid credentials, user or context ID; 404
+                    return Response.status(Response.Status.NOT_FOUND).build();
                 }
             }
         } // No valid header
