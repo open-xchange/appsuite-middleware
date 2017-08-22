@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +62,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
@@ -69,7 +71,6 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -89,11 +90,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class BasicAlarmTriggerTest extends AbstractChronosTest {
 
     private String folderId;
-
-    private EventData createSingleEventWithSingleAlarm(String summary) {
-        // Default to tomorrow at the same time with duration of "-PT15M"
-       return createSingleEventWithSingleAlarm(summary, System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1), "-PT15M");
-    }
 
     @SuppressWarnings("unchecked")
     private EventData createSingleEventWithSingleAlarm(String summary, Long startDate, String duration) {
@@ -154,192 +150,268 @@ public class BasicAlarmTriggerTest extends AbstractChronosTest {
         folderId = getDefaultFolder();
     }
 
-    @Test
-    public void testCreateSingleAlarmTrigger() throws Exception {
-        // Create an event with alarm
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testSingleAlarmTrigger"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param data The data element of the response
+     * @return The data
+     */
+    private <T> T checkResponse(String error, String errorDesc, T data) {
+        assertNull(errorDesc, error);
+        assertNotNull(data);
+        return data;
+    }
+
+    /**
+     * Simple wrapper to return alarm triggers
+     *
+     * @param from The lower limit
+     * @param unit The unit for the upper limit calculation
+     * @param value The amount for the upper limit calculation
+     * @param actions The alarm actions to retrieve or null to retrieve the basic ones
+     * @return The {@link AlarmTriggerResponse}
+     * @throws ApiException
+     */
+    private AlarmTriggerResponse getAlarmTrigger(long from, TimeUnit unit, int value, String actions) throws ApiException {
+        return api.getAlarmTrigger(session, getZuluDateTime(from + unit.toMillis(value)).getValue(), getZuluDateTime(from).getValue(), actions);
+    }
+
+    /**
+     * Shifts a given event by the given amount
+     *
+     * @param eventId The event id
+     * @param recurrence The recurrence id or null
+     * @param event The event data to change
+     * @param startTime The start time of the event
+     * @param unit The unit of the shift
+     * @param value The shifting amount
+     * @param timestamp The timestamp of the last request
+     * @return The {@link CalendarResult}
+     * @throws ApiException
+     */
+    private CalendarResult shiftEvent(String eventId, String recurrence, EventData event, long startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
+        long newStartTime = startTime + unit.toMillis(value);
+        event.setStartDate(getDateTime(newStartTime));
+        event.setEndDate(getDateTime(newStartTime + TimeUnit.HOURS.toMillis(1)));
+        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, eventId, event, timestamp, recurrence, false, false);
+        this.setLastTimestamp(updateEvent.getTimestamp());
+        return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
+    }
+
+    /**
+     * Checks if a given event exists and if it contains the giben amount of alarm objects
+     *
+     * @param event The event to check
+     * @param alarmSize The amount of alarm object
+     * @throws ApiException
+     */
+    private void getAndCheckEvent(EventData event, int alarmSize) throws ApiException{
+        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
+        EventData getEvent = checkResponse(eventResponse.getError(), eventResponse.getErrorDesc(), eventResponse.getData());
+        EventUtil.compare(event, getEvent, true);
+        assertNotNull(getEvent.getAlarms());
+        assertEquals(alarmSize, getEvent.getAlarms().size());
+        this.setLastTimestamp(eventResponse.getTimestamp());
+    }
+
+    /**
+     * Retrieves alarm triggers from the given time until the given time (calculated by unit and value) and checks if the response contains the correct amount of alarm trigger objects.
+     * Its also possible to filter for specific actions.
+     *
+     * @param from The lower limit
+     * @param unit The unit to add to the lower limit
+     * @param value The amount of the unit to add
+     * @param actions The actions to retrieve
+     * @param expected The expected amount of alarm objects
+     * @return The {@link AlarmTriggerData}
+     * @throws ApiException
+     */
+    private AlarmTriggerData getAndCheckAlarmTrigger(long from, TimeUnit unit, int value, String actions, int expected) throws ApiException {
+        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, unit, value, actions);
+        AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
+        assertTrue(triggers.size() == expected);
+        return triggers;
+    }
+
+    /**
+     * Retrieves alarm triggers from the given time until two days and checks if the response contains the correct amount of alarm trigger objects
+     *
+     * @param from The lower limit of the request
+     * @param expected The amount of expected alarm trigger objects
+     * @return The {@link AlarmTriggerData}
+     * @throws ApiException
+     */
+    private AlarmTriggerData getAndCheckAlarmTrigger(long from, int expected) throws ApiException {
+        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, TimeUnit.DAYS, 2, null);
+        AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
+        assertTrue(triggers.size() == expected);
+        return triggers;
+    }
+
+    /**
+     * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
+     * @return The calendar
+     */
+    private Calendar getUTCCalendar(){
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
+
+    /**
+     * Creates a single event with the given start time and name.
+     * Also handles all necessary tests and remembers the event for later deletion.
+     *
+     * @param name The name of the event
+     * @param startTime The startTime of the event
+     * @return The created event
+     * @throws ApiException
+     */
+    private EventData createSingleEvent(String name, long startTime) throws ApiException{
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm(name, startTime, "-PT15M"), false, false);
+        return handleCreation(createEvent);
+    }
+
+    /**
+     * Creates a event series with the given start time and name.
+     * Also handles all necessary tests and remembers the event for later deletion.
+     *
+     * @param name The name of the event
+     * @param startTime The startTime of the event
+     * @return The created event
+     * @throws ApiException
+     */
+    private EventData createSeriesEvent(String name, long startTime) throws ApiException{
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M"), false, false);
+        return handleCreation(createEvent);
+    }
+
+    /**
+     * Handles the result response of an event creation
+     *
+     * @param createEvent The result
+     * @return The created event
+     */
+    private EventData handleCreation(ChronosCalendarResultResponse createEvent){
+        CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
+        EventData event = result.getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
         rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        this.setLastTimestamp(createEvent.getTimestamp());
+        return event;
+    }
+
+    /**
+     * Checks if the trigger is related to the given event and if the trigger time is correct
+     *
+     * @param trigger The trigger
+     * @param eventId The event id
+     * @param expectedTime The expected trigger time
+     * @throws ParseException
+     */
+    private void checkAlarmTime(AlarmTrigger trigger, String eventId, long expectedTime) throws ParseException{
+        assertTrue(trigger.getEventId().equals(eventId));
+        Date parsedTime = ZULU_FORMATER.parse(trigger.getTime());
+        assertEquals(expectedTime, parsedTime.getTime());
+    }
+
+
+    @Test
+    public void testCreateSingleAlarmTrigger() throws Exception {
+        // Create an event with alarm
+        long currentTime = System.currentTimeMillis();
+
+        EventData event = createSingleEvent("testSingleAlarmTrigger", System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+        getAndCheckEvent(event, 1);
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
-        AlarmTriggerResponse triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)).getValue(), null, null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        AlarmTriggerData triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==0); // No triggers
+        getAndCheckAlarmTrigger(currentTime, TimeUnit.HOURS, 1, null, 0); // No triggers
 
         // 2. Get alarms within the next two days
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).getValue(), null, null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==1); // The created alarm
-        assertTrue(triggers.get(0).getEventId().equals(eventId.getId()));
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        assertTrue(triggers.get(0).getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).getValue(), null, "MAIL");
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==0); // No triggers
+        getAndCheckAlarmTrigger(currentTime, TimeUnit.DAYS, 2, "MAIL", 0); // No triggers
 
     }
 
     @Test
     public void testSingleEventAlarmTriggerTime() throws Exception {
         // Create an event tomorrow 12 o clock
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+
+        Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
         Date startTime = cal.getTime();
 
+        long currentTime = System.currentTimeMillis();
+
         // Create an event with alarm
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testSingleAlarmTriggerTime", startTime.getTime(), "-PT15M"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        EventData event = createSingleEvent("testSingleAlarmTriggerTime", startTime.getTime());
+
+        getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
-        AlarmTriggerResponse triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).getValue(), null, null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        AlarmTriggerData triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==1); // The created alarm
-        AlarmTrigger alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(eventId.getId()));
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
         cal.add(Calendar.MINUTE, -15);
-        Date parsedTime = ZULU_FORMATER.parse(alarmTrigger.getTime());
-        assertEquals(cal.getTime().getTime(), parsedTime.getTime());
+        checkAlarmTime(triggers.get(0), event.getId(), cal.getTimeInMillis());
     }
 
     @Test
     public void testSingleEventAlarmTriggerTimeAfterUpdate() throws Exception {
         // Create an event tomorrow 12 o clock
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
         Date startTime = cal.getTime();
 
+        long currentTime = System.currentTimeMillis();
+
         // Create an event with alarm
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testSingleAlarmTriggerWithUpdate", startTime.getTime(), "-PT15M"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        EventData event = createSingleEvent("testSingleAlarmTriggerWithUpdate", startTime.getTime());
+        getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
-        AlarmTriggerResponse triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).getValue(), null, null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        AlarmTriggerData triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==1); // The created alarm
-        AlarmTrigger alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(eventId.getId()));
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
         Calendar trigger1 = (Calendar) cal.clone();
         trigger1.add(Calendar.MINUTE, -15);
-        Date parsedTime = ZULU_FORMATER.parse(alarmTrigger.getTime());
-        assertEquals(trigger1.getTime().getTime(), parsedTime.getTime());
+        checkAlarmTime(triggers.get(0), event.getId(), trigger1.getTimeInMillis());
 
         // Shift the start time by one hour
-        cal.add(Calendar.HOUR, 1);
-        event.setStartDate(getDateTime(cal.getTimeInMillis()));
-        event.setEndDate(getDateTime(cal.getTimeInMillis()+ TimeUnit.HOURS.toMillis(1)));
-        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, event.getId(), event, eventResponse.getTimestamp(), null, false, false);
-        assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
-        assertNotNull(updateEvent.getData());
+        shiftEvent(event.getId(), null, event, cal.getTimeInMillis(), TimeUnit.HOURS, 1, getLastTimestamp());
 
         // Check if trigger time changed accordingly
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)).getValue(), null, null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==1); // The updated alarm
-        alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(eventId.getId()));
+        triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
         Calendar trigger2 = (Calendar) cal.clone();
+        trigger2.add(Calendar.HOUR, 1);
         trigger2.add(Calendar.MINUTE, -15);
-        parsedTime = ZULU_FORMATER.parse(alarmTrigger.getTime());
-        assertEquals(trigger2.getTime().getTime(), parsedTime.getTime());
+        checkAlarmTime(triggers.get(0), event.getId(), trigger2.getTimeInMillis());
 
     }
-
 
     @Test
     public void testEventSeriesAlarmTriggerTime() throws Exception {
         // Create an event yesterday 12 o clock
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Date startTime = cal.getTime();
 
         // Create an event with alarm
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm("testSeriesAlarmTriggerTime", startTime.getTime(), "-PT15M"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        EventData event = createSeriesEvent("testSeriesAlarmTriggerTime", startTime.getTime());
+        getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerResponse triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(currentTime + TimeUnit.DAYS.toMillis(2)).getValue(), getZuluDateTime(currentTime).getValue(), null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        AlarmTriggerData triggers = triggerResponse.getData();
-        assertTrue(triggers.size()==1); // The created alarm
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
         AlarmTrigger alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(eventId.getId()));
-        if(currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))){
+        if (currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
             cal.add(Calendar.DAY_OF_MONTH, 1);
         } else {
@@ -347,132 +419,81 @@ public class BasicAlarmTriggerTest extends AbstractChronosTest {
             cal.add(Calendar.DAY_OF_MONTH, 2);
         }
         cal.add(Calendar.MINUTE, -15);
-        Date parsedTime = ZULU_FORMATER.parse(alarmTrigger.getTime());
-        assertEquals(cal.getTime().getTime(), parsedTime.getTime());
+        checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testEventSeriesAlarmTriggerTimeRoundtripForSingleUser() throws Exception {
+
         /*
-         *  1. Create an event series and test if the time is correct
+         * 1. Create an event series and test if the time is correct
          */
 
         // Create an event yesterday 12 o clock
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
+        Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Date startTime = cal.getTime();
 
         // Create an event with alarm
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm("testSeriesAlarmTriggerTimeRoundtrip", startTime.getTime(), "-PT15M"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", startTime.getTime());
+        getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerResponse triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(currentTime + TimeUnit.DAYS.toMillis(2)).getValue(), getZuluDateTime(currentTime).getValue(), null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        AlarmTriggerData triggers = triggerResponse.getData();
-        assertEquals(1, triggers.size()); // The created alarm
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // The created alarm
         AlarmTrigger alarmTrigger = triggers.get(0);
-        assertTrue(alarmTrigger.getEventId().equals(eventId.getId()));
-        Calendar alarmTriggerTime = Calendar.getInstance();
-        alarmTriggerTime.setTimeInMillis(cal.getTimeInMillis());
-        if(currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))){
+        assertTrue(alarmTrigger.getEventId().equals(event.getId()));
+        Calendar eventTime = Calendar.getInstance();
+        eventTime.setTimeInMillis(cal.getTimeInMillis());
+        if (currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
-            alarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1);
+            eventTime.add(Calendar.DAY_OF_MONTH, 1);
         } else {
             // The next trigger is tomorrow
-            alarmTriggerTime.add(Calendar.DAY_OF_MONTH, 2);
+            eventTime.add(Calendar.DAY_OF_MONTH, 2);
         }
+        Calendar alarmTriggerTime = Calendar.getInstance();
+        alarmTriggerTime.setTime(eventTime.getTime());
         alarmTriggerTime.add(Calendar.MINUTE, -15);
-        Date parsedTime = ZULU_FORMATER.parse(alarmTrigger.getTime());
-        assertEquals(alarmTriggerTime.getTime().getTime(), parsedTime.getTime());
+        checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
 
         /*
-         *  2. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
+         * 2. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-
-        DateTimeData exceptionStartDate = addTimeToDateTimeData(event.getStartDate(), TimeUnit.DAYS.toMillis(1)+TimeUnit.HOURS.toMillis(1));
-        DateTimeData exceptionEndDate = addTimeToDateTimeData(event.getEndDate(), TimeUnit.DAYS.toMillis(1)+TimeUnit.HOURS.toMillis(1));
-        event.setStartDate(exceptionStartDate);
-        event.setEndDate(exceptionEndDate);
-        ChronosCalendarResultResponse updateEventResponse = api.updateEvent(session, folderId, event.getId(), event, eventResponse.getTimestamp(), alarmTrigger.getRecurrence(), false, false);
-        assertNull(updateEventResponse.getErrorDesc(), updateEventResponse.getError());
-        assertNotNull(updateEventResponse.getData());
-        CalendarResult updateResult = updateEventResponse.getData();
+        CalendarResult updateResult = shiftEvent(event.getId(), alarmTrigger.getRecurrence(), event, eventTime.getTimeInMillis(), TimeUnit.HOURS, 1, getLastTimestamp());
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
 
         // Check if trigger times are correct
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(currentTime + TimeUnit.DAYS.toMillis(2)).getValue(), getZuluDateTime(currentTime).getValue(), null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertEquals(2, triggers.size()); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         Calendar exceptionTriggerTime = Calendar.getInstance();
         exceptionTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         exceptionTriggerTime.add(Calendar.HOUR, 1); // Old alarm time shifted by one hour
-
-        AlarmTrigger exceptionTrigger = triggers.get(0);
-        assertTrue(exceptionTrigger.getEventId().equals(exceptionEvent.getId()));
-        parsedTime = ZULU_FORMATER.parse(exceptionTrigger.getTime());
-        assertEquals(exceptionTriggerTime.getTimeInMillis(), parsedTime.getTime());
+        checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
 
         // Check the normal alarm
         Calendar newAlarmTriggerTime = Calendar.getInstance();
         newAlarmTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         newAlarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1); // Old alarm time shifted by one day (next recurrence)
-
-        AlarmTrigger newAlarmTrigger = triggers.get(1);
-        assertTrue(newAlarmTrigger.getEventId().equals(event.getId()));
-        parsedTime = ZULU_FORMATER.parse(newAlarmTrigger.getTime());
-        assertEquals(newAlarmTriggerTime.getTimeInMillis(), parsedTime.getTime());
-
+        checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
          * 3. Delete the exception
          */
-
         EventId toDelete = new EventId();
         toDelete.setFolderId(folderId);
         toDelete.setId(exceptionEvent.getId());
         List<EventId> singletonList = Collections.singletonList(toDelete);
-        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, updateEventResponse.getTimestamp(), singletonList);
-        assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
-        assertNotNull(deleteResponse.getData());
+        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, getLastTimestamp(), singletonList);
+        checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(currentTime + TimeUnit.DAYS.toMillis(2)).getValue(), getZuluDateTime(currentTime).getValue(), null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertEquals(1, triggers.size()); // Only the alarm of the series
-
-        AlarmTrigger seriesTrigger = triggers.get(0);
-        assertTrue(seriesTrigger.getEventId().equals(event.getId()));
-        parsedTime = ZULU_FORMATER.parse(seriesTrigger.getTime());
-        assertEquals(newAlarmTriggerTime.getTimeInMillis(), parsedTime.getTime());
+        triggers = getAndCheckAlarmTrigger(currentTime, 1); // Only the alarm of the series
+        checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
          * 4. Delete series too
@@ -482,15 +503,10 @@ public class BasicAlarmTriggerTest extends AbstractChronosTest {
         toDelete.setId(event.getId());
         singletonList = Collections.singletonList(toDelete);
         deleteResponse = api.deleteEvent(session, deleteResponse.getTimestamp(), singletonList);
-        assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
-        assertNotNull(deleteResponse.getData());
+        checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        triggerResponse = api.getAlarmTrigger(session, getZuluDateTime(currentTime + TimeUnit.DAYS.toMillis(2)).getValue(), getZuluDateTime(currentTime).getValue(), null);
-        assertNull(triggerResponse.getErrorDesc(), triggerResponse.getError());
-        assertNotNull(triggerResponse.getData());
-        triggers = triggerResponse.getData();
-        assertEquals(0, triggers.size()); // No upcoming triggers
+        getAndCheckAlarmTrigger(currentTime, 0); // No upcoming triggers
     }
 
 }
