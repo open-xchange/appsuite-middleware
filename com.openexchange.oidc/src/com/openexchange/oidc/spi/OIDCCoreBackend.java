@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.spi;
 
 import java.io.IOException;
@@ -67,7 +68,6 @@ import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
-import com.openexchange.oidc.tools.OIDCTools;
 
 /**
  * The implementation of the core OpenID backend.

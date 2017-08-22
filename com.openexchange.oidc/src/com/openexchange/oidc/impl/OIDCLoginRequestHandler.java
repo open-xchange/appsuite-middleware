@@ -1,3 +1,52 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.oidc.impl;
 
 import java.io.IOException;
@@ -41,22 +90,21 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
-
 public class OIDCLoginRequestHandler implements LoginRequestHandler {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.class);
     private LoginConfiguration loginConfiguration;
     private OIDCBackend backend;
     //TODO QS-VS: Load UI-Webpath from where??
     private String uiWebPath = "/appsuite/ui";
-    
+
     public OIDCLoginRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend backend) {
         this.loginConfiguration = loginConfiguration;
         this.backend = backend;
     }
 
     @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             performLogin(request, response);
         } catch (OXException e) {
@@ -64,7 +112,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     //TODO QS-VS: Struktur der Methode verbessern
     private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
@@ -72,20 +120,20 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        
+
         SessionReservationService sessionReservationService = Services.getService(SessionReservationService.class);
         Reservation reservation = sessionReservationService.removeReservation(sessionToken);
         if (null == reservation) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        
+
         String idToken = reservation.getState().get(OIDCTools.IDTOKEN);
         if (Strings.isEmpty(idToken)) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        
+
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.getContext(reservation.getContextId());
         if (!context.isEnabled()) {
@@ -99,7 +147,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        
+
         String autologinCookieValue = null;
         if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
             Cookie autologinCookie = this.loadAutologinCookie(request, reservation);
@@ -113,15 +161,15 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                 autologinCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
             }
         }
-        
+
         LoginResult result = loginUser(request, context, user, reservation.getState(), autologinCookieValue);
 
         Session session = performSessionAdditions(result, request, response, idToken);
-        
+
         if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
             response.addCookie(getOIDCAutologinCookie(request, session, autologinCookieValue));
         }
-        
+
         sendRedirect(session, request, response);
     }
 
@@ -133,14 +181,13 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             }
             //No session found, log that
         }
-        
-        
+
         if (oidcAtologinCookie != null) {
             Cookie toRemove = (Cookie) oidcAtologinCookie.clone();
             toRemove.setMaxAge(0);
             response.addCookie(toRemove);
         }
-        
+
         return null;
     }
 
@@ -153,16 +200,12 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         return result;
     }
 
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) {
+    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
         Session session = null;
-        try {
-            SessiondService sessiondService = Services.getService(SessiondService.class);
-            Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-            if (sessions.size() > 0) {
-                session = sessiondService.getSession(sessions.iterator().next());
-            }
-        } catch (OXException e) {
-            
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
+        if (sessions.size() > 0) {
+            session = sessiondService.getSession(sessions.iterator().next());
         }
         return session;
     }
@@ -178,25 +221,25 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         oidcAutologinCookie.setPath("/");
         oidcAutologinCookie.setSecure(OIDCTools.considerSecure(request));
         oidcAutologinCookie.setMaxAge(-1);
-        
+
         String domain = OIDCTools.getDomainName(request);
         String cookieDomain = Cookies.getDomainValue(domain);
         if (cookieDomain != null) {
             oidcAutologinCookie.setDomain(cookieDomain);
         }
         return oidcAutologinCookie;
-        
+
     }
-    
+
     private Session performSessionAdditions(LoginResult loginResult, HttpServletRequest request, HttpServletResponse response, String idToken) throws OXException {
         Session session = loginResult.getSession();
-        
+
         LoginServlet.addHeadersAndCookies(loginResult, response);
 
         SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
-        
+
         LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
-        
+
         return session;
     }
 
@@ -205,29 +248,30 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
         //TODO QS-VS: Wirft eine Exception: Missing parameter in user's mail config: Session password not set.
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
-          
-          @Override
-          public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
-              Authenticated authenticated = enhanceAuthenticated(getDefaultAuthenticated(context, user), state);
-              
-              EnhancedAuthenticated enhanced = new EnhancedAuthenticated(authenticated) {
-                  @Override
-                protected void doEnhanceSession(Session session) {
-                    if (oidcAutologinCookieValue != null) {
-                        session.setParameter(OIDCTools.SESSION_COOKIE, oidcAutologinCookieValue);
+
+            @Override
+            public Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException {
+                Authenticated authenticated = enhanceAuthenticated(getDefaultAuthenticated(context, user), state);
+
+                EnhancedAuthenticated enhanced = new EnhancedAuthenticated(authenticated) {
+
+                    @Override
+                    protected void doEnhanceSession(Session session) {
+                        if (oidcAutologinCookieValue != null) {
+                            session.setParameter(OIDCTools.SESSION_COOKIE, oidcAutologinCookieValue);
+                        }
+
+                        session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
                     }
-                    
-                    session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
-                }
-              };
-              
-              return enhanced;
-          }
-      });
+                };
+
+                return enhanced;
+            }
+        });
 
         return loginResult;
     }
-    
+
     private Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, final Map<String, String> state) {
         Authenticated resultAuth = defaultAuthenticated;
         if (state != null) {
@@ -235,25 +279,25 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
         return resultAuth;
     }
-    
+
     private Authenticated getDefaultAuthenticated(final Context context, final User user) {
         return new Authenticated() {
-            
+
             @Override
             public String getUserInfo() {
                 return user.getLoginInfo();
             }
-            
+
             @Override
             public String getContextInfo() {
                 return context.getLoginInfo()[0];
             }
         };
     }
-    
+
     private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        String uiWebPath = this.loginConfiguration.getUiWebPath();
-        
+        //        String uiWebPath = this.loginConfiguration.getUiWebPath();
+
         response.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
     }
 

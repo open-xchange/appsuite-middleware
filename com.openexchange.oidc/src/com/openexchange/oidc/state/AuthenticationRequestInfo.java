@@ -49,8 +49,6 @@
 package com.openexchange.oidc.state;
 
 import java.util.Map;
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.openid.connect.sdk.Nonce;
 
 /**
  * Meta information about the client, that tries to authenticate on the server.

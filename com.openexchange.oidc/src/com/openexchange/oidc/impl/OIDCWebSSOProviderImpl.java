@@ -54,7 +54,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
@@ -84,7 +83,6 @@ import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -100,9 +98,7 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
-import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -118,15 +114,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCWebSSOProviderImpl.class);
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
-    private final LoginConfiguration loginConfiguration;
     private final SessionReservationService sessionReservationService;
 
 
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, LoginConfiguration loginConfiguration) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
-        this.loginConfiguration = loginConfiguration;
         this.sessionReservationService = Services.getService(SessionReservationService.class);
     }
 

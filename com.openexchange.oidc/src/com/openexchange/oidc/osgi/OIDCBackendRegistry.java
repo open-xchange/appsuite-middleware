@@ -60,6 +60,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
@@ -91,6 +93,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend>{
     
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCBackendRegistry.class);
     private ServiceLookup services;
     private final ConcurrentList<OIDCBackend> backends;
     private ConcurrentHashMap<OIDCBackend, Stack<String>> backendServlets;
@@ -124,7 +127,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.loginConfiguration);
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)));
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
@@ -133,7 +136,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.LOGIN_ACTION, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend));
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
-                
+                LOG.error(e.getLocalizedMessage(), e);
                 while (!servlets.isEmpty()) {
                     httpService.unregister(servlets.pop());
                 }

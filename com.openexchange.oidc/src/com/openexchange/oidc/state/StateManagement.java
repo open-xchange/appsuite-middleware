@@ -48,9 +48,6 @@
  */
 package com.openexchange.oidc.state;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Manager of all client states, that try to login with OpenID features.
  *
