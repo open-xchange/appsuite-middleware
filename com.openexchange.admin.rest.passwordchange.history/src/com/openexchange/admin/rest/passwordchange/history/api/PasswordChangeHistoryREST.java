@@ -224,8 +224,8 @@ public class PasswordChangeHistoryREST {
     /**
      * Check if context and user IDs are valid and the according entities exist.
      *
-     * @param contextId
-     * @param userId
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user
      * @return <code>null</code> if both IDs are valid. A {@link Response} to be returned to the client
      *         in case one of the IDs is invalid.
      * @throws OXException
@@ -234,7 +234,7 @@ public class PasswordChangeHistoryREST {
         ContextService contextService = getService(ContextService.class);
         UserService userService = getService(UserService.class);
         try {
-            Context context = contextService.getContext(userId);
+            Context context = contextService.getContext(contextId);
             userService.getUser(userId, context);
             return null;
         } catch (OXException e) {
