@@ -92,4 +92,8 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURILogout);
     }
 
+    @Override
+    public boolean isAutologinCookieEnabled() {
+        return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.autologinCookieEnabled);
+    }
 }

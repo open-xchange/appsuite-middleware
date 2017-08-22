@@ -165,7 +165,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private void addRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
         String deepLink = request.getParameter("deep_link");
         String uiClientID = this.getUiClient(request);
-        String hostname = this.getDomainName(request);
+        String hostname = OIDCTools.getDomainName(request);
         Map<String, String> additionalClientInformation = new HashMap<>();
 
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo.Builder(state.getValue())
@@ -190,20 +190,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return uiClientID;
     }
 
-    private String getDomainName(HttpServletRequest request) {
-        HostnameService hostnameService = Services.getService(HostnameService.class);
-        if (hostnameService == null) {
-            return request.getServerName();
-        }
-
-        String hostname = hostnameService.getHostname(-1, -1);
-        if (hostname == null) {
-            return request.getServerName();
-        }
-
-        return hostname;
-    }
-
     @Override
     public void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException{
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(request.getParameter("state"));
@@ -216,8 +202,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             TokenRequest tokenReq = createTokenRequest(request);
             OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
 
-            if (this.validTokenResponse(tokenResponse, storedRequestInformation) != null) {
-                this.sendLoginRequestToServer(request, response, tokenResponse);
+            IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation);
+            validTokenResponse.getSubject().getValue();
+            if (validTokenResponse != null) {
+                this.sendLoginRequestToServer(request, response, tokenResponse, validTokenResponse.getSubject().getValue());
             }
         } catch (OXException e) {
             // TODO Auto-generated catch block
@@ -225,8 +213,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
     }
 
-    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse) throws OXException {
+    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String subject) throws OXException {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
+        authInfo.setProperty(OIDCTools.SUBJECT, subject);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
@@ -237,7 +226,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             URIBuilder redirectLocation = new URIBuilder()
                 .setScheme(this.getRedirectScheme(request))
-                .setHost(this.getDomainName(request))
+                .setHost(OIDCTools.getDomainName(request))
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
@@ -308,7 +297,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String logoutRequest = this.backend.getBackendConfig().getRedirectURILogout();
         if (this.backend.getBackendConfig().isSSOLogout()) {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), this.getDomainName(request), session.getSessionID()));
+            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request), session.getSessionID()));
         } else {
             this.logoutCurrentUser(session, request, response);
         }
@@ -351,12 +340,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
     
     private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        SessionUtility.checkIP(session, request.getRemoteAddr());
-        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
-        if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
-        }
+        OIDCTools.validateSession(session, request);
         LoginPerformer.getInstance().doLogout(session.getSessionID());
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);

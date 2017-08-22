@@ -102,4 +102,6 @@ public interface OIDCBackendConfig {
     boolean isSSOLogout();
 
     String getRedirectURILogout();
+    
+    boolean isAutologinCookieEnabled();
 }
