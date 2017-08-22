@@ -328,7 +328,8 @@ public final class InlineImageDataSource implements ImageDataSource {
             if (charset != null) {
                 properties.put(DataProperties.PROPERTY_CHARSET, charset);
             }
-            properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
+            // Exact size is not known
+            //properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, fileName);
             return new SimpleData<D>((D) mailPart.getInputStream(), properties);
         }
