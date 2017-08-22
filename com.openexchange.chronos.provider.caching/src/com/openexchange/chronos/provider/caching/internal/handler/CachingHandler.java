@@ -96,6 +96,7 @@ public interface CachingHandler {
      * Updates the last modified timestamp of the account.
      * 
      * @param folderId The folder id
+     * @return <code>true</code> if the configuration has been updated; otherwise <code>false</code>
      */
-    void updateLastUpdated(String folderId);
+    boolean updateLastUpdated(String folderId);
 }

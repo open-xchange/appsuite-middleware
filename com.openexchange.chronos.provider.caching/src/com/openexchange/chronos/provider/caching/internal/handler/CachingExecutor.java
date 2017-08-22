@@ -120,8 +120,10 @@ public class CachingExecutor {
                 if (!diff.isEmpty()) {
                     cachingHandler.persist(calendarFolderId, diff);
                 }
-                cachingHandler.updateLastUpdated(calendarFolderId);
-                updated = true;
+                boolean lUpdated = cachingHandler.updateLastUpdated(calendarFolderId);
+                if (!updated) { // once true we have to save the config
+                    updated = lUpdated;
+                }
             } catch (OXException e) {
                 LOG.error("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
             }

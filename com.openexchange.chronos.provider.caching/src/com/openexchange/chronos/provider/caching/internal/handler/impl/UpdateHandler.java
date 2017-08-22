@@ -76,7 +76,6 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
@@ -166,14 +165,12 @@ public class UpdateHandler extends AbstractHandler {
             return;
         }
 
-        EventStorage eventStorage = calendarStorage.getEventStorage();
-
         for (EventUpdate eventUpdate : diff.getUpdatedItems()) {
             Event persistedEvent = eventUpdate.getOriginal();
             Event updatedEvent = eventUpdate.getUpdate();
 
             updatedEvent.setId(persistedEvent.getId());
-            eventStorage.updateEvent(updatedEvent);
+            update(calendarStorage, updatedEvent);
 
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {

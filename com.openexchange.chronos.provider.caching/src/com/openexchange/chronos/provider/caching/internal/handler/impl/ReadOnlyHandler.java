@@ -84,7 +84,7 @@ public class ReadOnlyHandler extends AbstractHandler {
     }
 
     @Override
-    public void updateLastUpdated(String folderId) {
-        // ignore update 
+    public boolean updateLastUpdated(String folderId) {
+        return false;
     }
 }

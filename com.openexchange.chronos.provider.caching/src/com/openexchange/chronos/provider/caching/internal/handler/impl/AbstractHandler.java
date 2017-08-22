@@ -69,6 +69,7 @@ import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
@@ -89,6 +90,8 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public abstract class AbstractHandler implements CachingHandler {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractHandler.class);
+
     private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
 
     protected final CachingCalendarAccess cachedCalendarAccess;
@@ -102,7 +105,7 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     @Override
-    public void updateLastUpdated(String folderId) {
+    public boolean updateLastUpdated(String folderId) {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
         Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CachingCalendarAccess.CACHING);
         if (caching == null) {
@@ -118,6 +121,7 @@ public abstract class AbstractHandler implements CachingHandler {
 
         caching.put(folderId, folderConfig);
         configuration.put(CachingCalendarAccess.CACHING, caching);
+        return true;
     }
 
     protected List<Event> getExistingEventsInFolder(String folderId) throws OXException {
@@ -158,8 +162,8 @@ public abstract class AbstractHandler implements CachingHandler {
 
     protected void create(String folderId, CalendarStorage calendarStorage, Entry<String, List<Event>> entry) throws OXException {
         Date now = new Date();
-
         List<Event> events = sortSeriesMasterFirst(entry.getValue());
+
         insertEvents(folderId, calendarStorage, now, events.toArray(new Event[events.size()]));
     }
 
@@ -176,7 +180,7 @@ public abstract class AbstractHandler implements CachingHandler {
         if (Strings.isNotEmpty(importedEvent.getRecurrenceRule())) {
             importedEvent.setSeriesId(id);
         }
-        calendarStorage.getEventStorage().insertEvent(importedEvent);
+        insert(calendarStorage, importedEvent);
         if (null != importedEvent.getAttendees() && !importedEvent.getAttendees().isEmpty()) {
             calendarStorage.getAttendeeStorage().insertAttendees(id, importedEvent.getAttendees());
         }
@@ -193,7 +197,7 @@ public abstract class AbstractHandler implements CachingHandler {
                 Event importedChangeException = applyDefaults(folderId, events.get(i), now);
                 importedChangeException.setSeriesId(id);
                 importedChangeException.setId(calendarStorage.getEventStorage().nextId());
-                calendarStorage.getEventStorage().insertEvent(importedChangeException);
+                insert(calendarStorage, importedChangeException);
                 if (null != importedChangeException.getAttendees() && !importedChangeException.getAttendees().isEmpty()) {
                     calendarStorage.getAttendeeStorage().insertAttendees(importedChangeException.getId(), importedChangeException.getAttendees());
                 }
@@ -205,6 +209,70 @@ public abstract class AbstractHandler implements CachingHandler {
                 }
             }
         }
+    }
+
+    private Boolean handleDataTruncation(Event event, OXException e) throws Exception {
+        CalendarUtilities calendarUtilities = Services.getService(CalendarUtilities.class);
+        /*
+         * trim mapped data truncations, indicate "try again" if possible
+         */
+        LOG.info("Data truncation detected, trimming problematic fields and trying again.");
+        boolean hasTrimmed = calendarUtilities.handleDataTruncation(e, event);
+        return hasTrimmed ? Boolean.TRUE : null;
+    }
+
+    private Boolean handle(Event event, OXException e) {
+        try {
+            switch (e.getErrorCode()) {
+                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
+                    return handleDataTruncation(event, e);
+            }
+        } catch (Exception x) {
+            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
+        }
+        return null;
+    }
+
+    private static final int MAX_RETRIES = 3;
+
+    protected void update(CalendarStorage calendarStorage, Event event) throws OXException {
+        int retryCount = 0;
+        do {
+            try {
+                calendarStorage.getEventStorage().updateEvent(event);
+                return;
+            } catch (OXException e) {
+                if (++retryCount < MAX_RETRIES) {
+                    Boolean handled = handle(event, e);
+                    if (Boolean.TRUE.equals(handled)) {
+                        continue;
+                    } else if (Boolean.FALSE.equals(handled)) {
+                        return;
+                    }
+                }
+                throw e;
+            }
+        } while (true);
+    }
+
+    private void insert(CalendarStorage calendarStorage, Event event) throws OXException {
+        int retryCount = 0;
+        do {
+            try {
+                calendarStorage.getEventStorage().insertEvent(event);
+                return;
+            } catch (OXException e) {
+                if (++retryCount < MAX_RETRIES) {
+                    Boolean handled = handle(event, e);
+                    if (Boolean.TRUE.equals(handled)) {
+                        continue;
+                    } else if (Boolean.FALSE.equals(handled)) {
+                        return;
+                    }
+                }
+                throw e;
+            }
+        } while (true);
     }
 
     private Event applyDefaults(String folderId, Event importedEvent, Date now) {

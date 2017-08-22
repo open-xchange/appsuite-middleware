@@ -193,10 +193,12 @@ public class DeleteHandler extends AbstractHandler {
     }
 
     @Override
-    public void updateLastUpdated(String folderId) {
+    public boolean updateLastUpdated(String folderId) {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
         Map<String, Long> lastUpdates = (Map<String, Long>) configuration.get(CachingCalendarAccess.CACHING);
         lastUpdates.remove(folderId);
+        
+        return true;
     }
 
 }
