@@ -92,7 +92,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
-    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
+    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=?";
     private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
 
     private final ConfigDatabaseService configDatabaseService;
@@ -409,9 +409,23 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
+            // Get the identifier of the read-write pool for given database pool identifier
+            stmt = con.prepareStatement("SELECT write_db_pool_id FROM db_cluster WHERE read_db_pool_id=? OR write_db_pool_id=?");
             stmt.setInt(1, poolId);
             stmt.setInt(2, poolId);
+            result = stmt.executeQuery();
+            if (false == result.next()) {
+                // No such database known
+                return new int[0];
+            }
+
+            int writePoolId = result.getInt(1);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
+            stmt.setInt(1, writePoolId);
             result = stmt.executeQuery();
             while (result.next()) {
                 tmp.add(I(result.getInt(1)));
