@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.6.3-31) stable; urgency=medium
+
+  * 2017-08-21 (4315)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 14 Aug 2017 15:21:21 +0200
+
 open-xchange-mobile-config (7.6.3-30) stable; urgency=medium
 
   * Build for patch 2017-08-01 (4308)
