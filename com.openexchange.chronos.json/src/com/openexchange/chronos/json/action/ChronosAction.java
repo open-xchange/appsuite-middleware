@@ -52,13 +52,18 @@ package com.openexchange.chronos.json.action;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ChronosAction}
@@ -82,6 +87,19 @@ public abstract class ChronosAction extends AbstractChronosAction {
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(requestData);
         AJAXRequestResult result = perform(calendarAccess, requestData);
         return result;
+    }
+
+    /**
+     * Gets the timezone used to interpret <i>Time</i> parameters in for the underlying request.
+     *
+     * @return The timezone
+     */
+    protected static TimeZone getTimeZone(Session session, AJAXRequestData requestData) throws OXException {
+        String timezoneId = requestData.getParameter("timezone");
+        if (Strings.isEmpty(timezoneId)) {
+            timezoneId = ServerSessionAdapter.valueOf(session).getUser().getTimeZone();
+        }
+        return TimeZoneUtils.getTimeZone(timezoneId);
     }
 
     /**

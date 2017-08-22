@@ -336,6 +336,10 @@ public class ChronosJsonFields {
          */
         public static final String UID = "uid";
         /**
+         * The acknowledged of the alarm. See {@link com.openexchange.chronos.Alarm#getRelatedTo()}
+         */
+        public static final String RELATED_TO = "relatedTo";
+        /**
          * The acknowledged of the alarm. See {@link com.openexchange.chronos.Alarm#getAcknowledged()}
          */
         public static final String ACK = "acknowledged";

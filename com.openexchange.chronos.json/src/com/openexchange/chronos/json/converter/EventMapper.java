@@ -67,25 +67,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
-import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ParticipantRole;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.Trigger;
-import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -863,7 +855,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return geoLocationJson;
             }
         });
-        mappings.put(EventField.ATTENDEES, new ListItemMapping<Attendee, Event, JSONObject>(ChronosJsonFields.ATTENDEES, ColumnIDs.ATTENDEES) {
+        mappings.put(EventField.ATTENDEES, new AttendeesMapping<Event>(ChronosJsonFields.ATTENDEES, ColumnIDs.ATTENDEES) {
 
             @Override
             public boolean isSet(Event object) {
@@ -884,88 +876,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             public void remove(Event object) {
                 object.removeAttendees();
             }
-
-            @Override
-            protected Attendee deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
-                JSONObject jsonObject = array.getJSONObject(index);
-                return deserialize(jsonObject, timeZone);
-            }
-
-            @Override
-            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
-                List<Attendee> value = get(from);
-                if (null == value) {
-                    return null;
-                }
-                JSONArray jsonArray = new JSONArray(value.size());
-                for (Attendee attendee : value) {
-
-                    jsonArray.put(serialize(attendee, timeZone));
-                }
-                return jsonArray;
-            }
-
-            @Override
-            public Attendee deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
-                Attendee attendee = deserializeCalendarUser(from, Attendee.class);
-                if (from.has(ChronosJsonFields.Attendee.CU_TYPE)) {
-                    attendee.setCuType(new CalendarUserType(from.getString(ChronosJsonFields.Attendee.CU_TYPE)));
-                }
-                if (from.has(ChronosJsonFields.Attendee.ROLE)) {
-                    attendee.setRole(new ParticipantRole(from.getString(ChronosJsonFields.Attendee.ROLE)));
-                }
-                if (from.has(ChronosJsonFields.Attendee.PARTICIPATION_STATUS)) {
-                    attendee.setPartStat(new ParticipationStatus(from.getString(ChronosJsonFields.Attendee.PARTICIPATION_STATUS)));
-                }
-                if (from.has(ChronosJsonFields.Attendee.COMMENT)) {
-                    attendee.setComment(from.getString(ChronosJsonFields.Attendee.COMMENT));
-                }
-                if (from.has(ChronosJsonFields.Attendee.RSVP)) {
-                    attendee.setRsvp(from.getBoolean(ChronosJsonFields.Attendee.RSVP));
-                }
-                if (from.has(ChronosJsonFields.Attendee.FOLDER)) {
-                    attendee.setFolderID(from.getString(ChronosJsonFields.Attendee.FOLDER));
-                }
-                if (from.has(ChronosJsonFields.Attendee.MEMBER)) {
-                    JSONArray array = from.getJSONArray(ChronosJsonFields.Attendee.MEMBER);
-                    List<String> list = new ArrayList<>(array.length());
-                    for(Object o: array.asList()){
-                        list.add(o.toString());
-                    }
-                    attendee.setMember(list);
-                }
-
-                return attendee;
-            }
-
-            @Override
-            public JSONObject serialize(Attendee from, TimeZone timeZone) throws JSONException {
-                JSONObject jsonObject = serializeCalendarUser(from);
-                if (null != from.getCuType()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.CU_TYPE, from.getCuType().getValue());
-                }
-                if (null != from.getRole()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.ROLE, from.getRole().getValue());
-                }
-                if (null != from.getPartStat()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.PARTICIPATION_STATUS, from.getPartStat().getValue());
-                }
-                if (null != from.getComment()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.COMMENT, from.getComment());
-                }
-                if (null != from.getRsvp()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.RSVP, from.getRsvp());
-                }
-                if (null != from.getFolderID()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.FOLDER, from.getFolderID());
-                }
-                if (null != from.getMember()) {
-                    jsonObject.put(ChronosJsonFields.Attendee.MEMBER, from.getMember());
-                }
-                return jsonObject;
-            }
         });
-        mappings.put(EventField.ATTACHMENTS, new ListItemMapping<Attachment, Event, JSONObject>(ChronosJsonFields.ATTACHMENTS, ColumnIDs.ATTACHMENTS) {
+        mappings.put(EventField.ATTACHMENTS, new AttachmentsMapping<Event>(ChronosJsonFields.ATTACHMENTS, ColumnIDs.ATTACHMENTS) {
 
             @Override
             public boolean isSet(Event object) {
@@ -987,92 +899,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeAttachments();
             }
 
-            @Override
-            protected Attachment deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
-                JSONObject jsonObject = array.getJSONObject(index);
-                return deserialize(jsonObject, timeZone);
-
-            }
-
-            @Override
-            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
-                List<Attachment> value = get(from);
-                if (null == value) {
-                    return null;
-                }
-                JSONArray jsonArray = new JSONArray(value.size());
-                for (Attachment attachment : value) {
-
-                    jsonArray.put(serialize(attachment, timeZone));
-                }
-                return jsonArray;
-            }
-
-            @Override
-            public Attachment deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
-                Attachment attachment = new Attachment();
-
-                if (from.has(ChronosJsonFields.Attachment.FORMAT_TYPE)) {
-                    attachment.setFormatType(from.getString(ChronosJsonFields.Attachment.FORMAT_TYPE));
-                }
-
-                if (from.has(ChronosJsonFields.Attachment.FILENAME)) {
-                    attachment.setFilename(from.getString(ChronosJsonFields.Attachment.FILENAME));
-                }
-
-                if (from.has(ChronosJsonFields.Attachment.SIZE)) {
-                    attachment.setSize(from.getLong(ChronosJsonFields.Attachment.SIZE));
-                }
-                if (from.has(ChronosJsonFields.Attachment.CREATED)) {
-                    long date = from.getLong(ChronosJsonFields.Attachment.CREATED);
-                    date -= timeZone.getOffset(date);
-                    attachment.setCreated(new Date(date));
-                }
-
-                /**
-                 *  The attachment is either a uri or a managed id.
-                 */
-                if (from.has(ChronosJsonFields.Attachment.URI)){
-                    attachment.setUri(from.getString(ChronosJsonFields.Attachment.URI));
-                    return attachment;
-                }
-
-                if (from.has(ChronosJsonFields.Attachment.MANAGED_ID)) {
-                    attachment.setManagedId(from.getInt(ChronosJsonFields.Attachment.MANAGED_ID));
-                    return attachment;
-                }
-                throw new JSONException("Missing required field. At least one of ["+ChronosJsonFields.Attachment.MANAGED_ID+","+ChronosJsonFields.Attachment.URI+"] must be present.");
-            }
-
-            @Override
-            public JSONObject serialize(Attachment attachment, TimeZone timeZone) throws JSONException {
-                JSONObject jsonObject = new JSONObject();
-                if (null != attachment.getFilename()) {
-                    jsonObject.put(ChronosJsonFields.Attachment.FILENAME, attachment.getFilename());
-                }
-                if (null != attachment.getFormatType()) {
-                    jsonObject.put(ChronosJsonFields.Attachment.FORMAT_TYPE, attachment.getFormatType());
-                }
-                if (0 < attachment.getSize()) {
-                    jsonObject.put(ChronosJsonFields.Attachment.SIZE, attachment.getSize());
-                }
-                if (null != attachment.getCreated()) {
-                    long date = attachment.getCreated().getTime();
-                    date += timeZone.getOffset(date);
-                    jsonObject.put(ChronosJsonFields.Attachment.CREATED, date);
-                }
-                if (0 < attachment.getManagedId()) {
-                    jsonObject.put(ChronosJsonFields.Attachment.MANAGED_ID, attachment.getManagedId());
-                }
-
-                if (null != attachment.getUri()){
-                    jsonObject.put(ChronosJsonFields.Attachment.URI, attachment.getUri());
-                }
-
-                return jsonObject;
-            }
         });
-        mappings.put(EventField.ALARMS, new DefaultJsonMapping<List<Alarm>, Event>(ChronosJsonFields.ALARMS, ColumnIDs.ALARMS) {
+        mappings.put(EventField.ALARMS, new ListMapping<Alarm, Event>(ChronosJsonFields.ALARMS, ColumnIDs.ALARMS) {
 
             @Override
             public boolean isSet(Event object) {
@@ -1094,90 +922,6 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeAlarms();
             }
 
-            @SuppressWarnings("unchecked")
-            @Override
-            public void deserialize(JSONObject from, Event to, TimeZone timezone) throws JSONException, OXException {
-
-                JSONArray arrayOfAlarms = from.getJSONArray(getAjaxName());
-                List<Alarm> alarms = new ArrayList<>(arrayOfAlarms.length());
-                for (int index = 0; index < arrayOfAlarms.length(); index++) {
-
-                    JSONObject jsonObject = arrayOfAlarms.getJSONObject(index);
-                    Alarm alarm = new Alarm();
-                    if (jsonObject.has(ChronosJsonFields.Alarm.ACTION)) {
-                        String action = jsonObject.getString(ChronosJsonFields.Alarm.ACTION);
-                        alarm.setAction(new AlarmAction(action));
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.TRIGGER)) {
-                        JSONObject triggerJSON = jsonObject.getJSONObject(ChronosJsonFields.Alarm.TRIGGER);
-                        Trigger trigger = new Trigger();
-                        if (triggerJSON.has(ChronosJsonFields.Alarm.Trigger.RELATED)) {
-                            String related = triggerJSON.getString(ChronosJsonFields.Alarm.Trigger.RELATED);
-                            trigger.setRelated(Related.valueOf(related.toUpperCase()));
-                        }
-                        if (triggerJSON.has(ChronosJsonFields.Alarm.Trigger.DURATION)) {
-                            String duration = triggerJSON.getString(ChronosJsonFields.Alarm.Trigger.DURATION);
-                            trigger.setDuration(duration);
-                        }
-                        if (triggerJSON.has(ChronosJsonFields.Alarm.Trigger.DATE_TIME)) {
-                            String date = triggerJSON.getString(ChronosJsonFields.Alarm.Trigger.DATE_TIME);
-                            DateTime dateTime = DateTime.parse("UTC", date);
-                            trigger.setDateTime(new Date(dateTime.getTimestamp()));
-                        }
-                        alarm.setTrigger(trigger);
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.ATTACHMENTS)) {
-                        JSONArray arrayOfAttachments = jsonObject.getJSONArray(ChronosJsonFields.Alarm.ATTACHMENTS);
-                        List<Attachment> attachments = new ArrayList<>(arrayOfAttachments.length());
-                        for (int x = 0; x < arrayOfAttachments.length(); x++) {
-                            JSONObject attachmentJSON = arrayOfAttachments.getJSONObject(x);
-                            Attachment attach = ((ListItemMapping<Attachment, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTACHMENTS)).deserialize(attachmentJSON, timezone);
-                            attachments.add(attach);
-                        }
-                        if (!attachments.isEmpty()) {
-                            alarm.setAttachments(attachments);
-                        }
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.ATTENDEES)) {
-                        JSONArray arrayOfAttendees = jsonObject.getJSONArray(ChronosJsonFields.Alarm.ATTENDEES);
-                        List<Attendee> attendees = new ArrayList<>(arrayOfAttendees.length());
-                        for (int x = 0; x < arrayOfAttendees.length(); x++) {
-                            JSONObject attendeeJSON = arrayOfAttendees.getJSONObject(x);
-                            Attendee attendee = ((ListItemMapping<Attendee, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTENDEES)).deserialize(attendeeJSON, timezone);
-                            attendees.add(attendee);
-                        }
-                        if (!attendees.isEmpty()) {
-                            alarm.setAttendees(attendees);
-                        }
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.SUMMARY)) {
-                        String summary = jsonObject.getString(ChronosJsonFields.Alarm.SUMMARY);
-                        alarm.setSummary(summary);
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.DESCRIPTION)) {
-                        String description = jsonObject.getString(ChronosJsonFields.Alarm.DESCRIPTION);
-                        alarm.setDescription(description);
-                    }
-
-                    if (jsonObject.has(ChronosJsonFields.Alarm.EXTENDED_PROPERTIES)) {
-                        ExtendedProperties deserializeExtendedProperties = deserializeExtendedProperties(jsonObject.getJSONArray(ChronosJsonFields.Alarm.EXTENDED_PROPERTIES));
-                        if (deserializeExtendedProperties != null) {
-                            alarm.setExtendedProperties(deserializeExtendedProperties);
-                        }
-                    }
-
-                    alarms.add(alarm);
-                }
-
-                to.setAlarms(alarms);
-            }
-
-            @SuppressWarnings("unchecked")
             @Override
             public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
                 List<Alarm> value = get(from);
@@ -1185,79 +929,26 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                     return null;
                 }
                 JSONArray jsonArray = new JSONArray(value.size());
-                for (Alarm alarm : value) {
-                    JSONObject jsonObject = new JSONObject();
-                    if (0 < alarm.getId()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.ID, alarm.getId());
+                try {
+                    for (Alarm alarm : value) {
+                        jsonArray.put(AlarmMapper.getInstance().serialize(alarm, AlarmMapper.getInstance().getAssignedFields(alarm), timeZone, session));
                     }
-                    if (null != alarm.getUid()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.UID, alarm.getUid());
-                    }
-                    if (null != alarm.getAction()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.ACTION, alarm.getAction().getValue());
-                    }
-                    if (null != alarm.getAcknowledged()) {
-                        long date = alarm.getAcknowledged().getTime();
-                        date += timeZone.getOffset(date);
-                        jsonObject.put(ChronosJsonFields.Alarm.ACK, date);
-                    }
-                    if (null != alarm.getTrigger()) {
-                        Trigger trigger = alarm.getTrigger();
-                        JSONObject triggerJsonObject = new JSONObject();
-                        if (null != trigger.getRelated()) {
-                            triggerJsonObject.put(ChronosJsonFields.Alarm.Trigger.RELATED, trigger.getRelated().name());
-                        }
-                        triggerJsonObject.putOpt(ChronosJsonFields.Alarm.Trigger.DURATION, trigger.getDuration());
-                        if (null != trigger.getDateTime()) {
-                            DateTime dateTime = new DateTime(trigger.getDateTime().getTime());
-                            jsonObject.put(ChronosJsonFields.Alarm.Trigger.DATE_TIME, dateTime.toString());
-                        }
-                        jsonObject.put(ChronosJsonFields.Alarm.TRIGGER, triggerJsonObject);
-                    }
-
-                    if (null != alarm.getAttachments()) {
-
-                        List<Attachment> attachments = alarm.getAttachments();
-                        JSONArray attachmentArray = new JSONArray(attachments.size());
-                        for(Attachment attachment: attachments){
-                            attachmentArray.put(((ListItemMapping<Attachment, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTACHMENTS)).serialize(attachment, timeZone));
-                        }
-                        jsonObject.put(ChronosJsonFields.Alarm.ATTACHMENTS, attachmentArray);
-                    }
-
-                    if (null != alarm.getAttendees()) {
-
-                        List<Attendee> attendees = alarm.getAttendees();
-                        JSONArray attendessArray = new JSONArray(attendees.size());
-                        for(Attendee attendee: attendees){
-                            attendessArray.put(((ListItemMapping<Attendee, Event, JSONObject>) EventMapper.getInstance().getMappings().get(EventField.ATTENDEES)).serialize(attendee, timeZone));
-                        }
-                        jsonObject.put(ChronosJsonFields.Alarm.ATTENDEES, attendessArray);
-                    }
-
-                    if (null != alarm.getSummary()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.SUMMARY, alarm.getSummary());
-                    }
-
-                    if (null != alarm.getDescription()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.DESCRIPTION, alarm.getDescription());
-                    }
-
-                    if (null != alarm.getExtendedProperties()) {
-                        jsonObject.put(ChronosJsonFields.Alarm.EXTENDED_PROPERTIES, serializeExtendedProperties(alarm.getExtendedProperties()));
-                    }
-                    jsonArray.put(jsonObject);
+                } catch (OXException e) {
+                    throw new JSONException(e);
                 }
                 return jsonArray;
             }
 
             @Override
-            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
-                this.deserialize(from, to, TimeZone.getTimeZone("UTC"));
-
+            protected Alarm deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                JSONObject jsonObject = array.getJSONObject(index);
+                if (null == jsonObject) {
+                    return null;
+                }
+                return AlarmMapper.getInstance().deserialize(jsonObject, AlarmMapper.getInstance().getMappedFields(), timeZone);
             }
         });
-        mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultJsonMapping<ExtendedProperties, Event>(ChronosJsonFields.EXTENDED_PROPERTIES, ColumnIDs.EXTENDED_PROPERTIES) {
+        mappings.put(EventField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Event>(ChronosJsonFields.EXTENDED_PROPERTIES, ColumnIDs.EXTENDED_PROPERTIES) {
 
             @Override
             public boolean isSet(Event object) {
@@ -1278,24 +969,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             public void remove(Event object) {
                 object.removeExtendedProperties();
             }
-
-            @Override
-            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
-                if (from.has(getAjaxName())) {
-                    set(to, deserializeExtendedProperties(from.getJSONArray(getAjaxName())));
-                }
-            }
-
-            @Override
-            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
-                return serializeExtendedProperties(from.getExtendedProperties());
-            }
         });
 
         return mappings;
     }
 
-    <T extends CalendarUser> T deserializeCalendarUser(JSONObject jsonObject, Class<T> calendarUserClass) throws JSONException {
+    static <T extends CalendarUser> T deserializeCalendarUser(JSONObject jsonObject, Class<T> calendarUserClass) throws JSONException {
         if (null == jsonObject) {
             return null;
         }
@@ -1337,75 +1016,6 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             jsonObject.put(ChronosJsonFields.CalendarUser.ENTITY, calendarUser.getEntity());
         }
         return jsonObject;
-    }
-
-    static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
-        if (null == jsonArray) {
-            return null;
-        }
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        for (int x = 0; x < jsonArray.length(); x++) {
-            extendedProperties.add(deserializeExtendedProperty(jsonArray.getJSONObject(x)));
-        }
-        return extendedProperties;
-    }
-
-    static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
-        if (null == extendedProperties) {
-            return null;
-        }
-        JSONArray jsonArray = new JSONArray(extendedProperties.size());
-        for (ExtendedProperty extendedProperty : extendedProperties) {
-            jsonArray.put(serializeExtendedProperty(extendedProperty));
-        }
-        return jsonArray;
-    }
-
-    private static JSONObject serializeExtendedProperty(ExtendedProperty extendedProperty) throws JSONException {
-        if (null == extendedProperty) {
-            return null;
-        }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(ChronosJsonFields.ExtendedProperty.NAME, extendedProperty.getName());
-        jsonObject.put(ChronosJsonFields.ExtendedProperty.VALUE, extendedProperty.getValue());
-        List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
-        if (null == parameters || parameters.isEmpty()) {
-            return jsonObject;
-        }
-        JSONArray jsonParameters = new JSONArray(parameters.size());
-        for (int i = 0; i < parameters.size(); i++) {
-            ExtendedPropertyParameter parameter = parameters.get(i);
-            jsonParameters.add(i, new JSONObject().putOpt(ChronosJsonFields.ExtendedProperty.Parameter.NAME, parameter.getName()).putOpt(ChronosJsonFields.ExtendedProperty.Parameter.VALUE, parameter.getValue()));
-        }
-        jsonObject.put(ChronosJsonFields.ExtendedProperty.PARAMETERS, jsonParameters);
-        return jsonObject;
-    }
-
-    private static ExtendedProperty deserializeExtendedProperty(JSONObject extendedProperty) throws JSONException {
-        if (null == extendedProperty) {
-            return null;
-        }
-
-        String name = extendedProperty.getString(ChronosJsonFields.ExtendedProperty.NAME);
-        String value = extendedProperty.getString(ChronosJsonFields.ExtendedProperty.VALUE);
-        List<ExtendedPropertyParameter> parameters = null;
-        if (extendedProperty.has(ChronosJsonFields.ExtendedProperty.PARAMETERS)) {
-            JSONArray array = extendedProperty.getJSONArray(ChronosJsonFields.ExtendedProperty.PARAMETERS);
-            parameters = new ArrayList<>(array.length());
-            for (int x = 0; x < extendedProperty.length(); x++) {
-                JSONObject param = array.getJSONObject(x);
-                String paraName = param.getString(ChronosJsonFields.ExtendedProperty.Parameter.NAME);
-                String paraValue = param.getString(ChronosJsonFields.ExtendedProperty.Parameter.VALUE);
-                if (paraName != null && !paraName.isEmpty() && paraValue != null && !paraValue.isEmpty()) {
-                    parameters.add(new ExtendedPropertyParameter(name, value));
-                }
-            }
-        }
-        if (parameters != null && !parameters.isEmpty()) {
-            return new ExtendedProperty(name, value, parameters);
-        } else {
-            return new ExtendedProperty(name, value);
-        }
     }
 
 }

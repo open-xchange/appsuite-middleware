@@ -70,7 +70,7 @@ public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
      * @param ajaxName
      * @param columnID
      */
-    public ListItemMapping(String ajaxName, int columnID) {
+    public ListItemMapping(String ajaxName, Integer columnID) {
         super(ajaxName, columnID);
     }
 
