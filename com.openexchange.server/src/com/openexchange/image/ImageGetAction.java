@@ -67,6 +67,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -197,9 +198,20 @@ public class ImageGetAction implements AJAXActionService {
         DataProperties dataProperties = data.getDataProperties();
         String ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        long size = -1L;
+        {
+            String sSize = dataProperties.get(DataProperties.PROPERTY_SIZE);
+            if (false == Strings.isEmpty(sSize)) {
+                try {
+                    size = Long.parseLong(sSize.trim());
+                } catch (NumberFormatException e) {
+                    // Ignore
+                }
+            }
+        }
 
         InputStream in = data.getData();
-        FileHolder fileHolder = new FileHolder(in, -1, ct, fileName);
+        FileHolder fileHolder = new FileHolder(in, size, ct, fileName);
         fileHolder.setDelivery("view");
         requestResult.setResultObject(fileHolder, "file");
     }
