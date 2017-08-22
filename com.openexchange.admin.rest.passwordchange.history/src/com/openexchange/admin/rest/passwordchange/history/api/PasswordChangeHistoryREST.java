@@ -69,19 +69,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.Tools;
 import com.openexchange.passwordchange.history.PasswordChangeClients;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeHistoryREST} - The REST endpoint for PasswordChangeHistory
@@ -94,27 +100,34 @@ import com.openexchange.tools.servlet.http.Authorization.Credentials;
 public class PasswordChangeHistoryREST {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryREST.class);
-    private final ServiceLookup           service;
+    private final ServiceLookup           services;
 
     /**
      * Initializes a new {@link PasswordChangeHistoryREST}.
      *
-     * @param service The {@link ServiceLookup} to get services from
+     * @param services The {@link ServiceLookup} to get services from
      */
-    public PasswordChangeHistoryREST(ServiceLookup service) {
+    public PasswordChangeHistoryREST(ServiceLookup services) {
         super();
-        this.service = service;
+        this.services = services;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Object listHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("context-id") int contextId, @PathParam("user-id") int userId, @QueryParam("limit") int limit, @QueryParam("sort") String sort) {
         try {
-            // Check for access
-            Object retval = checkAccess(contextId, auth);
-            if (null != retval) {
+            // Check validity of user and context IDs
+            Response error = checkUserAndContext(contextId, userId);
+            if (null != error) {
                 // Return error response
-                return retval;
+                return error;
+            }
+
+            // Check for access
+            error = checkAccess(contextId, auth);
+            if (null != error) {
+                // Return error response
+                return error;
             }
 
             // Get recorder from registry
@@ -199,28 +212,52 @@ public class PasswordChangeHistoryREST {
     }
 
     /**
-     * Get a specific service and throws {@link HistoryRestException#MISSING_SERVICE} if it can't be loaded
+     * Get a specific service and throws {@link ServiceExceptionCode.SERVICE_UNAVAILABLE} if it can't be loaded
      *
      * @param clazz The service to load
      * @return The service instance
      */
     private <T> T getService(Class<? extends T> clazz) throws OXException {
-        T retval = service.getService(clazz);
-        if (null == retval) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getSimpleName());
+        return Tools.requireService(clazz, services);
+    }
+
+    /**
+     * Check if context and user IDs are valid and the according entities exist.
+     *
+     * @param contextId
+     * @param userId
+     * @return <code>null</code> if both IDs are valid. A {@link Response} to be returned to the client
+     *         in case one of the IDs is invalid.
+     * @throws OXException
+     */
+    private Response checkUserAndContext(int contextId, int userId) throws OXException {
+        ContextService contextService = getService(ContextService.class);
+        UserService userService = getService(UserService.class);
+        try {
+            Context context = contextService.getContext(userId);
+            userService.getUser(userId, context);
+            return null;
+        } catch (OXException e) {
+            if (ContextExceptionCodes.UPDATE.equals(e)) {
+                // update tasks running
+                return Response.status(Status.SERVICE_UNAVAILABLE).build();
+            } else if (ContextExceptionCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
+
+            throw e;
         }
-        return retval;
     }
 
     /**
      * Check if access should be granted
      *
-     * @param contextID The context ID to authenticated against
+     * @param contextId The context ID to authenticated against
      * @param auth The Base64 decoded authentication string
      * @return <code>null</code> if everything is fine or a {@link Response} with error code.
      * @throws OXException In case of missing service
      */
-    private Object checkAccess(int contextID, String auth) throws OXException {
+    private Response checkAccess(int contextId, String auth) throws OXException {
         // Decode auth and validate
         if (Authorization.checkForBasicAuthorization(auth)) {
             // Valid header
@@ -229,11 +266,10 @@ public class PasswordChangeHistoryREST {
                 // Authenticate the context administrator
                 Authenticator authenticator = getService(Authenticator.class);
                 try {
-                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextID, true);
+                    authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextId, true);
                     return null;
                 } catch (OXException e) {
-                    // Invalid credentials, user or context ID; 404
-                    return Response.status(Response.Status.NOT_FOUND).build();
+                    // Fall through
                 }
             }
         } // No valid header
