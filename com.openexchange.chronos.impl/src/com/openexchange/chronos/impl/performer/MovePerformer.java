@@ -360,6 +360,11 @@ public class MovePerformer extends AbstractUpdatePerformer {
                 public String getFolderId() {
                     return folderId;
                 }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
             };
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
         }

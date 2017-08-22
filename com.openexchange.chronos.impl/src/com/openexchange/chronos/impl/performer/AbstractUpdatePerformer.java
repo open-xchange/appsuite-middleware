@@ -431,6 +431,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 public String getFolderId() {
                     return folderView;
                 }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
             };
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);

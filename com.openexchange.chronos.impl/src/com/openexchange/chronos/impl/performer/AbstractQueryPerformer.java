@@ -161,6 +161,11 @@ public abstract class AbstractQueryPerformer {
             public SortedSet<RecurrenceId> getDeleteExceptionDates() {
                 return recurrenceIds;
             }
+
+            @Override
+            public boolean containsDeleteExceptionDates() {
+                return true;
+            }
         };
         //        return session.getRecurrenceService().iterateEventOccurrences(masterEvent, from, until);
         return session.getRecurrenceService().iterateEventOccurrences(adjustedSeriesMaster, from, until);

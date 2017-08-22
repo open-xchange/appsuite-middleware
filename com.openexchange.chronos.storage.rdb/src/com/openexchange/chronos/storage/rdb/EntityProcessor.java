@@ -129,6 +129,11 @@ public class EntityProcessor {
                 public Organizer getOrganizer() {
                     return storedOrganizer;
                 }
+
+                @Override
+                public boolean containsOrganizer() {
+                    return true;
+                }
             };
         }
         return event;

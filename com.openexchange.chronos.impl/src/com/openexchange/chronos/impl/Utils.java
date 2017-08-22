@@ -573,6 +573,11 @@ public class Utils {
             public SortedSet<RecurrenceId> getDeleteExceptionDates() {
                 return userizedExceptionDates;
             }
+
+            @Override
+            public boolean containsDeleteExceptionDates() {
+                return true;
+            }
         };
     }
 

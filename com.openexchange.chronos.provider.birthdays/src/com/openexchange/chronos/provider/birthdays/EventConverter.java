@@ -204,6 +204,11 @@ public class EventConverter {
                 public String getSummary() {
                     return summary;
                 }
+
+                @Override
+                public boolean containsSummary() {
+                    return true;
+                }
             };
         }
         return occurrence;
