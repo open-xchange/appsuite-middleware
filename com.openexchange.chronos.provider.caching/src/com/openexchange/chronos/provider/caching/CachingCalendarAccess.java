@@ -98,11 +98,6 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     public static final String LAST_UPDATE = "lastUpdate";
 
     /**
-     * The key for persisting the last update timestamp that will be used if a roll back to the previous configuration is required
-     */
-    public static final String PREVIOUS_LAST_UPDATE = "previousLastUpdates";
-
-    /**
      * The key for persisting the used refresh interval (if provided by the external folder)
      */
     public static final String REFRESH_INTERVAL = "refreshInterval";
@@ -203,7 +198,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
             String folderId = externalFolder.getId();
             FolderUpdateState found = findExistingFolder(persistedUpdateStates, folderId);
             if (found == null) {
-                executionList.add(new FolderUpdateState(folderId, null, null, null, FolderProcessingType.INITIAL_INSERT));
+                executionList.add(new FolderUpdateState(folderId, null, null, FolderProcessingType.INITIAL_INSERT));
                 iterator.remove();
                 continue;
             }
@@ -213,7 +208,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         if (!persistedUpdateStates.isEmpty()) {
             for (FolderUpdateState folderUpdateState : persistedUpdateStates) {
-                executionList.add(new FolderUpdateState(folderUpdateState.getFolderId(), folderUpdateState.getLastUpdated(), folderUpdateState.getPreviousLastUpdated(), folderUpdateState.getRefreshInterval(), FolderProcessingType.DELETE));
+                executionList.add(new FolderUpdateState(folderUpdateState.getFolderId(), folderUpdateState.getLastUpdated(), folderUpdateState.getRefreshInterval(), FolderProcessingType.DELETE));
             }
         }
 
@@ -256,27 +251,23 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
 
         List<FolderUpdateState> currentStates = new ArrayList<>();
 
-        for (Entry<String, Map<String, Object>> knownFolders : lastUpdates.entrySet()) {
-            for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
-                String folderId = folderUpdateState.getKey();
-                Map<String, Object> folderConfig = folderUpdateState.getValue();
-                Long lastFolderUpdate = (Long) folderConfig.get(LAST_UPDATE);
-                Long previousLastUpdate = (Long) folderConfig.get(PREVIOUS_LAST_UPDATE);
-                Integer refreshInt = (Integer) folderConfig.get(REFRESH_INTERVAL);
-                Integer refreshInterval = refreshInt != null ? refreshInt : getRefreshInterval();
+        for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
+            String folderId = folderUpdateState.getKey();
+            Map<String, Object> folderConfig = folderUpdateState.getValue();
+            Long lastFolderUpdate = (Long) folderConfig.get(LAST_UPDATE);
+            Integer refreshInt = (Integer) folderConfig.get(REFRESH_INTERVAL);
+            Integer refreshInterval = refreshInt != null ? refreshInt : getRefreshInterval();
 
-                if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
-                    currentStates.add(new FolderUpdateState(folderUpdateState.getKey(), lastFolderUpdate, previousLastUpdate, refreshInterval, FolderProcessingType.INITIAL_INSERT));
-                    continue;
-                }
-                long currentTimeMillis = System.currentTimeMillis();
-                if (refreshInterval * 1000 * 60 < currentTimeMillis - lastFolderUpdate.longValue()) {
-                    currentStates.add(new FolderUpdateState(folderUpdateState.getKey(), lastFolderUpdate, previousLastUpdate, refreshInterval, FolderProcessingType.UPDATE));
-                    continue;
-                }
-                currentStates.add(new FolderUpdateState(folderUpdateState.getKey(), lastFolderUpdate, previousLastUpdate, refreshInterval, FolderProcessingType.READ_DB));
+            if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
+                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.INITIAL_INSERT));
+                continue;
             }
-
+            long currentTimeMillis = System.currentTimeMillis();
+            if (refreshInterval * 1000 * 60 < currentTimeMillis - lastFolderUpdate.longValue()) {
+                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.UPDATE));
+                continue;
+            }
+            currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.READ_DB));
         }
 
         return currentStates;

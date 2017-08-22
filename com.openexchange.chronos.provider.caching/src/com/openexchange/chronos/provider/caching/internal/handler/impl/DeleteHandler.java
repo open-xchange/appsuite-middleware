@@ -197,11 +197,6 @@ public class DeleteHandler extends AbstractHandler {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
         Map<String, Long> lastUpdates = (Map<String, Long>) configuration.get(CachingCalendarAccess.CACHING);
         lastUpdates.remove(folderId);
-//        try {
-//            this.cachedCalendarAccess.saveConfig(configuration);
-//        } catch (OXException e) {
-//            LOG.error("Unable to save configuration: {}", e.getMessage(), e);
-//        }
     }
 
 }

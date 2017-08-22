@@ -51,8 +51,6 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -67,6 +65,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -78,16 +77,12 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
-import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link UpdateHandler}
@@ -108,7 +103,7 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     private void delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.isEmpty() && diff.getRemovedItems().isEmpty()) {
+        if (diff.getRemovedItems().isEmpty()) {
             return;
         }
 
@@ -160,14 +155,14 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     private void create(String folderId, CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.isEmpty() && diff.getAddedItems().isEmpty()) {
+        if (diff.getAddedItems().isEmpty()) {
             return;
         }
         create(folderId, calendarStorage, diff.getAddedItems());
     }
 
     private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        if (diff.isEmpty() && diff.getUpdatedItems().isEmpty()) {
+        if (diff.getUpdatedItems().isEmpty()) {
             return;
         }
 
@@ -196,6 +191,9 @@ public class UpdateHandler extends AbstractHandler {
         if (!alarmUpdates.isEmpty()) {
             AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
+                for (Alarm alarm : alarmUpdates.getAddedItems()) {
+                    alarm.setId(alarmStorage.nextId());
+                }
                 alarmStorage.insertAlarms(event, event.getCreatedBy(), alarmUpdates.getAddedItems());
             }
             if (!alarmUpdates.getRemovedItems().isEmpty()) {
@@ -220,13 +218,17 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     private void updateAttendees(CalendarStorage calendarStorage, String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+        //FIXME is that correct or do I have to load the initial URI from Storage?!
         if (!attendeeUpdates.isEmpty()) {
+            AttendeeMapper attendeeMapper = AttendeeMapper.getInstance();
             AttendeeStorage attendeeStorage = calendarStorage.getAttendeeStorage();
             if (!attendeeUpdates.getAddedItems().isEmpty()) {
-                attendeeStorage.insertAttendees(eventId, attendeeUpdates.getAddedItems());
+                List<Attendee> copy = attendeeMapper.copy(attendeeUpdates.getAddedItems(), new AttendeeField[] { AttendeeField.URI });
+                attendeeStorage.insertAttendees(eventId, copy);
             }
             if (!attendeeUpdates.getRemovedItems().isEmpty()) {
-                attendeeStorage.deleteAttendees(eventId, attendeeUpdates.getRemovedItems());
+                List<Attendee> copy = attendeeMapper.copy(attendeeUpdates.getRemovedItems(), new AttendeeField[] { AttendeeField.URI });
+                attendeeStorage.deleteAttendees(eventId, copy);
             }
             if (!attendeeUpdates.getUpdatedItems().isEmpty()) {
                 List<Attendee> attendees = new ArrayList<Attendee>();
@@ -234,7 +236,8 @@ public class UpdateHandler extends AbstractHandler {
                     attendees.add(attendeeUpdate.getUpdate());
                 }
                 if (!attendees.isEmpty()) {
-                    attendeeStorage.updateAttendees(eventId, attendees);
+                    List<Attendee> copy = attendeeMapper.copy(attendees, new AttendeeField[] { AttendeeField.URI });
+                    attendeeStorage.updateAttendees(eventId, copy);
                 }
             }
         }
@@ -251,37 +254,19 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
+    public void persist(final String folderId, final EventUpdates diff) throws OXException {
         if (diff.isEmpty()) {
             return;
         }
-        boolean committed = false;
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection writeConnection = null;
-        Context context = this.cachedCalendarAccess.getSession().getContext();
-        try {
-            writeConnection = dbService.getWritable(context);
-            writeConnection.setAutoCommit(false);
-            processDiff(folderId, initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff);
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
-            writeConnection.commit();
-            committed = true;
-        } catch (SQLException e) {
-            if (DBUtils.isTransactionRollbackException(e)) {
-                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e.getMessage(), e);
+            @Override
+            protected Void call(CalendarStorage storage) throws OXException {
+                processDiff(folderId, storage, diff);
+
+                return null;
             }
-            throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage(), e);
-        } finally {
-            if (null != writeConnection) {
-                if (false == committed) {
-                    Databases.rollback(writeConnection);
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritableAfterReading(context, writeConnection);
-                } else {
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritable(context, writeConnection);
-                }
-            }
-        }
+
+        }.executeUpdate();
     }
 }

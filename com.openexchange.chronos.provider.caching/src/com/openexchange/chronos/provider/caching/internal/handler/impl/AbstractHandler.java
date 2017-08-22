@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
@@ -88,11 +89,6 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public abstract class AbstractHandler implements CachingHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractHandler.class);
-
-    /** A collection of fields that are always included when querying events from the storage */
-    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
-
     private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
 
     protected final CachingCalendarAccess cachedCalendarAccess;
@@ -103,26 +99,6 @@ public abstract class AbstractHandler implements CachingHandler {
 
     protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
         return Services.getService(CalendarStorageFactory.class).create(this.cachedCalendarAccess.getSession().getContext(), this.cachedCalendarAccess.getAccount().getAccountId(), null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-    }
-
-    @Override
-    public void handleExceptions(String folderId, OXException e) {
-        LOG.error("An error occurred: {}", e.getMessage(), e);
-        this.revertLastUpdated(folderId);
-    }
-
-    private void revertLastUpdated(String folderId) {
-        Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
-        Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CachingCalendarAccess.CACHING);
-        if (caching == null) {
-            caching = new HashMap<>();
-        }
-        Map<String, Object> folderConfig = caching.get(folderId);
-        if (folderConfig == null) {
-            folderConfig = new HashMap<>();
-        }
-        Long previousLastUpdate = (Long) folderConfig.get(CachingCalendarAccess.PREVIOUS_LAST_UPDATE);
-        folderConfig.put(CachingCalendarAccess.LAST_UPDATE, previousLastUpdate);
     }
 
     @Override
@@ -138,13 +114,6 @@ public abstract class AbstractHandler implements CachingHandler {
         }
 
         Long now = L(System.currentTimeMillis());
-        Long lastUpdate = (Long) folderConfig.get(CachingCalendarAccess.LAST_UPDATE);
-        if (lastUpdate != null) {
-            Long previousLastUpdate = lastUpdate;
-            folderConfig.put(CachingCalendarAccess.PREVIOUS_LAST_UPDATE, previousLastUpdate);
-        } else {
-            folderConfig.put(CachingCalendarAccess.PREVIOUS_LAST_UPDATE, now);
-        }
         folderConfig.put(CachingCalendarAccess.LAST_UPDATE, now);
 
         caching.put(folderId, folderConfig);
@@ -213,6 +182,9 @@ public abstract class AbstractHandler implements CachingHandler {
         }
 
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
+            for (Alarm alarm : importedEvent.getAlarms()) {
+                alarm.setId(calendarStorage.getAlarmStorage().nextId());
+            }
             calendarStorage.getAlarmStorage().insertAlarms(importedEvent, this.cachedCalendarAccess.getSession().getUserId(), importedEvent.getAlarms());
         }
 
@@ -226,6 +198,9 @@ public abstract class AbstractHandler implements CachingHandler {
                     calendarStorage.getAttendeeStorage().insertAttendees(importedChangeException.getId(), importedChangeException.getAttendees());
                 }
                 if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
+                    for (Alarm alarm : importedChangeException.getAlarms()) {
+                        alarm.setId(calendarStorage.getAlarmStorage().nextId());
+                    }
                     calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, this.cachedCalendarAccess.getSession().getUserId(), importedChangeException.getAlarms());
                 }
             }
@@ -244,7 +219,6 @@ public abstract class AbstractHandler implements CachingHandler {
 
         Set<EventField> fields = new HashSet<EventField>();
         fields.addAll(Arrays.asList(all));
-        fields.addAll(DEFAULT_FIELDS);
         fields.removeAll(IGNORED_FIELDS);
         return fields.toArray(new EventField[fields.size()]);
     }

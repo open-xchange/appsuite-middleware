@@ -61,14 +61,12 @@ public class FolderUpdateState implements Comparable<FolderUpdateState> {
 
     private final String folderId;
     private final Long lastUpdated;
-    private final Long previousLastUpdated;
     private final Integer refreshInterval;
     private final FolderProcessingType currentType;
 
-    public FolderUpdateState(String folderId, @Nullable Long lastUpdated, @Nullable Long previouslastUpdated, @Nullable Integer refreshInterval, FolderProcessingType type) {
+    public FolderUpdateState(String folderId, @Nullable Long lastUpdated, @Nullable Integer refreshInterval, FolderProcessingType type) {
         this.folderId = folderId;
         this.lastUpdated = lastUpdated;
-        this.previousLastUpdated = previouslastUpdated;
         this.currentType = type;
         this.refreshInterval = refreshInterval;
     }
@@ -110,9 +108,5 @@ public class FolderUpdateState implements Comparable<FolderUpdateState> {
 
     public Integer getRefreshInterval() {
         return refreshInterval;
-    }
-
-    public Long getPreviousLastUpdated() {
-        return previousLastUpdated;
     }
 }

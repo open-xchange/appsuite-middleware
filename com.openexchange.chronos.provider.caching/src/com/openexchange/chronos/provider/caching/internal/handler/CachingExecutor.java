@@ -121,11 +121,12 @@ public class CachingExecutor {
                     cachingHandler.persist(calendarFolderId, diff);
                 }
                 cachingHandler.updateLastUpdated(calendarFolderId);
+                updated = true;
             } catch (OXException e) {
-                cachingHandler.handleExceptions(calendarFolderId, e);
+                LOG.error("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
             }
-            updated = true;
         }
+
         try {
             if (updated) {
                 this.cachingCalendarAccess.saveConfig(this.cachingCalendarAccess.getAccount().getConfiguration());

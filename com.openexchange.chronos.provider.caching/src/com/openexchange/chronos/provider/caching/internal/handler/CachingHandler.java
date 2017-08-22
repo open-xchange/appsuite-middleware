@@ -93,15 +93,6 @@ public interface CachingHandler {
     void persist(String folderId, EventUpdates diff) throws OXException;
 
     /**
-     * Allows to handle errors (cleanups) if an {@link OXException} occurred.
-     * 
-     * @param folderId The folder id
-     * @param e The occurred {@link OXException}
-     * @throws OXException
-     */
-    void handleExceptions(String folderId, OXException e);
-
-    /**
      * Updates the last modified timestamp of the account.
      * 
      * @param folderId The folder id

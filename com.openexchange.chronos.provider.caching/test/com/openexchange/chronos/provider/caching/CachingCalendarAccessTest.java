@@ -174,8 +174,8 @@ public class CachingCalendarAccessTest {
     @Test
     public void testMerge_persistedButNoMoreAvailableFolders_returnInstructionsToRemove() {
         List<FolderUpdateState> lastFolders = new ArrayList<>();
-        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
 
         Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(lastFolders, Collections.<CalendarFolder> emptyList());
 
@@ -188,8 +188,8 @@ public class CachingCalendarAccessTest {
     @Test
     public void testMerge_mixedMode() {
         List<FolderUpdateState> lastFolders = new ArrayList<>();
-        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
 
         List<CalendarFolder> visibleFolders = new ArrayList<>();
         visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
@@ -214,13 +214,13 @@ public class CachingCalendarAccessTest {
     @Test
     public void testCleanupInstructions() {
         Set<FolderUpdateState> lastFolders = new HashSet<>();
-        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("a new Folder", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway", new Long(System.currentTimeMillis() - 111111111), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway2", new Long(System.currentTimeMillis() - 111111111), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.UPDATE));
-        lastFolders.add(new FolderUpdateState("deleteMeFolderId", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.DELETE));
-        lastFolders.add(new FolderUpdateState("DeleteMeToo", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.DELETE));
-        lastFolders.add(new FolderUpdateState("InitialInsertId", new Long(System.currentTimeMillis()), new Long(System.currentTimeMillis() - 300000), 1, FolderProcessingType.INITIAL_INSERT));
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("a new Folder", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway2", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("deleteMeFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.DELETE));
+        lastFolders.add(new FolderUpdateState("DeleteMeToo", new Long(System.currentTimeMillis()), 1, FolderProcessingType.DELETE));
+        lastFolders.add(new FolderUpdateState("InitialInsertId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.INITIAL_INSERT));
 
         cachingCalendarAccess.cleanup(lastFolders, new String[] { "myFolderId", "a new Folder" });
 
