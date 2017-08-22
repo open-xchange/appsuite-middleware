@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import java.util.Set;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -352,6 +353,18 @@ public interface CalendarService {
      * @return The update result
      */
     CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+
+    /**
+     * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding
+     * event.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update the alarms for
+     * @param alarms The updated list of alarms to apply, or <code>null</code> to remove any previously stored alarms
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
+     */
+    CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Delete an existing event.

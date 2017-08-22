@@ -49,50 +49,64 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.Date;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
+import com.openexchange.chronos.json.converter.EventMapper;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link UpdateAlarmsAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+@OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
+public class UpdateAlarmsAction extends ChronosAction {
 
-    private final Map<String, AJAXActionService> actions;
-
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updateAlarms", new UpdateAlarmsAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link UpdateAlarmsAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected UpdateAlarmsAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        long clientTimestamp = parseClientTimestamp(requestData);
+        EventID eventID = parseIdParameter(requestData);
+        List<Alarm> alarms = parseAlarms(requestData.getData());
+        CalendarResult calendarResult = calendarAccess.updateAlarms(eventID, alarms, clientTimestamp);
+        return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    private static List<Alarm> parseAlarms(Object requestBody) throws OXException {
+        if (null == requestBody) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        try {
+            Event event = new Event();
+            EventMapper.getInstance().get(EventField.ALARMS).deserialize((JSONObject) requestBody, event);
+            return event.getAlarms();
+        } catch (JSONException | ClassCastException e) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+        }
     }
 
 }

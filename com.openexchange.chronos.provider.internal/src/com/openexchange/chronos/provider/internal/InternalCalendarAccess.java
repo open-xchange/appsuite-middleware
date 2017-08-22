@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -99,8 +101,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware {
-    
+public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware {
+
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InternalCalendarAccess.class);
 
@@ -229,6 +231,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAlarms(session, eventID, alarms, clientTimestamp);
+    }
+
+    @Override
     public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
         return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
     }
@@ -325,10 +332,10 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
         return getCalendarService().getAlarmTrigger(session, actions);
     }
-    
+
     /**
      * Get user specific properties for the folder
-     * 
+     *
      * @param folder The {@link Folder}
      * @param contextId The identifier of the context
      * @param userId The identifier of the user the folder belongs to

@@ -50,11 +50,13 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolderView;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
+import static com.openexchange.chronos.impl.Utils.isInFolder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,6 +81,7 @@ import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.alarm.AlarmChange;
 import com.openexchange.chronos.alarm.AlarmTriggerService;
 import com.openexchange.chronos.alarm.EventSeriesWrapper;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -89,7 +92,9 @@ import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -122,6 +127,37 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUserId = getCalendarUserId(folder);
         this.timestamp = new Date();
         this.result = new InternalCalendarResult(session, calendarUserId, folder);
+    }
+
+    /**
+     * Tracks suitable results for an updated event in the current internal calendar result, which includes adding a <i>plain</i> update
+     * for the modified event data, as well as an update, deletion or creation from the acting user's point of view.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    protected void trackUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        /*
+         * track affected folders and add a 'plain' event update
+         */
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        /*
+         * check whether original and updated event are visible in actual folder view & add corresponding result
+         */
+        if (isInFolder(originalEvent, folder)) {
+            if (isInFolder(updatedEvent, folder)) {
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+            } else {
+                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+            }
+        } else if (isInFolder(updatedEvent, folder)) {
+            /*
+             * possible for attendee being added to an existing event, so that it shows up in the new attendee's folder
+             * afterwards (after #needsExistenceCheckInTargetFolder() was false)
+             */
+            result.addUserizedCreation(updatedEvent);
+        }
     }
 
     /**
@@ -399,6 +435,50 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
         event.setAlarms(newAlarms);
+    }
+
+    /**
+     * Updates a calendar user's alarms for a specific event.
+     *
+     * @param event The event to update the alarms in
+     * @param userId The identifier of the calendar user whose alarms are updated
+     * @param originalAlarms The original alarms, or <code>null</code> if there are none
+     * @param updatedAlarms The updated alarms
+     * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
+     */
+    protected boolean updateAlarms(Event event, int userId, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
+        if (alarmUpdates.isEmpty()) {
+            return false;
+        }
+        //        requireWritePermissions(event);
+        /*
+         * delete removed alarms
+         */
+        List<Alarm> removedItems = alarmUpdates.getRemovedItems();
+        if (0 < removedItems.size()) {
+            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, getAlarmIDs(removedItems));
+        }
+        /*
+         * save updated alarms
+         */
+        List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+        if (0 < updatedItems.size()) {
+            List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
+            for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
+                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, (AlarmField[]) null);
+                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
+                alarm.setId(itemUpdate.getOriginal().getId());
+                alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarms.add(Check.alarmIsValid(alarm));
+            }
+            storage.getAlarmStorage().updateAlarms(event, userId, alarms);
+        }
+        /*
+         * insert new alarms
+         */
+        insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        return true;
     }
 
     /**

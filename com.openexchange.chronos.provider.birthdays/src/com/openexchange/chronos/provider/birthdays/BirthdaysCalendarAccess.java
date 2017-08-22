@@ -51,21 +51,17 @@ package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
-import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -77,7 +73,6 @@ import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdateResult;
@@ -152,13 +147,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
     @Override
     protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
-        Contact contact;
-        try {
-            int[] decodedId = eventConverter.decodeEventId(eventId);
-            contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
-        } catch (IllegalArgumentException | OXException e) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(e, eventId);
-        }
+        Contact contact = getBirthdayContact(eventId);
         Event event = null == recurrenceId ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, recurrenceId);
         return postProcess(event);
     }
@@ -166,7 +155,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     @Override
     protected List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
-        if (isResolveOccurrences()) {
+        if (isExpandOccurrences()) {
             return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
         } else {
             return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
@@ -180,41 +169,15 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return Collections.emptyList();
     }
 
-    //    @Override
-    //    public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
-    //        checkFolderId(folderId);
-    //        String[] ignore = parameters.get(CalendarParameters.PARAMETER_IGNORE, String[].class);
-    //        List<Event> newAndModifiedEvents = null;
-    //        if (false == contains(ignore, "changed")) {
-    //            SearchTerm<?> searchTerm = new SingleSearchTerm(SingleOperation.GREATER_THAN)
-    //                .addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED))
-    //                .addOperand(new ConstantOperand<Date>(new Date(updatedSince)))
-    //            ;
-    //            List<Contact> contacts = searchBirthdayContacts(searchTerm);
-    //            newAndModifiedEvents = postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
-    //        }
-    //        List<Event> deletedEvents = null;
-    //        if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
-    //            //TODO: also consider deleted contacts in all visible contact folders (don't know if they had a birthday)? also consider contacts with removed birthday property?
-    //        }
-    //        return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
-    //    }
-    //
     @Override
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         checkFolderId(eventID.getFolderID());
         if (null != eventID.getRecurrenceID()) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(BirthdaysCalendarProvider.PROVIDER_ID);
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
-        Event originalEvent = getEvent(eventID.getObjectID(), null);
-        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), alarms);
-        if (alarmUpdates.isEmpty()) {
-            return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null, null);
-        }
-        List<UpdateResult> updates = new ArrayList<UpdateResult>();
-        //TODO perform alarm udates
-        updates.add(new UpdateResultImpl(originalEvent, getEvent(eventID.getObjectID(), null)));
-        return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, updates, null);
+        Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
+        UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
+        return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
     }
 
     private Event postProcess(Event event) throws OXException {
@@ -244,6 +207,19 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return searchBirthdayContacts(null);
     }
 
+    private Contact getBirthdayContact(String eventId) throws OXException {
+        try {
+            int[] decodedId = eventConverter.decodeEventId(eventId);
+            Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
+            if (null == contact.getBirthday()) {
+                throw OXException.notFound(eventId);
+            }
+            return contact;
+        } catch (IllegalArgumentException | OXException e) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(e, eventId);
+        }
+    }
+
     private List<Contact> searchBirthdayContacts(SearchTerm<?> searchTerm) throws OXException {
         if (null == searchTerm) {
             searchTerm = HAS_BIRTHDAY_TERM;
@@ -262,7 +238,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return new AlarmHelper(services, session.getContext(), account);
     }
 
-    private boolean isResolveOccurrences() {
+    private boolean isExpandOccurrences() {
         return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.TRUE).booleanValue();
     }
 

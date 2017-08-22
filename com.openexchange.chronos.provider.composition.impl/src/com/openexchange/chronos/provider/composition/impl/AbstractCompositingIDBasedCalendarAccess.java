@@ -70,6 +70,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -197,7 +198,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         try {
             return extensionClass.cast(access);
         } catch (ClassCastException e) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, getAccount(accountId).getProviderId());
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, getProviderName(getAccount(accountId)));
         }
     }
 
@@ -238,7 +239,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         try {
             return extensionClass.cast(access);
         } catch (ClassCastException e) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, account.getProviderId());
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(e, getProviderName(account));
         }
     }
 
@@ -296,6 +297,24 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected CalendarAccount getAccount(int accountId) throws OXException {
         CalendarAccountService service = services.getService(CalendarAccountService.class);
         return service.getAccount(session, accountId);
+    }
+
+    /**
+     * Gets the account's calendar provider's display name, localized in the current session user's language.
+     *
+     * @param account The account to get the provider name for
+     * @return The provider name
+     */
+    protected String getProviderName(CalendarAccount account) {
+        try {
+            CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+            if (null != provider) {
+                return provider.getDisplayName(ServerSessionAdapter.valueOf(session).getUser().getLocale());
+            }
+        } catch (Exception e) {
+            LOG.debug("Error getting display name for calendar provider \"{}\": {}", account.getProviderId(), e.getMessage());
+        }
+        return account.getProviderId();
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,12 +63,17 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -227,6 +233,75 @@ public class AlarmHelper {
         }.executeUpdate();
     }
 
+    /**
+     * Updates the user's alarms for a specific event.
+     *
+     * @param event The event to update the alarms for
+     * @param updatedAlarms The updated alarms
+     * @return The update result
+     */
+    public UpdateResult updateAlarms(final Event event, final List<Alarm> updatedAlarms) throws OXException {
+        return new OSGiCalendarStorageOperation<UpdateResult>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected UpdateResult call(CalendarStorage storage) throws OXException {
+                List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
+                if (false == updateAlarms(storage, event, originalAlarms, updatedAlarms)) {
+                    return null;
+                }
+                List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
+                return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(event, newAlarms));
+            }
+        }.executeUpdate();
+    }
+
+    private boolean updateAlarms(CalendarStorage storage, Event event, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
+        if (alarmUpdates.isEmpty()) {
+            return false;
+        }
+        /*
+         * delete removed alarms
+         */
+        List<Alarm> removedItems = alarmUpdates.getRemovedItems();
+        if (0 < removedItems.size()) {
+            storage.getAlarmStorage().deleteAlarms(event.getId(), account.getUserId(), getAlarmIDs(removedItems));
+        }
+        /*
+         * save updated alarms
+         */
+        List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+        if (0 < updatedItems.size()) {
+            List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
+            for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
+                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, (AlarmField[]) null);
+                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
+                alarm.setId(itemUpdate.getOriginal().getId());
+                alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarms.add(alarm);
+                //                alarms.add(Check.alarmIsValid(alarm));//TODO
+            }
+            storage.getAlarmStorage().updateAlarms(event, account.getUserId(), alarms);
+        }
+        /*
+         * insert new alarms
+         */
+        List<Alarm> addedItems = alarmUpdates.getAddedItems();
+        if (0 < addedItems.size()) {
+            List<Alarm> newAlarms = new ArrayList<Alarm>(addedItems.size());
+            for (Alarm alarm : addedItems) {
+                Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
+                newAlarm.setId(storage.getAlarmStorage().nextId());
+                if (false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
+                    newAlarm.setUid(UUID.randomUUID().toString());
+                }
+                newAlarms.add(newAlarm);
+            }
+            storage.getAlarmStorage().insertAlarms(event, account.getUserId(), newAlarms);
+        }
+        return true;
+    }
+
     private int insertDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Event> birthdaySeriesList) throws OXException {
         int count = 0;
         for (Event birthdaySeries : birthdaySeriesList) {
@@ -249,6 +324,13 @@ public class AlarmHelper {
         return newAlarms;
     }
 
+    /**
+     * Applies a specific list of alarms for an event.
+     *
+     * @param event The event to apply the alarms for
+     * @param alarms The alarms to apply
+     * @return A delegating event with the alarms applied
+     */
     private static Event applyAlarms(Event event, final List<Alarm> alarms) {
         if (null == event || null == alarms && null == event.getAlarms()) {
             return event;

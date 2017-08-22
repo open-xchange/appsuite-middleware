@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -71,6 +72,7 @@ import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.TouchPerformer;
+import com.openexchange.chronos.impl.performer.UpdateAlarmsPerformer;
 import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
@@ -349,6 +351,26 @@ public class CalendarServiceImpl implements CalendarService {
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
+
+            }
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult updateAlarms(CalendarSession session, final EventID eventID, final List<Alarm> alarms, final long clientTimestamp) throws OXException {
+        /*
+         * update attendee
+         */
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, clientTimestamp);
 
             }
         }.executeUpdate();
