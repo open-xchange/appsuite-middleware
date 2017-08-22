@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/management-api-3.2.1-b002.jar" sourcepath="lib/source/management-api-3.2.1-b002-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-tf-4.0.0-b004.jar" sourcepath="lib/source/pfl-tf-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gmbal-4.0.0-b001.jar" sourcepath="lib/source/gmbal-4.0.0-b001-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>

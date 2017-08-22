@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.charset
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.charset.osgi.CharsetActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,

@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Inet Proxy Config Bundle
 Bundle-SymbolicName: com.openexchange.inet.proxy.config
 Bundle-Version: 7.0.2
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.i18n,

@@ -80,7 +80,10 @@ import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistr
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.settings.AbstractShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.DefaultExpiryDateShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.DriveLimitShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.EnabledShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.ExpiryDatesShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.ForceAutoDeleteShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.NameShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.RequiredExpirationShareComposeSetting;
@@ -266,6 +269,9 @@ public class ShareComposeActivator extends HousekeepingActivator {
         registerSetting(new RequiredExpirationShareComposeSetting(handler));
         registerSetting(new ForceAutoDeleteShareComposeSetting(handler));
         registerSetting(new ThresholdShareComposeSetting(handler));
+        registerSetting(new DriveLimitShareComposeSetting(handler));
+        registerSetting(new ExpiryDatesShareComposeSetting(handler));
+        registerSetting(new DefaultExpiryDateShareComposeSetting(handler));
     }
 
     private <V> void registerSetting(AbstractShareComposeSetting<V> setting) {
