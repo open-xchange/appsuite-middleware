@@ -65,11 +65,11 @@ public enum PasswordChangeRecorderException implements OXExceptionCode {
     /**
      * Password change history for user %1$s in context %1$s is disabled
      */
-    DISABLED("Password change history for user %1$s in context %1$s is disabled", Category.CATEGORY_PERMISSION_DENIED, 101),
+    DISABLED("Password change history for user %1$s in context %2$s is disabled", Category.CATEGORY_PERMISSION_DENIED, 101),
     /**
      * Recorder for user %1$s in context %1$s is not configured. Therefore no history is created.
      */
-    MISSING_CONFIGURATION("Recorder for user %1$s in context %1$s is not configured. Therefore no history is created.", Category.CATEGORY_CONFIGURATION, 102),
+    MISSING_CONFIGURATION("Recorder for user %1$s in context %2$s is not configured. Therefore no history is created.", Category.CATEGORY_CONFIGURATION, 102),
     /**
      * The recorder %1$s was not found in the registry
      */
