@@ -114,6 +114,7 @@ public class MessageDataUtil {
     private static final String KEY_CID = "cid";
     private static final String KEY_DISPLAYNAME = "displayname";
     private static final String KEY_FOLDER = "folder";
+    private static final String KEY_ID = "id";
     private static final String KEY_SENDER = "email";
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_UNREAD = "unread";
@@ -124,6 +125,10 @@ public class MessageDataUtil {
 
     public static String getFolder(Map<String, Object> messageData) {
         return getString(messageData, KEY_FOLDER);
+    }
+
+    public static String getId(Map<String, Object> messageData) {
+        return getString(messageData, KEY_ID);
     }
 
     public static String getDisplayName(Map<String, Object> messageData) {
