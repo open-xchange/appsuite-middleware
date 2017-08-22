@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
@@ -138,7 +139,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     } else {
                         // Add account with error
                         Set<String> caps = determineCapabilities(access);
-                        result.put(writer.write(account, null, caps, e, session));
+                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
+                        result.put(writer.write(account, null, caps, e, session, includeStackTraceOnError));
                     }
                 }
             }
