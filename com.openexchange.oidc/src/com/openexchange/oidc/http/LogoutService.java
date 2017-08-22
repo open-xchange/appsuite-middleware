@@ -24,15 +24,16 @@ public class LogoutService extends OIDCServlet{
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getParameter(OIDCTools.TYPE) == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } else if (req.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getParameter(OIDCTools.TYPE) == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {
             try {
-                this.provider.logoutSSOUser(req, resp);
+                this.provider.logoutSSOUser(request, response);
             } catch (OXException e) {
                 // TODO QS-VS: Better exception handling
-                e.printStackTrace();
+                exceptionHandler.handleLogoutFailed(request, response, e);
+                LOG.error(e.getLocalizedMessage(), e);
             }
         }
     }

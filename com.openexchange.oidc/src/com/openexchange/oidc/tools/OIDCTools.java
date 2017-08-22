@@ -38,8 +38,6 @@ public class OIDCTools {
 
     public static final String SESSION_COOKIE = "com.openexchange.oidc.SessionCookie";
 
-    public static final String SUBJECT = "sub";
-    
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";

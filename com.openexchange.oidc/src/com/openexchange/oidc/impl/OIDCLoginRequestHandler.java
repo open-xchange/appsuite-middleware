@@ -98,7 +98,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
         
         String autologinCookieValue = null;
-        //TODO QS-VS: Entweder autologin oder normales login
         if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
             Cookie autologinCookie = this.loadAutologinCookie(request, reservation);
             if (autologinCookie != null) {

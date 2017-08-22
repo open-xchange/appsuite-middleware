@@ -135,17 +135,17 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         State state = new State();
         Nonce nonce = new Nonce();
 
-        String requestString = this.getRequestString(state, nonce, request);
+        String loginRequest = this.buildLoginRequest(state, nonce, request);
 
-        if (requestString.isEmpty()) {
+        if (loginRequest.isEmpty()) {
             throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
         }
 
-        this.addRequestToStateManager(request, state, nonce);
-        return requestString;
+        this.addAuthRequestToStateManager(request, state, nonce);
+        return loginRequest;
     }
 
-    private String getRequestString(State state, Nonce nonce, HttpServletRequest request) throws OXException {
+    private String buildLoginRequest(State state, Nonce nonce, HttpServletRequest request) throws OXException {
         String requestString = "";
         OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
         String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
@@ -162,7 +162,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return requestString;
     }
 
-    private void addRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
+    private void addAuthRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
         String deepLink = request.getParameter("deep_link");
         String uiClientID = this.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request);
@@ -199,23 +199,23 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
 
         try {
-            TokenRequest tokenReq = createTokenRequest(request);
-            OIDCTokenResponse tokenResponse = getTokenResponse(tokenReq);
+            TokenRequest tokenReq = this.createTokenRequest(request);
+            OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
 
             IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation);
-            validTokenResponse.getSubject().getValue();
             if (validTokenResponse != null) {
-                this.sendLoginRequestToServer(request, response, tokenResponse, validTokenResponse.getSubject().getValue());
+                this.sendLoginRequestToServer(request, response, tokenResponse);
             }
         } catch (OXException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            // Logge die einzelnen Möglichkeiten die zu einem Fehler geführt haben und
+            // wirf eine allgemeine Exception für einen fehlgeschlagen Versuch das IDToken zu besorgen
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e.getMessage());
         }
     }
 
-    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String subject) throws OXException {
+    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse) throws OXException {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
-        authInfo.setProperty(OIDCTools.SUBJECT, subject);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
@@ -278,6 +278,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         TokenResponse tokenResponse = null;
         try {
+            httpResponse.setContent("adgsafsd");
             tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
         } catch (ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);

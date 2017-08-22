@@ -59,11 +59,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
-import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * The servlet to handle OpenID specific requests like login and logout.
@@ -75,8 +73,6 @@ public class InitService extends OIDCServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(InitService.class);
     private static final long serialVersionUID = -7066156332544428369L;
-    private final ServiceLookup services;
-    private final OIDCConfig config;
 
     private static final ArrayList<String> acceptedFlows = new ArrayList<String>() {
 
@@ -87,10 +83,8 @@ public class InitService extends OIDCServlet {
         }
     };
 
-    public InitService(OIDCWebSSOProvider provider, OIDCExceptionHandler exceptionHandler, ServiceLookup services, OIDCConfig config) {
+    public InitService(OIDCWebSSOProvider provider, OIDCExceptionHandler exceptionHandler) {
         super(provider, exceptionHandler);
-        this.services = services;
-        this.config = config;
     }
 
     @Override
@@ -102,11 +96,11 @@ public class InitService extends OIDCServlet {
         }
         try {
             String redirectURI = this.getRedirectURI(flow, request, response);
-            buildResponse(response, redirectURI, request.getParameter("redirect"));
+            buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
             //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
             if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
-                LOG.debug(e.getLocalizedMessage());
+                LOG.error(e.getLocalizedMessage(), e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
         }
@@ -122,7 +116,7 @@ public class InitService extends OIDCServlet {
         return redirectUri;
     }
 
-    private void buildResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
+    private void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
         if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
             response.sendRedirect(redirectURI);
         } else {

@@ -125,7 +125,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
     public OIDCExceptionHandler getExceptionHandler() {
-        return null;
+        return new OIDCCoreExceptionHandler();
     }
     
     @Override
