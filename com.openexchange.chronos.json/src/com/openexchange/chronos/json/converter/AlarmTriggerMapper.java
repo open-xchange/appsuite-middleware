@@ -57,6 +57,8 @@ import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
@@ -228,12 +230,13 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
 
             @Override
             public void set(AlarmTrigger object, String value) throws OXException {
-                object.setRecurrence(value);
+                object.setRecurrence(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
             public String get(AlarmTrigger object) {
-                return object.getRecurrence();
+                RecurrenceId value = object.getRecurrence();
+                return null == value ? null : value.getValue().toString();
             }
 
             @Override

@@ -67,6 +67,7 @@ import com.openexchange.chronos.alarm.AlarmTriggerService;
 import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -166,11 +167,12 @@ public class AlarmTriggerServiceImpl implements AlarmTriggerService {
                     }
                     RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
                     RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
-                    trigger.setRecurrence(String.valueOf(iterateRecurrenceIds.next().getValue().getTimestamp()));
+                    RecurrenceId recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
+                    trigger.setRecurrence(recurrenceId);
                     trigger.setTime(AlarmUtils.getNextTriggerTime(event, alarm, new Date(), UTC, recurrenceService, eventWrapper.getExceptions()).getTime());
                 } else {
                     if (event.getRecurrenceId() != null) {
-                        trigger.setRecurrence(String.valueOf(event.getRecurrenceId().getValue().getTimestamp()));
+                        trigger.setRecurrence(event.getRecurrenceId());
                     }
                     trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), event, UTC).getTime());
                 }

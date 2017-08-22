@@ -63,7 +63,7 @@ public class AlarmTrigger {
     private Integer alarm;
     private String eventId;
     private String folder;
-    private String recurrence;
+    private RecurrenceId recurrence;
     private Long time;
     private Integer userId;
     private Boolean processed;
@@ -242,7 +242,7 @@ public class AlarmTrigger {
      *
      * @return The recurrence
      */
-    public String getRecurrence() {
+    public RecurrenceId getRecurrence() {
         return recurrence;
     }
 
@@ -355,7 +355,7 @@ public class AlarmTrigger {
      *
      * @param recurrence The recurrence to set
      */
-    public void setRecurrence(String recurrence) {
+    public void setRecurrence(RecurrenceId recurrence) {
         this.recurrence = recurrence;
         this.isRecurrenceSet=true;
     }

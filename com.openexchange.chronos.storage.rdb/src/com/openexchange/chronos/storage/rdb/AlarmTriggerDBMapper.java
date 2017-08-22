@@ -52,6 +52,8 @@ package com.openexchange.chronos.storage.rdb;
 import java.util.EnumMap;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -249,7 +251,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
 
             @Override
             public void set(AlarmTrigger alarmTrigger, String value) {
-                alarmTrigger.setRecurrence(value);
+                alarmTrigger.setRecurrence(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
@@ -259,7 +261,8 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
 
             @Override
             public String get(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.getRecurrence();
+                RecurrenceId value = alarmTrigger.getRecurrence();
+                return null == value ? null : value.getValue().toString();
             }
 
             @Override
