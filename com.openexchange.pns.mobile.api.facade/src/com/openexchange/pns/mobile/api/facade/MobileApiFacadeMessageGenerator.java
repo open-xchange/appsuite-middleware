@@ -61,7 +61,6 @@ import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
 import javapns.notification.PushNotificationPayload;
 
-
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
  *
@@ -123,7 +122,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 public com.google.android.gcm.Message getMessage() {
                     return gcmMessage;
                 }
-           };
+            };
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
 
@@ -135,6 +134,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String senderAddress = MessageDataUtil.getSender(messageData);
                 String sender = displayName.length() == 0 ? senderAddress : displayName;
                 String folder = MessageDataUtil.getFolder(messageData);
+                String id = MessageDataUtil.getId(messageData);
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
@@ -156,10 +156,14 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     }
                 }
 
+                if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
+                    path = folder + "/" + id;
+                }
+
                 if (path.length() > 0) {
                     payload.addCustomDictionary("cid", path);
                 } else if (folder.length() > 0) {
-                	payload.setContentAvailable(false);
+                    payload.setContentAvailable(false);
                     payload.addCustomDictionary("folder", folder);
                 }
 

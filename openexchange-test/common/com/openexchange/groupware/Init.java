@@ -516,7 +516,7 @@ public final class Init {
 
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
-        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");        
     }
 
     /**

@@ -1,0 +1,119 @@
+{
+	"variables": [],
+	"info": {
+		"name": "PasswordChangeHistory",
+		"_postman_id": "b37db5b2-db55-b927-4a15-8a6def393e42",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8009/password/history/v1/list?limit=10&contextID=10&userID=2",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8009/passwordchange/history/v1/list?limit=10&contextID=1&userID=4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8009",
+					"path": [
+						"passwordchange",
+						"history",
+						"v1",
+						"list"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "contextID",
+							"value": "1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "userID",
+							"value": "4",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46c2VjcmV0",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8009/password/history/v1/list?limit=10&contextID=10&userID=2&order=new",
+			"request": {
+				"url": {
+					"raw": "http://localhost:8009/passwordchange/history/v1/list?limit=10&contextID=1&userID=4&order=new",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8009",
+					"path": [
+						"passwordchange",
+						"history",
+						"v1",
+						"list"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "contextID",
+							"value": "1",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "userID",
+							"value": "4",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "order",
+							"value": "new",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46c2VjcmV0",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -233,7 +233,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 Map<String, List<String>> headers = copyHeaders(req);
                 com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
 
-                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies, req.getRemoteAddr()));
             } else {
                 PasswordChangeService passwordChangeService = services.getService(PasswordChangeService.class);
                 if (passwordChangeService == null) {
@@ -243,7 +243,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 Map<String, List<String>> headers = copyHeaders(req);
                 com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
 
-                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies, req.getRemoteAddr()));
             }
         } catch (final OXException e) {
             LOGGER.error("", e);
