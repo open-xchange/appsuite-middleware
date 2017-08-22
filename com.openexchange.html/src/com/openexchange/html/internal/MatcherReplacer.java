@@ -64,10 +64,24 @@ import com.openexchange.java.Stringer;
  */
 public final class MatcherReplacer {
 
+    /**
+     * Allows to specify a certain condition that is required to be fulfilled in order to {@link MatcherReplacer#appendTail(Stringer, Condition) append tail}.
+     */
+    public static interface Condition {
+
+        /**
+         * Whether the specified is supposed to be appended in case {@link MatcherReplacer#appendTail(Stringer, Condition) appendTail()} is invoked.
+         *
+         * @param tail The tail which is about to be appended
+         * @return The tail that is supposed to be appended; or <code>null</code> if nothing shall be appended
+         */
+        public CharSequence acceptTail(CharSequence tail);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------
+
     private Matcher matcher;
-
     private CharSequence input;
-
     private int lastPos;
 
     /**
@@ -300,7 +314,28 @@ public final class MatcherReplacer {
      * @param sb The target string builder
      */
     public void appendTail(final Stringer sb) {
-        sb.append(input.subSequence(lastPos, input.length()));
+        appendTail(sb, null);
+    }
+
+    /**
+     * Implements a terminal append-and-replace step.
+     * <p>
+     * This method reads characters from the input sequence, starting at the append position, and appends them to the given string builder.
+     * It is intended to be invoked after one or more invocations of the {@link #appendReplacement appendReplacement} method in order to
+     * copy the remainder of the input sequence.
+     * </p>
+     *
+     * @param sb The target string builder
+     */
+    public void appendTail(final Stringer sb, final Condition condition) {
+        if (null == condition) {
+            sb.append(input.subSequence(lastPos, input.length()));
+        } else {
+            CharSequence tail = condition.acceptTail(input.subSequence(lastPos, input.length()));
+            if (null != tail) {
+                sb.append(tail);
+            }
+        }
     }
 
 }

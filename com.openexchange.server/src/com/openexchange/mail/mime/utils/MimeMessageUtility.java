@@ -1075,6 +1075,9 @@ public final class MimeMessageUtility {
                                 }
                                 doEncode = false;
                             }
+                        } else if (prev!=null){
+                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
+                            prev=null;
                         }
                     } else {
                         if (null != prev) {
