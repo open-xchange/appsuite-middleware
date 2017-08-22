@@ -207,9 +207,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 this.sendLoginRequestToServer(request, response, tokenResponse);
             }
         } catch (OXException e) {
-            // TODO Auto-generated catch block
-            // Logge die einzelnen Möglichkeiten die zu einem Fehler geführt haben und
-            // wirf eine allgemeine Exception für einen fehlgeschlagen Versuch das IDToken zu besorgen
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e.getMessage());
         }
     }
@@ -235,7 +232,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of login request URI");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new OXException(e);
         }
         return null;
     }

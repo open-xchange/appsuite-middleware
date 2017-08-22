@@ -31,7 +31,6 @@ public class LogoutService extends OIDCServlet{
             try {
                 this.provider.logoutSSOUser(request, response);
             } catch (OXException e) {
-                // TODO QS-VS: Better exception handling
                 exceptionHandler.handleLogoutFailed(request, response, e);
                 LOG.error(e.getLocalizedMessage(), e);
             }

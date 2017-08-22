@@ -8,6 +8,8 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -42,6 +44,7 @@ import com.openexchange.user.UserService;
 
 public class OIDCLoginRequestHandler implements LoginRequestHandler {
     
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.class);
     private LoginConfiguration loginConfiguration;
     private OIDCBackend backend;
     //TODO QS-VS: Load UI-Webpath from where??
@@ -53,12 +56,12 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     }
 
     @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
         try {
-            performLogin(req, resp);
+            performLogin(request, response);
         } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getLocalizedMessage(), e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
     

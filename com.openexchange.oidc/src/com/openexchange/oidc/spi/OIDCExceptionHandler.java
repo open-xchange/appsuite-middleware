@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc.spi;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -60,10 +61,8 @@ import com.openexchange.exception.OXException;
  */
 public interface OIDCExceptionHandler {
     
-    void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception);
+    void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
 
-    void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception);
+    void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
     
-    void handleLoginFailed(HttpServletRequest request, HttpServletResponse response, OXException exception);
-
 }
