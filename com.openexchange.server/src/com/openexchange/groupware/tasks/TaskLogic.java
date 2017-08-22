@@ -807,7 +807,7 @@ public final class TaskLogic {
         return retval;
     }
 
-    private static void deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws OXException {
+    private static Set<Folder> deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws OXException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, ACTIVE);
         foldStor.deleteFolder(ctx, con, taskId, folders, ACTIVE);
         for (Folder folder : removed) {
@@ -816,6 +816,7 @@ public final class TaskLogic {
             }
         }
         foldStor.insertFolder(ctx, con, taskId, folders, DELETED);
+        return folders;
     }
 
     /**
@@ -894,11 +895,27 @@ public final class TaskLogic {
         task.setModifiedBy(userId);
         storage.insertTask(ctx, con, task, DELETED, TaskStorage.TOMBSTONE_ATTRS);
         final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
-        deleteFolder(ctx, con, task.getObjectID(), removed);
+        Set<Folder> alreadyInsertedFolders = deleteFolder(ctx, con, task.getObjectID(), removed);
         storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
         // Insert the folders remembering all task source folders on move
         // operations.
-        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
+        Set<Folder> foldersToInsert = filterAlreadyInsertedFolders(movedSourceFolders, alreadyInsertedFolders);
+        foldStor.insertFolder(ctx, con, taskId, foldersToInsert, DELETED);
+    }
+
+    private static Set<Folder> filterAlreadyInsertedFolders(Set<Folder> folders, Set<Folder> alreadyInsertedFolders) {
+
+        HashSet<Folder> result = new HashSet<>(folders.size() + alreadyInsertedFolders.size());
+
+        // Only return folders which are not already inserted
+        for (Folder f : folders) {
+            if (alreadyInsertedFolders.contains(f)) {
+                continue;
+            }
+            result.add(f);
+        }
+
+        return result;
     }
 
 }
