@@ -172,7 +172,7 @@ public class PasswordChangeHistoryREST {
      */
     private Map<SortField, SortOrder> getFields(String sort) {
         if (Strings.isEmpty(sort)) {
-            return Collections.emptyMap();
+            return Collections.singletonMap(SortField.DATE, SortOrder.DESC);
         }
 
         String[] fields = Strings.splitByComma(sort);

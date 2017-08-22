@@ -122,8 +122,8 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
             StringBuilder builder = new StringBuilder(GET_DATA);
             if (null == fieldNames || fieldNames.isEmpty()) {
                 // Default is ID ascending
-                builder.append("id ");
-                builder.append(SortOrder.ASC);
+                builder.append("created ");
+                builder.append(SortOrder.DESC);
             } else {
                 // User send fields
                 for (SortField field : fieldNames.keySet()) {
