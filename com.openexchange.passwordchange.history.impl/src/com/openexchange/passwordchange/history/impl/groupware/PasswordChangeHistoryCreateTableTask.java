@@ -75,7 +75,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE user_password_history (");
+        sb.append("CREATE TABLE ").append(HISTORY_NAME).append("(");
         sb.append("id INT UNSIGNED NOT NULL AUTO_INCREMENT,");
         sb.append("cid INT UNSIGNED NOT NULL,");
         sb.append("uid INT UNSIGNED NOT NULL,");
