@@ -51,7 +51,7 @@ package com.openexchange.admin.rest.passwordchange.history.osgi;
 
 import com.openexchange.admin.rest.passwordchange.history.api.PasswordChangeHistoryREST;
 import com.openexchange.auth.Authenticator;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
@@ -77,12 +77,16 @@ public final class PasswordChangeRestActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, PasswordChangeRecorderRegistryService.class, Authenticator.class, UserService.class, ContextService.class };
+        return new Class<?>[] { PasswordChangeRecorderRegistryService.class, Authenticator.class, UserService.class, ContextService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting PasswordChangeRest bundle");
+
+        // Track optional service
+        trackService(ConfigurationService.class);
+        openTrackers();
 
         // Register the different services for this bundle
         registerService(PasswordChangeHistoryREST.class, new PasswordChangeHistoryREST(this));
