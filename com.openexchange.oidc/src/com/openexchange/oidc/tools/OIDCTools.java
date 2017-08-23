@@ -87,6 +87,10 @@ public class OIDCTools {
 
     public static final String SESSION_COOKIE = "com.openexchange.oidc.SessionCookie";
 
+    public static final String ACCESS_TOKEN = "access_token";
+
+    public static final String REFRESH_TOKEN = "refresh_token";
+
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";

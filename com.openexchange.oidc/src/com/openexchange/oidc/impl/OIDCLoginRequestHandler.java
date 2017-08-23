@@ -262,6 +262,16 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                         }
 
                         session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
+                        
+                        String accessToken = state.get(OIDCTools.ACCESS_TOKEN);
+                        if (accessToken != null) {
+                            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
+                        }
+                        
+                        String refreshToken = state.get(OIDCTools.REFRESH_TOKEN);
+                        if (accessToken != null) {
+                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
+                        }
                     }
                 };
 

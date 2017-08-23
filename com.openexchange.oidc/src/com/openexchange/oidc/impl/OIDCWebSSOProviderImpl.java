@@ -73,6 +73,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -195,7 +196,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
-
             IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation);
             if (validTokenResponse != null) {
                 this.sendLoginRequestToServer(request, response, tokenResponse);
@@ -208,6 +208,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse) throws OXException {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
+        if (this.backend.getBackendConfig().isStoreOAuthTokensEnabled()) {
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, tokenResponse.getTokens().getBearerAccessToken().getValue());
+            authInfo.setProperty(OIDCTools.REFRESH_TOKEN, tokenResponse.getTokens().getRefreshToken().getValue());
+        }
+        
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
             authInfo.getContextId(),

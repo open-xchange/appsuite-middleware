@@ -75,7 +75,8 @@ public enum OIDCBackendProperty implements Property {
     ssoLogout(OIDCProperty.PREFIX, false), 
     redirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     //TODO QS-VS: Ist der default wirklich true?
-    autologinCookieEnabled(OIDCProperty.PREFIX, true);
+    autologinCookieEnabled(OIDCProperty.PREFIX, true),
+    storeOAuthTokens(OIDCProperty.PREFIX, false);
     
     private final String fqn;
     private final Object defaultValue;

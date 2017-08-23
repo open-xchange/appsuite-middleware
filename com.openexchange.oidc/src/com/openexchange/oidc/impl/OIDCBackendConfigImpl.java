@@ -145,4 +145,9 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public boolean isAutologinCookieEnabled() {
         return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.autologinCookieEnabled);
     }
+
+    @Override
+    public boolean isStoreOAuthTokensEnabled() {
+        return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.storeOAuthTokens);
+    }
 }
