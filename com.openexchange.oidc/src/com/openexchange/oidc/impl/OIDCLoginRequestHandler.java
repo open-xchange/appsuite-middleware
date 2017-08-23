@@ -78,6 +78,8 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
+import com.openexchange.oidc.OIDCBackendConfig;
+import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.tools.OIDCTools;
@@ -157,7 +159,12 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         // OX only bedeutet wir erstetzen den normalen autologin durch einen eigenen der direkt
         // in die Session läuft ohne über den idp zu gehen!! Muss im InitServlet passieren, vor dem
         // redirect zum IDP
-        if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
+        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().isAutologinCookieMode());
+        boolean ssoCookieLogin = autologinMode != null && autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT;
+        if (autologinMode == null) {
+            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: " + this.backend.getBackendConfig().isAutologinCookieMode());
+        }
+        if (ssoCookieLogin) {
             Cookie autologinCookie = this.loadAutologinCookie(request, reservation);
             if (autologinCookie != null) {
                 String cookieRedirectURL = this.getAutologinByCookieURL(request, response, reservation, autologinCookie);
@@ -174,7 +181,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
         Session session = performSessionAdditions(result, request, response, idToken);
 
-        if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
+        if (ssoCookieLogin) {
             response.addCookie(getOIDCAutologinCookie(request, session, autologinCookieValue));
         }
 

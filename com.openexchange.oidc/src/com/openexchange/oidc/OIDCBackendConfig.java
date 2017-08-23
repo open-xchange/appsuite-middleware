@@ -48,6 +48,9 @@
  */
 package com.openexchange.oidc;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link OIDCBackendConfig}
  *
@@ -55,6 +58,32 @@ package com.openexchange.oidc;
  * @since v7.10.0
  */
 public interface OIDCBackendConfig {
+    
+    public static enum AutologinMode {
+        OFF("off"), SSO_REDIRECT("sso_redirect"), OX_DIRECT("ox_direct");
+        
+        private String value;
+        
+        private AutologinMode(String value) {
+            this.value = value;
+        }
+        
+        private String getValue() {
+            return this.value;
+        }
+        
+        private static final Map<String, AutologinMode> lookup = new HashMap<String, AutologinMode>();
+
+        static {
+            for (AutologinMode mode : AutologinMode.values()) {
+                lookup.put(mode.getValue(), mode);
+            }
+        }
+        
+        public static AutologinMode get(String mode) {
+            return lookup.get(mode);
+        }
+    }
     
     String getClientID();
 
@@ -88,7 +117,7 @@ public interface OIDCBackendConfig {
 
     String getRedirectURILogout();
     
-    boolean isAutologinCookieEnabled();
+    String isAutologinCookieMode();
 
     boolean isStoreOAuthTokensEnabled();
 }
