@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos;
 
+import java.util.TimeZone;
 
 /**
  * {@link AlarmTrigger}s contain the information about when an alarm will be triggered.
@@ -67,6 +68,7 @@ public class AlarmTrigger {
     private Long time;
     private Integer userId;
     private Boolean processed;
+    private TimeZone timezone;
 
     private Integer contextId;
     private Integer account;
@@ -81,6 +83,8 @@ public class AlarmTrigger {
     private boolean isUserIdSet=false;
     private boolean isProcessedSet=false;
     private boolean isFolderSet = false;
+    private boolean isTimeZoneSet = false;
+
 
     /**
      * Initializes a new {@link AlarmTrigger}.
@@ -436,6 +440,42 @@ public class AlarmTrigger {
     public void removeContextId() {
         this.contextId = null;
         this.isContextIdSet = false;
+    }
+
+
+    /**
+     * Gets the timezone
+     *
+     * @return The timezone
+     */
+    public TimeZone getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * Sets the timezone
+     *
+     * @param timezone The timezone to set
+     */
+    public void setTimezone(TimeZone timezone) {
+        this.timezone = timezone;
+        this.isTimeZoneSet = true;
+    }
+
+    /**
+     * Removes the timezone
+     */
+    public void removeTimezone(){
+        this.timezone = null;
+        this.isTimeZoneSet = false;
+    }
+
+    /**
+     * Checks whether the {@link AlarmTrigger} contains a timezone
+     * @return
+     */
+    public boolean containsTimezone(){
+        return isTimeZoneSet;
     }
 
 }

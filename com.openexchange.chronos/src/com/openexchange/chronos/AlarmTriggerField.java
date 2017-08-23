@@ -80,7 +80,7 @@ public enum AlarmTriggerField {
     /**
      * A flag indicating whether the trigger is already triggered or not
      */
-    PROCESSED,
+    PUSHED,
     /**
      * The recurrence id
      */
@@ -96,6 +96,10 @@ public enum AlarmTriggerField {
     /**
      * The folder of the event
      */
-    FOLDER
+    FOLDER,
+    /**
+     * The timezone used for floating events
+     */
+    FLOATING_TIMEZONE
 
 }

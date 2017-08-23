@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import java.util.EnumMap;
+import java.util.TimeZone;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.RecurrenceId;
@@ -224,7 +225,7 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.PROCESSED, new BooleanMapping<AlarmTrigger>("processed", "Alarm ID") {
+        mappings.put(AlarmTriggerField.PUSHED, new BooleanMapping<AlarmTrigger>("pushed", "Pushed") {
 
             @Override
             public void set(AlarmTrigger alarmTrigger, Boolean value) {
@@ -268,6 +269,29 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             @Override
             public void remove(AlarmTrigger alarmTrigger) {
                 alarmTrigger.removeRecurrence();
+            }
+        });
+
+        mappings.put(AlarmTriggerField.FLOATING_TIMEZONE, new VarCharMapping<AlarmTrigger>("floatingTimezone", "Floating Timezone") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, String value) {
+                alarmTrigger.setTimezone(TimeZone.getTimeZone(value));
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsTimezone();
+            }
+
+            @Override
+            public String get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getTimezone().getID();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeTimezone();
             }
         });
 

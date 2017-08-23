@@ -50,9 +50,11 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.exception.OXException;
 
 /**
@@ -64,37 +66,30 @@ import com.openexchange.exception.OXException;
 public interface AlarmTriggerStorage {
 
     /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
+     * Inserts all necessary triggers for the given event. In case of an update remove all existing triggers first.
      *
-     * @param user The user id
-     * @param options The search options
-     * @return A list of {@link AlarmTrigger}
+     * @param event The event to insert triggers for
+     * @param exceptions The exceptions of the event
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTriggers(int user, SearchOptions options) throws OXException;
+    void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException;
 
     /**
-     * Inserts the alarm trigger
+     * Removes all existing triggers for the given event
      *
-     * @param trigger The {@link AlarmTrigger}
+     * @param eventId The event id
      * @throws OXException
      */
-    void insertAlarmTrigger(AlarmTrigger trigger) throws OXException;
+    void removeTriggers(String eventId) throws OXException;
 
     /**
-     * Updates the alarm trigger
+     * Lists all alarm triggers for the given user which will trigger within the given {@link RangeOption}
      *
-     * @param trigger The updated {@link AlarmTrigger}
+     * @param userId The user id
+     * @param option The {@link RangeOption}
+     * @return A list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    void updateAlarmTrigger(AlarmTrigger trigger) throws OXException;
-
-    /**
-     * Deletes the given alarm triggers
-     *
-     * @param alarmIds A list of alarm ids
-     * @throws OXException
-     */
-    void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException;
+    List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException;
 
 }

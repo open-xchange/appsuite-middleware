@@ -53,9 +53,7 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
@@ -64,9 +62,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.alarm.AlarmChange;
-import com.openexchange.chronos.alarm.AlarmTriggerService;
-import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.Check;
@@ -154,11 +149,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         return result;
     }
 
-    private void insertAlarmTrigger(Event newEvent) {
-        AlarmTriggerService alarmTriggerService = getTriggerService();
-        Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<>();
-        alarmsPerAttendee.put(calendarUserId, newEvent.getAlarms());
-        alarmTriggerService.handleChange(AlarmChange.newCreate(new EventSeriesWrapper(newEvent), alarmsPerAttendee), storage.getAlarmTriggerStorage());
+    private void insertAlarmTrigger(Event newEvent) throws OXException {
+        storage.getAlarmTriggerStorage().insertTriggers(newEvent, null);
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {

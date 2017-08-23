@@ -47,41 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.alarm;
+package com.openexchange.chronos;
 
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 
 /**
- * {@link EventSeriesWrapper} wraps an event and its exceptions.
+ * {@link EventExceptionWrapper} wraps an event and its exceptions.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class EventSeriesWrapper {
+public class EventExceptionWrapper {
 
     private Event event;
     private Set<RecurrenceId> exceptions;
 
     /**
-     * Initializes a new {@link EventSeriesWrapper}.
+     * Initializes a new {@link EventExceptionWrapper}.
      * 
      * @param event The event
      * @param exceptions A set if exceptions
      */
-    public EventSeriesWrapper(Event event, Set<RecurrenceId> exceptions) {
+    public EventExceptionWrapper(Event event, Set<RecurrenceId> exceptions) {
         super();
         this.event = event;
         this.exceptions = exceptions;
     }
 
     /**
-     * Initializes a new {@link EventSeriesWrapper} without exceptions.
+     * Initializes a new {@link EventExceptionWrapper} without exceptions.
      *
      * @param event The event
      */
-    public EventSeriesWrapper(Event event) {
+    public EventExceptionWrapper(Event event) {
         super();
         this.event = event;
         this.exceptions = null;

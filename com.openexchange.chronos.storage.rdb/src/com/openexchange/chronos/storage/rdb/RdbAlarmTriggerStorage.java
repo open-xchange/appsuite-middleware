@@ -54,18 +54,37 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventExceptionWrapper;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RangeOption;
+import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 
 /**
  * {@link RdbAlarmTriggerStorage} is an implementation of the {@link AlarmTriggerStorage}
@@ -79,6 +98,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAlarmTriggerStorage.class);
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
     private final int accountId;
+    private final AlarmStorage alarmStorage;
+    private final RecurrenceService recurrenceService;
+    private final EntityResolver resolver;
+
+    private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId=?;";
 
     /**
      * Initializes a new {@link RdbAlarmTriggerStorage}.
@@ -87,14 +111,23 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param accountId The account id
      * @param dbProvider A db provider
      * @param txPolicy The transaction policy
+     * @throws OXException
      */
-    protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy, AlarmStorage alarmStorage, EntityResolver resolver) throws OXException {
         super(context, dbProvider, txPolicy);
         this.accountId = accountId;
+        this.alarmStorage = alarmStorage;
+        this.recurrenceService = Services.getService(RecurrenceService.class, true);
+        this.resolver = resolver;
     }
 
-    @Override
-    public void insertAlarmTrigger(AlarmTrigger trigger) throws OXException {
+    /**
+     * Inserts the alarm trigger
+     *
+     * @param trigger The {@link AlarmTrigger}
+     * @throws OXException
+     */
+    private void insertAlarmTrigger(AlarmTrigger trigger) throws OXException {
         Connection writeCon = dbProvider.getWriteConnection(context);
         int updated = 0;
         try {
@@ -109,7 +142,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     };
 
     private int insertAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
-
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
             String sql = new StringBuilder().append("INSERT INTO calendar_alarm_trigger (cid, account, ").append(MAPPER.getColumns(mappedFields)).append(") VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(");").toString();
@@ -125,8 +157,14 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    @Override
-    public void updateAlarmTrigger(AlarmTrigger trigger) throws OXException {
+    /**
+     * Updates the alarm trigger
+     *
+     * @param trigger The updated {@link AlarmTrigger}
+     * @throws OXException
+     */
+    @SuppressWarnings("unused")
+    private void updateAlarmTrigger(AlarmTrigger trigger) throws OXException {
         Connection writeCon = dbProvider.getWriteConnection(context);
         int updated = 0;
         try {
@@ -158,8 +196,15 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    @Override
-    public List<AlarmTrigger> getAlarmTriggers(int user, SearchOptions options) throws OXException {
+    /**
+     * Lists alarm triggers for the given user from now until the given time in ascending order
+     *
+     * @param user The user id
+     * @param options The range options
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    private List<AlarmTrigger> getAlarmTriggers(int user, RangeOption options) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
             return getAlarmTriggers(user, options.getFrom() != null ? options.getFrom().getTime() : System.currentTimeMillis(), options.getUntil().getTime(), con);
@@ -200,13 +245,18 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return result;
     }
 
-    @Override
-    public void deleteAlarmTriggers(List<EventID> alarmIds) throws OXException {
+    /**
+     * Deletes all alarm triggers for the given event
+     *
+     * @param eventId The event id to delete
+     * @throws OXException
+     */
+    private void deleteAlarmTriggers(String eventId) throws OXException {
         Connection writeCon = dbProvider.getWriteConnection(context);
         int deleted = 0;
         try {
             txPolicy.setAutoCommit(writeCon, false);
-            deleted = deleteAlarmTriggers(context.getContextId(), accountId, alarmIds, writeCon);
+            deleted = deleteAlarmTriggers(context.getContextId(), accountId, eventId, writeCon);
             txPolicy.commit(writeCon);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -216,37 +266,17 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     }
 
-    private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId IN (";
-    private static final String SQL_DELETE_RECURRENCE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId=? AND recurrence=?;";
-
-    private int deleteAlarmTriggers(int contextId, int accountId, List<EventID> eventIds, Connection writeCon) throws OXException {
-
-        // divide into basic deletes and recurrence delete operations
-        List<EventID> recurrence = new ArrayList<>();
-        List<EventID> basic = new ArrayList<>();
-        for (EventID eventID : eventIds) {
-            if (eventID.getRecurrenceID() != null) {
-                recurrence.add(eventID);
-            } else {
-                basic.add(eventID);
-            }
-        }
-
-        int deleted = 0;
-        // Delete basic
-        if (!basic.isEmpty()) {
+    private int deleteAlarmTriggers(int contextId, int accountId, String eventId, Connection writeCon) throws OXException {
+        if (!Strings.isEmpty(eventId)) {
             PreparedStatement prepareStatement = null;
 
             try {
-                String sql = Databases.getIN(SQL_DELETE, basic.size());
-                prepareStatement = writeCon.prepareStatement(sql);
+                prepareStatement = writeCon.prepareStatement(SQL_DELETE);
                 int x = 0;
                 prepareStatement.setInt(++x, contextId);
                 prepareStatement.setInt(++x, accountId);
-                for (EventID eventId : basic) {
-                    prepareStatement.setInt(++x, Integer.valueOf(eventId.getObjectID()));
-                }
-                deleted += logExecuteUpdate(prepareStatement);
+                prepareStatement.setString(++x, eventId);
+                return logExecuteUpdate(prepareStatement);
             } catch (SQLException e) {
                 throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
             } finally {
@@ -254,30 +284,99 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             }
         }
 
-        // Delete recurrences
-        if (!recurrence.isEmpty()) {
-            PreparedStatement stmt = null;
-            try {
-                stmt = writeCon.prepareStatement(SQL_DELETE_RECURRENCE);
-                int x = 0;
-                for (EventID eventId : recurrence) {
-                    stmt.setInt(++x, contextId);
-                    stmt.setInt(++x, accountId);
-                    stmt.setInt(++x, Integer.valueOf(eventId.getObjectID()));
-                    stmt.setString(++x, eventId.getRecurrenceID().getValue().toString());
-                    stmt.addBatch();
-                }
-                int[] executeBatch = stmt.executeBatch();
-                for (int del : executeBatch) {
-                    deleted += del;
-                }
-            } catch (SQLException e) {
-                throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(stmt);
+        return 0;
+    }
+
+    @Override
+    public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
+        EventExceptionWrapper wrapper = new EventExceptionWrapper(event, exceptions);
+        Map<Integer, List<Alarm>> alarmsPerAttendee = alarmStorage.loadAlarms(event);
+        createAlarmTriggers(alarmsPerAttendee, wrapper);
+    }
+
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
+    /**
+     * Creates new alarm triggers
+     *
+     * @param alarmsPerAttendee A map of alarms per attendee
+     * @param eventWrapper The newly created event
+     * @throws OXException
+     */
+    private void createAlarmTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, EventExceptionWrapper eventWrapper) throws OXException {
+        Event event = eventWrapper.getEvent();
+        for(Integer userId: alarmsPerAttendee.keySet()){
+
+            List<Alarm> alarms = alarmsPerAttendee.get(userId);
+            if(alarms==null || alarms.isEmpty()){
+                continue;
             }
+            for (Alarm alarm : alarms) {
+                AlarmTrigger trigger = new AlarmTrigger();
+                trigger.setUserId(userId);
+                trigger.setAction(alarm.getAction().getValue());
+                trigger.setProcessed(false);
+                trigger.setAlarm(alarm.getId());
+                trigger.setEventId(event.getId());
+
+                if(CalendarUtils.isFloating(event)) {
+                    trigger.setTimezone(resolver.getTimeZone(userId));
+                }
+                TimeZone tz = UTC;
+                if(trigger.containsTimezone()){
+                    tz = trigger.getTimezone();
+                }
+                if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+
+                    long[] exceptions = null;
+                    if (eventWrapper.getExceptions() != null) {
+                        exceptions = new long[eventWrapper.getExceptions().size()];
+                        int x = 0;
+                        for (RecurrenceId recurrenceId : eventWrapper.getExceptions()) {
+                            exceptions[x++] = recurrenceId.getValue().getTimestamp();
+                        }
+                    }
+                    RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
+                    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+                    RecurrenceId recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
+                    trigger.setRecurrence(recurrenceId);
+
+                    trigger.setTime(AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, eventWrapper.getExceptions()).getTime());
+                } else {
+                    if (event.getRecurrenceId() != null) {
+                        trigger.setRecurrence(event.getRecurrenceId());
+                    }
+                    trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime());
+                }
+
+                // Set proper folder id
+                for (Attendee att : event.getAttendees()) {
+                    if (att.getEntity() == userId) {
+                        trigger.setFolder(att.getFolderID());
+                        break;
+                    }
+                }
+
+                if (!trigger.containsFolder()) {
+                    // TODO throw proper exception
+                }
+
+                insertAlarmTrigger(trigger);
+            }
+
         }
-        return deleted;
+
+    }
+
+
+    @Override
+    public void removeTriggers(String eventId) throws OXException {
+        deleteAlarmTriggers(eventId);
+    }
+
+    @Override
+    public List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException {
+        return getAlarmTriggers(userId, option);
     }
 
 }

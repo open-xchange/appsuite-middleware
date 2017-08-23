@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -78,9 +77,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.UnmodifiableEvent;
-import com.openexchange.chronos.alarm.AlarmChange;
-import com.openexchange.chronos.alarm.AlarmTriggerService;
-import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
@@ -90,7 +86,6 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
@@ -249,8 +244,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttendeeStorage().deleteAttendees(id);
 
         // Delete alarm triggers
-        AlarmTriggerService triggerService = getTriggerService();
-        triggerService.handleChange(AlarmChange.newDelete(new EventSeriesWrapper(originalEvent)), storage.getAlarmTriggerStorage());
+        storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
         /*
          * track deletion in result
          */
@@ -303,8 +297,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event updatedEvent = loadEventData(id);
 
         // Update alarm trigger
-        AlarmTriggerService triggerService = getTriggerService();
-        Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedEvent);
+        storage.getAlarmTriggerStorage().removeTriggers(updatedEvent.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(originalEvent)) {
             exceptions = getChangeExceptionDates(originalEvent.getSeriesId());
@@ -312,7 +305,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 exceptions.addAll(originalEvent.getDeleteExceptionDates());
             }
         }
-        triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedEvent, exceptions), Collections.singleton(EventField.ATTENDEES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, exceptions);
 
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
@@ -396,23 +389,24 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         Event createdException = loadEventData(exceptionEvent.getId());
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        removeAlarmTrigger(originalMasterEvent, createdException, updatedMasterEvent);
+        removeAlarmTrigger(createdException, updatedMasterEvent);
         result.addPlainCreation(createdException);
         result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalMasterEvent.getId(), recurrenceId));
         result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
     }
 
-    private void removeAlarmTrigger(Event original, Event createdException, Event updatedMasterEvent) throws OXException {
-        AlarmTriggerService triggerService = getTriggerService();
-        Map<Integer, List<Alarm>> alarmsPerAttendeeException = storage.getAlarmStorage().loadAlarms(createdException);
-        triggerService.handleChange(AlarmChange.newCreate(new EventSeriesWrapper(createdException), alarmsPerAttendeeException), storage.getAlarmTriggerStorage());
-        Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
+    private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
+
+        storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
+
+
         Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
         if (updatedMasterEvent.getDeleteExceptionDates() != null) {
             exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
         }
-        triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(original), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
+        storage.getAlarmTriggerStorage().removeTriggers(updatedMasterEvent.getId());
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }
 
     /**
@@ -653,7 +647,41 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         return userize(event, calendarUserId);
     }
 
-    protected AlarmTriggerService getTriggerService(){
-        return Services.getService(AlarmTriggerService.class);
+    /**
+     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
+     * via {@link #calendarUserId}. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * <li>taking over the user's personal list of alarm for the event</li>
+     * </ul>
+     *
+     * @param event The event to userize from the current calendar user's point of view
+     * @param alarms The alarms to take over
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    protected Event userize(Event event, List<Alarm> alarms) throws OXException {
+        event = userize(event, calendarUserId);
+        if (null == alarms && null != event.getAlarms() || null != alarms && null == event.getAlarms()) {
+            final List<Alarm> userizedAlarms = alarms;
+            event = new DelegatingEvent(event) {
+
+                @Override
+                public List<Alarm> getAlarms() {
+                    return userizedAlarms;
+                }
+
+                @Override
+                public boolean containsAlarms() {
+                    return true;
+                }
+            };
+        }
+        return event;
     }
 }

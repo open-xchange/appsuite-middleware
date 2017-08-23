@@ -122,8 +122,9 @@ public class CalendarDataMigration {
      * @param config The migration config to use
      * @param context The context being migrated
      * @param connection The database connection
+     * @throws OXException
      */
-    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, Connection connection) {
+    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, Connection connection) throws OXException {
         super();
         this.progress = progress;
         this.config = config;

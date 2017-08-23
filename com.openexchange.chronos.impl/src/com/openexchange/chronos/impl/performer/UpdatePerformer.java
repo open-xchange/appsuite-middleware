@@ -78,7 +78,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -97,9 +96,6 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.alarm.AlarmChange;
-import com.openexchange.chronos.alarm.AlarmTriggerService;
-import com.openexchange.chronos.alarm.EventSeriesWrapper;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -222,15 +218,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  * touch master & track results
                  */
                 Event updatedMasterEvent = loadEventData(originalEvent.getId());
-
-                AlarmTriggerService triggerService = getTriggerService();
-
                 Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
                 if (updatedMasterEvent.getDeleteExceptionDates() != null) {
                     exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
                 }
-                Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
-                triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(updatedMasterEvent, exceptions), Collections.singleton(EventField.DELETE_EXCEPTION_DATES), alarmsPerAttendee), storage.getAlarmTriggerStorage());
+
+                storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
 
                 touch(originalEvent.getId());
                 trackUpdate(originalEvent, updatedMasterEvent);
@@ -367,7 +361,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == eventUpdate) {
                 touch(originalEvent.getId());
             }
-            AlarmTriggerService triggerService = getTriggerService();
             Event alarmTriggerEvent = loadEventData(originalEvent.getId());
             SortedSet<RecurrenceId> exceptions = null;
             if (alarmTriggerEvent.getSeriesId() != null) {
@@ -376,9 +369,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     exceptions.addAll(alarmTriggerEvent.getDeleteExceptionDates());
                 }
             }
-            Map<Integer, List<Alarm>> alarmsPerAttendee = storage.getAlarmStorage().loadAlarms(alarmTriggerEvent);
-            Set<EventField> changedField = eventUpdate == null ? Collections.singleton(EventField.ALARMS) : eventUpdate.getUpdatedFields();
-            triggerService.handleChange(AlarmChange.newUpdate(new EventSeriesWrapper(originalEvent), new EventSeriesWrapper(alarmTriggerEvent, exceptions), changedField, alarmsPerAttendee), storage.getAlarmTriggerStorage());
+            storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
+            storage.getAlarmTriggerStorage().insertTriggers(alarmTriggerEvent, exceptions);
         }
         return wasUpdated;
     }

@@ -93,8 +93,9 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
+     * @throws OXException
      */
-    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         super();
         this.accountId = accountId;
         if (null == entityResolver) {
@@ -103,7 +104,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         eventStorage = new RdbEventStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, accountId, dbProvider, txPolicy);
+        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, accountId, dbProvider, txPolicy, alarmStorage, entityResolver);
         attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
         storageUtilities = new RdbCalendarStorageUtilities(this);
     }
