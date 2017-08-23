@@ -424,7 +424,8 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             result = null;
             stmt = null;
 
-            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
+            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+            stmt.setFetchSize(Integer.MIN_VALUE);
             stmt.setInt(1, writePoolId);
             result = stmt.executeQuery();
             if (false == result.next()) {
@@ -432,8 +433,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             }
 
             TIntList tmp = new TIntArrayList(8192);
+            int i = 1;
             do {
                 tmp.add(result.getInt(1));
+                System.out.println(i++);
             } while (result.next());
             return tmp.toArray();
         } catch (SQLException e) {
