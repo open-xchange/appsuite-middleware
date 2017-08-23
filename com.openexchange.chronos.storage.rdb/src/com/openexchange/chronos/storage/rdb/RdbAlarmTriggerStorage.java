@@ -264,7 +264,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     stmt.setInt(++x, contextId);
                     stmt.setInt(++x, accountId);
                     stmt.setInt(++x, Integer.valueOf(eventId.getObjectID()));
-                    stmt.setString(++x, String.valueOf(eventId.getRecurrenceID().getValue().getTimestamp()));
+                    stmt.setString(++x, eventId.getRecurrenceID().getValue().toString());
                     stmt.addBatch();
                 }
                 int[] executeBatch = stmt.executeBatch();
