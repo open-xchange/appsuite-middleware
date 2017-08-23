@@ -203,7 +203,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
         try {
             List<Assignment> assignments = f.get();
-            if (null == assignments) {
+            if (null == assignments || assignments.isEmpty()) {
                 LOG.warn("Found no assignment for schema name {}", schemaName);
                 return null;
             }
