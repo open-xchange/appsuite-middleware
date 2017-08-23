@@ -50,7 +50,9 @@
 package com.openexchange.chronos.service;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -105,6 +107,16 @@ public interface CalendarUtilities {
      * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
      */
     boolean handleDataTruncation(OXException e, Event event);
+
+    /**
+     * Handles a possible {@link CalendarExceptionCodes#DATA_TRUNCATION} exception that occurred when attempting to store the attendees data
+     * by trimming the affected values to the maximum allowed length that are indicated in the exception's <i>problematics</i>.
+     *
+     * @param e The exception to handle
+     * @param attendees The attendees being stored
+     * @return <code>true</code> if truncated values were trimmed successfully, <code>false</code>, otherwise
+     */
+    boolean handleDataTruncation(OXException e, List<Attendee> attendees);
 
     /**
      * Gets an entity resolver for a specific context.

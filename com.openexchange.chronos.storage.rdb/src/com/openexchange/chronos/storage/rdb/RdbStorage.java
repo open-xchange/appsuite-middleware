@@ -58,6 +58,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -355,6 +356,10 @@ public abstract class RdbStorage {
      * @return The OX exception
      */
     protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
+        return asOXException(e, mapper, Collections.singleton(object), connection, table);
+    }
+
+    protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
         if (IncorrectStringSQLException.class.isInstance(e)) {
             IncorrectStringSQLException incorrectStringException = (IncorrectStringSQLException) e;
             /*
@@ -375,7 +380,7 @@ public abstract class RdbStorage {
             /*
              * extract additional information if possible & decorate with corresponding "problematic" if available
              */
-            List<MappedTruncation<O>> mappedTruncations = getMappedTruncations((DataTruncation) e, mapper, object, connection, table);
+            List<MappedTruncation<O>> mappedTruncations = getMappedTruncations((DataTruncation) e, mapper, objects, connection, table);
             if (null != mappedTruncations && 0 < mappedTruncations.size()) {
                 MappedTruncation<O> firstTruncation = mappedTruncations.get(0);
                 OXException oxException = CalendarExceptionCodes.DATA_TRUNCATION.create(firstTruncation.getReadableName(), I(firstTruncation.getMaxSize()), I(firstTruncation.getLength()));
@@ -457,6 +462,26 @@ public abstract class RdbStorage {
                 MappedTruncation<O> mappedTruncation = getMappedTruncation(mapper, object, connection, table, column);
                 if (null != mappedTruncation) {
                     mappedTruncations.add(mappedTruncation);
+                }
+            }
+            return 0 < mappedTruncations.size() ? mappedTruncations : null;
+        }
+        return null;
+    }
+
+    private static <O, E extends Enum<E>> List<MappedTruncation<O>> getMappedTruncations(DataTruncation e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
+        if (null != mapper && null != objects && null != table && null != e) {
+            String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
+            if (null == truncatedColumns || 0 == truncatedColumns.length) {
+                return null;
+            }
+            List<MappedTruncation<O>> mappedTruncations = new ArrayList<MappedTruncation<O>>(truncatedColumns.length);
+            for (O object : objects) {
+                for (String column : truncatedColumns) {
+                    MappedTruncation<O> mappedTruncation = getMappedTruncation(mapper, object, connection, table, column);
+                    if (null != mappedTruncation) {
+                        mappedTruncations.add(mappedTruncation);
+                    }
                 }
             }
             return 0 < mappedTruncations.size() ? mappedTruncations : null;

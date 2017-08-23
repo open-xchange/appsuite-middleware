@@ -259,7 +259,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event");
+            throw asOXException(e, MAPPER, events, connection, "calendar_event");
         } finally {
             release(connection, updated);
         }

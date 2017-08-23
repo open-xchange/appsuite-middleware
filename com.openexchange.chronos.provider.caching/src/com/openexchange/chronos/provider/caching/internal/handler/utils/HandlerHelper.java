@@ -86,7 +86,7 @@ public class HandlerHelper {
 
     protected static EventID getEventIdForEvent(List<EventID> eventIDs, Event event) {
         for (EventID eventID : eventIDs) {
-            if (eventID.getObjectID().equals(event.getId()) || eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
+            if (eventID.getObjectID().equals(event.getId()) && eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
                 return eventID;
             }
         }

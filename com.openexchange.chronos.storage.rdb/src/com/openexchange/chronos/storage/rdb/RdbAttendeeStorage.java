@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.service.EntityResolver;
@@ -236,7 +238,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e);
+            throw asOXException(e, MAPPER, Lists.newArrayList(Iterables.concat(attendeesByEventId.values())), connection, "calendar_attendee");
         } finally {
             release(connection, updated);
         }

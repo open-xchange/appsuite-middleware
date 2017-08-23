@@ -57,6 +57,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -96,7 +97,7 @@ public class InitialWriteHandler extends AbstractHandler {
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            create(folderId, initStorage(new SimpleDBProvider(writeConnection, writeConnection)), diff.getAddedItems());
+            create(folderId, new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection))), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;

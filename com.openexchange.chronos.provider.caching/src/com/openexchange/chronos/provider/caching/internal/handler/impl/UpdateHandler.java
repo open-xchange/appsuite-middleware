@@ -69,6 +69,7 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
@@ -95,13 +96,13 @@ public class UpdateHandler extends AbstractHandler {
         super(cachedCalendarAccess);
     }
 
-    private void processDiff(String folderId, CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void processDiff(String folderId, TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         delete(calendarStorage, diff);
         create(folderId, calendarStorage, diff);
         update(calendarStorage, diff);
     }
 
-    private void delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void delete(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.getRemovedItems().isEmpty()) {
             return;
         }
@@ -111,7 +112,7 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    protected void delete(CalendarStorage calendarStorage, Event originalEvent) throws OXException {
+    protected void delete(TruncationAwareCalendarStorage calendarStorage, Event originalEvent) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(calendarStorage, originalEvent.getFolderId(), originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
         }
@@ -126,19 +127,19 @@ public class UpdateHandler extends AbstractHandler {
         calendarStorage.getAttendeeStorage().deleteAttendees(id, originalEvent.getAttendees());
     }
 
-    protected SortedSet<RecurrenceId> getChangeExceptionDates(CalendarStorage calendarStorage, String seriesId) throws OXException {
+    protected SortedSet<RecurrenceId> getChangeExceptionDates(TruncationAwareCalendarStorage calendarStorage, String seriesId) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(CalendarUtils.getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(CalendarUtils.getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
         List<Event> changeExceptions = calendarStorage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.RECURRENCE_ID });
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
-    protected void deleteExceptions(CalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
+    protected void deleteExceptions(TruncationAwareCalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
         for (Event originalExceptionEvent : loadExceptionData(calendarStorage, folderId, seriesID, exceptionDates)) {
             delete(calendarStorage, originalExceptionEvent);
         }
     }
 
-    protected List<Event> loadExceptionData(CalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
+    protected List<Event> loadExceptionData(TruncationAwareCalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
             for (RecurrenceId recurrenceID : recurrenceIDs) {
@@ -153,14 +154,14 @@ public class UpdateHandler extends AbstractHandler {
         return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, EventField.values());
     }
 
-    private void create(String folderId, CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void create(String folderId, TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.getAddedItems().isEmpty()) {
             return;
         }
         create(folderId, calendarStorage, diff.getAddedItems());
     }
 
-    private void update(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void update(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.getUpdatedItems().isEmpty()) {
             return;
         }
@@ -170,7 +171,7 @@ public class UpdateHandler extends AbstractHandler {
             Event updatedEvent = eventUpdate.getUpdate();
 
             updatedEvent.setId(persistedEvent.getId());
-            update(calendarStorage, updatedEvent);
+            calendarStorage.updateEvent(updatedEvent);
 
             CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = eventUpdate.getAttendeeUpdates();
             if (!attendeeUpdates.isEmpty()) {
@@ -184,7 +185,7 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    private void updateAlarms(CalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
+    private void updateAlarms(TruncationAwareCalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
         if (!alarmUpdates.isEmpty()) {
             AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
@@ -214,28 +215,24 @@ public class UpdateHandler extends AbstractHandler {
         }
     }
 
-    private void updateAttendees(CalendarStorage calendarStorage, String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
-        //FIXME is that correct or do I have to load the initial URI from Storage?!
+    private void updateAttendees(TruncationAwareCalendarStorage calendarStorage, String eventId, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
         if (!attendeeUpdates.isEmpty()) {
-            AttendeeMapper attendeeMapper = AttendeeMapper.getInstance();
             AttendeeStorage attendeeStorage = calendarStorage.getAttendeeStorage();
             if (!attendeeUpdates.getAddedItems().isEmpty()) {
-                List<Attendee> copy = attendeeMapper.copy(attendeeUpdates.getAddedItems(), new AttendeeField[] { AttendeeField.URI });
-                attendeeStorage.insertAttendees(eventId, copy);
+                calendarStorage.insertAttendees(eventId, attendeeUpdates.getAddedItems());
             }
             if (!attendeeUpdates.getRemovedItems().isEmpty()) {
-                List<Attendee> copy = attendeeMapper.copy(attendeeUpdates.getRemovedItems(), new AttendeeField[] { AttendeeField.URI });
-                attendeeStorage.deleteAttendees(eventId, copy);
+                attendeeStorage.deleteAttendees(eventId, attendeeUpdates.getRemovedItems());
             }
             if (!attendeeUpdates.getUpdatedItems().isEmpty()) {
-                List<Attendee> attendees = new ArrayList<Attendee>();
+                List<Attendee> updatedAttendees = new ArrayList<>();
                 for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeUpdates.getUpdatedItems()) {
-                    attendees.add(attendeeUpdate.getUpdate());
+                    Attendee updated = attendeeUpdate.getUpdate();
+                    Attendee original = attendeeUpdate.getOriginal();
+                    Attendee newUpdatedAttendee = AttendeeMapper.getInstance().copy(original, updated, AttendeeField.URI);
+                    updatedAttendees.add(newUpdatedAttendee);
                 }
-                if (!attendees.isEmpty()) {
-                    List<Attendee> copy = attendeeMapper.copy(attendees, new AttendeeField[] { AttendeeField.URI });
-                    attendeeStorage.updateAttendees(eventId, copy);
-                }
+                calendarStorage.updateAttendees(eventId, updatedAttendees);
             }
         }
     }
@@ -259,7 +256,7 @@ public class UpdateHandler extends AbstractHandler {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                processDiff(folderId, storage, diff);
+                processDiff(folderId, new TruncationAwareCalendarStorage(storage), diff);
 
                 return null;
             }

@@ -135,16 +135,21 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
             try {
                 hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), event);
             } catch (ClassCastException | OXException x1) {
-                // also try attendees
-                List<Attendee> attendees = event.getAttendees();
-                if (null != attendees) {
-                    for (Attendee attendee : attendees) {
-                        try {
-                            hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), attendee);
-                        } catch (ClassCastException | OXException x2) {
-                            // ignore
-                        }
-                    }
+                // ignore
+            }
+        }
+        return hasTrimmed;
+    }
+
+    @Override
+    public boolean handleDataTruncation(OXException e, List<Attendee> attendees) {
+        boolean hasTrimmed = false;
+        if (null != attendees) {
+            for (Attendee attendee : attendees) {
+                try {
+                    hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), attendee);
+                } catch (ClassCastException | OXException x2) {
+                    // ignore
                 }
             }
         }

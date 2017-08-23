@@ -520,7 +520,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws SQLException, OXException {
+    private static int updateAttendees(Connection connection, int contextID, int objectID, List<Attendee> attendees) throws OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
             if (false == CalendarUtils.isInternal(attendee)) {
