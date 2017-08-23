@@ -84,6 +84,7 @@ import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -97,6 +98,7 @@ import com.openexchange.oidc.state.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.state.LogoutRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
@@ -116,13 +118,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final OIDCBackend backend;
     private final StateManagement stateManagement;
     private final SessionReservationService sessionReservationService;
+    private final ServiceLookup services;
 
 
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, ServiceLookup services) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
         this.sessionReservationService = Services.getService(SessionReservationService.class);
+        this.services = services;
     }
 
     @Override
@@ -160,7 +164,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private void addAuthRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
         String deepLink = request.getParameter("deep_link");
         String uiClientID = this.getUiClient(request);
-        String hostname = OIDCTools.getDomainName(request);
+        String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         Map<String, String> additionalClientInformation = new HashMap<>();
 
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo.Builder(state.getValue())
@@ -198,14 +202,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
             IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation);
             if (validTokenResponse != null) {
-                this.sendLoginRequestToServer(request, response, tokenResponse);
+                this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
             }
         } catch (OXException e) {
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e.getMessage());
         }
     }
 
-    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse) throws OXException {
+    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         if (this.backend.getBackendConfig().isStoreOAuthTokensEnabled()) {
@@ -222,7 +226,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             URIBuilder redirectLocation = new URIBuilder()
                 .setScheme(this.getRedirectScheme(request))
-                .setHost(OIDCTools.getDomainName(request))
+                .setHost(domainName)
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
@@ -293,7 +297,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String logoutRequest = this.backend.getBackendConfig().getRedirectURILogout();
         if (this.backend.getBackendConfig().isSSOLogout()) {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request), session.getSessionID()));
+            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
         } else {
             this.logoutCurrentUser(session, request, response);
         }

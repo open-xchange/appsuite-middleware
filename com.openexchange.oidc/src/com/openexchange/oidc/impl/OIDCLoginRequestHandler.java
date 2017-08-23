@@ -70,6 +70,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.LoginRequest;
@@ -80,6 +81,7 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
@@ -97,10 +99,12 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     private OIDCBackend backend;
     //TODO QS-VS: Load UI-Webpath from where??
     private String uiWebPath = "/appsuite/ui";
+    private final ServiceLookup services;
 
-    public OIDCLoginRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend backend) {
+    public OIDCLoginRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend backend, ServiceLookup services) {
         this.loginConfiguration = loginConfiguration;
         this.backend = backend;
+        this.services = services;
     }
 
     @Override
@@ -149,6 +153,10 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
 
         String autologinCookieValue = null;
+        //TODO QS-VS: Change to mode, off, over IDP, OX only
+        // OX only bedeutet wir erstetzen den normalen autologin durch einen eigenen der direkt
+        // in die Session läuft ohne über den idp zu gehen!! Muss im InitServlet passieren, vor dem
+        // redirect zum IDP
         if (this.backend.getBackendConfig().isAutologinCookieEnabled()) {
             Cookie autologinCookie = this.loadAutologinCookie(request, reservation);
             if (autologinCookie != null) {
@@ -220,9 +228,10 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + session.getHash(), uuid);
         oidcAutologinCookie.setPath("/");
         oidcAutologinCookie.setSecure(OIDCTools.considerSecure(request));
+        // TODO QS-VS: Browserlifetime
         oidcAutologinCookie.setMaxAge(-1);
 
-        String domain = OIDCTools.getDomainName(request);
+        String domain = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         String cookieDomain = Cookies.getDomainValue(domain);
         if (cookieDomain != null) {
             oidcAutologinCookie.setDomain(cookieDomain);

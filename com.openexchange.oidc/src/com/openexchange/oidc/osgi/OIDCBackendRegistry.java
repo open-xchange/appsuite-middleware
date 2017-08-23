@@ -127,13 +127,13 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)));
+                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.LOGIN_ACTION, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend));
+                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.LOGIN_ACTION, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend, this.services));
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
                 LOG.error(e.getLocalizedMessage(), e);

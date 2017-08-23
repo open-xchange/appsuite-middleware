@@ -121,8 +121,7 @@ public class OIDCTools {
         }
     }
     
-    public static String getDomainName(HttpServletRequest request) {
-        HostnameService hostnameService = Services.getService(HostnameService.class);
+    public static String getDomainName(HttpServletRequest request, HostnameService hostnameService) {
         if (hostnameService == null) {
             return request.getServerName();
         }

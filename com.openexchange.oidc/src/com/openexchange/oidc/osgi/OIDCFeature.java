@@ -54,6 +54,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
@@ -74,8 +75,12 @@ public class OIDCFeature extends DependentServiceStarter{
     
     private final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
+    private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {
+        HostnameService.class
+    };
+    
     public OIDCFeature(BundleContext context, Class<?>[] neededServices, OIDCConfig config) throws InvalidSyntaxException {
-        super(context, neededServices);
+        super(context, neededServices, OPTIONAL_SERVICES);
         this.config = config;
     }
 
