@@ -56,11 +56,6 @@ package com.openexchange.oidc;
  */
 public interface OIDCBackendConfig {
     
-    /**
-     * Get the stored client ID of this backend.
-     * 
-     * @return The client id. Never <code>null</code>.
-     */
     String getClientID();
 
     String getRedirectURIInit();
@@ -77,20 +72,10 @@ public interface OIDCBackendConfig {
 
     String getJWSAlgortihm();
     
-    /**
-     * Get the default scope of this feature.
-     * 
-     * @return The scope or an empty string. Never <code>null</code>.
-     */
     String getScope();
     
     String getIssuer();
     
-    /**
-     * Get the default response type of this feature
-     * 
-     * @return The response type. Never <code>null</code>.
-     */
     String getResponseType();
     
     String getUserInfoEndpoint();

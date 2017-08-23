@@ -269,7 +269,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         TokenResponse tokenResponse = null;
         try {
-            httpResponse.setContent("adgsafsd");
             tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
         } catch (ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);
