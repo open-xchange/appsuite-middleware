@@ -161,7 +161,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.report.appsuite"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.reseller"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rmi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret"/>
