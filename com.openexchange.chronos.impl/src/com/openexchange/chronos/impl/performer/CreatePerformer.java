@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
@@ -149,12 +148,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * track creation & return result
          */
         Event createdEvent = loadEventData(newEvent.getId());
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
-        result.addPlainCreation(createdEvent);
-        List<Alarm> alarms = null != event.getAlarms() && 0 < event.getAlarms().size() ? storage.getAlarmStorage().loadAlarms(createdEvent, calendarUserId) : null;
-        Event userizedEvent = userize(createdEvent, alarms);
+        trackCreation(createdEvent);
+        Event userizedEvent = userize(createdEvent);
         insertAlarmTrigger(userizedEvent);
-        result.addUserizedCreation(userizedEvent);
         return result;
     }
 

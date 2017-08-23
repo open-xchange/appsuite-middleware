@@ -68,7 +68,6 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.asList;
-import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -177,12 +176,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         return result;
-    }
-
-    private void trackCreation(Event createdEvent) throws OXException {
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
-        result.addPlainCreation(createdEvent);
-        result.addUserizedCreation(userize(createdEvent));
     }
 
     private void updateEvent(Event originalEvent, Event updatedEventData, RecurrenceId recurrenceId) throws OXException {
@@ -551,7 +544,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * check for newly indicated delete exceptions, from the calendar user's point of view
              */
             Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
-            Event userizedOriginalEvent = userize(originalEvent, calendarUserId);
+            Event userizedOriginalEvent = userize(originalEvent);
             SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(
                 userizedOriginalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
             if (0 < exceptionDateUpdates.getRemovedItems().size() || null == userAttendee) {

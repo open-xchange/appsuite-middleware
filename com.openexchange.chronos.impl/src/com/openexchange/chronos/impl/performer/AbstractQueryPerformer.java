@@ -72,6 +72,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
@@ -275,6 +276,7 @@ public abstract class AbstractQueryPerformer {
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance</li>
+     * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
      * @param event The event to userize
@@ -287,8 +289,9 @@ public abstract class AbstractQueryPerformer {
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, forUser);
         }
+        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
         final String folderView = Utils.getFolderView(storage, event, forUser);
-        if (false == folderView.equals(event.getFolderId())) {
+        if (null != alarms || false == folderView.equals(event.getFolderId())) {
             event = new DelegatingEvent(event) {
 
                 @Override
@@ -298,6 +301,16 @@ public abstract class AbstractQueryPerformer {
 
                 @Override
                 public boolean containsFolderId() {
+                    return true;
+                }
+
+                @Override
+                public List<Alarm> getAlarms() {
+                    return alarms;
+                }
+
+                @Override
+                public boolean containsAlarms() {
                     return true;
                 }
             };
