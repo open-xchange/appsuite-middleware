@@ -70,7 +70,7 @@ ox_set_JAVA_BIN() {
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
     version=$(detect_java_version)
-    if [ $version -lt 7 ]; then
+    if [ $version -lt 8 ]; then
       JAVA_BIN=/opt/open-xchange/sbin/insufficientjava
     fi
 }
