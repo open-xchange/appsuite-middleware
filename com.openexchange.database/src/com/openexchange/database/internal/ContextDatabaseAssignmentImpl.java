@@ -76,6 +76,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 
 /**
@@ -405,7 +406,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     private static int[] listContexts(Connection con, int poolId) throws OXException {
-        final List<Integer> tmp = new LinkedList<Integer>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -427,19 +427,20 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
             stmt.setInt(1, writePoolId);
             result = stmt.executeQuery();
-            while (result.next()) {
-                tmp.add(I(result.getInt(1)));
+            if (false == result.next()) {
+                return new int[0];
             }
+
+            TIntList tmp = new TIntArrayList(8192);
+            do {
+                tmp.add(result.getInt(1));
+            } while (result.next());
+            return tmp.toArray();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        final int[] retval = new int[tmp.size()];
-        for (int i = 0; i < tmp.size(); i++) {
-            retval[i] = tmp.get(i).intValue();
-        }
-        return retval;
     }
 
     @Override
