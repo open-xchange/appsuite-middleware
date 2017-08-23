@@ -97,7 +97,7 @@ public enum GuardApiExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 8),
+    JSON_ERROR("A JSON error occurred: %1$s", GuardApiExceptionMessages.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 8),
 
     ;
 
