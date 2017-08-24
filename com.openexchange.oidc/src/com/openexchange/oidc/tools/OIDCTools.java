@@ -56,6 +56,8 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -74,6 +76,8 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
 public class OIDCTools {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCTools.class);
 
     public static final String SESSION_TOKEN = "sessionToken";
     
@@ -152,6 +156,7 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
+            LOG.debug("No secret cookie found for session: " + session.getSessionID());
             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
     }
