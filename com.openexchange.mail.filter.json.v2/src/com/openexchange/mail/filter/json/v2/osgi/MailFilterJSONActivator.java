@@ -125,6 +125,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerTestCommandParserRegistry();
         registerActionCommandParserRegistry();
+        openTrackers();
 
         getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
@@ -165,7 +166,9 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(SimplifiedHeaderTest.AnyRecipient.getCommandName(), simplifiedHeaderTestParser);
         registry.register(SimplifiedHeaderTest.MailingList.getCommandName(), simplifiedHeaderTestParser);
 
-        addService(TestCommandParserRegistry.class, registry);
+        registerService(TestCommandParserRegistry.class, registry);
+        trackService(TestCommandParserRegistry.class);
+
     }
 
     /**
@@ -188,6 +191,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
         registry.register(SimplifiedActions.Copy.getCommandName(), new FileIntoActionCommandParser(this));
 
-        addService(ActionCommandParserRegistry.class, registry);
+        registerService(ActionCommandParserRegistry.class, registry);
+        trackService(ActionCommandParserRegistry.class);
     }
 }

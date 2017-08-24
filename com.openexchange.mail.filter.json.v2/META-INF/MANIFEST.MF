@@ -70,4 +70,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j
+Export-Package: com.openexchange.mail.filter.json.v2.json.mapper.parser
 Bundle-Activator: com.openexchange.mail.filter.json.v2.osgi.MailFilterJSONActivator
