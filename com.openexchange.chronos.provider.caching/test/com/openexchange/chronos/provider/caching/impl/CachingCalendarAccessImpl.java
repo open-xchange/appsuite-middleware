@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.impl;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -57,7 +58,6 @@ import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link CachingCalendarAccessImpl}
@@ -67,11 +67,15 @@ import com.openexchange.session.Session;
  */
 public class CachingCalendarAccessImpl extends CachingCalendarAccess {
 
+    private boolean configSaved = false;
+
     public CachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.CalendarAccess#close()
      */
     @Override
@@ -80,7 +84,9 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
      */
     @Override
@@ -89,7 +95,9 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
      */
     @Override
@@ -98,7 +106,9 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
      */
     @Override
@@ -107,7 +117,9 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
@@ -115,13 +127,24 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
         return 60;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
     public List<Event> getEvents(String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void saveConfig(Map<String, Object> configuration) throws OXException {
+        configSaved = true;
+    }
+
+    public boolean isConfigSaved() {
+        return configSaved;
     }
 
 }

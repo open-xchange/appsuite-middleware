@@ -1,0 +1,175 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.chronos.provider.caching.internal.handler;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccessTest;
+import com.openexchange.exception.OXException;
+
+/**
+ * {@link CachingExecutorTest}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ CachingHandlerFactory.class })
+public class CachingExecutorTest extends CachingCalendarAccessTest {
+
+    private CachingExecutor executor;
+
+    @Mock
+    private CachingHandler handler;
+
+    @Mock
+    private CachingHandlerFactory factory;
+
+    private List<Event> existingEvents = new ArrayList<>();
+
+    private List<Event> externalEvents = new ArrayList<>();
+
+    private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        PowerMockito.mockStatic(CachingHandlerFactory.class);
+        Mockito.when(CachingHandlerFactory.getInstance()).thenReturn(factory);
+        Mockito.when(factory.get(Matchers.any(), Matchers.any())).thenReturn(handler);
+
+        Mockito.when(handler.getExistingEvents(Matchers.anyString())).thenReturn(existingEvents);
+        Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalEvents);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(false);
+
+        lastFolderStates.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+    }
+
+    @Test
+    public void testCache_executionSetNotAvailable_nothingTodo() throws OXException {
+        executor = new CachingExecutor(cachingCalendarAccess, null);
+
+        executor.cache();
+
+        assertFalse(cachingCalendarAccess.isConfigSaved());
+        Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
+    }
+
+    @Test
+    public void testCache_emptyExecutionSet_nothingTodo() throws OXException {
+        executor = new CachingExecutor(cachingCalendarAccess, Collections.<FolderUpdateState> emptySet());
+
+        executor.cache();
+
+        assertFalse(cachingCalendarAccess.isConfigSaved());
+        Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
+    }
+
+    @Test
+    public void testCache_existingAndExternalEmpty_nothingToPersist() throws OXException {
+        executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
+
+        executor.cache();
+
+        assertFalse(cachingCalendarAccess.isConfigSaved());
+        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
+        Mockito.verify(handler, Mockito.never()).persist(Matchers.anyString(), Matchers.any());
+    }
+
+    @Test
+    public void testCache_externalHasNewEvents_persistAndUpdateConfig() throws OXException {
+        executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
+
+        Event e = new Event();
+        e.setUid("available");
+        externalEvents.add(e);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
+
+        executor.cache();
+
+        assertTrue(cachingCalendarAccess.isConfigSaved());
+        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
+        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
+    }
+
+    @Test
+    public void testCache_existingHasEventsButExternalNot_persistAndUpdateConfig() throws OXException {
+        executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
+
+        Event e = new Event();
+        e.setUid("available");
+        existingEvents.add(e);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
+
+        executor.cache();
+
+        assertTrue(cachingCalendarAccess.isConfigSaved());
+        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
+        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
+    }
+
+}

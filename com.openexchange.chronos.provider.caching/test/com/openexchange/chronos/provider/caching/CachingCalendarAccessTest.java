@@ -79,6 +79,7 @@ import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateSt
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -94,19 +95,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @PrepareForTest({ ServerSessionAdapter.class, Services.class })
 public class CachingCalendarAccessTest {
 
-    private CachingCalendarAccessImpl cachingCalendarAccess;
+    protected CachingCalendarAccessImpl cachingCalendarAccess;
 
     @Mock
-    private Session session;
+    protected Session session;
 
     @Mock
     private ServerSession serverSession;
 
     @Mock
-    private CalendarAccount account;
+    protected CalendarAccount account;
 
     @Mock
-    private CalendarParameters parameters;
+    protected CalendarParameters parameters;
 
     @Mock
     private CalendarStorageFactory calendarStorageFactory;
@@ -117,7 +118,7 @@ public class CachingCalendarAccessTest {
     @Mock
     private Connection connection;
 
-    private Map<String, Object> calendarConfig = new HashMap<String, Object>();
+    private Map<String, Object> cachingConfig = new HashMap<String, Object>();
 
     @Before
     public void setUp() throws Exception {
@@ -133,7 +134,7 @@ public class CachingCalendarAccessTest {
 
         cachingCalendarAccess = new CachingCalendarAccessImpl(session, account, parameters);
 
-        Mockito.when(account.getConfiguration()).thenReturn(calendarConfig);
+        Mockito.when(account.getConfiguration()).thenReturn(cachingConfig);
     }
 
     @Test
@@ -212,7 +213,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testCleanupInstructions() {
+    public void testCleanup_removeUndesiredInstructions() {
         Set<FolderUpdateState> lastFolders = new HashSet<>();
         lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
         lastFolders.add(new FolderUpdateState("a new Folder", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
@@ -236,5 +237,89 @@ public class CachingCalendarAccessTest {
                 assertEquals(FolderProcessingType.INITIAL_INSERT, folderUpdateState.getType());
             }
         }
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_emptyConfiguration_noFolderCachingState() throws OXException {
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertTrue(latestUpdateStates.isEmpty());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertTrue(latestUpdateStates.isEmpty());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_oneFolderCachedButRequestedInReadTime_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.READ_DB, latestUpdateStates.get(0).getType());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_oneFolderCachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - 60 * 60 * 10000);
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.UPDATE, latestUpdateStates.get(0).getType());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_multipleFolderCached_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - 60 * 60 * 10000);
+        folderCachingConfig.put("0", latestUpdate);
+
+        Map<String, Object> latestUpdate2 = new HashMap<>();
+        latestUpdate2.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        folderCachingConfig.put("2", latestUpdate2);
+
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(2, latestUpdateStates.size());
+        for (FolderUpdateState folderUpdateState : latestUpdateStates) {
+            if (folderUpdateState.getFolderId().equals("0")) {
+                assertEquals(FolderProcessingType.UPDATE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("2")) {
+                assertEquals(FolderProcessingType.READ_DB, folderUpdateState.getType());
+            }
+        }
+    }
+    
+    @Test
+    public void testGetLatestUpdateStates_folderKnownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.INITIAL_INSERT, latestUpdateStates.get(0).getType());
     }
 }
