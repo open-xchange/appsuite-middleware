@@ -101,6 +101,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.exception.filter.ExceptionFilter;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Localizable;
@@ -601,7 +602,12 @@ public final class ResponseWriter {
         /*
          * Stack trace
          */
-        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError())) {
+        boolean allow = true;
+        ExceptionFilter filter = ServerServiceRegistry.getInstance().getService(ExceptionFilter.class);
+        if (null != filter) {
+            allow = filter.isStackTraceAllowed(exception);
+        }
+        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError()) && allow) {
             // Write exception
             StackTraceElement[] traceElements = exception.getStackTrace();
             final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
