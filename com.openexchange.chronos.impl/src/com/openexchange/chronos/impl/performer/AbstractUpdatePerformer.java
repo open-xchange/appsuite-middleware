@@ -448,7 +448,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             };
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
-        event.setAlarms(newAlarms);
     }
 
     /**
@@ -486,12 +485,39 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm));
             }
-            storage.getAlarmStorage().updateAlarms(event, userId, alarms);
+            final String folderView = Utils.getFolderView(storage, event, userId);
+            if (false == folderView.equals(event.getFolderId())) {
+                Event userizedEvent = new DelegatingEvent(event) {
+
+                    @Override
+                    public String getFolderId() {
+                        return folderView;
+                    }
+
+                    @Override
+                    public boolean containsFolderId() {
+                        return true;
+                    }
+                };
+                storage.getAlarmStorage().updateAlarms(userizedEvent, userId, alarms);
+            } else {
+                storage.getAlarmStorage().updateAlarms(event, userId, alarms);
+            }
         }
         /*
          * insert new alarms
          */
         insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        storage.getAlarmTriggerStorage().removeTriggers(event.getId());
+        Set<RecurrenceId> exceptions = null;
+        if (isSeriesMaster(event)) {
+            exceptions = getChangeExceptionDates(event.getSeriesId());
+            if (event.getDeleteExceptionDates() != null) {
+                exceptions.addAll(event.getDeleteExceptionDates());
+            }
+        }
+        storage.getAlarmTriggerStorage().insertTriggers(event, exceptions);
+
         return true;
     }
 

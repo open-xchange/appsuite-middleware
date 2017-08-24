@@ -49,44 +49,66 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import java.util.Collection;
-import java.util.Collections;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.action.ChronosAction;
+import com.openexchange.chronos.json.converter.CalendarResultConverter;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AlarmActionFactory}
+ * {@link AcknowledgeAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmActionFactory implements AJAXActionServiceFactory {
+public class AcknowledgeAction extends ChronosAction {
 
-    private final ImmutableMap<String, AJAXActionService> actions;
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID, CalendarParameters.PARAMETER_ALARM_ID);
 
     /**
-     * Initializes a new {@link AlarmActionFactory}.
+     * Initializes a new {@link AcknowledgeAction}.
+     * @param services
      */
-    public AlarmActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("until", new UntilAction(services));
-        actions.put("ack", new AcknowledgeAction(services));
-        actions.put("snooze", new SnoozeAction(services));
-        this.actions = actions.build();
+    protected AcknowledgeAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+
+        Date now = new Date();
+        Entry<String, ?> alarmId = parseParameter(requestData, CalendarParameters.PARAMETER_ALARM_ID, true);
+        EventID eventID = parseIdParameter(requestData);
+        Event event = calendarAccess.getEvent(eventID);
+        List<Alarm> alarms = event.getAlarms();
+        for(Alarm alarm: alarms){
+            if (alarm.getId() == (Integer) alarmId.getValue()) {
+                alarm.setAcknowledged(now);
+                break;
+            }
+        }
+
+        CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
+        return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
     }
+
 
 }

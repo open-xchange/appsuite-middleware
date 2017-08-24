@@ -187,6 +187,22 @@ public interface CalendarParameters {
     static final String PARAMETER_RECURRENCE_ID = "recurrenceId";
 
     /**
+     * {@link Integer}
+     * <p/>
+     * The alarm id of an alarm.
+     * <p/>
+     */
+    static final String PARAMETER_ALARM_ID = "alarmId";
+
+    /**
+     * {@link Long}
+     * <p/>
+     * The snooze duration.
+     * <p/>
+     */
+    static final String PARAMETER_SNOOZE_DURATION = "snoozeTime";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set
