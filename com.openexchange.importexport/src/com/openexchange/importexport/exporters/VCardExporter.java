@@ -204,7 +204,7 @@ public class VCardExporter implements Exporter {
         Contact.YOMI_FIRST_NAME,
         Contact.YOMI_LAST_NAME
     };
-    
+
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -237,13 +237,13 @@ public class VCardExporter implements Exporter {
         }
         return perm.canReadAllObjects();
     }
-    
+
     @Override
     public boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
         for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
             if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
                 return false;
-            }            
+            }
             for (String objectId : batchEntry.getValue()) {
                 try {
                     Integer.parseInt(objectId);
@@ -285,9 +285,9 @@ public class VCardExporter implements Exporter {
               if (null != out) {
                   requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                   if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getFolderExportFileName(session, folder) + Format.VCARD.getExtension()+"\"");
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getFolderExportFileName(session, folder) + Format.VCARD.getExtension()+"\"");
                   } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename="+"\""+getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension()+"\"");
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=\""+getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension()+"\"");
                   } else {
                       requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }

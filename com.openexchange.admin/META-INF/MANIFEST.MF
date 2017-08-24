@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
 Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.admin.osgi.AdminActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.damienmiller,
  com.mysql.jdbc,
@@ -12,6 +12,7 @@ Import-Package: com.damienmiller,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
+ com.openexchange.ajax.requesthandler.cache,
  com.openexchange.auth,
  com.openexchange.cache.impl,
  com.openexchange.caching,
@@ -56,6 +57,7 @@ Import-Package: com.damienmiller,
  com.openexchange.publish.helpers,
  com.openexchange.publish.tools,
  com.openexchange.sessiond,
+ com.openexchange.snippet,
  com.openexchange.spamhandler,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,

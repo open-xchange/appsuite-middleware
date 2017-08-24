@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.realtime.hazelcast
 Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.realtime.hazelcast.osgi.HazelcastRealtimeActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.hazelcast.config,

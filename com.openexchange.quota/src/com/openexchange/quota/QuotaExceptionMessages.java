@@ -79,6 +79,8 @@ public final class QuotaExceptionMessages implements LocalizableStrings {
 
     public static final String QUOTA_EXCEEDED_SNIPPETS_MSG = "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please delete some signatures in order to create new ones.";
 
+    public static final String QUOTA_EXCEEDED_SIGNATURES_MSG = "The storage limit for signatures is %1$s. Delete old signatures to be able to store a new one.";
+
     /**
      * Initializes a new {@link QuotaExceptionMessages}.
      */

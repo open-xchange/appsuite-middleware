@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.openexchange.http.grizzly
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/grizzly-framework-monitoring-2.3.29.jar,
  lib/grizzly-http-all-2.3.29.jar,
  lib/grizzly-http-monitoring-2.3.29.jar,

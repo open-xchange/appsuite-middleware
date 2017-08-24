@@ -119,7 +119,7 @@ public enum MetadataGroup {
 
     // - Members ---------------------------------------------------------------
 
-    private String m_name = null;
+    private final String m_name;
 }
 
 

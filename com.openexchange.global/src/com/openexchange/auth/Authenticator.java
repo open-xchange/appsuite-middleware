@@ -94,6 +94,16 @@ public interface Authenticator {
     void doAuthentication(Credentials authdata, int contextId) throws OXException;
 
     /**
+     * Authenticates the context administrator
+     *
+     * @param authdata The credentials for context administrator to check
+     * @param contextId The context identifier
+     * @param plugInAware If set to <code>true</code> a PlugInAwareAuthenticator is used, if set to <code>false</code> a NonPlugInAwareAuthenticator
+     * @throws OXException If credentials are invalid
+     */
+    void doAuthentication(Credentials authdata, int contextId, boolean plugInAware) throws OXException;
+
+    /**
      * Authenticates all users within a context.
      *
      * @param authdata The credentials for user to check

@@ -58,7 +58,9 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
 
@@ -69,6 +71,15 @@ import com.openexchange.session.Session;
  * @since v7.8.2
  */
 public abstract class AbstractShareComposeSetting<V> implements PreferencesItemService, ConfigTreeEquivalent {
+
+    protected static final String PROPERTY_EXPIRY_DATES         = "com.openexchange.mail.compose.share.expiryDates";
+    protected static final String PROPERTY_REQUIRED_EXPIRATION  = "com.openexchange.mail.compose.share.requiredExpiration";
+    protected static final String PROPERTY_DEFAULT_EXPIRY_DATE  = "com.openexchange.mail.compose.share.defaultExpiryDate";
+    protected static final String PROPERTY_FORCE_AUTO_DELETE    = "com.openexchange.mail.compose.share.forceAutoDelete";
+    protected static final String PROPERTY_NAME                 = "com.openexchange.mail.compose.share.name";
+    protected static final String PROPERTY_THRESHOLD            = "com.openexchange.mail.compose.share.threshold";
+
+    protected static final String DEFAULT_EXPIRY_DATES = "1d, 1w, 1M, 3M, 6M, 1y";
 
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractShareComposeSetting.class);
@@ -100,8 +111,6 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
      */
     protected abstract V getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-    // modules/mail/vcard > io.ox/mail//appendVcard
-
     @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "compose", "shareAttachments", nameInPath };
@@ -114,7 +123,13 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 Object value = getSettingValue(session, ctx, user, userConfig);
-                setting.setSingleValue(value);
+                if (value instanceof Object[]) {
+                    for (Object obj : (Object[]) value) {
+                        setting.addMultiValue(obj);
+                    }
+                } else {
+                    setting.setSingleValue(value);
+                }
             }
 
             @Override
@@ -133,5 +148,22 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
     @Override
     public String getJslobPath() {
         return "io.ox/mail//compose/shareAttachments/" + nameInPath;
+    }
+
+    /**
+     * Gets the configured expiry dates, see {@value #PROPERTY_EXPIRY_DATES}.
+     *
+     * @param session The session; must not be <code>null</code>
+     * @return An array of date values. Never empty, never <code>null</code>
+     * @throws OXException
+     */
+    protected String[] getExpiryDates(Session session) throws OXException {
+        String[] expiryDates = Strings.splitByComma(Utilities.getValueFromProperty(PROPERTY_EXPIRY_DATES, DEFAULT_EXPIRY_DATES, session));
+        if (expiryDates.length == 0) {
+            LOG.warn("Invalid value '{}' for property '{}'. Falling back to default: {}", expiryDates, PROPERTY_EXPIRY_DATES, DEFAULT_EXPIRY_DATES);
+            expiryDates = Strings.splitByComma(DEFAULT_EXPIRY_DATES);
+        }
+
+        return expiryDates;
     }
 }

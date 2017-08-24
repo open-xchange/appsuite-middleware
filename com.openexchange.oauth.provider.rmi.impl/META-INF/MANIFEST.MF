@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.oauth.provider.rmi.impl
 Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.oauth.provider.rmi.impl.osgi.OAuthProviderRMIActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io;version="18.0.0",
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,

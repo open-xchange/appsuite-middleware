@@ -47,62 +47,32 @@
  *
  */
 
-package com.openexchange.snippet.osgi;
+package com.openexchange.rest.passwordchange.history;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.conversion.DataSource;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.html.HtmlService;
-import com.openexchange.image.ImageActionFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.snippet.SnippetImageDataSource;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.internal.Services;
+import static org.junit.Assert.assertEquals;
+import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
+import org.junit.Test;
+import com.openexchange.admin.rest.passwordchange.history.api.PasswordChangeHistoryREST;
 
 /**
- * {@link SnippetActivator}
+ * {@link LimitTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.0
  */
-public final class SnippetActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link SnippetActivator}.
-     */
-    public SnippetActivator() {
-        super();
-    }
+public class LimitTest extends AbstractPasswordchangehistoryTest {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, ManagedFileManagement.class, ConfigViewFactory.class, CapabilityService.class };
+    protected Application configure() {
+        return new ResourceConfig(PasswordChangeHistoryREST.class);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
-        rememberTracker(snippetServiceRegistry);
-        openTrackers();
-
-        {
-            SnippetImageDataSource signImageDataSource = SnippetImageDataSource.getInstance();
-            signImageDataSource.setServiceListing(snippetServiceRegistry);
-            Dictionary<String, Object> signImageProps = new Hashtable<String, Object>(1);
-            signImageProps.put("identifier", signImageDataSource.getRegistrationName());
-            registerService(DataSource.class, signImageDataSource, signImageProps);
-            ImageActionFactory.addMapping(signImageDataSource.getRegistrationName(), signImageDataSource.getAlias());
-        }
+    @Test
+    public void testLimit() throws Exception {
+        String retval = pwdhapi.passwdChanges(contextID, userID, limit, null);
+        JSONArray json = new JSONArray(retval);
+        assertEquals("More than one element! Limitation did not work..", 1, json.asList().size());
     }
-
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
-    }
-
 }

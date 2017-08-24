@@ -146,6 +146,7 @@ Import-Package: com.davekoelle,
  com.openexchange.share.groupware,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.snippet,
  com.openexchange.sql.tools,
  com.openexchange.templating,
  com.openexchange.textxtraction,
@@ -579,7 +580,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.webdav.protocol.osgi,
  com.openexchange.webdav.protocol.util,
  com.openexchange.webdav.xml.resources
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/bcmail-jdk15on-152.jar,
  lib/bcpkix-jdk15on-152.jar,

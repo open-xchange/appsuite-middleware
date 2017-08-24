@@ -4,7 +4,7 @@ Bundle-Name: Core Bundle for Share
 Bundle-SymbolicName: com.openexchange.share.core
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io;version="18.0.0",
  com.openexchange.ajax.requesthandler,
  com.openexchange.capabilities,

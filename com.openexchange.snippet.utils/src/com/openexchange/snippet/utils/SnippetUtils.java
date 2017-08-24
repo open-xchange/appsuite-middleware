@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.snippet;
+package com.openexchange.snippet.utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
-import com.openexchange.snippet.internal.Services;
+import com.openexchange.snippet.utils.internal.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

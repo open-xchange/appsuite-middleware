@@ -69,8 +69,8 @@ public enum SimplifiedHeaderTest {
     From("from", "From"),
     To("to", "To"),
     Cc("cc", "Cc"),
-    AnyRecipient("anyRecipient", "to", "cc"),
-    MailingList("mailingList", "List-Id", "X-BeenThere", "X-Mailinglist", "X-Mailing-List");
+    AnyRecipient("anyrecipient", "to", "cc"),
+    MailingList("mailinglist", "List-Id", "X-BeenThere", "X-Mailinglist", "X-Mailing-List");
 
     private static final Map<String, SimplifiedHeaderTest> map;
     static {
@@ -110,7 +110,7 @@ public enum SimplifiedHeaderTest {
 
     /**
      * Retrieves the header names of this {@link SimplifiedHeaderTest}
-     * 
+     *
      * @return A list of header names
      */
     public List<String> getHeaderNames() {

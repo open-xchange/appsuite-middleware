@@ -27,7 +27,7 @@
         schema:
           type: string
   put:
-    operationId: exportAsVCard
+    operationId: exportAsCSV
     tags:
       - Export
     summary: Exports a batch of contact data to a CSV file.
