@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -246,7 +247,7 @@ public class Filestore2UserUtil {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     /**
      * Gets the file store user count for specified file store.
      *
@@ -765,6 +766,15 @@ public class Filestore2UserUtil {
                         } while (result.next());
                         return entries;
                     } catch (OXException e) {
+                        if (DBPoolingExceptionCodes.SCHEMA_FAILED.equals(e)) {
+                            // Such a schema/catalog does not exist
+                            Throwable t = e.getCause();
+                            if (null == t) {
+                                t = e;
+                            }
+                            LOG.warn("Unknown schema \"{}\" on database host {}. Please check database accessibility and/or context-to-schema associations.", poolAndSchema.getSchema(), Integer.valueOf(poolAndSchema.getPoolId()), t);
+                            return Collections.emptySet();
+                        }
                         LOG.error("Pool Error", e);
                         throw new StorageException(e);
                     } catch (SQLException e) {
