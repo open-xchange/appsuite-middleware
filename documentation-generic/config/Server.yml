@@ -802,3 +802,19 @@ properties:
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server", "Timezone"] 
+  - key: com.openexchange.ajax.response.exception.blacklisted
+    description: |
+      Comma seperated list of blacklisted exceptions. Blacklisted exceptions 
+      are not allowed to be included into a response. A wildcard pattern can  
+      be used to denie writting for a class. E.g. "SES", "SES*" or "SES-*" will 
+      add all SessionExceptionCodes to the blacklist. For single ExceptionsCodes 
+      to omit, the ExceptionCode itself must be added. E.g. "SES-203" will add 
+      the SessionExceptionCode "SESSION_EXPIRED" to the blacklist. 
+    defaultValue: "SES"
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: com.openexchange.ajax.response.includeStackTraceOnError
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 
