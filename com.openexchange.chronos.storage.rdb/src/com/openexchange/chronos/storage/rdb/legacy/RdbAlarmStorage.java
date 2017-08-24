@@ -216,7 +216,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
+            ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
+            if (null == originalReminder) {
+                updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
+            } else {
+                ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
+                if (null == updatedReminder) {
+                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                } else {
+                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
+                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                }
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
