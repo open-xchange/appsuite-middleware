@@ -4,7 +4,7 @@ Bundle-Name: The chronos calendar account service
 Bundle-SymbolicName: com.openexchange.chronos.calendar.account.service.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,

@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -338,7 +339,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "del_dates");
+            throw asOXException(e, MAPPER, events, connection, "del_dates");
         } finally {
             release(connection, updated);
         }
@@ -354,7 +355,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = deleteEvent(connection, context.getContextId(), asInt(objectID));
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "prg_dates");
+            throw asOXException(e, MAPPER, Collections.singleton(null), connection, "prg_dates");
         } finally {
             release(connection, updated);
         }

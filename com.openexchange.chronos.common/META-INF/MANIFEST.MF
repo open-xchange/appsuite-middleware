@@ -4,7 +4,7 @@ Bundle-Name: The chronos common bundle
 Bundle-SymbolicName: com.openexchange.chronos.common
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/vinnie-2.0.0.jar,
  lib/lib-recur-0.10.jar

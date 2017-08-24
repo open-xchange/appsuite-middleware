@@ -295,7 +295,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = deleteEvent(connection, eventId);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event");
+            throw asOXException(e, MAPPER, Collections.singleton(null), connection, "calendar_event");
         } finally {
             release(connection, updated);
         }
@@ -378,7 +378,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event_tombstone");
+            throw asOXException(e, MAPPER, events, connection, "calendar_event_tombstone");
         } finally {
             release(connection, updated);
         }
