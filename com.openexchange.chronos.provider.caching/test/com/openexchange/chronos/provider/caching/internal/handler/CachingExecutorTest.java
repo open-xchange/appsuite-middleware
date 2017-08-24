@@ -92,6 +92,8 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     private List<Event> externalEvents = new ArrayList<>();
 
     private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
+    
+    private List<OXException> warnings = new ArrayList<>();
 
     @Override
     public void setUp() throws Exception {
@@ -113,7 +115,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     public void testCache_executionSetNotAvailable_nothingTodo() throws OXException {
         executor = new CachingExecutor(cachingCalendarAccess, null);
 
-        executor.cache();
+        executor.cache(warnings);
 
         assertFalse(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
@@ -123,7 +125,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     public void testCache_emptyExecutionSet_nothingTodo() throws OXException {
         executor = new CachingExecutor(cachingCalendarAccess, Collections.<FolderUpdateState> emptySet());
 
-        executor.cache();
+        executor.cache(warnings);
 
         assertFalse(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
@@ -133,7 +135,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     public void testCache_existingAndExternalEmpty_nothingToPersist() throws OXException {
         executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
 
-        executor.cache();
+        executor.cache(warnings);
 
         assertFalse(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
@@ -149,7 +151,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         externalEvents.add(e);
         Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
 
-        executor.cache();
+        executor.cache(warnings);
 
         assertTrue(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
@@ -165,7 +167,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         existingEvents.add(e);
         Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
 
-        executor.cache();
+        executor.cache(warnings);
 
         assertTrue(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());

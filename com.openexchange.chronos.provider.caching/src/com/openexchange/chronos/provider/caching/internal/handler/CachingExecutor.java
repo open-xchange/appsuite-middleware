@@ -53,12 +53,10 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
@@ -83,26 +81,13 @@ public class CachingExecutor {
         this.executionList = executionList;
     }
 
-    public Event cacheAndGet(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        cache();
-        return new ResultCollector(this.cachingCalendarAccess).get(folderId, eventId, recurrenceId);
-    }
+    public ResultCollector cache(List<OXException> warnings) {
+        ResultCollector resultCollector = new ResultCollector(this.cachingCalendarAccess);
 
-    public List<Event> cacheAndGet(String folderId) throws OXException {
-        cache();
-        return new ResultCollector(this.cachingCalendarAccess).get(folderId);
-    }
-
-    public List<Event> cacheAndGet(List<EventID> eventIDs) throws OXException {
-        cache();
-        return new ResultCollector(this.cachingCalendarAccess).get(eventIDs);
-    }
-
-    protected void cache() {
         boolean updated = false;
         if (executionList == null) {
             LOG.warn("Nothing to cache as the provided execution list is null.");
-            return;
+            return resultCollector;
         }
         for (FolderUpdateState folderUpdateState : executionList) {
             CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(folderUpdateState.getType(), cachingCalendarAccess);
@@ -128,7 +113,8 @@ public class CachingExecutor {
                     updated = true;
                 }
             } catch (OXException e) {
-                LOG.error("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
+                LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
+                warnings.add(e);
             }
         }
 
@@ -139,6 +125,8 @@ public class CachingExecutor {
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
+        return resultCollector;
+
     }
 
     /**

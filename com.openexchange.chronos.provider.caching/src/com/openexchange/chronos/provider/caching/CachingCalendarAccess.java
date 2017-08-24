@@ -68,6 +68,7 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
@@ -85,7 +86,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class CachingCalendarAccess implements CalendarAccess {
+public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * The general key for persisting the caching information
@@ -105,6 +106,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     private final ServerSession session;
     private final CalendarAccount account;
     private final CalendarParameters parameters;
+    private List<OXException> warnings = new ArrayList<>();
 
     /**
      * Initializes a new {@link CachingCalendarAccess}.
@@ -138,7 +140,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     @Override
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
-        return new CachingExecutor(this, executionList).cacheAndGet(folderId, eventId, recurrenceId);
+        return new CachingExecutor(this, executionList).cache(this.warnings).get(folderId, eventId, recurrenceId);
     }
 
     @Override
@@ -146,13 +148,13 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
 
         Set<FolderUpdateState> executionList = generateExecutionList(sortEventIDsPerFolderId.keySet().toArray(new String[sortEventIDsPerFolderId.size()]));
-        return new CachingExecutor(this, executionList).cacheAndGet(eventIDs);
+        return new CachingExecutor(this, executionList).cache(this.warnings).get(eventIDs);
     }
 
     @Override
     public final List<Event> getEventsInFolder(String folderId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
-        return new CachingExecutor(this, executionList).cacheAndGet(folderId);
+        return new CachingExecutor(this, executionList).cache(this.warnings).get(folderId);
     }
 
     private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {
@@ -284,5 +286,10 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     public void saveConfig(Map<String, Object> configuration) throws OXException {
         CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
         accountStorage.updateAccount(this.account.getAccountId(), configuration, this.getAccount().getLastModified().getTime());
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 }
