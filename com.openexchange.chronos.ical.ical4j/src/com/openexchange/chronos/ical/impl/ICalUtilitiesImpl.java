@@ -49,60 +49,81 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import static com.openexchange.chronos.ical.impl.ICalUtils.exportComponents;
 import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
+import static com.openexchange.chronos.ical.impl.ICalUtils.parseVAlarmComponents;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.ical.CalendarExport;
+import java.util.TimeZone;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ICalUtilities;
-import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.component.VAlarm;
 
 /**
- * {@link ICalServiceImpl}
+ * {@link ICalUtilitiesImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalServiceImpl implements ICalService {
+public class ICalUtilitiesImpl implements ICalUtilities {
 
     private final ICalMapper mapper;
-    private final ICalUtilities iCalUtilities;
 
     /**
-     * Initializes a new {@link ICalServiceImpl}.
+     * Initializes a new {@link ICalUtilitiesImpl}.
+     *
+     * @param mapper The iCal mapper to use
      */
-    public ICalServiceImpl() {
+    public ICalUtilitiesImpl(ICalMapper mapper) {
         super();
-        this.mapper = new ICalMapper();
-        this.iCalUtilities = new ICalUtilitiesImpl(mapper);
+        this.mapper = mapper;
+    }
+
+
+    @Override
+    public List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException {
+        parameters = getParametersOrDefault(parameters);
+        return ICalUtils.importAlarms(parseVAlarmComponents(inputStream, parameters), mapper, parameters);
     }
 
     @Override
-    public CalendarExport exportICal(ICalParameters parameters) {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        List<OXException> warnings = new ArrayList<OXException>();
-        return new CalendarExportImpl(mapper, iCalParameters, warnings);
+    public void exportAlarms(OutputStream outputStream, List<Alarm> alarms, ICalParameters parameters) throws OXException {
+        if (null == alarms || 0 == alarms.size()) {
+            return;
+        }
+        parameters = getParametersOrDefault(parameters);
+        ComponentList alarmComponents = exportAlarms(alarms, parameters, new ArrayList<OXException>());
+        exportComponents(outputStream, alarmComponents, parameters);
     }
 
     @Override
-    public ImportedCalendar importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        ImportedCalendar calendar = ICalUtils.importCalendar(iCalFile, mapper, iCalParameters);
-        return calendar;
+    public List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException {
+        parameters = getParametersOrDefault(parameters);
+
+        return null;
     }
 
-    @Override
-    public ICalParameters initParameters() {
-        return getParametersOrDefault(null);
+    private ComponentList exportAlarms(List<Alarm> alarms, ICalParameters parameters, List<OXException> warnings) throws OXException {
+        if (null == alarms) {
+            return null;
+        }
+        ComponentList components = new ComponentList();
+        for (Alarm alarm : alarms) {
+            components.add(exportAlarm(alarm, parameters, warnings));
+        }
+        return components;
     }
 
-    @Override
-    public ICalUtilities getUtilities() {
-        return iCalUtilities;
+    private VAlarm exportAlarm(Alarm alarm, ICalParameters parameters, List<OXException> warnings) throws OXException {
+        VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
+        ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+        return vAlarm;
     }
 
 }

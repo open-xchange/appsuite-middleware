@@ -55,13 +55,16 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -170,6 +173,30 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The events
      */
     List<Event> getEventsOfUser() throws OXException;
+
+    /**
+     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * Additional, storage-specific search filters can be applied.
+     * <p/>
+     * <b>Note:</b> Only available for {@link SearchAware} calendar providers.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param queries The queries to search for, or <code>null</code> if not specified
+     * @return The found events, or an empty list if there are none
+     */
+    List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.

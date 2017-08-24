@@ -101,9 +101,11 @@ import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.Operand;
@@ -1422,6 +1424,47 @@ public class CalendarUtils {
             }
         }
         return timestamp;
+    }
+
+    /**
+     * Sorts a list of events.
+     *
+     * @param events The events to sort
+     * @param sortOrders The sort orders to use
+     * @param timeZone The timezone to consider for comparing <i>floating</i> date properties, i.e. the actual 'perspective' of the
+     *            comparison, or <code>null</code> to fall back to UTC
+     * @return The sorted events
+     */
+    public static List<Event> sortEvents(List<Event> events, final SortOrder[] sortOrders, final TimeZone timeZone) throws OXException {
+        if (null == events || 2 > events.size() || null == sortOrders || 0 == sortOrders.length) {
+            return events;
+        }
+        Collections.sort(events, new Comparator<Event>() {
+
+            @Override
+            public int compare(Event event1, Event event2) {
+                if (null == event1) {
+                    return null == event2 ? 0 : -1;
+                }
+                if (null == event2) {
+                    return 1;
+                }
+                int comparison = 0;
+                for (SortOrder sortOrder : sortOrders) {
+                    Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
+                    if (null == mapping) {
+                        org.slf4j.LoggerFactory.getLogger(CalendarUtils.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
+                        continue;
+                    }
+                    comparison = mapping.compare(event1, event2, null, timeZone);
+                    if (0 != comparison) {
+                        return sortOrder.isDescending() ? -1 * comparison : comparison;
+                    }
+                }
+                return comparison;
+            }
+        });
+        return events;
     }
 
 }

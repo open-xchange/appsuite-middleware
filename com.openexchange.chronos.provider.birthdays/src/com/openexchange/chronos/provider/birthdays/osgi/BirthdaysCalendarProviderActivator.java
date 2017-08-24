@@ -54,6 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider;
 import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
@@ -83,7 +84,7 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, 
+        return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, ICalService.class, 
             CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarAccountStorageFactory.class };
     }
 

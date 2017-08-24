@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -223,6 +226,50 @@ public class IDMangling {
         } catch (IllegalArgumentException e) {
             throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null);
         }
+    }
+
+    /**
+     * Gets the relative representation of a list of unique composite folder identifier, mapped to their associated account identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @return The relative folder identifiers, mapped to their associated calendar account identifier
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from a passed composite identifier
+     */
+    public static Map<Integer, List<String>> getRelativeFolderIdsPerAccountId(String[] uniqueFolderIds) throws OXException {
+        if (null == uniqueFolderIds) {
+            return null;
+        }
+        Map<Integer, List<String>> foldersPerAccountId = new HashMap<Integer, List<String>>(uniqueFolderIds.length);
+        for (String uniqueFolderId : uniqueFolderIds) {
+            try {
+                List<String> unmangledId = unmangleFolderId(uniqueFolderId);
+                Integer accountId = Integer.valueOf(unmangledId.get(1));
+                String relativeFolderId = unmangledId.get(2);
+                com.openexchange.tools.arrays.Collections.put(foldersPerAccountId, accountId, relativeFolderId);
+            } catch (IllegalArgumentException e) {
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null);
+            }
+        }
+        return foldersPerAccountId;
+    }
+
+    /**
+     * Gets the relative representation of a list of unique full event identifier, mapped to their associated account identifier.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @return The relative folder identifiers, mapped to their associated calendar account identifier
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from a passed composite identifier
+     */
+    public static Map<Integer, List<EventID>> getRelativeIdsPerAccountId(List<EventID> uniqueEventIDs) throws OXException {
+        Map<Integer, List<EventID>> idsPerAccountId = new HashMap<Integer, List<EventID>>();
+        for (EventID eventID : uniqueEventIDs) {
+            Integer accountId = I(getAccountId(eventID.getFolderID()));
+            EventID relativeEventId = getRelativeId(eventID);
+            com.openexchange.tools.arrays.Collections.put(idsPerAccountId, accountId, relativeEventId);
+        }
+        return idsPerAccountId;
     }
 
     /**

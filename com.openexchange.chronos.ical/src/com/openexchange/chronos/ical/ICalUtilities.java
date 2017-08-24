@@ -47,62 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical;
 
-import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.OutputStream;
 import java.util.List;
-import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.ical.ICalUtilities;
-import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import java.util.TimeZone;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ICalServiceImpl}
+ * {@link ICalUtilities}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalServiceImpl implements ICalService {
-
-    private final ICalMapper mapper;
-    private final ICalUtilities iCalUtilities;
+public interface ICalUtilities {
 
     /**
-     * Initializes a new {@link ICalServiceImpl}.
+     * Imports one or more alarm components from the supplied input stream.
+     * <p/>
+     * Note that the data is expected to just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e. syntactically the <i>alarmc</i> elements as
+     * per <a href="https://tools.ietf.org/html/rfc5545#section-3.6.6">RFC 5545, section 3.6.6</a>.
+     *
+     * @param inputStream The input stream carrying <code>VALARM</code> components
+     * @param parameters Further parameters for the iCalendar import, or <code>null</code> to stick with the defaults
+     * @return The imported alarms, or <code>null</code> if none were found
      */
-    public ICalServiceImpl() {
-        super();
-        this.mapper = new ICalMapper();
-        this.iCalUtilities = new ICalUtilitiesImpl(mapper);
-    }
+    List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException;
 
-    @Override
-    public CalendarExport exportICal(ICalParameters parameters) {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        List<OXException> warnings = new ArrayList<OXException>();
-        return new CalendarExportImpl(mapper, iCalParameters, warnings);
-    }
+    /**
+     * Exports one or more alarms to <code>VALARM</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e. syntactically the <i>alarmc</i> elements as
+     * per <a href="https://tools.ietf.org/html/rfc5545#section-3.6.6">RFC 5545, section 3.6.6</a>.
+     *
+     * @param outputStream The output stream to write to
+     * @param alarms The alarms to export
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     */
+    void exportAlarms(OutputStream outputStream, List<Alarm> alarms, ICalParameters parameters) throws OXException;
 
-    @Override
-    public ImportedCalendar importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        ImportedCalendar calendar = ICalUtils.importCalendar(iCalFile, mapper, iCalParameters);
-        return calendar;
-    }
-
-    @Override
-    public ICalParameters initParameters() {
-        return getParametersOrDefault(null);
-    }
-
-    @Override
-    public ICalUtilities getUtilities() {
-        return iCalUtilities;
-    }
+    List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException;
 
 }

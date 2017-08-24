@@ -70,6 +70,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.TransactionAware;
 
@@ -84,7 +85,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedCalendarAccess.class);
 
     protected final ServiceLookup services;
-    protected final Session session;
+    protected final ServerSession session;
 
     private final CalendarProviderRegistry providerRegistry;
     private final Map<String, Object> parameters;
@@ -101,7 +102,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         super();
         this.services = services;
         this.providerRegistry = providerRegistry;
-        this.session = session;
+        this.session = ServerSessionAdapter.valueOf(session);
         this.parameters = new HashMap<String, Object>();
         this.connectedAccesses = new ConcurrentHashMap<Integer, CalendarAccess>();
     }

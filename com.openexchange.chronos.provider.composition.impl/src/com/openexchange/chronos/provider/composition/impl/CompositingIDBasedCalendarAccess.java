@@ -52,23 +52,28 @@ package com.openexchange.chronos.provider.composition.impl;
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withRelativeID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -77,14 +82,19 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -129,7 +139,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         /*
          * get events from each account
          */
-        Map<Integer, List<EventID>> idsPerAccountId = getIDsPerAccountId(eventIDs);
+        Map<Integer, List<EventID>> idsPerAccountId = getRelativeIdsPerAccountId(eventIDs);
         Map<Integer, List<Event>> eventsPerAccountId = new HashMap<Integer, List<Event>>(idsPerAccountId.size());
         for (Entry<Integer, List<EventID>> entry : idsPerAccountId.entrySet()) {
             int accountId = entry.getKey().intValue();
@@ -182,6 +192,42 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
+    }
+
+    @Override
+    public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        if (null == folderIds) {
+            return searchEvents(filters, queries);
+        }
+        List<Event> events = new ArrayList<Event>();
+        Map<Integer, List<String>> foldersPerAccountId = getRelativeFolderIdsPerAccountId(folderIds);
+        for (Map.Entry<Integer, List<String>> entry : foldersPerAccountId.entrySet()) {
+            String[] relativeFolderIds = entry.getValue().toArray(new String[entry.getValue().size()]);
+            int accountId = i(entry.getKey());
+            try {
+                List<Event> eventsInAccount = getAccess(accountId, SearchAware.class).searchEvents(relativeFolderIds, filters, queries);
+                events.addAll(withUniqueIDs(eventsInAccount, accountId));
+            } catch (OXException e) {
+                throw withUniqueIDs(e, accountId);
+            }
+        }
+        return 1 < foldersPerAccountId.size() ? sort(events) : events;
+    }
+
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
+        List<Event> events = new ArrayList<Event>();
+        for (CalendarAccount account : getAccounts()) {
+            CalendarAccess access = getAccess(account);
+            if (SearchAware.class.isInstance(access)) {
+                try {
+                    List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
+                    events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
+                } catch (OXException e) {
+                    throw withUniqueIDs(e, account.getAccountId());
+                }
+            }
+        }
+        return sort(events);
     }
 
     @Override
@@ -352,33 +398,6 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
     }
 
-    private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
-        if (null != events) {
-            for (Event event : events) {
-                if (folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
-                    if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
-                        return event;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private static Event find(List<Event> events, EventID eventID) {
-        return find(events, eventID.getFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
-    }
-
-    private static Map<Integer, List<EventID>> getIDsPerAccountId(List<EventID> eventIDs) throws OXException {
-        Map<Integer, List<EventID>> idsPerAccountId = new HashMap<Integer, List<EventID>>();
-        for (EventID eventID : eventIDs) {
-            Integer accountId = I(getAccountId(eventID.getFolderID()));
-            EventID relativeEventId = getRelativeId(eventID);
-            com.openexchange.tools.arrays.Collections.put(idsPerAccountId, accountId, relativeEventId);
-        }
-        return idsPerAccountId;
-    }
-
     @Override
     public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
         List<CalendarAccount> accounts = getAccounts();
@@ -392,6 +411,34 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             trigger.setFolder(getUniqueFolderId(trigger.getAccount(), trigger.getFolder()));
         }
         return result;
+    }
+
+    private List<Event> sort(List<Event> events) throws OXException {
+        if (null != events && 0 < events.size()) {
+            SortOrder[] sortOrders = new SearchOptions(this).getSortOrders();
+            if (null != sortOrders && 0 < sortOrders.length) {
+                TimeZone timeZone = CalendarUtils.optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+                CalendarUtils.sortEvents(events, sortOrders, timeZone);
+            }
+        }
+        return events;
+    }
+
+    private static Event find(List<Event> events, EventID eventID) {
+        return find(events, eventID.getFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
+    }
+
+    private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
+        if (null != events) {
+            for (Event event : events) {
+                if (folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
+                    if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
+                        return event;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

@@ -47,62 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.provider.extensions;
 
-import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.ical.ICalUtilities;
-import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.provider.CalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ICalServiceImpl}
+ * {@link SearchAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalServiceImpl implements ICalService {
-
-    private final ICalMapper mapper;
-    private final ICalUtilities iCalUtilities;
+public interface SearchAware extends CalendarAccess {
 
     /**
-     * Initializes a new {@link ICalServiceImpl}.
+     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * Additional, storage-specific search filters can be applied.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param queries The queries to search for, or <code>null</code> if not specified
+     * @return The found events, or an empty list if there are none
      */
-    public ICalServiceImpl() {
-        super();
-        this.mapper = new ICalMapper();
-        this.iCalUtilities = new ICalUtilitiesImpl(mapper);
-    }
-
-    @Override
-    public CalendarExport exportICal(ICalParameters parameters) {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        List<OXException> warnings = new ArrayList<OXException>();
-        return new CalendarExportImpl(mapper, iCalParameters, warnings);
-    }
-
-    @Override
-    public ImportedCalendar importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
-        ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        ImportedCalendar calendar = ICalUtils.importCalendar(iCalFile, mapper, iCalParameters);
-        return calendar;
-    }
-
-    @Override
-    public ICalParameters initParameters() {
-        return getParametersOrDefault(null);
-    }
-
-    @Override
-    public ICalUtilities getUtilities() {
-        return iCalUtilities;
-    }
+    List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
 }
