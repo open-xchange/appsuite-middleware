@@ -52,7 +52,7 @@ package com.openexchange.exception.filter;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ExceptionFilter}
+ * {@link ExceptionFilter} - Filters for allowed exceptions
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
