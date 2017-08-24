@@ -109,7 +109,7 @@ public class InitService extends OIDCServlet {
     private String getRedirectURI(String flow, HttpServletRequest request, HttpServletResponse response) throws OXException {
         String redirectUri = "";
         if (flow.equals("login")) {
-            redirectUri = provider.getLoginRedirectRequest(request);
+            redirectUri = provider.getLoginRedirectRequest(request, response);
         } else if (flow.equals("logout")) {
             redirectUri = provider.getLogoutRedirectRequest(request, response);
         }

@@ -51,9 +51,11 @@ package com.openexchange.oidc.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
@@ -80,14 +82,18 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
+import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.AuthenticationInfo;
 import com.openexchange.oidc.spi.OIDCBackend;
@@ -99,8 +105,11 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -118,18 +127,32 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final StateManagement stateManagement;
     private final SessionReservationService sessionReservationService;
     private final ServiceLookup services;
+    private final LoginConfiguration loginConfiguration;
+    //TODO QS-VS: Load UI-Webpath from where??
+    private String uiWebPath = "/appsuite/ui";
 
 
-    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, ServiceLookup services) {
+    public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, ServiceLookup services, LoginConfiguration loginConfiguration) {
         super();
         this.backend = backend;
         this.stateManagement = stateManagement;
         this.sessionReservationService = Services.getService(SessionReservationService.class);
         this.services = services;
+        this.loginConfiguration = loginConfiguration;
     }
 
     @Override
-    public String getLoginRedirectRequest(HttpServletRequest request) throws OXException{
+    public String getLoginRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException{
+        
+        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
+
+        if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
+            String autologinRedirect = getAutologinURLFromOIDCCookie(request, response);
+            if (autologinRedirect != null && !autologinRedirect.isEmpty()) {
+                return autologinRedirect;
+            }
+        }
+        
         State state = new State();
         Nonce nonce = new Nonce();
 
@@ -343,5 +366,54 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         LoginPerformer.getInstance().doLogout(session.getSessionID());
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);
+    }
+    
+    private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        Cookie autologinCookie = this.loadAutologinCookie(request);
+        
+        if (autologinCookie == null) {
+            return null;
+        }
+        
+        return getAutologinByCookieURL(request, response, autologinCookie);
+    }
+
+    private Cookie loadAutologinCookie(HttpServletRequest request) throws OXException {
+        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
+    }
+    
+    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
+        if (oidcAtologinCookie != null) {
+            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
+            if (session != null) {
+                return this.getRedirectLocationForSession(request, session);
+            }
+            //No session found, log that
+        }
+
+        if (oidcAtologinCookie != null) {
+            Cookie toRemove = (Cookie) oidcAtologinCookie.clone();
+            toRemove.setMaxAge(0);
+            response.addCookie(toRemove);
+        }
+
+        return null;
+    }
+    
+    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
+        Session session = null;
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
+        if (sessions.size() > 0) {
+            session = sessiondService.getSession(sessions.iterator().next());
+        }
+        return session;
+    }
+    
+    private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
+        OIDCTools.validateSession(session, request);
+        return OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
     }
 }

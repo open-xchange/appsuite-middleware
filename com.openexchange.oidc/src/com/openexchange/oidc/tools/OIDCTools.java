@@ -55,8 +55,10 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
@@ -66,6 +68,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
+import com.openexchange.session.reservation.Reservation;
+import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -143,13 +147,13 @@ public class OIDCTools {
         return request.isSecure();
     }
     
-    @SuppressWarnings("deprecation")
     public static void validateSession(Session session, HttpServletRequest request) throws OXException {
         SessionUtility.checkIP(session, request.getRemoteAddr());
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(session.getSessionID());
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
     }
+    
 }

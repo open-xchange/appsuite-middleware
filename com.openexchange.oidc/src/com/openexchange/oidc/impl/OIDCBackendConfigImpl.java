@@ -142,7 +142,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     }
 
     @Override
-    public String isAutologinCookieMode() {
+    public String autologinCookieMode() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.autologinCookieMode);
     }
 

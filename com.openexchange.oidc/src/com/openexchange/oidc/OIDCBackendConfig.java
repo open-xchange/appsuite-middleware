@@ -117,7 +117,7 @@ public interface OIDCBackendConfig {
 
     String getRedirectURILogout();
     
-    String isAutologinCookieMode();
+    String autologinCookieMode();
 
     boolean isStoreOAuthTokensEnabled();
 }
