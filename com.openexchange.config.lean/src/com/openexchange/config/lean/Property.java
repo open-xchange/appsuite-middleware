@@ -68,6 +68,7 @@ public interface Property {
      *
      * @param clazz The type of the {@link Property}
      * @return the default value of the {@link Property}
+     * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
     <T extends Object> T getDefaultValue(Class<T> clazz);
 }
