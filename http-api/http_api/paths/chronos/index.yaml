@@ -8,4 +8,3 @@ requests:
   - DeleteRequest.yaml
   - UpdateAttendeeRequest.yaml
   - MoveRequest.yaml
-  - UntilRequest.yaml
