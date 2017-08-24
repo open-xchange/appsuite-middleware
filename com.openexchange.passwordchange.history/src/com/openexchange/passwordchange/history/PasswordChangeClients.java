@@ -64,7 +64,13 @@ public enum PasswordChangeClients {
     APP_SUITE("open-xchange-appsuite", "App Suite UI", "appsuite", "app_suite"),
 
     /** Password changes made by the Provisioning Interface */
-    PROVISIONING("provisioning-api", "Provisioning API", "provisioning")
+    PROVISIONING("provisioning-api", "Provisioning API", "provisioning"),
+    
+    /** Password changes transmitted through the OX6 UI */
+    OX6("com.openexchange.ox.gui.dhtml", "OX6 UI", "ox6"),
+    
+    /** Password changes made the OxtenderV2 */
+    OXTENDER_2("OpenXchange.HTTPClient.OXAddIn", "Connector for Microsoft Outlook")
 
     ;
 
