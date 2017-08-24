@@ -251,7 +251,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setHost(domainName)
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
-                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.LOGIN_ACTION + OIDCTools.getPathString(this.backend.getPath()));
+                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
             response.sendRedirect(redirectLocation.build().toString());
         } catch (URISyntaxException e) {
@@ -321,7 +321,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
         } else {
-            this.logoutCurrentUser(session, request, response);
+            this.logoutCurrentUserFromOXServer(session, request, response, null);
         }
         return logoutRequest;
     }
@@ -352,20 +352,38 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP");
         }
         //load state
-        LogoutRequestInfo loginRequestInfo = this.stateManagement.getAndRemoveLoginRequestInfo(state);
-        if (loginRequestInfo == null) {
+        LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLoginRequestInfo(state);
+        if (logoutRequestInfo == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP");
         }
-        String sessionId = loginRequestInfo.getSessionId();
+        String sessionId = logoutRequestInfo.getSessionId();
         //logout user
-        this.logoutCurrentUser(getSessionFromId(sessionId), request, response);
+        this.logoutCurrentUserFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
     
-    private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        OIDCTools.validateSession(session, request);
-        LoginPerformer.getInstance().doLogout(session.getSessionID());
-        SessionUtility.removeOXCookies(session, request, response);
-        SessionUtility.removeJSESSIONID(request, response);
+    private void logoutCurrentUserFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
+        String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
+        String sessionId = session.getSessionID();
+        
+        if (logoutRequestInfo != null) {
+            domainName = logoutRequestInfo.getDomainName();
+            sessionId = logoutRequestInfo.getSessionId();
+        }
+        
+        try {
+            URIBuilder redirectLocation = new URIBuilder()
+                .setScheme(this.getRedirectScheme(request))
+                .setHost(domainName)
+                .setPath(getRedirectPathPrefix() + "login")
+                .setParameter(LoginServlet.PARAMETER_SESSION, sessionId)
+                .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGOUT + OIDCTools.getPathString(this.backend.getPath()));
+            Tools.disableCaching(response);
+            response.sendRedirect(redirectLocation.build().toString());
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of logout request URI");
+        } catch (IOException e) {
+            throw new OXException(e);
+        }
     }
     
     private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {

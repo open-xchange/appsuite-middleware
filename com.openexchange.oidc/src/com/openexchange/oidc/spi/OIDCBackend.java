@@ -51,6 +51,7 @@ package com.openexchange.oidc.spi;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
@@ -125,5 +126,7 @@ public interface OIDCBackend {
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 
     String getLogoutFromIDPRequest(Session session) throws OXException;
+    
+    void finishLogout(HttpServletRequest request, HttpServletResponse response);
 
 }

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.SerializeException;
@@ -128,5 +129,9 @@ public class OIDCCoreBackend extends AbstractOIDCBackend{
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, path);
         }
+    }
+
+    @Override
+    public void finishLogout(HttpServletRequest request, HttpServletResponse response) {
     }
 }

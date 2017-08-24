@@ -81,7 +81,7 @@ public class OIDCTools {
 
     public static final String SESSION_TOKEN = "sessionToken";
     
-    public static final String LOGIN_ACTION = "loginAction";
+    public static final String OIDC_LOGIN = "oidcLogin";
 
     public static final String IDTOKEN = "idToken";
 
@@ -98,6 +98,8 @@ public class OIDCTools {
     public static final String ACCESS_TOKEN = "access_token";
 
     public static final String REFRESH_TOKEN = "refresh_token";
+
+    public static final String OIDC_LOGOUT = "oidcLogout";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
