@@ -59,24 +59,25 @@ import com.openexchange.exception.filter.ExceptionFilter;
 import com.openexchange.java.Strings;
 
 /**
- * {@link ExceptionFilterImpl}
+ * {@link ExceptionFilterImpl} - Implementation of {@link ExceptionFilter}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 public class ExceptionFilterImpl implements ExceptionFilter, Reloadable {
 
+    /** The logger */
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExceptionFilterImpl.class);
 
     /** The property defining the blacklisted exceptions */
-    private final static String BLACK_LISTED = "com.openexchange.ajax.response.exceptions.blacklisted";
+    private final static String BLACK_LISTED = "com.openexchange.ajax.response.exception.blacklisted";
 
+    // Blacklisted exceptions
     private Set<String> prefixes;
     private Set<String> codes;
 
     /**
      * Initializes a new {@link ExceptionFilterImpl}.
-     * 
      */
     public ExceptionFilterImpl() {
         super();
@@ -113,17 +114,16 @@ public class ExceptionFilterImpl implements ExceptionFilter, Reloadable {
         }
 
         // Parse
-        String[] entries = Strings.splitByComma(unparsed);
-        for (String entry : entries) {
+        for (String entry : Strings.splitByComma(unparsed)) {
             if (entry.matches("[A-Z]{3}-[0-9]*")) {
-                // Complete error code like SES-200
+                // Complete error code like 'SES-200'
                 codes.add(entry);
             } else if (entry.matches("[A-Z]{3}(-|-\\*|\\*)?")) {
-                // Prefix like SES, SES* or SES-*
-                prefixes.add(entry.replaceAll("-|-\\*|\\*", ""));
+                // Prefix like 'SES', 'SES*' or 'SES-*'
+                prefixes.add(entry.substring(0, 3));
             } else {
                 // Not supported
-                LOGGER.debug("{} does not match any typical prefix or exception code", entry);
+                LOGGER.warn("{} does not match any typical exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
             }
         }
     }
