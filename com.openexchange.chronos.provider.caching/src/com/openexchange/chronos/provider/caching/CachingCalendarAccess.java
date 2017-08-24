@@ -237,7 +237,7 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     }
 
     /**
-     * Returns the current update state for each currently known folder (under consideration of the provided refresh interval).
+     * Returns the last persisted update state for each currently known folder (under consideration of the provided refresh interval).
      * 
      * @return {@link ProcessingType} that indicates the following steps of processing
      * @throws OXException

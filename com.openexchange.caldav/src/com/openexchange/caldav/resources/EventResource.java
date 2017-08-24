@@ -574,6 +574,7 @@ public class EventResource extends DAVObjectResource<Event> {
         LOG.info("Data truncation detected, trimming problematic fields and trying again.");
         CalendarUtilities calendarUtilities = getCalendarSession().getUtilities();
         boolean hasTrimmed = calendarUtilities.handleDataTruncation(e, caldavImport.getEvent());
+        hasTrimmed |= calendarUtilities.handleDataTruncation(e, caldavImport.getEvent().getAttendees());
         for (Event changeException : caldavImport.getChangeExceptions()) {
             hasTrimmed |= calendarUtilities.handleDataTruncation(e, changeException);
         }

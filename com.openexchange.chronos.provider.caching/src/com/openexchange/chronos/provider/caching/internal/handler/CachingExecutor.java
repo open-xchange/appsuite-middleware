@@ -100,6 +100,10 @@ public class CachingExecutor {
 
     protected void cache() {
         boolean updated = false;
+        if (executionList == null) {
+            LOG.warn("Nothing to cache as the provided execution list is null.");
+            return;
+        }
         for (FolderUpdateState folderUpdateState : executionList) {
             CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(folderUpdateState.getType(), cachingCalendarAccess);
             String calendarFolderId = folderUpdateState.getFolderId();
@@ -120,9 +124,8 @@ public class CachingExecutor {
                 if (!diff.isEmpty()) {
                     cachingHandler.persist(calendarFolderId, diff);
                 }
-                boolean lUpdated = cachingHandler.updateLastUpdated(calendarFolderId);
-                if (!updated) { // once true we have to save the config
-                    updated = lUpdated;
+                if (cachingHandler.updateLastUpdated(calendarFolderId)) {
+                    updated = true;
                 }
             } catch (OXException e) {
                 LOG.error("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);

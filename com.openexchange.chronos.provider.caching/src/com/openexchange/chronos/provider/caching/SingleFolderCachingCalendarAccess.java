@@ -108,8 +108,6 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
      */
     public abstract List<Event> getEvents() throws OXException;
 
-//    public abstract String getFolderIdentifier();
-
     @Override
     public final List<Event> getEvents(String folderId) throws OXException {
         checkFolderId(folderId);
@@ -153,5 +151,4 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         }
         return folder;
     }
-
 }
