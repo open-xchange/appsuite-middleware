@@ -154,6 +154,11 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     if (config.isApnSoundEnabled()) {
                         payload.addSound(config.getApnSoundFile());
                     }
+
+                    payload.setContentAvailable(false);
+                } else {
+                    // Silent push
+                    payload.setContentAvailable(true);
                 }
 
                 if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
@@ -163,7 +168,6 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 if (path.length() > 0) {
                     payload.addCustomDictionary("cid", path);
                 } else if (folder.length() > 0) {
-                    payload.setContentAvailable(false);
                     payload.addCustomDictionary("folder", folder);
                 }
 
