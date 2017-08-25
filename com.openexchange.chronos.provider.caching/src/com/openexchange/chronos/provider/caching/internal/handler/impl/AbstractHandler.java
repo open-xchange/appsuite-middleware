@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
-import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Date;
@@ -104,7 +103,7 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     @Override
-    public boolean updateLastUpdated(String folderId) {
+    public boolean updateLastUpdated(String folderId, long timestamp) {
         Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
         Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CachingCalendarAccess.CACHING);
         if (caching == null) {
@@ -114,9 +113,7 @@ public abstract class AbstractHandler implements CachingHandler {
         if (folderConfig == null) {
             folderConfig = new HashMap<>();
         }
-
-        Long now = L(System.currentTimeMillis());
-        folderConfig.put(CachingCalendarAccess.LAST_UPDATE, now);
+        folderConfig.put(CachingCalendarAccess.LAST_UPDATE, timestamp);
 
         caching.put(folderId, folderConfig);
         configuration.put(CachingCalendarAccess.CACHING, caching);

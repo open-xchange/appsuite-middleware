@@ -92,7 +92,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     private List<Event> externalEvents = new ArrayList<>();
 
     private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
-    
+
     private List<OXException> warnings = new ArrayList<>();
 
     @Override
@@ -106,7 +106,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
         Mockito.when(handler.getExistingEvents(Matchers.anyString())).thenReturn(existingEvents);
         Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalEvents);
-        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(false);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString(), Matchers.anyLong())).thenReturn(false);
 
         lastFolderStates.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
     }
@@ -149,7 +149,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         Event e = new Event();
         e.setUid("available");
         externalEvents.add(e);
-        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString(), Matchers.anyLong())).thenReturn(true);
 
         executor.cache(warnings);
 
@@ -165,7 +165,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         Event e = new Event();
         e.setUid("available");
         existingEvents.add(e);
-        Mockito.when(handler.updateLastUpdated(Matchers.anyString())).thenReturn(true);
+        Mockito.when(handler.updateLastUpdated(Matchers.anyString(), Matchers.anyLong())).thenReturn(true);
 
         executor.cache(warnings);
 

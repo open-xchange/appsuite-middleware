@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import com.openexchange.annotation.Nullable;
-
 /**
  * {@link FolderUpdateState}
  *
@@ -60,11 +58,11 @@ import com.openexchange.annotation.Nullable;
 public class FolderUpdateState implements Comparable<FolderUpdateState> {
 
     private final String folderId;
-    private final Long lastUpdated;
-    private final Integer refreshInterval;
+    private final long lastUpdated;
+    private final long refreshInterval;
     private final FolderProcessingType currentType;
 
-    public FolderUpdateState(String folderId, @Nullable Long lastUpdated, @Nullable Integer refreshInterval, FolderProcessingType type) {
+    public FolderUpdateState(String folderId, long lastUpdated, long refreshInterval, FolderProcessingType type) {
         this.folderId = folderId;
         this.lastUpdated = lastUpdated;
         this.currentType = type;
@@ -76,7 +74,7 @@ public class FolderUpdateState implements Comparable<FolderUpdateState> {
      *
      * @return The lastUpdated
      */
-    public @Nullable Long getLastUpdated() {
+    public long getLastUpdated() {
         return lastUpdated;
     }
 
@@ -106,7 +104,7 @@ public class FolderUpdateState implements Comparable<FolderUpdateState> {
         return 1;
     }
 
-    public Integer getRefreshInterval() {
+    public long getRefreshInterval() {
         return refreshInterval;
     }
 }

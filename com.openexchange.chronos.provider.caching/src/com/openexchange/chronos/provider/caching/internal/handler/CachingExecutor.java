@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -109,12 +110,17 @@ public class CachingExecutor {
                 if (!diff.isEmpty()) {
                     cachingHandler.persist(calendarFolderId, diff);
                 }
-                if (cachingHandler.updateLastUpdated(calendarFolderId)) {
+                if (cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis())) {
                     updated = true;
                 }
             } catch (OXException e) {
                 LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
                 warnings.add(e);
+
+                if (handleInternally(cachingHandler, calendarFolderId)) {
+                    updated = true;
+                }
+                this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
             }
         }
 
@@ -126,7 +132,13 @@ public class CachingExecutor {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
         return resultCollector;
+    }
 
+    private boolean handleInternally(CachingHandler cachingHandler, String calendarFolderId) {
+        //FIXME this handling might be dependent on the occurring error
+        long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getExternalRequestTimeout());
+        long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
+        return cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
     }
 
     /**

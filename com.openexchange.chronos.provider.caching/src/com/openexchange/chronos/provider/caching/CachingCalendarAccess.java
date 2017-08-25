@@ -58,6 +58,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.joda.time.Hours;
+import org.joda.time.Weeks;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -99,7 +101,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public static final String LAST_UPDATE = "lastUpdate";
 
     /**
-     * The key for persisting the used refresh interval (if provided by the external folder)
+     * The key for persisting the used refresh interval (if provided by the external folder). The interval should be persisted in minutes
      */
     public static final String REFRESH_INTERVAL = "refreshInterval";
 
@@ -123,11 +125,20 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     }
 
     /**
-     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
+     * <br>
+     * If the value is <=0 the default of one day will be used.
      * 
      * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
-    protected abstract int getRefreshInterval();
+    protected abstract long getRefreshInterval();
+
+    /**
+     * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
+     * 
+     * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
+     */
+    public abstract long getExternalRequestTimeout();
 
     /**
      * Returns a list of {@link Event}s by querying the underlying calendar for the given folder id.
@@ -136,6 +147,14 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * @return The events
      */
     public abstract List<Event> getEvents(String folderId) throws OXException;
+
+    /**
+     * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
+     * 
+     * @param folderId The identifier of the folder the error occurred for
+     * @param e The {@link OXException} occurred
+     */
+    public abstract void handleExceptions(String calendarFolderId, OXException e);
 
     @Override
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
@@ -200,7 +219,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             String folderId = externalFolder.getId();
             FolderUpdateState found = findExistingFolder(persistedUpdateStates, folderId);
             if (found == null) {
-                executionList.add(new FolderUpdateState(folderId, null, null, FolderProcessingType.INITIAL_INSERT));
+                executionList.add(new FolderUpdateState(folderId, 0, 0, FolderProcessingType.INITIAL_INSERT));
                 iterator.remove();
                 continue;
             }
@@ -257,22 +276,35 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = folderUpdateState.getValue();
             Long lastFolderUpdate = (Long) folderConfig.get(LAST_UPDATE);
-            Integer refreshInt = (Integer) folderConfig.get(REFRESH_INTERVAL);
-            Integer refreshInterval = refreshInt != null ? refreshInt : getRefreshInterval();
+            long refreshInterval = getCascadedRefreshInterval(folderConfig);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
-                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.INITIAL_INSERT));
+                currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
                 continue;
             }
             long currentTimeMillis = System.currentTimeMillis();
-            if (refreshInterval * 1000 * 60 < currentTimeMillis - lastFolderUpdate.longValue()) {
-                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.UPDATE));
+            if (TimeUnit.MINUTES.toMillis(refreshInterval) < currentTimeMillis - lastFolderUpdate.longValue()) {
+                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.UPDATE));
                 continue;
             }
-            currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate, refreshInterval, FolderProcessingType.READ_DB));
+            currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.READ_DB));
         }
 
         return currentStates;
+    }
+
+    protected long getCascadedRefreshInterval(Map<String, Object> folderConfig) {
+        if (folderConfig != null && !folderConfig.isEmpty()) {
+            Long calendarProviderInterval = (Long) folderConfig.get(REFRESH_INTERVAL);
+            if (calendarProviderInterval != null) {
+                return calendarProviderInterval.longValue();
+            }
+        }
+        long providerRefreshInterval = getRefreshInterval();
+        if (providerRefreshInterval > Hours.ONE.toStandardMinutes().getMinutes()) {
+            return providerRefreshInterval;
+        }
+        return Weeks.ONE.toStandardMinutes().getMinutes();
     }
 
     /**

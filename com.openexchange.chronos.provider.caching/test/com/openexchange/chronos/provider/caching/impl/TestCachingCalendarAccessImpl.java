@@ -60,16 +60,16 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link CachingCalendarAccessImpl}
+ * {@link TestCachingCalendarAccessImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class CachingCalendarAccessImpl extends CachingCalendarAccess {
+public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     private boolean configSaved = false;
 
-    public CachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
     }
 
@@ -123,7 +123,7 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
-    public int getRefreshInterval() {
+    public long getRefreshInterval() {
         return 60;
     }
 
@@ -145,6 +145,17 @@ public class CachingCalendarAccessImpl extends CachingCalendarAccess {
 
     public boolean isConfigSaved() {
         return configSaved;
+    }
+
+    @Override
+    public long getExternalRequestTimeout() {
+        return 1;
+    }
+
+    @Override
+    public void handleExceptions(OXException e) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

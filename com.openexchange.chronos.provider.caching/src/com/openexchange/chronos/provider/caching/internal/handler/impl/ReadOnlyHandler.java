@@ -84,7 +84,7 @@ public class ReadOnlyHandler extends AbstractHandler {
     }
 
     @Override
-    public boolean updateLastUpdated(String folderId) {
+    public boolean updateLastUpdated(String folderId, long timestamp) {
         return false;
     }
 }
