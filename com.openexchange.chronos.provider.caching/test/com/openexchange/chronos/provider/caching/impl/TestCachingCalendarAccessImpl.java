@@ -153,7 +153,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     }
 
     @Override
-    public void handleExceptions(OXException e) {
+    public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
         
     }
