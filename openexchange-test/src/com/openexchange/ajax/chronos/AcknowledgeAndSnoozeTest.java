@@ -68,7 +68,7 @@ import com.openexchange.testing.httpclient.models.EventData;
 
 /**
  *
- * {@link AcknowledgeAndSnoozeTest} tests alarm triggers.
+ * {@link AcknowledgeAndSnoozeTest} tests acknowledge and snooze actions.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0

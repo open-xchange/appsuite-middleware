@@ -52,7 +52,6 @@ package com.openexchange.chronos.alarm.json;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.ajax.AJAXServlet;
@@ -63,11 +62,9 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
-import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.AlarmMapper;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -81,9 +78,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class SnoozeAction extends ChronosAction {
+public class SnoozeAction extends AbstractChronosAlarmAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID, CalendarParameters.PARAMETER_ALARM_ID);
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID);
 
     /**
      * Initializes a new {@link SnoozeAction}.
@@ -102,23 +99,23 @@ public class SnoozeAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
 
         Date now = new Date();
-        Entry<String, ?> alarmId = parseParameter(requestData, CalendarParameters.PARAMETER_ALARM_ID, true);
-        Long snooze = (Long) parseParameter(requestData, CalendarParameters.PARAMETER_SNOOZE_DURATION, true).getValue();
+        Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
+        Long snooze = (Long) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_SNOOZE_DURATION, true);
         if (snooze <= 0) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(CalendarParameters.PARAMETER_SNOOZE_DURATION, "The snooze time must be greater than 0");
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_SNOOZE_DURATION, "The snooze time must be greater than 0");
         }
         EventID eventID = parseIdParameter(requestData);
         Event event = calendarAccess.getEvent(eventID);
         List<Alarm> alarms = event.getAlarms();
         Alarm alarmToSnooze = null;
         for(Alarm alarm: alarms){
-            if (alarm.getId() == (Integer) alarmId.getValue()) {
+            if (alarm.getId() == alarmId) {
                 alarmToSnooze = alarm;
                 alarmToSnooze.setAcknowledged(now);
             }
         }
         if (alarmToSnooze == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(CalendarParameters.PARAMETER_ALARM_ID, "Unable to find an alarm with id " + alarmId);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_ALARM_ID, "Unable to find an alarm with id " + alarmId);
         }
 
         Alarm snoozeAlarm = AlarmMapper.getInstance().copy(alarmToSnooze, null, (AlarmField[]) null);

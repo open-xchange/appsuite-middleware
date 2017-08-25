@@ -49,63 +49,50 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link AcknowledgeAction}
+ * {@link AbstractChronosAlarmAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AcknowledgeAction extends AbstractChronosAlarmAction {
+public abstract class AbstractChronosAlarmAction extends ChronosAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID);
 
     /**
-     * Initializes a new {@link AcknowledgeAction}.
+     * Initializes a new {@link AbstractChronosAlarmAction}.
      * @param services
      */
-    protected AcknowledgeAction(ServiceLookup services) {
+    protected AbstractChronosAlarmAction(ServiceLookup services) {
         super(services);
     }
 
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
+    public Object parseAlarmParameter(AJAXRequestData request, String parameter, boolean required) throws IllegalArgumentException, OXException {
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
-        Date now = new Date();
-        Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
-        EventID eventID = parseIdParameter(requestData);
-        Event event = calendarAccess.getEvent(eventID);
-        List<Alarm> alarms = event.getAlarms();
-        for(Alarm alarm: alarms){
-            if (alarm.getId() == alarmId) {
-                alarm.setAcknowledged(now);
-                break;
+        String value = request.getParameter(parameter);
+        if (Strings.isEmpty(value)) {
+            if (false == required) {
+                return null;
             }
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameter);
         }
-
-        CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
-        return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
+        try {
+            switch (parameter) {
+                case AlarmParameters.PARAMETER_ALARM_ID:
+                    return Integer.valueOf(value);
+                case AlarmParameters.PARAMETER_SNOOZE_DURATION:
+                    return Long.valueOf(value);
+                default:
+                    return null;
+            }
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, value);
+        }
     }
-
-
 }

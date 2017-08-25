@@ -49,63 +49,29 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AcknowledgeAction}
+ * {@link AlarmParameters}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AcknowledgeAction extends AbstractChronosAlarmAction {
-
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(AJAXServlet.PARAMETER_ID, AJAXServlet.PARAMETER_FOLDERID);
+public class AlarmParameters {
 
     /**
-     * Initializes a new {@link AcknowledgeAction}.
-     * @param services
+     * {@link Integer}
+     * <p/>
+     * The alarm id of an alarm.
+     * <p/>
      */
-    protected AcknowledgeAction(ServiceLookup services) {
-        super(services);
-    }
+    public static final String PARAMETER_ALARM_ID = "alarmId";
 
-    @Override
-    protected Set<String> getRequiredParameters() {
-        return REQUIRED_PARAMETERS;
-    }
-
-    @Override
-    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
-        Date now = new Date();
-        Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
-        EventID eventID = parseIdParameter(requestData);
-        Event event = calendarAccess.getEvent(eventID);
-        List<Alarm> alarms = event.getAlarms();
-        for(Alarm alarm: alarms){
-            if (alarm.getId() == alarmId) {
-                alarm.setAcknowledged(now);
-                break;
-            }
-        }
-
-        CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
-        return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
-    }
-
+    /**
+     * {@link Long}
+     * <p/>
+     * The snooze duration.
+     * <p/>
+     */
+    public static final String PARAMETER_SNOOZE_DURATION = "snoozeTime";
 
 }

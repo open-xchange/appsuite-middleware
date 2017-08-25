@@ -58,8 +58,6 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ALARM_ID;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SNOOZE_DURATION;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -202,10 +200,6 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
             case "sendInternalNotifications":
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
-            case PARAMETER_ALARM_ID:
-                return new AbstractMap.SimpleEntry<String, Integer>(PARAMETER_ALARM_ID, Integer.valueOf(value));
-            case PARAMETER_SNOOZE_DURATION:
-                return new AbstractMap.SimpleEntry<String, Long>(PARAMETER_SNOOZE_DURATION, Long.valueOf(value));
             default:
                 return null;
         }
