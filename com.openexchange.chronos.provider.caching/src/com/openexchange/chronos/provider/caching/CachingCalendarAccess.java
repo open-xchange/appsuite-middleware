@@ -344,4 +344,19 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public List<OXException> getWarnings() {
         return warnings;
     }
+
+    public Map<String, Object> getFolderConfiguration(String folderId) {
+        Map<String, Object> configuration = getAccount().getConfiguration();
+        Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CACHING);
+        if (caching == null) {
+            caching = new HashMap<>();
+            configuration.put(CACHING, caching);
+        }
+        Map<String, Object> folderConfig = caching.get(folderId);
+        if (folderConfig == null) {
+            folderConfig = new HashMap<>();
+            caching.put(folderId, folderConfig);
+        }
+        return folderConfig;
+    }
 }

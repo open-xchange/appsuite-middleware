@@ -100,6 +100,10 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return Collections.singletonList(folder);
     }
 
+    protected Map<String, Object> getFolderConfiguration() {
+        return getFolderConfiguration(folder.getId());
+    }
+
     /**
      * Returns a list of {@link Event}s by querying the underlying calendar.
      * 

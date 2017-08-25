@@ -55,7 +55,6 @@ import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirs
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,21 +102,9 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     @Override
-    public boolean updateLastUpdated(String folderId, long timestamp) {
-        Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
-        Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CachingCalendarAccess.CACHING);
-        if (caching == null) {
-            caching = new HashMap<>();
-        }
-        Map<String, Object> folderConfig = caching.get(folderId);
-        if (folderConfig == null) {
-            folderConfig = new HashMap<>();
-        }
+    public void updateLastUpdated(String folderId, long timestamp) {
+        Map<String, Object> folderConfig = this.cachedCalendarAccess.getFolderConfiguration(folderId);
         folderConfig.put(CachingCalendarAccess.LAST_UPDATE, timestamp);
-
-        caching.put(folderId, folderConfig);
-        configuration.put(CachingCalendarAccess.CACHING, caching);
-        return true;
     }
 
     protected List<Event> getExistingEventsInFolder(String folderId) throws OXException {

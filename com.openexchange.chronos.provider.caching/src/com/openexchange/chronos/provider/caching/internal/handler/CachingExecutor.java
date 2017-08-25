@@ -121,11 +121,11 @@ public class CachingExecutor {
         return resultCollector;
     }
 
-    private boolean handleInternally(CachingHandler cachingHandler, String calendarFolderId) {
+    private void handleInternally(CachingHandler cachingHandler, String calendarFolderId) {
         //FIXME this handling might be dependent on the occurring error
         long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getExternalRequestTimeout());
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
-        return cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
+        cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
     }
 
     /**
