@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.caching.impl;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -139,7 +138,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     }
 
     @Override
-    public void saveConfig(Map<String, Object> configuration) throws OXException {
+    protected void saveConfig() {
         configSaved = true;
     }
 

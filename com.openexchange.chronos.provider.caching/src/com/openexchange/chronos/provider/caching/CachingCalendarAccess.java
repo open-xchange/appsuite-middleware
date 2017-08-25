@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -58,6 +59,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.SerializationUtils;
 import org.joda.time.Hours;
 import org.joda.time.Weeks;
 import com.openexchange.chronos.Event;
@@ -70,6 +72,7 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -89,6 +92,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.10.0
  */
 public abstract class CachingCalendarAccess implements WarningsAware {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarAccess.class);
 
     /**
      * The general key for persisting the caching information
@@ -110,6 +115,8 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     private final CalendarParameters parameters;
     private List<OXException> warnings = new ArrayList<>();
 
+    private Map<String, Object> originConfiguration;
+
     /**
      * Initializes a new {@link CachingCalendarAccess}.
      * 
@@ -122,6 +129,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
+        this.originConfiguration = SerializationUtils.clone((HashMap<String, Object>) this.getAccount().getConfiguration());
     }
 
     /**
@@ -159,7 +167,11 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     @Override
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
-        return new CachingExecutor(this, executionList).cache(this.warnings).get(folderId, eventId, recurrenceId);
+
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(folderId, eventId, recurrenceId);
     }
 
     @Override
@@ -167,13 +179,20 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
 
         Set<FolderUpdateState> executionList = generateExecutionList(sortEventIDsPerFolderId.keySet().toArray(new String[sortEventIDsPerFolderId.size()]));
-        return new CachingExecutor(this, executionList).cache(this.warnings).get(eventIDs);
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(eventIDs);
     }
 
     @Override
     public final List<Event> getEventsInFolder(String folderId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
-        return new CachingExecutor(this, executionList).cache(this.warnings).get(folderId);
+
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(folderId);
     }
 
     private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {
@@ -269,7 +288,6 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         if (lastUpdates == null) {
             return Collections.emptyList();
         }
-
         List<FolderUpdateState> currentStates = new ArrayList<>();
 
         for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
@@ -308,16 +326,18 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     }
 
     /**
-     * Saves the current configuration for the account.<br>
-     * <br>
-     * This might be overridden to enhance the configuration by parameters of the underlying implementation.
-     * 
-     * @param configuration The configuration to persist
-     * @throws OXException
+     * Saves the current configuration for the account if it has been changed while processing
      */
-    public void saveConfig(Map<String, Object> configuration) throws OXException {
-        CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
-        accountStorage.updateAccount(this.account.getAccountId(), configuration, this.getAccount().getLastModified().getTime());
+    protected void saveConfig() {
+        if (this.originConfiguration.equals(this.getAccount().getConfiguration())) {
+            return;
+        }
+        try {
+            CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
+            accountStorage.updateAccount(this.account.getAccountId(), this.getAccount().getConfiguration(), this.getAccount().getLastModified().getTime());
+        } catch (OXException e) {
+            LOG.error("Unable to save configuration: {}", e.getMessage(), e);
+        }
     }
 
     @Override

@@ -85,7 +85,6 @@ public class CachingExecutor {
     public ResultCollector cache(List<OXException> warnings) {
         ResultCollector resultCollector = new ResultCollector(this.cachingCalendarAccess);
 
-        boolean updated = false;
         if (executionList == null) {
             LOG.warn("Nothing to cache as the provided execution list is null.");
             return resultCollector;
@@ -110,26 +109,14 @@ public class CachingExecutor {
                 if (!diff.isEmpty()) {
                     cachingHandler.persist(calendarFolderId, diff);
                 }
-                if (cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis())) {
-                    updated = true;
-                }
+                cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis());
             } catch (OXException e) {
                 LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
                 warnings.add(e);
 
-                if (handleInternally(cachingHandler, calendarFolderId)) {
-                    updated = true;
-                }
+                handleInternally(cachingHandler, calendarFolderId);
                 this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
             }
-        }
-
-        try {
-            if (updated) {
-                this.cachingCalendarAccess.saveConfig(this.cachingCalendarAccess.getAccount().getConfiguration());
-            }
-        } catch (OXException e) {
-            LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
         return resultCollector;
     }

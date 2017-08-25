@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.caching.internal.handler;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -143,7 +142,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     }
 
     @Test
-    public void testCache_externalHasNewEvents_persistAndUpdateConfig() throws OXException {
+    public void testCache_externalHasNewEvents_persist() throws OXException {
         executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
 
         Event e = new Event();
@@ -153,13 +152,12 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
         executor.cache(warnings);
 
-        assertTrue(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
         Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
     }
 
     @Test
-    public void testCache_existingHasEventsButExternalNot_persistAndUpdateConfig() throws OXException {
+    public void testCache_existingHasEventsButExternalNot_persist() throws OXException {
         executor = new CachingExecutor(cachingCalendarAccess, lastFolderStates);
 
         Event e = new Event();
@@ -169,7 +167,6 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
         executor.cache(warnings);
 
-        assertTrue(cachingCalendarAccess.isConfigSaved());
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
         Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
     }
