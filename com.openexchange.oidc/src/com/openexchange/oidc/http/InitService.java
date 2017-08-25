@@ -62,6 +62,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
+import com.openexchange.oidc.tools.OIDCTools;
 
 /**
  * The servlet to handle OpenID specific requests like login and logout.
@@ -96,7 +97,7 @@ public class InitService extends OIDCServlet {
         }
         try {
             String redirectURI = this.getRedirectURI(flow, request, response);
-            buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
+            OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
             //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
             if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
@@ -116,7 +117,7 @@ public class InitService extends OIDCServlet {
         return redirectUri;
     }
 
-    private void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
+    public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
         if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
             response.sendRedirect(redirectURI);
         } else {

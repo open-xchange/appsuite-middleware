@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.spi;
 
 import java.io.IOException;
@@ -54,11 +55,13 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -72,6 +75,7 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -79,6 +83,7 @@ import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
@@ -98,49 +103,49 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public abstract class AbstractOIDCBackend implements OIDCBackend {
-    
+
     protected static final String AUTH_RESPONSE = "auth_response";
-    
+
     @Override
     public OIDCConfig getOIDCConfig() {
         return new OIDCConfigImpl(Services.getService(LeanConfigurationService.class));
     }
-    
+
     @Override
     public OIDCBackendConfig getBackendConfig() {
         return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class));
     }
-    
+
     @Override
     public String getPath() {
         return "";
     }
-    
+
     @Override
     public OIDCExceptionHandler getExceptionHandler() {
         return new OIDCCoreExceptionHandler();
     }
-    
+
     @Override
     public HTTPRequest getHttpRequest(HTTPRequest request) {
         return request;
     }
-    
+
     @Override
     public ClientAuthentication getClientAuthentication() {
         ClientID clientID = new ClientID(this.getBackendConfig().getClientID());
         Secret clientSecret = new Secret(this.getBackendConfig().getClientSecret());
         return new ClientSecretBasic(clientID, clientSecret);
     }
-    
+
     @Override
     public TokenRequest getTokenRequest(TokenRequest tokenRequest) {
         return tokenRequest;
     }
-    
+
     @Override
     public JWKSet getJwkSet() throws OXException {
-         JWKSet jwkSet = null;
+        JWKSet jwkSet = null;
         try {
             jwkSet = JWKSet.load(new URL(this.getBackendConfig().getJwkSet()));
         } catch (IOException | ParseException e) {
@@ -148,7 +153,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
         return jwkSet;
     }
-    
+
     @Override
     public JWSAlgorithm getJWSAlgorithm() throws OXException {
         JWSAlgorithm algorithm = JWSAlgorithm.RS256;
@@ -158,7 +163,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
         return algorithm;
     }
-    
+
     protected JWSAlgorithm getAlgorithmFromString(String algorithmString) throws OXException {
         JWSAlgorithm algorithm = JWSAlgorithm.parse(algorithmString);
         if (algorithm == null) {
@@ -166,12 +171,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
         return algorithm;
     }
-    
+
     @Override
     public AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest request) {
         return requestBuilder.build();
     }
-    
+
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException {
         IDTokenClaimsSet result = null;
@@ -185,17 +190,17 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
         } catch (JOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
-        } 
+        }
         return result;
     }
-    
+
     @Override
     public Scope getScope() {
         String scopes = getBackendConfig().getScope();
         String[] scopeArray = scopes.split(";");
         return new Scope(scopeArray);
     }
-    
+
     @Override
     public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
         String login = userID + "@" + contextID;
@@ -203,12 +208,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
         return parseLogin;
     }
-    
+
     @Override
     public Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state) {
         return defaultAuthenticated;
     }
-    
+
     @Override
     public String getLogoutFromIDPRequest(Session session) throws OXException {
         URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
@@ -224,6 +229,45 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
         return logoutRequest.toURI().toString();
     }
-    
+
+    @Override
+    public void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String afterLogoutURI = this.getBackendConfig().getRedirectURILogout();
+        if (!afterLogoutURI.isEmpty() && !response.isCommitted()) {
+            response.sendRedirect(afterLogoutURI);
+        }
+
+    }
+
+    @Override
+    public AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException {
+        JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+        String subject = "";
+        try {
+            JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
+            subject = jwtClaimsSet.getSubject();
+        } catch (java.text.ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (subject.isEmpty()) {
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create();
+        }
+        AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
+        resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
+        return resultInfo;
+    }
+
+    private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
+        ContextService contextService = Services.getService(ContextService.class);
+        String[] userData = subject.split("@");
+        if (userData.length != 2) {
+            throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
+        }
+        int contextId = contextService.getContextId(userData[1]);
+        return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
+    }
+
     //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist
 }

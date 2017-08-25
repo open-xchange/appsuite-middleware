@@ -161,26 +161,12 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         // redirect zum IDP
         
         //TODO QS-VS: Das muss viel besser vereinheitlicht werden, das Chaos mit dem autologin
-        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
+        boolean autologinEnabled = this.backend.getBackendConfig().isAutologinEnabled();
         
-        if (autologinMode == null) {
-            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: " + this.backend.getBackendConfig().autologinCookieMode());
-        }
-        
-        boolean ssoCookieLogin = autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT;
-        if (ssoCookieLogin) {
-            Cookie autologinCookie = this.loadAutologinCookie(request, reservation);
-            if (autologinCookie != null) {
-                String cookieRedirectURL = this.getAutologinByCookieURL(request, response, reservation, autologinCookie);
-                if (cookieRedirectURL != null) {
-                    response.sendRedirect(cookieRedirectURL);
-                    return;
-                }
-            } 
-        }
-        
-        boolean oxDirectAutologin = autologinMode == AutologinMode.OX_DIRECT;
-        if (ssoCookieLogin || oxDirectAutologin) {
+        if (autologinEnabled) {
+            if (this.performCookieLogin(request, response, reservation)) {
+                return;
+            }
             autologinCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
         }
         
@@ -188,11 +174,28 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
         Session session = performSessionAdditions(result, request, response, idToken);
 
-        if (ssoCookieLogin || oxDirectAutologin) {
+        if (autologinEnabled) {
             response.addCookie(createOIDCAutologinCookie(request, session, autologinCookieValue));
         }
 
         sendRedirect(session, request, response);
+    }
+
+    private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation) throws OXException, IOException {
+        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
+        
+        boolean ssoCookieLogin = autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT;
+        if (ssoCookieLogin) {
+            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+            if (autologinCookie != null) {
+                String cookieRedirectURL = this.getAutologinByCookieURL(request, response, reservation, autologinCookie);
+                if (cookieRedirectURL != null) {
+                    response.sendRedirect(cookieRedirectURL);
+                    return true;
+                }
+            } 
+        }
+        return false;
     }
 
     private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Reservation reservation, Cookie oidcAtologinCookie) throws OXException {
@@ -230,12 +233,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             session = sessiondService.getSession(sessions.iterator().next());
         }
         return session;
-    }
-
-    private Cookie loadAutologinCookie(HttpServletRequest request, Reservation reservation) throws OXException {
-        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
-        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
 
     private Cookie createOIDCAutologinCookie(HttpServletRequest request, Session session, String uuid) {

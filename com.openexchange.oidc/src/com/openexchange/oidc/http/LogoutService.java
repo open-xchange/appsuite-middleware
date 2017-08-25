@@ -78,7 +78,8 @@ public class LogoutService extends OIDCServlet{
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {
             try {
-                this.provider.logoutSSOUser(request, response);
+                String redirectURI = this.provider.logoutSSOUser(request, response);
+                OIDCTools.buildRedirectResponse(response, redirectURI, "true");
             } catch (OXException e) {
                 exceptionHandler.handleLogoutFailed(request, response, e);
                 LOG.error(e.getLocalizedMessage(), e);

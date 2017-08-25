@@ -50,12 +50,14 @@
 package com.openexchange.oidc.impl;
 
 import java.io.IOException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
@@ -67,9 +69,11 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLogoutRequestHandler.class);
     private final OIDCBackend backend;
+    private final LoginConfiguration loginConfiguration;
 
-    public OIDCLogoutRequestHandler(OIDCBackend oidcBackend) {
+    public OIDCLogoutRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend oidcBackend) {
         this.backend = oidcBackend;
+        this.loginConfiguration = loginConfiguration;
     }
 
     @Override
@@ -102,5 +106,9 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
         LoginPerformer.getInstance().doLogout(session.getSessionID());
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);
+        if (this.backend.getBackendConfig().isAutologinEnabled()) {
+            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+            SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+        }
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.spi;
 
+import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -127,6 +128,5 @@ public interface OIDCBackend {
 
     String getLogoutFromIDPRequest(Session session) throws OXException;
     
-    void finishLogout(HttpServletRequest request, HttpServletResponse response);
-
+    void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

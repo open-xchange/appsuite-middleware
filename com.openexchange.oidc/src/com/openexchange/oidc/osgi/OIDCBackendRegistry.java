@@ -135,7 +135,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
                 this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend, this.services));
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(oidcBackend));
+                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(this.loginConfiguration, oidcBackend));
 
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {

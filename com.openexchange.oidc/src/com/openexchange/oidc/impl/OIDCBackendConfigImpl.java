@@ -49,11 +49,15 @@
 
 package com.openexchange.oidc.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendProperty;
 
 public class OIDCBackendConfigImpl implements OIDCBackendConfig{
+    
+    private final static Logger LOG = LoggerFactory.getLogger(OIDCBackendConfigImpl.class);
     
     private LeanConfigurationService leanConfigurationService; 
     
@@ -149,5 +153,18 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     @Override
     public boolean isStoreOAuthTokensEnabled() {
         return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.storeOAuthTokens);
+    }
+
+    @Override
+    public boolean isAutologinEnabled() {
+        boolean result = false;
+        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.autologinCookieMode());
+        
+        if (autologinMode == null) {
+            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: " + this.autologinCookieMode());
+        } else {
+            result = (autologinMode == AutologinMode.OX_DIRECT || autologinMode == AutologinMode.SSO_REDIRECT);
+        }
+        return result;
     }
 }

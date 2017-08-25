@@ -53,7 +53,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
@@ -80,11 +79,11 @@ public class OIDCActivator extends HousekeepingActivator{
             HttpService.class,
             DispatcherPrefixService.class,
             HazelcastInstance.class,
-            MailResolver.class,
             SessionReservationService.class,
             ContextService.class,
             UserService.class,
-            SessiondService.class
+            SessiondService.class,
+            ContextService.class
         };
     }
 

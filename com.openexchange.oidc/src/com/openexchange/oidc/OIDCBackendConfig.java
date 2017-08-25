@@ -120,4 +120,6 @@ public interface OIDCBackendConfig {
     String autologinCookieMode();
 
     boolean isStoreOAuthTokensEnabled();
+    
+    boolean isAutologinEnabled();
 }

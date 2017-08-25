@@ -227,7 +227,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
             }
         } catch (OXException e) {
-            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e.getMessage());
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -321,7 +321,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
         } else {
-            this.logoutCurrentUserFromOXServer(session, request, response, null);
+            logoutRequest = this.logoutCurrentUserFromOXServer(session, request, response, null);
         }
         return logoutRequest;
     }
@@ -345,7 +345,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     @Override
-    public void logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public String logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException {
         //Check state
         String state = request.getParameter(OIDCTools.STATE);
         if (state == null) {
@@ -358,10 +358,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         String sessionId = logoutRequestInfo.getSessionId();
         //logout user
-        this.logoutCurrentUserFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
+        return this.logoutCurrentUserFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
     
-    private void logoutCurrentUserFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
+    private String logoutCurrentUserFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
         String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         String sessionId = session.getSessionID();
         
@@ -378,16 +378,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setParameter(LoginServlet.PARAMETER_SESSION, sessionId)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGOUT + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
-            response.sendRedirect(redirectLocation.build().toString());
+            return redirectLocation.build().toString();
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of logout request URI");
-        } catch (IOException e) {
-            throw new OXException(e);
-        }
+        } 
     }
     
     private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
-        Cookie autologinCookie = this.loadAutologinCookie(request);
+        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
         
         if (autologinCookie == null) {
             return null;
@@ -396,12 +394,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return getAutologinByCookieURL(request, response, autologinCookie);
     }
 
-    private Cookie loadAutologinCookie(HttpServletRequest request) throws OXException {
-        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
-        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-        return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
-    }
-    
     private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
         if (oidcAtologinCookie != null) {
             Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);

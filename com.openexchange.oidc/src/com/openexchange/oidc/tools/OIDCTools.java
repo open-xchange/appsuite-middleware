@@ -50,6 +50,8 @@
 package com.openexchange.oidc.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -61,11 +63,13 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
@@ -163,4 +167,22 @@ public class OIDCTools {
         }
     }
     
+    public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
+        if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
+            response.sendRedirect(redirectURI);
+        } else {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setCharacterEncoding(Charsets.UTF_8_NAME);
+            response.setContentType("application/json");
+            PrintWriter writer = response.getWriter();
+            writer.write("{\"redirect\":\"" + redirectURI + "\"}");
+            writer.flush();
+        }
+    }
+    
+    public static Cookie loadAutologinCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
+        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
+    }
 }
