@@ -130,7 +130,7 @@ public class ContactEventHandler implements EventHandler {
                     handleUpdate(event.getContextId(), affectedUsers, (Contact) event.getOldObj(), (Contact) event.getActionObj());
                     break;
                 case TOPIC_DELETE:
-                    handleDelete(event.getContextId(), affectedUsers, (Contact) event.getOldObj());
+                    handleDelete(event.getContextId(), affectedUsers, (Contact) event.getActionObj());
                     break;
                 default:
                     LOG.info("Skipping event handling for unexpected topic \"{}\".", topic);
