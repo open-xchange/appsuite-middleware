@@ -371,16 +371,46 @@ public final class PGPKeysUtil {
      * @throws PGPException
      */
     public static PGPPublicKeyRing addUID(PGPPublicKeyRing publicKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
-        PGPPublicKey pub = publicKeyRing.getPublicKey();
-        PGPSignatureGenerator generator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
+        PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
+        PGPPublicKey newPublicMasterKey = addUID(publicMasterKey,privateKey, userId);
+        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
+        publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+        return publicKeyRing;
+    }
+
+    /**
+     * Adds a new User ID to a {@link PGPSecretKeyRing}
+     *
+     * @param secretKeyRing The secret key ring to add the user ID to
+     * @param privateKey The private key used to signing
+     * @param userId The new user ID
+     * @return The secret key ring containing the new user ID
+     * @throws PGPException
+     */
+    public static PGPSecretKeyRing addUID(PGPSecretKeyRing secretKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
+        PGPSecretKey secretMasterKey = secretKeyRing.getSecretKey();
+        PGPPublicKey modifiedPublicMasterKey = addUID(secretMasterKey.getPublicKey(), privateKey, userId);
+        PGPSecretKey modifiedSecretMasterKey = PGPSecretKey.replacePublicKey(secretMasterKey, modifiedPublicMasterKey);
+        return PGPSecretKeyRing.insertSecretKey(secretKeyRing, modifiedSecretMasterKey);
+    }
+
+    /**
+     * Adds a new User ID to a {@link PGPPublicKey}
+     *
+     * @param publicKey The public key to add the user ID to
+     * @param privateKey The private key used for singning
+     * @param userId The new user ID
+     * @return The public key containing the new user ID
+     * @throws PGPException
+     */
+    public static PGPPublicKey addUID(PGPPublicKey publicKey, PGPPrivateKey privateKey, String userId) throws PGPException {
+        PGPSignatureGenerator generator = new PGPSignatureGenerator(
+            new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
         PGPSignatureSubpacketGenerator signhashgen = new PGPSignatureSubpacketGenerator();
         generator.setHashedSubpackets(signhashgen.generate());
-        PGPSignature certification = generator.generateCertification(userId, pub);
-        PGPPublicKey newPubKey = PGPPublicKey.addCertification(pub, userId, certification);
-        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, pub);
-        publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPubKey);
-        return publicKeyRing;
+        PGPSignature certification = generator.generateCertification(userId, publicKey);
+        return PGPPublicKey.addCertification(publicKey, userId, certification);
     }
 
     /**
