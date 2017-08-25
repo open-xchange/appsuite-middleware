@@ -137,7 +137,7 @@ public class SnoozeAction extends ChronosAction {
         alarms.add(snoozeAlarm);
 
         // Remove old snooze in case it was snoozed again
-        if (alarmToSnooze.getRelatedTo() != null && alarmToSnooze.getRelatedTo().getRelType() == "SNOOZE") {
+        if (alarmToSnooze.getRelatedTo() != null && alarmToSnooze.getRelatedTo().getRelType().equals("SNOOZE")) {
             alarms.remove(alarmToSnooze);
         }
 
