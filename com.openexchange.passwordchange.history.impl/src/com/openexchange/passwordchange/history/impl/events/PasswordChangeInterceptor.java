@@ -94,7 +94,7 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // Check if password was changed
-        if (null != user.getUserPassword()) {
+        if (null != context && null != user && null != user.getUserPassword()) {
             final int contextId = context.getContextId();
             final int userId = user.getId();
 

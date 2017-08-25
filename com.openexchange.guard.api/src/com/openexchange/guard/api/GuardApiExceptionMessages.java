@@ -70,14 +70,16 @@ public final class GuardApiExceptionMessages implements LocalizableStrings {
     // The Guard resource does not exist: %1$s
     public static final String NOT_FOUND_MSG = "The provided Guard resource does not exist: %1$s";
 
+    // The Guard resource does not exist
+    public static final String NOT_FOUND_SIMPLE_MSG = "The Guard resource does not exist";
+
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
     // Authentication failed: %1$s
     public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
 
-    // The Guard resource does not exist
-    public static final String NOT_FOUND_SIMPLE_MSG = "The Guard resource does not exist";
+    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
     /**
      * Initializes a new {@link GuardApiExceptionMessages}.

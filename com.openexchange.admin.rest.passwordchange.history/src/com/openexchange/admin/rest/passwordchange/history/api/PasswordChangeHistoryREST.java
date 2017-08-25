@@ -69,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -258,13 +259,13 @@ public class PasswordChangeHistoryREST {
      * @throws OXException In case of missing service
      */
     private Response checkAccess(int contextId, String auth) throws OXException {
+        Authenticator authenticator = getService(Authenticator.class);
         // Decode auth and validate
         if (Authorization.checkForBasicAuthorization(auth)) {
             // Valid header
             Credentials creds = Authorization.decode(auth);
             if (Authorization.checkLogin(creds.getPassword())) {
                 // Authenticate the context administrator
-                Authenticator authenticator = getService(Authenticator.class);
                 try {
                     authenticator.doAuthentication(new com.openexchange.auth.Credentials(creds.getLogin(), creds.getPassword()), contextId, true);
                     return null;
@@ -272,7 +273,23 @@ public class PasswordChangeHistoryREST {
                     // Fall through
                 }
             }
-        } // No valid header
+        } else {
+            // No valid header, check if unauthorized access is allowed
+            if (authenticator.isContextAuthenticationDisabled()) {
+                LOG.warn("Granting access to password change history without basicAuth! 'CONTEXT_AUTHENTICATION_DISABLED' is set to 'true'.");
+                return null;
+            }
+            ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+            if (null != configService) {
+                Boolean masertAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
+                if (authenticator.isMasterAuthenticationDisabled() && masertAccountOverride) {
+                    LOG.warn("Granting access to password change history without basicAuth! 'MASTER_AUTHENTICATION_DISABLED' and 'MASTER_ACCOUNT_OVERRIDE' are set to 'true' ");
+                    return null;
+                }
+            } else {
+                LOG.debug("Could not get ConfigurationService. Can not check if access without basicAuth HEADER ist allowed.");
+            }
+        }
         return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"").build();
     }
 

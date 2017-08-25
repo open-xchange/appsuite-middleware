@@ -853,6 +853,11 @@ public class Filestore2UserUtil {
                                 }
                             } else if (DBPoolingExceptionCodes.SCHEMA_FAILED.equals(e)) {
                                 // Such a schema does not exist
+                                Throwable t = e.getCause();
+                                if (null == t) {
+                                    t = e;
+                                }
+                                LOG.warn("Unknown schema \"{}\" on database host {}. Please check database accessibility and/or context-to-schema associations.", schema.getSchema(), Integer.valueOf(schema.getPoolId()), t);
                                 return Collections.emptySet();
                             }
 

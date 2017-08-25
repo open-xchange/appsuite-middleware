@@ -1648,13 +1648,13 @@ msgstr ""
 
 #. An I/O error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "An I/O error occurred: %1$s"
 msgstr ""
 
 #. Authentication failed: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:77
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "Authentication failed: %1$s"
 msgstr ""
 
@@ -3074,8 +3074,12 @@ msgid "The provided Guard resource does not exist: %1$s"
 msgstr ""
 
 #. The Guard resource does not exist
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
 msgid "The Guard resource does not exist"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
+msgid "A JSON error occurred: %1$s"
 msgstr ""
 
 #. No Linked-In account available.
