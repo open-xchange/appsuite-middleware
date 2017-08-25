@@ -263,7 +263,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT, OPT_QUOTA_LONG, OPT_NAME_CONTEXT_QUOTA_DESCRIPTION, true, convertBooleantoTriState(required));
     }
 
-    protected void sysoutOutput(final Context[] ctxs, final AdminParser parser) throws InvalidDataException {
+    protected void sysoutOutput(Context[] ctxs, AdminParser parser) throws InvalidDataException {
+        sysoutOutput(ctxs, false, parser);
+    }
+
+    protected void sysoutOutput(Context[] ctxs, boolean continuation, AdminParser parser) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Context ctx : ctxs) {
             data.add(makeData(ctx, new ClosureInterface() {
@@ -299,7 +303,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("lmappings");
         columnnames.addAll(humanReadableColumnsOfAllExtensions);
 
-        doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
+        doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), continuation, data);
     }
 
     protected void sysoutOutput(Quota[] quotas) throws InvalidDataException {
@@ -332,10 +336,14 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("module");
         columnnames.add("qlimit");
 
-        doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
+        doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), false, data);
     }
 
-    protected void precsvinfos(final Context[] ctxs, final AdminParser parser) throws InvalidDataException {
+    protected void precsvinfos(Context[] ctxs, AdminParser parser) throws InvalidDataException {
+        precsvinfos(ctxs, false, parser);
+    }
+
+    protected void precsvinfos(Context[] ctxs, boolean continuation, AdminParser parser) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -361,7 +369,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             }, true));
         }
 
-        doCSVOutput(columns, data);
+        doCSVOutput(columns, continuation, data);
     }
 
     protected void precsvinfos(Quota[] quotas) throws InvalidDataException {
@@ -390,7 +398,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             data.add(curData);
         }
 
-        doCSVOutput(columns, data);
+        doCSVOutput(columns, false, data);
     }
 
     protected void setDatabaseIDOption(final AdminParser parser) {

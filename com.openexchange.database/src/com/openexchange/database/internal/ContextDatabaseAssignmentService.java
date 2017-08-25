@@ -107,7 +107,16 @@ interface ContextDatabaseAssignmentService {
      */
     int[] getContextsFromSchema(Connection con, int writePoolId, String schema) throws OXException;
 
-    int[] getContextsInDatabase(int poolId) throws OXException;
+    /**
+     * Retrieves the identifiers of all contexts that reside in specified database host.
+     *
+     * @param poolId The identifier of the database host
+     * @param offset The start offset or <code>-1</code> to retrieve all
+     * @param length The max. number of context identifiers to return or <code>-1</code> to retrieve all
+     * @return The context identifiers
+     * @throws OXException If context identifiers cannot be returned
+     */
+    int[] getContextsInDatabase(int poolId, int offset, int length) throws OXException;
 
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
 

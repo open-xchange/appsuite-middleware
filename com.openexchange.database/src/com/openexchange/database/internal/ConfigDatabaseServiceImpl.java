@@ -209,8 +209,8 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public int[] listContexts(final int poolId) throws OXException {
-        return contextAssignment.getContextsInDatabase(poolId);
+    public int[] listContexts(int poolId, int offset, int length) throws OXException {
+        return contextAssignment.getContextsInDatabase(poolId, offset, length);
     }
 
     @Override

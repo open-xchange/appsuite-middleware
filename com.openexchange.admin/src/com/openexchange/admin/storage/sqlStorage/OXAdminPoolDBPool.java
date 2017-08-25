@@ -352,9 +352,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public int[] listContexts(int poolId) throws PoolException {
+    public int[] listContexts(int poolId, int offset, int length) throws PoolException {
         try {
-            return getService().listContexts(poolId);
+            return getService().listContexts(poolId, offset, length);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
             throw new PoolException(e.getMessage());

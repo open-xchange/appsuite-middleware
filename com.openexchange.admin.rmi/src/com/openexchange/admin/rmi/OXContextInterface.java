@@ -136,7 +136,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context! Given access combination name will be used for admin module access rights!
-     * 
+     *
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access_combination_name String Access combination name!
@@ -153,7 +153,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context! Given access rights be used for admin!
-     * 
+     *
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access UserModuleAccess Access rights!
@@ -191,7 +191,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context! Given access combination name will be used for admin module access rights!
-     * 
+     *
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access_combination_name String Access combination name!
@@ -209,7 +209,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context! Given access rights be used for admin!
-     * 
+     *
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
      * @param access UserModuleAccess Access rights!
@@ -350,7 +350,26 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
      */
-    public Context[] list(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Context[] list(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Search for contexts<br>
+     * Returns all contexts matching the provided search_pattern.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
+     *
+     * @param search_pattern Search pattern e.g "*mycontext*".
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of contexts to return or <code>-1</code> to get full list
+     * @param auth Credentials for authenticating against server.
+     * @return Contexts.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public Context[] list(String search_pattern, int offset, int length, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Convenience method for listing all contexts
@@ -363,7 +382,22 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
      */
-    public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Context[] listAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Convenience method for listing all contexts
+     * Use this for search a context or list all contexts.
+     *
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of contexts to return or <code>-1</code> to get full list
+     * @param auth Credentials for authenticating against server.
+     * @return Contexts.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public Context[] listAll(int offset, int length, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Disable all contexts.<br>
@@ -595,7 +629,24 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws NoSuchDatabaseException
      */
-    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
+    public Context[] listByDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
+
+    /**
+     * Search for context on specified db.
+     *
+     * @param db Database on which to search for contexts.
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of contexts to return or <code>-1</code> to get full list
+     * @param auth Credentials for authenticating against server.
+     * @return Found contexts on the specified database.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     *
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws NoSuchDatabaseException
+     */
+    public Context[] listByDatabase(Database db, int offset, int length, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
 
     /**
      * Search for context which store data on specified filestore
@@ -610,7 +661,24 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occurred.
      * @throws NoSuchFilestoreException
      */
-    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException;
+    public Context[] listByFilestore(Filestore fs, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException;
+
+    /**
+     * Search for context which store data on specified filestore
+     *
+     * @param fs Filestore
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of contexts to return or <code>-1</code> to get full list
+     * @param auth Credentials for authenticating against server.
+     * @return Contexts found on this filestore.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     *
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws NoSuchFilestoreException
+     */
+    public Context[] listByFilestore(Filestore fs, int offset, int length, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException;
 
     /**
      * Determines the user ID of the admin user for a given context

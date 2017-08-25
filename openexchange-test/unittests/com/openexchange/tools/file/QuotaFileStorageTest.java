@@ -327,7 +327,7 @@ public class QuotaFileStorageTest {
         }
 
         @Override
-        public int[] listContexts(final int poolId) {
+        public int[] listContexts(int poolId, int offset, int length) {
             return null;
         }
 

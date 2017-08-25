@@ -193,8 +193,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public int[] listContexts(final int poolId) throws OXException {
-        return configDatabaseService.listContexts(poolId);
+    public int[] listContexts(int poolId, int offset, int length) throws OXException {
+        return configDatabaseService.listContexts(poolId, offset, length);
     }
 
     @Override

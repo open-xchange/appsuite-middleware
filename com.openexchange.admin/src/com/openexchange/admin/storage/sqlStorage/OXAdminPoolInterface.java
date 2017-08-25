@@ -103,7 +103,7 @@ public interface OXAdminPoolInterface {
 
     int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
 
-    int[] listContexts(int poolId) throws PoolException;
+    int[] listContexts(int poolId, int offset, int length) throws PoolException;
 
     int getWritePool(int contextId) throws PoolException;
 

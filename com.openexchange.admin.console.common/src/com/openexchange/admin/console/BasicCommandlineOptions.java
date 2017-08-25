@@ -322,20 +322,40 @@ public abstract class BasicCommandlineOptions {
      * @param data
      * @throws InvalidDataException
      */
-    protected final void doCSVOutput(final List<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+    protected final void doCSVOutput(List<String> columns, ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        doCSVOutput(columns, false, data);
+    }
+
+    /**
+     * Prints out the given data as csv output.
+     * The first ArrayList contains the columns which describe the following data lines.<br><br>
+     *
+     * Example output:<br><br>
+     * username,email,mycolumn<br>
+     * testuser,test@test.org,mycolumndata<br>
+     *
+     * @param columns
+     * @param data
+     * @throws InvalidDataException
+     */
+    protected final void doCSVOutput(List<String> columns, boolean continuation, ArrayList<ArrayList<String>> data) throws InvalidDataException {
         // first prepare the columns line
-        StringBuilder sb = new StringBuilder();
-        for (final String column_entry : columns) {
-            sb.append(column_entry);
-            sb.append(",");
-        }
-        if(sb.length()>0) {
-            // remove last ","
-            sb.deleteCharAt(sb.length()-1);
+        StringBuilder sb;
+        if (false == continuation) {
+            sb = new StringBuilder();
+            for (final String column_entry : columns) {
+                sb.append(column_entry);
+                sb.append(",");
+            }
+            if(sb.length()>0) {
+                // remove last ","
+                sb.deleteCharAt(sb.length()-1);
+            }
+
+            // print the columns line
+            System.out.println(sb.toString());
         }
 
-        // print the columns line
-        System.out.println(sb.toString());
         if (data != null && !data.isEmpty()) {
             if (columns.size()!=data.get(0).size()) {
                 throw new InvalidDataException("Number of columnnames and number of columns in data object must be the same");
@@ -617,13 +637,19 @@ public abstract class BasicCommandlineOptions {
         return max;
     }
 
-    protected void doOutput(final String[] columnsizesandalignments, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+    protected void doOutput(String[] columnsizesandalignments, String[] columnnames, ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        doOutput(columnsizesandalignments, columnnames, false, data);
+    }
+
+    protected void doOutput(String[] columnsizesandalignments, String[] columnnames, boolean continuation, ArrayList<ArrayList<String>> data) throws InvalidDataException {
         if (columnsizesandalignments.length != columnnames.length) {
             throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equal");
         }
-        final int[] columnsizes = new int[columnsizesandalignments.length];
-        final char[] alignments = new char[columnsizesandalignments.length];
-        final StringBuilder formatsb = new StringBuilder();
+
+        int[] columnsizes = new int[columnsizesandalignments.length];
+        char[] alignments = new char[columnsizesandalignments.length];
+
+        StringBuilder formatsb = new StringBuilder();
         for (int i = 0; i < columnsizesandalignments.length; i++) {
             // fill up part
             try {
@@ -650,7 +676,11 @@ public abstract class BasicCommandlineOptions {
         }
         formatsb.deleteCharAt(formatsb.length() - 1);
         formatsb.append('\n');
-        System.out.format(formatsb.toString(), (Object[]) columnnames);
+
+        if (false == continuation) {
+            System.out.format(formatsb.toString(), (Object[]) columnnames);
+        }
+
         for (final ArrayList<String> row : data) {
             if (row.size() != columnsizesandalignments.length) {
                 throw new InvalidDataException("The size of one of the rows isn't correct");

@@ -121,10 +121,12 @@ public interface ConfigDatabaseService {
      * Lists all identifiers of the contexts associated with specified database pool.
      *
      * @param poolId The identifier of the database pool
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of context identifiers to return (starting from offset) or <code>-1</code> to get full list
      * @return All identifiers of associated contexts
      * @throws OXException If context identifiers cannot be returned
      */
-    int[] listContexts(int poolId) throws OXException;
+    int[] listContexts(int poolId, int offset, int length) throws OXException;
 
     /**
      * Gets the identifier of the registered server matching the configured <code>SERVER_NAME</code> property.

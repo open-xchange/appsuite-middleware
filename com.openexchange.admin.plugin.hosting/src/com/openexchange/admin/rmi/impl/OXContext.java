@@ -879,7 +879,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public Context[] list(final String search_pattern, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] list(String search_pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return list(search_pattern, -1, -1, credentials);
+    }
+
+    @Override
+    public Context[] list(String search_pattern, int offset, int length, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         if (null == search_pattern) {
             InvalidDataException invalidDataException = new InvalidDataException("Search pattern is null");
             LOGGER.error("", invalidDataException);
@@ -902,9 +907,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
-                for (final OXContextPluginInterface oxctx : pluginInterfaces.getContextPlugins().getServiceList()) {
-                    final String bundlename = oxctx.getClass().getName();
-                    LOGGER.debug("Calling list for plugin: {}", bundlename);
+                for (OXContextPluginInterface oxctx : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    String pluginName = oxctx.getClass().getName();
+                    LOGGER.debug("Calling list for plugin: {}", pluginName);
                     try {
                         filter = oxctx.filter(auth);
                         if (null != filter) {
@@ -915,13 +920,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             loaderFilter.add(loader);
                         }
                     } catch (final PluginException e) {
-                        LOGGER.error("Error while calling method list of plugin {}", bundlename, e);
+                        LOGGER.error("Error while calling method list of plugin {}", pluginName, e);
                         throw StorageException.wrapForRMI(e);
                     }
                 }
             }
 
-            return oxcox.listContext(search_pattern, contextFilter, loaderFilter);
+            return oxcox.listContext(search_pattern, contextFilter, loaderFilter, offset, length);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -930,11 +935,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return list("*", auth);
+        return listAll(-1, -1, auth);
     }
 
     @Override
-    public Context[] listByDatabase(final Database db, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public Context[] listAll(int offset, int length, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return list("*", offset, length, auth);
+    }
+
+    @Override
+    public Context[] listByDatabase(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        return listByDatabase(db, -1, -1, credentials);
+    }
+
+    @Override
+    public Context[] listByDatabase(Database db, int offset, int length, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         if (null == db) {
             InvalidDataException invalidDataException = new InvalidDataException("Database is null");
             LOGGER.error("", invalidDataException);
@@ -958,7 +973,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
             final List<Context> retval = new ArrayList<>();
-            final Context[] ret = oxcox.searchContextByDatabase(db);
+            final Context[] ret = oxcox.searchContextByDatabase(db, offset, length);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
                 retval.addAll(callGetDataPlugins);
@@ -973,7 +988,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public Context[] listByFilestore(final Filestore filestore, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
+    public Context[] listByFilestore(Filestore filestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
+        return listByFilestore(filestore, -1, -1, credentials);
+    }
+
+    @Override
+    public Context[] listByFilestore(Filestore filestore, int offset, int length, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         if (null == filestore) {
             InvalidDataException invalidDataException = new InvalidDataException("Filestore is null");
             LOGGER.error("", invalidDataException);
@@ -996,7 +1016,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             final List<Context> retval = new ArrayList<>();
-            final Context[] ret = oxcox.searchContextByFilestore(filestore);
+            final Context[] ret = oxcox.searchContextByFilestore(filestore, offset, length);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
                 retval.addAll(callGetDataPlugins);
@@ -1065,12 +1085,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             {
                 // Check if target database is already source database
-                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-                final Context[] results = oxcox.searchContextByDatabase(db);
-                for (final Context context : results) {
-                    if (context.getId().intValue() == ctx.getId().intValue()) {
-                        throw new OXContextException("Context with id " + ctx.getId() + " already exists in database with id " + dbid);
-                    }
+                OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+                Context storageVersion = oxcox.getData(new Context(ctx.getId()));
+                if (storageVersion.getWriteDatabase().getId().intValue() == dbid.intValue()) {
+                    throw new OXContextException("Context with id " + ctx.getId() + " already exists in database with id " + dbid);
                 }
             }
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);

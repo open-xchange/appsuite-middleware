@@ -93,7 +93,6 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
-    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=?";
     private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
 
     private final ConfigDatabaseService configDatabaseService;
@@ -405,7 +404,21 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
-    private static int[] listContexts(Connection con, int poolId) throws OXException {
+    private static int[] listContexts(Connection con, int poolId, int offset, int length) throws OXException {
+        boolean withLimit = true;
+        if (offset < 0 || length < 0) {
+            withLimit = false;
+        }
+        if (withLimit && length < 0) {
+            throw OXException.general("Invalid length: " + length);
+        }
+        if (withLimit && (offset + length) < 0) {
+            throw OXException.general("Invalid offset/length: " + offset + ", " + length);
+        }
+        if (length == 0) {
+            return new int[0];
+        }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -424,19 +437,20 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             result = null;
             stmt = null;
 
-            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE, java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(Integer.MIN_VALUE);
+            if (withLimit) {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=? ORDER BY cid LIMIT " + offset + ", " + length);
+            } else {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=?");
+            }
             stmt.setInt(1, writePoolId);
             result = stmt.executeQuery();
             if (false == result.next()) {
                 return new int[0];
             }
 
-            TIntList tmp = new TIntArrayList(8192);
-            int i = 1;
+            TIntList tmp = length > 0 ? new TIntArrayList(length) : new TIntArrayList(2048);
             do {
                 tmp.add(result.getInt(1));
-                System.out.println(i++);
             } while (result.next());
             return tmp.toArray();
         } catch (SQLException e) {
@@ -447,10 +461,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     @Override
-    public int[] getContextsInDatabase(int poolId) throws OXException {
+    public int[] getContextsInDatabase(int poolId, int offset, int length) throws OXException {
         final Connection con = configDatabaseService.getReadOnly();
         try {
-            return listContexts(con, poolId);
+            return listContexts(con, poolId, offset, length);
         } finally {
             configDatabaseService.backReadOnly(con);
         }
