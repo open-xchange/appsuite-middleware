@@ -6,6 +6,8 @@
     summary: Snoozes an alarm by the given duration.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosFolder"
       - in: query
         name: alarmId
         type: integer
