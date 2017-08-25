@@ -262,6 +262,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "action VARCHAR(32) NOT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
+                "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
                 "PRIMARY KEY (cid,account,alarm)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"

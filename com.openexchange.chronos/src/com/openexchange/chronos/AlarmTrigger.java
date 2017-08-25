@@ -66,6 +66,7 @@ public class AlarmTrigger {
     private String folder;
     private RecurrenceId recurrence;
     private Long time;
+    private Long relatedTime;
     private Integer userId;
     private Boolean processed;
     private TimeZone timezone;
@@ -84,6 +85,7 @@ public class AlarmTrigger {
     private boolean isProcessedSet=false;
     private boolean isFolderSet = false;
     private boolean isTimeZoneSet = false;
+    private boolean isRelatedTimeSet = false;
 
 
     /**
@@ -476,6 +478,34 @@ public class AlarmTrigger {
      */
     public boolean containsTimezone(){
         return isTimeZoneSet;
+    }
+
+    /**
+     * Gets the relatedTime
+     *
+     * @return The relatedTime
+     */
+    public Long getRelatedTime() {
+        return relatedTime;
+    }
+
+    /**
+     * Sets the relatedTime
+     *
+     * @param relatedTime The relatedTime to set
+     */
+    public void setRelatedTime(Long relatedTime) {
+        this.relatedTime = relatedTime;
+        this.isRelatedTimeSet = true;
+    }
+
+    public boolean containsRelatedTime(){
+        return isRelatedTimeSet;
+    }
+
+    public void removeRelatedTime(){
+        this.relatedTime = null;
+        this.isRelatedTimeSet = false;
     }
 
 }

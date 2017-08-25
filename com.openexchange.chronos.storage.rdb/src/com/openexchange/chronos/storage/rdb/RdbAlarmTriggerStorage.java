@@ -238,7 +238,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     };
 
-    private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField[] fields) throws SQLException, OXException {
+    private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
         AlarmTrigger result = MAPPER.fromResultSet(resultSet, fields);
         result.setAccount(accountId);
         result.setContextId(context.getContextId());
@@ -340,12 +340,14 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
                     RecurrenceId recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
                     trigger.setRecurrence(recurrenceId);
+                    addRelatedDate(alarm, event, trigger);
 
                     trigger.setTime(AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, eventWrapper.getExceptions()).getTime());
                 } else {
                     if (event.getRecurrenceId() != null) {
                         trigger.setRecurrence(event.getRecurrenceId());
                     }
+                    addRelatedDate(alarm, event, trigger);
                     trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime());
                 }
 
@@ -368,6 +370,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     }
 
+    private void addRelatedDate(Alarm alarm, Event event, AlarmTrigger trigger){
+        if(alarm.getTrigger().getDateTime()==null){
+            trigger.setRelatedTime(AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), event).getTimestamp());
+        }
+    }
+
 
     @Override
     public void removeTriggers(String eventId) throws OXException {
@@ -377,6 +385,79 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     @Override
     public List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException {
         return getAlarmTriggers(userId, option);
+    }
+
+    @Override
+    public Integer recalculateFloatingAlarmTriggers(int userId) throws OXException {
+        Connection writeCon = dbProvider.getWriteConnection(context);
+        int updated = 0;
+        try {
+            txPolicy.setAutoCommit(writeCon, false);
+            updated = recalculateFloatingAlarmTriggers(userId, writeCon);
+            txPolicy.commit(writeCon);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(writeCon, updated);
+        }
+        return updated;
+
+    }
+
+    private static final String FLOATING_TRIGGER_SQL = "SELECT alarm, triggerDate, floatingTimezone, relatedTime FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND floatingTimezone IS NOT NULL;";
+    private static final String UPDATE_TRIGGER_TIME_SQL = "UPDATE calendar_alarm_trigger SET triggerDate=?, floatingTimezone=? WHERE cid=? AND account=? AND alarm=?;";
+
+    private int recalculateFloatingAlarmTriggers(int userId, Connection writeCon) throws OXException, SQLException {
+        ResultSet resultSet = null;
+        PreparedStatement stmt = null;
+        List<AlarmTrigger> triggers = new ArrayList<>();
+        try {
+            stmt = writeCon.prepareStatement(FLOATING_TRIGGER_SQL);
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, userId);
+            resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                triggers.add(readTrigger(resultSet, AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.FLOATING_TIMEZONE, AlarmTriggerField.RELATED_TIME));
+            }
+
+            if (triggers.isEmpty()) {
+                return 0;
+            }
+
+        } finally {
+            Databases.closeSQLStuff(resultSet, stmt);
+        }
+
+        try {
+            stmt = writeCon.prepareCall(UPDATE_TRIGGER_TIME_SQL);
+
+            for (AlarmTrigger trigger : triggers) {
+                int index = 1;
+                TimeZone oldTimeZone = trigger.getTimezone();
+                TimeZone newTimeZone = resolver.getTimeZone(userId);
+                int offsetOld = oldTimeZone.getOffset(trigger.getRelatedTime());
+                int offsetNew = newTimeZone.getOffset(trigger.getRelatedTime());
+                int dif = offsetOld - offsetNew;
+                long newTriggerTime = trigger.getTime() + dif;
+                stmt.setLong(index++, newTriggerTime);
+                stmt.setString(index++, newTimeZone.getID());
+                stmt.setInt(index++, context.getContextId());
+                stmt.setInt(index++, accountId);
+                stmt.setInt(index++, trigger.getAlarm());
+                stmt.addBatch();
+            }
+
+            int[] executeBatch = stmt.executeBatch();
+            int result = 0;
+            for(int x: executeBatch){
+                result+=x;
+            }
+            return result;
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 }

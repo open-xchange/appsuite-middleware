@@ -92,4 +92,6 @@ public interface AlarmTriggerStorage {
      */
     List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException;
 
+    Integer recalculateFloatingAlarmTriggers(int userId) throws OXException;
+
 }

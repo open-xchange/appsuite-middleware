@@ -100,6 +100,10 @@ public enum AlarmTriggerField {
     /**
      * The timezone used for floating events
      */
-    FLOATING_TIMEZONE
+    FLOATING_TIMEZONE,
+    /**
+     * The date and time the trigger time is calculated on
+     */
+    RELATED_TIME
 
 }

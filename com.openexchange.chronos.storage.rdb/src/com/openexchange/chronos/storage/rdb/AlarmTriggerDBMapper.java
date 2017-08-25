@@ -225,6 +225,29 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
+        mappings.put(AlarmTriggerField.RELATED_TIME, new BigIntMapping<AlarmTrigger>("relatedTime", "Related time") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Long value) {
+                alarmTrigger.setRelatedTime(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsRelatedTime();
+            }
+
+            @Override
+            public Long get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getRelatedTime();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeRelatedTime();
+            }
+        });
+
         mappings.put(AlarmTriggerField.PUSHED, new BooleanMapping<AlarmTrigger>("pushed", "Pushed") {
 
             @Override
