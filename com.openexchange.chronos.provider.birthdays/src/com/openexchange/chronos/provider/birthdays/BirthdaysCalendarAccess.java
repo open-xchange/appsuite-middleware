@@ -53,7 +53,9 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -63,6 +65,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -72,10 +75,11 @@ import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contact.ContactFieldOperand;
@@ -101,7 +105,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implements PersonalAlarmAware {
+public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implements PersonalAlarmAware, SearchAware {
 
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
@@ -194,27 +198,42 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
     }
 
-    private Event postProcess(Event event) throws OXException {
-        if (contains(getFields(), EventField.ALARMS)) {
-            event = getAlarmHelper().applyAlarms(event);
+    @Override
+    public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        if (null != folderIds) {
+            for (String folderId : folderIds) {
+                checkFolderId(folderId);
+            }
         }
-        return event;
+        List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
+        if (isExpandOccurrences()) {
+            return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
+        } else {
+            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
+        }
     }
 
     private List<Event> postProcess(List<Event> events) throws OXException {
         if (contains(getFields(), EventField.ALARMS)) {
             events = getAlarmHelper().applyAlarms(events);
         }
-        return sortEvents(events, new SearchOptions(parameters), getTimeZone());
+        TimeZone timeZone = getTimeZone();
+        Date from = getFrom();
+        Date until = getUntil();
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            if (false == CalendarUtils.isInRange(iterator.next(), from, until, timeZone)) {
+                iterator.remove();
+            }
+        }
+        CalendarUtils.sortEvents(events, new SearchOptions(parameters).getSortOrders(), timeZone);
+        return events;
     }
 
-    private List<Event> sortEvents(List<Event> events, SearchOptions searchOptions, TimeZone timeZone) throws OXException {
-        if (null == events || 2 > events.size() || null == searchOptions || SearchOptions.EMPTY.equals(searchOptions) ||
-            null == searchOptions.getSortOrders() || 0 == searchOptions.getSortOrders().length) {
-            return events;
+    private Event postProcess(Event event) throws OXException {
+        if (contains(getFields(), EventField.ALARMS)) {
+            event = getAlarmHelper().applyAlarms(event);
         }
-        Collections.sort(events, services.getService(CalendarUtilities.class).getComparator(searchOptions.getSortOrders(), timeZone));
-        return events;
+        return event;
     }
 
     private List<Contact> getBirthdayContacts() throws OXException {

@@ -47,22 +47,31 @@
  *
  */
 
-package com.openexchange.find.basic.calendar.sort;
+package com.openexchange.find.basic.calendar;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.groupware.container.Appointment;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link RankedAppointmentComparator}
+ * {@link RankedEventComparator}
  *
- * A comparator that ranks appointments by how close their start date is to today. There is an additional
- * degression factor that causes appointments in the past to be less relevant than upcoming ones.
+ * A comparator that ranks events by how close their start date is to today. There is an additional
+ * degression factor that causes events in the past to be less relevant than upcoming ones.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class RankedAppointmentComparator implements Comparator<Appointment> {
+public class RankedEventComparator implements Comparator<Event>, Serializable {
+
+    /** serialVersionUID */
+    private static final long serialVersionUID = 5180481713172279479L;
 
     /** Milliseconds per day */
     private static final long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
@@ -71,28 +80,35 @@ public class RankedAppointmentComparator implements Comparator<Appointment> {
     private static final double DEGRESSION_FACTOR = 1.1;
 
     private final long relativeTo;
+    private final TimeZone timeZone;
 
     /**
-     * Initializes a new {@link RankedAppointmentComparator}, using "now" as relative date.
+     * Initializes a new {@link RankedEventComparator}, using "now" as relative date.
+     *
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
      */
-    public RankedAppointmentComparator() {
-        this(new Date());
+    public RankedEventComparator(TimeZone timeZone) {
+        this(new Date(), timeZone);
     }
 
     /**
-     * Initializes a new {@link RankedAppointmentComparator}, using the supplied relative date.
+     * Initializes a new {@link RankedEventComparator}, using the supplied relative date.
      *
      * @param relativeTo The relative date to use for comparisons.
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
      */
-    public RankedAppointmentComparator(Date relativeTo) {
+    public RankedEventComparator(Date relativeTo, TimeZone timeZone) {
         super();
         this.relativeTo = relativeTo.getTime();
+        this.timeZone = null != timeZone ? timeZone : TimeZones.UTC;
     }
 
     @Override
-    public int compare(Appointment appointment1, Appointment appointment2) {
-        Date date1 = null != appointment1 ? appointment1.getStartDate() : null;
-        Date date2 = null != appointment2 ? appointment2.getStartDate() : null;
+    public int compare(Event event1, Event event2) {
+        DateTime date1 = null != event1 ? event1.getStartDate() : null;
+        DateTime date2 = null != event2 ? event2.getStartDate() : null;
         if (date1 == date2) {
             return 0;
         } else if (null == date1) {
@@ -100,14 +116,14 @@ public class RankedAppointmentComparator implements Comparator<Appointment> {
         } else if (null == date2) {
             return -1;
         } else {
-            double ranking1 = calculateRating(date1, relativeTo);
-            double ranking2 = calculateRating(date2, relativeTo);
+            double ranking1 = calculateRating(date1, relativeTo, timeZone);
+            double ranking2 = calculateRating(date2, relativeTo, timeZone);
             return ranking1 > ranking2 ? 1 : ranking1 == ranking2 ? 0 : -1;
         }
     }
 
-    private static double calculateRating(Date date, long relativeTo) {
-        long time = date.getTime();
+    private static double calculateRating(DateTime dateTime, long relativeTo, TimeZone timeZone) {
+        long time = dateTime.isFloating() ? CalendarUtils.getDateInTimeZone(dateTime, timeZone) : dateTime.getTimestamp();
         if (time > relativeTo) {
             return Math.pow(((double)(time - relativeTo)) / MILLIS_PER_DAY, 2.0);
         } else {

@@ -68,10 +68,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link VCardCleaner}
+ * {@link ContactEventHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since 7.8.0
+ * @since 7.10.0
  */
 public class ContactEventHandler implements EventHandler {
 

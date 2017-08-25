@@ -112,6 +112,11 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         accounts.addAll(getCalendarAccountStorage(session).getAccounts(session.getUserId()));
         accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
+
+        {
+            //            createAccount(session, "birthdays", null);
+        }
+
         return accounts;
     }
 

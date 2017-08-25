@@ -52,7 +52,8 @@ package com.openexchange.find.basic.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
-import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -61,7 +62,6 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
-import com.openexchange.find.basic.calendar.BasicEventDriver;
 import com.openexchange.find.basic.contacts.AutocompleteFields;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
@@ -69,8 +69,6 @@ import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.tasks.BasicTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.service.MailService;
@@ -92,9 +90,10 @@ public class FindBasicActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
-            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
-            IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class,
-            FileStorageServiceRegistry.class, ConfigViewFactory.class, CalendarService.class };
+            ThreadPoolService.class, IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class,
+            InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class,
+            IDBasedCalendarAccessFactory.class, RecurrenceService.class
+        };
     }
 
     @Override
@@ -106,7 +105,6 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
-        registerService(ModuleSearchDriver.class, new BasicEventDriver(), 14);
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
     }

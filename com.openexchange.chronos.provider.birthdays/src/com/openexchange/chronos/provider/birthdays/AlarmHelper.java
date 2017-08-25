@@ -82,10 +82,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link VCardCleaner}
+ * {@link AlarmHelper}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since 7.8.0
+ * @since 7.10.0
  */
 public class AlarmHelper {
 

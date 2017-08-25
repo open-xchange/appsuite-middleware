@@ -229,7 +229,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SearchOptions(session));
+        return sortEvents(processedEvents);
     }
 
     /**
@@ -265,7 +265,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SearchOptions(session));
+        return sortEvents(processedEvents);
     }
 
     /**
@@ -319,19 +319,13 @@ public abstract class AbstractQueryPerformer {
     }
 
     /**
-     * Sorts a list of events.
+     * Sorts a list of events if requested, based on the search options set in the underlying calendar parameters.
      *
      * @param events The events to sort
-     * @param sortOptions The sort options to use
      * @return The sorted events
      */
-    protected List<Event> sortEvents(List<Event> events, SearchOptions sortOptions) throws OXException {
-        if (null == events || 2 > events.size() || null == sortOptions || SearchOptions.EMPTY.equals(sortOptions) ||
-            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
-            return events;
-        }
-        Collections.sort(events, session.getUtilities().getComparator(sortOptions.getSortOrders(), Utils.getTimeZone(session)));
-        return events;
+    protected List<Event> sortEvents(List<Event> events) throws OXException {
+        return CalendarUtils.sortEvents(events, new SearchOptions(session).getSortOrders(), Utils.getTimeZone(session));
     }
 
     /**
