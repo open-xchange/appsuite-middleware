@@ -987,7 +987,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Collection<Integer> cids;
 
         String sqlPattern = null == pattern ? null : pattern.replace('*', '%');
-        if (null == sqlPattern || "%".equals(sqlPattern)) {
+        if ((null == sqlPattern || "%".equals(sqlPattern)) && (null == filters || filters.isEmpty())) {
             Connection con = null;
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -1022,38 +1022,67 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
         } else {
-            ThreadPoolService threadPool;
-            try {
-                threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-            } catch (final OXException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
+            if (null == sqlPattern || "%".equals(sqlPattern)) {
+                cids = new ContextSearcher(cache, "SELECT cid FROM context ORDER BY cid", null).execute();
+            } else {
+                try {
+                    Integer.parseInt(sqlPattern);
+                    cids = new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern).execute();
+                } catch (NumberFormatException nfe) {
+                    // Ignore and do nothing, because we are not including that query to the searcher
+                    // since the specified sqlPattern does not solely consists out of numbers.
+                    ThreadPoolService threadPool;
+                    try {
+                        threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                    } catch (final OXException e) {
+                        throw new StorageException(e.getMessage(), e);
+                    }
+                    List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
+                    searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
+                    searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
 
-            List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
-            searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
-            searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
-            try {
-                Integer.parseInt(sqlPattern);
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern));
-            } catch (NumberFormatException e) {
-                // Ignore and do nothing, because we are not including that query to the searcher
-                // since the specified sqlPattern does not solely consists out of numbers.
-            }
-
-            //Invoke & add into sorted set
-            CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
-            cids = new TreeSet<Integer>();
-            try {
-                for (int i = searchers.size(); i-- > 0;) {
-                    cids.addAll(completion.take().get());
+                    // Invoke & add into sorted set
+                    CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
+                    cids = new TreeSet<Integer>();
+                    try {
+                        for (int i = searchers.size(); i-- > 0;) {
+                            cids.addAll(completion.take().get());
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new StorageException(e.getMessage(), e);
+                    } catch (CancellationException e) {
+                        throw new StorageException(e.getMessage(), e);
+                    } catch (ExecutionException e) {
+                        throw ThreadPools.launderThrowable(e, StorageException.class);
+                    }
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new StorageException(e.getMessage(), e);
-            } catch (CancellationException e) {
-                throw new StorageException(e.getMessage(), e);
-            } catch (ExecutionException e) {
-                throw ThreadPools.launderThrowable(e, StorageException.class);
+            }
+
+            if (null != filters && filters.size() > 0) {
+                PipesAndFiltersService pnfService;
+                try {
+                    pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
+                } catch (final OXException e) {
+                    throw new StorageException(e.getMessage(), e);
+                }
+                DataSource<Integer> output = pnfService.create(cids);
+                for (final Object f : filters.toArray()) {
+                    output = output.addFilter((Filter<Integer, Integer>) f);
+                }
+                Set<Integer> filteredCids = new HashSet<Integer>(cids.size());
+                try {
+                    while (output.hasData()) {
+                        output.getData(filteredCids);
+                    }
+                } catch (final PipesAndFiltersException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof StorageException) {
+                        throw (StorageException) cause;
+                    }
+                    throw new StorageException(cause.getMessage(), cause);
+                }
+                cids = filteredCids;
             }
 
             // Slice
@@ -1073,38 +1102,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             }
-        }
-
-        if (null != filters && filters.size() > 0) {
-            PipesAndFiltersService pnfService;
-            try {
-                pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
-            } catch (final OXException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            DataSource<Integer> output = pnfService.create(cids);
-            for (final Object f : filters.toArray()) {
-                output = output.addFilter((Filter<Integer, Integer>) f);
-            }
-            Set<Integer> filteredCids = new HashSet<Integer>(cids.size());
-            try {
-                while (output.hasData()) {
-                    output.getData(filteredCids);
-                }
-            } catch (final PipesAndFiltersException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof StorageException) {
-                    throw (StorageException) cause;
-                }
-                throw new StorageException(cause.getMessage(), cause);
-            }
-            cids = filteredCids;
-        }
-
-        boolean failOnMissing = false;
-
-        if (null != loaders && false == loaders.isEmpty()) {
-            return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")), loaders, failOnMissing);
         }
 
         Connection con = null;
@@ -1264,6 +1261,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             id2context = null; // Might help GC
+
+            if (null != loaders && false == loaders.isEmpty()) {
+                try {
+                    for (Filter<Context, Context> loader : loaders) {
+                        loader.filter(contexts);
+                    }
+                } catch (final PipesAndFiltersException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof StorageException) {
+                        throw (StorageException) cause;
+                    }
+                    throw new StorageException(cause.getMessage(), cause);
+                }
+            }
+
             return contexts.toArray(new Context[contexts.size()]);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);

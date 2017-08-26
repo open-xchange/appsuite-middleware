@@ -61,9 +61,9 @@ import java.util.List;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.Databases;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Executes some SQL statements searching for context identifier with a separate thread.
@@ -102,7 +102,9 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setString(1, pattern);
+            if (null != pattern) {
+                stmt.setString(1, pattern);
+            }
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return Collections.emptyList();
@@ -116,7 +118,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e1) {
