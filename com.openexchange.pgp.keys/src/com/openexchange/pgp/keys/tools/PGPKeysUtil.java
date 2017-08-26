@@ -440,11 +440,12 @@ public final class PGPKeysUtil {
      *
      * @param privateKey The private key which is used for revocation.
      * @param publicKeyRing The public key ring to be revoked
+     * @param keyId The id of the key/subkey to be revoked, 0 if all keys
      * @param revocationReason The reason why the key is being revoked.
      * @return The new key ring with the recovation certificate set
      * @throws PGPException
      */
-    public static PGPPublicKeyRing revokeKey(PGPPrivateKey privateKey, PGPPublicKeyRing publicKeyRing, String revocationReason) throws PGPException {
+    public static PGPPublicKeyRing revokeKey(PGPPrivateKey privateKey, PGPPublicKeyRing publicKeyRing, long keyId, String revocationReason) throws PGPException {
         privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
         publicKeyRing = Objects.requireNonNull(publicKeyRing, "publicKeyRing must not be null");
         PGPPublicKeyRing ret = publicKeyRing;
@@ -452,30 +453,32 @@ public final class PGPKeysUtil {
         PGPPublicKey master = getPublicMasterKey(publicKeyRing);
         while (pkeys.hasNext()) {
             PGPPublicKey pub = pkeys.next();
-            ret = PGPPublicKeyRing.removePublicKey(ret, pub);
-            PGPSignatureSubpacketGenerator subHashGenerator = new PGPSignatureSubpacketGenerator();
-            PGPSignatureSubpacketGenerator subUnHashGenerator = new PGPSignatureSubpacketGenerator();
-            PGPSignatureGenerator generator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(pub.getAlgorithm(), org.bouncycastle.openpgp.PGPUtil.SHA1));
-            if (pub.isMasterKey()) {
-                generator.init(PGPSignature.KEY_REVOCATION, privateKey);
-                master = pub;
-            } else {
-                generator.init(PGPSignature.SUBKEY_REVOCATION, privateKey);
-            }
-            subHashGenerator.setSignatureCreationTime(false, new Date());
-            subHashGenerator.setRevocationReason(false, revokeReason(revocationReason), revocationReason);
-            subUnHashGenerator.setRevocationKey(false, pub.getAlgorithm(), pub.getFingerprint());
-            generator.setHashedSubpackets(subHashGenerator.generate());
-            generator.setUnhashedSubpackets(subUnHashGenerator.generate());
-            if (pub.isMasterKey()) {
-                PGPSignature signature = generator.generateCertification(pub);
-                pub = PGPPublicKey.addCertification(pub, signature);
-            } else {
-                PGPSignature signature = generator.generateCertification(master, pub);
-                pub = PGPPublicKey.addCertification(pub, signature);
-            }
+            if (pub.getKeyID() == keyId || keyId == 0) {
+                ret = PGPPublicKeyRing.removePublicKey(ret, pub);
+                PGPSignatureSubpacketGenerator subHashGenerator = new PGPSignatureSubpacketGenerator();
+                PGPSignatureSubpacketGenerator subUnHashGenerator = new PGPSignatureSubpacketGenerator();
+                PGPSignatureGenerator generator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(pub.getAlgorithm(), org.bouncycastle.openpgp.PGPUtil.SHA1));
+                if (pub.isMasterKey()) {
+                    generator.init(PGPSignature.KEY_REVOCATION, privateKey);
+                    master = pub;
+                } else {
+                    generator.init(PGPSignature.SUBKEY_REVOCATION, privateKey);
+                }
+                subHashGenerator.setSignatureCreationTime(false, new Date());
+                subHashGenerator.setRevocationReason(false, revokeReason(revocationReason), revocationReason);
+                subUnHashGenerator.setRevocationKey(false, pub.getAlgorithm(), pub.getFingerprint());
+                generator.setHashedSubpackets(subHashGenerator.generate());
+                generator.setUnhashedSubpackets(subUnHashGenerator.generate());
+                if (pub.isMasterKey()) {
+                    PGPSignature signature = generator.generateCertification(pub);
+                    pub = PGPPublicKey.addCertification(pub, signature);
+                } else {
+                    PGPSignature signature = generator.generateCertification(master, pub);
+                    pub = PGPPublicKey.addCertification(pub, signature);
+                }
 
-            ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
+                ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
+            }
         }
 
         return ret;
