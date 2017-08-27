@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.common.annotations,
  com.google.common.base,
- com.google.common.base.internal,
  com.google.common.cache,
  com.google.common.collect,
  com.google.common.escape,
