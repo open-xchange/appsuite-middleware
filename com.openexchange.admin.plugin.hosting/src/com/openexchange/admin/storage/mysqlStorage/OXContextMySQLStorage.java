@@ -1120,146 +1120,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     stmt.setInt(pos++, contextId.intValue());
                 }
                 rs = stmt.executeQuery();
-                while (rs.next()) {
-                    Context cs = new Context();
-
-                    int context_id = rs.getInt(1);
-                    cs.setId(Integer.valueOf(context_id));
-                    cs.setUsedQuota(Long.valueOf(0));
-
-                    String name = rs.getString(2); // name
-                    // name of the context, currently same with contextid
-                    if (name != null) {
-                        cs.setName(name);
-                    }
-
-                    cs.setEnabled(Boolean.valueOf(rs.getBoolean(3))); // enabled
-                    int reason_id = rs.getInt(4); // reason
-                    // CONTEXT STATE INFOS #
-                    if (-1 != reason_id) {
-                        cs.setMaintenanceReason(new MaintenanceReason(Integer.valueOf(reason_id)));
-                    }
-                    cs.setFilestoreId(Integer.valueOf(rs.getInt(5))); // filestore_id
-                    cs.setFilestore_name(rs.getString(6)); // filestore_name
-                    long quota_max = rs.getLong(7); // quota_max
-                    if (quota_max != -1) {
-                        quota_max = quota_max >> 20;
-                        // set quota max also in context setup object
-                        cs.setMaxQuota(Long.valueOf(quota_max));
-                    }
-                    cs.setAverage_size(averageContextFileStoreSize);
-
-                    contexts.add(cs);
-                }
+                contexts.addAll(ContextLoadUtility.loadBasicContexts(rs, false, averageContextFileStoreSize, partition.size()));
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
             }
 
             // Load login mappings per context and group by database schema association
-            Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
             TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
-            for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
-                // Load login mappings
-                stmt = con.prepareStatement(Databases.getIN("SELECT login_info, cid FROM login2context WHERE cid IN (", partition.size()));
-                id2context.clear();
-                int pos = 1;
-                for (Context context : partition) {
-                    int contextId = context.getId().intValue();
-                    stmt.setInt(pos++, contextId);
-                    id2context.put(contextId, context);
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    id2context.get(rs.getInt(2)).addLoginMapping(rs.getString(1));
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-
-                // Group by database schema association
-                stmt = con.prepareStatement(Databases.getIN("SELECT write_db_pool_id, read_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.size()));
-                pos = 1;
-                for (Context context : partition) {
-                    stmt.setInt(pos++, context.getId().intValue());
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    int write_pool = rs.getInt(1); // write_pool_id
-                    int read_pool = rs.getInt(2); // read_pool_id
-                    String db_schema = rs.getString(3); // db_schema
-                    if (null != db_schema) {
-                        Context cs = id2context.get(rs.getInt(4));
-                        cs.setReadDatabase(new Database(read_pool, db_schema));
-                        cs.setWriteDatabase(new Database(write_pool, db_schema));
-                        PoolAndSchema pas = new PoolAndSchema(read_pool <= 0 ? write_pool : read_pool, db_schema);
-                        List<Context> allInSchema = schema2contexts.get(pas);
-                        if (null == allInSchema) {
-                            allInSchema = new LinkedList<>();
-                            schema2contexts.put(pas, allInSchema);
-                        }
-                        allInSchema.add(cs);
-                    }
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-            } // End of for loop
+            Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
 
             // Connection to ConfigDB no more needed
             cache.pushReadConnectionForConfigDB(con);
             con = null;
 
             // Query used quota per schema
-            for (Map.Entry<PoolAndSchema, List<Context>> schema2contextsEntry : schema2contexts.entrySet()) {
-                List<Context> allInSchema = schema2contextsEntry.getValue();
-                int representativeContextId = allInSchema.get(0).getId().intValue();
-                Connection oxdb_read = cache.getConnectionForContext(representativeContextId);
-                try {
-                    for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
-                        stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT used, cid FROM filestore_usage WHERE user=0 AND cid IN (", partitionInSchema.size()));
-                        id2context.clear();
-                        int pos = 1;
-                        for (Context context : partitionInSchema) {
-                            int contextId = context.getId().intValue();
-                            stmt.setInt(pos++, contextId);
-                            id2context.put(contextId, context);
-                        }
-                        rs = stmt.executeQuery();
-                        while (rs.next()) {
-                            long quota_used = rs.getLong(1);
-                            if (quota_used > 0) {
-                                quota_used = quota_used >> 20;
-                            }
-                            id2context.get(rs.getInt(2)).setUsedQuota(Long.valueOf(quota_used));
-                        }
-                        Databases.closeSQLStuff(rs, stmt);
-                        rs = null;
-                        stmt = null;
-
-                        stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT cid, name, value FROM contextAttribute WHERE cid IN (", partitionInSchema.size()));
-                        pos = 1;
-                        for (Context context : partitionInSchema) {
-                            stmt.setInt(pos++, context.getId().intValue());
-                        }
-                        rs = stmt.executeQuery();
-                        while (rs.next()) {
-                            String name = rs.getString(2);
-                            if (OXContextMySQLStorageCommon.isDynamicAttribute(name)) {
-                                String[] namespaced = OXContextMySQLStorageCommon.parseDynamicAttribute(name);
-                                String value = rs.getString(3);
-                                id2context.get(rs.getInt(1)).setUserAttribute(namespaced[0], namespaced[1], value);
-                            }
-                        }
-                        Databases.closeSQLStuff(rs, stmt);
-                        rs = null;
-                        stmt = null;
-                    }
-                } finally {
-                    cache.pushConnectionForContextAfterReading(representativeContextId, oxdb_read);
-                }
-            }
-
+            ContextLoadUtility.fillUsageAndAttributes(schema2contexts, true, id2context, cache);
             id2context = null; // Might help GC
 
             if (null != loaders && false == loaders.isEmpty()) {
@@ -1364,129 +1240,24 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     stmt.setInt(pos++, contextId.intValue());
                 }
                 rs = stmt.executeQuery();
-                while (rs.next()) {
-                    Context cs = new Context();
-
-                    int context_id = rs.getInt(1);
-                    cs.setId(Integer.valueOf(context_id));
-                    cs.setUsedQuota(Long.valueOf(0));
-
-                    String name = rs.getString(2); // name
-                    // name of the context, currently same with contextid
-                    if (name != null) {
-                        cs.setName(name);
-                    }
-
-                    cs.setEnabled(Boolean.valueOf(rs.getBoolean(3))); // enabled
-                    int reason_id = rs.getInt(4); // reason
-                    // CONTEXT STATE INFOS #
-                    if (-1 != reason_id) {
-                        cs.setMaintenanceReason(new MaintenanceReason(Integer.valueOf(reason_id)));
-                    }
-                    cs.setFilestoreId(Integer.valueOf(rs.getInt(5))); // filestore_id
-                    cs.setFilestore_name(rs.getString(6)); // filestore_name
-                    long quota_max = rs.getLong(7); // quota_max
-                    if (quota_max != -1) {
-                        quota_max = quota_max >> 20;
-                        // set quota max also in context setup object
-                        cs.setMaxQuota(Long.valueOf(quota_max));
-                    }
-                    cs.setAverage_size(averageContextFileStoreSize);
-
-                    contexts.add(cs);
-                }
+                contexts.addAll(ContextLoadUtility.loadBasicContexts(rs, false, averageContextFileStoreSize, partition.size()));
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
             }
 
             // Load login mappings per context and group by database schema association
-            Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
             TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
-            for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
-                // Load login mappings
-                stmt = con.prepareStatement(Databases.getIN("SELECT login_info, cid FROM login2context WHERE cid IN (", partition.size()));
-                id2context.clear();
-                int pos = 1;
-                for (Context context : partition) {
-                    int contextId = context.getId().intValue();
-                    stmt.setInt(pos++, contextId);
-                    id2context.put(contextId, context);
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    id2context.get(rs.getInt(2)).addLoginMapping(rs.getString(1));
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-
-                // Group by database schema association
-                stmt = con.prepareStatement(Databases.getIN("SELECT write_db_pool_id, read_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.size()));
-                pos = 1;
-                for (Context context : partition) {
-                    stmt.setInt(pos++, context.getId().intValue());
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    int write_pool = rs.getInt(1); // write_pool_id
-                    int read_pool = rs.getInt(2); // read_pool_id
-                    String db_schema = rs.getString(3); // db_schema
-                    if (null != db_schema) {
-                        Context cs = id2context.get(rs.getInt(4));
-                        cs.setReadDatabase(new Database(read_pool, db_schema));
-                        cs.setWriteDatabase(new Database(write_pool, db_schema));
-                        PoolAndSchema pas = new PoolAndSchema(read_pool <= 0 ? write_pool : read_pool, db_schema);
-                        List<Context> allInSchema = schema2contexts.get(pas);
-                        if (null == allInSchema) {
-                            allInSchema = new LinkedList<>();
-                            schema2contexts.put(pas, allInSchema);
-                        }
-                        allInSchema.add(cs);
-                    }
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-            } // End of for loop
+            Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
 
             // Connection to ConfigDB no more needed
             cache.pushReadConnectionForConfigDB(con);
             con = null;
 
             // Query used quota per schema
-            for (Map.Entry<PoolAndSchema, List<Context>> schema2contextsEntry : schema2contexts.entrySet()) {
-                List<Context> allInSchema = schema2contextsEntry.getValue();
-                int representativeContextId = allInSchema.get(0).getId().intValue();
-                Connection oxdb_read = cache.getConnectionForContext(representativeContextId);
-                try {
-                    for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
-                        stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT used, cid FROM filestore_usage WHERE user=0 AND cid IN (", partitionInSchema.size()));
-                        id2context.clear();
-                        int pos = 1;
-                        for (Context context : partitionInSchema) {
-                            int contextId = context.getId().intValue();
-                            stmt.setInt(pos++, contextId);
-                            id2context.put(contextId, context);
-                        }
-                        rs = stmt.executeQuery();
-                        while (rs.next()) {
-                            long quota_used = rs.getLong(1);
-                            if (quota_used > 0) {
-                                quota_used = quota_used >> 20;
-                            }
-                            id2context.get(rs.getInt(2)).setUsedQuota(Long.valueOf(quota_used));
-                        }
-                        Databases.closeSQLStuff(rs, stmt);
-                        rs = null;
-                        stmt = null;
-                    }
-                } finally {
-                    cache.pushConnectionForContextAfterReading(representativeContextId, oxdb_read);
-                }
-            }
-
+            ContextLoadUtility.fillUsageAndAttributes(schema2contexts, false, id2context, cache);
             id2context = null; // Might help GC
+
             return contexts.toArray(new Context[contexts.size()]);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
@@ -1563,9 +1334,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             con = cache.getReadConnectionForConfigDB();
             if (withLimit) {
-                stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_name, quota_max FROM context WHERE filestore_id=? ORDER BY cid LIMIT " + offset + ", " + length);
+                stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_id, filestore_name, quota_max FROM context WHERE filestore_id=? ORDER BY cid LIMIT " + offset + ", " + length);
             } else {
-                stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_name, quota_max FROM context WHERE filestore_id=?");
+                stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_id, filestore_name, quota_max FROM context WHERE filestore_id=?");
             }
             stmt.setInt(1, filestoreId);
             rs = stmt.executeQuery();
@@ -1574,129 +1345,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             Long averageContextFileStoreSize = Long.valueOf(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
-            List<Context> contexts = length > 0 ? new ArrayList<>(length) : new LinkedList<>();
-            do {
-                Context cs = new Context();
-
-                int context_id = rs.getInt(1);
-                cs.setId(Integer.valueOf(context_id));
-                cs.setUsedQuota(Long.valueOf(0));
-
-                String name = rs.getString(2); // name
-                // name of the context, currently same with contextid
-                if (name != null) {
-                    cs.setName(name);
-                }
-
-                cs.setEnabled(Boolean.valueOf(rs.getBoolean(3))); // enabled
-                int reason_id = rs.getInt(4); // reason
-                // CONTEXT STATE INFOS #
-                if (-1 != reason_id) {
-                    cs.setMaintenanceReason(new MaintenanceReason(Integer.valueOf(reason_id)));
-                }
-                cs.setFilestoreId(Integer.valueOf(filestoreId)); // filestore_id
-                cs.setFilestore_name(rs.getString(5)); // filestore_name
-                long quota_max = rs.getLong(6); // quota_max
-                if (quota_max != -1) {
-                    quota_max = quota_max >> 20;
-                    // set quota max also in context setup object
-                    cs.setMaxQuota(Long.valueOf(quota_max));
-                }
-                cs.setAverage_size(averageContextFileStoreSize);
-
-                contexts.add(cs);
-            } while (rs.next());
+            List<Context> contexts = ContextLoadUtility.loadBasicContexts(rs, true, averageContextFileStoreSize, length);
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
             // Load login mappings per context and group by database schema association
-            Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
             TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
-            for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
-                // Load login mappings
-                stmt = con.prepareStatement(Databases.getIN("SELECT login_info, cid FROM login2context WHERE cid IN (", partition.size()));
-                id2context.clear();
-                int pos = 1;
-                for (Context context : partition) {
-                    int contextId = context.getId().intValue();
-                    stmt.setInt(pos++, contextId);
-                    id2context.put(contextId, context);
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    id2context.get(rs.getInt(2)).addLoginMapping(rs.getString(1));
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-
-                // Group by database schema association
-                stmt = con.prepareStatement(Databases.getIN("SELECT write_db_pool_id, read_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.size()));
-                pos = 1;
-                for (Context context : partition) {
-                    stmt.setInt(pos++, context.getId().intValue());
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    int write_pool = rs.getInt(1); // write_pool_id
-                    int read_pool = rs.getInt(2); // read_pool_id
-                    String db_schema = rs.getString(3); // db_schema
-                    if (null != db_schema) {
-                        Context cs = id2context.get(rs.getInt(4));
-                        cs.setReadDatabase(new Database(read_pool, db_schema));
-                        cs.setWriteDatabase(new Database(write_pool, db_schema));
-                        PoolAndSchema pas = new PoolAndSchema(read_pool <= 0 ? write_pool : read_pool, db_schema);
-                        List<Context> allInSchema = schema2contexts.get(pas);
-                        if (null == allInSchema) {
-                            allInSchema = new LinkedList<>();
-                            schema2contexts.put(pas, allInSchema);
-                        }
-                        allInSchema.add(cs);
-                    }
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-            } // End of for loop
+            Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
 
             // Connection to ConfigDB no more needed
             cache.pushReadConnectionForConfigDB(con);
             con = null;
 
             // Query used quota per schema
-            for (Map.Entry<PoolAndSchema, List<Context>> schema2contextsEntry : schema2contexts.entrySet()) {
-                List<Context> allInSchema = schema2contextsEntry.getValue();
-                int representativeContextId = allInSchema.get(0).getId().intValue();
-                Connection oxdb_read = cache.getConnectionForContext(representativeContextId);
-                try {
-                    for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
-                        stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT used, cid FROM filestore_usage WHERE user=0 AND cid IN (", partitionInSchema.size()));
-                        id2context.clear();
-                        int pos = 1;
-                        for (Context context : partitionInSchema) {
-                            int contextId = context.getId().intValue();
-                            stmt.setInt(pos++, contextId);
-                            id2context.put(contextId, context);
-                        }
-                        rs = stmt.executeQuery();
-                        while (rs.next()) {
-                            long quota_used = rs.getLong(1);
-                            if (quota_used > 0) {
-                                quota_used = quota_used >> 20;
-                            }
-                            id2context.get(rs.getInt(2)).setUsedQuota(Long.valueOf(quota_used));
-                        }
-                        Databases.closeSQLStuff(rs, stmt);
-                        rs = null;
-                        stmt = null;
-                    }
-                } finally {
-                    cache.pushConnectionForContextAfterReading(representativeContextId, oxdb_read);
-                }
-            }
-
+            ContextLoadUtility.fillUsageAndAttributes(schema2contexts, false, id2context, cache);
             id2context = null; // Might help GC
+
             return contexts.toArray(new Context[contexts.size()]);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
