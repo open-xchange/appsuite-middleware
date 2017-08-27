@@ -67,6 +67,7 @@ import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.testing.httpclient.modules.JSlobApi;
 
 /**
  * {@link AbstractChronosTest}
@@ -88,11 +89,13 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     List<EventId> eventIds;
     protected int calUser;
     private long lastTimeStamp;
+    protected JSlobApi jslob;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         api = new ChronosApi(getClient());
+        jslob = new JSlobApi(getClient());
         foldersApi = new FoldersApi(getClient());
         LoginResponse login = login(this.testUser, this.apiClient);
         calUser = login.getUserId();

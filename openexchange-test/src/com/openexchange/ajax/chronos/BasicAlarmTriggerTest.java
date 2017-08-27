@@ -50,12 +50,14 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +70,7 @@ import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
+import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
@@ -468,6 +471,51 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         // check user 2
         getAndCheckAlarmTrigger(currentTime, 0, api2, session2); // No upcoming triggers
+    }
+
+    @Test
+    public void testFloatingEventAlarmTriggerTime() throws Exception {
+        changeTimezone(TimeZone.getTimeZone("Europe/Berlin"));
+        // Create an event tomorrow 12 o clock
+
+        // Set floating date one day after the summer time change
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.DAY_OF_MONTH, 27);
+        cal.set(Calendar.MONTH, 2);
+        cal.set(Calendar.YEAR, 2017);
+        Date start = cal.getTime();
+
+        // Create an floating event with an alarm 3 days earlier
+        DateTimeData startTime = getDateTime(null, start.getTime());
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D"), false, false);
+        EventData event = handleCreation(createEvent);
+        getAndCheckEvent(event, 1);
+
+        // Check if next trigger is at correct time
+        Calendar from = getUTCCalendar();
+        from.set(Calendar.DAY_OF_MONTH, 20);
+        from.set(Calendar.MONTH, 2);
+        from.set(Calendar.YEAR, 2017);
+
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
+        long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3);
+        checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
+
+        changeTimezone(TimeZone.getTimeZone("America/New_York"));
+
+        AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
+        Date parse = ZULU_FORMATER.parse(triggers2.get(0).getTime());
+        assertNotEquals(triggerTime, parse.getTime());
+
+        int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(start.getTime());
+        int offsetOld = TimeZone.getTimeZone("Europe/Berlin").getOffset(start.getTime());
+        int offset = offsetOld - offsetNew;
+        checkAlarmTime(triggers2.get(0), event.getId(), triggerTime + offset);
     }
 
 }
