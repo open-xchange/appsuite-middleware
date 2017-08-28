@@ -110,6 +110,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -681,12 +682,15 @@ public class Utils {
      * attendees.
      *
      * @param attendees The attendees to collect the folder identifiers for
-     * @return The personal folder identifiers of the internal user attendees
+     * @return The personal folder identifiers of the internal user attendees, or an empty list if there are none
      */
     public static List<String> getPersonalFolderIds(List<Attendee> attendees) {
         List<String> folderIds = new ArrayList<String>();
         for (Attendee attendee : CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            folderIds.add(attendee.getFolderID());
+            String folderId = attendee.getFolderID();
+            if (Strings.isNotEmpty(folderId) && false == AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID.equals(attendee.getFolderID())) {
+                folderIds.add(folderId);
+            }
         }
         return folderIds;
     }

@@ -125,7 +125,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Tracks suitable results for a created event in the current internal calendar result, which includes adding a <i>plain</i> update
+     * Tracks suitable results for a created event in the current internal calendar result, which includes adding a <i>plain</i> creation
      * for the new event data, as well as an appropriate creation from the acting user's point of view.
      *
      * @param createdEvent The created event
@@ -168,6 +168,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
              */
             result.addUserizedCreation(updatedEvent);
         }
+    }
+
+    /**
+     * Tracks suitable results for a deleted event in the current internal calendar result, which includes adding a <i>plain</i> deletion
+     * for the removed event data, as well as an appropriate deletion from the acting user's point of view.
+     *
+     * @param deletedEvent The deleted event
+     */
+    protected void trackDeletion(Event deletedEvent) {
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
+        result.addPlainDeletion(timestamp.getTime(), getEventID(deletedEvent));
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
     }
 
     /**
@@ -248,9 +260,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * track deletion in result
          */
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
-        result.addPlainDeletion(timestamp.getTime(), getEventID(originalEvent));
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
+        trackDeletion(originalEvent);
     }
 
     /**
@@ -295,6 +305,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         touch(id);
         Event updatedEvent = loadEventData(id);
+        trackUpdate(originalEvent, updatedEvent);
 
         // Update alarm trigger
         storage.getAlarmTriggerStorage().removeTriggers(updatedEvent.getId());
@@ -306,10 +317,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, exceptions);
-
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
-        result.addPlainUpdate(originalEvent, updatedEvent);
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
     }
 
     /**
