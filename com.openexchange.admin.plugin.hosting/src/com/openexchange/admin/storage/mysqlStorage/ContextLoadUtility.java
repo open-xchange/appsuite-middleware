@@ -176,56 +176,64 @@ public class ContextLoadUtility {
      */
     public static Map<PoolAndSchema, List<Context>> fillLoginMappingsAndDatabases(List<Context> contexts, TIntObjectMap<Context> id2context, Connection con) throws StorageException {
         Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
+        if (contexts.size() <= Databases.IN_LIMIT) {
+            fillLoginMappingsAndDatabasesChunk(contexts, id2context, con, schema2contexts);
+        } else {
+            for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
+                fillLoginMappingsAndDatabasesChunk(partition, id2context, con, schema2contexts);
+            }
+        }
+        return schema2contexts;
+    }
+
+    private static void fillLoginMappingsAndDatabasesChunk(List<Context> partition, TIntObjectMap<Context> id2context, Connection con, Map<PoolAndSchema, List<Context>> schema2contexts) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
-                // Load login mappings
-                stmt = con.prepareStatement(Databases.getIN("SELECT login_info, cid FROM login2context WHERE cid IN (", partition.size()));
-                id2context.clear();
-                int pos = 1;
-                for (Context context : partition) {
-                    int contextId = context.getId().intValue();
-                    stmt.setInt(pos++, contextId);
-                    id2context.put(contextId, context);
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    id2context.get(rs.getInt(2)).addLoginMapping(rs.getString(1));
-                }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
+            // Load login mappings
+            stmt = con.prepareStatement(Databases.getIN("SELECT login_info, cid FROM login2context WHERE cid IN (", partition.size()));
+            id2context.clear();
+            int pos = 1;
+            for (Context context : partition) {
+                int contextId = context.getId().intValue();
+                stmt.setInt(pos++, contextId);
+                id2context.put(contextId, context);
+            }
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                id2context.get(rs.getInt(2)).addLoginMapping(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
 
-                // Group by database schema association
-                stmt = con.prepareStatement(Databases.getIN("SELECT write_db_pool_id, read_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.size()));
-                pos = 1;
-                for (Context context : partition) {
-                    stmt.setInt(pos++, context.getId().intValue());
-                }
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    String db_schema = rs.getString(3); // db_schema
-                    if (null != db_schema) {
-                        int write_pool = rs.getInt(1); // write_pool_id
-                        int read_pool = rs.getInt(2); // read_pool_id
-                        Context cs = id2context.get(rs.getInt(4));
-                        cs.setReadDatabase(new Database(read_pool, db_schema));
-                        cs.setWriteDatabase(new Database(write_pool, db_schema));
-                        PoolAndSchema pas = new PoolAndSchema(read_pool <= 0 ? write_pool : read_pool, db_schema);
-                        List<Context> allInSchema = schema2contexts.get(pas);
-                        if (null == allInSchema) {
-                            allInSchema = new LinkedList<>();
-                            schema2contexts.put(pas, allInSchema);
-                        }
-                        allInSchema.add(cs);
+            // Group by database schema association
+            stmt = con.prepareStatement(Databases.getIN("SELECT write_db_pool_id, read_db_pool_id, db_schema, cid FROM context_server2db_pool WHERE cid IN (", partition.size()));
+            pos = 1;
+            for (Context context : partition) {
+                stmt.setInt(pos++, context.getId().intValue());
+            }
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String db_schema = rs.getString(3); // db_schema
+                if (null != db_schema) {
+                    int write_pool = rs.getInt(1); // write_pool_id
+                    int read_pool = rs.getInt(2); // read_pool_id
+                    Context cs = id2context.get(rs.getInt(4));
+                    cs.setReadDatabase(new Database(read_pool, db_schema));
+                    cs.setWriteDatabase(new Database(write_pool, db_schema));
+                    PoolAndSchema pas = new PoolAndSchema(read_pool <= 0 ? write_pool : read_pool, db_schema);
+                    List<Context> allInSchema = schema2contexts.get(pas);
+                    if (null == allInSchema) {
+                        allInSchema = new LinkedList<>();
+                        schema2contexts.put(pas, allInSchema);
                     }
+                    allInSchema.add(cs);
                 }
-                Databases.closeSQLStuff(rs, stmt);
-                rs = null;
-                stmt = null;
-            } // End of for loop
-            return schema2contexts;
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
@@ -261,49 +269,57 @@ public class ContextLoadUtility {
     }
 
     private static void fillContextsSchema(List<Context> allInSchema, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
+        if (allInSchema.size() <= Databases.IN_LIMIT) {
+            fillContextsSchemaChunk(allInSchema, withContextAttributes, id2context, oxdb_read);
+        } else {
+            for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
+                fillContextsSchemaChunk(partitionInSchema, withContextAttributes, id2context, oxdb_read);
+            }
+        }
+    }
+
+    private static void fillContextsSchemaChunk(List<Context> partitionInSchema, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
-                stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT used, cid FROM filestore_usage WHERE user=0 AND cid IN (", partitionInSchema.size()));
-                id2context.clear();
-                int pos = 1;
+            stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT used, cid FROM filestore_usage WHERE user=0 AND cid IN (", partitionInSchema.size()));
+            id2context.clear();
+            int pos = 1;
+            for (Context context : partitionInSchema) {
+                int contextId = context.getId().intValue();
+                stmt.setInt(pos++, contextId);
+                id2context.put(contextId, context);
+            }
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                long quota_used = rs.getLong(1);
+                if (quota_used > 0) {
+                    quota_used = quota_used >> 20;
+                }
+                id2context.get(rs.getInt(2)).setUsedQuota(Long.valueOf(quota_used));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (withContextAttributes) {
+                stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT cid, name, value FROM contextAttribute WHERE cid IN (", partitionInSchema.size()));
+                pos = 1;
                 for (Context context : partitionInSchema) {
-                    int contextId = context.getId().intValue();
-                    stmt.setInt(pos++, contextId);
-                    id2context.put(contextId, context);
+                    stmt.setInt(pos++, context.getId().intValue());
                 }
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    long quota_used = rs.getLong(1);
-                    if (quota_used > 0) {
-                        quota_used = quota_used >> 20;
+                    String name = rs.getString(2);
+                    if (OXContextMySQLStorageCommon.isDynamicAttribute(name)) {
+                        String[] namespaced = OXContextMySQLStorageCommon.parseDynamicAttribute(name);
+                        String value = rs.getString(3);
+                        id2context.get(rs.getInt(1)).setUserAttribute(namespaced[0], namespaced[1], value);
                     }
-                    id2context.get(rs.getInt(2)).setUsedQuota(Long.valueOf(quota_used));
                 }
                 Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
-
-                if (withContextAttributes) {
-                    stmt = oxdb_read.prepareStatement(Databases.getIN("SELECT cid, name, value FROM contextAttribute WHERE cid IN (", partitionInSchema.size()));
-                    pos = 1;
-                    for (Context context : partitionInSchema) {
-                        stmt.setInt(pos++, context.getId().intValue());
-                    }
-                    rs = stmt.executeQuery();
-                    while (rs.next()) {
-                        String name = rs.getString(2);
-                        if (OXContextMySQLStorageCommon.isDynamicAttribute(name)) {
-                            String[] namespaced = OXContextMySQLStorageCommon.parseDynamicAttribute(name);
-                            String value = rs.getString(3);
-                            id2context.get(rs.getInt(1)).setUserAttribute(namespaced[0], namespaced[1], value);
-                        }
-                    }
-                    Databases.closeSQLStuff(rs, stmt);
-                    rs = null;
-                    stmt = null;
-                }
             }
         } catch (SQLException e) {
             throw new StorageException(e);

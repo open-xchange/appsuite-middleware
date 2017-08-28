@@ -296,15 +296,15 @@ public final class Databases {
     }
 
     /**
-     * Extends a SQL statement with enough ? characters in the last IN argument.
+     * Extends an SQL statement with enough <code>'?'</code> characters in the last <code>IN</code> argument.
      *
-     * @param sql SQL statement ending with "IN (";
-     * @param length number of entries.
-     * @return the ready to use SQL statement.
+     * @param sql The SQL statement ending with <code>"IN ("</code>
+     * @param length The number of entries.
+     * @return The ready to use SQL statement.
      */
     public static String getIN(String sql, int length) {
         StringBuilder retval = new StringBuilder(sql);
-        for (int i = 0; i < length; i++) {
+        for (int i = length; i-- > 0;) {
             retval.append("?,");
         }
         retval.setCharAt(retval.length() - 1, ')');
