@@ -50,6 +50,7 @@
 package com.openexchange.oidc.spi;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
@@ -58,7 +59,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -144,17 +144,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     @Override
-    public JWKSet getJwkSet() throws OXException {
-        JWKSet jwkSet = null;
-        try {
-            jwkSet = JWKSet.load(new URL(this.getBackendConfig().getJwkSet()));
-        } catch (IOException | ParseException e) {
-            throw OIDCExceptionCode.UNABLE_TO_GET_JWKSET_WITH_URL.create(e, this.getBackendConfig().getJwkSet());
-        }
-        return jwkSet;
-    }
-
-    @Override
     public JWSAlgorithm getJWSAlgorithm() throws OXException {
         JWSAlgorithm algorithm = JWSAlgorithm.RS256;
         String algorithmString = this.getBackendConfig().getJWSAlgortihm();
@@ -180,16 +169,16 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException {
         IDTokenClaimsSet result = null;
-        JWKSet jwkSet = this.getJwkSet();
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
-
-        IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, jwkSet);
         try {
+            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getJwkSet()));
             result = idTokenValidator.validate(idToken, new Nonce(storedRequestInformation.getNonce()));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
         } catch (JOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
+        } catch (MalformedURLException e) {
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "Unable to parse JWKSet URL");
         }
         return result;
     }
@@ -248,6 +237,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             subject = jwtClaimsSet.getSubject();
         } catch (java.text.ParseException e) {
             // TODO Auto-generated catch block
+            // TODO QS-VS: catch exception
             e.printStackTrace();
         }
 
@@ -268,6 +258,4 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         int contextId = contextService.getContextId(userData[1]);
         return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
     }
-
-    //TODO QS-VS: Cache JWKSet HttpCaching, Header müssen angeben wann eine Aktualisierung des Caches notwendig ist
 }

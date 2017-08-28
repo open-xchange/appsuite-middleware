@@ -110,8 +110,6 @@ public interface OIDCBackend {
 
     TokenRequest getTokenRequest(TokenRequest tokenRequest);
 
-    JWKSet getJwkSet() throws OXException;
-
     JWSAlgorithm getJWSAlgorithm() throws OXException;
 
     AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest request);

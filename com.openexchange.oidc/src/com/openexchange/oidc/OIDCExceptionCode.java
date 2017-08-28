@@ -68,7 +68,7 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     UNABLE_TO_PARSE_JWS_ALGORITHM("Unable to parse the given JWS algorithm parameter: %1$s", Category.CATEGORY_CONFIGURATION, 5), 
     UNABLE_TO_GET_JWKSET_WITH_URL("Unable to load JWKSet from the given URL: %1$s", Category.CATEGORY_CONFIGURATION, 6), 
     IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 7),
-    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors", Category.CATEGORY_ERROR, 8), 
+    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors: %1$s", Category.CATEGORY_ERROR, 8), 
     IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: %1$s", Category.CATEGORY_ERROR, 9), 
     INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", Category.CATEGORY_ERROR, 10), 
     INVALID_IDTOKEN_GENERAL("Unable to extract claims from the given IDToken for unspecified reasons, see the logfiles for more information.", Category.CATEGORY_ERROR, 11), 
