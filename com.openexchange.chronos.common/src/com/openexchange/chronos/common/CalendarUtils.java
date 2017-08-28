@@ -265,27 +265,36 @@ public class CalendarUtils {
             return false;
         }
         if (user1.getCn() == null) {
-            if (user2.getCn() != null)
+            if (user2.getCn() != null) {
                 return false;
-        } else if (!user1.getCn().equals(user2.getCn()))
+            }
+        } else if (!user1.getCn().equals(user2.getCn())) {
             return false;
+        }
         if (user1.getEMail() == null) {
-            if (user2.getEMail() != null)
+            if (user2.getEMail() != null) {
                 return false;
-        } else if (!user1.getEMail().equals(user2.getEMail()))
+            }
+        } else if (!user1.getEMail().equals(user2.getEMail())) {
             return false;
-        if (user1.getEntity() != user2.getEntity())
+        }
+        if (user1.getEntity() != user2.getEntity()) {
             return false;
+        }
         if (user1.getSentBy() == null) {
-            if (user2.getSentBy() != null)
+            if (user2.getSentBy() != null) {
                 return false;
-        } else if (!user1.getSentBy().equals(user2.getSentBy()))
+            }
+        } else if (!user1.getSentBy().equals(user2.getSentBy())) {
             return false;
+        }
         if (user1.getUri() == null) {
-            if (user2.getUri() != null)
+            if (user2.getUri() != null) {
                 return false;
-        } else if (!user1.getUri().equals(user2.getUri()))
+            }
+        } else if (!user1.getUri().equals(user2.getUri())) {
             return false;
+        }
         return true;
     }
 
@@ -1465,6 +1474,29 @@ public class CalendarUtils {
             }
         });
         return events;
+    }
+
+
+    /**
+     * Gets the identifier of the folder representing a specific calendar user's view on an event. For events in <i>public</i> folders or
+     * not <i>group-scheduled</i> events, this is always the common folder identifier of the event. Otherwise, the corresponding
+     * attendee's parent folder identifier is returned.
+     *
+     * @param event The event to get the folder view for
+     * @param calendarUser The identifier of the user to get the folder view for
+     * @return The folder identifier
+     * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
+     */
+    public static String getFolderView(Event event, int calendarUser) throws OXException {
+        if (null != event.getFolderId() || false == isGroupScheduled(event)) {
+            return event.getFolderId();
+        } else {
+            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), calendarUser);
+            if (null == userAttendee || null == userAttendee.getFolderID()) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
+            }
+            return userAttendee.getFolderID();
+        }
     }
 
 }

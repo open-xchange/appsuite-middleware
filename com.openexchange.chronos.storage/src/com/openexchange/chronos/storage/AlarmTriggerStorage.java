@@ -50,7 +50,9 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -73,6 +75,16 @@ public interface AlarmTriggerStorage {
      * @throws OXException
      */
     void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException;
+
+    /**
+     * Inserts all necessary triggers for the given alarm objects. In case of an update remove all existing triggers first.
+     *
+     * @param alarmsPerAttendee A map of alarms per user.
+     * @param event The event to insert triggers for.
+     * @param exceptions The exceptions of the event.
+     * @throws OXException
+     */
+    public void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, Event event, Set<RecurrenceId> exceptions) throws OXException;
 
     /**
      * Removes all existing triggers for the given event

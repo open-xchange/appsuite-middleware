@@ -62,7 +62,6 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventExceptionWrapper;
 import com.openexchange.chronos.RecurrenceId;
@@ -291,7 +290,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
         EventExceptionWrapper wrapper = new EventExceptionWrapper(event, exceptions);
         Map<Integer, List<Alarm>> alarmsPerAttendee = alarmStorage.loadAlarms(event);
-        createAlarmTriggers(alarmsPerAttendee, wrapper);
+        insertTriggers(alarmsPerAttendee, wrapper);
+    }
+
+    @Override
+    public void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, Event event, Set<RecurrenceId> exceptions) throws OXException {
+        EventExceptionWrapper wrapper = new EventExceptionWrapper(event, exceptions);
+        insertTriggers(alarmsPerAttendee, wrapper);
     }
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -303,12 +308,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param eventWrapper The newly created event
      * @throws OXException
      */
-    private void createAlarmTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, EventExceptionWrapper eventWrapper) throws OXException {
+    private void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, EventExceptionWrapper eventWrapper) throws OXException {
         Event event = eventWrapper.getEvent();
-        for(Integer userId: alarmsPerAttendee.keySet()){
+        for (Integer userId : alarmsPerAttendee.keySet()) {
 
             List<Alarm> alarms = alarmsPerAttendee.get(userId);
-            if(alarms==null || alarms.isEmpty()){
+            if (alarms == null || alarms.isEmpty()) {
                 continue;
             }
             for (Alarm alarm : alarms) {
@@ -319,11 +324,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 trigger.setAlarm(alarm.getId());
                 trigger.setEventId(event.getId());
 
-                if(CalendarUtils.isFloating(event)) {
+                if (CalendarUtils.isFloating(event)) {
                     trigger.setTimezone(resolver.getTimeZone(userId));
                 }
                 TimeZone tz = UTC;
-                if(trigger.containsTimezone()){
+                if (trigger.containsTimezone()) {
                     tz = trigger.getTimezone();
                 }
                 if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
@@ -352,16 +357,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 }
 
                 // Set proper folder id
-                for (Attendee att : event.getAttendees()) {
-                    if (att.getEntity() == userId) {
-                        trigger.setFolder(att.getFolderID());
-                        break;
-                    }
-                }
-
-                if (!trigger.containsFolder()) {
-                    // TODO throw proper exception
-                }
+                trigger.setFolder(CalendarUtils.getFolderView(event, userId));
 
                 insertAlarmTrigger(trigger);
             }
