@@ -307,6 +307,8 @@ public class AlarmUtils extends CalendarUtils {
         return null;
     }
 
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     /**
      * Calculates the actual time of an alarm trigger associated with an event.
      *
@@ -328,7 +330,7 @@ public class AlarmUtils extends CalendarUtils {
                 long dateInTimeZone = getDateInTimeZone(relatedDate, timeZone);
                 relatedDate = new DateTime(timeZone, dateInTimeZone);
             }
-            Calendar calendar = initCalendar(timeZone, relatedDate.getTimestamp());
+            Calendar calendar = initCalendar(UTC, relatedDate.getTimestamp());
             return applyDuration(trigger.getDuration(), calendar).getTime();
         }
         return null;
