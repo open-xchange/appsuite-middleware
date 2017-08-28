@@ -1165,7 +1165,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue());
+            Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue(), false);
 
             // Check capacity
             if (!oxu.hasSpaceForAnotherContext(destFilestore)) {
@@ -1185,7 +1185,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             try {
                 // Initialize mover instance
-                FilestoreDataMover fsdm = FilestoreDataMover.newContextMover(oxu.getFilestore(srcStore_id), destFilestore, ctx);
+                FilestoreDataMover fsdm = FilestoreDataMover.newContextMover(oxu.getFilestore(srcStore_id, false), destFilestore, ctx);
 
                 // Enable context after processing
                 fsdm.addPostProcessTask(new PostProcessTask() {

@@ -984,8 +984,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             return new Context[0];
         }
 
-        Collection<Integer> cids;
-
         String sqlPattern = null == pattern ? null : pattern.replace('*', '%');
         if ((null == sqlPattern || "%".equals(sqlPattern)) && (null == filters || filters.isEmpty())) {
             Connection con = null;
@@ -994,19 +992,48 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             try {
                 con = cache.getReadConnectionForConfigDB();
                 if (withLimit) {
-                    stmt = con.prepareStatement("SELECT cid FROM context ORDER BY cid LIMIT " + offset + ", " + length);
+                    stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_id, filestore_name, quota_max FROM context ORDER BY cid LIMIT " + offset + ", " + length);
                 } else {
-                    stmt = con.prepareStatement("SELECT cid FROM context");
+                    stmt = con.prepareStatement("SELECT cid, name, enabled, reason_id, filestore_id, filestore_name, quota_max FROM context");
                 }
                 rs = stmt.executeQuery();
                 if (false == rs.next()) {
                     return new Context[0];
                 }
 
-                cids = length > 0 ? new ArrayList<>(length) : new LinkedList<>();
-                do {
-                    cids.add(Integer.valueOf(rs.getInt(1)));
-                } while (rs.next());
+                Long averageContextFileStoreSize = Long.valueOf(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
+                List<Context> contexts = ContextLoadUtility.loadBasicContexts(rs, true, averageContextFileStoreSize, length);
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                // Load login mappings per context and group by database schema association
+                TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
+                Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
+
+                // Connection to ConfigDB no more needed
+                cache.pushReadConnectionForConfigDB(con);
+                con = null;
+
+                // Query used quota per schema
+                ContextLoadUtility.fillUsageAndAttributes(schema2contexts, true, id2context, cache);
+                id2context = null; // Might help GC
+
+                if (null != loaders && false == loaders.isEmpty()) {
+                    try {
+                        for (Filter<Context, Context> loader : loaders) {
+                            loader.filter(contexts);
+                        }
+                    } catch (final PipesAndFiltersException e) {
+                        final Throwable cause = e.getCause();
+                        if (cause instanceof StorageException) {
+                            throw (StorageException) cause;
+                        }
+                        throw new StorageException(cause.getMessage(), cause);
+                    }
+                }
+
+                return contexts.toArray(new Context[contexts.size()]);
             } catch (PoolException e) {
                 throw new StorageException(e);
             } catch (SQLException e) {
@@ -1021,85 +1048,87 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
             }
+        }
+
+        // Search pattern and/or additional filters specified
+        Collection<Integer> cids;
+        if (null == sqlPattern || "%".equals(sqlPattern)) {
+            cids = new ContextSearcher(cache, "SELECT cid FROM context ORDER BY cid", null).execute();
         } else {
-            if (null == sqlPattern || "%".equals(sqlPattern)) {
-                cids = new ContextSearcher(cache, "SELECT cid FROM context ORDER BY cid", null).execute();
-            } else {
+            try {
+                Integer.parseInt(sqlPattern);
+                cids = new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern).execute();
+            } catch (NumberFormatException nfe) {
+                // Ignore and do nothing, because we are not including that query to the searcher
+                // since the specified sqlPattern does not solely consists out of numbers.
+                ThreadPoolService threadPool;
                 try {
-                    Integer.parseInt(sqlPattern);
-                    cids = new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern).execute();
-                } catch (NumberFormatException nfe) {
-                    // Ignore and do nothing, because we are not including that query to the searcher
-                    // since the specified sqlPattern does not solely consists out of numbers.
-                    ThreadPoolService threadPool;
-                    try {
-                        threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                    } catch (final OXException e) {
-                        throw new StorageException(e.getMessage(), e);
-                    }
-                    List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
-                    searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
-                    searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
-
-                    // Invoke & add into sorted set
-                    CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
-                    cids = new TreeSet<Integer>();
-                    try {
-                        for (int i = searchers.size(); i-- > 0;) {
-                            cids.addAll(completion.take().get());
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new StorageException(e.getMessage(), e);
-                    } catch (CancellationException e) {
-                        throw new StorageException(e.getMessage(), e);
-                    } catch (ExecutionException e) {
-                        throw ThreadPools.launderThrowable(e, StorageException.class);
-                    }
-                }
-            }
-
-            if (null != filters && filters.size() > 0) {
-                PipesAndFiltersService pnfService;
-                try {
-                    pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
+                    threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 } catch (final OXException e) {
                     throw new StorageException(e.getMessage(), e);
                 }
-                DataSource<Integer> output = pnfService.create(cids);
-                for (final Object f : filters.toArray()) {
-                    output = output.addFilter((Filter<Integer, Integer>) f);
-                }
-                Set<Integer> filteredCids = new HashSet<Integer>(cids.size());
+                List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
+                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
+                searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
+
+                // Invoke & add into sorted set
+                CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
+                cids = new TreeSet<Integer>();
                 try {
-                    while (output.hasData()) {
-                        output.getData(filteredCids);
+                    for (int i = searchers.size(); i-- > 0;) {
+                        cids.addAll(completion.take().get());
                     }
-                } catch (final PipesAndFiltersException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof StorageException) {
-                        throw (StorageException) cause;
-                    }
-                    throw new StorageException(cause.getMessage(), cause);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new StorageException(e.getMessage(), e);
+                } catch (CancellationException e) {
+                    throw new StorageException(e.getMessage(), e);
+                } catch (ExecutionException e) {
+                    throw ThreadPools.launderThrowable(e, StorageException.class);
                 }
-                cids = filteredCids;
+            }
+        }
+
+        if (null != filters && filters.size() > 0) {
+            PipesAndFiltersService pnfService;
+            try {
+                pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
+            } catch (final OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+            DataSource<Integer> output = pnfService.create(cids);
+            for (final Object f : filters.toArray()) {
+                output = output.addFilter((Filter<Integer, Integer>) f);
+            }
+            Set<Integer> filteredCids = new HashSet<Integer>(cids.size());
+            try {
+                while (output.hasData()) {
+                    output.getData(filteredCids);
+                }
+            } catch (final PipesAndFiltersException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof StorageException) {
+                    throw (StorageException) cause;
+                }
+                throw new StorageException(cause.getMessage(), cause);
+            }
+            cids = filteredCids;
+        }
+
+        // Slice
+        if (withLimit) {
+            if (offset >= cids.size()) {
+                return new Context[0];
             }
 
-            // Slice
-            if (withLimit) {
-                if (offset >= cids.size()) {
-                    return new Context[0];
-                }
-
-                List<Integer> subset = new ArrayList<>(length);
-                int i = 0;
-                int numAdded = 0;
-                for (Iterator<Integer> iter = cids.iterator(); numAdded < length && iter.hasNext();) {
-                    Integer cid = iter.next();
-                    if (i++ >= offset) {
-                        subset.add(cid);
-                        numAdded++;
-                    }
+            List<Integer> subset = new ArrayList<>(length);
+            int i = 0;
+            int numAdded = 0;
+            for (Iterator<Integer> iter = cids.iterator(); numAdded < length && iter.hasNext();) {
+                Integer cid = iter.next();
+                if (i++ >= offset) {
+                    subset.add(cid);
+                    numAdded++;
                 }
             }
         }

@@ -1897,7 +1897,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 Connection con = null;
                 try {
                     con = cache.getReadConnectionForConfigDB();
-                    databases = PoolAndSchema.listDatabaseSchemas(poolId, cache.getServerId(), con);
+                    databases = PoolAndSchema.listDatabaseSchemas(poolId, con);
                 } catch (PoolException e) {
                     throw new StorageException(e.getMessage(), e);
                 } finally {
@@ -1984,7 +1984,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Connection con = null;
             try {
                 con = cache.getReadConnectionForConfigDB();
-                databases = PoolAndSchema.listAllSchemas(cache.getServerId(), con);
+                databases = PoolAndSchema.listAllSchemas(con);
             } catch (PoolException e) {
                 throw new StorageException(e.getMessage(), e);
             } finally {
