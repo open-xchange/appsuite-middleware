@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.birthdays;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.contact.ContactFieldOperand;
@@ -74,10 +75,6 @@ public class SearchAdapter {
 
     /** The contact fields considered for a birthday event's summary */
     private static final ContactField[] SUMMARY_FIELDS = { ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME };
-
-    /** The contact fields considered for a birthday event's attendee */
-    private static final ContactField[] ATTENDEE_FIELDS = com.openexchange.tools.arrays.Arrays.add(
-        SUMMARY_FIELDS, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 );
 
     /** A synthetic search term that leads to no results */
     private static final SearchTerm<?> NO_RESULTS_TERM = new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
@@ -143,8 +140,8 @@ public class SearchAdapter {
                 return getContactFieldTerm(queries, CompositeOperation.AND, SUMMARY_FIELDS);
             case "users":
                 return getContactUserIdTerm(queries, CompositeOperation.AND);
-            case "participants":
-                return getContactFieldTerm(queries, CompositeOperation.AND, ATTENDEE_FIELDS);
+            case "participant":
+                return getContactEMailTerm(queries, CompositeOperation.AND);
             case "location":
             case "description":
             case "status":
@@ -256,6 +253,35 @@ public class SearchAdapter {
             compositeTerm.addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
                 .addOperand(new ContactFieldOperand(field))
                 .addOperand(new ConstantOperand<String>(pattern)
+            ));
+        }
+        return compositeTerm;
+    }
+
+    private static SearchTerm<?> getContactEMailTerm(List<String> queries, CompositeOperation operation) {
+        if (null == queries || queries.isEmpty()) {
+            return null;
+        }
+        if (1 == queries.size()) {
+            return getContactEMailTerm(queries.get(0));
+        }
+        CompositeSearchTerm compositeTerm = new CompositeSearchTerm(operation);
+        for (String query : queries) {
+            compositeTerm.addSearchTerm(getContactEMailTerm(query));
+        }
+        return compositeTerm;
+    }
+
+    private static SearchTerm<?> getContactEMailTerm(String query) {
+        if (isWildcardOnly(query)) {
+            return null;
+        }
+        String mailAddress = CalendarUtils.extractEMailAddress(query);
+        CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (ContactField field : new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }) {
+            compositeTerm.addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
+                .addOperand(new ContactFieldOperand(field))
+                .addOperand(new ConstantOperand<String>(mailAddress)
             ));
         }
         return compositeTerm;
