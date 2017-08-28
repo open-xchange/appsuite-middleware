@@ -237,7 +237,7 @@ properties:
         Note:  
         This flag is only announced via the new v2 mailfilter api.
       defaultValue: true
-      version: 7.10.0
+      version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related:
@@ -264,7 +264,7 @@ properties:
         1. Invalid elements will be ignored.  
         2. This blacklist is only applicable for the new v2 mailfilter api.
       defaultValue: 
-      version: 7.10.0
+      version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related:
@@ -295,7 +295,7 @@ properties:
         Note:  
         This blacklist is only applicable for the new v2 mailfilter api.
       defaultValue: 
-      version: 7.10.0
+      version: 7.8.4
       reloadable: true
       configcascadeAware: true
       related:
