@@ -144,7 +144,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         triggerData = getAndCheckAlarmTrigger(currentTime, 2);
         AlarmTrigger alarmTrigger2 = triggerData.get(0);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
-        Date parsedTime = ZULU_FORMATER.parse(alarmTrigger2.getTime());
+        Date parsedTime = ZULU_FORMATER.get().parse(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
         String snoozeAlarmId = alarmTrigger2.getAlarmId();
 
@@ -160,7 +160,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         alarmTrigger2 = triggerData.get(0);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
         assertNotEquals(alarmTrigger2.getAlarmId(), snoozeAlarmId);
-        parsedTime = ZULU_FORMATER.parse(alarmTrigger2.getTime());
+        parsedTime = ZULU_FORMATER.get().parse(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
 
     }

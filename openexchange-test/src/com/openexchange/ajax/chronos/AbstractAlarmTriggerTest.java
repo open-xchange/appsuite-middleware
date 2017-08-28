@@ -376,7 +376,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      */
     protected void checkAlarmTime(AlarmTrigger trigger, String eventId, long expectedTime) throws ParseException {
         assertEquals(eventId, trigger.getEventId());
-        Date parsedTime = ZULU_FORMATER.parse(trigger.getTime());
+        Date parsedTime = ZULU_FORMATER.get().parse(trigger.getTime());
         assertEquals(expectedTime, parsedTime.getTime());
     }
 

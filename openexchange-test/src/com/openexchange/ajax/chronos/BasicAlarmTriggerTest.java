@@ -65,8 +65,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -509,7 +509,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
         AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
-        Date parse = ZULU_FORMATER.parse(triggers2.get(0).getTime());
+        Date parse = ZULU_FORMATER.get().parse(triggers2.get(0).getTime());
         assertNotEquals(triggerTime, parse.getTime());
 
         int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(start.getTime());

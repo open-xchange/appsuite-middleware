@@ -77,11 +77,31 @@ import com.openexchange.testing.httpclient.modules.JSlobApi;
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
 
-    protected static SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    protected static SimpleDateFormat ZULU_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-    static {
-        ZULU_FORMATER.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> BASIC_FORMATER = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
+
+    /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss'Z'</code> as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> ZULU_FORMATER = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
 
     protected ChronosApi api;
     private FoldersApi foldersApi;
@@ -173,7 +193,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         DateTimeData result = new DateTimeData();
         result.setTzid("UTC");
         Date date = new Date(millis);
-        result.setValue(ZULU_FORMATER.format(date));
+        result.setValue(ZULU_FORMATER.get().format(date));
         return result;
     }
 
@@ -185,18 +205,18 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);
         Date date = new Date(millis);
-        result.setValue(BASIC_FORMATER.format(date));
+        result.setValue(BASIC_FORMATER.get().format(date));
         return result;
     }
 
 
     protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
-        Date date = BASIC_FORMATER.parse(data.getValue());
+        Date date = BASIC_FORMATER.get().parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime()+millis);
     }
 
     protected Date getTime(DateTimeData time) throws ParseException {
-        return BASIC_FORMATER.parse(time.getValue());
+        return BASIC_FORMATER.get().parse(time.getValue());
     }
 
     protected void setLastTimestamp(long timestamp){
