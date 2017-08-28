@@ -1,5 +1,5 @@
 /chronos/accounts?action=update:
-  get:
+  put:
     operationId: updateAccount
     tags:
       - Chronos

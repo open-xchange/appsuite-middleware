@@ -147,7 +147,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
         }
     }
 
-    private CalendarAccount  loadCalendarAccount(int id, Session session) throws OXException {
+    private CalendarAccount loadCalendarAccount(int id, Session session) throws OXException {
         return getCalendarAccountStorage(session).getAccount(id);
     }
 
