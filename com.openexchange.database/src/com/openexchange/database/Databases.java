@@ -232,6 +232,9 @@ public final class Databases {
      * @throws SQLException if starting the transaction fails.
      */
     public static void startTransaction(Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
