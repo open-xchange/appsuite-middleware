@@ -142,7 +142,7 @@ public class ChronosJsonFields {
     /**
      * The seriesId of the event. See {@link Event#getSeriesId()}
      */
-    public static final String SERIES_ID = "seriedId";
+    public static final String SERIES_ID = "seriesId";
     /**
      * The recurrence rule of the event. See {@link Event#getRecurrenceRule()}
      */
