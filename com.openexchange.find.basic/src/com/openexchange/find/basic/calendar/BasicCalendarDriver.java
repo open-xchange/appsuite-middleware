@@ -49,12 +49,14 @@
 
 package com.openexchange.find.basic.calendar;
 
+import static com.openexchange.chronos.common.CalendarUtils.add;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -70,6 +72,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.configuration.ServerConfig;
@@ -205,10 +208,11 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * select suitable occurrences for series events
          */
+        RangeOption searchRange = getSearchRange(filters);
         for (ListIterator<Event> iterator = events.listIterator(); iterator.hasNext();) {
             Event event = iterator.next();
             if (isSeriesMaster(event)) {
-                event = getBestMatchingOccurrence(event);
+                event = getBestMatchingOccurrence(event, searchRange);
                 if (null == event) {
                     iterator.remove();
                 } else {
@@ -216,9 +220,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 }
             }
         }
-        //        for (int i = 0; i < events.size(); i++) {
-        //            events.set(i, getBestMatchingOccurrence(events.get(i)));
-        //        }
         /*
          * check if limit has been exceeded
          */
@@ -253,47 +254,46 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
      * Invoking this method on a non-recurring event has no effect.
      *
      * @param event The recurring event
-     * @return The best matching occurrence
+     * @param range The time range as derived from the value of the query's range facet filter, or <code>null</code> if not restricted
+     * @return The best matching occurrence, or <code>null</code> if there's no suitable occurrence available
      */
-    private static Event getBestMatchingOccurrence(Event event) throws OXException {
-
-        //TODO: consider range facet to check if there is any matching occurrence
-
-        if (CalendarUtils.isSeriesMaster(event)) {
-            RecurrenceService recurrenceService = Services.requireService(RecurrenceService.class);
-            Event occurrence = null;
-            Date now = new Date();
-            /*
-             * prefer the "next" occurrence if possible
-             */
-            Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, now, null);
-            if (iterator.hasNext()) {
-                occurrence = iterator.next();
-            } else {
-                /*
-                 * prefer the "last" occurrence
-                 */
-                iterator = recurrenceService.iterateEventOccurrences(event, null, now);
-                while (iterator.hasNext()) {
-                    occurrence = iterator.next();
-                }
-            }
-            if (null != occurrence) {
-                return occurrence;
-            } else {
-                /*
-                 * fall back to very first occurrence
-                 */
-                iterator = recurrenceService.iterateEventOccurrences(event, null, null);
-                if (iterator.hasNext()) {
-                    return iterator.next();
-                }
-            }
+    private static Event getBestMatchingOccurrence(Event event, RangeOption range) throws OXException {
+        if (false == isSeriesMaster(event)) {
+            return null;
+        }
+        Date from = null != range ? range.getFrom() : null;
+        Date until = null != range ? range.getUntil() : null;
+        RecurrenceService recurrenceService = Services.requireService(RecurrenceService.class);
+        Event occurrence = null;
+        Date now = new Date();
+        /*
+         * prefer the "next" occurrence if possible
+         */
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, now, until);
+        if (iterator.hasNext()) {
+            return iterator.next();
         }
         /*
-         * return regular event, otherwise
+         * prefer the "last" occurrence, otherwise
          */
-        return event;
+        iterator = recurrenceService.iterateEventOccurrences(event, from, now);
+        if (iterator.hasNext()) {
+            while (iterator.hasNext()) {
+                occurrence = iterator.next();
+            }
+            return occurrence;
+        }
+        /*
+         * fall back to very first occurrence, otherwise
+         */
+        iterator = recurrenceService.iterateEventOccurrences(event, from, until);
+        if (iterator.hasNext()) {
+            return iterator.next();
+        }
+        /*
+         * no matching occurrence, otherwise
+         */
+        return null;
     }
 
     private static SearchFilter getFilter(ServerSession session, String field, List<String> queries) throws OXException {
@@ -444,6 +444,35 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
 
     private static int getHardResultLimit() throws OXException {
         return Services.getConfigurationService().getIntProperty("com.openexchange.find.basic.calendar.hardResultLimit", 1000);
+    }
+
+    private static RangeOption getSearchRange(List<SearchFilter> filters) {
+        if (null != filters && 0 < filters.size()) {
+            for (SearchFilter filter : filters) {
+                if (null != filter.getFields() && 1 == filter.getFields().size() && CalendarFacetType.RANGE.getId().equals(filter.getFields().get(0)) &&
+                    null != filter.getQueries() && 1 == filter.getQueries().size()) {
+                    return getSearchRange(filter.getQueries().get(0));
+                }
+            }
+        }
+        return null;
+    }
+
+    private static RangeOption getSearchRange(String rangeValue) {
+        if (null == rangeValue) {
+            return null;
+        }
+        Date now = new Date();
+        switch (rangeValue) {
+            case CalendarFacetValues.RANGE_ONE_MONTH:
+                return new RangeOption().setRange(add(now, Calendar.MONTH, -1), add(now, Calendar.MONTH, +1));
+            case CalendarFacetValues.RANGE_THREE_MONTHS:
+                return new RangeOption().setRange(add(now, Calendar.MONTH, -3), add(now, Calendar.MONTH, +3));
+            case CalendarFacetValues.RANGE_ONE_YEAR:
+                return new RangeOption().setRange(add(now, Calendar.YEAR, -1), add(now, Calendar.YEAR, +1));
+            default:
+                return null;
+        }
     }
 
 }
