@@ -51,8 +51,9 @@ package com.openexchange.i18n.yaml.clt;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -64,6 +65,7 @@ import org.fedorahosted.tennera.jgettext.PoWriter;
 import com.openexchange.cli.AbstractCLI;
 import com.openexchange.i18n.yaml.internal.I18NYamlParserImpl;
 import com.openexchange.i18n.yaml.internal.I18nYamlParseException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -174,7 +176,7 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
     }
 
     private void saveCat(Catalog cat, File poFile) throws IOException {
-        BufferedWriter out = new BufferedWriter(new FileWriter(poFile));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(poFile), Charsets.UTF_8));
         try {
             PoWriter writer = new PoWriter();
             writer.setGenerateHeader(false);
