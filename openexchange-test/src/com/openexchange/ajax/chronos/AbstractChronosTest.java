@@ -201,6 +201,10 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return getDateTime(TimeZone.getDefault().getID(), millis);
     }
 
+    protected DateTimeData getDateTime(Calendar cal) {
+        return getDateTime(cal.getTimeZone().getID(), cal.getTimeInMillis());
+    }
+
     protected DateTimeData getDateTime(String timezoneId, long millis) {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);

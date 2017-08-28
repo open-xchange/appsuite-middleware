@@ -131,7 +131,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     @SuppressWarnings("unchecked")
-    private EventData createSeriesEventWithSingleAlarm(String summary, Long startDate, String duration, List<Attendee> attendees) {
+    private EventData createSeriesEventWithSingleAlarm(String summary, Calendar startDate, String duration, List<Attendee> attendees) {
         EventData seriesEvent = new EventData();
         seriesEvent.setPropertyClass("PUBLIC");
         if (attendees == null) {
@@ -144,7 +144,10 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
             seriesEvent.setAttendees(attendees);
         }
         seriesEvent.setStartDate(getDateTime(startDate));
-        seriesEvent.setEndDate(getDateTime(startDate + TimeUnit.HOURS.toMillis(1)));
+        Calendar endDate = Calendar.getInstance(startDate.getTimeZone());
+        endDate.setTimeInMillis(startDate.getTimeInMillis());
+        endDate.add(Calendar.HOUR, 1);
+        seriesEvent.setEndDate(getDateTime(endDate));
         seriesEvent.setTransp(TranspEnum.OPAQUE);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=4");
         seriesEvent.setAllDay(false);
@@ -219,10 +222,14 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The {@link CalendarResult}
      * @throws ApiException
      */
-    protected CalendarResult shiftEvent(String eventId, String recurrence, EventData event, long startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
-        long newStartTime = startTime + unit.toMillis(value);
+    protected CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
+        Calendar newStartTime = Calendar.getInstance(startTime.getTimeZone());
+        newStartTime.setTimeInMillis(startTime.getTimeInMillis() + unit.toMillis(value));
         event.setStartDate(getDateTime(newStartTime));
-        event.setEndDate(getDateTime(newStartTime + TimeUnit.HOURS.toMillis(1)));
+        Calendar endTime = Calendar.getInstance(startTime.getTimeZone());
+        endTime.setTimeInMillis(startTime.getTimeInMillis());
+        endTime.add(Calendar.HOUR, 1);
+        event.setEndDate(getDateTime(endTime));
         ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, eventId, event, timestamp, recurrence, false, false);
         this.setLastTimestamp(updateEvent.getTimestamp());
         return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
@@ -322,6 +329,21 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     /**
+     * Creates a single event with the given start time and name.
+     * Also handles all necessary tests and remembers the event for later deletion.
+     *
+     * @param name The name of the event
+     * @param startTime The startTime of the event
+     * @return The created event
+     * @throws ApiException
+     * @throws ParseException
+     */
+    protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
+        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
+        return handleCreation(createEvent);
+    }
+
+    /**
      * Creates a event series with the given start time and name.
      * Also handles all necessary tests and remembers the event for later deletion.
      *
@@ -330,7 +352,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The created event
      * @throws ApiException
      */
-    protected EventData createSeriesEvent(String name, long startTime) throws ApiException {
+    protected EventData createSeriesEvent(String name, Calendar startTime) throws ApiException {
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
@@ -344,7 +366,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The created event
      * @throws ApiException
      */
-    protected EventData createSeriesEvent(String name, long startTime, List<Attendee> attendees) throws ApiException {
+    protected EventData createSeriesEvent(String name, Calendar startTime, List<Attendee> attendees) throws ApiException {
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false);
         return handleCreation(createEvent);
     }

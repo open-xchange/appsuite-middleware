@@ -86,6 +86,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     @Test
     public void testCreateSingleAlarmTrigger() throws Exception {
         // Create an event with alarm
@@ -112,17 +114,17 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date startTime = cal.getTime();
-
-        long currentTime = System.currentTimeMillis();
 
         // Create an event with alarm
-        EventData event = createSingleEvent("testSingleAlarmTriggerTime", startTime.getTime());
+        EventData event = createSingleEvent("testSingleAlarmTriggerTime", cal);
 
         getAndCheckEvent(event, 1);
 
+        Calendar today = Calendar.getInstance(UTC);
+        today.setTime(new Date());
+
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(today.getTimeInMillis(), 1); // No triggers
         cal.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), cal.getTimeInMillis());
     }
@@ -132,25 +134,25 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // Create an event tomorrow 12 o clock
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date startTime = cal.getTime();
-
-        long currentTime = System.currentTimeMillis();
 
         // Create an event with alarm
-        EventData event = createSingleEvent("testSingleAlarmTriggerWithUpdate", startTime.getTime());
+        EventData event = createSingleEvent("testSingleAlarmTriggerWithUpdate", cal);
         getAndCheckEvent(event, 1);
 
+        Calendar today = Calendar.getInstance(UTC);
+        today.setTime(new Date());
+
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(today.getTimeInMillis(), 1); // No triggers
         Calendar trigger1 = (Calendar) cal.clone();
         trigger1.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), trigger1.getTimeInMillis());
 
         // Shift the start time by one hour
-        shiftEvent(event.getId(), null, event, cal.getTimeInMillis(), TimeUnit.HOURS, 1, getLastTimestamp());
+        shiftEvent(event.getId(), null, event, cal, TimeUnit.HOURS, 1, getLastTimestamp());
 
         // Check if trigger time changed accordingly
-        triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        triggers = getAndCheckAlarmTrigger(cal.getTimeInMillis(), 1); // No triggers
         Calendar trigger2 = (Calendar) cal.clone();
         trigger2.add(Calendar.HOUR, 1);
         trigger2.add(Calendar.MINUTE, -15);
@@ -163,17 +165,16 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // Create an event yesterday 12 o clock
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date startTime = cal.getTime();
 
         // Create an event with alarm
-        EventData event = createSeriesEvent("testSeriesAlarmTriggerTime", startTime.getTime());
+        EventData event = createSeriesEvent("testSeriesAlarmTriggerTime", cal);
         getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
         AlarmTrigger alarmTrigger = triggers.get(0);
-        if (currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
+        if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
             cal.add(Calendar.DAY_OF_MONTH, 1);
         } else {
@@ -195,10 +196,9 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // Create an event yesterday 12 o clock
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date startTime = cal.getTime();
 
         // Create an event with alarm
-        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", startTime.getTime());
+        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
         getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
@@ -206,16 +206,16 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // The created alarm
         AlarmTrigger alarmTrigger = triggers.get(0);
         assertTrue(alarmTrigger.getEventId().equals(event.getId()));
-        Calendar eventTime = Calendar.getInstance();
+        Calendar eventTime = Calendar.getInstance(UTC);
         eventTime.setTimeInMillis(cal.getTimeInMillis());
-        if (currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
+        if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
             eventTime.add(Calendar.DAY_OF_MONTH, 1);
         } else {
             // The next trigger is tomorrow
             eventTime.add(Calendar.DAY_OF_MONTH, 2);
         }
-        Calendar alarmTriggerTime = Calendar.getInstance();
+        Calendar alarmTriggerTime = Calendar.getInstance(UTC);
         alarmTriggerTime.setTime(eventTime.getTime());
         alarmTriggerTime.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
@@ -223,7 +223,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         /*
          * 2. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = shiftEvent(event.getId(), alarmTrigger.getRecurrence(), event, eventTime.getTimeInMillis(), TimeUnit.HOURS, 1, getLastTimestamp());
+        CalendarResult updateResult = shiftEvent(event.getId(), alarmTrigger.getRecurrence(), event, eventTime, TimeUnit.HOURS, 1, getLastTimestamp());
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
@@ -232,13 +232,13 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
-        Calendar exceptionTriggerTime = Calendar.getInstance();
+        Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
         exceptionTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         exceptionTriggerTime.add(Calendar.HOUR, 1); // Old alarm time shifted by one hour
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
 
         // Check the normal alarm
-        Calendar newAlarmTriggerTime = Calendar.getInstance();
+        Calendar newAlarmTriggerTime = Calendar.getInstance(UTC);
         newAlarmTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         newAlarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1); // Old alarm time shifted by one day (next recurrence)
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
@@ -282,7 +282,6 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // Create an event yesterday 12 o clock
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date startTime = cal.getTime();
 
         // Create an event with alarm and two attendees
         Attendee attendee = new Attendee();
@@ -299,7 +298,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         atts.add(attendee);
         atts.add(attendee2);
 
-        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", startTime.getTime(), atts);
+        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal, atts);
         getAndCheckEvent(event, 1);
 
         ChronosUpdatesResponse updates = api2.getUpdates(session2, folderId2, 0l, null, null, null, null, null, false, true);
@@ -311,16 +310,16 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         long currentTime = System.currentTimeMillis();
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // The created alarm
         AlarmTrigger alarmTrigger = triggers.get(0);
-        Calendar eventTime = Calendar.getInstance();
+        Calendar eventTime = Calendar.getInstance(UTC);
         eventTime.setTimeInMillis(cal.getTimeInMillis());
-        if (currentTime < (startTime.getTime() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
+        if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
             eventTime.add(Calendar.DAY_OF_MONTH, 1);
         } else {
             // The next trigger is tomorrow
             eventTime.add(Calendar.DAY_OF_MONTH, 2);
         }
-        Calendar alarmTriggerTime = Calendar.getInstance();
+        Calendar alarmTriggerTime = Calendar.getInstance(UTC);
         alarmTriggerTime.setTime(eventTime.getTime());
         alarmTriggerTime.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
@@ -348,7 +347,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         /*
          * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = shiftEvent(event.getId(), alarmTrigger.getRecurrence(), event, eventTime.getTimeInMillis(), TimeUnit.HOURS, 1, getLastTimestamp());
+        CalendarResult updateResult = shiftEvent(event.getId(), alarmTrigger.getRecurrence(), event, eventTime, TimeUnit.HOURS, 1, getLastTimestamp());
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
@@ -357,13 +356,13 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
-        Calendar exceptionTriggerTime = Calendar.getInstance();
+        Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
         exceptionTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         exceptionTriggerTime.add(Calendar.HOUR, 1); // Old alarm time shifted by one hour
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
 
         // Check the normal alarm
-        Calendar newAlarmTriggerTime = Calendar.getInstance();
+        Calendar newAlarmTriggerTime = Calendar.getInstance(UTC);
         newAlarmTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
         newAlarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1); // Old alarm time shifted by one day (next recurrence)
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
@@ -475,11 +474,12 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
     @Test
     public void testFloatingEventAlarmTriggerTime() throws Exception {
-        changeTimezone(TimeZone.getTimeZone("Europe/Berlin"));
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        changeTimezone(timeZone);
         // Create an event tomorrow 12 o clock
 
         // Set floating date one day after the summer time change
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.set(Calendar.HOUR_OF_DAY, 12);
         cal.set(Calendar.MINUTE, 0);
@@ -488,10 +488,11 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         cal.set(Calendar.DAY_OF_MONTH, 27);
         cal.set(Calendar.MONTH, 2);
         cal.set(Calendar.YEAR, 2017);
-        Date start = cal.getTime();
+
+        long offset = timeZone.getOffset(cal.getTimeInMillis());
 
         // Create an floating event with an alarm 3 days earlier
-        DateTimeData startTime = getDateTime(null, start.getTime());
+        DateTimeData startTime = getDateTime(null, cal.getTimeInMillis());
         ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D"), false, false);
         EventData event = handleCreation(createEvent);
         getAndCheckEvent(event, 1);
@@ -503,7 +504,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         from.set(Calendar.YEAR, 2017);
 
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
-        long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3);
+        long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3) - offset;
         checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
 
         changeTimezone(TimeZone.getTimeZone("America/New_York"));
@@ -512,9 +513,9 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         Date parse = ZULU_FORMATER.get().parse(triggers2.get(0).getTime());
         assertNotEquals(triggerTime, parse.getTime());
 
-        int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(start.getTime());
-        int offsetOld = TimeZone.getTimeZone("Europe/Berlin").getOffset(start.getTime());
-        int offset = offsetOld - offsetNew;
+        int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(cal.getTimeInMillis());
+        int offsetOld = TimeZone.getTimeZone("Europe/Berlin").getOffset(cal.getTimeInMillis());
+        offset = offsetOld - offsetNew;
         checkAlarmTime(triggers2.get(0), event.getId(), triggerTime + offset);
     }
 
