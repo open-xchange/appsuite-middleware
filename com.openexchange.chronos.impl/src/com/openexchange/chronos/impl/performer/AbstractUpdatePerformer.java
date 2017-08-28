@@ -244,7 +244,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * delete event data from storage
          */
-        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         String id = originalEvent.getId();
         Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
@@ -254,9 +253,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
-
-        // Delete alarm triggers
-        storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
+        storage.getAlarmTriggerStorage().removeTriggers(id);
         /*
          * track deletion in result
          */
@@ -284,7 +281,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
-        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userId);
