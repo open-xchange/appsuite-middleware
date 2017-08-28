@@ -55,7 +55,6 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -140,17 +139,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
         /*
-         * track creation & return result
+         * track creation, insert alarm triggers & return result
          */
         Event createdEvent = loadEventData(newEvent.getId());
         trackCreation(createdEvent);
-        Event userizedEvent = userize(createdEvent);
-        insertAlarmTrigger(userizedEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(newEvent, newEvent.getDeleteExceptionDates());
         return result;
-    }
-
-    private void insertAlarmTrigger(Event newEvent) throws OXException {
-        storage.getAlarmTriggerStorage().insertTriggers(newEvent, null);
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {
