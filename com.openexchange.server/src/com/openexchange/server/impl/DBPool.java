@@ -60,6 +60,10 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class DBPool  {
 
+    public static final int getServerId() throws OXException {
+        return Database.getServerId();
+    }
+
     public static final Connection pickup() throws OXException {
         return Database.get(false);
     }

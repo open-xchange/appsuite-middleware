@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,60 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.groupware.ldap;
 
 import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import java.sql.SQLException;
+import java.sql.Statement;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.ContextDelete;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 
 
 /**
- * {@link DefaultContextCountPerSchemaClosure}
+ * {@link UserContextDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public class DefaultContextCountPerSchemaClosure implements ContextCountPerSchemaClosure {
-
-    private final Connection configCon;
-    private final OXAdminPoolInterface pool;
+public class UserContextDeleteListener extends ContextDelete {
 
     /**
-     * Initializes a new {@link DefaultContextCountPerSchemaClosure}.
+     * Initializes a new {@link UserContextDeleteListener}.
      */
-    public DefaultContextCountPerSchemaClosure(Connection configCon, OXAdminPoolInterface pool) {
+    public UserContextDeleteListener() {
         super();
-        this.configCon = configCon;
-        this.pool = pool;
     }
 
     @Override
-    public Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException {
-        try {
-            return pool.getContextCountPerSchema(configCon, poolId, maxContexts);
-        } catch (PoolException e) {
-            throw new StorageException(e);
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (isContextDelete(event)) {
+            handleContextDeletion(writeCon, event.getContext());
         }
     }
 
+    private void handleContextDeletion(Connection writeCon, Context ctx) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM login2user WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_setting_server WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_setting_mail WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_setting_admin WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_configuration WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_alias WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_attribute WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
 }

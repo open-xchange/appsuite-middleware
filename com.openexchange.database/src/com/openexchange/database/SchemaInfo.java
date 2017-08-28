@@ -47,69 +47,101 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
-
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
-import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+package com.openexchange.database;
 
 /**
- * {@link SchemaResult} - A simple class to reflect how a context's schema has been determined.
+ * {@link SchemaInfo} - An immutable simple wrapper for a pool identifier and schema name tuple.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public class SchemaResult {
-
-    /** The constant for automatic schema creation/detection */
-    public static final SchemaResult AUTOMATIC = new SchemaResult(Strategy.AUTOMATIC, null);
-
-    /** The constant for pre-defined schema name */
-    public static final SchemaResult SCHEMA_NAME = new SchemaResult(Strategy.SCHEMA, null);
+public class SchemaInfo {
 
     /**
-     * Gets a result for in-memory schema detection with given roll-back.
+     * Creates a new {@code SchemaInfo} instance for specified pool identifier and schema name.
      *
-     * @param cacheFinalize The cache finalize
-     * @return The result for in-memory schema detection
+     * @param poolId The identifier of the database pool, in which the schema resides
+     * @param schema The schema name
+     * @return The resulting {@code SchemaInfo} instance
      */
-    public static SchemaResult inMemoryWith(SchemaCacheFinalize cacheFinalize) {
-        return new SchemaResult(Strategy.IN_MEMORY, cacheFinalize);
+    public static SchemaInfo valueOf(int poolId, String schema) {
+        return new SchemaInfo(poolId, schema);
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
 
-    private final SchemaSelectStrategy.Strategy strategy;
-    private final SchemaCacheFinalize cacheRollback;
+    private final int poolId;
+    private final String schema;
+    private int hash = 0;
 
     /**
-     * Initializes a new {@link SchemaResult}.
-     *
-     * @param strategy The utilized strategy
-     * @param cacheRollback The optional cach roll-back
+     * Initializes a new {@link SchemaInfo}.
      */
-    private SchemaResult(Strategy strategy, SchemaCacheFinalize cacheRollback) {
+    private SchemaInfo(int poolId, String schema) {
         super();
-        this.strategy = strategy;
-        this.cacheRollback = cacheRollback;
+        this.poolId = poolId;
+        this.schema = schema;
     }
 
     /**
-     * Gets the utilized strategy
+     * Gets the identifier of the database pool, in which the schema resides
      *
-     * @return The utilized strategy
+     * @return The pool identifier
      */
-    public SchemaSelectStrategy.Strategy getStrategy() {
-        return strategy;
+    public int getPoolId() {
+        return poolId;
     }
 
     /**
-     * Gets the optional cache roll-back.
+     * Gets the schema name
      *
-     * @return The cacheRollback or <code>null</code>
+     * @return The schema name
      */
-    public SchemaCacheFinalize getCacheFinalize() {
-        return cacheRollback;
+    public String getSchema() {
+        return schema;
+    }
+
+    @Override
+    public int hashCode() {
+        // Not thread-safe, but does not matter. In worst case a thread calculates the hash code itself
+        int result = hash;
+        if (result == 0) {
+            result = 31 * 1 + poolId;
+            result = 31 * result + ((schema == null) ? 0 : schema.hashCode());
+            this.hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SchemaInfo)) {
+            return false;
+        }
+        SchemaInfo other = (SchemaInfo) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append("[poolId=").append(poolId).append(", ");
+        builder.append("schema=").append(schema);
+        builder.append("]");
+        return builder.toString();
     }
 
 }

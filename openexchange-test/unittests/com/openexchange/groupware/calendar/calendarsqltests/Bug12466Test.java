@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -94,7 +92,7 @@ public class Bug12466Test extends CalendarSqlTest {
             writecon = DBPool.pickupWriteable(ctx);
             final SessionObject so = SessionObjectWrapper.createSessionObject(userId, ctx.getContextId(), "deleteAllUserApps");
 
-            final DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
+            final DeleteEvent delEvent = DeleteEvent.createDeleteEventForUserDeletion(this, so.getUserId(), ContextStorage.getInstance().getContext(so.getContextId()));
 
             final CalendarAdministration ca = new CalendarAdministration();
             ca.deletePerformed(delEvent, readcon, writecon);

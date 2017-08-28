@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,54 @@
  *
  */
 
-package com.openexchange.admin.schemacache.inmemory;
+package com.openexchange.database.internal;
 
 /**
- * Manages the number of contexts for a certain database schema.
+ * {@link LockMech} - Specifies how a locking for a certain database pool (and possibly a given schema) is supposed to be performed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class SchemaCount implements Comparable<SchemaCount> {
+public enum LockMech {
 
-    final String name;
-    final long modCount;
-    int count;
+    /**
+     * Performs row locking through a <code>"SELECT ... FOR UPDATE"</code> statement using pool identifier (and possibly schema name) for fine-grained lock scope.
+     */
+    ROW_LOCK("row"),
+    /**
+     * Performs global locking through attempting to increment a counter in a "semaphore" table:<br><code>"UPDATE ctx_per_schema_sem SET id=id+1"</code>
+     */
+    GLOBAL_LOCK("global");
 
-    SchemaCount(String name, int count, long modCount) {
-        super();
-        this.modCount = modCount;
-        this.name = name;
-        this.count = count;
-    }
+    private final String id;
 
-    @Override
-    public int compareTo(SchemaCount o) {
-        int thisCount = this.count;
-        int otherCount = o.count;
-        return thisCount < otherCount ? -1 : (thisCount == otherCount ? 0 : 1);
+    private LockMech(String id) {
+        this.id = id;
     }
 
     /**
-     * Gets the modification count
+     * Gets the identifier
      *
-     * @return The modification count
+     * @return The identifier
      */
-    public long getModCount() {
-        return modCount;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Gets the schema name
+     * Gets the lock mechanism for specified identifier
      *
-     * @return The schema name
+     * @param id The identifier
+     * @return The looked-up lock mechanism or {@link #ROW_LOCK} as fall-back
      */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Gets the current count; that is the number of contexts using associated schema.
-     *
-     * @return The current count
-     */
-    public int getCount() {
-        return count;
-    }
-
-    void incrementCount() {
-        count++;
-    }
-
-    void decrementCount() {
-        count--;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(24).append("SchemaCount [");
-        if (name != null) {
-            builder.append("name=").append(name).append(", ");
+    public static LockMech lockMechFor(String id) {
+        if (null != id) {
+            for (LockMech lm : values()) {
+                if (lm.id.equals(id)) {
+                    return lm;
+                }
+            }
         }
-        builder.append("count=").append(count).append("]");
-        return builder.toString();
+        return LockMech.ROW_LOCK;
     }
+
 }

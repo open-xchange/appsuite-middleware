@@ -51,8 +51,9 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
+import java.sql.Statement;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -100,14 +101,43 @@ public class OXFolderDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon) throws OXException {
         final Context ctx = delEvent.getContext();
-        final long lastModified = System.currentTimeMillis();
+        if (delEvent.getType() == DeleteEvent.TYPE_CONTEXT) {
+            handleContextDeletion(writeCon, ctx);
+            return;
+        }
 
         if (delEvent.getType() == DeleteEvent.TYPE_USER) {
+            long lastModified = System.currentTimeMillis();
             handleUserDeletion(delEvent, readCon, writeCon, ctx, lastModified);
+            OXFolderDeleteListenerHelper.ensureConsistency(ctx, writeCon);
         } else if (delEvent.getType() == DeleteEvent.TYPE_GROUP) {
+            long lastModified = System.currentTimeMillis();
             handleGroupDeletion(delEvent, readCon, writeCon, ctx, lastModified);
+            OXFolderDeleteListenerHelper.ensureConsistency(ctx, writeCon);
         }
-        OXFolderDeleteListenerHelper.ensureConsistency(ctx, writeCon);
+    }
+
+    private void handleContextDeletion(Connection writeCon, Context ctx) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM oxfolder_property WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_lock WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_oxfolder_permissions WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_oxfolder_tree WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_userfolders_standardfolders WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_userfolders WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_specialfolders WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_permissions WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM oxfolder_tree WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 	private void handleGroupDeletion(final DeleteEvent delEvent,

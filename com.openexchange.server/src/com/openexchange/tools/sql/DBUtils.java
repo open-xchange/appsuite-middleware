@@ -249,9 +249,7 @@ public final class DBUtils {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.rollback();
-            }
+            con.rollback();
         } catch (final SQLException e) {
             LOG.error("", e);
         }
@@ -269,9 +267,7 @@ public final class DBUtils {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.setAutoCommit(true);
-            }
+            con.setAutoCommit(true);
         } catch (final SQLException e) {
             LOG.error("", e);
         }
@@ -587,6 +583,28 @@ public final class DBUtils {
             return null;
         }
         return extractSqlException((Exception) cause);
+    }
+
+    /**
+     * Extracts possibly nested reference of specified exception type.
+     *
+     * @param clazz The exception's type
+     * @param exception The parental exception to extract from
+     * @return The reference or <code>null</code>
+     */
+    public static <E extends Exception> E extractException(Class<E> clazz, Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (clazz.isInstance(exception)) {
+            return (E) exception;
+        }
+
+        Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractException(clazz, (Exception) cause);
     }
 
     /**

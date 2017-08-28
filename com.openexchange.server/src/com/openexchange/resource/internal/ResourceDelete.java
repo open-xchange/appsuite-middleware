@@ -228,7 +228,7 @@ public final class ResourceDelete {
         /*
          * Delete all references to resource
          */
-        final DeleteEvent event = new DeleteEvent(getOrig(), resource.getIdentifier(), DeleteEvent.TYPE_RESOURCE, ctx);
+        final DeleteEvent event = DeleteEvent.createDeleteEventForResourceDeletion(getOrig(), resource.getIdentifier(), ctx);
         DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 

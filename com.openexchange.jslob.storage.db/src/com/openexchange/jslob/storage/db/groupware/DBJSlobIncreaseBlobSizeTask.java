@@ -53,13 +53,10 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -71,26 +68,18 @@ import com.openexchange.tools.update.Tools;
  */
 public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link DBJSlobIncreaseBlobSizeTask}.
      *
      * @param services The service look-up
      */
-    public DBJSlobIncreaseBlobSizeTask(final ServiceLookup services) {
+    public DBJSlobIncreaseBlobSizeTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         boolean writeOperationPerformed = false;
         boolean rollback = false;
         try {
@@ -108,11 +97,6 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
         } finally {
             if (rollback) {
                 DBUtils.autocommit(writeCon);
-            }
-            if (writeOperationPerformed) {
-                dbService.backForUpdateTask(contextId, writeCon);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, writeCon);
             }
         }
     }

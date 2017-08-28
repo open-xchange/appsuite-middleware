@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,26 +47,44 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.groupware.update.internal;
 
-import java.util.Map;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import java.sql.Connection;
+import com.openexchange.database.Databases;
+import com.openexchange.groupware.update.ConnectionProvider;
+
 
 /**
- * {@link ContextCountPerSchemaClosure}
+ * {@link AbstractConnectionProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public interface ContextCountPerSchemaClosure {
+public abstract class AbstractConnectionProvider implements ConnectionProvider {
 
     /**
-     * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
-     *
-     * @param poolId The identifier of the database pool
-     * @param maxContexts The configured max. number of contexts allowed per schema
-     * @return A mapping providing the count per schema
-     * @throws StorageException If schema count cannot be returned
+     * Initializes a new {@link AbstractConnectionProvider}.
      */
-    Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException;
+    protected AbstractConnectionProvider() {
+        super();
+    }
+
+    /**
+     * Checks given connection if suitable for being freshly used.
+     *
+     * @param connection The connection
+     * @return The checked connection
+     */
+    protected Connection checkConnection(Connection connection) {
+        if (null != connection) {
+            Databases.autocommit(connection);
+        }
+        return connection;
+    }
+
+    /**
+     * Closes the connection.
+     */
+    public abstract void close();
+
 }

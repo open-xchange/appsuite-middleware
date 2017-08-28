@@ -125,7 +125,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
         datarow.add(String.valueOf(access.isPublicFolderEditable()));
         data.add(datarow);
-        doCSVOutput(getAccessColums(),data);
+        doCSVOutput(getAccessColums(), false, data);
     }
 
     private static ArrayList<String> getAccessColums() {

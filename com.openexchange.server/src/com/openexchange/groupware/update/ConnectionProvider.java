@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,47 +47,36 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.groupware.update;
+
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchemaCacheResult}
+ * {@link ConnectionProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public class SchemaCacheResult {
-
-    private final String schemaName;
-    private final SchemaCacheFinalize finalize;
+public interface ConnectionProvider {
 
     /**
-     * Initializes a new {@link SchemaCacheResult}.
+     * Gets the connection to use.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: The returned connection must not be closed.
+     * </div>
      *
-     * @param schemaName The schema name
-     * @param finalize The finalize instance or <code>null</code>
+     * @return The connection to use
+     * @throws OXException If connection cannot be returned
      */
-    public SchemaCacheResult(String schemaName, SchemaCacheFinalize finalize) {
-        super();
-        this.schemaName = schemaName;
-        this.finalize = finalize;
-    }
+    Connection getConnection() throws OXException;
 
     /**
-     * Gets the schema name
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
      *
-     * @return The schema name
+     * @return all contexts having their data in the same schema and on the same database.
+     * @throws OXException if some problem occurs.
      */
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    /**
-     * Gets the finalize instance
-     *
-     * @return The finalize instance or <code>null</code>
-     */
-    public SchemaCacheFinalize getFinalize() {
-        return finalize;
-    }
-
+    int[] getContextsInSameSchema() throws OXException;
 }

@@ -133,7 +133,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this), new PnsSubscriptionsReindexTask(this), new PnsSubscriptionsAddExpiresColumTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(this), new PnsSubscriptionsAddExpiresColumTask()));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
             registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }

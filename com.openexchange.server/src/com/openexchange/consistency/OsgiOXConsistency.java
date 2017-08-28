@@ -219,8 +219,7 @@ public class OsgiOXConsistency extends Consistency {
             }
         }
 
-        final int[] contextIds = configDB.listContexts(databaseId);
-
+        int[] contextIds = configDB.listContexts(databaseId, -1, -1);
         return loadContexts(contextIds);
     }
 

@@ -49,18 +49,16 @@
 
 package com.openexchange.push.malpoll;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -84,14 +82,11 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con.setAutoCommit(false); // BEGIN
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
-        try {
+            con.setAutoCommit(false);
+            rollback = true;
 
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MALPollModifyTableTask.class);
 
@@ -144,17 +139,17 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
                 addPrimaryKey(con, table2, log);
             }
 
-            con.commit(); // COMMIT
-            log.info("Update task {} successfully performed.", MALPollModifyTableTask.class.getName());
-        } catch (final SQLException e) {
-            rollback(con);
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final Exception e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
     }
 

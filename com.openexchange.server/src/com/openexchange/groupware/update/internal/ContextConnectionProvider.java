@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,64 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.groupware.update.internal;
 
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import java.sql.Connection;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link SchemaCache} - A cache for selecting the next schema to use when creating a context.
+ * {@link ContextConnectionProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public interface SchemaCache {
+public class ContextConnectionProvider extends AbstractConnectionProvider {
+
+    private final int contextId;
+    private final DatabaseService databaseService; // Ok to remember since freshly created for each using thread
+    private Connection connection;
 
     /**
-     * Gets the name for the next schema that is supposed to be used.
-     * <p>
-     * (Re-)initialization is performed if cache bucket is currently empty
-     *
-     * @param poolId The identifier of the database pool
-     * @param maxContexts The configured max. number of contexts allowed per schema
-     * @param closure The closure to invoke to retrieve the current context-per-schema count
-     * @return The schema name according to cache's state or <code>null</code> if no suitable schema is known to the cache
-     * @throws StorageException If next schema cannot be returned
+     * Initializes a new {@link ContextConnectionProvider}.
      */
-    SchemaCacheResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
+    public ContextConnectionProvider(int contextId) {
+        super();
+        this.contextId = contextId;
+        databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+    }
 
-    /**
-     * Clears the cache for given write pool to force (re-)initialization on next {@link #getNextSchemaFor(int, int, ContextCountPerSchemaClosure)} invocation.
-     *
-     * @param poolId The identifier of the database pool
-     * @throws StorageException If clear operation fails
-     */
-    void clearFor(int poolId) throws StorageException;
+    @Override
+    public synchronized Connection getConnection() throws OXException {
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        Connection connection = this.connection;
+        if (null == connection) {
+            connection = databaseService.getForUpdateTask(contextId);
+            this.connection = connection;
+        }
+        return checkConnection(connection);
+    }
+
+    @Override
+    public synchronized void close() {
+        Connection connection = this.connection;
+        if (null != connection) {
+            this.connection = null;
+            if (null != databaseService) {
+                databaseService.backForUpdateTask(contextId, connection);
+            }
+        }
+    }
+
+    @Override
+    public int[] getContextsInSameSchema() throws OXException {
+        return databaseService.getContextsInSameSchema(contextId);
+    }
 
 }

@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -75,10 +74,12 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        Connection conn = Database.getNoTimeout(ctxId, true);
+        Connection conn = params.getConnection();
+        boolean rollback = false;
         try {
             conn.setAutoCommit(false);
+            rollback = true;
+
             if (false == Tools.tableExists(conn, "user_alias")) {
                 createTable(conn);
             }
@@ -88,15 +89,16 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
                 insertAliases(conn, aliases);
             }
             conn.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(conn);
+            }
             DBUtils.autocommit(conn);
-            Database.backNoTimeout(ctxId, true, conn);
         }
     }
 
@@ -105,17 +107,17 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
         try {
             stmt = conn.createStatement();
             stmt.execute("CREATE TABLE `user_alias` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
-            + "`cid` INT4 UNSIGNED NOT NULL, " 
-            + "`user` INT4 UNSIGNED NOT NULL, " 
-            + "`alias` VARCHAR(255) NOT NULL, " 
-            + "`uuid` BINARY(16) DEFAULT NULL," 
-            + "PRIMARY KEY (`cid`, `user`, `alias`) " 
+            + "`cid` INT4 UNSIGNED NOT NULL, "
+            + "`user` INT4 UNSIGNED NOT NULL, "
+            + "`alias` VARCHAR(255) NOT NULL, "
+            + "`uuid` BINARY(16) DEFAULT NULL,"
+            + "PRIMARY KEY (`cid`, `user`, `alias`) "
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         } finally {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {

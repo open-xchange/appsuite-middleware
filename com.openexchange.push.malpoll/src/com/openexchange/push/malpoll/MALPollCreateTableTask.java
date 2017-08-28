@@ -54,13 +54,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -120,26 +120,43 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        createTable("malPollHash", getCreateHashTable(), contextId);
-        createTable("malPollUid", getCreateUIDsTable(), contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            createTable("malPollHash", getCreateHashTable(), con);
+            createTable("malPollUid", getCreateUIDsTable(), con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+        }
+
         LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException, OXException {
-        final Connection writeCon = Database.get(contextId, true);
+    private void createTable(final String tablename, final String sqlCreate, final Connection con) throws OXException, OXException {
         PreparedStatement stmt = null;
         try {
-            if (Tools.tableExists(writeCon, tablename)) {
+            if (Tools.tableExists(con, tablename)) {
                 return;
             }
-            stmt = writeCon.prepareStatement(sqlCreate);
+            stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 }

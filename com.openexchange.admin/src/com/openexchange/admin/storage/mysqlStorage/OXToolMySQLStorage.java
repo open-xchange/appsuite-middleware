@@ -82,6 +82,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
@@ -1730,6 +1731,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean schemaInUse(int pool_id, String schemaName) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            stmt = con.prepareStatement("SELECT 1 FROM context_server2db_pool WHERE (write_db_pool_id = ? OR read_db_pool_id = ?) AND db_schema=?");
+            stmt.setInt(1, pool_id);
+            stmt.setInt(2, pool_id);
+            stmt.setString(3, schemaName);
+            rs = stmt.executeQuery();
+
+            return rs.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException {
         int context_id = ctx.getId().intValue();
         Connection con = null;
@@ -1831,7 +1865,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 // it can only happen, when a schema has not been initialized correctly!
                 log.debug("FATAL: this error must not happen", e);
             }
-            log.error("Error in checking/updating schema", e);
+            log.error("Error while checking/updating schema", e);
             throw new StorageException(e.toString(), e);
         }
     }
@@ -1863,7 +1897,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 Connection con = null;
                 try {
                     con = cache.getReadConnectionForConfigDB();
-                    databases = PoolAndSchema.listDatabaseSchemas(poolId, cache.getServerId(), con);
+                    databases = PoolAndSchema.listDatabaseSchemas(poolId, con);
                 } catch (PoolException e) {
                     throw new StorageException(e.getMessage(), e);
                 } finally {
@@ -1950,7 +1984,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Connection con = null;
             try {
                 con = cache.getReadConnectionForConfigDB();
-                databases = PoolAndSchema.listAllSchemas(cache.getServerId(), con);
+                databases = PoolAndSchema.listAllSchemas(con);
             } catch (PoolException e) {
                 throw new StorageException(e.getMessage(), e);
             } finally {
@@ -2405,6 +2439,54 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean checkContextName(Context ctx) throws NoSuchContextException, InvalidDataException, StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            int contextId = ctx.getId().intValue();
+            String name = ctx.getName();
+            prep_check = con.prepareStatement("SELECT cid, name FROM context WHERE name=? OR cid=?");
+            prep_check.setString(1, name);
+            prep_check.setInt(2, contextId);
+            rs = prep_check.executeQuery();
+
+            String foundName = null;
+            while (rs.next()) {
+                int cid = rs.getInt(1);
+                if (cid != contextId) {
+                    throw new InvalidDataException("Context " + name + " already exists!");
+                }
+                foundName = rs.getString(2);
+            }
+
+            if (null == foundName) {
+                throw new NoSuchContextException();
+            }
+            return !name.equalsIgnoreCase(foundName);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean existsDatabaseName(final Database db) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -2711,7 +2793,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new InvalidDataException("email1 not set but required!");
             }
         }
-        
+
         if (usr.isDriveFolderModeSet() && OXFolderDefaultMode.fromString(usr.getDriveFolderMode()) == null) {
             String modes = "";
             for (OXFolderDefaultMode mode : OXFolderDefaultMode.values()) {
@@ -2748,7 +2830,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
 
                     if (lang != null) {
-                        if (lang.indexOf('_') == -1) {
+                        if (lang.indexOf('_') < 0) {
                             throw new InvalidDataException("language must contain an underscore, e.g. en_US");
                         }
                         user.setLanguage(lang);
@@ -2761,7 +2843,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             user.setLanguage(FALLBACK_LANGUAGE_CREATE + '_' + FALLBACK_COUNTRY_CREATE);
         } else {
-            if (lang.indexOf('_') == -1) {
+            if (lang.indexOf('_') < 0) {
                 throw new InvalidDataException("language must contain an underscore, e.g. en_US");
             }
         }
@@ -2894,6 +2976,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Database retval = new Database();
             int pos = 1;
             retval.setId(I(id));
+            retval.setMaster(Boolean.TRUE);
             retval.setUrl(rs.getString(pos++));
             retval.setDriver(rs.getString(pos++));
             retval.setLogin(rs.getString(pos++));

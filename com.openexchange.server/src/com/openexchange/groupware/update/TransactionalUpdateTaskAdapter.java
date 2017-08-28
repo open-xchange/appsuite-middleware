@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,80 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.groupware.update;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.admin.schemacache.inmemory.InMemorySchemaCache;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.sql.DBUtils;
+
 
 /**
- * {@link SchemaCacheProvider} - The provider for a {@link SchemaCache} instance.
+ * {@link TransactionalUpdateTaskAdapter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.10.0
  */
-public class SchemaCacheProvider {
-
-    private static final SchemaCacheProvider INSTANCE = new SchemaCacheProvider();
+public abstract class TransactionalUpdateTaskAdapter extends UpdateTaskAdapter {
 
     /**
-     * Gets the instance
-     *
-     * @return The instance
+     * Initializes a new {@link TransactionalUpdateTaskAdapter}.
      */
-    public static SchemaCacheProvider getInstance() {
-        return INSTANCE;
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------
-
-    private final AtomicReference<SchemaCache> cacheReference;
-
-    /**
-     * Initializes a new {@link SchemaCacheProvider}.
-     */
-    private SchemaCacheProvider() {
+    public TransactionalUpdateTaskAdapter() {
         super();
-        cacheReference = new AtomicReference<SchemaCache>();
     }
 
-    /**
-     * Gets the schema cache
-     *
-     * @return The schema cache
-     */
-    public SchemaCache getSchemaCache() {
-        SchemaCache schemaCache = cacheReference.get();
-        if (null == schemaCache) {
-            synchronized (this) {
-                schemaCache = cacheReference.get();
-                if (null == schemaCache) {
-                    schemaCache = new InMemorySchemaCache(-1L);
-                    cacheReference.set(schemaCache);
-                }
+    @Override
+    public final void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        try {
+            if (false == needsChanges(con)) {
+                // Nothing needs to be done
+                return;
             }
+
+            // Perform changes in transaction
+            boolean rollback = false;
+            try {
+                con.setAutoCommit(false);
+                rollback = true;
+
+                performChanges(params, con);
+
+                con.commit();
+                rollback = false;
+            } finally {
+                if (rollback) {
+                    DBUtils.rollback(con);
+                }
+                DBUtils.autocommit(con);
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }
-        return schemaCache;
     }
 
     /**
-     * Optionally gets the schema cache (if already initialized).
+     * Performs the changes for this update task. Given connection is in transaction.
      *
-     * @return The schema cache or <code>null</code>
+     * @param params The parameters carrying some useful parameters for performing the update.
+     * @param con The connection to use
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
      */
-    public SchemaCache optSchemaCache() {
-        return cacheReference.get();
+    protected abstract void performChanges(PerformParameters params, Connection con) throws OXException, SQLException;
+
+    /**
+     * Checks whether changes are required to be performed by this update task
+     *
+     * @param con The connection to use
+     * @return <code>true</code> if changes are required; otherwise <code>false</code> for no-op
+     * @throws SQLException If an SQL error occurs
+     */
+    protected boolean needsChanges(Connection con) throws SQLException{
+        return true;
     }
 
 }

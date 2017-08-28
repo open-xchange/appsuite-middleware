@@ -50,9 +50,11 @@
 package com.openexchange.groupware.update;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -108,22 +110,26 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = getConnection(contextId);
+            con.setAutoCommit(false);
+            rollback = true;
+
             create.perform(con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            releaseConnection(contextId, con);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
-    }
-
-    private void releaseConnection(final int contextId, final Connection con) {
-        databaseService.backForUpdateTask(contextId, con);
-    }
-
-    private Connection getConnection(final int contextId) throws OXException {
-        return databaseService.getForUpdateTask(contextId);
     }
 
 }

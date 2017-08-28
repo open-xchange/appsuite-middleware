@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,7 +58,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
@@ -72,6 +70,7 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Restores the initial permissions on the public root folder.
@@ -98,13 +97,15 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int ctxId = params.getContextId();
         final ProgressState progress = params.getProgressState();
-        final Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
+
             Exception re = null;
-            final int[] contextIds = Database.getContextsInSameSchema(ctxId);
+            final int[] contextIds = params.getContextsInSameSchema();
             progress.setTotal(contextIds.length);
             int pos = 0;
             for (final int contextId : contextIds) {
@@ -122,13 +123,16 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                     }
                 }
             }
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 
