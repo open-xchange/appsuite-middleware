@@ -86,8 +86,6 @@ public class DefaultManagedSession implements ManagedSession {
         private String client;
         private String userAgent;
         private long loginTime;
-        private int ctxId;
-        private int userId;
         private String location;
 
         Builder() {
@@ -101,8 +99,6 @@ public class DefaultManagedSession implements ManagedSession {
             this.client = session.getClient();
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             this.loginTime = parseLoginTime(session);
-            this.ctxId = session.getContextId();
-            this.userId = session.getUserId();
             location = SessionManagementStrings.UNKNOWN_LOCATION;
         }
 
@@ -149,23 +145,13 @@ public class DefaultManagedSession implements ManagedSession {
             return this;
         }
 
-        public Builder setCtxId(int ctxId) {
-            this.ctxId = ctxId;
-            return this;
-        }
-
-        public Builder setUserId(int userId) {
-            this.userId = userId;
-            return this;
-        }
-
         public Builder setLocation(String location) {
             this.location = location;
             return this;
         }
 
         public DefaultManagedSession build() {
-            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, ctxId, userId, location);
+            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, location);
         }
     }
 
@@ -176,19 +162,15 @@ public class DefaultManagedSession implements ManagedSession {
     private final String client;
     private final String userAgent;
     private final long loginTime;
-    private final int ctxId;
-    private final int userId;
     private final String location;
 
-    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId, String location) {
+    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, String location) {
         super();
         this.sessionId = sessionId;
         this.ipAddress = ipAddress;
         this.client = client;
         this.userAgent = userAgent;
         this.loginTime = loginTime;
-        this.ctxId = ctxId;
-        this.userId = userId;
         this.location = location;
     }
 
@@ -215,16 +197,6 @@ public class DefaultManagedSession implements ManagedSession {
     @Override
     public long getLoginTime() {
         return loginTime;
-    }
-
-    @Override
-    public int getContextId() {
-        return ctxId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
     }
 
     @Override

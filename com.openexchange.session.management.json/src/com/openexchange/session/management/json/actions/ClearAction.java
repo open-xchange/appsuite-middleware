@@ -49,46 +49,52 @@
 
 package com.openexchange.session.management.json.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link RemoveSessionAction}
+ * {@link ClearAction}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RemoveSessionAction implements AJAXActionService {
+public class ClearAction implements AJAXActionService {
 
-
-    public RemoveSessionAction() {
+    /**
+     * Initializes a new {@link ClearAction}.
+     */
+    public ClearAction() {
         super();
+
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Object data = requestData.getData();
-        if ((data == null) || (false == JSONObject.class.isInstance(data))) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        // Get the service
+        SessionManagementService service = Services.getService(SessionManagementService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        JSONObject dataObject = (JSONObject) data;
-        try {
-            String sessionIdToRemove = dataObject.getString("sessionIdToRemove");
-            SessionManagementService service = Services.getService(SessionManagementService.class);
-            service.removeSession(session, sessionIdToRemove);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+
+        // Get the data
+        String sessionIdToKeep = session.getSessionID();
+        Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
+
+        // Remove all sessions except blacklisted and transmitted to keep
+        for (ManagedSession mSession : userSessions) {
+            String mSessionId = mSession.getSessionId();
+            if (false == sessionIdToKeep.equals(mSessionId)) {
+                service.removeSession(session, mSessionId);
+            }
         }
         return new AJAXRequestResult();
     }
-
 }

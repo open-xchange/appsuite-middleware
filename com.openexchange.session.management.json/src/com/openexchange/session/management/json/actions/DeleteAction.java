@@ -49,52 +49,48 @@
 
 package com.openexchange.session.management.json.actions;
 
-import java.util.Collection;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.json.osgi.Services;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link RemoveAllOtherSessionsAction}
+ * {@link DeleteAction}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsAction implements AJAXActionService {
+public class DeleteAction implements AJAXActionService {
 
-    /**
-     * Initializes a new {@link RemoveAllOtherSessionsAction}.
-     */
-    public RemoveAllOtherSessionsAction() {
+
+    public DeleteAction() {
         super();
-
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Get the service
-        SessionManagementService service = Services.getService(SessionManagementService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(SessionManagementService.class);
+        Object data = requestData.getData();
+        if ((data == null) || (false == JSONArray.class.isInstance(data))) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-
-        // Get the data
-        String sessionIdToKeep = session.getSessionID();
-        Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
-
-        // Remove all sessions except blacklisted and transmitted to keep
-        for (ManagedSession mSession : userSessions) {
-            String mSessionId = mSession.getSessionId();
-            if (false == sessionIdToKeep.equals(mSessionId)) {
-                service.removeSession(session, mSessionId);
+        JSONArray dataObject = (JSONArray) data;
+        try {
+            SessionManagementService service = Services.getService(SessionManagementService.class);
+            for (int i = 0; i < dataObject.length(); i++) {
+                String sessionId = dataObject.getString(i);
+                service.removeSession(session, sessionId);
             }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
         return new AJAXRequestResult();
     }
+
 }

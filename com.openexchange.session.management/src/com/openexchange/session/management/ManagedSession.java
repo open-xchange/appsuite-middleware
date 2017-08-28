@@ -93,20 +93,6 @@ public interface ManagedSession {
     long getLoginTime();
 
     /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    int getUserId();
-
-    /**
      * Gets the (optional) location
      *
      * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}

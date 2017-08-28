@@ -57,22 +57,28 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.OperatingSystem;
+import net.sf.uadetector.ReadableUserAgent;
 
 /**
- * {@link GetSessionsAction}
+ * {@link AllAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsAction implements AJAXActionService {
+public class AllAction implements AJAXActionService {
 
+    //private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
-    public GetSessionsAction() {
+    public AllAction() {
         super();
     }
 
@@ -86,21 +92,68 @@ public class GetSessionsAction implements AJAXActionService {
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(8);
+                JSONObject json = new JSONObject(7);
                 json.put("sessionId", s.getSessionId());
                 json.put("ipAddress", s.getIpAddress());
                 json.put("client", s.getClient());
                 json.put("userAgent", s.getUserAgent());
-                json.put("ctxId", s.getContextId());
-                json.put("userId", s.getUserId());
-                json.put("location", s.getLocation());
-                json.put("loginTime", s.getLoginTime());
+                String location = s.getLocation();
+                if (Strings.isNotEmpty(location) && !SessionManagementStrings.UNKNOWN_LOCATION.equals(location)) {
+                    json.put("location", s.getLocation());
+                }
+                long loginTime = s.getLoginTime();
+                if (0 < loginTime) {
+                    json.put("loginTime", loginTime);
+                }
+                JSONObject deviceInfo = getDeviceInfo(s.getUserAgent());
+                if (null != deviceInfo) {
+                    json.put("deviceInfo", deviceInfo);
+                }
                 result.add(0, json);
             }
         } catch (JSONException e) {
             // should not happen
         }
         return new AJAXRequestResult(result, "json");
+    }
+
+    private JSONObject getDeviceInfo(String userAgent) {
+        UserAgentParser parser = Services.getService(UserAgentParser.class);
+        if (null == parser) {
+            return null;
+        }
+
+        ReadableUserAgent info = parser.parse(userAgent);
+        OperatingSystem operatingSystem = info.getOperatingSystem();
+        String os = null;
+        String osVersion = null;
+        if (null != operatingSystem) {
+            os = operatingSystem.getName();
+            osVersion = operatingSystem.getVersionNumber().getMajor();
+        }
+        String browser = info.getName();
+        String browserVersion = info.getVersionNumber().getMajor();
+        if (Strings.isNotEmpty(os) && Strings.isNotEmpty(osVersion) && Strings.isNotEmpty(browser) || Strings.isNotEmpty(browserVersion)) {
+            JSONObject deviceInfo = new JSONObject(5);
+            try {
+                if (Strings.isNotEmpty(os)) {
+                    deviceInfo.put("os", os);
+                }
+                if (Strings.isNotEmpty(osVersion)) {
+                    deviceInfo.put("osVersion", osVersion);
+                }
+                if (Strings.isNotEmpty(browser)) {
+                    deviceInfo.put("browser", browser);
+                }
+                if (Strings.isNotEmpty(browserVersion)) {
+                    deviceInfo.put("browserVersion", browserVersion);
+                }
+            } catch (JSONException e) {
+                // will not happen
+            }
+            return deviceInfo;
+        }
+        return null;
     }
 
 }
