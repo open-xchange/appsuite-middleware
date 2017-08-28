@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.8.3-33) stable; urgency=medium
+
+  * Build for patch 2017-09-04 (4327)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 28 Aug 2017 12:49:32 +0200
+
 open-xchange-admin-autocontextid (7.8.3-32) stable; urgency=medium
 
   * Build for patch 2017-08-21 (4317)
