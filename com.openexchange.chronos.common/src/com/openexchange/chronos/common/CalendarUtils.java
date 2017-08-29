@@ -1476,11 +1476,10 @@ public class CalendarUtils {
         return events;
     }
 
-
     /**
      * Gets the identifier of the folder representing a specific calendar user's view on an event. For events in <i>public</i> folders or
-     * not <i>group-scheduled</i> events, this is always the common folder identifier of the event. Otherwise, the corresponding
-     * attendee's parent folder identifier is returned.
+     * not <i>group-scheduled</i> events, this is always the common folder identifier of the event as per {@link Event#getFolderId}.
+     * Otherwise, the corresponding attendee's parent folder identifier is returned.
      *
      * @param event The event to get the folder view for
      * @param calendarUser The identifier of the user to get the folder view for
@@ -1488,15 +1487,14 @@ public class CalendarUtils {
      * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
      */
     public static String getFolderView(Event event, int calendarUser) throws OXException {
-        if (null != event.getFolderId() || false == isGroupScheduled(event)) {
+        if (null != event.getFolderId()) {
             return event.getFolderId();
-        } else {
-            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), calendarUser);
-            if (null == userAttendee || null == userAttendee.getFolderID()) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
-            }
-            return userAttendee.getFolderID();
         }
+        Attendee userAttendee = find(event.getAttendees(), calendarUser);
+        if (null == userAttendee || null == userAttendee.getFolderID()) {
+            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
+        }
+        return userAttendee.getFolderID();
     }
 
 }

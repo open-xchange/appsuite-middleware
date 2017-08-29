@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.findAttachment;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
@@ -802,7 +803,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     eventUpdate.removeSequence();
                     break;
                 case FOLDER_ID:
-                    if (Utils.getFolderView(storage, originalEvent, calendarUserId).equals(eventUpdate.getFolderId())) {
+                    if (getFolderView(originalEvent, calendarUserId).equals(eventUpdate.getFolderId())) {
                         // ignore implicitly
                         eventUpdate.removeFolderId();
                         break;

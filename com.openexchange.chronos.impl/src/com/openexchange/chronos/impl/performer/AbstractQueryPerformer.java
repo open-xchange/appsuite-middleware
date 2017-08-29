@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -253,7 +254,7 @@ public abstract class AbstractQueryPerformer {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
-            event.setFolderId(Utils.getFolderView(storage, event, forUser));
+            event.setFolderId(getFolderView(event, forUser));
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
@@ -290,7 +291,7 @@ public abstract class AbstractQueryPerformer {
             event = applyExceptionDates(storage, event, forUser);
         }
         final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
-        final String folderView = Utils.getFolderView(storage, event, forUser);
+        final String folderView = getFolderView(event, forUser);
         if (null != alarms || false == folderView.equals(event.getFolderId())) {
             event = new DelegatingEvent(event) {
 

@@ -52,9 +52,9 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getFolderView;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
 import java.util.ArrayList;
@@ -361,7 +361,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * prepare & insert a new plain exception
          */
-        String folderView = getFolderView(storage, originalMasterEvent, calendarUserId);
+        String folderView = getFolderView(originalMasterEvent, calendarUserId);
         Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
         storage.getEventStorage().insertEvent(exceptionEvent);
         /*
@@ -435,7 +435,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
             newAlarms.add(newAlarm);
         }
-        final String folderView = Utils.getFolderView(storage, event, userId);
+        final String folderView = getFolderView(event, userId);
         if (false == folderView.equals(event.getFolderId())) {
             event = new DelegatingEvent(event) {
 
@@ -488,7 +488,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm));
             }
-            final String folderView = Utils.getFolderView(storage, event, userId);
+            final String folderView = getFolderView(event, userId);
             if (false == folderView.equals(event.getFolderId())) {
                 Event userizedEvent = new DelegatingEvent(event) {
 
