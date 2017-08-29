@@ -99,81 +99,90 @@ public class DBMigrationExecutor implements Runnable {
         return null != thread;
     }
 
+    private boolean checkIfUpdateIsNeeded(ScheduledExecution scheduledExecution, Connection connection) {
+        try {
+            if (needsUpdate(scheduledExecution, connection)) {
+                return true;
+            }
+
+            LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
+            scheduledExecution.setDone(null);
+            notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
+            return false;
+        } catch (ValidationFailedException validationFailedException) {
+            LOG.error("MD5Sum validation failed. No more ChangeSets from file {} will be executed!", scheduledExecution.getMigration().getFileLocation(), validationFailedException);
+            return false;
+        }
+    }
+
     @Override
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
             DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
             Connection connection = null;
             try {
+                // Acquire connection
                 connection = connectionProvider.get();
 
                 // Check if update is needed
-                try {
-                    if (false == needsUpdate(scheduledExecution, connection)) {
-                        LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
-                        scheduledExecution.setDone(null);
-                        notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
-                        continue;
-                    }
-                } catch (ValidationFailedException validationFailedException) {
-                    LOG.error("MD5Sum validation failed. No more ChangeSets from file {} will be executed!", scheduledExecution.getMigration().getFileLocation(), validationFailedException);
-                    continue;
-                }
-
-                // Execute update
-                Exception exception = null;
-                Liquibase liquibase = null;
-                DBMigrationListener migrationListener = new DBMigrationListener();
-                String fileLocation = scheduledExecution.getFileLocation();
-                try {
-                    liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
-                    liquibase.setChangeExecListener(migrationListener);
-                    DBMigrationMonitor.getInstance().addFile(fileLocation);
-                    if (scheduledExecution.isRollback()) {
-                        Object target = scheduledExecution.getRollbackTarget();
-                        if (target instanceof Integer) {
-                            int numberOfChangeSetsToRollback = ((Integer) target).intValue();
-                            LOG.info("Rollback {} numbers of changesets of changelog {}", Integer.valueOf(numberOfChangeSetsToRollback), fileLocation);
-                            liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
-                        } else if (target instanceof String) {
-                            String changeSetTag = (String) target;
-                            LOG.info("Rollback to changeset {} of changelog {}", changeSetTag, fileLocation);
-                            liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
-                        } else {
-                            throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
-                        }
-                    } else {
-                        LOG.info("Running migrations of changelog {}", fileLocation);
-                        liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
-                    }
-                } catch (liquibase.exception.ValidationFailedException e) {
-                    exception = e;
-                    LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
-                } catch (liquibase.exception.LiquibaseException e) {
-                    exception = e;
-                    LOG.error("", e);
-                } catch (OXException e) {
-                    exception = e;
-                    LOG.error("", e);
-                } catch (Exception e) {
-                    exception = e;
-                    LOG.error("", e);
-                } finally {
-                    scheduledExecution.setDone(exception);
+                if (checkIfUpdateIsNeeded(scheduledExecution, connection)) {
+                    // Execute update
+                    Exception exception = null;
+                    Liquibase liquibase = null;
+                    DBMigrationListener migrationListener = new DBMigrationListener();
+                    String fileLocation = scheduledExecution.getFileLocation();
                     try {
-                        LiquibaseHelper.cleanUpLiquibase(liquibase);
-                    } catch (Exception e) {
+                        liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
+                        liquibase.setChangeExecListener(migrationListener);
+                        DBMigrationMonitor.getInstance().addFile(fileLocation);
+                        if (scheduledExecution.isRollback()) {
+                            Object target = scheduledExecution.getRollbackTarget();
+                            if (target instanceof Integer) {
+                                int numberOfChangeSetsToRollback = ((Integer) target).intValue();
+                                LOG.info("Rollback {} numbers of changesets of changelog {}", Integer.valueOf(numberOfChangeSetsToRollback), fileLocation);
+                                liquibase.rollback(numberOfChangeSetsToRollback, LIQUIBASE_NO_DEFINED_CONTEXT);
+                            } else if (target instanceof String) {
+                                String changeSetTag = (String) target;
+                                LOG.info("Rollback to changeset {} of changelog {}", changeSetTag, fileLocation);
+                                liquibase.rollback(changeSetTag, LIQUIBASE_NO_DEFINED_CONTEXT);
+                            } else {
+                                throw DBMigrationExceptionCodes.WRONG_TYPE_OF_DATA_ROLLBACK_ERROR.create();
+                            }
+                        } else {
+                            LOG.info("Running migrations of changelog {}", fileLocation);
+                            liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
+                        }
+                    } catch (liquibase.exception.ValidationFailedException e) {
+                        exception = e;
+                        LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
+                    } catch (liquibase.exception.LiquibaseException e) {
+                        exception = e;
                         LOG.error("", e);
+                    } catch (OXException e) {
+                        exception = e;
+                        LOG.error("", e);
+                    } catch (Exception e) {
+                        exception = e;
+                        LOG.error("", e);
+                    } finally {
+                        scheduledExecution.setDone(exception);
+                        if (null != liquibase) {
+                            try {
+                                LiquibaseHelper.cleanUpLiquibase(liquibase);
+                            } catch (Exception e) {
+                                LOG.error("", e);
+                            }
+                        }
+                        if (null != connection) {
+                            connectionProvider.back(connection);
+                            connection = null;
+                        }
+                        DBMigrationMonitor.getInstance().removeFile(fileLocation);
                     }
-                    if (null != connection) {
-                        connectionProvider.back(connection);
-                        connection = null;
-                    }
-                    DBMigrationMonitor.getInstance().removeFile(fileLocation);
-                }
 
-                // Notify...
-                notify(scheduledExecution.getCallback(), migrationListener.getExecuted(), migrationListener.getRolledBack());
+                    // Notify...
+                    notify(scheduledExecution.getCallback(), migrationListener.getExecuted(), migrationListener.getRolledBack());
+                }
             } catch (OXException e) {
                 LOG.warn("Error acquiring connection.", e);
             } finally {
@@ -238,6 +247,7 @@ public class DBMigrationExecutor implements Runnable {
      * Performs an unsynchronized check to determine if there are any unrun changesets in the scheduled execution or not.
      *
      * @param scheduledExecution The scheduled execution
+     * @param connection The connection to use
      * @return <code>true</code> if unrun changesets are signaled by liquibase or if the unrun changesets can't be evaluated, <code>false</code>, otherwise
      * @throws ValidationFailedException
      */
