@@ -53,6 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.time.Instant;
+import java.time.zone.ZoneOffsetTransition;
+import java.time.zone.ZoneRules;
+import java.time.zone.ZoneRulesProvider;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -479,15 +483,9 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // Create an event tomorrow 12 o clock
 
         // Set floating date one day after the summer time change
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.DAY_OF_MONTH, 27);
-        cal.set(Calendar.MONTH, 2);
-        cal.set(Calendar.YEAR, 2017);
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        Calendar cal = getDaylightSavingDate(timeZone, currentYear+1);
+        cal.add(Calendar.DAY_OF_MONTH, 3);
 
         long offset = timeZone.getOffset(cal.getTimeInMillis());
 
@@ -498,10 +496,9 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         getAndCheckEvent(event, 1);
 
         // Check if next trigger is at correct time
-        Calendar from = getUTCCalendar();
-        from.set(Calendar.DAY_OF_MONTH, 20);
-        from.set(Calendar.MONTH, 2);
-        from.set(Calendar.YEAR, 2017);
+        Calendar from = Calendar.getInstance(UTC);
+        from.setTimeInMillis(cal.getTimeInMillis());
+        from.add(Calendar.DAY_OF_MONTH, -5);
 
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
         long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3) - offset;
@@ -517,6 +514,15 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         int offsetOld = TimeZone.getTimeZone("Europe/Berlin").getOffset(cal.getTimeInMillis());
         offset = offsetOld - offsetNew;
         checkAlarmTime(triggers2.get(0), event.getId(), triggerTime + offset);
+    }
+
+    private Calendar getDaylightSavingDate( TimeZone tz, int year){
+        Calendar cal = Calendar.getInstance(tz);
+        cal.set(year, 1, 1, 0, 0);
+        ZoneRules rules = ZoneRulesProvider.getRules(tz.getID(), true);
+        ZoneOffsetTransition nextTransition = rules.nextTransition(Instant.ofEpochMilli(cal.getTimeInMillis()));
+        cal.setTimeInMillis(nextTransition.getInstant().getEpochSecond() * 1000);
+        return cal;
     }
 
 }
