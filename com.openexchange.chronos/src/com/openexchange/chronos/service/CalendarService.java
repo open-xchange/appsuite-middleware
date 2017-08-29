@@ -377,6 +377,16 @@ public interface CalendarService {
     CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
 
     /**
+     * Clears a folder's contents by deleting all contained events.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to clear
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The delete result
+     */
+    CalendarResult clearEvents(CalendarSession session, String folderId, long clientTimestamp) throws OXException;
+
+    /**
      * Retrieves upcoming alarm triggers.
      *
      * The following calendar parameters are evaluated:

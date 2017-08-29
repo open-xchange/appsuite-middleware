@@ -62,6 +62,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
+import com.openexchange.chronos.impl.performer.ClearPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
@@ -392,6 +393,26 @@ public class CalendarServiceImpl implements CalendarService {
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID()))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
+
+            }
+        }.executeUpdate();
+        /*
+         * notify handlers & return userized result
+         */
+        notifyHandlers(result);
+        return result.getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult clearEvents(CalendarSession session, final String folderId, final long clientTimestamp) throws OXException {
+        /*
+         * delete event
+         */
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ClearPerformer(storage, session, getFolder(session, folderId)).perform(clientTimestamp);
 
             }
         }.executeUpdate();
