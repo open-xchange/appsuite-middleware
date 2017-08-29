@@ -99,7 +99,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
-        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), getExportFileName(req) + sis.getFormat().getExtension());
+        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), getExportFileName(req, sis.getFormat().getExtension()));
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
@@ -116,7 +116,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
             return null;
         }
 
-        Map<String, Object> optionalParams = new HashMap<String, Object>(4);
+        Map<String, Object> optionalParams = new HashMap<>(4);
         optionalParams.put("__requestData", request);
         String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
         String delivery = request.getParameter(DELIVERY);
@@ -127,13 +127,12 @@ public abstract class AbstractExportAction implements AJAXActionService {
         return optionalParams;
     }
 
-    private String getExportFileName(ExportRequest req) throws OXException{
+    private String getExportFileName(ExportRequest req, String extension) throws OXException{
         Map<String, List<String>> batchIds = req.getBatchIds();
         if (null == batchIds || batchIds.isEmpty()) {
-            return getExporter().getFolderExportFileName(req.getSession(), req.getFolder());
+            return getExporter().getFolderExportFileName(req.getSession(), req.getFolder(), extension);
         }
-
-        return getExporter().getBatchExportFileName(req.getSession(), batchIds);
+        return getExporter().getBatchExportFileName(req.getSession(), batchIds, extension);
     }
 
 }

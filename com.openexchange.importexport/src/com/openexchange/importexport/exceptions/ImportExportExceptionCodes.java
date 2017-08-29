@@ -186,10 +186,8 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
 
     /** %1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s */
     WARNINGS_AND_TRUNCATED_RESULTS("%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s", CATEGORY_WARNING, 1322, ImportExportExceptionMessages.WARNINGS_AND_TRUNCATED_RESULTS_MSG),
-
-    COULD_NOT_VALIDATE_OBJECT("There are invalid objects in the batch data.", Category.CATEGORY_USER_INPUT, 1323, OXExceptionStrings.BAD_REQUEST),
     ;
-    
+
     private String message;
     private Category category;
     private int number;

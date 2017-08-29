@@ -53,10 +53,13 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.ajax.helper.DownloadUtility;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -88,12 +91,12 @@ public class ExportFileNameCreator {
 
     /**
      * Creates a file name based on the folder
-     * 
+     *
      * @param session The session object
      * @param folder The folder to create the file name with
      * @return String The file name
      */
-    public static String createFolderExportFileName(ServerSession session, String folder) {
+    public static String createFolderExportFileName(ServerSession session, String folder, String extension) {
         FolderService folderService = ImportExportServices.getFolderService();
         final StringBuilder sb = new StringBuilder();
         try {
@@ -103,19 +106,18 @@ public class ExportFileNameCreator {
             LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
             sb.append(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME));
         }
-        sb.append(".");
-        return sb.toString();
+        return validateFileName(session, sb, extension);
     }
 
     /**
      * Creates a file name based on the a batch of folders and objects
-     * 
+     *
      * @param session The session object
      * @param batchIds The batchIds to create the file name with
      * @return String The file name
      */
-    public static String createBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds) {
-        StringBuilder sb = new StringBuilder();
+    public static String createBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
+        final StringBuilder sb = new StringBuilder();
         Entry<String, List<String>> entry = batchIds.entrySet().iterator().next();
         if (batchIds.size() == 1) {
             //check for contacts of the same folder
@@ -141,21 +143,20 @@ public class ExportFileNameCreator {
                     LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
                     sb.append(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME));
                 }
-            sb.append(".");
         }
-        return sb.toString();
+        return validateFileName(session, sb, extension);
     }
 
     /**
      * Helper method for creating a file name based on the folder and the object
-     * 
+     *
      * @param session The session object
      * @param folder The folderId to create the file name with
      * @param batchId The batchId to create the file name with
      * @return String The file name
      */
     private static String createBatchExportFileName(ServerSession session, String folder, String batchId) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         FolderService folderService = ImportExportServices.getFolderService();
         try {
             FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
@@ -191,13 +192,12 @@ public class ExportFileNameCreator {
             LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
             sb.append(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME));
         }
-        sb.append(".");
         return sb.toString();
     }
 
     /**
      * Creates a localized string based on the file name
-     * 
+     *
      * @param session The session object
      * @param fileName The file name of the module
      * @return String The localized file name
@@ -208,11 +208,11 @@ public class ExportFileNameCreator {
 
     /**
      * Creates a file name for a single contact
-     * 
+     *
      * @param session The session object
      * @param folder The folderId
      * @param batchId The objectId
-     * @return String a file name for a single contact export
+     * @return String A file name for a single contact export
      * @throws OXException if contact is unavailable
      */
     private static String createSingleContactName(ServerSession session, String folder, String batchId) throws OXException {
@@ -239,6 +239,39 @@ public class ExportFileNameCreator {
                 }
             }
         }
+        return sb.toString();
+    }
+
+    /**
+     * Validates the file name
+     *
+     * @param session The session object
+     * @param sb The {@link StringBuilder} instance which contains the file name
+     * @param extension The file extension
+     * @return String The validated file name
+     */
+    private static String validateFileName(ServerSession session, final StringBuilder sb, String extension) {
+        try {
+            sb.append("."+extension);
+            FilenameValidationUtils.checkCharacters(sb.toString());
+            FilenameValidationUtils.checkName(sb.toString());
+        } catch (OXException e) {
+            LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+            return getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME)+"."+extension;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Appends the file name parameter
+     *
+     * @param requestData The ajax request data
+     * @param fileName The file name to encode
+     * @return String The validated and encoded file name parameter
+     */
+    public static String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
+        final StringBuilder sb = new StringBuilder();
+        DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
         return sb.toString();
     }
 
