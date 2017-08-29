@@ -253,7 +253,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         //String[] userData = subject.split("@");
-        //TODO QS-VS:
+        //TODO QS-VS: 
         String[] userData = {"3", "wonderland.net"}; 
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
@@ -267,6 +267,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
+        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
         
         SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
         if (sessionStorageService != null) {

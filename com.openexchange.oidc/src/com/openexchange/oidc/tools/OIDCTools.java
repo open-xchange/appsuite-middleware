@@ -105,6 +105,8 @@ public class OIDCTools {
 
     public static final String OIDC_LOGOUT = "oidcLogout";
 
+    public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
+
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";

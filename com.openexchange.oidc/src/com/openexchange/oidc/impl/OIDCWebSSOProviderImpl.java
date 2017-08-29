@@ -51,7 +51,9 @@ package com.openexchange.oidc.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -75,6 +77,8 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -228,8 +232,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         if (this.backend.getBackendConfig().isStoreOAuthTokensEnabled()) {
-            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, tokenResponse.getTokens().getBearerAccessToken().getValue());
-            authInfo.setProperty(OIDCTools.REFRESH_TOKEN, tokenResponse.getTokens().getRefreshToken().getValue());
+            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+            RefreshToken refreshToken = tokenResponse.getTokens().getRefreshToken();
+            if (bearerAccessToken != null && refreshToken != null) {
+                authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+                authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
+                long expiryDate = new Date().getTime();
+                expiryDate += bearerAccessToken.getLifetime() * 1000;
+                authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
+            }
         }
         
         String sessionToken = sessionReservationService.reserveSessionFor(

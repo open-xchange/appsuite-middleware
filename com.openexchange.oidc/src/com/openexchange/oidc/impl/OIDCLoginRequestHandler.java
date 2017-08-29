@@ -61,10 +61,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -155,10 +153,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
 
         String autologinCookieValue = null;
-        //TODO QS-VS: Change to mode, off, over IDP, OX only
-        // OX only bedeutet wir erstetzen den normalen autologin durch einen eigenen der direkt
-        // in die Session läuft ohne über den idp zu gehen!! Muss im InitServlet passieren, vor dem
-        // redirect zum IDP
         
         //TODO QS-VS: Das muss viel besser vereinheitlicht werden, das Chaos mit dem autologin
         boolean autologinEnabled = this.backend.getBackendConfig().isAutologinEnabled();
@@ -283,15 +277,8 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                         }
                         session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
                         OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
-//                        String accessToken = state.get(OIDCTools.ACCESS_TOKEN);
-//                        if (accessToken != null) {
-//                            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
-//                        }
                         OIDCTools.addParameterToSession(session, state, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
-//                        String refreshToken = state.get(OIDCTools.REFRESH_TOKEN);
-//                        if (refreshToken != null) {
-//                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
-//                        }
+                        OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
                     }
                 };
 
