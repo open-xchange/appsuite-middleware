@@ -98,12 +98,16 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAlarmTriggerStorage.class);
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     private final int accountId;
     private final AlarmStorage alarmStorage;
     private final RecurrenceService recurrenceService;
     private final EntityResolver resolver;
 
     private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId=?;";
+    private static final String FLOATING_TRIGGER_SQL = "SELECT alarm, triggerDate, floatingTimezone, relatedTime FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND floatingTimezone IS NOT NULL;";
+    private static final String UPDATE_TRIGGER_TIME_SQL = "UPDATE calendar_alarm_trigger SET triggerDate=?, floatingTimezone=? WHERE cid=? AND account=? AND alarm=?;";
 
     /**
      * Initializes a new {@link RdbAlarmTriggerStorage}.
@@ -295,8 +299,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         insertTriggers(alarmsPerAttendee, wrapper);
     }
 
-    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
     /**
      * Creates new alarm triggers
      *
@@ -306,64 +308,40 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      */
     private void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, EventExceptionWrapper eventWrapper) throws OXException {
         Event event = eventWrapper.getEvent();
+        Set<RecurrenceId> exceptionSet = null;
+        RecurrenceId recurrenceId = null;
+        if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+
+            long[] exceptions = null;
+            exceptionSet = eventWrapper.getExceptions();
+            if (exceptionSet != null) {
+                exceptions = new long[exceptionSet.size()];
+                int x = 0;
+                for (RecurrenceId recId : exceptionSet) {
+                    exceptions[x++] = recId.getValue().getTimestamp();
+                }
+            }
+            RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
+            RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+            if(!iterateRecurrenceIds.hasNext()){
+                // Nothing to do
+                return;
+            }
+            recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
+
+        }
         for (Integer userId : alarmsPerAttendee.keySet()) {
 
             List<Alarm> alarms = alarmsPerAttendee.get(userId);
             if (alarms == null || alarms.isEmpty()) {
                 continue;
             }
+
             for (Alarm alarm : alarms) {
-                AlarmTrigger trigger = new AlarmTrigger();
-                trigger.setUserId(userId);
-                trigger.setAction(alarm.getAction().getValue());
-                trigger.setProcessed(false);
-                trigger.setAlarm(alarm.getId());
-                trigger.setEventId(event.getId());
-
-                if (CalendarUtils.isFloating(event)) {
-                    trigger.setTimezone(resolver.getTimeZone(userId));
-                }
-                TimeZone tz = UTC;
-                if (trigger.containsTimezone()) {
-                    tz = trigger.getTimezone();
-                }
-                if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-
-                    long[] exceptions = null;
-                    if (eventWrapper.getExceptions() != null) {
-                        exceptions = new long[eventWrapper.getExceptions().size()];
-                        int x = 0;
-                        for (RecurrenceId recurrenceId : eventWrapper.getExceptions()) {
-                            exceptions[x++] = recurrenceId.getValue().getTimestamp();
-                        }
-                    }
-                    RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
-                    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
-                    if(!iterateRecurrenceIds.hasNext()){
-                        continue;
-                    }
-
-                    RecurrenceId recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
-                    trigger.setRecurrence(recurrenceId);
-                    addRelatedDate(alarm, event, trigger);
-
-                    trigger.setTime(AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, eventWrapper.getExceptions()).getTime());
-                } else {
-                    if (event.getRecurrenceId() != null) {
-                        trigger.setRecurrence(event.getRecurrenceId());
-                    }
-                    addRelatedDate(alarm, event, trigger);
-                    trigger.setTime(AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime());
-                }
-
-                // Set proper folder id
-                try {
-                    trigger.setFolder(getFolderId(event, userId));
-                } catch (OXException e) {
-                    addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
+                if(trigger==null){
                     continue;
                 }
-
                 insertAlarmTrigger(trigger);
             }
 
@@ -412,9 +390,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return updated;
 
     }
-
-    private static final String FLOATING_TRIGGER_SQL = "SELECT alarm, triggerDate, floatingTimezone, relatedTime FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND floatingTimezone IS NOT NULL;";
-    private static final String UPDATE_TRIGGER_TIME_SQL = "UPDATE calendar_alarm_trigger SET triggerDate=?, floatingTimezone=? WHERE cid=? AND account=? AND alarm=?;";
 
     private int recalculateFloatingAlarmTriggers(int userId, Connection writeCon) throws OXException, SQLException {
         ResultSet resultSet = null;
@@ -524,49 +499,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     continue;
                 }
                 for (Alarm alarm : alarms) {
-                    AlarmTrigger trigger = new AlarmTrigger();
-                    trigger.setUserId(userId);
-                    trigger.setAction(alarm.getAction().getValue());
-                    trigger.setProcessed(false);
-                    trigger.setAlarm(alarm.getId());
-                    trigger.setEventId(event.getId());
 
-                    if (CalendarUtils.isFloating(event)) {
-                        trigger.setTimezone(resolver.getTimeZone(userId));
-                    }
-                    TimeZone tz = UTC;
-                    if (trigger.containsTimezone()) {
-                        tz = trigger.getTimezone();
-                    }
-
-                    if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-                        long triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, exceptionSet).getTime();
-                        if(triggerTime <= System.currentTimeMillis()){
-                            continue;
-                        }
-                        addRelatedDate(alarm, event, trigger);
-                        trigger.setRecurrence(recurrenceId);
-                        trigger.setTime(triggerTime);
-                    } else {
-                        long triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime();
-                        if(triggerTime <= System.currentTimeMillis()){
-                            continue;
-                        }
-                        trigger.setTime(triggerTime);
-                        if (event.getRecurrenceId() != null) {
-                            trigger.setRecurrence(event.getRecurrenceId());
-                        }
-                        addRelatedDate(alarm, event, trigger);
-                    }
-
-                    // Set proper folder id
-                    try {
-                        trigger.setFolder(getFolderId(event, userId));
-                    } catch (OXException e) {
-                        addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                    AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
+                    if(trigger==null){
                         continue;
                     }
-
                     addBatch(trigger, stmt);
                 }
             }
@@ -578,6 +515,64 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
         return result;
 
+    }
+
+    /**
+     * Prepares an {@link AlarmTrigger} object
+     *
+     * @param userId The user id
+     * @param alarm The corresponding alarm
+     * @param event The corresponding event
+     * @param exceptionSet The optional exceptions
+     * @param recurrenceId The optional recurrence id
+     * @return The prepared {@link AlarmTrigger}
+     * @throws OXException
+     */
+    private AlarmTrigger prepareTrigger(Integer userId, Alarm alarm, Event event, Set<RecurrenceId> exceptionSet, RecurrenceId recurrenceId) throws OXException{
+        AlarmTrigger trigger = new AlarmTrigger();
+        trigger.setUserId(userId);
+        trigger.setAction(alarm.getAction().getValue());
+        trigger.setProcessed(false);
+        trigger.setAlarm(alarm.getId());
+        trigger.setEventId(event.getId());
+
+        if (CalendarUtils.isFloating(event)) {
+            trigger.setTimezone(resolver.getTimeZone(userId));
+        }
+        TimeZone tz = UTC;
+        if (trigger.containsTimezone()) {
+            tz = trigger.getTimezone();
+        }
+
+        if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+            long triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, exceptionSet).getTime();
+            if(triggerTime <= System.currentTimeMillis()){
+                return null;
+            }
+            addRelatedDate(alarm, event, trigger);
+            trigger.setRecurrence(recurrenceId);
+            trigger.setTime(triggerTime);
+        } else {
+            long triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime();
+            if(triggerTime <= System.currentTimeMillis()){
+                return null;
+            }
+            trigger.setTime(triggerTime);
+            if (event.getRecurrenceId() != null) {
+                trigger.setRecurrence(event.getRecurrenceId());
+            }
+            addRelatedDate(alarm, event, trigger);
+        }
+
+        // Set proper folder id
+        try {
+            trigger.setFolder(getFolderId(event, userId));
+        } catch (OXException e) {
+            addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+            return null;
+        }
+
+        return trigger;
     }
 
     private PreparedStatement getBatchStmt(Connection writeCon) throws OXException {
