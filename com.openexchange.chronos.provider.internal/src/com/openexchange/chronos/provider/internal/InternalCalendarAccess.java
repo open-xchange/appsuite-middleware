@@ -128,13 +128,12 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public GroupwareCalendarFolder getDefaultFolder() throws OXException {
         Folder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
-        return getCalendarFolder(folder, getFolderProperties(folder, session.getContextId(), session.getUserId(), false));
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), false));
     }
 
     @Override
     public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        return getCalendarFolders(getFolderService().getVisibleFolders(
-            TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
+        return getCalendarFolders(getFolderService().getVisibleFolders(TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
     }
 
     @Override
@@ -149,7 +148,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
         Folder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
-        return getCalendarFolder(folder, getFolderProperties(folder, session.getContextId(), session.getUserId(), true));
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), true));
     }
 
     @Override
@@ -310,7 +309,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.length);
         for (UserizedFolder userizedFolder : folders) {
-            calendarFolders.add(getCalendarFolder(userizedFolder, getFolderProperties(userizedFolder, userizedFolder.getContext().getContextId(), userizedFolder.getUser().getId(), true)));
+            calendarFolders.add(getCalendarFolder(userizedFolder, getFolderProperties(userizedFolder.getContext().getContextId(), userizedFolder, userizedFolder.getUser().getId(), true)));
         }
         return calendarFolders;
     }
@@ -349,16 +348,16 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
      * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
      * @return {@link Collections#emptyMap()} or a {@link Map} with user-specific properties
      */
-    private static Map<String, String> getFolderProperties(Folder folder, int contextId, int userId, boolean loadOwner) {
+    private static Map<String, String> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
         Map<String, String> properties;
         FolderUserPropertyStorage fps = Services.optService(FolderUserPropertyStorage.class);
         if (null != fps) {
             try {
-                properties = fps.getFolderProperties(Integer.valueOf(folder.getID()).intValue(), contextId, userId);
+                properties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), userId);
                 // Check if we can fall-back to owner properties
                 if (loadOwner && folder.getCreatedBy() != userId) {
                     // Try to load owner properties
-                    Map<String, String> ownerProperties = fps.getFolderProperties(Integer.valueOf(folder.getID()).intValue(), contextId, folder.getCreatedBy());
+                    Map<String, String> ownerProperties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), folder.getCreatedBy());
                     for (String key : ownerProperties.keySet()) {
                         if (false == properties.containsKey(key)) {
                             properties.put(key, ownerProperties.get(key));

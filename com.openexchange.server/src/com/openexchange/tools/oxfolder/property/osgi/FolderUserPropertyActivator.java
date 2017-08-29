@@ -58,7 +58,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyStorageImpl;
-import com.openexchange.tools.oxfolder.property.sql.CreateFolderPropertyTask;
+import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
 
 /**
  * {@link FolderUserPropertyActivator}
@@ -67,6 +67,14 @@ import com.openexchange.tools.oxfolder.property.sql.CreateFolderPropertyTask;
  * @since v7.10.0
  */
 public class FolderUserPropertyActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link FolderUserPropertyActivator}.
+     * 
+     */
+    public FolderUserPropertyActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -80,7 +88,7 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
         if (null == dbService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
-        final CreateFolderPropertyTask task = new CreateFolderPropertyTask(dbService);
+        final CreateFolderUserPropertyTask task = new CreateFolderUserPropertyTask(dbService);
 
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 

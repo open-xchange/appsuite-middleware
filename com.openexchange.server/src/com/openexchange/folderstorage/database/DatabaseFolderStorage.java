@@ -1036,7 +1036,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         FolderUserPropertyStorage fps = services.getOptionalService(FolderUserPropertyStorage.class);
         if (null != fps) {
             Integer folderId = Integer.valueOf(folder.getID());
-            Map<String, String> properties = fps.getFolderProperties(folderId.intValue(), storageParameters.getContextId(), storageParameters.getUserId());
+            Map<String, String> properties = fps.getFolderProperties(storageParameters.getContextId(), folderId.intValue(), storageParameters.getUserId());
             if (null != properties && false == properties.isEmpty()) {
                 Map<String, Object> meta = new HashMap<>(properties.size());
                 meta.putAll(properties);

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.property;
 
+import java.sql.Connection;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -64,106 +65,269 @@ public interface FolderUserPropertyStorage {
     /**
      * Deletes all given user-specific properties for a given folder.
      * 
-     * @param folderId The ID of the folder
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
      * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperties(int folderId, int contextId, int userId, Set<String> propertyKeys) throws OXException;
+    void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys) throws OXException;
+
+    /**
+     * Deletes all given user-specific properties for a given folder.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param propertyKeys The properties to delete. If the {@link Set} is <code>null</code> or empty all properties will be deleted
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void deleteFolderProperties(int contextId, int folderId, int userId, Set<String> propertyKeys, Connection connection) throws OXException;
 
     /**
      * Deletes a single property for a user from a folder.
      * 
-     * @param folderId The ID of the folder to delete
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to delete
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void deleteFolderProperty(int folderId, int contextId, int userId, String key) throws OXException;
+    void deleteFolderProperty(int contextId, int folderId, int userId, String key) throws OXException;
+
+    /**
+     * Deletes a single property for a user from a folder.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to delete
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param key The name of the property
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void deleteFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException;
 
     /**
      * Check if a folder has user-specific properties and therefore exits
      * 
-     * @param folderId The ID of the folder to check existence for
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to check existence for
      * @param userId The ID of the user the user-specific folder belongs to
      * @return <code>true</code> if user-specific folder properties exists,
      *         <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean exists(int folderId, int contextId, int userId) throws OXException;
+    boolean exists(int contextId, int folderId, int userId) throws OXException;
+
+    /**
+     * Check if a folder has user-specific properties and therefore exits
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to check existence for
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param connection The {@link Connection} to to use for the transaction
+     * @return <code>true</code> if user-specific folder properties exists,
+     *         <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    boolean exists(int contextId, int folderId, int userId, Connection connection) throws OXException;
 
     /**
      * Get a {@link Map} with user-specific properties for the folder
      * 
-     * @param folderId The ID of the folder
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
-     * @return The folder properties. Might be empty
+     * @return The folder properties.
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    Map<String, String> getFolderProperties(int folderId, int contextId, int userId) throws OXException;
+    Map<String, String> getFolderProperties(int contextId, int folderId, int userId) throws OXException;
+
+    /**
+     * Get a {@link Map} with user-specific properties for multiple folders
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @return The folder properties.
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    Map<String, String> getFolderProperties(int contextId, int folderId, int userId, Connection connection) throws OXException;
+
+    /**
+     * Get a {@link Map} with user-specific properties for the folder
+     * 
+     * @param contextId The context ID of the user
+     * @param folderIds The IDs of the folder to load
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @return The folder properties for each given folder.
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    Map<Integer, Map<String, String>> getFolderProperties(int contextId, int[] folderIds, int userId) throws OXException;
+
+    /**
+     * Get a {@link Map} with user-specific properties for multiple folders
+     * 
+     * @param contextId The context ID of the user
+     * @param folderIds The IDs of the folder to load
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @return The folder properties for each given folder.
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    Map<Integer, Map<String, String>> getFolderProperties(int contextId, int[] folderIds, int userId, Connection connection) throws OXException;
 
     /**
      * Get an user-specific property from a folder
      * 
-     * @param folderId The ID of the folder
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @return The value of the property or <code>null</code>
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    String getFolderProperty(int folderId, int contextId, int userId, String key) throws OXException;
+    String getFolderProperty(int contextId, int folderId, int userId, String key) throws OXException;
+
+    /**
+     * Get an user-specific property from a folder
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param key The name of the property
+     * @return The value of the property or <code>null</code>
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    String getFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException;
 
     /**
      * Insert user-specific values for a folder into the database.
      * 
-     * @param folderId The ID of the folder to insert
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
      * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean insertFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties) throws OXException;
+    void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException;
 
     /**
      * Insert user-specific values for a folder into the database.
      * 
-     * @param folderId The ID of the folder to insert
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param properties The properties to save for the folder. Must be modifiable
+     * @param connection The {@link Connection} to to use for the transaction
+     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException;
+
+    /**
+     * Insert user-specific values for a folder into the database.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @param value The value to of the property
      * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    boolean insertFolderProperty(int folderId, int contextId, int userId, String key, String value) throws OXException;
+    void insertFolderProperty(int contextId, int folderId, int userId, String key, String value) throws OXException;
+
+    /**
+     * Insert user-specific values for a folder into the database.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param key The name of the property
+     * @param value The value to of the property
+     * @param connection The {@link Connection} to to use for the transaction
+     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void insertFolderProperty(int contextId, int folderId, int userId, String key, String value, Connection connection) throws OXException;
+
+    /**
+     * Insert user-specific values for the given folder. If a property already exists the value will be updated.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param properties The properties to add to the folder
+     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException;
+
+    /**
+     * Insert user-specific values for the given folder. If a property already exists the value will be updated.
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param properties The properties to add to the folder
+     * @param connection The {@link Connection} to use for the transaction
+     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException;
 
     /**
      * Updates a specific property on the folder
      * 
-     * @param folderId The ID of the folder to insert
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void updateFolderProperties(int folderId, int contextId, int userId, Map<String, String> properties) throws OXException;
+    void updateFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException;
 
     /**
      * Updates a specific property on the folder
      * 
-     * @param folderId The ID of the folder to insert
      * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param properties The properties to save for the folder. Must be modifiable
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void updateFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException;
+
+    /**
+     * Updates a specific property on the folder
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @param value The value to update the property to
+     * @param connection The {@link Connection} to to use for the transaction
      * @throws OXException In case of missing service or no connection could be obtained
      */
-    void updateFolderProperty(int folderId, int contextId, int userId, String key, String value) throws OXException;
+    void updateFolderProperty(int contextId, int folderId, int userId, String key, String value) throws OXException;
+
+    /**
+     * Updates a specific property on the folder
+     * 
+     * @param contextId The context ID of the user
+     * @param folderId The ID of the folder to insert
+     * @param userId The ID of the user the user-specific folder belongs to
+     * @param key The name of the property
+     * @param value The value to update the property to
+     * @param connection The {@link Connection} to to use for the transaction
+     * @throws OXException In case of missing service or no connection could be obtained
+     */
+    void updateFolderProperty(int contextId, int folderId, int userId, String key, String value, Connection connection) throws OXException;
 
 }

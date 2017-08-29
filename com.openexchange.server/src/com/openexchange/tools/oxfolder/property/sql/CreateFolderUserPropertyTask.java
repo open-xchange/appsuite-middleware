@@ -53,20 +53,20 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
 
 /**
- * {@link CreateFolderPropertyTask}
+ * {@link CreateFolderUserPropertyTask}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class CreateFolderPropertyTask extends CreateTableUpdateTask {
+public class CreateFolderUserPropertyTask extends CreateTableUpdateTask {
 
     /**
      * Initializes a new {@link CreateUserPropertyFolderTask}.
      * 
      * @param databaseService The {@link DatabaseService} to get the connection from
      */
-    public CreateFolderPropertyTask(DatabaseService databaseService) {
-        super(new CreateFolderPropertyTable(), new String[0], databaseService);
+    public CreateFolderUserPropertyTask(DatabaseService databaseService) {
+        super(new CreateFolderUserPropertyTable(), new String[0], databaseService);
     }
 
 }

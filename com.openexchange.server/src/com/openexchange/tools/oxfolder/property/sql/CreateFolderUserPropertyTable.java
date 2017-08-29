@@ -52,12 +52,12 @@ package com.openexchange.tools.oxfolder.property.sql;
 import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link CreateFolderPropertyTable}
+ * {@link CreateFolderUserPropertyTable}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class CreateFolderPropertyTable extends AbstractCreateTableImpl {
+public class CreateFolderUserPropertyTable extends AbstractCreateTableImpl {
 
     public final static String TABLE_NAME = "oxfolder_user_property";
 
@@ -90,9 +90,9 @@ public class CreateFolderPropertyTable extends AbstractCreateTableImpl {
         builder.append("fuid INT(10) UNSIGNED NOT NULL,");
         builder.append("userid INT(10) UNSIGNED NOT NULL,");
         builder.append("name VARCHAR(128) NOT NULL,");
-        builder.append("value VARCHAR(512) NOT NULL,");
+        builder.append("value TINYTEXT NOT NULL,");
         builder.append("PRIMARY KEY (cid, fuid, userid, name)");
-        builder.append(")ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        builder.append(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci;");
         return builder.toString();
     }
 
