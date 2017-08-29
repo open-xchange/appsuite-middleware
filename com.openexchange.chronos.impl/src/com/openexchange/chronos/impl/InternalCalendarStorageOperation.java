@@ -63,6 +63,8 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -107,11 +109,16 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
     @Override
     protected CalendarStorage initStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-        if (session.getConfig().isReplayToLegacyStorage()) {
-            return Services.getService(ReplayingCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, txPolicy);
-        }
         if (session.getConfig().isUseLegacyStorage()) {
             return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, txPolicy);
+        }
+        UpdateStatus updateStatus = Updater.getInstance().getStatus(context.getContextId());
+        if (false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
+            LOG.debug("ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' storage.");
+            return Services.getService(LegacyCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, txPolicy);
+        }
+        if (session.getConfig().isReplayToLegacyStorage()) {
+            return Services.getService(ReplayingCalendarStorageFactory.class).create(context, session.getEntityResolver(), dbProvider, txPolicy);
         }
         return Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, session.getEntityResolver(), dbProvider, txPolicy);
     }
