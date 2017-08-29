@@ -243,6 +243,15 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     };
 
+    /**
+     * Retrieves an {@link AlarmTrigger} by reading the given {@link AlarmTriggerField}s from the result set.
+     *
+     * @param resultSet The {@link ResultSet}
+     * @param fields The fields to read
+     * @return The {@link AlarmTrigger}
+     * @throws SQLException
+     * @throws OXException
+     */
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
         AlarmTrigger result = MAPPER.fromResultSet(resultSet, fields);
         result.setAccount(accountId);
@@ -324,7 +333,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
             RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
             if(!iterateRecurrenceIds.hasNext()){
-                // Nothing to do
+                // Nothing to do for this event
                 return;
             }
             recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
@@ -334,12 +343,14 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
             List<Alarm> alarms = alarmsPerAttendee.get(userId);
             if (alarms == null || alarms.isEmpty()) {
+                // Skip user in case no alarms are available
                 continue;
             }
 
             for (Alarm alarm : alarms) {
                 AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
                 if(trigger==null){
+                    // Skip invalid and past alarm triggers
                     continue;
                 }
                 insertAlarmTrigger(trigger);
@@ -362,7 +373,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             trigger.setRelatedTime(AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), event).getTimestamp());
         }
     }
-
 
     @Override
     public void removeTriggers(String eventId) throws OXException {
@@ -407,6 +417,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             }
 
             if (triggers.isEmpty()) {
+                // recalculation isn't needed
                 return 0;
             }
 
@@ -463,7 +474,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap, Connection writeCon) throws OXException, SQLException {
-        PreparedStatement stmt = getBatchStmt(writeCon);
+        PreparedStatement stmt = getInsertStatementForBatch(writeCon);
         for (Event event : events) {
 
             Map<Integer, List<Alarm>> alarmsPerAttendee = alarmMap.get(event.getId());
@@ -486,6 +497,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
                 RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
                 if(!iterateRecurrenceIds.hasNext()){
+                    // Nothing to do for this event
                     continue;
                 }
                 recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
@@ -496,12 +508,14 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
                 List<Alarm> alarms = alarmsPerAttendee.get(userId);
                 if (alarms == null || alarms.isEmpty()) {
+                    // Skip user in case no alarms available
                     continue;
                 }
                 for (Alarm alarm : alarms) {
 
                     AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
                     if(trigger==null){
+                        // Skip past and invalid triggers
                         continue;
                     }
                     addBatch(trigger, stmt);
@@ -525,7 +539,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param event The corresponding event
      * @param exceptionSet The optional exceptions
      * @param recurrenceId The optional recurrence id
-     * @return The prepared {@link AlarmTrigger}
+     * @return The prepared {@link AlarmTrigger} or null in case the alarm is in the past or is invalid
      * @throws OXException
      */
     private AlarmTrigger prepareTrigger(Integer userId, Alarm alarm, Event event, Set<RecurrenceId> exceptionSet, RecurrenceId recurrenceId) throws OXException{
@@ -575,7 +589,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return trigger;
     }
 
-    private PreparedStatement getBatchStmt(Connection writeCon) throws OXException {
+    /**
+     * Retrieves an {@link PreparedStatement} for batch operations.
+     * @param writeCon The write {@link Connection}
+     * @return The {@link PreparedStatement}
+     * @throws OXException
+     */
+    private PreparedStatement getInsertStatementForBatch(Connection writeCon) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
             String sql = new StringBuilder().append("INSERT INTO calendar_alarm_trigger (cid, account, ").append(MAPPER.getColumns(mappedFields)).append(") VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(");").toString();
@@ -585,6 +605,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
+    /**
+     * Adds another batch to the given statement
+     * @param trigger The trigger to add
+     * @param stmt The statement
+     * @throws OXException
+     */
     private void addBatch(AlarmTrigger trigger, PreparedStatement stmt) throws OXException {
         try {
             int parameterIndex = 1;
