@@ -295,12 +295,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         insertTriggers(alarmsPerAttendee, wrapper);
     }
 
-    @Override
-    public void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, Event event, Set<RecurrenceId> exceptions) throws OXException {
-        EventExceptionWrapper wrapper = new EventExceptionWrapper(event, exceptions);
-        insertTriggers(alarmsPerAttendee, wrapper);
-    }
-
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     /**
@@ -470,5 +464,136 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             Databases.closeSQLStuff(stmt);
         }
     }
+
+    @Override
+    public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap) throws OXException {
+
+        Connection writeCon = dbProvider.getWriteConnection(context);
+        int updated = 0;
+        try {
+            txPolicy.setAutoCommit(writeCon, false);
+            updated = insertTrigger(alarmMap, events, exceptionsMap, writeCon);
+            txPolicy.commit(writeCon);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(writeCon, updated);
+        }
+
+
+    }
+
+    private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap, Connection writeCon) throws OXException, SQLException {
+        PreparedStatement stmt = getBatchStmt(writeCon);
+        for (Event event : events) {
+
+            Map<Integer, List<Alarm>> alarmsPerAttendee = alarmMap.get(event.getId());
+            if (alarmsPerAttendee == null) {
+                continue;
+            }
+            Set<RecurrenceId> exceptionSet = null;
+            RecurrenceId recurrenceId = null;
+            if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+
+                long[] exceptions = null;
+                exceptionSet = exceptionsMap.get(event.getId());
+                if (exceptionSet != null) {
+                    exceptions = new long[exceptionSet.size()];
+                    int x = 0;
+                    for (RecurrenceId recId : exceptionSet) {
+                        exceptions[x++] = recId.getValue().getTimestamp();
+                    }
+                }
+                RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
+                RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+                recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
+
+            }
+
+            for (Integer userId : alarmsPerAttendee.keySet()) {
+
+                List<Alarm> alarms = alarmsPerAttendee.get(userId);
+                if (alarms == null || alarms.isEmpty()) {
+                    continue;
+                }
+                for (Alarm alarm : alarms) {
+                    AlarmTrigger trigger = new AlarmTrigger();
+                    trigger.setUserId(userId);
+                    trigger.setAction(alarm.getAction().getValue());
+                    trigger.setProcessed(false);
+                    trigger.setAlarm(alarm.getId());
+                    trigger.setEventId(event.getId());
+
+                    if (CalendarUtils.isFloating(event)) {
+                        trigger.setTimezone(resolver.getTimeZone(userId));
+                    }
+                    TimeZone tz = UTC;
+                    if (trigger.containsTimezone()) {
+                        tz = trigger.getTimezone();
+                    }
+
+                    if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+                        long triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, exceptionSet).getTime();
+                        if(triggerTime <= System.currentTimeMillis()){
+                            continue;
+                        }
+                        addRelatedDate(alarm, event, trigger);
+                        trigger.setRecurrence(recurrenceId);
+                        trigger.setTime(triggerTime);
+                    } else {
+                        long triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime();
+                        if(triggerTime <= System.currentTimeMillis()){
+                            continue;
+                        }
+                        trigger.setTime(triggerTime);
+                        if (event.getRecurrenceId() != null) {
+                            trigger.setRecurrence(event.getRecurrenceId());
+                        }
+                        addRelatedDate(alarm, event, trigger);
+                    }
+
+                    // Set proper folder id
+                    try {
+                        trigger.setFolder(getFolderId(event, userId));
+                    } catch (OXException e) {
+                        addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                        continue;
+                    }
+
+                    addBatch(trigger, stmt);
+                }
+            }
+        }
+        int[] executeBatch = stmt.executeBatch();
+        int result = 0;
+        for(int i: executeBatch){
+            result+=i;
+        }
+        return result;
+
+    }
+
+    private PreparedStatement getBatchStmt(Connection writeCon) throws OXException {
+        try {
+            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
+            String sql = new StringBuilder().append("INSERT INTO calendar_alarm_trigger (cid, account, ").append(MAPPER.getColumns(mappedFields)).append(") VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(");").toString();
+            return writeCon.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void addBatch(AlarmTrigger trigger, PreparedStatement stmt) throws OXException {
+        try {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, MAPPER.getMappedFields());
+            stmt.addBatch();
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+    }
+
 
 }

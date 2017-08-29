@@ -62,7 +62,6 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -299,7 +298,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
 
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent, Set<RecurrenceId> deleteExceptionDates) throws OXException {
         SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
-        Set<RecurrenceId> exceptions = new HashSet<>(deleteExceptionDates);
+        Set<RecurrenceId> exceptions = new TreeSet<>(deleteExceptionDates);
         exceptions.addAll(changeExceptionDates);
         storage.getAlarmTriggerStorage().removeTriggers(originalMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);

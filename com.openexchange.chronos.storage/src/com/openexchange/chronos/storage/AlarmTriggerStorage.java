@@ -77,14 +77,15 @@ public interface AlarmTriggerStorage {
     void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException;
 
     /**
-     * Inserts all necessary triggers for the given alarm objects. In case of an update remove all existing triggers first.
+     * Inserts all necessary triggers for the given alarm objects.
+     * This method adds alarm trigger objects as a batch operation and does some additional performance optimizations.
      *
-     * @param alarmsPerAttendee A map of alarms per user.
-     * @param event The event to insert triggers for.
-     * @param exceptions The exceptions of the event.
+     * @param alarmsPerAttendee A map of alarms per user per event.
+     * @param event A list of events.
+     * @param exceptions A map of exceptions per event.
      * @throws OXException
      */
-    public void insertTriggers(Map<Integer, List<Alarm>> alarmsPerAttendee, Event event, Set<RecurrenceId> exceptions) throws OXException;
+    public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events, Map<String, Set<RecurrenceId>> exceptions) throws OXException;
 
     /**
      * Removes all existing triggers for the given event
@@ -104,6 +105,13 @@ public interface AlarmTriggerStorage {
      */
     List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException;
 
+    /**
+     * Recalculates the trigger time for floating events. E.g. to adapt to a timezone change of the user.
+     *
+     * @param userId The user id
+     * @return The number of changed alarm triggers
+     * @throws OXException
+     */
     Integer recalculateFloatingAlarmTriggers(int userId) throws OXException;
 
 }

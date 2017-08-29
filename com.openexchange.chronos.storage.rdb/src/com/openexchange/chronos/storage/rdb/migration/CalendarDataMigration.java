@@ -62,7 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,6 +70,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
@@ -269,6 +270,8 @@ public class CalendarDataMigration {
         /*
          * prepare alarm trigger
          */
+        Map<String, Set<RecurrenceId>> exceptionMap = new HashMap<>(events.size());
+
         for (Event event : events) {
             List<Attendee> atts = attendees.get(event.getId());
             if (atts != null) {
@@ -279,15 +282,16 @@ public class CalendarDataMigration {
                 continue;
             }
 
-            Set<RecurrenceId> exceptions = new HashSet<>();
+            Set<RecurrenceId> exceptions = new TreeSet<>();
             if (CalendarUtils.isSeriesMaster(event)) {
                 exceptions.addAll(getChangeExceptionDates(event.getSeriesId()));
                 if (event.getDeleteExceptionDates() != null) {
                     exceptions.addAll(event.getDeleteExceptionDates());
                 }
             }
-            destinationStorage.getAlarmTriggerStorage().insertTriggers(alarmsPerAttendee, event, exceptions);
+            exceptionMap.put(event.getId(), exceptions);
         }
+        destinationStorage.getAlarmTriggerStorage().insertTriggers(alarms, events, exceptionMap);
 
         int nextLastObjectId = Integer.parseInt(events.get(events.size() - 1).getId());
         LOG.trace("Successfully copied {} events, {} attendees and {} alarms; next last object id evaluated to {}.",
