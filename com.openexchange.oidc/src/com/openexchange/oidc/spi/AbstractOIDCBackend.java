@@ -236,7 +236,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
             subject = jwtClaimsSet.getSubject();
         } catch (java.text.ParseException e) {
-            // TODO Auto-generated catch block
             // TODO QS-VS: catch exception
             e.printStackTrace();
         }
@@ -257,5 +256,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
         int contextId = contextService.getContextId(userData[1]);
         return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
+    }
+    
+    @Override
+    public void updateSession(Session session, Map<String, String> tokenMap) {
+        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
+        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
+        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
     }
 }

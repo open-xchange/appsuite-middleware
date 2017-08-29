@@ -58,6 +58,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
+import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.server.ServiceLookup;
 
@@ -90,6 +91,7 @@ public class OIDCFeature extends DependentServiceStarter{
             LOG.info("Starting core OpenID Connect support... ");
             getOIDCBackends(services);
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null));
+            serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null));
         } else {
             LOG.info("OpenID Connect support is disabled by configuration. Skipping initialization...");
         }

@@ -81,19 +81,14 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Strings;
-import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
+import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
-import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.AuthenticationInfo;
 import com.openexchange.oidc.spi.OIDCBackend;
@@ -105,11 +100,9 @@ import com.openexchange.oidc.state.StateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -411,7 +404,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
         return null;
     }
-    
+
     private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
         Session session = null;
         SessiondService sessiondService = Services.getService(SessiondService.class);

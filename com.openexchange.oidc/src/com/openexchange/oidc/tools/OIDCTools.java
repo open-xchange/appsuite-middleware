@@ -185,4 +185,11 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
+    
+    public static void addParameterToSession(Session session, Map<String, String> map, String entryLoad, String entrySet) {
+        String parameter = map.get(entryLoad);
+        if (!Strings.isEmpty(parameter)) {
+            session.setParameter(entrySet, parameter);
+        }
+    }
 }

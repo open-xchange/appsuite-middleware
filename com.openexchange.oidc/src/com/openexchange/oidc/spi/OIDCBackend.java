@@ -54,7 +54,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -120,11 +119,13 @@ public interface OIDCBackend {
 
     LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException;
 
-    AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException;
+    AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokens) throws OXException;
 
     Authenticated enhanceAuthenticated(Authenticated defaultAuthenticated, Map<String, String> state);
 
     String getLogoutFromIDPRequest(Session session) throws OXException;
     
     void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    
+    void updateSession(Session session, Map<String, String> tokenMap);
 }

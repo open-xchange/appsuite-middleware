@@ -119,7 +119,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
     }
 
-    //TODO QS-VS: Struktur der Methode verbessern
+    //TODO QS-VS: Struktur der Methode verbessern, make DRY
     private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
         if (Strings.isEmpty(sessionToken)) {
@@ -280,18 +280,17 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                         if (oidcAutologinCookieValue != null) {
                             session.setParameter(OIDCTools.SESSION_COOKIE, oidcAutologinCookieValue);
                         }
-
                         session.setParameter(OIDCTools.IDTOKEN, state.get(OIDCTools.IDTOKEN));
-                        
-                        String accessToken = state.get(OIDCTools.ACCESS_TOKEN);
-                        if (accessToken != null) {
-                            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
-                        }
-                        
-                        String refreshToken = state.get(OIDCTools.REFRESH_TOKEN);
-                        if (accessToken != null) {
-                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
-                        }
+                        OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
+//                        String accessToken = state.get(OIDCTools.ACCESS_TOKEN);
+//                        if (accessToken != null) {
+//                            session.setParameter(Session.PARAM_OAUTH_ACCESS_TOKEN, accessToken);
+//                        }
+                        OIDCTools.addParameterToSession(session, state, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
+//                        String refreshToken = state.get(OIDCTools.REFRESH_TOKEN);
+//                        if (refreshToken != null) {
+//                            session.setParameter(Session.PARAM_OAUTH_REFRESH_TOKEN, refreshToken);
+//                        }
                     }
                 };
 
