@@ -4041,6 +4041,10 @@ msgstr ""
 msgid "Password was not changed."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.pgp.keys/src/com/openexchange/pgp/keys/exceptions/PGPKeysExceptionMessages.java:62
+msgid "The master key for the given key ring could not be found."
+msgstr ""
+
 #. The topic(s) of interest is/are invalid
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
 msgid "One or more specified topics are invalid."
