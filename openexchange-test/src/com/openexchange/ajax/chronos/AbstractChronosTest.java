@@ -150,7 +150,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             return (String) privateList.get(0).get(0);
         } else {
             for (ArrayList<?> folder : privateList) {
-                if ((boolean) folder.get(1)) {
+                if ((Boolean) folder.get(1)) {
                     return (String) folder.get(0);
                 }
             }
@@ -171,7 +171,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             return (String) privateList.get(0).get(0);
         } else {
             for (ArrayList<?> folder : privateList) {
-                if ((boolean) folder.get(1)) {
+                if ((Boolean) folder.get(1)) {
                     return (String) folder.get(0);
                 }
             }
