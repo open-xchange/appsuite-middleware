@@ -75,7 +75,8 @@ public enum OIDCBackendProperty implements Property {
     ssoLogout(OIDCProperty.PREFIX, false), 
     redirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     autologinCookieMode(OIDCProperty.PREFIX, "off"),
-    storeOAuthTokens(OIDCProperty.PREFIX, false);
+    storeOAuthTokens(OIDCProperty.PREFIX, false), 
+    oauthRefreshTime(OIDCProperty.PREFIX, 60);
     
     private final String fqn;
     private final Object defaultValue;

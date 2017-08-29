@@ -167,4 +167,9 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
         }
         return result;
     }
+
+    @Override
+    public int getOauthRefreshTime() {
+        return this.leanConfigurationService.getIntProperty(OIDCBackendProperty.oauthRefreshTime);
+    }
 }

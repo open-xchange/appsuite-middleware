@@ -122,4 +122,6 @@ public interface OIDCBackendConfig {
     boolean isStoreOAuthTokensEnabled();
     
     boolean isAutologinEnabled();
+    
+    int getOauthRefreshTime();
 }
