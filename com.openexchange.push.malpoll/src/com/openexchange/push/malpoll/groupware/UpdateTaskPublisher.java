@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.malpoll;
+package com.openexchange.push.malpoll.groupware;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,11 +71,11 @@ public final class UpdateTaskPublisher implements UpdateTaskProviderService {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public Collection<UpdateTaskV2> getUpdateTasks() {
-        final List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(2);
+        List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(3);
         tasks.add(new MALPollCreateTableTask());
         tasks.add(new MALPollModifyTableTask());
+        tasks.add(new MALPollDropForeignKeysTask());
         return tasks;
     }
 

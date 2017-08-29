@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.malpoll;
+package com.openexchange.push.malpoll.groupware;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -79,8 +79,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         " id INT4 UNSIGNED NOT NULL," +
         " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " hash BINARY(16) NOT NULL," +
-        " PRIMARY KEY (cid,user,id,fullname)," +
-        " FOREIGN KEY (cid,user,id) REFERENCES user_mail_account(cid,user,id)" +
+        " PRIMARY KEY (cid,user,id,fullname)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

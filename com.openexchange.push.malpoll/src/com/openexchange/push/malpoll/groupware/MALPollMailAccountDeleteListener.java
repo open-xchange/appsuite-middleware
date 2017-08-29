@@ -47,43 +47,39 @@
  *
  */
 
-package com.openexchange.push.malpoll;
+package com.openexchange.push.malpoll.groupware;
 
 import java.sql.Connection;
-import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.push.malpoll.MALPollPushListener;
+import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
 
 /**
- * {@link MALPollDeleteListener} - Delete listener for MAL Poll bundle.
+ * {@link MALPollMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for MAL Poll bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MALPollDeleteListener implements DeleteListener {
+public final class MALPollMailAccountDeleteListener implements MailAccountDeleteListener {
 
-    public MALPollDeleteListener() {
+    /**
+     * Initializes a new {@link MALPollMailAccountDeleteListener}.
+     */
+    public MALPollMailAccountDeleteListener() {
         super();
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            final int contextId = event.getContext().getContextId();
-            final int userId = event.getId();
-            MALPollPushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId);
+    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        // Nothing to do
+    }
 
-            MALPollDBUtility.deleteUserData(contextId, userId);
-        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            int contextId = event.getContext().getContextId();
-            List<Integer> userIds = event.getUserIds();
-            if (null != userIds) {
-                for (Integer userId : userIds) {
-                    MALPollPushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId.intValue());
-                }
-            }
-
-            MALPollDBUtility.deleteContextData(contextId);
+    @Override
+    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        if (MALPollPushListener.getAccountId() == id) {
+            MALPollPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
         }
     }
+
 }

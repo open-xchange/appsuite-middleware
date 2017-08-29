@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.malpoll;
+package com.openexchange.push.malpoll.groupware;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;

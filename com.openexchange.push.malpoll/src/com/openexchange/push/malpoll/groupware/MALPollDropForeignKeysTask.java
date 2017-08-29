@@ -47,36 +47,82 @@
  *
  */
 
-package com.openexchange.push.malpoll;
+package com.openexchange.push.malpoll.groupware;
 
 import java.sql.Connection;
-import java.util.Map;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link MALPollMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for MAL Poll bundle.
+ * {@link MALPollDropForeignKeysTask} - Drops possible foreign keys from <code>"malPollHash"</code> and <code>"malPollUid"</code> tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MALPollMailAccountDeleteListener implements MailAccountDeleteListener {
+public final class MALPollDropForeignKeysTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link MALPollMailAccountDeleteListener}.
+     * Initializes a new {@link MALPollDropForeignKeysTask}.
      */
-    public MALPollMailAccountDeleteListener() {
+    public MALPollDropForeignKeysTask() {
         super();
     }
 
     @Override
-    public void onAfterMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        // Nothing to do
+    public String[] getDependencies() {
+        return new String[] { MALPollModifyTableTask.class.getName() };
     }
 
     @Override
-    public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        if (MALPollPushListener.getAccountId() == id) {
-            MALPollPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
+    public void perform(final PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            for (final String table : new String[] {"malPollHash", "malPollUid" }) {
+                dropForeignKeysFrom(table, con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
+    }
+
+    private void dropForeignKeysFrom(final String table, final Connection con) throws SQLException {
+        if (false == Tools.tableExists(con, table)) {
+            return;
+        }
+
+        List<String> keyNames = Tools.allForeignKey(con, table);
+        if (null == keyNames || keyNames.isEmpty()) {
+            return;
+        }
+
+        for (String keyName : keyNames) {
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+            } finally {
+                Databases.closeSQLStuff(null, stmt);
+            }
         }
     }
 
