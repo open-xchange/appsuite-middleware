@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -59,6 +59,7 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.json.fields.ChronosAlarmTriggerJsonFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
@@ -129,7 +130,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
     @Override
     protected EnumMap<AlarmTriggerField, ? extends JsonMapping<? extends Object, AlarmTrigger>> createMappings() {
         EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>> mappings = new EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>>(AlarmTriggerField.class);
-        mappings.put(AlarmTriggerField.ACTION, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.ACTION, null) {
+        mappings.put(AlarmTriggerField.ACTION, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ACTION, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -152,7 +153,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>(ChronosAlarmJsonFields.ALARM, null) {
+        mappings.put(AlarmTriggerField.ALARM_ID, new IntegerMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ALARM, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -175,7 +176,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>(ChronosAlarmJsonFields.ACCOUNT, null) {
+        mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ACCOUNT, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -198,7 +199,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.EVENT_ID, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.EVENT_ID, null) {
+        mappings.put(AlarmTriggerField.EVENT_ID, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.EVENT_ID, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -221,7 +222,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.RECURRENCE, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.RECURRENCE, null) {
+        mappings.put(AlarmTriggerField.RECURRENCE, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.RECURRENCE, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -245,7 +246,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.FOLDER, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.FOLDER, null) {
+        mappings.put(AlarmTriggerField.FOLDER, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.FOLDER, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
@@ -268,7 +269,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.TIME, new StringMapping<AlarmTrigger>(ChronosAlarmJsonFields.TIME, null) {
+        mappings.put(AlarmTriggerField.TIME, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.TIME, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {

@@ -59,10 +59,17 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class CalendarExceptionMessages implements LocalizableStrings {
 
+    /**
+     * The event %s couldn't be deleted: %s
+     */
     public static final String ERROR_DELETING_EVENT_MSG = "The event %s couldn't be deleted: %s";
-
+    /**
+     * Multiple events couldn't be deleted.
+     */
     public static final String ERROR_DELETING_EVENTS_MSG = "Multiple events couldn't be deleted.";
-
+    /**
+     * Unable to add alarms: %s
+     */
     public static final String UNABLE_TO_ADD_ALARMS_MSG = "Unable to add alarms: %s";
 
 }

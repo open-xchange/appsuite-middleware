@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.Date;
 import java.util.List;
@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 

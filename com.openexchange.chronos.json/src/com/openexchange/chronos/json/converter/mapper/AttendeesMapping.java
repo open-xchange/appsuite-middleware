@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +59,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.ArrayList;
 import java.util.List;

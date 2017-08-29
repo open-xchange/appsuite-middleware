@@ -47,46 +47,61 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
-import com.openexchange.chronos.AlarmTrigger;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
+import com.openexchange.session.Session;
 
 /**
- * {@link ChronosAlarmJsonFields} contains all fields which are used by the {@link AlarmTriggerMapper}
+ *
+ * {@link DateTimeMapping} - JSON specific mapping implementation for DateTimes.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
+ * @param <O> the type of the object
  */
-public class ChronosAlarmJsonFields {
+public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O> {
 
-    /**
-     * The action of the alarm. See {@link AlarmTrigger#getAction()}
-     */
-    public static final String ACTION = "action";
-    /**
-     * The alarm id of the alarm. See {@link AlarmTrigger#getAlarm()}
-     */
-    public static final String ALARM = "alarmId";
+    private static final String TIME_ZONE = "tzid";
+    private static final String VALUE = "value";
 
-    /**
-     * The calendar account. See {@link AlarmTrigger#getAccount()}
-     */
-    public static final String ACCOUNT = "account";
-    /**
-     * The event id. See {@link AlarmTrigger#getEventId()}
-     */
-    public static final String EVENT_ID = "eventId";
-    /**
-     * The recurrence id. See {@link AlarmTrigger#getRecurrence()}
-     */
-    public static final String RECURRENCE = "recurrence";
-    /**
-     * The datetime of the alarm. See {@link AlarmTrigger#getTime()}
-     */
-    public static final String TIME = "time";
-    /**
-     * The folder of the event. See {@link AlarmTrigger#getFolder()}
-     */
-    public static final String FOLDER = "folder";
+    public DateTimeMapping(final String ajaxName, final Integer columnID) {
+		super(ajaxName, columnID);
+	}
+
+    @Override
+    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
+        JSONObject dateTimeJSON = from.getJSONObject(getAjaxName());
+        String value = dateTimeJSON.getString(VALUE);
+        String tz = null;
+        if (dateTimeJSON.has(TIME_ZONE)) {
+            tz = dateTimeJSON.getString(TIME_ZONE);
+        }
+        this.set(to, from.isNull(getAjaxName()) ? null : DateTime.parse(tz, value));
+    }
+
+    @Override
+    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
+        deserialize(from, to);
+    }
+
+	@Override
+	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
+        DateTime value = this.get(from);
+        if (value == null) {
+            return JSONObject.NULL;
+        }
+        JSONObject result = new JSONObject();
+        if (value.getTimeZone() != null && value.getTimeZone()!=TimeZone.getTimeZone("UTC")) {
+            result.put(TIME_ZONE, value.getTimeZone().getID());
+        }
+        result.put(VALUE, value.toString());
+        return result;
+	}
 
 }

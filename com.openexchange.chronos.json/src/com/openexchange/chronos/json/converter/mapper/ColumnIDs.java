@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;

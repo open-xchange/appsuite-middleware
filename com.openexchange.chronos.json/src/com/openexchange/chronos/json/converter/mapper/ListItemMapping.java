@@ -47,61 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.tools.mappings.json.ListMapping;
 
 /**
+ * {@link ListItemMapping}
  *
- * {@link DateTimeMapping} - JSON specific mapping implementation for DateTimes.
+ * @param <O> The type of the object
+ * @param <T> The type of the list elements
+ * @param <I> The type of the the json list element
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
- * @param <O> the type of the object
  */
-public abstract class DateTimeMapping<O> extends DefaultJsonMapping<DateTime, O> {
+public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
 
-    private static final String TIME_ZONE = "tzid";
-    private static final String VALUE = "value";
-
-    public DateTimeMapping(final String ajaxName, final Integer columnID) {
-		super(ajaxName, columnID);
-	}
-
-    @Override
-    public void deserialize(JSONObject from, O to) throws JSONException, OXException {
-        JSONObject dateTimeJSON = from.getJSONObject(getAjaxName());
-        String value = dateTimeJSON.getString(VALUE);
-        String tz = null;
-        if (dateTimeJSON.has(TIME_ZONE)) {
-            tz = dateTimeJSON.getString(TIME_ZONE);
-        }
-        this.set(to, from.isNull(getAjaxName()) ? null : DateTime.parse(tz, value));
+    /**
+     * Initializes a new {@link ListItemMapping}.
+     * @param ajaxName
+     * @param columnID
+     */
+    public ListItemMapping(String ajaxName, Integer columnID) {
+        super(ajaxName, columnID);
     }
 
-    @Override
-    public void deserialize(JSONObject from, O to, TimeZone timeZone) throws JSONException, OXException {
-        deserialize(from, to);
-    }
+    /**
+     * Deserializes a list item from a json list element.
+     *
+     * @param from The source
+     * @param timeZone The {@link TimeZone} to use
+     * @return The deserialized object
+     * @throws JSONException
+     */
+    public abstract T deserialize(I from, TimeZone timeZone) throws JSONException;
 
-	@Override
-	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
-        DateTime value = this.get(from);
-        if (value == null) {
-            return JSONObject.NULL;
-        }
-        JSONObject result = new JSONObject();
-        if (value.getTimeZone() != null && value.getTimeZone()!=TimeZone.getTimeZone("UTC")) {
-            result.put(TIME_ZONE, value.getTimeZone().getID());
-        }
-        result.put(VALUE, value.toString());
-        return result;
-	}
+    /**
+     * Serializes a list item to a json list element.
+     *
+     * @param from The source
+     * @param timeZone The {@link TimeZone} to use
+     * @return The serialized object
+     * @throws JSONException
+     */
+    public abstract I serialize(T from, TimeZone timeZone) throws JSONException;
 
 }

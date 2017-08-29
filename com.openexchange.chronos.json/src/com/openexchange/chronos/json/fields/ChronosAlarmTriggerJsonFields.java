@@ -47,51 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.fields;
 
-import java.util.TimeZone;
-import org.json.JSONException;
-import com.openexchange.groupware.tools.mappings.json.ListMapping;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.json.converter.mapper.AlarmTriggerMapper;
 
 /**
- * {@link ListItemMapping}
- *
- * @param <O> The type of the object
- * @param <T> The type of the list elements
- * @param <I> The type of the the json list element
+ * {@link ChronosAlarmTriggerJsonFields} contains all fields which are used by the {@link AlarmTriggerMapper}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public abstract class ListItemMapping<T,O,I> extends ListMapping<T,O> {
+public class ChronosAlarmTriggerJsonFields {
 
     /**
-     * Initializes a new {@link ListItemMapping}.
-     * @param ajaxName
-     * @param columnID
+     * The action of the alarm. See {@link AlarmTrigger#getAction()}
      */
-    public ListItemMapping(String ajaxName, Integer columnID) {
-        super(ajaxName, columnID);
-    }
+    public static final String ACTION = "action";
+    /**
+     * The alarm id of the alarm. See {@link AlarmTrigger#getAlarm()}
+     */
+    public static final String ALARM = "alarmId";
 
     /**
-     * Deserializes a list item from a json list element.
-     *
-     * @param from The source
-     * @param timeZone The {@link TimeZone} to use
-     * @return The deserialized object
-     * @throws JSONException
+     * The calendar account. See {@link AlarmTrigger#getAccount()}
      */
-    public abstract T deserialize(I from, TimeZone timeZone) throws JSONException;
-
+    public static final String ACCOUNT = "account";
     /**
-     * Serializes a list item to a json list element.
-     *
-     * @param from The source
-     * @param timeZone The {@link TimeZone} to use
-     * @return The serialized object
-     * @throws JSONException
+     * The event id. See {@link AlarmTrigger#getEventId()}
      */
-    public abstract I serialize(T from, TimeZone timeZone) throws JSONException;
+    public static final String EVENT_ID = "eventId";
+    /**
+     * The recurrence id. See {@link AlarmTrigger#getRecurrence()}
+     */
+    public static final String RECURRENCE = "recurrence";
+    /**
+     * The datetime of the alarm. See {@link AlarmTrigger#getTime()}
+     */
+    public static final String TIME = "time";
+    /**
+     * The folder of the event. See {@link AlarmTrigger#getFolder()}
+     */
+    public static final String FOLDER = "folder";
 
 }

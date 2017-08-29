@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.converter.mapper;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
@@ -79,6 +79,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.exception.OXException;
@@ -1003,7 +1004,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return calendarUser;
     }
 
-    static JSONObject serializeCalendarUser(CalendarUser calendarUser) throws JSONException {
+    public static JSONObject serializeCalendarUser(CalendarUser calendarUser) throws JSONException {
         if (null == calendarUser) {
             return null;
         }

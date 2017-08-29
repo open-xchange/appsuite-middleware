@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.fields;
 
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
 
 /**
  * {@link ChronosJsonFields} contains all fields which are used by the {@link EventMapper}
