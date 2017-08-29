@@ -64,12 +64,14 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventExceptionWrapper;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -357,13 +359,26 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 }
 
                 // Set proper folder id
-                trigger.setFolder(CalendarUtils.getFolderView(event, userId));
+                try {
+                    trigger.setFolder(getFolderId(event, userId));
+                } catch (OXException e) {
+                    addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                    continue;
+                }
 
                 insertAlarmTrigger(trigger);
             }
 
         }
 
+    }
+
+    private static String getFolderId(Event event, int userId) throws OXException {
+        String folderId = CalendarUtils.getFolderView(event, userId);
+        if (null == folderId) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No folder view for user " + userId);
+        }
+        return folderId;
     }
 
     private void addRelatedDate(Alarm alarm, Event event, AlarmTrigger trigger){
