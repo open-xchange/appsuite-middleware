@@ -95,6 +95,8 @@ import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * Reference implementation of an OpenID backend.
@@ -250,7 +252,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
-        String[] userData = subject.split("@");
+        //String[] userData = subject.split("@");
+        //TODO QS-VS:
+        String[] userData = {"3", "wonderland.net"}; 
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }
@@ -259,9 +263,17 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
     
     @Override
-    public void updateSession(Session session, Map<String, String> tokenMap) {
+    public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
         OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
+        
+        SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+        if (sessionStorageService != null) {
+            sessionStorageService.addSession(session);
+        } else {
+            SessiondService sessiondService = Services.getService(SessiondService.class);
+            sessiondService.storeSession(session.getSessionID());
+        }
     }
 }

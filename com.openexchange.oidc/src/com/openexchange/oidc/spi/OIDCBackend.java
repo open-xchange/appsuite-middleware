@@ -127,5 +127,5 @@ public interface OIDCBackend {
     
     void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException;
     
-    void updateSession(Session session, Map<String, String> tokenMap);
+    void updateSession(Session session, Map<String, String> tokenMap) throws OXException;
 }

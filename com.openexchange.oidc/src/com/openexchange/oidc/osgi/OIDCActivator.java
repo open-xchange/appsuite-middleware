@@ -54,11 +54,14 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
+import com.openexchange.oidc.impl.OIDCSessionParameterNamesProvider;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.user.UserService;
 
 /**
@@ -83,7 +86,7 @@ public class OIDCActivator extends HousekeepingActivator{
             ContextService.class,
             UserService.class,
             SessiondService.class,
-            ContextService.class
+            SessionStorageService.class
         };
     }
 
@@ -97,6 +100,7 @@ public class OIDCActivator extends HousekeepingActivator{
         if (config.startDefaultBackend()) {
             context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
+        context.registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider(), null);
     }
 
     @Override

@@ -87,7 +87,7 @@ public class OIDCTools {
     
     public static final String OIDC_LOGIN = "oidcLogin";
 
-    public static final String IDTOKEN = "idToken";
+    public static final String IDTOKEN = "__session.idToken";
 
     public static final String TYPE = "type";
     

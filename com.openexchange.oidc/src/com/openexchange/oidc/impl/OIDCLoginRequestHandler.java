@@ -202,6 +202,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         if (oidcAtologinCookie != null) {
             Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
             if (session != null) {
+                this.backend.updateSession(session, reservation.getState());
                 return this.getRedirectLocationForSession(request, session, reservation);
             }
             //No session found, log that
