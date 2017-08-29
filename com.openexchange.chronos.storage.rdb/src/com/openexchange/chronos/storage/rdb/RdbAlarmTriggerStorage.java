@@ -339,6 +339,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     }
                     RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
                     RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+                    if(!iterateRecurrenceIds.hasNext()){
+                        continue;
+                    }
+
                     RecurrenceId recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
                     trigger.setRecurrence(recurrenceId);
                     addRelatedDate(alarm, event, trigger);
@@ -506,6 +510,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 }
                 RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
                 RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+                if(!iterateRecurrenceIds.hasNext()){
+                    continue;
+                }
                 recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
 
             }
