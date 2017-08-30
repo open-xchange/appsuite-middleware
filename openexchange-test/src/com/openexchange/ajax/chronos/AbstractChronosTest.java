@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,6 +63,8 @@ import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
@@ -122,7 +126,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         session = login.getSession();
     }
 
-    protected void rememberEventId(EventId eventId) {
+    public void rememberEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new ArrayList<>();
         }
@@ -229,6 +233,32 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected long getLastTimestamp(){
     	return lastTimeStamp;
+    }
+
+    /**
+     * Changes the timezone of the default user to the given value
+     *
+     * @param tz The new timezone
+     * @throws ApiException
+     */
+    protected void changeTimezone(TimeZone tz) throws ApiException {
+        String body = "{timezone: \"" + tz.getID() + "\"}";
+        CommonResponse updateJSlob = jslob.updateJSlob(session, body, "io.ox/core", null);
+        assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param data The data element of the response
+     * @return The data
+     */
+    protected <T> T checkResponse(String error, String errorDesc, T data) {
+        assertNull(errorDesc, error);
+        assertNotNull(data);
+        return data;
     }
 }
 

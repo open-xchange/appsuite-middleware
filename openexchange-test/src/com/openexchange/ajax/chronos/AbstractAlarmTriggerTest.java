@@ -67,7 +67,6 @@ import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
@@ -179,20 +178,6 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
     public void tearDown() throws Exception {
         super.tearDown();
         logoutClient(api2.getApiClient());
-    }
-
-    /**
-     * Checks if a response doesn't contain any errors
-     *
-     * @param error The error element of the response
-     * @param errorDesc The error description element of the response
-     * @param data The data element of the response
-     * @return The data
-     */
-    protected <T> T checkResponse(String error, String errorDesc, T data) {
-        assertNull(errorDesc, error);
-        assertNotNull(data);
-        return data;
     }
 
     /**
@@ -400,18 +385,6 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         assertEquals(eventId, trigger.getEventId());
         Date parsedTime = ZULU_FORMATER.get().parse(trigger.getTime());
         assertEquals(expectedTime, parsedTime.getTime());
-    }
-
-    /**
-     * Changes the timezone of the default user to the given value
-     *
-     * @param tz The new timezone
-     * @throws ApiException
-     */
-    protected void changeTimezone(TimeZone tz) throws ApiException {
-        String body = "{timezone: \"" + tz.getID() + "\"}";
-        CommonResponse updateJSlob = jslob.updateJSlob(session, body, "io.ox/core", null);
-        assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
     }
 
 }
