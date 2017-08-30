@@ -110,7 +110,6 @@ import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.Charsets;
 import net.fortuna.ical4j.model.component.Available;
 import net.fortuna.ical4j.model.component.VAvailability;
@@ -119,6 +118,8 @@ import net.fortuna.ical4j.model.component.VAvailability;
  * {@link AbstractChronosCaldavTest} - Common base class for CalDAV tests
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
@@ -560,16 +561,6 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
         return format(date, TimeZone.getTimeZone(timeZoneID));
     }
 
-    protected static Appointment generateAppointment(Date start, Date end, String uid, String summary, String location) {
-        Appointment appointment = new Appointment();
-        appointment.setTitle(summary);
-        appointment.setLocation(location);
-        appointment.setStartDate(start);
-        appointment.setEndDate(end);
-        appointment.setUid(uid);
-        return appointment;
-    }
-
     protected static String formatAsUTC(final Date date) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -666,15 +657,6 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
         sb.append("END:VCALENDAR").append("\r\n");
 
         return sb.toString();
-    }
-
-    public static void assertAppointmentEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid, String expectedTitle, String expectedLocation) {
-        assertNotNull("appointment is null", appointment);
-        Assert.assertEquals("start date wrong", expectedStart, appointment.getStartDate());
-        Assert.assertEquals("end date wrong", expectedEnd, appointment.getEndDate());
-        Assert.assertEquals("uid wrong", expectedUid, appointment.getUid());
-        Assert.assertEquals("title wrong", expectedTitle, appointment.getTitle());
-        Assert.assertEquals("location wrong", expectedLocation, appointment.getLocation());
     }
 
     public static ICalResource assertContains(String uid, Collection<ICalResource> iCalResources) {

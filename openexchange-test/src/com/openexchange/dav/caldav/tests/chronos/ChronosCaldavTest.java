@@ -49,6 +49,10 @@
 
 package com.openexchange.dav.caldav.tests.chronos;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -132,4 +136,89 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         return result;
 
     }
+
+    /**
+     * Verifies that the event exists
+     *
+     * Assumes that the event contains exactly 1 alarm
+     *
+     *
+     * @param uid The uid of the event
+     * @param remember Whether the event should be remembered for deletion
+     * @param duration The expected duration of the alarm
+     * @return The event
+     * @throws ApiException
+     * @throws Exception
+     */
+    protected EventData verifyEvent(String uid, boolean remember, String duration) throws ApiException, Exception{
+        EventData event = getEvent(uid, remember);
+        assertNotNull("event not found on server", event);
+        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
+        assertEquals("no alarm found", 1, event.getAlarms().size());
+        assertEquals("alarm trigger duration wrong", duration, event.getAlarms().get(0).getTrigger().getDuration());
+        return event;
+    }
+
+    /**
+     * Verifies that the event exists
+     *
+     * @param uid The uid of the event
+     * @param remember Whether the event should be remembered for deletion
+     * @param alarms The number of expected alarms
+     * @return The event
+     * @throws ApiException
+     * @throws Exception
+     */
+    protected EventData verifyEvent(String uid, boolean remember, int alarms) throws ApiException, Exception{
+        EventData event = getEvent(uid, remember);
+        assertNotNull("event not found on server", event);
+        if(alarms>0){
+            assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
+            assertEquals("no alarm found", alarms, event.getAlarms().size());
+        } else {
+            assertTrue("Alarm still found", event.getAlarms() == null || event.getAlarms().isEmpty());
+        }
+        return event;
+    }
+
+    /**
+     * Verifies that exactly one exception exists, which contains the given amount of alarms and that the first alarm has the given duration
+     *
+     * @param seriesId The series id of the event
+     * @param alarms The number of expected alarms
+     * @param firstAlarmDuration The duration of the first alarm
+     * @return The exceptions
+     * @throws ApiException
+     * @throws Exception
+     */
+    protected List<EventData> verifyEventExceptions(String seriesId, int alarms, String firstAlarmDuration) throws ApiException, Exception{
+        List<EventData> exceptions = getExceptions(seriesId);
+        assertFalse("No change exceptions found on server", exceptions.isEmpty());
+        assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
+        EventData changeExcpetion = exceptions.get(0);
+        if(alarms>0){
+            assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
+            assertEquals("Wrong size of alarms found", alarms, changeExcpetion.getAlarms().size());
+            if(firstAlarmDuration!=null){
+                assertEquals("alarm trigger duration wrong", firstAlarmDuration, changeExcpetion.getAlarms().get(0).getTrigger().getDuration());
+            }
+        } else {
+            assertTrue("Alarm still found", changeExcpetion.getAlarms() == null || changeExcpetion.getAlarms().isEmpty());
+        }
+        return exceptions;
+    }
+
+    /**
+     * Verifies that no event exceptions exist
+     *
+     * @param seriesId The series id of the event
+     * @throws ApiException
+     * @throws Exception
+     */
+    protected void verifyNoEventExceptions(String seriesId) throws ApiException, Exception{
+        List<EventData> exceptions = getExceptions(seriesId);
+        assertTrue("Change exceptions found on server", exceptions.isEmpty());
+    }
+
+
 }

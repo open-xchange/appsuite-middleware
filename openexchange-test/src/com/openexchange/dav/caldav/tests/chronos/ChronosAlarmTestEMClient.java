@@ -50,7 +50,6 @@
 package com.openexchange.dav.caldav.tests.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
@@ -69,7 +68,8 @@ import com.openexchange.testing.httpclient.models.EventData;
  * {@link ChronosAlarmTestEMClient}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
 public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
 
@@ -136,11 +136,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, true, "-PT15M");
         /*
          * verify event on client
          */
@@ -200,11 +196,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("Size of alarms wrong", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        EventData event = verifyEvent(uid, false, "-PT15M");
         Date date = new Date(event.getAlarms().get(0).getAcknowledged());
         assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
         /*
@@ -274,11 +266,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, true, "-PT15M");
         /*
          * verify event on client
          */
@@ -348,10 +336,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 2, event.getAlarms().size());
+        EventData event = verifyEvent(uid, false, 2);
         assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
         /*
          * verify event on client
@@ -429,11 +414,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, true, "-PT15M");
         /*
          * verify event on client
          */
@@ -494,11 +475,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT30M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, false, "-PT30M");
         /*
          * verify event on client
          */
@@ -567,11 +544,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, true, "-PT15M");
         /*
          * verify event on client
          */
@@ -636,11 +609,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, false, "-PT15M");
         /*
          * verify event on client
          */
@@ -711,11 +680,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        verifyEvent(uid, true, "-PT15M");
         /*
          * verify event on client
          */
@@ -786,10 +751,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 2, event.getAlarms().size());
+        EventData event = verifyEvent(uid, false, 2);
         assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
         /*
          * verify event on client
@@ -896,19 +858,9 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event & exception on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+        EventData event = verifyEvent(uid, true, "-PT15M");
+        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
-        List<EventData> exceptions = getExceptions(event.getSeriesId());
-        assertFalse("No change exceptions found on server", exceptions.isEmpty());
-        assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
-        EventData changeExcpetion = exceptions.get(0);
-        assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, changeExcpetion.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", changeExcpetion.getAlarms().get(0).getTrigger().getDuration());
         /*
          * verify event & exception on client
          */
@@ -996,19 +948,9 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event & exception on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
-
-        exceptions = getExceptions(event.getSeriesId());
-        assertFalse("No change exceptions found on server", exceptions.isEmpty());
-        assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
-        changeExcpetion = exceptions.get(0);
-        assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
-        assertEquals("Size of alarms wrong", 1, changeExcpetion.getAlarms().size());
-
+        event = verifyEvent(uid, false, "-PT15M");
+        List<EventData> exceptions = verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
+        EventData changeExcpetion = exceptions.get(0);
         Date date = new Date(changeExcpetion.getAlarms().get(0).getAcknowledged());
         assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
 
@@ -1117,19 +1059,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event & exception on server
          */
-        EventData event = getEvent(uid, true);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
-
-        List<EventData> exceptions = getExceptions(event.getSeriesId());
-        assertFalse("No change exceptions found on server", exceptions.isEmpty());
-        assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
-        EventData changeExcpetion = exceptions.get(0);
-        assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, changeExcpetion.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", changeExcpetion.getAlarms().get(0).getTrigger().getDuration());
+        EventData event = verifyEvent(uid, true, "-PT15M");
+        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
         /*
          * verify event & exception on client
@@ -1232,19 +1163,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event & exception on server
          */
-        event = getEvent(uid, false);
-        assertNotNull("event not found on server", event);
-        assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
-        assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
-
-        exceptions = getExceptions(event.getSeriesId());
-        assertFalse("No change exceptions found on server", exceptions.isEmpty());
-        assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
-        changeExcpetion = exceptions.get(0);
-        assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
-        assertEquals("no alarm found", 2, changeExcpetion.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", "-PT15M", changeExcpetion.getAlarms().get(0).getTrigger().getDuration());
+        event = verifyEvent(uid, false, "-PT15M");
+        verifyEventExceptions(event.getSeriesId(), 2, "-PT15M");
 
         /*
          * verify event & exception on client
