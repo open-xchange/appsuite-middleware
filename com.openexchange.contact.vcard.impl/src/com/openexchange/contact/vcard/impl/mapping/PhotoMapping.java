@@ -403,8 +403,14 @@ public class PhotoMapping extends AbstractMapping {
      * @return A file holder containing the loaded image, or <code>null</code> if no valid image could be loaded
      */
     private static ThresholdFileHolder loadImageFromURL(String urlString, List<OXException> warnings) throws IOException, OXException {
+        int maxNumAttempts = 5;
+        int numAttempts = 0;
         LoadedImage result;
         do {
+            if (numAttempts++ >= maxNumAttempts) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                return null;
+            }
             result = doLoadImageFromURL(urlString, urlString, warnings);
         } while (result.redirectUrl != null);
         return result.fileHolder;
