@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -710,7 +711,8 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             try {
                 con.close();
             } catch (Exception e) {
-                // Ignore
+                Logger logger = org.slf4j.LoggerFactory.getLogger(CountTablesCustomTaskChange.class);
+                logger.warn("Failed to close connection to database host {}", url, e);
             }
         }
     }
