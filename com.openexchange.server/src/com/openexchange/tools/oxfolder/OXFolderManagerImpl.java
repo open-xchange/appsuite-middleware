@@ -51,16 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -82,6 +72,8 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.Databases;
@@ -134,6 +126,16 @@ import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnUpdate;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderManagerImpl} - The {@link OXFolderManager} implementation
@@ -1515,7 +1517,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final int module = fo.getModule();
         switch (module) {
             case FolderObject.CALENDAR:
-                deleteContainedAppointments(fo.getObjectID());
+                deleteContainedEvents(fo.getObjectID());
                 break;
             case FolderObject.TASK:
                 deleteContainedTasks(fo.getObjectID());
@@ -1529,7 +1531,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 deleteContainedDocuments(fo.getObjectID());
                 break;
             default:
-                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(I(module), I(ctx.getContextId()));
         }
         /*
          * delete subfolders, too, when clearing the trash folder
@@ -2007,35 +2009,29 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private void deleteContainedItems(final int folderID) throws OXException {
         final int module = getOXFolderAccess().getFolderModule(folderID);
         switch (module) {
-        case FolderObject.CALENDAR:
-            deleteContainedAppointments(folderID);
-            break;
-        case FolderObject.TASK:
-            deleteContainedTasks(folderID);
-            break;
-        case FolderObject.CONTACT:
-            deleteContainedContacts(folderID);
-            break;
-        case FolderObject.UNBOUND:
-            break;
-        case FolderObject.INFOSTORE:
-            deleteContainedDocuments(folderID);
-            break;
-        default:
-            throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
+            case FolderObject.CALENDAR:
+                deleteContainedEvents(folderID);
+                break;
+            case FolderObject.TASK:
+                deleteContainedTasks(folderID);
+                break;
+            case FolderObject.CONTACT:
+                deleteContainedContacts(folderID);
+                break;
+            case FolderObject.UNBOUND:
+                break;
+            case FolderObject.INFOSTORE:
+                deleteContainedDocuments(folderID);
+                break;
+            default:
+                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(I(module), I(ctx.getContextId()));
         }
     }
 
-    private void deleteContainedAppointments(final int folderID) throws OXException {
-        try {
-            if (null == writeCon) {
-                cSql.deleteAppointmentsInFolder(folderID);
-            } else {
-                cSql.deleteAppointmentsInFolder(folderID, writeCon);
-            }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+    private void deleteContainedEvents(int folderId) throws OXException {
+        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class).init(session);
+        calendarSession.set(Connection.class.getName(), writeCon);
+        calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), Long.MAX_VALUE);
     }
 
     private void deleteContainedTasks(final int folderID) throws OXException {
