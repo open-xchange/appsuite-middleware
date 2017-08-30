@@ -2029,7 +2029,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void deleteContainedEvents(int folderId) throws OXException {
-        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class).init(session);
+        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
         calendarSession.set(Connection.class.getName(), writeCon);
         calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), Long.MAX_VALUE);
     }

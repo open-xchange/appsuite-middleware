@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
+import static com.openexchange.chronos.impl.Utils.optConnection;
 import java.sql.Connection;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -83,7 +84,7 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
      * @param session The calendar session
      */
     public InternalCalendarStorageOperation(CalendarSession session) throws OXException {
-        super(Services.getService(DatabaseService.class), session.getSession().getContextId());
+        super(Services.getService(DatabaseService.class), session.getSession().getContextId(), DEFAULT_RETRIES, optConnection(session));
         this.session = session;
     }
 

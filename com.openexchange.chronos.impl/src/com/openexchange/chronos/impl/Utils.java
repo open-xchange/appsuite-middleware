@@ -746,7 +746,7 @@ public class Utils {
         return decorator;
     }
 
-    private static Connection optConnection(CalendarSession session) {
+    public static Connection optConnection(CalendarSession session) {
         return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
     }
 
