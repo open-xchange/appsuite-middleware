@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.nimbusds.jose.JOSEException;
@@ -264,17 +265,26 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     
     @Override
     public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
-        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
-        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
-        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
-        OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
-        
-        SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            sessionStorageService.addSession(session);
-        } else {
-            SessiondService sessiondService = Services.getService(SessiondService.class);
-            sessiondService.storeSession(session.getSessionID());
+        Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
+        if (lock == null) {
+            lock = Session.EMPTY_LOCK;
+        }
+        lock.lock();
+        try {
+            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.IDTOKEN, OIDCTools.IDTOKEN);
+            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
+            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
+            OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+            
+            SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.addSession(session);
+            } else {
+                SessiondService sessiondService = Services.getService(SessiondService.class);
+                sessiondService.storeSession(session.getSessionID());
+            }
+        } finally {
+            lock.unlock();
         }
     }
 }

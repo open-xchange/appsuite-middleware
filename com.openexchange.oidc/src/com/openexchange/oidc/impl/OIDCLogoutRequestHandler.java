@@ -79,13 +79,12 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            Session session = null;
             String sessionId = request.getParameter(LoginServlet.PARAMETER_SESSION);
             if (sessionId == null) {
                 LOG.info("Missing session id in OIDC logout request");
             } else {
                 LOG.debug("Received logout request for session {}", sessionId);
-                session = LoginPerformer.getInstance().lookupSession(sessionId);
+                Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if (session != null) {
                     this.logoutCurrentUser(session, request, response);
                 } else {

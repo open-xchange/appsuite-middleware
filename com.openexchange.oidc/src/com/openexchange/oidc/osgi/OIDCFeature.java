@@ -59,8 +59,10 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
 import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
+import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.osgi.DependentServiceStarter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.inspector.SessionInspectorService;
 
 /**
  * Starts the OpenID feature.
@@ -90,6 +92,7 @@ public class OIDCFeature extends DependentServiceStarter{
         if(config.isEnabled()) {
             LOG.info("Starting core OpenID Connect support... ");
             getOIDCBackends(services);
+            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new OIDCSessionInspectorService(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null));
         } else {
