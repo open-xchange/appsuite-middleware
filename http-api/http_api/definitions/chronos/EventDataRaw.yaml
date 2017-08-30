@@ -114,3 +114,6 @@ geo:
 url:
   type: string
   description: The uniform resource locator (URL) of the event.
+seriesId:
+  type: string
+  description: The identifier of the event series.
