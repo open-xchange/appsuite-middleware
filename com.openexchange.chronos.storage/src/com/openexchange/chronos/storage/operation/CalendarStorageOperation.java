@@ -86,6 +86,7 @@ public abstract class CalendarStorageOperation<T> {
 
     protected final int contextId;
     private final DatabaseService dbService;
+    private final Connection foreignConnection;
     private final int maxRetries;
 
     private int retryCount;
@@ -97,7 +98,7 @@ public abstract class CalendarStorageOperation<T> {
      * @param contextId The context identifier
      */
     protected CalendarStorageOperation(DatabaseService dbService, int contextId) throws OXException {
-        this(dbService, contextId, DEFAULT_RETRIES);
+        this(dbService, contextId, DEFAULT_RETRIES, null);
     }
 
     /**
@@ -106,12 +107,14 @@ public abstract class CalendarStorageOperation<T> {
      * @param dbService A reference to the database service
      * @param contextId The context identifier
      * @param maxRetries The maximum number of retry attempts when encountering recoverable storage errors, or <code>0</code> for no retries
+     * @param optConnection An optional <i>outer</i> database connection to use
      */
-    protected CalendarStorageOperation(DatabaseService dbService, int contextId, int maxRetries) throws OXException {
+    protected CalendarStorageOperation(DatabaseService dbService, int contextId, int maxRetries, Connection optConnection) throws OXException {
         super();
         this.dbService = dbService;
         this.contextId = contextId;
         this.maxRetries = maxRetries;
+        this.foreignConnection = optConnection;
     }
 
     /**
@@ -161,6 +164,9 @@ public abstract class CalendarStorageOperation<T> {
      * @return The result
      */
     public T executeQuery() throws OXException {
+        if (null != foreignConnection) {
+            return call(initStorage(new SimpleDBProvider(foreignConnection, null), DBTransactionPolicy.NO_TRANSACTIONS));
+        }
         return doExecuteQuery();
     }
 
@@ -170,6 +176,9 @@ public abstract class CalendarStorageOperation<T> {
      * @return The result
      */
     public T executeUpdate() throws OXException {
+        if (null != foreignConnection) {
+            return call(initStorage(new SimpleDBProvider(foreignConnection, foreignConnection), DBTransactionPolicy.NO_TRANSACTIONS));
+        }
         while (true) {
             try {
                 return doExecuteUpdate();
@@ -226,7 +235,6 @@ public abstract class CalendarStorageOperation<T> {
             }
         }
     }
-
 
     private static void rollback(Connection connection) {
         if (null != connection) {

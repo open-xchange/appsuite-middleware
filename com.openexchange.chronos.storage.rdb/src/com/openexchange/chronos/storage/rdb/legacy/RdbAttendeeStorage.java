@@ -244,12 +244,17 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void deleteAttendees(String objectID) throws OXException {
+        deleteAttendees(Collections.singletonList(objectID));
+    }
+
+    @Override
+    public void deleteAttendees(List<String> objectIDs) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAttendees(connection, context.getContextId(), asInt(objectID));
+            updated = deleteAttendees(connection, context.getContextId(), objectIDs);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -568,22 +573,23 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private static int deleteAttendees(Connection connection, int contextID, int objectID) throws SQLException {
+    private static int deleteAttendees(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
+        String[] deleteStatements = new String[] {
+            "DELETE FROM dateExternal WHERE cid=? AND objectId",
+            "DELETE FROM prg_dates_members WHERE cid=? AND object_id",
+            "DELETE FROM prg_date_rights WHERE cid=? AND object_id"
+        };
         int updated = 0;
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            updated += logExecuteUpdate(stmt);
-        }
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates_members WHERE cid=? AND object_id=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            updated += logExecuteUpdate(stmt);
-        }
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_date_rights WHERE cid=? AND object_id=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
-            updated += logExecuteUpdate(stmt);
+        for (String deleteStatement : deleteStatements) {
+            String sql = new StringBuilder().append(deleteStatement).append(getPlaceholders(objectIDs.size())).append(';').toString();
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, contextID);
+                for (String id : objectIDs) {
+                    stmt.setInt(parameterIndex, asInt(id));
+                }
+                updated += logExecuteUpdate(stmt);
+            }
         }
         return updated;
     }

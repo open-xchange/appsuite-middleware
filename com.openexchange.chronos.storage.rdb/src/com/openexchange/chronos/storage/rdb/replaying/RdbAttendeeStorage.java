@@ -106,6 +106,12 @@ public class RdbAttendeeStorage implements AttendeeStorage {
     }
 
     @Override
+    public void deleteAttendees(List<String> eventIds) throws OXException {
+        delegate.deleteAttendees(eventIds);
+        legacyDelegate.deleteAttendees(eventIds);
+    }
+
+    @Override
     public void deleteAttendees(String eventId, List<Attendee> attendees) throws OXException {
         delegate.deleteAttendees(eventId, attendees);
         legacyDelegate.deleteAttendees(eventId, attendees);

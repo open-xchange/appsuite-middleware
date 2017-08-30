@@ -347,24 +347,38 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public void deleteEvent(String objectID) throws OXException {
+        deleteEvents(Collections.singletonList(objectID));
+    }
+
+    public void deleteEvents(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteEvent(connection, context.getContextId(), asInt(objectID));
+            updated = deleteEvents(connection, context.getContextId(), eventIds);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, Collections.singleton(null), connection, "prg_dates");
+            throw asOXException(e, MAPPER, (Event) null, connection, "prg_dates");
         } finally {
             release(connection, updated);
         }
     }
 
-    private static int deleteEvent(Connection connection, int contextID, int objectID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates WHERE cid=? AND intfield01=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, objectID);
+    private static int deleteEvents(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
+        if (null == objectIDs || 0 == objectIDs.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM prg_dates WHERE cid=? AND intfield01")
+            .append(getPlaceholders(objectIDs.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (String id : objectIDs) {
+                stmt.setInt(parameterIndex, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }

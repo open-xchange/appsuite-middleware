@@ -356,9 +356,19 @@ public abstract class RdbStorage {
      * @return The OX exception
      */
     protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
-        return asOXException(e, mapper, Collections.singleton(object), connection, table);
+        return asOXException(e, mapper, null == object ? null : Collections.singleton(object), connection, table);
     }
 
+    /**
+     * Gets an {@link OXException} appropriate for the supplied {@link SQLException} that occurred during a write-operation.
+     *
+     * @param e The SQL exception to get the OX exception for
+     * @param mapper The corresponding db mapper, or <code>null</code> if not available
+     * @param objects The corresponding objects being written, or <code>null</code> if not available
+     * @param connection The current database connection, or <code>null</code> if not available
+     * @param table The name of the targeted database table, or <code>null</code> if not available
+     * @return The OX exception
+     */
     protected static <O, E extends Enum<E>> OXException asOXException(SQLException e, DbMapper<O, E> mapper, Collection<O> objects, Connection connection, String table) {
         if (IncorrectStringSQLException.class.isInstance(e)) {
             IncorrectStringSQLException incorrectStringException = (IncorrectStringSQLException) e;
@@ -397,7 +407,7 @@ public abstract class RdbStorage {
      * Parses the supplied identifier to its numerical integer value.
      *
      * @param id The identifier to get the integer value for
-     * @return The integer value of the supplied identifier.
+     * @return The integer value of the supplied identifier
      * @throws NumberFormatException
      */
     protected static int asInt(String id) {
@@ -405,10 +415,25 @@ public abstract class RdbStorage {
     }
 
     /**
+     * Parses the supplied identifiers to their numerical integer values.
+     *
+     * @param ids The identifiers to get the integer values for
+     * @return The integer values of the supplied identifiers
+     * @throws NumberFormatException
+     */
+    protected static int[] asInt(String[] ids) {
+        int[] numericalIds = new int[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            numericalIds[i] = Integer.parseInt(ids[i]);
+        }
+        return numericalIds;
+    }
+
+    /**
      * Parses the supplied identifier to its numerical integer value.
      *
      * @param id The identifier to get the integer value for
-     * @return The integer value of the supplied identifier.
+     * @return The integer value of the supplied identifier
      * @throws NumberFormatException
      */
     protected static Integer asInteger(String id) {
@@ -419,7 +444,7 @@ public abstract class RdbStorage {
      * Gets the string representation of the supplied numerical identifier.
      *
      * @param id The identifier to get the string representation for
-     * @return The string representation of the supplied numerical identifier.
+     * @return The string representation of the supplied numerical identifier
      */
     protected static String asString(int id) {
         return String.valueOf(id);
@@ -429,10 +454,34 @@ public abstract class RdbStorage {
      * Gets the string representation of the supplied numerical identifier.
      *
      * @param id The identifier to get the string representation for
-     * @return The string representation of the supplied numerical identifier.
+     * @return The string representation of the supplied numerical identifier
      */
     protected static String asString(Integer id) {
         return null == id ? null : id.toString();
+    }
+
+    /**
+     * Gets an SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
+     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
+     *
+     * @param count The number of placeholders to append
+     * @return The placeholder string
+     * @throws IllegalArgumentException if count is <code>0</code> or negative
+     */
+    protected static String getPlaceholders(int count) {
+        if (0 >= count) {
+            throw new IllegalArgumentException("count");
+        }
+        if (1 == count) {
+            return "=?";
+        }
+        StringBuilder stringBuilder = new StringBuilder(6 + 2 * count);
+        stringBuilder.append(" IN (?");
+        for (int i = 1; i < count; i++) {
+            stringBuilder.append(",?");
+        }
+        stringBuilder.append(')');
+        return stringBuilder.toString();
     }
 
     private static <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {
@@ -447,24 +496,6 @@ public abstract class RdbStorage {
                     LOG.warn("Error deriving mapping for incorrect string", x);
                 }
             }
-        }
-        return null;
-    }
-
-    private static <O, E extends Enum<E>> List<MappedTruncation<O>> getMappedTruncations(DataTruncation e, DbMapper<O, E> mapper, O object, Connection connection, String table) {
-        if (null != mapper && null != object && null != table && null != e) {
-            String[] truncatedColumns = DBUtils.parseTruncatedFields(e);
-            if (null == truncatedColumns || 0 == truncatedColumns.length) {
-                return null;
-            }
-            List<MappedTruncation<O>> mappedTruncations = new ArrayList<MappedTruncation<O>>(truncatedColumns.length);
-            for (String column : truncatedColumns) {
-                MappedTruncation<O> mappedTruncation = getMappedTruncation(mapper, object, connection, table, column);
-                if (null != mappedTruncation) {
-                    mappedTruncations.add(mappedTruncation);
-                }
-            }
-            return 0 < mappedTruncations.size() ? mappedTruncations : null;
         }
         return null;
     }

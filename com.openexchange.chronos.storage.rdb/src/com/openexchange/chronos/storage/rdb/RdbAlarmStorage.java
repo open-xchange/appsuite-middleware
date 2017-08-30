@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -97,6 +98,7 @@ import com.openexchange.java.Strings;
 public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     private static final int INSERT_CHUNK_SIZE = 200;
+    private static final int DELETE_CHUNK_SIZE = 200;
     private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
 
     private final int accountId;
@@ -282,12 +284,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void deleteAlarms(String eventId) throws OXException {
+        deleteAlarms(Collections.singletonList(eventId));
+    }
+
+    @Override
+    public void deleteAlarms(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAlarms(connection, context.getContextId(), accountId, eventId);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteAlarms(connection, context.getContextId(), accountId, chunk);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -492,11 +501,21 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return alarmsByUserById;
     }
 
-    private static int deleteAlarms(Connection connection, int cid, int account, String eventId) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event=?;")) {
-            stmt.setInt(1, cid);
-            stmt.setInt(2, account);
-            stmt.setString(3, eventId);
+    private static int deleteAlarms(Connection connection, int cid, int account, List<String> eventIds) throws SQLException {
+        if (null == eventIds || 0 == eventIds.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event")
+            .append(getPlaceholders(eventIds.size())).append(';');
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, account);
+            for (String id : eventIds) {
+                stmt.setString(parameterIndex, id);
+            }
             return logExecuteUpdate(stmt);
         }
     }

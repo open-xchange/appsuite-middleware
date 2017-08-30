@@ -293,13 +293,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void deleteAlarms(String eventID) throws OXException {
+        deleteAlarms(Collections.singletonList(eventID));
+    }
+
+    @Override
+    public void deleteAlarms(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += deleteReminderMinutes(connection, context.getContextId(), asInt(eventID));
-            updated += deleteReminderTriggers(connection, context.getContextId(), asInt(eventID));
+            updated += deleteReminderMinutes(connection, context.getContextId(), eventIds);
+            updated += deleteReminderTriggers(connection, context.getContextId(), eventIds);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -605,11 +610,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int deleteReminderTriggers(Connection connection, int contextID, int eventID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM reminder WHERE cid=? AND target_id=? AND module=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, eventID);
-            stmt.setInt(3, REMINDER_MODULE);
+    private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id")
+            .append(getPlaceholders(eventIds.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, REMINDER_MODULE);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
@@ -631,11 +643,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int deleteReminderMinutes(Connection connection, int contextID, int eventID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=?;")) {
-            stmt.setNull(1, java.sql.Types.INTEGER);
-            stmt.setInt(2, contextID);
-            stmt.setInt(3, eventID);
+    private static int deleteReminderMinutes(Connection connection, int contextID, List<String> eventIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id")
+            .append(getPlaceholders(eventIds.size())).append(';');
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            stmt.setInt(parameterIndex++, contextID);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
