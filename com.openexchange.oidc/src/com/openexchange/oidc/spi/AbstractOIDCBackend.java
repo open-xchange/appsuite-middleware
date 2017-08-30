@@ -52,8 +52,10 @@ package com.openexchange.oidc.spi;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.http.HttpServletRequest;
@@ -64,15 +66,22 @@ import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.oauth2.sdk.AccessTokenResponse;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
+import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
 import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
@@ -170,12 +179,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     @Override
-    public IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException {
+    public IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException {
         IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
             IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getJwkSet()));
-            result = idTokenValidator.validate(idToken, new Nonce(storedRequestInformation.getNonce()));
+            result = idTokenValidator.validate(idToken, new Nonce(nounce));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
         } catch (JOSEException e) {
@@ -254,15 +263,15 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         //String[] userData = subject.split("@");
-        //TODO QS-VS: 
-        String[] userData = {"3", "wonderland.net"}; 
+        //TODO QS-VS: auf die auskommentierte Abhandlung umstellen
+        String[] userData = { "3", "wonderland.net" };
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }
         int contextId = contextService.getContextId(userData[1]);
         return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
     }
-    
+
     @Override
     public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
@@ -275,7 +284,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
             OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
             OIDCTools.addParameterToSession(session, tokenMap, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
-            
+
             SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 sessionStorageService.addSession(session);
@@ -287,4 +296,57 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             lock.unlock();
         }
     }
+
+    @Override
+    public boolean updateOauthTokens(Session session) throws OXException {
+        AccessTokenResponse accessToken = loadAccessToken(session);
+        if (accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
+            return false;
+        }
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
+        tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());
+        updateSession(session, tokenMap);
+        return true;
+    }
+
+    //TODO QS-VS: Die Authentifizierung des Client wird öfters gebraucht, sollte ausgelagert werden
+    private AccessTokenResponse loadAccessToken(Session session) throws OXException {
+        RefreshToken refreshToken = new RefreshToken((String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN));
+        AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
+        ClientID clientID = new ClientID(this.getBackendConfig().getClientID());
+        Secret clientSecret = new Secret(this.getBackendConfig().getClientSecret());
+        ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
+        try {
+            URI tokenEndpoint = new URI(this.getBackendConfig().getTokenEndpoint());
+
+            TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
+
+            TokenResponse response = null;
+            response = TokenResponse.parse(request.toHTTPRequest().send());
+
+            if (!response.indicatesSuccess()) {
+                TokenErrorResponse errorResponse = (TokenErrorResponse) response;
+                throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(errorResponse.getErrorObject().getHTTPStatusCode() + " " + errorResponse.getErrorObject().getDescription());
+            }
+            return (AccessTokenResponse) response;
+        } catch (URISyntaxException e) {
+            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
+        } catch (com.nimbusds.oauth2.sdk.ParseException e) {
+            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
+        } catch (IOException e) {
+            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
+        }
+    }
+
+    @Override
+    public boolean tokensExpired(Session session) throws OXException {
+        //TODO QS-VS: später mit echtem Code tauschen
+        return true;
+//        long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
+//        long expiryDate = (long) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+//        return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
+    }
+    
+    
 }

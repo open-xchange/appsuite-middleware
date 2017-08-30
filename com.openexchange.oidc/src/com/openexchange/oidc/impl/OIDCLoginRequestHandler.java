@@ -279,6 +279,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                         OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN, Session.PARAM_OAUTH_ACCESS_TOKEN);
                         OIDCTools.addParameterToSession(session, state, OIDCTools.REFRESH_TOKEN, Session.PARAM_OAUTH_REFRESH_TOKEN);
                         OIDCTools.addParameterToSession(session, state, OIDCTools.ACCESS_TOKEN_EXPIRY, Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+                        session.setParameter(OIDCTools.BACKEND_PATH, backend.getPath());
                     }
                 };
 

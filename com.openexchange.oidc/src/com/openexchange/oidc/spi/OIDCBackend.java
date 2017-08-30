@@ -113,7 +113,7 @@ public interface OIDCBackend {
 
     AuthorizationRequest getAuthorisationRequest(Builder requestBuilder, HttpServletRequest request);
 
-    IDTokenClaimsSet validateIdToken(JWT idToken, AuthenticationRequestInfo storedRequestInformation) throws OXException;
+    IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException;
 
     Scope getScope();
 
@@ -128,4 +128,8 @@ public interface OIDCBackend {
     void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException;
     
     void updateSession(Session session, Map<String, String> tokenMap) throws OXException;
+
+    boolean updateOauthTokens(Session session) throws OXException;
+
+    boolean tokensExpired(Session session) throws OXException;
 }

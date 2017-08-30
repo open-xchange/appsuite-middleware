@@ -92,7 +92,7 @@ public class OIDCFeature extends DependentServiceStarter{
         if(config.isEnabled()) {
             LOG.info("Starting core OpenID Connect support... ");
             getOIDCBackends(services);
-            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new OIDCSessionInspectorService(), null));
+            serviceRegistrations.push(context.registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackends, context), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null));
         } else {

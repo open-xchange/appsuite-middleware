@@ -74,8 +74,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
-import com.openexchange.session.reservation.Reservation;
-import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -87,7 +85,7 @@ public class OIDCTools {
     
     public static final String OIDC_LOGIN = "oidcLogin";
 
-    public static final String IDTOKEN = "__session.idToken";
+    public static final String IDTOKEN = "__session.oidc.idToken";
 
     public static final String TYPE = "type";
     
@@ -106,6 +104,8 @@ public class OIDCTools {
     public static final String OIDC_LOGOUT = "oidcLogout";
 
     public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
+    
+    public static final String BACKEND_PATH = "__session.oidc.backend.path";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {

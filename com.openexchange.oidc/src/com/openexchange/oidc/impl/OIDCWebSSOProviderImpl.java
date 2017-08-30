@@ -219,7 +219,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
-            IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation);
+            IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation.getNonce());
             if (validTokenResponse != null) {
                 this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
             }
@@ -276,8 +276,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return prefixService.getPrefix();
     }
 
-    private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
-        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation);
+    private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, String nounce) throws OXException {
+        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), nounce);
     }
 
     private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
@@ -295,7 +295,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
-        // TODO QS-VS: ISt die send Methode sicher genug?
         HTTPResponse httpResponse = null;
         try {
             httpResponse = httpRequest.send();
