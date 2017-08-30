@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class CreateSchemas extends DatabaseAbstraction {
+public final class CreateSchemas extends DatabaseAbstraction {
 
     public CreateSchemas(final String[] args2) {
         final AdminParser parser = new AdminParser("createschemas");
