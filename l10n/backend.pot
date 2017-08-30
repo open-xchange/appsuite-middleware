@@ -1057,15 +1057,24 @@ msgstr ""
 msgid "Validation failed: %1$s"
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:62
+#. *
+#. * The event %s couldn't be deleted: %s
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
 msgid "The event %s couldn't be deleted: %s"
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:64
+#. *
+#. * Multiple events couldn't be deleted.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:69
 msgid "Multiple events couldn't be deleted."
 msgstr ""
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:66
+#. *
+#. * Unable to add alarms: %s
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:73
 msgid "Unable to add alarms: %s"
 msgstr ""
 
