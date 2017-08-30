@@ -60,10 +60,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
-import com.openexchange.ajax.importexport.actions.VCardExportRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -75,7 +73,7 @@ import com.openexchange.groupware.container.Appointment;
  * @since v7.10
  */
 public class ICalSingleAndBatchExportTest extends ManagedAppointmentTest {
-    
+
     @Test
     public void testICalSingleAppointment() throws OXException, IOException, JSONException {
         final String title = "testExportICalAppointment" + System.currentTimeMillis();
@@ -87,20 +85,19 @@ public class ICalSingleAndBatchExportTest extends ManagedAppointmentTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setParentFolderID(folderID);
         appointmentObj.setIgnoreConflicts(true);
-
         int objId = catm.insert(appointmentObj).getObjectID();
-        
+
         JSONArray array = new JSONArray();
         array.put(addRequestIds(folderID, objId));
         String body = array.toString();
-        
+
         ICalExportResponse response = getClient().execute(new ICalExportRequest(-1, -1, body));
-        
+
         String iCal = response.getICal();
         assertTrue(iCal.contains(title));
         assertFileName(response.getHttpResponse(), appointmentObj.getTitle()+".ics");
-    }    
-    
+    }
+
     @Test
     public void testICalMultipleExport() throws JSONException, OXException, IOException {
         final String title = "testExportICalAppointment" + System.currentTimeMillis();
@@ -114,7 +111,7 @@ public class ICalSingleAndBatchExportTest extends ManagedAppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
 
         int objId = catm.insert(appointmentObj).getObjectID();
-        
+
         final String title2 = "testExportICalAppointment" + System.currentTimeMillis();
         int secondFolderID = folder.getObjectID();
         appointmentObj = new Appointment();
@@ -126,28 +123,28 @@ public class ICalSingleAndBatchExportTest extends ManagedAppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
 
         int secondObjId = catm.insert(appointmentObj).getObjectID();
-        
+
         JSONArray array = new JSONArray();
         array.put(addRequestIds(folderID, objId));
         array.put(addRequestIds(secondFolderID, secondObjId));
         String body = array.toString();
-        
+
         ICalExportResponse response = getClient().execute(new ICalExportRequest(-1, -1, body));
-        
+
         String iCal = response.getICal();
         assertTrue(iCal.contains(title));
         assertTrue(iCal.contains(title2));
         assertFileName(response.getHttpResponse(), folder.getFolderName()+".ics");
     }
-    
+
     protected void assertFileName(HttpResponse httpResp, String expectedFileName) {
         Header[] headers = httpResp.getHeaders("Content-Disposition");
         for (Header header : headers) {
             assertNotNull(header.getValue());
             assertTrue(header.getValue().contains(expectedFileName));
         }
-    }    
-    
+    }
+
     protected JSONObject addRequestIds(int folderId, int objectId) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("id", objectId);
