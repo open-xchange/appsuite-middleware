@@ -276,7 +276,7 @@ public class VCardExporter implements Exporter {
           }
       }
 
-      boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
+      boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
           if (null != requestData) {

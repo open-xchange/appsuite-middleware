@@ -231,7 +231,8 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            Object oExportDlists = optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS);
+            exportDlists = null == oExportDlists ? true : Boolean.valueOf(oExportDlists.toString()).booleanValue();
         }
 
         SearchIterator<Contact> conIter;
@@ -300,7 +301,8 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            Object oExportDlists = optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS);
+            exportDlists = null == oExportDlists ? true : Boolean.valueOf(oExportDlists.toString()).booleanValue();
         }
         List<ContactField> fieldList = Arrays.asList(fields.clone());
         if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {

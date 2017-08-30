@@ -58,7 +58,7 @@ import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * Defines a class able to export a certain type of OX folder as a certain format
+ * Defines a class able to export a certain type of PIM objects (contacts, appointments, and tasks) as a certain format.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - export file name, batch data
