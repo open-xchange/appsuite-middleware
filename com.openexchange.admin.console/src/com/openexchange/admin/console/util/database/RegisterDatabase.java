@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  * @author d7,cutmasta
  *
  */
-public class RegisterDatabase extends DatabaseAbstraction {
+public final class RegisterDatabase extends DatabaseAbstraction {
 
     public RegisterDatabase(final String[] args2) {
 
