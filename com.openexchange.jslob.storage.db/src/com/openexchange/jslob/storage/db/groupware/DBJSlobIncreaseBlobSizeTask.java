@@ -49,9 +49,7 @@
 
 package com.openexchange.jslob.storage.db.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -80,13 +78,20 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
-        boolean writeOperationPerformed = false;
         boolean rollback = false;
         try {
+            String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
+            if ("MEDIUMBLOB".equalsIgnoreCase(typeName)) {
+                // Nothing to do
+                return;
+            }
+
+            // Change to MEDIUMBLOB
             writeCon.setAutoCommit(false); // BEGIN
             rollback = true;
 
-            writeOperationPerformed = doPerform(writeCon);
+            Column column = new Column("data", "MEDIUMBLOB");
+            Tools.modifyColumns(writeCon, "jsonStorage", column);
 
             writeCon.commit(); // COMMIT
             rollback = false;
@@ -98,27 +103,6 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
             if (rollback) {
                 DBUtils.autocommit(writeCon);
             }
-        }
-    }
-
-    private boolean doPerform(final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            boolean writeOperationPerformed = false;
-
-            // Check current type name
-            String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
-            if (!"MEDIUMBLOB".equalsIgnoreCase(typeName)) {
-                final Column column = new Column("data", "MEDIUMBLOB");
-                Tools.modifyColumns(writeCon, "jsonStorage", column);
-                writeOperationPerformed = true;
-            }
-
-            return writeOperationPerformed;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 
