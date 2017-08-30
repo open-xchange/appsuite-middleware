@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CheckCountsConsistency extends ContextAbstraction {
+public final class CheckCountsConsistency extends ContextAbstraction {
 
     /**
      * Entry point

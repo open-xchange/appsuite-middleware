@@ -67,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CheckDatabase extends DatabaseAbstraction {
+public final class CheckDatabase extends DatabaseAbstraction {
 
     public CheckDatabase(final String[] args2) {
 
