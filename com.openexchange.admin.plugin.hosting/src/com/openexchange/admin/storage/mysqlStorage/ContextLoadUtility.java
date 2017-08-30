@@ -181,17 +181,17 @@ public class ContextLoadUtility {
 
         Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
         if (contexts.size() <= Databases.IN_LIMIT) {
-            fillLoginMappingsAndDatabasesChunk(contexts, id2context, con, schema2contexts);
+            fillLoginMappingsAndDatabasesChunk(contexts, false, id2context, con, schema2contexts);
         } else {
             for (List<Context> partition : Lists.partition(contexts, Databases.IN_LIMIT)) {
-                fillLoginMappingsAndDatabasesChunk(partition, id2context, con, schema2contexts);
+                fillLoginMappingsAndDatabasesChunk(partition, true, id2context, con, schema2contexts);
             }
         }
         return schema2contexts;
     }
 
-    private static void fillLoginMappingsAndDatabasesChunk(List<Context> partition, TIntObjectMap<Context> id2context, Connection con, Map<PoolAndSchema, List<Context>> schema2contexts) throws StorageException {
-        if (partition.isEmpty()) {
+    private static void fillLoginMappingsAndDatabasesChunk(List<Context> partition, boolean checkIfEmpty, TIntObjectMap<Context> id2context, Connection con, Map<PoolAndSchema, List<Context>> schema2contexts) throws StorageException {
+        if (checkIfEmpty && partition.isEmpty()) {
             // Nothing to do
             return;
         }
@@ -287,16 +287,16 @@ public class ContextLoadUtility {
         }
 
         if (allInSchema.size() <= Databases.IN_LIMIT) {
-            fillContextsSchemaChunk(allInSchema, withContextAttributes, id2context, oxdb_read);
+            fillContextsSchemaChunk(allInSchema, false, withContextAttributes, id2context, oxdb_read);
         } else {
             for (List<Context> partitionInSchema : Lists.partition(allInSchema, Databases.IN_LIMIT)) {
-                fillContextsSchemaChunk(partitionInSchema, withContextAttributes, id2context, oxdb_read);
+                fillContextsSchemaChunk(partitionInSchema, true, withContextAttributes, id2context, oxdb_read);
             }
         }
     }
 
-    private static void fillContextsSchemaChunk(List<Context> partitionInSchema, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
-        if (partitionInSchema.isEmpty()) {
+    private static void fillContextsSchemaChunk(List<Context> partitionInSchema, boolean checkIfEmpty, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
+        if (checkIfEmpty && partitionInSchema.isEmpty()) {
             return;
         }
 

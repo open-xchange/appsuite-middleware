@@ -1007,6 +1007,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 rs = null;
                 stmt = null;
 
+                // Check if empty
+                if (contexts.isEmpty()) {
+                    return new Context[0];
+                }
+
                 // Load login mappings per context and group by database schema association
                 TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
                 Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
@@ -1290,6 +1295,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
             }
 
+            // Check if empty
+            if (contexts.isEmpty()) {
+                return new Context[0];
+            }
+
             // Load login mappings per context and group by database schema association
             TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
             Map<PoolAndSchema, List<Context>> schema2contexts = ContextLoadUtility.fillLoginMappingsAndDatabases(contexts, id2context, con);
@@ -1393,6 +1403,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
+
+            // Check if empty
+            if (contexts.isEmpty()) {
+                return new Context[0];
+            }
 
             // Load login mappings per context and group by database schema association
             TIntObjectMap<Context> id2context = new TIntObjectHashMap<Context>(Databases.IN_LIMIT);
