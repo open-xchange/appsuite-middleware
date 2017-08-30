@@ -818,14 +818,16 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         /*
-         * adjust attendee-dependent fields (for non-exception events)
+         * adjust attendee-dependent fields (ignore for change exceptions)
          */
-        if (false == isSeriesException(originalEvent)) {
-            if (isNullOrEmpty(newAttendees)) {
-                adjustForNonGroupScheduled(originalEvent, eventUpdate);
-            } else {
-                adjustForGroupScheduled(originalEvent, eventUpdate);
-            }
+        if (isSeriesException(originalEvent)) {
+            eventUpdate.removeOrganizer();
+            eventUpdate.removeFolderId();
+            eventUpdate.removeCalendarUser();
+        } else if (isNullOrEmpty(newAttendees)) {
+            adjustForNonGroupScheduled(originalEvent, eventUpdate);
+        } else {
+            adjustForGroupScheduled(originalEvent, eventUpdate);
         }
         /*
          * wrap changes and return as item update (if there are any)
