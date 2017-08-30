@@ -92,7 +92,7 @@ public class CreateFolderUserPropertyTable extends AbstractCreateTableImpl {
         builder.append("name VARCHAR(128) NOT NULL,");
         builder.append("value TINYTEXT NOT NULL,");
         builder.append("PRIMARY KEY (cid, fuid, userid, name)");
-        builder.append(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci;");
+        builder.append(")ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;");
         return builder.toString();
     }
 
