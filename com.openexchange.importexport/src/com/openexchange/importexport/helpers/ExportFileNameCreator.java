@@ -67,7 +67,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.importexport.exceptions.ImportExportExceptionMessages;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
@@ -103,7 +102,7 @@ public class ExportFileNameCreator {
             FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
             prefix = folderObj.getFolderName();
         } catch (OXException e) {
-            LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+            LOG.debug("", e);
             prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
         }
         return validateFileName(prefix, extension, session);
@@ -142,7 +141,7 @@ public class ExportFileNameCreator {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
                 }
             } catch (OXException e) {
-                LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+                LOG.debug("", e);
                 prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
             }
         }
@@ -190,10 +189,10 @@ public class ExportFileNameCreator {
                 }
             }
         } catch (OXException e) {
-            LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+            LOG.debug("", e);
             sb.append(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME));
         } catch (SQLException e) {
-            LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+            LOG.debug("", e);
             sb.append(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME));
         }
         return sb.toString();
@@ -263,7 +262,7 @@ public class ExportFileNameCreator {
             FilenameValidationUtils.checkName(fileName);
             return fileName;
         } catch (OXException e) {
-            LOG.error(ImportExportExceptionMessages.COULD_NOT_CREATE_FILE_NAME, e);
+            LOG.debug("", e);
             return new StringBuilder(getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME)).append('.').append(suffix).toString();
         }
     }

@@ -88,7 +88,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
         SizedInputStream sis;
 
-        if (doBatchExport(batchIds, exporter)) {
+        if (doBatchExport(batchIds)) {
             sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
             sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
@@ -105,7 +105,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
         return new AJAXRequestResult(fileHolder, "file");
     }
 
-    private boolean doBatchExport(Map<String, List<String>> batchIds, Exporter exporter) {
+    private boolean doBatchExport(Map<String, List<String>> batchIds) {
         return null != batchIds && false == batchIds.isEmpty();
     }
 
