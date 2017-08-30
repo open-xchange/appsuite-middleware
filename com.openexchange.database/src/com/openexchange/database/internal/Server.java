@@ -95,19 +95,17 @@ public final class Server {
             synchronized (Server.class) {
                 tmp = serverId;
                 if (null == tmp) {
-                    tmp = Integer.valueOf(Server.loadServerId(getServerName()));
-                    LOG.trace("Got server id: {}", tmp);
+                    int iServerId = Server.loadServerId(getServerName());
+                    if (-1 == iServerId) {
+                        throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
+                    }
+                    tmp = Integer.valueOf(iServerId);
                     serverId = tmp;
+                    LOG.trace("Got server id: {}", tmp);
                 }
             }
         }
-
-        // Check & return
-        int _serverId = tmp.intValue();
-        if (_serverId < 0) {
-            throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
-        }
-        return _serverId;
+        return tmp.intValue();
     }
 
     public static final void start(final ConfigurationService service) throws OXException {
@@ -127,19 +125,20 @@ public final class Server {
     }
 
     private static int loadServerId(final String name) throws OXException {
-        int retval = -1;
+        final ConfigDatabaseService myService = Server.configDatabaseService;
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final ConfigDatabaseService myService = Server.configDatabaseService;
         try {
             con = myService.getReadOnly();
             stmt = con.prepareStatement(SELECT);
             stmt.setString(1, name);
             result = stmt.executeQuery();
+            int retval = -1;
             if (result.next()) {
                 retval = result.getInt(1);
             }
+            return retval;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -148,6 +147,5 @@ public final class Server {
                 myService.backReadOnly(con);
             }
         }
-        return retval;
     }
 }
