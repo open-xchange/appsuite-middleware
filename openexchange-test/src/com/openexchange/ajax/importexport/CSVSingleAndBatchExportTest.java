@@ -207,4 +207,10 @@ public class CSVSingleAndBatchExportTest extends AbstractManagedContactTest {
         assertFileName(exportResponse.getHttpResponse(), "Contacts.csv");
     }
 
+    @Test
+    public void testInvalidFileNameExport() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

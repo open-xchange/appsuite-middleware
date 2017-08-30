@@ -179,4 +179,21 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         assertFileName(vcardExportResponse.getHttpResponse(), "Contacts.vcf");
     }
 
+    @Test
+    public void testInvalidFileNameExport() throws JSONException, OXException, IOException {
+        Contact firstContact = generateContact("First \"Contact\" Contact");
+        int firstId = cotm.newAction(firstContact).getObjectID();
+
+        JSONArray array = new JSONArray();
+        array.put(addRequestIds(folderID, firstId));
+
+        String body = array.toString();
+
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        String vcard = (String) vcardExportResponse.getData();
+        String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
+        assertEquals("One vCards expected!", 1, result.length);
+        assertFileName(vcardExportResponse.getHttpResponse(), "Export.vcf");
+    }
+
 }

@@ -137,6 +137,32 @@ public class ICalSingleAndBatchExportTest extends ManagedAppointmentTest {
         assertFileName(response.getHttpResponse(), folder.getFolderName()+".ics");
     }
 
+    @Test
+    public void testICalFileNameExport() throws OXException, IOException, JSONException {
+        //testing for whitespace characters
+        final String title = "ICal Test Appointment for testing file name encoding";
+        int folderID = folder.getObjectID();
+        Appointment appointmentObj = new Appointment();
+        appointmentObj.setTitle(title);
+        appointmentObj.setStartDate(new Date());
+        appointmentObj.setEndDate(new Date());
+        appointmentObj.setShownAs(Appointment.RESERVED);
+        appointmentObj.setParentFolderID(folderID);
+        appointmentObj.setIgnoreConflicts(true);
+
+        int objId = catm.insert(appointmentObj).getObjectID();
+
+        JSONArray array = new JSONArray();
+        array.put(addRequestIds(folderID, objId));
+        String body = array.toString();
+
+        ICalExportResponse response = getClient().execute(new ICalExportRequest(-1, -1, body));
+
+        String iCal = response.getICal();
+        assertTrue(iCal.contains(title));
+        assertFileName(response.getHttpResponse(), title+".ics");
+    }
+
     protected void assertFileName(HttpResponse httpResp, String expectedFileName) {
         Header[] headers = httpResp.getHeaders("Content-Disposition");
         for (Header header : headers) {
