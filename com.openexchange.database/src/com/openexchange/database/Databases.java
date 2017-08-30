@@ -304,8 +304,15 @@ public final class Databases {
      * @param sql The SQL statement ending with <code>"IN ("</code>
      * @param length The number of entries.
      * @return The ready to use SQL statement.
+     * @throws IllegalArgumentException If <code>sql</code> is <code>null</code> <i>OR</i> <code>length</code> is less than or equal to <code>0</code> (zero)
      */
     public static String getIN(String sql, int length) {
+        if (null == sql) {
+            throw new IllegalArgumentException("SQL statement must not be null");
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be positive");
+        }
         StringBuilder retval = new StringBuilder(sql);
         for (int i = length; i-- > 0;) {
             retval.append("?,");

@@ -1089,6 +1089,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
 
+        if (cids.isEmpty()) {
+            return new Context[0];
+        }
+
         if (null != filters && filters.size() > 0) {
             PipesAndFiltersService pnfService;
             try {
@@ -1112,6 +1116,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 throw new StorageException(cause.getMessage(), cause);
             }
+
+            if (filteredCids.isEmpty()) {
+                return new Context[0];
+            }
+
             cids = filteredCids;
         }
 
@@ -1131,6 +1140,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     numAdded++;
                 }
             }
+
+            if (subset.isEmpty()) {
+                return new Context[0];
+            }
+
+            cids = subset;
         }
 
         Connection con = null;

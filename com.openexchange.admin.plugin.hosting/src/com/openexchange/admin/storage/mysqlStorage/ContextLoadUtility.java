@@ -175,6 +175,10 @@ public class ContextLoadUtility {
      * @throws StorageException If filling contexts fails
      */
     public static Map<PoolAndSchema, List<Context>> fillLoginMappingsAndDatabases(List<Context> contexts, TIntObjectMap<Context> id2context, Connection con) throws StorageException {
+        if (contexts.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         Map<PoolAndSchema, List<Context>> schema2contexts = new HashMap<>(contexts.size());
         if (contexts.size() <= Databases.IN_LIMIT) {
             fillLoginMappingsAndDatabasesChunk(contexts, id2context, con, schema2contexts);
@@ -187,6 +191,11 @@ public class ContextLoadUtility {
     }
 
     private static void fillLoginMappingsAndDatabasesChunk(List<Context> partition, TIntObjectMap<Context> id2context, Connection con, Map<PoolAndSchema, List<Context>> schema2contexts) throws StorageException {
+        if (partition.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -251,6 +260,10 @@ public class ContextLoadUtility {
      * @throws StorageException If filling the contexts fails
      */
     public static void fillUsageAndAttributes(Map<PoolAndSchema, List<Context>> schema2contexts, boolean withContextAttributes, TIntObjectMap<Context> id2context, AdminCacheExtended cache) throws StorageException {
+        if (schema2contexts.isEmpty()) {
+            return;
+        }
+
         // Query used quota per schema
         try {
             for (Map.Entry<PoolAndSchema, List<Context>> schema2contextsEntry : schema2contexts.entrySet()) {
@@ -269,6 +282,10 @@ public class ContextLoadUtility {
     }
 
     private static void fillContextsSchema(List<Context> allInSchema, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
+        if (allInSchema.isEmpty()) {
+            return;
+        }
+
         if (allInSchema.size() <= Databases.IN_LIMIT) {
             fillContextsSchemaChunk(allInSchema, withContextAttributes, id2context, oxdb_read);
         } else {
@@ -279,6 +296,10 @@ public class ContextLoadUtility {
     }
 
     private static void fillContextsSchemaChunk(List<Context> partitionInSchema, boolean withContextAttributes, TIntObjectMap<Context> id2context, Connection oxdb_read) throws StorageException {
+        if (partitionInSchema.isEmpty()) {
+            return;
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
