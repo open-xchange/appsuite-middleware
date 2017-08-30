@@ -198,12 +198,12 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
         ComposedConfigProperty<Integer> property = view.property(PasswordChangeRecorderProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
         if (property.isDefined()) {
-            limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
-        } else {
             limit = property.get();
             if (null == limit) {
                 limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
             }
+        } else {
+            limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
         }
 
         try {
