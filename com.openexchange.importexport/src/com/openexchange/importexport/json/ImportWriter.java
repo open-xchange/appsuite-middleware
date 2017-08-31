@@ -95,7 +95,7 @@ public class ImportWriter extends DataWriter {
 		this.session = session;
 	}
 
-	public void writeObject(final ImportResult importResult) throws JSONException {
+    public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
@@ -107,14 +107,14 @@ public class ImportWriter extends DataWriter {
             if (Category.CATEGORY_ERROR.getType().equals(exception.getCategory().getType())) {
                 writeParameter("line_number", String.valueOf(importResult.getEntryNumber()));
             }
-            final List<ConversionWarning> warnings = importResult.getWarnings();
+            List<ConversionWarning> warnings = importResult.getWarnings();
             if (warnings != null && warnings.size() > 0) {
-            	jsonwriter.key("warnings");
+                jsonwriter.key("warnings");
                 jsonwriter.array();
                 for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
-                    ResponseWriter.addWarning(jsonWarning, warning,  locale);
+                    ResponseWriter.addWarning(jsonWarning, warning, locale);
                     writeDepth1(jsonWarning.getJSONObject("warnings"));
                     jsonwriter.endObject();
                 }
@@ -130,13 +130,13 @@ public class ImportWriter extends DataWriter {
             }
             jsonwriter.endObject();
         } else {
-    		jsonwriter.object();
-    		writeParameter("id", importResult.getObjectId());
-    		writeParameter("last_modified", importResult.getDate());
-    		writeParameter("folder_id", importResult.getFolder());
-    		jsonwriter.endObject();
+            jsonwriter.object();
+            writeParameter("id", importResult.getObjectId());
+            writeParameter("last_modified", importResult.getDate());
+            writeParameter("folder_id", importResult.getFolder());
+            jsonwriter.endObject();
         }
-   }
+    }
 
     private void writeDepth1(final JSONObject json) throws JSONException {
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
