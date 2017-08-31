@@ -88,7 +88,7 @@ public class CalendarFolderConverter {
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             return getStorageFolder(treeId, accountId, contentType, (GroupwareCalendarFolder) calendarFolder);
         }
-        Folder folder = newStorageFolder(treeId, accountId, contentType, false);
+        Folder folder = newStorageFolder(treeId, accountId, contentType);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setParentID(CalendarFolderStorage.PRIVATE_ID);
@@ -116,7 +116,7 @@ public class CalendarFolderConverter {
      * @return The folder-storage compatible folder
      */
     public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, GroupwareCalendarFolder calendarFolder) {
-        Folder folder = newStorageFolder(treeId, accountId, contentType, true);
+        Folder folder = newStorageFolder(treeId, accountId, contentType);
         folder.setAccountID(accountId);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
@@ -296,17 +296,16 @@ public class CalendarFolderConverter {
      * @param treeId The identifier of the folder tree to take over
      * @param accountId The fully-qualified account identifier to take over
      * @param contentType The context type to take over
-     * @param global <code>true</code> if the folder is globally unique, <code>false</code> if it is bound to a certain user only
      * @return A new folder instance
      */
-    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType, final boolean global) {
+    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType) {
         Folder folder = new AbstractFolder() {
 
             private static final long serialVersionUID = 4412370864216762652L;
 
             @Override
             public boolean isGlobalID() {
-                return global;
+                return false;
             }
         };
         folder.setTreeID(treeId);
