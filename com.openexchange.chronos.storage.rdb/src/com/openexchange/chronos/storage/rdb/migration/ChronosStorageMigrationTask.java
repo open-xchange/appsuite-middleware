@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -106,11 +105,10 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         MigrationConfig config = new MigrationConfig(services);
-        DatabaseService dbService = services.getService(DatabaseService.class);
         ContextService contextService = services.getService(ContextService.class);
-        int[] contextIds = dbService.getContextsInSameSchema(params.getContextId());
+        int[] contextIds = params.getContextsInSameSchema();
         MigrationProgress progress = new MigrationProgress(params.getProgressState(), contextIds.length);
-        Connection connection = dbService.getForUpdateTask(params.getContextId());
+        Connection connection = params.getConnection();
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
@@ -136,12 +134,8 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
         } finally {
             if (false == committed) {
                 rollback(connection);
-                autocommit(connection);
-                dbService.backForUpdateTaskAfterReading(params.getContextId(), connection);
-            } else {
-                autocommit(connection);
-                dbService.backForUpdateTask(params.getContextId(), connection);
             }
+            autocommit(connection);
         }
     }
 
