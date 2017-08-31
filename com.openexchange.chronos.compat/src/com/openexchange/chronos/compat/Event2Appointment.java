@@ -272,7 +272,8 @@ public class Event2Appointment {
     }
 
     /**
-     * Gets the "reminder" value based on the supplied alarm list.
+     * Gets the "reminder" value based on the supplied list of alarms, in case an alarm is contained whose trigger is of type
+     * {@link AlarmAction#DISPLAY}, and has a non-positive duration relative to the start date.
      *
      * @param alarms The alarms
      * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
@@ -280,13 +281,30 @@ public class Event2Appointment {
     public static Integer getReminder(List<Alarm> alarms) {
         if (null != alarms && 0 < alarms.size()) {
             for (Alarm alarm : alarms) {
-                if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
-                    Trigger trigger = alarm.getTrigger();
-                    if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
-                        if (Strings.isNotEmpty(trigger.getDuration())) {
-                            long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
-                            return Autoboxing.I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
-                        }
+                Integer reminder = getReminder(alarm);
+                if (null != reminder) {
+                    return reminder;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the "reminder" value based on the supplied alarm, in case the alarm's trigger is of type {@link AlarmAction#DISPLAY}, and has
+     * a non-positive duration relative to the start date.
+     *
+     * @param alarm The alarm
+     * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
+     */
+    public static Integer getReminder(Alarm alarm) {
+        if (null != alarm && AlarmAction.DISPLAY.equals(alarm.getAction())) {
+            Trigger trigger = alarm.getTrigger();
+            if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
+                if (Strings.isNotEmpty(trigger.getDuration())) {
+                    long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
+                    if (0L >= triggerDuration) {
+                        return Autoboxing.I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
                     }
                 }
             }

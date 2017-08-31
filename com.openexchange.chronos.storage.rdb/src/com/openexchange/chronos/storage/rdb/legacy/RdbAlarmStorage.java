@@ -407,18 +407,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return null;
         }
         /*
-         * distinguish between 'snooze' & regular alarms (via RELTYPE=SNOOZE)
+         * distinguish between 'snooze' & regular alarms (via RELTYPE=SNOOZE),
+         * only considering regular alarms with a non-positive duration relative to event's the start date (reminder minutes >= 0)
          */
+        TimeZone timeZone = entityResolver.getTimeZone(userID);
         List<Alarm> regularAlarms = new ArrayList<Alarm>();
         List<Alarm> snoozeAlarms = new ArrayList<Alarm>();
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
                 snoozeAlarms.add(alarm);
-            } else {
+            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
                 regularAlarms.add(alarm);
             }
         }
-        TimeZone timeZone = entityResolver.getTimeZone(userID);
         Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
         if (null != snoozeAlarm) {
             /*
@@ -745,7 +746,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
      * @return The next alarm, or <code>null</code> if there is none
      */
-    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) {
+    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
         if (null == alarms || 0 == alarms.size()) {
             return null;
         }
