@@ -69,7 +69,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.properties.AdminProperties;
@@ -103,7 +102,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.Strings;
@@ -2877,27 +2875,45 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException {
+        // Collecting ONE Context id for each schema
+        List<Integer> contextIdsForSchema;
+        {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                con = cache.getReadConnectionForConfigDB();
 
-        //Collecting ONE Context id for each schema
-        Set<Integer> contextIdsForSchema = new HashSet<Integer>();
-        try {
-            List<Integer> allCids = ContextStorage.getInstance().getAllContextIds();
-            Set<Integer> handledContextIds = new HashSet<Integer>();
-            for (int cid : allCids) {
-                if (!handledContextIds.contains(cid)) {
-                    int[] contextsInSameSchema = com.openexchange.databaseold.Database.getContextsInSameSchema(cid);
-                    for (int contextInSameSchama : contextsInSameSchema) {
-                        handledContextIds.add(contextInSameSchama);
+                stmt = con.prepareStatement("SELECT MIN(cid) FROM context_server2db_pool GROUP BY db_schema");
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return;
+                }
+
+                contextIdsForSchema = new LinkedList<Integer>();
+                do {
+                    contextIdsForSchema.add(Integer.valueOf(rs.getInt(1)));
+                } while (rs.next());
+                Databases.closeSQLStuff(rs, stmt);
+            } catch (PoolException e) {
+                log.error("Pool Error", e);
+                throw new StorageException(e);
+            } catch (SQLException e) {
+                log.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                if (null != con) {
+                    try {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } catch (final PoolException e) {
+                        log.error("Error pushing COnfigDB connection to pool.", e);
                     }
-                    contextIdsForSchema.add(cid);
                 }
             }
-        } catch (OXException e) {
-            log.error("Internal Error", e);
-            throw new StorageException(e);
         }
 
-        //Execute once for each schema
+        // Execute once for each schema
         for (int cid : contextIdsForSchema) {
             changeAccessCombination(cid, filter, addAccess, removeAccess);
         }
