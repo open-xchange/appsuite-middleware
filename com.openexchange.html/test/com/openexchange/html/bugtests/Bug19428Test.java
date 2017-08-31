@@ -157,7 +157,7 @@ public class Bug19428Test extends AbstractSanitizing {
             "            INQUIRE ist ein Produkt von STAGEx aus Paderborn.\n" +
             "            Weitere Informationen erhalten Sie unter http://www.stage-x.de.\n" +
             "        --> \n" +
-            "  <title>BVMW- Bundesverband mittelständische Wirtschaft</title> \n" +
+            "  <title>BVMW- Bundesverband mittelst\u00E4ndische Wirtschaft</title> \n" +
             "  <link rel=\"stylesheet\" href=\"https://bvmw.stage-x.de/styles/stageNeu.css\"> \n" +
             "  <link rel=\"stylesheet\" href=\"https://www.stage-x.de/styles/newsletter.css\"> \n" +
             " </head>\n" +
@@ -180,7 +180,7 @@ public class Bug19428Test extends AbstractSanitizing {
             "       <div class=\"hr\"> \n" +
             "        <hr> \n" +
             "        <div>\n" +
-            "         <h2 style=\"font: bold 14px/14px arial,helvetica,sans-serif; color: #000000; margin: 10px 0 10px 0; padding: 0;\">Udo Wiemann lädt ein zum</h2>\n" +
+            "         <h2 style=\"font: bold 14px/14px arial,helvetica,sans-serif; color: #000000; margin: 10px 0 10px 0; padding: 0;\">Udo Wiemann l\u00E4dt ein zum</h2>\n" +
             "         <br>\n" +
             "         <center>\n" +
             "          <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"690\">\n" +
@@ -196,18 +196,18 @@ public class Bug19428Test extends AbstractSanitizing {
             "          &nbsp;\n" +
             "         </div>\n" +
             "         <div class=\"h1\"> \n" +
-            "          <h1 class=\"original\"> Persönliche Einladung zum Business Lunch am 15 .Juni 2011 in das Thermalbad „Driburg Therme“ </h1> \n" +
+            "          <h1 class=\"original\"> Pers\u00F6nliche Einladung zum Business Lunch am 15 .Juni 2011 in das Thermalbad \u201eDriburg Therme\u201c </h1> \n" +
             "         </div>\n" +
             "         <font>Sehr geehrter Herr Thiet,</font>\n" +
             "         <div class=\"text\"> \n" +
-            "          <p class=\"original\"> in regelmäßigen Abständen treffen wir uns in einem kleinen Kreis von 12 Unternehmerinnen und Unternehmern zu einem Strategiegespräch, in dem ein aktuelles Thema aufgegriffen und diskutiert wird.<br> <br> Unser aktuelles Thema:<br> <br> <b>Werbung - effektiv, modern und strategisch</b><br> - Die Qual der Wahl: Twitter, Facebook &amp; Co. - oder eher klassisch? -<br> <br> Diskutieren Sie mit uns die zukünftigen Herausforderungen und Möglichkeiten, die Unternehmen im harten Wettbewerb um Absatzmärkte bewältigen müssen. Als ein mit entscheidendes Kriterium wird die Positionierung des Unternehmens im Markt und die Darstellung der Dienstleistung und/oder der anzubietenden Produkte angesehen. Welche Werbebotschaften erreichen welche Kundengruppen und welche Rolle spielen die neuen Kommunikationsformen?<br> <br> Diese und andere Fragen möchten wir mit Ihnen bei einem excellenten Menü im Ambiente des Thermalbades diskutieren.<br> </p> \n" +
+            "          <p class=\"original\"> in regelm\u00E4ßigen Abst\u00E4nden treffen wir uns in einem kleinen Kreis von 12 Unternehmerinnen und Unternehmern zu einem Strategiegespr\u00E4ch, in dem ein aktuelles Thema aufgegriffen und diskutiert wird.<br> <br> Unser aktuelles Thema:<br> <br> <b>Werbung - effektiv, modern und strategisch</b><br> - Die Qual der Wahl: Twitter, Facebook &amp; Co. - oder eher klassisch? -<br> <br> Diskutieren Sie mit uns die zuk\u00FCnftigen Herausforderungen und M\u00F6glichkeiten, die Unternehmen im harten Wettbewerb um Absatzm\u00E4rkte bew\u00E4ltigen m\u00FCssen. Als ein mit entscheidendes Kriterium wird die Positionierung des Unternehmens im Markt und die Darstellung der Dienstleistung und/oder der anzubietenden Produkte angesehen. Welche Werbebotschaften erreichen welche Kundengruppen und welche Rolle spielen die neuen Kommunikationsformen?<br> <br> Diese und andere Fragen m\u00F6chten wir mit Ihnen bei einem excellenten Men\u00FC im Ambiente des Thermalbades diskutieren.<br> </p> \n" +
             "         </div>\n" +
             "         <div style=\"margin-left:0px;\">\n" +
             "          <p class=\"text\">Ich freue mich auf Sie!<br> Ihr</p> \n" +
             "          <img style=\"margin-top:-15px; margin-bottom:-15px;\" border=\"0\" width=\"160\" src=\"https://bvmw.stage-x.de/vorlagen/images/SignatureWiemann.jpg\"> \n" +
-            "          <p class=\"text\">Udo Wiemann<br>BVMW Kreisgeschäftsführer<br>Paderborn•Höxter•Gütersloh</p>\n" +
+            "          <p class=\"text\">Udo Wiemann<br>BVMW Kreisgesch\u00E4ftsf\u00FChrer<br>Paderborn\u2022H\u00F6xter\u2022G\u00FCtersloh</p>\n" +
             "         </div>\n" +
-            "         <span><b>Die Teilnahme an dieser Veranstaltung ist für Sie kostenfrei.</b></span>\n" +
+            "         <span><b>Die Teilnahme an dieser Veranstaltung ist f\u00FCr Sie kostenfrei.</b></span>\n" +
             "         <div style=\"margin-top: 30px;\">\n" +
             "          &nbsp;\n" +
             "         </div>\n" +
@@ -223,7 +223,7 @@ public class Bug19428Test extends AbstractSanitizing {
             "      <td width=\"10\"> &nbsp; </td> \n" +
             "     </tr> \n" +
             "     <tr style=\"background-color: #C6C4C5;\"> \n" +
-            "      <td style=\"color: black; text-align: center; font-family: arial, helvetica, sans-serif; font-size: 12px;\" colspan=\"3\"> Bundesverband mittelständische Wirtschaft | Driburger Str. 42 | 33100 Paderborn | <a style=\"font-family: arial, helvetica,sans-serif; font-weight: normal; font-size: 12px; color: black;\" href=\"http://www.bvmw.de/?id=769\">www.bvmw.de</a><br> Telefon: (05251) 6860367 | Telefax: (05251) 6862328 | E-Mail: <a style=\"font-family: arial, helvetica,sans-serif; font-weight: normal; font-size: 12px; color: black;\" href=\"mailto:erika.schumacher@bvmw.de\">erika.schumacher@bvmw.de</a> </td> \n" +
+            "      <td style=\"color: black; text-align: center; font-family: arial, helvetica, sans-serif; font-size: 12px;\" colspan=\"3\"> Bundesverband mittelst\u00E4ndische Wirtschaft | Driburger Str. 42 | 33100 Paderborn | <a style=\"font-family: arial, helvetica,sans-serif; font-weight: normal; font-size: 12px; color: black;\" href=\"http://www.bvmw.de/?id=769\">www.bvmw.de</a><br> Telefon: (05251) 6860367 | Telefax: (05251) 6862328 | E-Mail: <a style=\"font-family: arial, helvetica,sans-serif; font-weight: normal; font-size: 12px; color: black;\" href=\"mailto:erika.schumacher@bvmw.de\">erika.schumacher@bvmw.de</a> </td> \n" +
             "     </tr> \n" +
             "    </tbody>\n" +
             "   </table> \n" +
