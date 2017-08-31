@@ -115,6 +115,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
 
+        log.debug("change admin {}", adm);
+        
         boolean rollback = false;
         try {
             oxcon = cache.getWriteConnectionForConfigDB();
@@ -227,6 +229,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
+        log.debug("create admin {}", adm);
+
         boolean rollback = false;
         try {
             oxcon = cache.getWriteConnectionForConfigDB();
@@ -296,6 +300,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
+        log.debug("delete admin {}", adm);
+
         boolean rollback = false;
         try {
 
@@ -338,6 +344,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public ResellerAdmin[] list(final String search_pattern, final int pid) throws StorageException {
+
+        log.debug("list using pattern {}, parent id {}", search_pattern, pid);
+
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -426,6 +435,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public ResellerAdmin[] getData(final ResellerAdmin[] admins, final int pid) throws StorageException {
+        log.debug("getData");
+
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -506,6 +517,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     private boolean existsAdmin(final ResellerAdmin[] admins, final int pid) throws StorageException {
+        log.debug("existsAdmin");
+
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -569,6 +582,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
+        log.debug("ownContext {} to admin {}", ctx.getId(), creds.getLogin());
+
         boolean rollback = false;
         try {
             final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
@@ -625,6 +640,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
+        log.debug("unownContext {} from admin {}", ctx.getId(), adm.getName());
+
         boolean rollback = false;
         try {
             if (adm.getId() == null) {
@@ -673,6 +690,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
+        log.debug("getContextOwner from context {}", ctx.getId());
         try {
             if (ctx.getId() == null) {
                 throw new InvalidDataException("ContextID must not be null");
@@ -710,6 +728,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
+        log.debug("ownsContext ctx={}  admin={}", null == ctx ? null : ctx.getId(), admid);
         try {
             oxcon = cache.getReadConnectionForConfigDB();
             if (ctx == null) {
@@ -754,6 +773,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
+        log.debug("ownsContextOrIsPidOfOwner ctx={}  admin={}", null == ctx ? null : ctx.getId(), admid);
         try {
             oxcon = cache.getReadConnectionForConfigDB();
             if (ctx == null) {
@@ -810,6 +830,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection oxcon = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
+        log.debug("checkOwnsContextAndSetSid ctx={}  admin={}", null == ctx ? null : ctx.getId(), creds.getLogin());
         try {
             final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
             oxcon = cache.getReadConnectionForConfigDB();
@@ -866,6 +887,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
+        log.debug("listRestrictions search_pattern={}", search_pattern);
         try {
             con = cache.getReadConnectionForConfigDB();
             final String search_patterntmp = search_pattern.replace('*', '%');
@@ -1221,6 +1243,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void checkPerSubadminRestrictions(final Credentials creds, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException {
+        log.debug("checkPerSubadminRestrictions");
         final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
         HashSet<Restriction> restrictions = OXResellerTools.array2HashSet(adm.getRestrictions());
         // default is: not allowed to create SUBADMINS
@@ -1306,6 +1329,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void checkPerContextRestrictions(final Context ctx, final UserModuleAccess access, boolean contextAdmin, final String... restriction_types) throws StorageException {
+        log.debug("checkPerContextRestrictions");
         Connection con = null;
 
         try {
@@ -1414,6 +1438,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException {
+        log.debug("applyRestrictionsToContext {}", ctx);
         Connection oxcon = null;
         PreparedStatement prep = null;
 
@@ -1469,6 +1494,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public Restriction[] getRestrictionsFromContext(final Context ctx) throws StorageException {
+        log.debug("getRestrictionsFromContext {}", ctx);
         Connection con = null;
         try {
             con = cache.getReadConnectionForConfigDB();
@@ -1517,6 +1543,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void initDatabaseRestrictions() throws StorageException {
+        log.debug("initDatabaseRestrictions");
         Connection con = null;
         PreparedStatement prep = null;
 
@@ -1576,6 +1603,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void removeDatabaseRestrictions() throws StorageException {
+        log.debug("removeDatabaseRestrictions");
         Connection con = null;
         PreparedStatement prep = null;
         boolean rollback = false;
@@ -1608,6 +1636,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public String getCustomId(final Context ctx) throws StorageException {
+        log.debug("getCustomId from context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1636,6 +1665,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void writeCustomId(final Context ctx) throws StorageException {
+        log.debug("writeCustomId to context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1677,6 +1707,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public void deleteCustomFields(final Context ctx) throws StorageException {
+        log.debug("deleteCustomFields from context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
         final ResultSet rs = null;
@@ -1699,6 +1730,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public void generateCreateTimestamp(final Context ctx) throws StorageException {
+        log.debug("generateCreateTimestamp for context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
         final ResultSet rs = null;
@@ -1724,6 +1756,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public void updateModifyTimestamp(final Context ctx) throws StorageException {
+        log.debug("updateModifyTimestamp for context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1732,11 +1765,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep = con.prepareStatement("SELECT * FROM context_customfields WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
-            if( ! rs.next() ) {
-                generateCreateTimestamp(ctx);
-                prep.close();
-                rs.close();
-            } else {
+            if( rs.next() ) {
                 prep.close();
                 rs.close();
                 prep = con.prepareStatement("UPDATE context_customfields SET modifyTimestamp=? WHERE cid=?");
@@ -1787,6 +1816,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      */
     @Override
     public void updateModuleAccessRestrictions() throws StorageException, OXResellerException {
+        log.debug("updateModuleAccessRestrictions");
         Connection con = null;
         PreparedStatement prep = null;
         ResultSet rs = null;
@@ -1892,6 +1922,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     @Override
     public void updateRestrictions() throws StorageException, OXResellerException {
+        log.debug("updateRestrictions");
         Connection con = null;
         PreparedStatement prep = null;
 
