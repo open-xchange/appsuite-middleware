@@ -54,6 +54,7 @@ import org.junit.After;
 import org.junit.Before;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -62,6 +63,7 @@ import com.openexchange.html.osgi.HTMLServiceActivator;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public abstract class AbstractSanitizing {
+
     private HtmlService service;
 
     @Before
@@ -85,5 +87,14 @@ public abstract class AbstractSanitizing {
 
     protected HtmlService getHtmlService() {
         return service;
+    }
+
+    protected String trimLines(String str) {
+        String[] lines = Strings.splitByCRLF(str);
+        StringBuilder sb = new StringBuilder(str.length());
+        for (String line : lines) {
+            sb.append(line.trim()).append('\n');
+        }
+        return sb.toString();
     }
 }

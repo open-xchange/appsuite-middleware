@@ -33,8 +33,14 @@ postFix() {
     ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" $PFILE
 
     # SoftwareChange_Request-3843
+    prefer_gssapi=$(ox_read_property com.openexchange.mail.filter.preferGSSAPI ${PFILE})
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
-    ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    if [ "${prefer_gssapi}" = "true" ]
+    then
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech GSSAPI $PFILE
+    else
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    fi
 
     # SoftwareChange_Request-3987
     OLDNAMES=( SIEVE_LOGIN_TYPE SIEVE_CREDSRC SIEVE_SERVER SIEVE_PORT SCRIPT_NAME SIEVE_AUTH_ENC NON_RFC_COMPLIANT_TLS_REGEX TLS VACATION_DOMAINS )

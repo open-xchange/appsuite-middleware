@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public class UtilDatabaseTest extends AbstractTest {
 
-    private OXUtilInterface oxu;
+    private final OXUtilInterface oxu;
 
     private Database client_db;
 
@@ -86,7 +86,7 @@ public class UtilDatabaseTest extends AbstractTest {
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(oxu.registerDatabase(client_db, ContextTest.DummyMasterCredentials()).getId());
+        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), ContextTest.DummyMasterCredentials()).getId());
     }
 
     @After

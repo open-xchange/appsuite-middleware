@@ -1359,11 +1359,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
+                    LOG.debug("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }

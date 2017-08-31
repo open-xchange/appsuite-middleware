@@ -97,6 +97,37 @@ CREATE TABLE context_server2db_pool (
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE contexts_per_dbpool (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    count INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (db_pool_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE contexts_per_filestore (
+    filestore_id INT4 UNSIGNED NOT NULL,
+    count INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (filestore_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE contexts_per_dbschema (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    schemaname VARCHAR(32) NOT NULL,
+    count INT4 UNSIGNED NOT NULL,
+    creating_date BIGINT(64) NOT NULL,
+    PRIMARY KEY (db_pool_id, schemaname)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE dbpool_lock (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (db_pool_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE dbschema_lock (
+    db_pool_id INT4 UNSIGNED NOT NULL,
+    schemaname VARCHAR(32) NOT NULL,
+    PRIMARY KEY (db_pool_id, schemaname)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE context2push_registration (
     cid INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)

@@ -648,14 +648,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         public ThresholdFileHolder call() throws Exception {
             ThresholdFileHolder encodedThumbnail = null;
             try {
+                String mimeType = Strings.isEmpty(this.mimeType) ? null : Strings.asciiLowerCase(this.mimeType);
 
                 // Document is an image
-                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image") && !mimeType.toLowerCase().startsWith("image/svg+xml")) {
+                if (null != mimeType && mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) {
                     encodedThumbnail = transformImage(document, mimeType);
                 }
 
                 // Document is an audio file
-                else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                else if (null != mimeType && mimeType.startsWith("audio/mpeg")) {
                     if (Mp3CoverExtractor.isSupported(mimeType)) {
                         IFileHolder mp3Cover = null;
                         try {
@@ -674,7 +675,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 // Document is something else, try to get preview image with document converter
                 else {
                     if (documentPreviewEnabled) {
-                        PreviewDocument preview = getDocumentPreview(document, mimeType, session);
+                        PreviewDocument preview = getDocumentPreview(document, this.mimeType, session);
                         InputStream in = null;
                         try {
                             in = preview.getThumbnail();

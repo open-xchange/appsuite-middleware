@@ -897,7 +897,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM pns_subscriptions WHERE cid=? AND transport=? AND token=?");
+            stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND transport=? AND token=?");
             stmt.setInt(1, contextId);
             stmt.setString(2, transportId);
             stmt.setString(3, token);
@@ -966,7 +966,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE pns_subscriptions SET token=?, last_modified=? WHERE cid=? AND user=? AND token=? AND client=?");
+            stmt = con.prepareStatement("UPDATE pns_subscription SET token=?, last_modified=? WHERE cid=? AND user=? AND token=? AND client=?");
             stmt.setString(1, newToken);
             stmt.setLong(2, System.currentTimeMillis());
             stmt.setInt(3, subscription.getContextId());

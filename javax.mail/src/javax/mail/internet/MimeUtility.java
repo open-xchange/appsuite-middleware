@@ -927,7 +927,7 @@ public class MimeUtility {
 	    throw uex;
 	} catch (IOException ioex) {
 	    // Shouldn't happen.
-	    throw new ParseException(ioex.toString());
+	    throw new ParseException(ioex.toString(), ioex);
 	} catch (IllegalArgumentException iex) {
 	    /* An unknown charset of the form ISO-XXX-XXX, will cause
 	     * the JDK to throw an IllegalArgumentException ... Since the

@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -76,7 +75,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE user_password_history (");
+        sb.append("CREATE TABLE ").append(HISTORY_NAME).append("(");
         sb.append("id INT UNSIGNED NOT NULL AUTO_INCREMENT,");
         sb.append("cid INT UNSIGNED NOT NULL,");
         sb.append("uid INT UNSIGNED NOT NULL,");
@@ -101,11 +100,10 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
      *
      * @param tablename The table name
      * @param sqlCreate The command to create the table
-     * @param contextId The context to operate on
+     * @param writeCon The connection to use
      * @throws OXException In case of {@link SQLException}
      */
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
+    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             if (Tools.tableExists(writeCon, tablename)) {
@@ -117,7 +115,6 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 
@@ -133,9 +130,8 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        createTable(HISTORY_NAME, getHistoryTable(), contextID);
-        LOG.info("UpdateTask 'PasswordChangeHistoryCreateTableTask' successfully performed!");
+        createTable(HISTORY_NAME, getHistoryTable(), params.getConnection());
+        LOG.info("UpdateTask '" + PasswordChangeHistoryCreateTableTask.class.getSimpleName() + "' successfully performed!");
     }
 
     @Override

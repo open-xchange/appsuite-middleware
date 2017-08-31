@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.rdb.Services;
@@ -108,9 +107,8 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
     }
 
     @Override
-    public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        createTable("filestorageAccount", getMessagingAccountTable(), contextId);
+    public void perform(PerformParameters params) throws com.openexchange.exception.OXException {
+        createTable("filestorageAccount", getMessagingAccountTable(), params.getConnectionProvider().getConnection());
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageRdbCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", FileStorageRdbCreateTableTask.class.getSimpleName());
     }
@@ -125,9 +123,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         return new String[] { "filestorageAccount" };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
+    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {
@@ -139,7 +135,6 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
         }
     }
 

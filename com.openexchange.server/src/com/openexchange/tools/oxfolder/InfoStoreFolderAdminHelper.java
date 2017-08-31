@@ -164,7 +164,7 @@ public final class InfoStoreFolderAdminHelper {
             FolderObject folder = prepareDefaultFolder(userID, parentFolderID, type, folderName);
             int folderID = getNextSerialForAdmin(context, connection);
             insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), true, context, connection);
-            LOG.info("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
+            LOG.debug("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
                 folderName, I(type), I(folderID), I(userID), I(contextID));
             return folderID;
         } catch (SQLException e) {
