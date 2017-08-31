@@ -54,9 +54,15 @@ import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
+import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -253,7 +259,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
-        storage.getAlarmTriggerStorage().removeTriggers(id);
+        storage.getAlarmTriggerStorage().deleteTriggers(id);
         /*
          * track deletion in result
          */
@@ -304,7 +310,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         trackUpdate(originalEvent, updatedEvent);
 
         // Update alarm trigger
-        storage.getAlarmTriggerStorage().removeTriggers(updatedEvent.getId());
+        storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(originalEvent)) {
             exceptions = getChangeExceptionDates(originalEvent.getSeriesId());
@@ -408,7 +414,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         if (updatedMasterEvent.getDeleteExceptionDates() != null) {
             exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
         }
-        storage.getAlarmTriggerStorage().removeTriggers(updatedMasterEvent.getId());
+        storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }
 
@@ -511,7 +517,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * insert new alarms
          */
         insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
-        storage.getAlarmTriggerStorage().removeTriggers(event.getId());
+        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(event)) {
             exceptions = getChangeExceptionDates(event.getSeriesId());
@@ -713,4 +719,25 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         return event;
     }
+
+    /**
+     * Checks that the current session's user is able to delete a specific event, by either requiring delete access for <i>own</i> or
+     * <i>all</i> objects, based on the user being the creator of the event or not.
+     * <p/>
+     * Additionally, the event's classification is checked.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent) throws OXException {
+        if (session.getUserId() == originalEvent.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        }
+        classificationAllowsUpdate(folder, originalEvent);
+    }
+
 }

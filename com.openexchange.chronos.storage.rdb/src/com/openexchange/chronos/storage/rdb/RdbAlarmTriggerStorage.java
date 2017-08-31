@@ -54,11 +54,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
@@ -85,7 +87,6 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 
 /**
  * {@link RdbAlarmTriggerStorage} is an implementation of the {@link AlarmTriggerStorage}
@@ -99,13 +100,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAlarmTriggerStorage.class);
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private static final int DELETE_CHUNK_SIZE = 200;
 
     private final int accountId;
     private final AlarmStorage alarmStorage;
     private final RecurrenceService recurrenceService;
     private final EntityResolver resolver;
 
-    private static final String SQL_DELETE = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId=?;";
     private static final String FLOATING_TRIGGER_SQL = "SELECT alarm, triggerDate, floatingTimezone, relatedTime FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND floatingTimezone IS NOT NULL;";
     private static final String UPDATE_TRIGGER_TIME_SQL = "UPDATE calendar_alarm_trigger SET triggerDate=?, floatingTimezone=? WHERE cid=? AND account=? AND alarm=?;";
 
@@ -259,48 +260,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return result;
     }
 
-    /**
-     * Deletes all alarm triggers for the given event
-     *
-     * @param eventId The event id to delete
-     * @throws OXException
-     */
-    private void deleteAlarmTriggers(String eventId) throws OXException {
-        Connection writeCon = dbProvider.getWriteConnection(context);
-        int deleted = 0;
-        try {
-            txPolicy.setAutoCommit(writeCon, false);
-            deleted = deleteAlarmTriggers(context.getContextId(), accountId, eventId, writeCon);
-            txPolicy.commit(writeCon);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(writeCon, deleted);
-        }
-
-    }
-
-    private int deleteAlarmTriggers(int contextId, int accountId, String eventId, Connection writeCon) throws OXException {
-        if (!Strings.isEmpty(eventId)) {
-            PreparedStatement prepareStatement = null;
-
-            try {
-                prepareStatement = writeCon.prepareStatement(SQL_DELETE);
-                int x = 0;
-                prepareStatement.setInt(++x, contextId);
-                prepareStatement.setInt(++x, accountId);
-                prepareStatement.setString(++x, eventId);
-                return logExecuteUpdate(prepareStatement);
-            } catch (SQLException e) {
-                throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(prepareStatement);
-            }
-        }
-
-        return 0;
-    }
-
     @Override
     public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
         EventExceptionWrapper wrapper = new EventExceptionWrapper(event, exceptions);
@@ -375,8 +334,45 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public void removeTriggers(String eventId) throws OXException {
-        deleteAlarmTriggers(eventId);
+    public void deleteTriggers(String eventId) throws OXException {
+        deleteTriggers(Collections.singletonList(eventId));
+    }
+
+    @Override
+    public void deleteTriggers(List<String> eventIds) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteTriggers(connection, chunk);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    private int deleteTriggers(Connection connection, List<String> ids) throws SQLException {
+        if (null == ids || 0 == ids.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId")
+            .append(getPlaceholders(ids.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (String id : ids) {
+                stmt.setInt(parameterIndex, asInt(id));
+            }
+            return logExecuteUpdate(stmt);
+        }
     }
 
     @Override

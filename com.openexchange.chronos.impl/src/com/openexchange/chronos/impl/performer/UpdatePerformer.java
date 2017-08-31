@@ -224,7 +224,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
                 }
 
-                storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
+                storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
 
                 touch(originalEvent.getId());
@@ -370,7 +370,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     exceptions.addAll(alarmTriggerEvent.getDeleteExceptionDates());
                 }
             }
-            storage.getAlarmTriggerStorage().removeTriggers(originalEvent.getId());
+            storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
             storage.getAlarmTriggerStorage().insertTriggers(alarmTriggerEvent, exceptions);
         }
         return wasUpdated;

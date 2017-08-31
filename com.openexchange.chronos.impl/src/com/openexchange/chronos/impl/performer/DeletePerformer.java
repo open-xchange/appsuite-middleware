@@ -55,13 +55,8 @@ import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
-import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -300,7 +295,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
         Set<RecurrenceId> exceptions = new TreeSet<>(deleteExceptionDates);
         exceptions.addAll(changeExceptionDates);
-        storage.getAlarmTriggerStorage().removeTriggers(originalMasterEvent.getId());
+        storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }
 
@@ -359,15 +354,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
         result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
         result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
-    }
-
-    private void requireDeletePermissions(Event originalEvent) throws OXException {
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-        }
-        Check.classificationAllowsUpdate(folder, originalEvent);
     }
 
 }

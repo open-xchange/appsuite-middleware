@@ -52,19 +52,19 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -135,46 +135,41 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         /*
          * check permissions & prepare tombstone data
          */
+        List<String> eventIds = new ArrayList<String>(originalEvents.size());
+        Map<String, List<Attachment>> attachmentsByEvent = new HashMap<String, List<Attachment>>();
         List<Event> eventTombstones = new ArrayList<Event>(originalEvents.size());
         Map<String, List<Attendee>> attendeeTombstonesById = new HashMap<String, List<Attendee>>(originalEvents.size());
         for (Event originalEvent : originalEvents) {
             requireDeletePermissions(originalEvent);
             requireUpToDateTimestamp(originalEvent, clientTimestamp);
+            eventIds.add(originalEvent.getId());
             eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
-            if (null != originalEvent.getAttendees()) {
+            if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
                 attendeeTombstonesById.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
+            }
+            if (null != originalEvent.getAttachments() && 0 < originalEvent.getAttachments().size()) {
+                attachmentsByEvent.put(originalEvent.getId(), originalEvent.getAttachments());
             }
         }
         /*
-         * insert tombstone date & perform deletion
+         * insert tombstone data & perform deletion
          */
         storage.getEventStorage().insertEventTombstones(eventTombstones);
         storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesById);
+        storage.getAlarmStorage().deleteAlarms(eventIds);
+        storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
+        storage.getAttendeeStorage().deleteAttendees(eventIds);
+        storage.getEventStorage().deleteEvents(eventIds);
+        if (0 < attachmentsByEvent.size()) {
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getID(), attachmentsByEvent));
+        }
+        /*
+         * track deletions in result
+         */
         for (Event originalEvent : originalEvents) {
-
-            //TODO: batch operations to delete by (String[] ids)
-
-            String id = originalEvent.getId();
-            storage.getAlarmStorage().deleteAlarms(id);
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
-            storage.getEventStorage().deleteEvent(id);
-            storage.getAttendeeStorage().deleteAttendees(id);
-            storage.getAlarmTriggerStorage().removeTriggers(id);
-            /*
-             * track deletion in result
-             */
             trackDeletion(originalEvent);
         }
         return originalEvents.size();
-    }
-
-    private void requireDeletePermissions(Event originalEvent) throws OXException {
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-        }
-        Check.classificationAllowsUpdate(folder, originalEvent);
     }
 
 }

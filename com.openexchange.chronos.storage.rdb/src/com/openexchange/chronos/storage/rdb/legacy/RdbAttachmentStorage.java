@@ -161,23 +161,43 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             attachmentBase.finish();
         }
     }
-
+    
     @Override
     public void deleteAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
             return;
         }
         ServerSession serverSession = checkSession(session);
-        List<Integer> attachmentIDs = new ArrayList<Integer>(attachments.size());
-        for (Attachment attachment : attachments) {
-            attachmentIDs.add(I(attachment.getManagedId()));
-        }
         AttachmentBase attachmentBase = initAttachmentBase();
         serverSession.setParameter(AttachmentStorage.class.getName(), Boolean.TRUE);
         try {
             attachmentBase.startTransaction();
-            attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, I2i(attachmentIDs),
+            attachmentBase.detachFromObject(asInt(folderID), asInt(eventID), MODULE_ID, getAttachmentIds(attachments),
                 session, context, serverSession.getUser(), serverSession.getUserConfiguration());
+            attachmentBase.commit();
+        } finally {
+            serverSession.setParameter(AttachmentStorage.class.getName(), null);
+            attachmentBase.finish();
+        }
+    }
+
+    @Override
+    public void deleteAttachments(Session session, Map<String, Map<String, List<Attachment>>> attachmentsByEventPerFolderId) throws OXException {
+        if (null == attachmentsByEventPerFolderId || 0 == attachmentsByEventPerFolderId.size()) {
+            return;
+        }
+        ServerSession serverSession = checkSession(session);
+        AttachmentBase attachmentBase = initAttachmentBase();
+        serverSession.setParameter(AttachmentStorage.class.getName(), Boolean.TRUE);
+        try {
+            attachmentBase.startTransaction();
+            for (Map.Entry<String, Map<String, List<Attachment>>> entry : attachmentsByEventPerFolderId.entrySet()) {
+                int folderId = asInt(entry.getKey());
+                for (Map.Entry<String, List<Attachment>> attachmentsByEvent : entry.getValue().entrySet()) {
+                    attachmentBase.detachFromObject(folderId, asInt(attachmentsByEvent.getKey()), MODULE_ID, getAttachmentIds(attachmentsByEvent.getValue()),
+                        session, context, serverSession.getUser(), serverSession.getUserConfiguration());
+                }
+            }
             attachmentBase.commit();
         } finally {
             serverSession.setParameter(AttachmentStorage.class.getName(), null);
@@ -346,6 +366,14 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             metadata.setFilesize(attachment.getData().getLength());
         }
         return metadata;
+    }
+
+    private static int[] getAttachmentIds(List<Attachment> attachments) {
+        List<Integer> attachmentIDs = new ArrayList<Integer>(attachments.size());
+        for (Attachment attachment : attachments) {
+            attachmentIDs.add(I(attachment.getManagedId()));
+        }
+        return I2i(attachmentIDs);   
     }
 
 }
