@@ -128,6 +128,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!Strings.isEmpty(path)) {
                     validatePath(path);
                 }
+                oidcBackend.setLoginConfiguration(this.loginConfiguration);
                 OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services, this.loginConfiguration);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
                 

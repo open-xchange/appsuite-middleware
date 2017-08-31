@@ -69,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
-import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.session.Session;
 
 /**
@@ -132,4 +131,8 @@ public interface OIDCBackend {
     boolean updateOauthTokens(Session session) throws OXException;
 
     boolean tokensExpired(Session session) throws OXException;
+
+    void setLoginConfiguration(LoginConfiguration loginConfiguration);
+
+    void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfiguration) throws OXException;
 }

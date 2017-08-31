@@ -31,7 +31,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
         OIDCBackend backend = this.loadBackendForSession(session);
         if (backend.tokensExpired(session)) {
             if(!backend.updateOauthTokens(session)) {
-                //TODO QS-VS: Sende request um Benutzer vom Server zu werfen
+                backend.logoutCurrentUser(session, request, response, null);
             }
         }
         return Reply.NEUTRAL;

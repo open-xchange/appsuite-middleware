@@ -50,19 +50,16 @@
 package com.openexchange.oidc.impl;
 
 import java.io.IOException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.spi.OIDCBackend;
-import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
 
 public class OIDCLogoutRequestHandler implements LoginRequestHandler {
@@ -86,7 +83,7 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
                 LOG.debug("Received logout request for session {}", sessionId);
                 Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if (session != null) {
-                    this.logoutCurrentUser(session, request, response);
+                    this.backend.logoutCurrentUser(session, request, response, this.loginConfiguration);
                 } else {
                     LOG.info("Received logout request for a session that does not exist, session id: {}", sessionId);
                 }
@@ -97,17 +94,5 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
         }
 
         this.backend.finishLogout(request, response);
-    }
-
-    private void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        LOG.debug("Try to Logout user for session {}", session.getSessionID());
-        OIDCTools.validateSession(session, request);
-        LoginPerformer.getInstance().doLogout(session.getSessionID());
-        SessionUtility.removeOXCookies(session, request, response);
-        SessionUtility.removeJSESSIONID(request, response);
-        if (this.backend.getBackendConfig().isAutologinEnabled()) {
-            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
-            SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
-        }
     }
 }

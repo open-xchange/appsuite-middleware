@@ -58,8 +58,11 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -80,7 +83,6 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
@@ -88,6 +90,8 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
@@ -96,13 +100,13 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRequest;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
-import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -117,6 +121,8 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     protected static final String AUTH_RESPONSE = "auth_response";
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackend.class);
+    private LoginConfiguration loginConfiguration;
 
     @Override
     public OIDCConfig getOIDCConfig() {
@@ -126,6 +132,11 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public OIDCBackendConfig getBackendConfig() {
         return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class));
+    }
+    
+    @Override
+    public void setLoginConfiguration(LoginConfiguration loginConfiguration) {
+        this.loginConfiguration = loginConfiguration;
     }
 
     @Override
@@ -306,7 +317,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
         tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());
-        updateSession(session, tokenMap);
+        this.updateSession(session, tokenMap);
         return true;
     }
 
@@ -348,5 +359,23 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 //        return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
     }
     
+    private LoginConfiguration getLoginConfiguration() {
+        if (this.loginConfiguration == null) {
+            this.loginConfiguration = LoginServlet.getLoginConfiguration();
+        }
+        return this.loginConfiguration;
+    }
     
+    @Override
+    public void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfiguration) throws OXException {
+        LOG.debug("Try to Logout user for session {}", session.getSessionID());
+        OIDCTools.validateSession(session, request);
+        LoginPerformer.getInstance().doLogout(session.getSessionID());
+        SessionUtility.removeOXCookies(session, request, response);
+        SessionUtility.removeJSESSIONID(request, response);
+        if (this.getBackendConfig().isAutologinEnabled()) {
+            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, loginConfiguration != null ? loginConfiguration : this.getLoginConfiguration());
+            SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+        }
+    }
 }
