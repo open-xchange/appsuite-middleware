@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder.property.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -58,6 +59,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.oxfolder.property.impl.FolderUserPropertyStorageImpl;
+import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable;
 import com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask;
 
 /**
@@ -98,6 +100,7 @@ public class FolderUserPropertyActivator extends HousekeepingActivator {
             }
 
         });
+        registerService(CreateTableService.class, new CreateFolderUserPropertyTable());
 
         // Register FolderUserPropertyStorage 
         registerService(FolderUserPropertyStorage.class, new FolderUserPropertyStorageImpl(this));
