@@ -623,6 +623,13 @@ public final class HtmlServiceImpl implements HtmlService {
                 boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
                 if (options.isSanitize()) {
+                    boolean[] sanitized = new boolean[] { true };
+                    while (sanitized[0]) {
+                        sanitized[0] = false;
+                        // Start sanitizing round
+                        html = SaneScriptTags.saneScriptTags(html, sanitized);
+                    }
+
                     CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
                     handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
                     handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
@@ -646,13 +653,6 @@ public final class HtmlServiceImpl implements HtmlService {
                         Document document = handler.getDocument();
                         html = hasBody ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
-                    }
-
-                    boolean[] sanitized = new boolean[] { true };
-                    while (sanitized[0]) {
-                        sanitized[0] = false;
-                        // Start sanitizing round
-                        html = SaneScriptTags.saneScriptTags(html, sanitized);
                     }
                 } else {
                     CssOnlyCleaningJsoupHandler handler = new CssOnlyCleaningJsoupHandler();
