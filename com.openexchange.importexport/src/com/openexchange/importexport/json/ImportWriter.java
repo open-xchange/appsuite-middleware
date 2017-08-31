@@ -142,7 +142,7 @@ public class ImportWriter extends DataWriter {
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
 		final int len = entrySet.size();
 		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
-		for (int i = 0; i < len; i++) {
+		for (int i = len; i-- > 0;) {
 			final Map.Entry<String, Object> e = iter.next();
 			jsonwriter.key(e.getKey()).value(e.getValue());
 		}
@@ -157,11 +157,11 @@ public class ImportWriter extends DataWriter {
 		return ((OXJSONWriter) jsonwriter).getObject();
 	}
 
-	public void writeObjects(final List<ImportResult> importResult) throws JSONException {
+	public void writeObjects(final List<ImportResult> importResults) throws JSONException {
 		jsonwriter.array();
-		for (int a = 0; a < importResult.size(); a++) {
-			writeObject(importResult.get(a));
-		}
+		for (ImportResult importResult : importResults) {
+		    writeObject(importResult);
+        }
 		jsonwriter.endArray();
 	}
 }
