@@ -64,7 +64,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyException;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import static com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable.TABLE_NAME;
 
@@ -122,8 +122,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             connection.commit();
             rollback = false;
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't delete folder properties", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(connection);
@@ -173,8 +172,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 stmt.executeBatch();
             }
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't delete folder properties", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -233,8 +231,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 return true;
             }
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't check if the folder exists", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -281,8 +278,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             }
             return properties;
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't get folder", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -312,8 +308,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public Map<Integer, Map<String, String>> getFolderProperties(int contextId, int[] folderIds, int userId, Connection connection) throws OXException {
         if (null == folderIds || folderIds.length < 1) {
-            LOGGER.debug("Can't iterate over an empty array");
-            throw FolderUserPropertyException.MISSING_FOLDER.create();
+            IllegalArgumentException e = new IllegalArgumentException("Can't iterate over an empty array");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
         if (null == connection) {
             // Get connection an re-call this function
@@ -368,8 +364,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 return retval;
             }
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't get folder property", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -379,8 +374,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            LOGGER.debug("Properties missing!");
-            throw FolderUserPropertyException.MISSING_USER_PROPERTIES.create(folderId, contextId);
+            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
 
         Connection connection = null;
@@ -404,8 +399,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             connection.commit();
             rollback = false;
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't insert folder properties", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(connection);
@@ -424,8 +418,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            LOGGER.debug("Properties missing!");
-            throw FolderUserPropertyException.MISSING_USER_PROPERTIES.create(folderId, contextId);
+            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
         if (null == connection) {
             // Get connection an re-call this function
@@ -446,8 +440,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't insert folder properties", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -461,8 +454,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void insertFolderProperty(int contextId, int folderId, int userId, String key, String value, Connection connection) throws OXException {
         if (null == key || null == value) {
-            LOGGER.debug("Flawed key-value pair!");
-            throw FolderUserPropertyException.FLAWED_KEY_VALUE.create(key, value, folderId, contextId);
+            IllegalArgumentException e = new IllegalArgumentException("Flawed key-value-pair! Can't add user property to folder");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
         Map<String, String> map = new HashMap<>(1);
         map.put(key, value);
@@ -472,8 +465,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            LOGGER.debug("Properties missing!");
-            throw FolderUserPropertyException.MISSING_USER_PROPERTIES.create(folderId, contextId);
+            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
 
         Connection connection = null;
@@ -497,8 +490,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             connection.commit();
             rollback = false;
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't insert folder properties", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(connection);
@@ -517,8 +509,8 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     @Override
     public void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException {
         if (null == properties || properties.isEmpty()) {
-            LOGGER.debug("Properties missing!");
-            throw FolderUserPropertyException.MISSING_USER_PROPERTIES.create(folderId, contextId);
+            IllegalArgumentException e = new IllegalArgumentException("User properties for folder missing!");
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, String.valueOf(contextId));
         }
         if (null == connection) {
             // Get connection an re-call this function
@@ -542,8 +534,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            LOGGER.error("Couldn't delete userized folder", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -578,8 +569,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             rollback = false;
 
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't delete userized folder", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(connection);
@@ -622,8 +612,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            LOGGER.debug("Couldn't delete userized folder", e);
-            throw FolderUserPropertyException.SQL_ERROR.create(e.getMessage());
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
