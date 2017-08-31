@@ -88,7 +88,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.entity(calUser);
+        attendee.entity(defaultUserApi.getCalUser());
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
@@ -108,15 +108,15 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     @Test
     public void testCreateSingle() throws Exception {
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testCreateSingle"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testCreateSingle"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
-        rememberEventId(eventId);
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
+        rememberEventId(defaultUserApi, eventId);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
@@ -126,7 +126,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     @Test
     public void testDeleteSingle() throws Exception {
 
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testDeleteSingle"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testDeleteSingle"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
@@ -134,10 +134,10 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
 
-        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, System.currentTimeMillis(), Collections.singletonList(eventId));
+        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
 
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNotNull(eventResponse.getError());
         assertEquals("CAL-4040", eventResponse.getCode());
     }
@@ -145,18 +145,18 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     @Test
     public void testUpdateSingle() throws Exception {
         EventData initialEvent = createSingleEvent("testUpdateSingle");
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, initialEvent, false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
-        rememberEventId(eventId);
+        rememberEventId(defaultUserApi, eventId);
 
         event.setEndDate(addTimeToDateTimeData(event.getEndDate(), 5000));
 
-        ChronosCalendarResultResponse updateResponse = api.updateEvent(session, folderId, eventId.getId(), event, System.currentTimeMillis(), null, true, false);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, eventId.getId(), event, System.currentTimeMillis(), null, true, false);
         assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
         assertNotNull(updateResponse.getData());
 
@@ -176,30 +176,30 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Date tomorrow = getAPIDate(TimeZone.getTimeZone("UTC"), date, 1);
 
         // Create a single event
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEvent("testGetEvent"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testGetEvent"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
-        rememberEventId(eventId);
+        rememberEventId(defaultUserApi, eventId);
 
         // Get event directly
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getErrorDesc(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = api.getAllEvents(session, getZuluDateTime(today.getTime()).getValue(), getZuluDateTime(tomorrow.getTime()).getValue(), folderId, null, null, null, false, true);
+        EventsResponse eventsResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), getZuluDateTime(today.getTime()).getValue(), getZuluDateTime(tomorrow.getTime()).getValue(), folderId, null, null, null, false, true);
         assertNull(eventsResponse.getErrorDesc(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(1, eventsResponse.getData().size());
         EventUtil.compare(event, eventsResponse.getData().get(0), true);
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = api.getUpdates(session, folderId, date.getTime(), null, null, null, null, null, false, true);
+        ChronosUpdatesResponse updatesResponse = defaultUserApi.getApi().getUpdates(defaultUserApi.getSession(), folderId, date.getTime(), null, null, null, null, null, false, true);
         assertNull(updatesResponse.getErrorDesc(), updatesResponse.getError());
         assertNotNull(updatesResponse.getData());
         assertEquals(1, updatesResponse.getData().getNewAndModified().size());
@@ -208,7 +208,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         // List events
         List<EventId> ids = new ArrayList<>(1);
         ids.add(eventId);
-        EventsResponse listResponse = api.getEventList(session, ids, null);
+        EventsResponse listResponse = defaultUserApi.getApi().getEventList(defaultUserApi.getSession(), ids, null);
         assertNull(listResponse.getErrorDesc(), listResponse.getError());
         assertNotNull(listResponse.getData());
         assertEquals(1, listResponse.getData().size());

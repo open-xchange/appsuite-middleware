@@ -51,13 +51,13 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -72,7 +72,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
-import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
@@ -88,9 +87,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
 
     protected String folderId;
     protected String folderId2;
-    protected ChronosApi api2;
-    protected String session2;
-    protected Integer calUser2;
+    protected UserApi user2;
 
     /**
      * Initializes a new {@link AbstractAlarmTriggerTest}.
@@ -104,7 +101,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.entity(calUser);
+        attendee.entity(defaultUserApi.getCalUser());
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
@@ -135,7 +132,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         seriesEvent.setPropertyClass("PUBLIC");
         if (attendees == null) {
             Attendee attendee = new Attendee();
-            attendee.entity(calUser);
+            attendee.entity(defaultUserApi.getCalUser());
             attendee.cuType(CuTypeEnum.INDIVIDUAL);
             attendee.setUri("mailto:" + this.testUser.getLogin());
             seriesEvent.setAttendees(Collections.singletonList(attendee));
@@ -166,18 +163,16 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = getDefaultFolder();
-        api2 = new ChronosApi(generateClient(testUser2));
-        LoginResponse login = login(testUser2, api2.getApiClient());
-        session2 = login.getSession();
-        calUser2 = login.getUserId();
-        folderId2 = getDefaultFolder(session2, api2.getApiClient());
+        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
+        ApiClient client = generateClient(testUser2);
+        rememberClient(client);
+        user2 = new UserApi(client, testUser2);
+        folderId2 = getDefaultFolder(user2.getSession(), client);
     }
 
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-        logoutClient(api2.getApiClient());
     }
 
     /**
@@ -215,7 +210,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         endTime.setTimeInMillis(startTime.getTimeInMillis());
         endTime.add(Calendar.HOUR, 1);
         event.setEndDate(getDateTime(endTime));
-        ChronosCalendarResultResponse updateEvent = api.updateEvent(session, folderId, eventId, event, timestamp, recurrence, false, false);
+        ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, eventId, event, timestamp, recurrence, false, false);
         this.setLastTimestamp(updateEvent.getTimestamp());
         return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
     }
@@ -228,7 +223,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     protected EventData getAndCheckEvent(EventData event, int alarmSize) throws ApiException {
-        EventResponse eventResponse = api.getEvent(session, event.getId(), folderId, null, null);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         EventData getEvent = checkResponse(eventResponse.getError(), eventResponse.getErrorDesc(), eventResponse.getData());
         EventUtil.compare(event, getEvent, true);
         assertNotNull(getEvent.getAlarms());
@@ -250,7 +245,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     protected AlarmTriggerData getAndCheckAlarmTrigger(long from, TimeUnit unit, int value, String actions, int expected) throws ApiException {
-        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, unit, value, actions, api, session);
+        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, unit, value, actions, defaultUserApi.getApi(), defaultUserApi.getSession());
         AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
         assertEquals(expected, triggers.size());
         return triggers;
@@ -281,7 +276,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     protected AlarmTriggerData getAndCheckAlarmTrigger(long from, int expected) throws ApiException {
-        return getAndCheckAlarmTrigger(from, expected, api, session);
+        return getAndCheckAlarmTrigger(from, expected, defaultUserApi.getApi(), defaultUserApi.getSession());
     }
 
     /**
@@ -309,7 +304,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, long startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
         return handleCreation(createEvent);
     }
 
@@ -324,7 +319,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
         return handleCreation(createEvent);
     }
 
@@ -338,7 +333,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     protected EventData createSeriesEvent(String name, Calendar startTime) throws ApiException {
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
 
@@ -352,7 +347,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     protected EventData createSeriesEvent(String name, Calendar startTime, List<Attendee> attendees) throws ApiException {
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false);
         return handleCreation(createEvent);
     }
 
@@ -368,7 +363,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(folderId);
-        rememberEventId(eventId);
+        rememberEventId(defaultUserApi, eventId);
         this.setLastTimestamp(createEvent.getTimestamp());
         return event;
     }

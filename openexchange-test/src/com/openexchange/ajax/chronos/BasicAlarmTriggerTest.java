@@ -254,7 +254,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         toDelete.setFolderId(folderId);
         toDelete.setId(exceptionEvent.getId());
         List<EventId> singletonList = Collections.singletonList(toDelete);
-        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, getLastTimestamp(), singletonList);
+        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), singletonList);
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
@@ -268,7 +268,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         toDelete.setFolderId(folderId);
         toDelete.setId(event.getId());
         singletonList = Collections.singletonList(toDelete);
-        deleteResponse = api.deleteEvent(session, deleteResponse.getTimestamp(), singletonList);
+        deleteResponse = defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), deleteResponse.getTimestamp(), singletonList);
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
@@ -289,12 +289,12 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         // Create an event with alarm and two attendees
         Attendee attendee = new Attendee();
-        attendee.entity(calUser);
+        attendee.entity(defaultUserApi.getCalUser());
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
 
         Attendee attendee2 = new Attendee();
-        attendee2.entity(calUser2);
+        attendee2.entity(user2.getCalUser());
         attendee2.cuType(CuTypeEnum.INDIVIDUAL);
         attendee2.setUri("mailto:" + this.testUser2.getLogin());
 
@@ -305,7 +305,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal, atts);
         getAndCheckEvent(event, 1);
 
-        ChronosUpdatesResponse updates = api2.getUpdates(session2, folderId2, 0l, null, null, null, null, null, false, true);
+        ChronosUpdatesResponse updates = user2.getApi().getUpdates(user2.getSession(), folderId2, 0l, null, null, null, null, null, false, true);
         UpdatesResult updatesResult = checkResponse(updates.getError(), updates.getErrorDesc(), updates.getData());
         assertEquals(1, updatesResult.getNewAndModified().size());
         EventData eventU2 = updatesResult.getNewAndModified().get(0);
@@ -329,7 +329,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
 
         // User 2 shouldn't have any triggers
-        getAndCheckAlarmTrigger(currentTime, 0, api2, session2); // No alarms
+        getAndCheckAlarmTrigger(currentTime, 0, user2.getApi(), user2.getSession()); // No alarms
 
         /*
          * 2. Accept the event with user 2
@@ -339,12 +339,12 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         body.attendee(attendee2);
 
         body.addAlarmsItem(createSingleAlarm("-PT20M"));
-        ChronosCalendarResultResponse updateAttendee = api2.updateAttendee(session2, folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
+        ChronosCalendarResultResponse updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
 
         // Now user 2 should have a trigger
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, api2, session2);
+        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession());
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
 
@@ -372,7 +372,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 2, api2, session2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(currentTime, 2, user2.getApi(), user2.getSession()); // The alarm of the series and the alarm for the exception
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
@@ -381,12 +381,12 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
          */
         List<Attendee> attendees = exceptionEvent.getAttendees();
         Attendee removed;
-        if(attendees.get(0).getEntity() == calUser){
+        if(attendees.get(0).getEntity() == defaultUserApi.getCalUser()){
             removed = attendees.remove(1);
         } else {
             removed = attendees.remove(0);
         }
-        ChronosCalendarResultResponse updateEventResponse = api.updateEvent(session, folderId, exceptionEvent.getId(), exceptionEvent, getLastTimestamp(), null, true, false);
+        ChronosCalendarResultResponse updateEventResponse = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, exceptionEvent.getId(), exceptionEvent, getLastTimestamp(), null, true, false);
         checkResponse(updateEventResponse.getError(), updateEventResponse.getErrorDesc(), updateEventResponse.getData());
         setLastTimestamp(updateEventResponse.getTimestamp());
 
@@ -400,14 +400,14 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, api2, session2); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
          * 5. Re-add user 2
          */
         attendees.add(removed);
-        updateEventResponse = api.updateEvent(session, folderId, exceptionEvent.getId(), exceptionEvent, getLastTimestamp(), null, true, false);
+        updateEventResponse = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, exceptionEvent.getId(), exceptionEvent, getLastTimestamp(), null, true, false);
         checkResponse(updateEventResponse.getError(), updateEventResponse.getErrorDesc(), updateEventResponse.getData());
         setLastTimestamp(updateEventResponse.getTimestamp());
 
@@ -421,7 +421,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, api2, session2); // Still one alarm
+        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Still one alarm
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
@@ -432,12 +432,12 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         body.attendee(attendee2);
 
         body.addAlarmsItem(createSingleAlarm("-PT20M"));
-        updateAttendee = api2.updateAttendee(session2, folderId2, exceptionEvent.getId(), getLastTimestamp(), body, null, false, true);
+        updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, exceptionEvent.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
 
         // Now user 2 should have a trigger again
-        triggers = getAndCheckAlarmTrigger(currentTime, 2, api2, session2);
+        triggers = getAndCheckAlarmTrigger(currentTime, 2, user2.getApi(), user2.getSession());
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
@@ -448,7 +448,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         toDelete.setFolderId(folderId);
         toDelete.setId(exceptionEvent.getId());
         List<EventId> singletonList = Collections.singletonList(toDelete);
-        ChronosCalendarResultResponse deleteResponse = api.deleteEvent(session, getLastTimestamp(), singletonList);
+        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), singletonList);
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
@@ -456,7 +456,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // check user 2
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, api2, session2); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
@@ -466,14 +466,14 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         toDelete.setFolderId(folderId);
         toDelete.setId(event.getId());
         singletonList = Collections.singletonList(toDelete);
-        deleteResponse = api.deleteEvent(session, deleteResponse.getTimestamp(), singletonList);
+        deleteResponse = defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), deleteResponse.getTimestamp(), singletonList);
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
         getAndCheckAlarmTrigger(currentTime, 0); // No upcoming triggers
 
         // check user 2
-        getAndCheckAlarmTrigger(currentTime, 0, api2, session2); // No upcoming triggers
+        getAndCheckAlarmTrigger(currentTime, 0, user2.getApi(), user2.getSession()); // No upcoming triggers
     }
 
     @Test
@@ -491,7 +491,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         // Create an floating event with an alarm 3 days earlier
         DateTimeData startTime = getDateTime(null, cal.getTimeInMillis());
-        ChronosCalendarResultResponse createEvent = api.createEvent(session, folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D"), false, false);
         EventData event = handleCreation(createEvent);
         getAndCheckEvent(event, 1);
 
