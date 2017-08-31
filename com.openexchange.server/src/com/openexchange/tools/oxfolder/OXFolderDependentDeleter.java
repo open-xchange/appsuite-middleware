@@ -262,7 +262,7 @@ public class OXFolderDependentDeleter {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(rs, stmt);            
+            Databases.closeSQLStuff(rs, stmt);
         }
         return guestIDs.toArray();
     }
@@ -305,7 +305,7 @@ public class OXFolderDependentDeleter {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(rs, stmt); 
+            Databases.closeSQLStuff(rs, stmt);
         }
         return entityIDs;
     }
@@ -415,10 +415,10 @@ public class OXFolderDependentDeleter {
             return stmt.executeUpdate();
         }
     }
-    
+
     /**
      * Deletes all properties on the specific folder for all users
-     * 
+     *
      * @param connection The {@link Connection} to use
      * @param contextId The ID of the context the folder belongs to
      * @param folderIDs The folder to be deleted
@@ -427,7 +427,7 @@ public class OXFolderDependentDeleter {
      */
     private static int deleteFolderProperties(Connection connection, int contextId, List<Integer> folderIDs) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DELETE FROM oxfolder_user_property WHERE cid=? AND folder_id");
+        stringBuilder.append("DELETE FROM oxfolder_user_property WHERE cid=? AND fuid");
         appendPlaceholdersForWhere(stringBuilder, folderIDs.size()).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
