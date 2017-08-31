@@ -303,6 +303,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
             "END:DAYLIGHT\r\n" +
             "END:VTIMEZONE\r\n" +
+            // Begin event --------------------
             "BEGIN:VEVENT\r\n" +
             "UID:" + uid + "\r\n" +
             "DTSTART;TZID=\"W. Europe Standard Time\":" + format(start, "Europe/Berlin") + "\r\n" +
@@ -315,6 +316,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "SUMMARY:snooze\r\n" +
             "CLASS:PUBLIC\r\n" +
             "X-MOZ-SNOOZE:" + formatAsUTC(nextTrigger) + "\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "TRIGGER;RELATED=START:-PT15M\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -322,6 +324,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "X-MOZ-LASTACK:" + formatAsUTC(nextAcknowledged) + "\r\n" +
             "ACKNOWLEDGED:" + formatAsUTC(nextAcknowledged) + "\r\n" +
             "END:VALARM\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "ACTION:DISPLAY\r\n" +
             "DESCRIPTION:Alarm\r\n" +
@@ -337,7 +340,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event on server
          */
         EventData event = verifyEvent(uid, false, 2);
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
+
         /*
          * verify event on client
          */
@@ -347,13 +350,19 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         List<Component> vAlarms = iCalResource.getVEvent().getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
+        String uid1 = null;
+        String uid2 = null;
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
                 assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarm.getPropertyValue("TRIGGER"));
+                uid1 = vAlarm.getUID();
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
+                uid2 = vAlarm.getUID();
             }
         }
+
+        checkAlarms(event.getAlarms(), getPair(uid2, "-PT15M"), getPair(uid1, formatAsUTC(nextTrigger)));
     }
 
 
@@ -717,6 +726,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
             "END:DAYLIGHT\r\n" +
             "END:VTIMEZONE\r\n" +
+            // Begin event -----------
             "BEGIN:VEVENT\r\n" +
             "UID:" + uid + "\r\n" +
             "DTSTART;TZID=\"W. Europe Standard Time\":" + format(start, "Europe/Berlin") + "\r\n" +
@@ -730,6 +740,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "SUMMARY:RecurringReminder\r\n" +
             "CLASS:PUBLIC\r\n" +
             "RRULE:FREQ=DAILY\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "TRIGGER;RELATED=START:-PT15M\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -737,6 +748,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
             "X-MOZ-LASTACK:" + formatAsUTC(nextAcknowledged) + "\r\n" +
             "ACKNOWLEDGED:" + formatAsUTC(nextAcknowledged) + "\r\n" +
             "END:VALARM\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "TRIGGER;VALUE=DATE-TIME:" + formatAsUTC(nextTrigger) + "\r\n" +
             "ACTION:DISPLAY\r\n" +
@@ -752,7 +764,6 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event on server
          */
         EventData event = verifyEvent(uid, false, 2);
-        assertEquals("alarm trigger duration wrong", "-PT15M", event.getAlarms().get(0).getTrigger().getDuration());
         /*
          * verify event on client
          */
@@ -768,6 +779,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(nextAcknowledged), vAlarms.get(0).getPropertyValue("X-MOZ-LASTACK"));
         assertNotNull("No RELATED-TO found", vAlarms.get(1).getProperty("RELATED-TO"));
         assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarms.get(1).getPropertyValue("TRIGGER"));
+
+        checkAlarms(event.getAlarms(), getPair(vAlarms.get(0).getUID(), "-PT15M"), getPair(vAlarms.get(1).getUID(), formatAsUTC(nextTrigger)));
     }
 
     @Test
@@ -859,7 +872,6 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
         /*
          * verify event & exception on client
@@ -876,6 +888,9 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "dailyEDIT", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * acknowledge exception reminder in client
          */
@@ -949,10 +964,6 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        List<EventData> exceptions = verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
-        EventData changeExcpetion = exceptions.get(0);
-        Date date = new Date(changeExcpetion.getAlarms().get(0).getAcknowledged());
-        assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
 
         /*
          * verify event & exception on client
@@ -969,6 +980,10 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "dailyEDIT", iCalResource.getVEvents().get(1).getSummary());
         Component vAlarm = iCalResource.getVEvents().get(1).getVAlarm();
         assertTrue("Unacknowledged ALARM in iCal found", null == vAlarm || "99991231T235859Z".equals(vAlarm.getPropertyValue("ACKNOWLEDGED")));
+
+        EventData exception = verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+        Date date = new Date(exception.getAlarms().get(0).getAcknowledged());
+        assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
     }
 
     @Test
@@ -1060,7 +1075,6 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
         /*
          * verify event & exception on client
@@ -1077,6 +1091,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "dailyEDIT", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
         /*
          * snooze exception reminder in client
          */
@@ -1164,7 +1180,6 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 2, "-PT15M");
 
         /*
          * verify event & exception on client
@@ -1182,13 +1197,19 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         List<Component> vAlarms = iCalResource.getVEvents().get(1).getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
+        String uid1 = null;
+        String uid2 = null;
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
                 assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarm.getPropertyValue("TRIGGER"));
+                uid1 = vAlarm.getUID();
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
+                uid2 = vAlarm.getUID();
             }
         }
+
+        verifyEventException(event.getSeriesId(), 2, getPair(uid1, formatAsUTC(nextTrigger)), getPair(uid2, "-PT15M"));
     }
 
 }

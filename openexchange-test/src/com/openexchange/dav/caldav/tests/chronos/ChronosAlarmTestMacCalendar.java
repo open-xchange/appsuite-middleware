@@ -872,10 +872,6 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         alarm = event.getAlarms().get(0);
         assertEquals("Trigger time doesn't match", "19760401T005545Z", alarm.getTrigger().getDateTime());
 
-        List<EventData> exceptions = verifyEventExceptions(event.getSeriesId(), 1, null);
-        EventData exception = exceptions.get(0);
-        alarm = exception.getAlarms().get(0);
-        assertEquals("Trigger time doesn't match", "19760401T005545Z", alarm.getTrigger().getDateTime());
         /*
          * verify appointment & exception on client
          */
@@ -894,13 +890,19 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         List<Component> vAlarms = iCalResource.getVEvents().get(1).getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
+        String uid1 = null;
+        String uid2 = null;
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
                 assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarm.getPropertyValue("TRIGGER"));
+                uid1 = vAlarm.getUID();
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
+                uid2 = vAlarm.getUID();
             }
         }
+
+        verifyEventException(event.getSeriesId(), 1, getPair(uid1, "19760401T005545Z"), getPair(uid2, "-PT15M"));
     }
 
     @Test
@@ -969,7 +971,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         /*
          * verify appointment on server
          */
-        EventData event = verifyEvent(uid, true, "-PT15M");
+        verifyEvent(uid, true, "-PT15M");
 
         /*
          * verify appointment on client
@@ -995,9 +997,9 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         Date acknowledgedDate = calendar.getTime();
         calendar.add(Calendar.MINUTE, 5);
         Date nextTrigger = calendar.getTime();
-        calendar.add(Calendar.MINUTE, -1);
-        Date nextAcknowledged = calendar.getTime();
         String relatedUID = randomUID();
+        String snoozedUID = randomUID();
+
         iCal = // @formatter:off
             "BEGIN:VCALENDAR\r\n" +
             "VERSION:2.0\r\n" +
@@ -1022,6 +1024,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "END:VTIMEZONE\r\n" +
             // Begin event ------------
             "BEGIN:VEVENT\r\n" +
+            "STATUS:CONFIRMED\r\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
             "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
             "TRANSP:OPAQUE\r\n" +
@@ -1054,6 +1057,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "END:VEVENT\r\n" +
             // Begin event ------------
             "BEGIN:VEVENT\r\n" +
+            "STATUS:CONFIRMED\r\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
             "DTEND;TZID=Europe/Berlin:" + format(exceptionEnd, "Europe/Berlin") + "\r\n" +
             "TRANSP:OPAQUE\r\n" +
@@ -1077,7 +1081,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             // Begin alarm
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:" + randomUID() + "\r\n" +
-            "UID:" + randomUID() + "\r\n" +
+            "UID:" + snoozedUID + "\r\n" +
             "TRIGGER;VALUE=DATE-TIME:" + formatAsUTC(nextTrigger) + "\r\n" +
             "DESCRIPTION:Alarm\r\n" +
             "RELATED-TO:" + relatedUID + "\r\n" +
@@ -1098,23 +1102,27 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         /*
          * verify appointment & exception on server
          */
-        event = verifyEvent(uid, false, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 3, "-PT15M");
-        // TODO why 2 instead of 3? Is the middleware ignoring the snoozed alarm?
+        verifyEvent(uid, false, 2);
         /*
          * verify appointment on client
          */
         iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
-        assertEquals("More than one VEVENT in iCal found", 1, iCalResource.getVEvents().size());
+        assertEquals("Unexpected VEVENT size in iCal found", 1, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         List<Component> vAlarms = iCalResource.getVEvent().getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
-        assertEquals("ALARM wrong", "-PT15M", vAlarms.get(0).getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(nextAcknowledged), vAlarms.get(0).getPropertyValue("ACKNOWLEDGED"));
-        assertNotNull("No RELATED-TO found", vAlarms.get(1).getProperty("RELATED-TO"));
-        assertEquals("ALARM wrong", "-PT8M43S", vAlarms.get(1).getPropertyValue("TRIGGER"));
+
+        for (Component alarm : vAlarms) {
+            if (relatedUID.equals(alarm.getUID())) {
+                assertNotNull("No RELATED-TO found", vAlarms.get(1).getProperty("RELATED-TO"));
+                assertEquals("ALARM wrong", "-PT8M43S", vAlarms.get(1).getPropertyValue("TRIGGER"));
+            } else if ("56C5C265-7442-44E6-8F9C-17C71DCF932A".equals(alarm.getUID())) {
+                assertEquals("ALARM wrong", "-PT15M", vAlarms.get(0).getPropertyValue("TRIGGER"));
+                assertEquals("ACKNOWLEDGED wrong", formatAsUTC(acknowledgedDate), vAlarms.get(0).getPropertyValue("ACKNOWLEDGED"));
+            }
+        }
     }
 
     @Test
@@ -1220,8 +1228,6 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
 
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
-
         /*
          * verify appointment & exception on client
          */
@@ -1237,6 +1243,9 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "EXception", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * acknowledge exception reminder in client
          */
@@ -1266,6 +1275,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "TZOFFSETTO:+0100\r\n" +
             "END:STANDARD\r\n" +
             "END:VTIMEZONE\r\n" +
+            // Begin event ------------
             "BEGIN:VEVENT\r\n" +
             "RRULE:FREQ=DAILY;INTERVAL=1\r\n" +
             "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
@@ -1279,6 +1289,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:47B1F982-7DAE-4029-9FBD-88899D1577FB\r\n" +
             "UID:47B1F982-7DAE-4029-9FBD-88899D1577FB\r\n" +
@@ -1288,6 +1299,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "ACKNOWLEDGED:" + formatAsUTC(seriesAcknowledged) + "\r\n" +
             "DESCRIPTION:Alarm\r\n" +
             "END:VALARM\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:30C8AEDF-B12D-4DAE-8079-59A1FE218CA0\r\n" +
             "UID:30C8AEDF-B12D-4DAE-8079-59A1FE218CA0\r\n" +
@@ -1295,6 +1307,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "X-APPLE-DEFAULT-ALARM:TRUE\r\n" +
             "ACTION:NONE\r\n" +
             "END:VALARM\r\n" +
+            // Begin event -------------
             "END:VEVENT\r\n" +
             "BEGIN:VEVENT\r\n" +
             "DTSTART;TZID=Europe/Berlin:" + format(exceptionStart, "Europe/Berlin") + "\r\n" +
@@ -1309,6 +1322,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
             "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:4BEE3916-2A02-463F-AA31-B9C90084F092\r\n" +
             "UID:4BEE3916-2A02-463F-AA31-B9C90084F092\r\n" +
@@ -1318,6 +1332,7 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
             "ACKNOWLEDGED:" + formatAsUTC(exceptionAcknowledged) + "\r\n" +
             "DESCRIPTION:Alarm\r\n" +
             "END:VALARM\r\n" +
+            // Begin alarm
             "BEGIN:VALARM\r\n" +
             "X-WR-ALARMUID:4EA89B39-B283-439F-824F-194AD29DC41F\r\n" +
             "UID:4EA89B39-B283-439F-824F-194AD29DC41F\r\n" +
@@ -1334,8 +1349,6 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
          */
         event = verifyEvent(uid, false, "-PT15M");
 
-        verifyEventExceptions(event.getSeriesId(), 1, null);
-
         /*
          * verify appointment & exception on client
          */
@@ -1350,6 +1363,8 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "EXception", iCalResource.getVEvents().get(1).getSummary());
         assertAcknowledgedOrDummyAlarm(iCalResource.getVEvents().get(1), formatAsUTC(exceptionAcknowledged));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
     }
 
     @Test
@@ -1455,8 +1470,6 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
 
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
-
         /*
          * verify appointment & exception on client
          */
@@ -1472,6 +1485,9 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "EXception", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * snooze exception reminder in client
          */
@@ -1585,8 +1601,6 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 3, null);
-        // TODO Why 2 instead of 3. Snoozed alarm ignored?
 
         /*
          * verify appointment & exception on client
@@ -1604,13 +1618,19 @@ public class ChronosAlarmTestMacCalendar extends ChronosCaldavTest {
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         List<Component> vAlarms = iCalResource.getVEvents().get(1).getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
+        String uid1 = null;
+        String uid2 = null;
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
                 assertEquals("ALARM wrong", formatAsUTC(nextTrigger), vAlarm.getPropertyValue("TRIGGER"));
+                uid1=vAlarm.getUID();
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
+                uid2=vAlarm.getUID();
             }
         }
+
+        verifyEventException(event.getSeriesId(), 2, getPair(uid1, formatAsUTC(nextTrigger)), getPair(uid2, "-PT15M"));
     }
 
 }

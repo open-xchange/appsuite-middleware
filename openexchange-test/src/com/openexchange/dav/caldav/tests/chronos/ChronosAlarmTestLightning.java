@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -798,7 +797,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
         /*
          * verify appointment & exception on client
          */
@@ -814,6 +812,9 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * acknowledge exception reminder in client
          */
@@ -897,8 +898,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        List<EventData> exceptions = verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
-        assertEquals("Acknowledge date doesn't match",exceptions.get(0).getAlarms().get(0).getAcknowledged().longValue(), exceptionAcknowledged.getTime());
 
         /*
          * verify appointment & exception on client
@@ -914,6 +913,9 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("ALARM in iCal exception found", iCalResource.getVEvents().get(1).getVAlarm());
+
+        EventData eventException = verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+        assertEquals("Acknowledge date doesn't match",eventException.getAlarms().get(0).getAcknowledged().longValue(), exceptionAcknowledged.getTime());
     }
 
     @Test
@@ -1006,7 +1008,6 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
         /*
          * verify appointment & exception on client
@@ -1023,6 +1024,9 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * snooze exception reminder in client
          */
@@ -1104,7 +1108,21 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(uid, iCal, iCalResource.getETag()));
 
         event = verifyEvent(uid, true, 2);
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
+
+        iCalResource = get(uid);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
+        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
+        assertEquals("X-MOZ-LASTACK wrong", formatAsUTC(exceptionAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("X-MOZ-LASTACK"));
+        assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
+        assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
+        assertEquals("SUMMARY wrong", "edit", iCalResource.getVEvents().get(1).getSummary());
+        assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
+        assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
 
     }
 

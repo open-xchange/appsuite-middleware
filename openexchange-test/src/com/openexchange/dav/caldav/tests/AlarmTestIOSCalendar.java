@@ -573,9 +573,6 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
          */
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         calendar.setTime(initialAcknowledged);
-        calendar.add(Calendar.DATE, 1);
-        Date nextAcknowledged = calendar.getTime();
-        calendar.setTime(initialAcknowledged);
         calendar.add(Calendar.MINUTE, 3);
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime();
@@ -642,7 +639,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(nextAcknowledged), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
+        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(acknowledgedDate), iCalResource.getVEvent().getVAlarm().getPropertyValue("ACKNOWLEDGED"));
     }
 
     @Test
@@ -727,10 +724,6 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         calendar.add(Calendar.MINUTE, -14);
         calendar.add(Calendar.SECOND, 17);
         Date acknowledgedDate = calendar.getTime(); // 09:46:17
-        calendar.add(Calendar.MINUTE, 5);
-//        Date nextTrigger = calendar.getTime(); // 09:51:17
-        calendar.add(Calendar.MINUTE, -1);
-        Date nextAcknowledged = calendar.getTime(); // 09:50:17
         iCal =
             "BEGIN:VCALENDAR\r\n" +
             "CALSCALE:GREGORIAN\r\n" +
@@ -805,7 +798,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         List<Component> vAlarms = iCalResource.getVEvent().getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
         assertEquals("ALARM wrong", "-PT15M", vAlarms.get(0).getPropertyValue("TRIGGER"));
-        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(nextAcknowledged), vAlarms.get(0).getPropertyValue("ACKNOWLEDGED"));
+        assertEquals("ACKNOWLEDGED wrong", formatAsUTC(acknowledgedDate), vAlarms.get(0).getPropertyValue("ACKNOWLEDGED"));
         assertNotNull("No RELATED-TO found", vAlarms.get(1).getProperty("RELATED-TO"));
         assertEquals("ALARM wrong", "-PT8M43S", vAlarms.get(1).getPropertyValue("TRIGGER"));
     }

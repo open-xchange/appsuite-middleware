@@ -852,7 +852,6 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
 
         /*
          * verify appointment & exception on client
@@ -869,6 +868,9 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "SerieEdit", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
+
         /*
          * acknowledge exception reminder in client
          */
@@ -948,7 +950,6 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
         /*
          * verify appointment & exception on client
          */
@@ -963,6 +964,8 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "SerieEdit", iCalResource.getVEvents().get(1).getSummary());
         assertAcknowledgedOrDummyAlarm(iCalResource.getVEvents().get(1), formatAsUTC(exceptionAcknowledged));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
     }
 
     @Test
@@ -1054,7 +1057,6 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 1, "-PT15M");
         /*
          * verify appointment & exception on client
          */
@@ -1070,6 +1072,8 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
         assertEquals("SUMMARY wrong", "SerieEdit", iCalResource.getVEvents().get(1).getSummary());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvents().get(1).getVAlarm().getPropertyValue("TRIGGER"));
+
+        verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
         /*
          * snooze exception reminder in client
          */
@@ -1157,7 +1161,6 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
          * verify appointment & exception on server
          */
         event = verifyEvent(uid, false, "-PT15M");
-        verifyEventExceptions(event.getSeriesId(), 2, "-PT15M");
         /*
          * verify appointment & exception on client
          */
@@ -1174,13 +1177,19 @@ public class ChronosAlarmTestIOSCalendar extends ChronosCaldavTest {
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvents().get(1).getVAlarm());
         List<Component> vAlarms = iCalResource.getVEvents().get(1).getVAlarms();
         assertEquals("Unexpected number of VALARMs found", 2, vAlarms.size());
+        String uid1 = null;
+        String uid2 = null;
         for (Component vAlarm : vAlarms) {
             if (null != vAlarm.getProperty("RELATED-TO")) {
                 assertEquals("ALARM wrong", "-PT4M8S", vAlarm.getPropertyValue("TRIGGER"));
+                uid1 = vAlarm.getUID();
             } else {
                 assertEquals("ALARM wrong", "-PT15M", vAlarm.getPropertyValue("TRIGGER"));
+                uid2 = vAlarm.getUID();
             }
         }
+
+        verifyEventException(event.getSeriesId(), 2, getPair(uid1, "-PT4M8S"), getPair(uid2, "-PT15M"));
     }
 
 }

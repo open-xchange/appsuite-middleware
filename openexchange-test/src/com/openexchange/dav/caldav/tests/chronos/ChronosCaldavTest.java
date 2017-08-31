@@ -58,8 +58,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.java.util.Pair;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 
@@ -72,9 +74,9 @@ import com.openexchange.testing.httpclient.models.EventsResponse;
 public class ChronosCaldavTest extends AbstractChronosCaldavTest {
 
     /**
-     * retrieves the event by uid
+     * Retrieves the event by UID
      *
-     * @param uid The uid
+     * @param uid The UID
      * @return The event
      * @throws Exception
      * @throws ApiException
@@ -110,6 +112,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
 
     /**
      * Retrieves exceptions by series id
+     *
      * @param seriesId The series id
      * @return The exceptions
      * @throws ApiException
@@ -142,7 +145,6 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      *
      * Assumes that the event contains exactly 1 alarm
      *
-     *
      * @param uid The uid of the event
      * @param remember Whether the event should be remembered for deletion
      * @param duration The expected duration of the alarm
@@ -150,13 +152,17 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws ApiException
      * @throws Exception
      */
-    protected EventData verifyEvent(String uid, boolean remember, String duration) throws ApiException, Exception{
+    protected EventData verifyEvent(String uid, boolean remember, String triggerValue) throws ApiException, Exception{
         EventData event = getEvent(uid, remember);
         assertNotNull("event not found on server", event);
         assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
         assertEquals("no alarm found", 1, event.getAlarms().size());
-        assertEquals("alarm trigger duration wrong", duration, event.getAlarms().get(0).getTrigger().getDuration());
+        checkAlarms(event.getAlarms(), getPair(event.getAlarms().get(0).getUid(), triggerValue));
         return event;
+    }
+
+    protected Pair<String, String> getPair(String uid, String value){
+        return new Pair<String, String>(uid, value);
     }
 
     /**
@@ -191,7 +197,8 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws ApiException
      * @throws Exception
      */
-    protected List<EventData> verifyEventExceptions(String seriesId, int alarms, String firstAlarmDuration) throws ApiException, Exception{
+    @SafeVarargs
+    final protected EventData verifyEventException(String seriesId, int alarms, Pair<String, String>... triggerValues) throws ApiException, Exception{
         List<EventData> exceptions = getExceptions(seriesId);
         assertFalse("No change exceptions found on server", exceptions.isEmpty());
         assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
@@ -199,13 +206,11 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         if(alarms>0){
             assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
             assertEquals("Wrong size of alarms found", alarms, changeExcpetion.getAlarms().size());
-            if(firstAlarmDuration!=null){
-                assertEquals("alarm trigger duration wrong", firstAlarmDuration, changeExcpetion.getAlarms().get(0).getTrigger().getDuration());
-            }
+            checkAlarms(changeExcpetion.getAlarms(), triggerValues);
         } else {
             assertTrue("Alarm still found", changeExcpetion.getAlarms() == null || changeExcpetion.getAlarms().isEmpty());
         }
-        return exceptions;
+        return changeExcpetion;
     }
 
     /**
@@ -218,6 +223,28 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
     protected void verifyNoEventExceptions(String seriesId) throws ApiException, Exception{
         List<EventData> exceptions = getExceptions(seriesId);
         assertTrue("Change exceptions found on server", exceptions.isEmpty());
+    }
+
+
+    /**
+     * Checks whether the alarm contain the given value as either duration or dateTime
+     *
+     * @param alarms The alarm to check
+     * @param alarmTriggerValue A pair of alarm uid and value (either duration or date time)
+     */
+    @SafeVarargs
+    final protected void checkAlarms(List<Alarm> alarms, Pair<String, String>... alarmTriggerValue){
+
+        for(Alarm alarm: alarms){
+            String uid = alarm.getUid();
+            for(Pair<String, String> alarmUid: alarmTriggerValue){
+                if(uid.equals(alarmUid.getFirst())){
+                    String expected = alarmUid.getSecond();
+                    assertTrue("Wrong trigger.", expected.equals(alarm.getTrigger().getDuration()) || expected.equals(alarm.getTrigger().getDateTime()));
+                }
+            }
+        }
+
     }
 
 
