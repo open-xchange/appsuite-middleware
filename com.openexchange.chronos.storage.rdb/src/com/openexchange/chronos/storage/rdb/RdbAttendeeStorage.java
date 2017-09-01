@@ -154,6 +154,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         deleteAttendees(java.util.Collections.singletonList(eventId));
     }
 
+    @Override
     public void deleteAttendees(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -287,7 +288,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             for (String id : eventIds) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }

@@ -383,7 +383,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             for (String id : ids) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }

@@ -356,6 +356,24 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
+    @Override
+    public void deleteTriggers(List<String> eventIds, int userId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteTriggers(connection, chunk, userId);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     private int deleteTriggers(Connection connection, List<String> ids) throws SQLException {
         if (null == ids || 0 == ids.size()) {
             return 0;
@@ -369,7 +387,27 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             for (String id : ids) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int deleteTriggers(Connection connection, List<String> ids, int userId) throws SQLException {
+        if (null == ids || 0 == ids.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
+            .append(getPlaceholders(ids.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, userId);
+            for (String id : ids) {
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }

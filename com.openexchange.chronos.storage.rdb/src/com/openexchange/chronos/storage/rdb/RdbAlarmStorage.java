@@ -514,7 +514,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             for (String id : eventIds) {
-                stmt.setString(parameterIndex, id);
+                stmt.setString(parameterIndex++, id);
             }
             return logExecuteUpdate(stmt);
         }
