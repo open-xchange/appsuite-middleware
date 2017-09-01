@@ -103,6 +103,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -235,12 +236,12 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <p/>
      * The deletion includes:
      * <ul>
-     * <li>insertion of a <i>tombstone</i> record for the original event</li>
-     * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
-     * <li>deletion of any alarms associated with the event</li>
-     * <li>deletion of any attachments associated with the event</li>
-     * <li>deletion of the event</li>
-     * <li>deletion of the event's attendees</li>
+     * <ul>insertion of a <i>tombstone</i> record for the original event</ul>
+     * <ul>insertion of <i>tombstone</i> records for the original event's attendees</ul>
+     * <ul>deletion of any alarms associated with the event</ul>
+     * <ul>deletion of any attachments associated with the event</ul>
+     * <ul>deletion of the event</ul>
+     * <ul>deletion of the event's attendees</ul>
      * </ul>
      *
      * @param originalEvent The original event to delete
@@ -787,17 +788,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * to a <i>real</i> deletion of the event from the storage, or if only the calendar user is removed from the attendee list, hence
      * rather an update is performed.
      * <p/>
-     * The evaluation is performed on the event being <i>group-scheduled</i> or not, the calendar user being the organizer or not, or the
-     * calendar user being the last internal user attendee or not.
+     * A deletion leads to a complete removal if
+     * <ul>
+     * <li>the event is located in a <i>public folder</i></li>
+     * <li>or the event is not <i>group-scheduled</i></li>
+     * <li>or the calendar user is the organizer of the event</li>
+     * <li>or the calendar user is the last internal user attendee in the event</li>
+     * </ul>
      *
      * @param originalEvent The original event to check
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */
     protected boolean deleteRemovesEvent(Event originalEvent) {
-
-        //TODO: deletion in public folder is always a real deletion or not?
-
-        return false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId);
+        return PublicType.getInstance().equals(folder.getType()) ||
+            false == isGroupScheduled(originalEvent) ||
+            isOrganizer(originalEvent, calendarUserId) ||
+            isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)
+        ;
     }
 
 }
