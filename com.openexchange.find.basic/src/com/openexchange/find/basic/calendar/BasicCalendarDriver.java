@@ -304,7 +304,8 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 preparedQueries.add(addWildcards(checkPatternLength(query), true, true));
             }
             return new DefaultSearchFilter(field, preparedQueries);
-        } else if (CalendarFacetType.STATUS.getId().equals(field)) {
+        }
+        if (CalendarFacetType.STATUS.getId().equals(field)) {
             List<String> preparedQueries = new ArrayList<String>(1 + queries.size());
             preparedQueries.add(String.valueOf(session.getUserId()));
             for (String query : queries) {
@@ -313,6 +314,13 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                     throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.STATUS.getId());
                 }
                 preparedQueries.add(String.valueOf(partStat));
+            }
+            return new DefaultSearchFilter(field, preparedQueries);
+        }
+        if (CalendarFacetType.PARTICIPANT.getId().equals(field)) {
+            List<String> preparedQueries = new ArrayList<String>(queries.size());
+            for (String query : queries) {
+                preparedQueries.add(CalendarUtils.getURI(query));
             }
             return new DefaultSearchFilter(field, preparedQueries);
         }
