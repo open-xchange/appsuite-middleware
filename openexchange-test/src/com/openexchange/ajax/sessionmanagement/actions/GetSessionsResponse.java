@@ -95,7 +95,7 @@ public class GetSessionsResponse extends AbstractAJAXResponse {
         long loginTime = obj.getLong("loginTime");
         int ctxId = obj.getInt("ctxId");
         int userId = obj.getInt("userId");
-        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setCtxId(ctxId).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).setUserId(userId).build();
+        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).build();
         return session;
     }
 
