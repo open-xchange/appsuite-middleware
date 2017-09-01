@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -56,15 +57,20 @@ import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -126,6 +132,9 @@ public class ClearPerformer extends AbstractUpdatePerformer {
     }
 
     private int deleteEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, long clientTimestamp) throws OXException {
+        /*
+         * load original events
+         */
         EventField[] fields = Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]);
         List<Event> originalEvents = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
         if (null == originalEvents || 0 == originalEvents.size()) {
@@ -133,51 +142,117 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         }
         originalEvents = storage.getUtilities().loadAdditionalEventData(-1, originalEvents, null);
         /*
-         * check permissions & prepare tombstone data
+         * derive kind of deletion for each event and check permissions
          */
-        List<String> eventIds = new ArrayList<String>(originalEvents.size());
-        Map<String, List<Attachment>> attachmentsByEvent = new HashMap<String, List<Attachment>>();
-        List<Event> eventTombstones = new ArrayList<Event>(originalEvents.size());
-        Map<String, List<Attendee>> attendeeTombstonesById = new HashMap<String, List<Attendee>>(originalEvents.size());
+        List<Event> eventsToDelete = new ArrayList<Event>(originalEvents.size());
+        List<Entry<Event, Attendee>> attendeesToDeleteByEvent = new ArrayList<Entry<Event, Attendee>>();
         for (Event originalEvent : originalEvents) {
             requireDeletePermissions(originalEvent);
             requireUpToDateTimestamp(originalEvent, clientTimestamp);
-
-            //TODO
             if (deleteRemovesEvent(originalEvent)) {
-
+                /*
+                 * deletion of not group-scheduled event / by organizer / last user attendee
+                 */
+                eventsToDelete.add(originalEvent);
             } else {
-
+                /*
+                 * deletion as one of the attendees
+                 */
+                Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
+                if (null == userAttendee) {
+                    throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
+                }
+                attendeesToDeleteByEvent.add(new AbstractMap.SimpleEntry<Event, Attendee>(originalEvent, userAttendee));
             }
+        }
+        /*
+         * perform deletion & return number of processed events
+         */
+        if (0 < eventsToDelete.size()) {
+            deleteEvents(eventsToDelete);
+        }
+        if (0 < attendeesToDeleteByEvent.size()) {
+            deleteAttendees(attendeesToDeleteByEvent);
+        }
+        return originalEvents.size();
+    }
 
+    private void deleteEvents(List<Event> eventsToDelete) throws OXException {
+        /*
+         * collect data to delete & prepare tombstone data
+         */
+        List<String> eventIds = new ArrayList<String>(eventsToDelete.size());
+        Map<String, List<Attachment>> attachmentsByEventId = new HashMap<String, List<Attachment>>();
+        List<Event> eventTombstones = new ArrayList<Event>(eventsToDelete.size());
+        Map<String, List<Attendee>> attendeeTombstonesByEventId = new HashMap<String, List<Attendee>>(eventsToDelete.size());
+        for (Event originalEvent : eventsToDelete) {
             eventIds.add(originalEvent.getId());
             eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
             if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
-                attendeeTombstonesById.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
+                attendeeTombstonesByEventId.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
             }
             if (null != originalEvent.getAttachments() && 0 < originalEvent.getAttachments().size()) {
-                attachmentsByEvent.put(originalEvent.getId(), originalEvent.getAttachments());
+                attachmentsByEventId.put(originalEvent.getId(), originalEvent.getAttachments());
             }
         }
         /*
          * insert tombstone data & perform deletion
          */
         storage.getEventStorage().insertEventTombstones(eventTombstones);
-        storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesById);
+        storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
         storage.getAlarmStorage().deleteAlarms(eventIds);
         storage.getAlarmTriggerStorage().deleteTriggers(eventIds);
         storage.getAttendeeStorage().deleteAttendees(eventIds);
         storage.getEventStorage().deleteEvents(eventIds);
-        if (0 < attachmentsByEvent.size()) {
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getID(), attachmentsByEvent));
+        if (0 < attachmentsByEventId.size()) {
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getID(), attachmentsByEventId));
         }
         /*
          * track deletions in result
          */
-        for (Event originalEvent : originalEvents) {
+        for (Event originalEvent : eventsToDelete) {
             trackDeletion(originalEvent);
         }
-        return originalEvents.size();
+    }
+
+    private void deleteAttendees(List<Entry<Event, Attendee>> attendeesToDeleteByEvent) throws OXException {
+        //TODO: further batch operations
+        /*
+         * collect data to delete & prepare tombstone data
+         */
+        Map<Integer, List<String>> eventIdsByUserId = new HashMap<Integer, List<String>>();
+        List<Event> eventTombstones = new ArrayList<Event>(attendeesToDeleteByEvent.size());
+        Map<String, List<Attendee>> attendeeTombstonesByEventId = new HashMap<String, List<Attendee>>(attendeesToDeleteByEvent.size());
+        for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
+            Event event = attendeeToDeleteByEvent.getKey();
+            Attendee attendee = attendeeToDeleteByEvent.getValue();
+            com.openexchange.tools.arrays.Collections.put(eventIdsByUserId, I(attendee.getEntity()), event.getId());
+            eventTombstones.add(storage.getUtilities().getTombstone(event, timestamp, calendarUserId));
+            attendeeTombstonesByEventId.put(event.getId(), Collections.singletonList(storage.getUtilities().getTombstone(attendee)));
+        }
+        /*
+         * insert tombstone data & perform deletion and updates
+         */
+        for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
+            Event event = attendeeToDeleteByEvent.getKey();
+            Attendee attendee = attendeeToDeleteByEvent.getValue();
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
+            storage.getAlarmStorage().deleteAlarms(event.getId(), attendee.getEntity());
+        }
+        for (Entry<Integer, List<String>> entry : eventIdsByUserId.entrySet()) {
+            storage.getAlarmTriggerStorage().deleteTriggers(entry.getValue(), i(entry.getKey()));
+        }
+        storage.getEventStorage().insertEventTombstones(eventTombstones);
+        storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
+        /*
+         * 'touch' modified events & track results
+         */
+        for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
+            Event originalEvent = attendeeToDeleteByEvent.getKey();
+            touch(originalEvent.getId());
+            Event updatedEvent = loadEventData(originalEvent.getId());
+            trackUpdate(originalEvent, updatedEvent);
+        }
     }
 
 }

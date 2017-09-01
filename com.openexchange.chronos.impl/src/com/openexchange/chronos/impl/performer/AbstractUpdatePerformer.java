@@ -61,6 +61,7 @@ import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -104,6 +105,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -552,6 +556,41 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Loads all non user-specific data for multiple events, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the events is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
+     * event data is loaded from the storage.
+     *
+     * @param ids The identifiers of the event to load
+     * @return The event data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
+     */
+    protected List<Event> loadEventData(List<String> ids) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
+        }
+        if (1 == ids.size()) {
+            return Collections.singletonList(loadEventData(ids.get(0)));
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (String id : ids) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, id));
+        }
+
+        List<Event> foundEvents = storage.getEventStorage().searchEvents(searchTerm, null, null);
+        foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, null);
+        List<Event> events = new ArrayList<Event>(ids.size());
+        for (String id : ids) {
+            Event event = find(foundEvents, id);
+            if (null == event) {
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
+            }
+            events.add(new UnmodifiableEvent(event));
+        }
+        return events;
+    }
+
+    /**
      * Loads all non user-specific data for a all exceptions of an event series, including attendees and attachments.
      * <p/>
      * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
@@ -756,7 +795,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      */
     protected boolean deleteRemovesEvent(Event originalEvent) {
 
-        //TODO: deletion in public folder is always a real deletion or not? 
+        //TODO: deletion in public folder is always a real deletion or not?
 
         return false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId);
     }
