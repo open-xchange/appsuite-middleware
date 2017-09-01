@@ -88,7 +88,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class BasicAlarmTriggerTest extends AbstractTimezoneAlarmTriggerTest {
+public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest {
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

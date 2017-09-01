@@ -58,13 +58,13 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * {@link AbstractTimezoneAlarmTriggerTest}
+ * {@link AbstractUserTimezoneAlarmTriggerTest} runs the tests with different user timezone configurations.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public abstract class AbstractTimezoneAlarmTriggerTest extends AbstractAlarmTriggerTest {
+public abstract class AbstractUserTimezoneAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
     @Parameter(value = 0)
     public TimeZone timeZone;
