@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.zone.ZoneOffsetTransition;
 import java.time.zone.ZoneRules;
@@ -66,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -77,6 +79,7 @@ import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -338,7 +341,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(createSingleAlarm("-PT20M"));
+        body.addAlarmsItem(createSingleAlarm("-PT20M", RelatedEnum.START));
         ChronosCalendarResultResponse updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
@@ -431,7 +434,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(createSingleAlarm("-PT20M"));
+        body.addAlarmsItem(createSingleAlarm("-PT20M", RelatedEnum.START));
         updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, exceptionEvent.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
@@ -491,7 +494,7 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         // Create an floating event with an alarm 3 days earlier
         DateTimeData startTime = getDateTime(null, cal.getTimeInMillis());
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D", RelatedEnum.START), false, false);
         EventData event = handleCreation(createEvent);
         getAndCheckEvent(event, 1);
 
@@ -514,6 +517,42 @@ public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
         int offsetOld = TimeZone.getTimeZone("Europe/Berlin").getOffset(cal.getTimeInMillis());
         offset = offsetOld - offsetNew;
         checkAlarmTime(triggers2.get(0), event.getId(), triggerTime + offset);
+    }
+
+    @Test
+    public void testPositiveDurationTrigger() throws ApiException, ParseException {
+        // Create an event with an alarm with a positive duration
+        Calendar cal = getUTCCalendar();
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        DateTimeData startDate = getDateTime(cal);
+        EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "PT10M", RelatedEnum.START);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
+        event = handleCreation(createEvent);
+
+        getAndCheckEvent(event, 1);
+
+        // Get alarms within the next two days
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+        AlarmTrigger alarmTrigger = triggers.get(0);
+        checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
+    }
+
+    @Test
+    public void testEndDateTrigger() throws ApiException, ParseException {
+        // Create an event with an alarm related to the end date
+        Calendar cal = getUTCCalendar();
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        DateTimeData startDate = getDateTime(cal);
+        EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "-PT10M", RelatedEnum.END);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
+        event = handleCreation(createEvent);
+
+        getAndCheckEvent(event, 1);
+
+        // Get alarms within the next two days
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+        AlarmTrigger alarmTrigger = triggers.get(0);
+        checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(1) - TimeUnit.MINUTES.toMillis(10));
     }
 
     private Calendar getDaylightSavingDate( TimeZone tz, int year){

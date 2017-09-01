@@ -97,7 +97,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     @SuppressWarnings("unchecked")
-    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, String duration) throws ParseException {
+    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, String duration, RelatedEnum related) throws ParseException {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
@@ -110,16 +110,20 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
         singleEvent.setEndDate(addTimeToDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration)));
+        singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration, related)));
         singleEvent.setSummary(summary);
         return singleEvent;
     }
 
-    protected Alarm createSingleAlarm(String duration) {
+    protected Alarm createSingleAlarm(String duration, RelatedEnum related) {
         Alarm alarm = new Alarm();
         alarm.setAction("display");
         Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
+        if (related == null) {
+            trigger.setRelated(RelatedEnum.START);
+        } else {
+            trigger.setRelated(related);
+        }
         trigger.setDuration(duration);
         alarm.setTrigger(trigger);
         alarm.setDescription("This is the display message!");
@@ -304,7 +308,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, long startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
 
@@ -319,7 +323,7 @@ public class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
 
