@@ -50,6 +50,10 @@
 package com.openexchange.dav;
 
 import com.openexchange.ajax.Client;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.clientinfo.impl.DefaultClientInfo;
 import com.openexchange.session.Session;
 
 /**
@@ -58,7 +62,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DAVClientInfoProvider {
+public class DAVClientInfoProvider implements ClientInfoProvider {
 
     /**
      * Initializes a new {@link DAVClientInfoProvider}.
@@ -67,21 +71,26 @@ public class DAVClientInfoProvider {
         super();
     }
 
-    public Object getClientInfo(Session session) {
+    @Override
+    public ClientInfo getClientInfo(Session session) {
         if (null == session || false == isDAVClient(session.getClient())) {
             return null;
         }
         DAVUserAgent userAgent = getDAVUserAgent(session);
-        return userAgent.getReadableName();
+//        return userAgent.getReadableName();
+        return new DefaultClientInfo(userAgent.getReadableName(), ClientInfoType.SYNC);
     }
 
-    public Object getClientInfo(String clientId) {
+    @Override
+    public ClientInfo getClientInfo(String clientId) {
         Client client = Client.getClientByID(clientId);
         if (Client.CALDAV.equals(client)) {
-            return DAVUserAgent.GENERIC_CALDAV.getReadableName();
+//            return DAVUserAgent.GENERIC_CALDAV.getReadableName();
+            return new DefaultClientInfo(DAVUserAgent.GENERIC_CALDAV.getReadableName(), ClientInfoType.SYNC);
         }
         if (Client.CARDDAV.equals(client)) {
-            return DAVUserAgent.GENERIC_CARDDAV.getReadableName();
+//            return DAVUserAgent.GENERIC_CARDDAV.getReadableName();
+            return new DefaultClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName(), ClientInfoType.SYNC);
         }
         return null;
     }
