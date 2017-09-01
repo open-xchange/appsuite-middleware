@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
@@ -67,8 +68,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -309,6 +313,24 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         assertNull(errorDesc, error);
         assertNotNull(data);
         return data;
+    }
+
+    /**
+     * Handles the result response of an event creation
+     *
+     * @param createEvent The result
+     * @return The created event
+     */
+    protected EventData handleCreation(ChronosCalendarResultResponse createEvent) {
+        CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
+        assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
+        EventData event = result.getCreated().get(0);
+        EventId eventId = new EventId();
+        eventId.setId(event.getId());
+        eventId.setFolderId(event.getFolder());
+        rememberEventId(defaultUserApi, eventId);
+        this.setLastTimestamp(createEvent.getTimestamp());
+        return event;
     }
 }
 

@@ -70,7 +70,6 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
@@ -353,24 +352,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     protected EventData createSeriesEvent(String name, Calendar startTime, List<Attendee> attendees) throws ApiException {
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false);
         return handleCreation(createEvent);
-    }
-
-    /**
-     * Handles the result response of an event creation
-     *
-     * @param createEvent The result
-     * @return The created event
-     */
-    protected EventData handleCreation(ChronosCalendarResultResponse createEvent) {
-        CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
-        assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
-        EventData event = result.getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        this.setLastTimestamp(createEvent.getTimestamp());
-        return event;
     }
 
     /**
