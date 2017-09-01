@@ -50,10 +50,17 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
@@ -151,7 +158,39 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public AlarmTriggerStorage getAlarmTriggerStorage() {
-        throw new UnsupportedOperationException();
+        // Return an idly storage for the legacy storage
+        return new AlarmTriggerStorage() {
+
+            @Override
+            public Integer recalculateFloatingAlarmTriggers(int userId) throws OXException {
+                return 0;
+            }
+
+            @Override
+            public List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events, Map<String, Set<RecurrenceId>> exceptions) throws OXException {
+                // Do nothing
+            }
+
+            @Override
+            public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
+                // Do nothing
+            }
+
+            @Override
+            public void deleteTriggers(List<String> eventIds) throws OXException {
+                // Do nothing
+            }
+
+            @Override
+            public void deleteTriggers(String eventId) throws OXException {
+                // Do nothing
+            }
+        };
     }
 
 }
