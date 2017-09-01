@@ -65,8 +65,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
@@ -90,8 +88,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@RunWith(BlockJUnit4ClassRunner.class)
-public class BasicAlarmTriggerTest extends AbstractAlarmTriggerTest {
+public class BasicAlarmTriggerTest extends AbstractTimezoneAlarmTriggerTest {
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

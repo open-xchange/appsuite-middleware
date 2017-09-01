@@ -83,7 +83,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AbstractAlarmTriggerTest extends AbstractChronosTest {
+public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
 
     protected String folderId;
     protected String folderId2;
