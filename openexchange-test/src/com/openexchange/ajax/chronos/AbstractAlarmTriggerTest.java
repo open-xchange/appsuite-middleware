@@ -363,6 +363,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      */
     protected EventData handleCreation(ChronosCalendarResultResponse createEvent) {
         CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
+        assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
         EventData event = result.getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
