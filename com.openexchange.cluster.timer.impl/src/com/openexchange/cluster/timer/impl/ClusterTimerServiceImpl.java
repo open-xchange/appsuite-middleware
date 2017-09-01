@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cluster.timer.internal;
+package com.openexchange.cluster.timer.impl;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;

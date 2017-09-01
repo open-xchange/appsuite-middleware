@@ -47,74 +47,25 @@
  *
  */
 
-package com.openexchange.oauth.impl.osgi;
+package com.openexchange.cluster.timer.impl;
 
-import java.util.List;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 
 /**
- * {@link OSGiContextService}
+ * {@link Unregisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public interface Unregisterer {
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Manually unregisters the service
      */
-    public OSGiContextService() {
-        super(ContextService.class);
-    }
+    void unregister();
 
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
-    }
-
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
-    }
-
-    @Override
-    public List<Integer> getDistinctContextsPerSchema() throws OXException {
-        return getService().getDistinctContextsPerSchema();
-    }
-
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateContexts(int[] contextIDs) throws OXException {
-        try {
-            getService().invalidateContexts(contextIDs);
-        } catch (final OXException e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
-    }
+    /**
+     * Propagates not-active exception
+     */
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }
