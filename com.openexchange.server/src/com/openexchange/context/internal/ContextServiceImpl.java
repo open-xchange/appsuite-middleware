@@ -81,6 +81,11 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return ContextStorage.getInstance().getDistinctContextsPerSchema();
+    }
+
+    @Override
     public Context getContext(final int contextId) throws OXException {
         return ContextStorage.getInstance().getContext(contextId);
     }

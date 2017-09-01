@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.lock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.timer"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.timer.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.lean"/>

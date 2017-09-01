@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cluster.timer.osgi;
+package com.openexchange.cluster.timer.impl.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.timer.ClusterTimerService;
-import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
-import com.openexchange.cluster.timer.internal.Unregisterer;
+import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
+import com.openexchange.cluster.timer.impl.Unregisterer;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
