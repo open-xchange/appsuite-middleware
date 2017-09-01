@@ -580,7 +580,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         AlarmTrigger trigger = new AlarmTrigger();
         trigger.setUserId(userId);
         trigger.setAction(alarm.getAction().getValue());
-        trigger.setProcessed(false);
+        trigger.setPushed(false);
         trigger.setAlarm(alarm.getId());
         trigger.setEventId(event.getId());
 

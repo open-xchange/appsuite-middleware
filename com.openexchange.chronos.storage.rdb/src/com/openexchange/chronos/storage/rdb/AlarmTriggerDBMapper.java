@@ -252,24 +252,25 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
 
             @Override
             public void set(AlarmTrigger alarmTrigger, Boolean value) {
-                alarmTrigger.setProcessed(value);
+                alarmTrigger.setPushed(value);
             }
 
             @Override
             public boolean isSet(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.containsProcessed();
+                return alarmTrigger.containsPushed();
             }
 
             @Override
             public Boolean get(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.isProcessed();
+                return alarmTrigger.isPushed();
             }
 
             @Override
             public void remove(AlarmTrigger alarmTrigger) {
-                alarmTrigger.removeProcessed();
+                alarmTrigger.removePushed();
             }
         });
+
 
         mappings.put(AlarmTriggerField.RECURRENCE, new VarCharMapping<AlarmTrigger>("recurrence", "Recurrence ID") {
 

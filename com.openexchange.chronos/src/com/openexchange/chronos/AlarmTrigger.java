@@ -68,7 +68,7 @@ public class AlarmTrigger {
     private Long time;
     private Long relatedTime;
     private Integer userId;
-    private Boolean processed;
+    private Boolean pushed;
     private TimeZone timezone;
 
     private Integer contextId;
@@ -82,7 +82,7 @@ public class AlarmTrigger {
     private boolean isRecurrenceSet=false;
     private boolean isTimeSet=false;
     private boolean isUserIdSet=false;
-    private boolean isProcessedSet=false;
+    private boolean isPushedSet = false;
     private boolean isFolderSet = false;
     private boolean isTimeZoneSet = false;
     private boolean isRelatedTimeSet = false;
@@ -140,8 +140,8 @@ public class AlarmTrigger {
         return isContextIdSet;
     }
 
-    public boolean containsProcessed() {
-        return isProcessedSet;
+    public boolean containsPushed() {
+        return isPushedSet;
     }
 
     /**
@@ -235,12 +235,12 @@ public class AlarmTrigger {
     }
 
     /**
-     * Whether the alarm is processed or not
+     * Whether the alarm is already pushed or not
      *
-     * @return The processed
+     * @return The pushed
      */
-    public Boolean isProcessed() {
-        return processed;
+    public Boolean isPushed() {
+        return pushed;
     }
 
     /**
@@ -295,11 +295,11 @@ public class AlarmTrigger {
     }
 
     /**
-     * Removes the recurrence
+     * Removes the pushed
      */
-    public void removeProcessed() {
-        this.processed=null;
-        this.isProcessedSet=false;
+    public void removePushed() {
+        this.pushed=null;
+        this.isPushedSet = false;
     }
 
     /**
@@ -347,13 +347,13 @@ public class AlarmTrigger {
     }
 
     /**
-     * Sets the processed
+     * Sets the pushed
      *
-     * @param processed A boolean indicating whether the alarm is processed or not
+     * @param processed A boolean indicating whether the alarm is pushed or not
      */
-    public void setProcessed(Boolean processed) {
-        this.processed = processed;
-        this.isProcessedSet=true;
+    public void setPushed(Boolean pushed) {
+        this.pushed = pushed;
+        this.isPushedSet = true;
     }
 
     /**
