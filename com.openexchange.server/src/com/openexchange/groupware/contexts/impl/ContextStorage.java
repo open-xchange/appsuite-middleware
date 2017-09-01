@@ -184,6 +184,14 @@ public abstract class ContextStorage {
     public abstract List<Integer> getAllContextIds() throws OXException;
 
     /**
+     * Gets a listing of exactly one context per database schema
+     *
+     * @return A listing of distinct contexts per schema
+     * @throws OXException If contexts cannot be returned
+     */
+    public abstract List<Integer> getDistinctContextsPerSchema() throws OXException;
+
+    /**
      * Get a list of all context ids that are bound to the specified filestore id
      *
      * @param filestoreId the filestoreId

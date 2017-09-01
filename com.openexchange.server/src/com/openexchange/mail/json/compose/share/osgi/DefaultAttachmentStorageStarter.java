@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,25 +47,59 @@
  *
  */
 
-package com.openexchange.cluster.timer.internal;
+package com.openexchange.mail.json.compose.share.osgi;
 
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.cluster.timer.ClusterTimerService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mail.json.compose.share.DefaultAttachmentStorage;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Unregisterer}
+ * {@link DefaultAttachmentStorageStarter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface Unregisterer {
+public class DefaultAttachmentStorageStarter implements ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService> {
+
+    private final BundleContext context;
+    private final ServiceLookup services;
 
     /**
-     * Manually unregisters the service
+     * Initializes a new {@link DefaultAttachmentStorageStarter}.
      */
-    void unregister();
+    public DefaultAttachmentStorageStarter(BundleContext context, ServiceLookup services) {
+        super();
+        this.context = context;
+        this.services = services;
+    }
 
-    /**
-     * Propagates not-active exception
-     */
-    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
+    @Override
+    public ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
+        ClusterTimerService service = context.getService(reference);
+        try {
+            DefaultAttachmentStorage.initiateCleaner(services.getService(ConfigurationService.class), service);
+            return service;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DefaultAttachmentStorageStarter.class);
+            logger.warn("Failed to initiate cleaner task", e);
+            context.ungetService(reference);
+            return null;
+        }
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+        DefaultAttachmentStorage.dropCleaner();
+        context.ungetService(reference);
+    }
 
 }

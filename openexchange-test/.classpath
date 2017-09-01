@@ -154,5 +154,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

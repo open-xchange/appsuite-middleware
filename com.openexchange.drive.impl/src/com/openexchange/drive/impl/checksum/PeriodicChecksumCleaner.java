@@ -106,8 +106,9 @@ public class PeriodicChecksumCleaner implements Runnable {
             }
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
             long lastLogTime = start;
-            for (int i = 0; i < contextIDs.size(); i++) {
-                int contextID = contextIDs.get(i).intValue();
+            int i = 0;
+            for (Integer ctxID : contextIDs) {
+                int contextID = ctxID.intValue();
                 for (int retry = 0; retry < 3; retry++) {
                     if (false == active.get()) {
                         LOG.info("Periodic checksum cleanup task stopping.");
@@ -133,6 +134,7 @@ public class PeriodicChecksumCleaner implements Runnable {
                         }
                     }
                 }
+                i++;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
