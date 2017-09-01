@@ -50,9 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
@@ -128,7 +125,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteEvent(Event originalEvent) throws OXException {
-        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
+        if (deleteRemovesEvent(originalEvent)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
@@ -164,7 +161,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
-        if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
+        if (deleteRemovesEvent(originalEvent)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */

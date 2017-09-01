@@ -53,6 +53,9 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -738,6 +741,24 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         }
         classificationAllowsUpdate(folder, originalEvent);
+    }
+
+    /**
+     * Gets a value indicating whether a delete operation performed in the current folder from the calendar user's perspective would lead
+     * to a <i>real</i> deletion of the event from the storage, or if only the calendar user is removed from the attendee list, hence
+     * rather an update is performed.
+     * <p/>
+     * The evaluation is performed on the event being <i>group-scheduled</i> or not, the calendar user being the organizer or not, or the
+     * calendar user being the last internal user attendee or not.
+     *
+     * @param originalEvent The original event to check
+     * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
+     */
+    protected boolean deleteRemovesEvent(Event originalEvent) {
+
+        //TODO: deletion in public folder is always a real deletion or not? 
+
+        return false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId);
     }
 
 }

@@ -60,7 +60,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -527,7 +526,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     private boolean updateDeleteExceptions(Event originalEvent, Event updatedEvent) throws OXException {
         if (isSeriesMaster(originalEvent) && false == isNullOrEmpty(updatedEvent.getDeleteExceptionDates())) {
-            if (false == isGroupScheduled(originalEvent) || isOrganizer(originalEvent, calendarUserId) || isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)) {
+            if (deleteRemovesEvent(originalEvent)) {
                 /*
                  * "real" delete exceptions for all attendees, take over as-is during normal update routine
                  */

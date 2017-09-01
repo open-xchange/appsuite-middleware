@@ -142,6 +142,14 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         for (Event originalEvent : originalEvents) {
             requireDeletePermissions(originalEvent);
             requireUpToDateTimestamp(originalEvent, clientTimestamp);
+
+            //TODO
+            if (deleteRemovesEvent(originalEvent)) {
+
+            } else {
+
+            }
+
             eventIds.add(originalEvent.getId());
             eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
             if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
