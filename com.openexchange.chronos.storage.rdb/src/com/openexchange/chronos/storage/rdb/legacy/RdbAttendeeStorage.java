@@ -586,7 +586,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, contextID);
                 for (String id : objectIDs) {
-                    stmt.setInt(parameterIndex, asInt(id));
+                    stmt.setInt(parameterIndex++, asInt(id));
                 }
                 updated += logExecuteUpdate(stmt);
             }

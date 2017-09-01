@@ -621,7 +621,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, REMINDER_MODULE);
             for (String id : eventIds) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }
@@ -654,7 +654,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
             for (String id : eventIds) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }

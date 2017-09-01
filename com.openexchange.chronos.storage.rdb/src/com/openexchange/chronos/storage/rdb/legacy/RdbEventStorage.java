@@ -350,6 +350,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         deleteEvents(Collections.singletonList(objectID));
     }
 
+    @Override
     public void deleteEvents(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -377,7 +378,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
             for (String id : objectIDs) {
-                stmt.setInt(parameterIndex, asInt(id));
+                stmt.setInt(parameterIndex++, asInt(id));
             }
             return logExecuteUpdate(stmt);
         }
