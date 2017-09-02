@@ -55,6 +55,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -79,6 +86,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -410,6 +418,94 @@ public final class MessageUtility {
     }
 
     /**
+     * Tries to decode the specified bytes using given charset. Returns <code>null</code> in case of malformed input and/or unmappable character.
+     *
+     * @param bytes The bytes to decode
+     * @param charset The charset to use
+     * @return The resulting string on success; otherwise <code>null</code> when a character decoding error occurs
+     * @throws IllegalArgumentException If either specified bytes or given charset are <code>null</code> or empty
+     * @throws IllegalCharsetNameException If the given charset name is illegal
+     * @throws UnsupportedCharsetException If no support for the named charset is available in this instance of the Java virtual machine
+     */
+    public static String tryDecode(byte[] bytes, String charset) {
+        if (null == bytes || bytes.length <= 0) {
+            throw new IllegalArgumentException("Bytes must not be null or empty");
+        }
+        if (Strings.isEmpty(charset)) {
+            throw new IllegalArgumentException("Charset must not be null or empty");
+        }
+
+        return tryDecode(bytes, Charsets.forName(charset));
+    }
+
+    /**
+     * Tries to decode the specified bytes using given charset. Returns <code>null</code> in case of malformed input and/or unmappable character.
+     *
+     * @param bytes The bytes to decode
+     * @param charset The charset to use
+     * @return The resulting string on success; otherwise <code>null</code> when a character decoding error occurs
+     * @throws IllegalArgumentException If either specified bytes or given charset are <code>null</code> or empty
+     */
+    public static String tryDecode(byte[] bytes, Charset charset) {
+        if (null == bytes || bytes.length <= 0) {
+            throw new IllegalArgumentException("Bytes must not be null or empty");
+        }
+        return tryDecode(bytes, 0, bytes.length, charset);
+    }
+
+    /**
+     * Tries to decode the specified bytes using given charset. Returns <code>null</code> in case of malformed input and/or unmappable character.
+     *
+     * @param bytes The bytes to decode
+     * @param offset The index of the first byte to decode
+     * @param length The number of bytes to decode
+     * @param charset The charset to use
+     * @return The resulting string on success; otherwise <code>null</code> when a character decoding error occurs
+     * @throws IllegalArgumentException If either specified bytes or given charset are <code>null</code> or empty
+     * @throws IllegalCharsetNameException If the given charset name is illegal
+     * @throws UnsupportedCharsetException If no support for the named charset is available in this instance of the Java virtual machine
+     * @throws IndexOutOfBoundsException If the preconditions on the <tt>offset</tt> and <tt>length</tt> parameters do not hold
+     */
+    public static String tryDecode(byte[] bytes, int offset, int length, String charset) {
+        if (null == bytes || bytes.length <= 0) {
+            throw new IllegalArgumentException("Bytes must not be null or empty");
+        }
+        if (Strings.isEmpty(charset)) {
+            throw new IllegalArgumentException("Charset must not be null or empty");
+        }
+
+        return tryDecode(bytes, offset, length, Charsets.forName(charset));
+    }
+
+    /**
+     * Tries to decode the specified bytes using given charset. Returns <code>null</code> in case of malformed input and/or unmappable character.
+     *
+     * @param bytes The bytes to decode
+     * @param offset The index of the first byte to decode
+     * @param length The number of bytes to decode
+     * @param charset The charset to use
+     * @return The resulting string on success; otherwise <code>null</code> when a character decoding error occurs
+     * @throws IllegalArgumentException If either specified bytes or given charset are <code>null</code> or empty
+     * @throws IndexOutOfBoundsException If the preconditions on the <tt>offset</tt> and <tt>length</tt> parameters do not hold
+     */
+    public static String tryDecode(byte[] bytes, int offset, int length, Charset charset) {
+        if (null == bytes || bytes.length <= 0) {
+            throw new IllegalArgumentException("Bytes must not be null or empty");
+        }
+        if (null == charset) {
+            throw new IllegalArgumentException("Charset must not be null");
+        }
+
+        try {
+            CharsetDecoder decoder = charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
+            CharBuffer charBuffer = decoder.decode(ByteBuffer.wrap(bytes, offset, length));
+            return charBuffer.toString();
+        } catch (CharacterCodingException e) {
+            return null;
+        }
+    }
+
+    /**
      * Reads a string from given input stream using direct buffering.
      *
      * @param streamProvider The input stream provider
@@ -457,12 +553,12 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("GB2312"));
-            if (containsNoUnknown(retval)) {
+            String retval = tryDecode(bytes, Charsets.forName("GB2312"));
+            if (null != retval) {
                 return retval;
             }
-            retval = new String(bytes, Charsets.forName("GB18030"));
-            if (containsNoUnknown(retval)) {
+            retval = tryDecode(bytes, Charsets.forName("GB18030"));
+            if (null != retval) {
                 return retval;
             }
             /*
@@ -483,8 +579,8 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (containsNoUnknown(retval)) {
+            String retval = tryDecode(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
+            if (null != retval) {
                 return retval;
             }
             // MS932
@@ -547,12 +643,12 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("GB2312"));
-            if (containsNoUnknown(retval)) {
+            String retval = tryDecode(bytes, Charsets.forName("GB2312"));
+            if (null != retval) {
                 return retval;
             }
-            retval = new String(bytes, Charsets.forName("GB18030"));
-            if (containsNoUnknown(retval)) {
+            retval = tryDecode(bytes, Charsets.forName("GB18030"));
+            if (null != retval) {
                 return retval;
             }
             /*
@@ -573,8 +669,8 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (containsNoUnknown(retval)) {
+            String retval = tryDecode(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
+            if (null != retval) {
                 return retval;
             }
             // MS932
@@ -590,8 +686,8 @@ public final class MessageUtility {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
-        final String retval = new String(bytes, Charsets.forName("GB18030"));
-        if (containsNoUnknown(retval)) {
+        final String retval = tryDecode(bytes, Charsets.forName("GB18030"));
+        if (null != retval) {
             return retval;
         }
         /*
@@ -609,8 +705,8 @@ public final class MessageUtility {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
-        final String retval = new String(bytes, Charsets.forName("big5"));
-        if (containsNoUnknown(retval)) {
+        final String retval = tryDecode(bytes, Charsets.forName("big5"));
+        if (null != retval) {
             return retval;
         }
         /*
@@ -635,8 +731,8 @@ public final class MessageUtility {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
-        final String retval = new String(bytes, Charsets.forName("ISO-2022-JP"));
-        if (containsNoUnknown(retval)) {
+        final String retval = tryDecode(bytes, Charsets.forName("ISO-2022-JP"));
+        if (null != retval) {
             return retval;
         }
         /*
