@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.EventUpdates;
@@ -79,7 +80,7 @@ public class InitialWriteHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getExternalEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
         return getAndPrepareExtEvents(folderId);
     }
 

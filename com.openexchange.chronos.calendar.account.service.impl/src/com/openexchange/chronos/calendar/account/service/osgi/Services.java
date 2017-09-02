@@ -47,44 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.calendar.account.service.osgi;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public final class Services {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
-    }
-
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        return serviceLookup.getService(clazz);
     }
 }

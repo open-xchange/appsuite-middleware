@@ -119,6 +119,10 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The attendee '%1$s' is either not an internal user or does not exist.";
 
+    public static final String AUTH_FAILED_MSG = "Authentication failed.";
+
+    public static final String BAD_AUTH_CONFIGURATION_MSG = "Unable to create account. There have been issues with the provided authentication.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

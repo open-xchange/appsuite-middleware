@@ -65,6 +65,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -148,8 +149,10 @@ public class DeleteHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getExternalEvents(String folderId) throws OXException {
-        return Collections.emptyList();
+    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
+        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
+        externalCalendarResult.addEvents(Collections.emptyList());
+        return externalCalendarResult;
     }
 
     @Override

@@ -105,29 +105,35 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     }
 
     /**
-     * Returns a list of {@link Event}s by querying the underlying calendar.
+     * Returns a list of {@link Event}s by querying the underlying calendar and some meta information encapsulated within an {@link ExternalCalendarResult}
      * 
-     * @return The external events associated with the calendar account
+     * @return {@link ExternalCalendarResult} containing the external events associated with the calendar account
      * @throws OXException
      */
-    public abstract List<Event> getEvents() throws OXException;
+    public abstract ExternalCalendarResult getEvents() throws OXException;
 
     @Override
-    public final List<Event> getEvents(String folderId) throws OXException {
+    public final ExternalCalendarResult getEvents(String folderId) throws OXException {
         checkFolderId(folderId);
-        List<Event> events = new ArrayList<Event>();
-        for (Event event : getEvents()) {
-            event.setFolderId(this.folder.getId());
-            events.add(event);
+        ExternalCalendarResult externalCalendarResult = getEvents();
+        if (externalCalendarResult.isUpToDate()) {
+            return externalCalendarResult;
         }
-        return events;
+        for (Event event : externalCalendarResult.getEvents()) {
+            event.setFolderId(this.folder.getId());
+        }
+        return externalCalendarResult;
     }
 
     @Override
     public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
         checkFolderId(folderId);
         List<Event> events = new ArrayList<Event>();
-        for (Event event : getEvents()) {
+        ExternalCalendarResult externalCalendarResult = getEvents();
+        if (externalCalendarResult.isUpToDate()) {
+            return externalCalendarResult.getEvents();
+        }
+        for (Event event : externalCalendarResult.getEvents()) {
             if (CalendarUtils.isSeriesException(event) && seriesId.equals(event.getSeriesId())) {
                 event.setFolderId(folderId);
                 events.add(event);

@@ -149,12 +149,12 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public abstract long getExternalRequestTimeout();
 
     /**
-     * Returns a list of {@link Event}s by querying the underlying calendar for the given folder id.
+     * Returns an {@link ExternalCalendarResult} containing the external {@link Event}s by querying the underlying calendar for the given folder id and additional information.
      * 
      * @param folderId The identifier of the folder to get the events from
-     * @return The events
+     * @return {@link ExternalCalendarResult}
      */
-    public abstract List<Event> getEvents(String folderId) throws OXException;
+    public abstract ExternalCalendarResult getEvents(String folderId) throws OXException;
 
     /**
      * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
@@ -293,7 +293,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = folderUpdateState.getValue();
-            Long lastFolderUpdate = (Long) folderConfig.get(LAST_UPDATE);
+            Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
             long refreshInterval = getCascadedRefreshInterval(folderConfig);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
@@ -313,7 +313,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     protected long getCascadedRefreshInterval(Map<String, Object> folderConfig) {
         if (folderConfig != null && !folderConfig.isEmpty()) {
-            Long calendarProviderInterval = (Long) folderConfig.get(REFRESH_INTERVAL);
+            Number calendarProviderInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
             if (calendarProviderInterval != null) {
                 return calendarProviderInterval.longValue();
             }

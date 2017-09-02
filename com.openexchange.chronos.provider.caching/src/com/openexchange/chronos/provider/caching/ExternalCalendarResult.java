@@ -47,44 +47,34 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.caching;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * Container holding the external events (if available) and additional information, for instance if there have been updates
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class ExternalCalendarResult {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    private List<Event> events = new ArrayList<>();
+
+    private boolean isUpToDate = true;
+
+    public void addEvents(List<Event> events) {
+        this.events.addAll(events);
+        this.isUpToDate = false;
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    public List<Event> getEvents() {
+        return this.events;
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
-    }
-
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
-    }
-
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    public boolean isUpToDate() {
+        return this.isUpToDate;
     }
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,42 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.osgi;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.provider.internal.Services;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link ProviderActivator}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class ProviderActivator extends HousekeepingActivator {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    private static final Logger LOG = LoggerFactory.getLogger(ProviderActivator.class);
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CryptoService.class };
     }
 
     @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.chronos.provider\"");
+        Services.setServiceLookup(this);
     }
 
     @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.chronos.provider\"");
+
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
-    }
-
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
-    }
 }

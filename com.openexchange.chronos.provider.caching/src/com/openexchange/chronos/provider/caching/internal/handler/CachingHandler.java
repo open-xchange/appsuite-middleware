@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
@@ -66,13 +67,13 @@ import com.openexchange.exception.OXException;
 public interface CachingHandler {
 
     /**
-     * Returns a list of {@link Event}s for the underlying account. Returned fields depend on the feeds ical file.
+     * Returns the result of querying the underlying account. This contains the {@link Event}s and additional meta information
      * 
      * @param folderId The folder id of the account
      * @return A list of {@link Event}s
      * @throws OXException
      */
-    List<Event> getExternalEvents(String folderId) throws OXException;
+    ExternalCalendarResult getExternalEvents(String folderId) throws OXException;
 
     /**
      * Returns the currently persisted {@link Event}s identified by the given folder identifier with all available fields.

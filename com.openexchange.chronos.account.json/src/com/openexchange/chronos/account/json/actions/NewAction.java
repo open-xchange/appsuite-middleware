@@ -83,12 +83,12 @@ public class NewAction extends AbstractAccountAction implements CalendarAccountF
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject data = requestData.getData(JSONObject.class);
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         CalendarAccountService service = getService(CalendarAccountService.class);
+        JSONObject data = requestData.getData(JSONObject.class);
         CalendarAccount account = service.createAccount(session, providerId, data.asMap());
         try {
             return new AJAXRequestResult(new JSONObject(1).put(ID, JSONCoercion.coerceToJSON(account.getAccountId())), FORMAT);

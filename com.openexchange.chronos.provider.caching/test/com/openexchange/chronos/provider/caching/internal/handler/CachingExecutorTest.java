@@ -66,6 +66,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccessTest;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -88,6 +89,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
     private List<Event> existingEvents = new ArrayList<>();
 
+    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
     private List<Event> externalEvents = new ArrayList<>();
 
     private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
@@ -104,7 +106,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         Mockito.when(factory.get(Matchers.any(), Matchers.any())).thenReturn(handler);
 
         Mockito.when(handler.getExistingEvents(Matchers.anyString())).thenReturn(existingEvents);
-        Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalEvents);
+        Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalCalendarResult);
 
         lastFolderStates.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
     }
@@ -147,6 +149,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         Event e = new Event();
         e.setUid("available");
         externalEvents.add(e);
+        externalCalendarResult.addEvents(externalEvents);
 
         executor.cache(warnings);
 
@@ -165,7 +168,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         executor.cache(warnings);
 
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
-        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
+        Mockito.verify(handler, Mockito.never()).persist(Matchers.anyString(), Matchers.any());
     }
 
 }

@@ -68,6 +68,9 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -238,7 +241,7 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public List<Event> getExternalEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
         return getAndPrepareExtEvents(folderId);
     }
 

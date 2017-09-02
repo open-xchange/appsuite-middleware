@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.ical.osgi;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import static org.slf4j.LoggerFactory.getLogger;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.ical.ICalCalendarProvider;
+import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link ICalCalendarProviderActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    /**
+     * Initializes a new {@link ICalCalendarProviderActivator}.
+     */
+    public ICalCalendarProviderActivator() {
+        super();
     }
 
     @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    protected void startBundle() throws Exception {
+        try {
+            getLogger(ICalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
+
+            Services.setServiceLookup(this);
+
+            registerService(CalendarProvider.class, new ICalCalendarProvider());
+        } catch (Exception e) {
+            getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
+            throw e;
+        }
     }
 
     @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
+    protected void stopBundle() throws Exception {
+        getLogger(ICalCalendarProviderActivator.class).info("stopping bundle {}", context.getBundle());
+
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
-    }
 }

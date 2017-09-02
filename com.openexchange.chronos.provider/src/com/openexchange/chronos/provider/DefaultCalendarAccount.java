@@ -49,8 +49,14 @@
 
 package com.openexchange.chronos.provider;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openexchange.auth.info.AuthInfo;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultCalendarAccount}
@@ -68,6 +74,7 @@ public class DefaultCalendarAccount implements CalendarAccount {
     private final int userId;
     private final Date lastModified;
     private final Map<String, Object> configuration;
+    private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
 
     /**
      * Initializes a new {@link DefaultCalendarAccount}.
@@ -110,5 +117,14 @@ public class DefaultCalendarAccount implements CalendarAccount {
     @Override
     public Date getLastModified() {
         return lastModified;
+    }
+
+    @Override
+    public AuthInfo getAuthInfo() throws OXException {
+        try {
+            return mapper.readValue((String) configuration.get("auth"), AuthInfo.class);
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        }
     }
 }

@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -73,7 +74,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarAccountStorageFactory.class };
+        return new Class<?>[] { CalendarAccountStorageFactory.class, OAuthService.class };
     }
 
     @Override
@@ -85,7 +86,10 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle {}", context.getBundle());
+            Services.setServiceLookup(this);
             registerService(CalendarAccountService.class, new com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl(this));
+
+            openTrackers();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -95,6 +99,8 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
+        Services.setServiceLookup(null);
+
         super.stopBundle();
     }
 

@@ -53,6 +53,8 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import com.openexchange.auth.info.AuthInfo;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarAccount}
@@ -60,7 +62,7 @@ import java.util.Map;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarAccount extends Serializable{
+public interface CalendarAccount extends Serializable {
 
     /** The default <i>internal</i> calendar provider account */
     static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
@@ -99,4 +101,12 @@ public interface CalendarAccount extends Serializable{
      * @return The last modification timestamp
      */
     Date getLastModified();
+
+    /**
+     * Returns the authentication information for the calendar account.
+     * 
+     * @return {@link AuthInfo} with authentication information
+     * @throws OXException
+     */
+    AuthInfo getAuthInfo() throws OXException;
 }

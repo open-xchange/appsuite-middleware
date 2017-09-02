@@ -55,7 +55,9 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
 import com.openexchange.chronos.service.EventUpdates;
@@ -94,35 +96,40 @@ public class CachingExecutor {
             String calendarFolderId = folderUpdateState.getFolderId();
 
             try {
-                List<Event> externalEvents = cachingHandler.getExternalEvents(calendarFolderId);
-                List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
+                ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents(calendarFolderId);
+                if (!externalCalendarResult.isUpToDate()) {
+                    List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
+                    List<Event> externalEvents = externalCalendarResult.getEvents();
 
-                EventUpdates diff = null;
-                boolean containsUID = containsUid(externalEvents);
-                if (containsUID) {
-                    diff = generateEventDiff(existingEvents, externalEvents);
-                } else {
-                    //FIXME generate reproducible UID for upcoming refreshes
-                    diff = new EmptyUidUpdates(existingEvents, externalEvents);
-                }
+                    EventUpdates diff = null;
+                    boolean containsUID = containsUid(externalEvents);
+                    if (containsUID) {
+                        diff = generateEventDiff(existingEvents, externalEvents);
+                    } else {
+                        //FIXME generate reproducible UID for upcoming refreshes
+                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
+                    }
 
-                if (!diff.isEmpty()) {
-                    cachingHandler.persist(calendarFolderId, diff);
+                    if (!diff.isEmpty()) {
+                        cachingHandler.persist(calendarFolderId, diff);
+                    }
                 }
                 cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis());
             } catch (OXException e) {
                 LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
                 warnings.add(e);
 
-                handleInternally(cachingHandler, calendarFolderId);
+                handleInternally(cachingHandler, calendarFolderId, e);
                 this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
             }
         }
         return resultCollector;
     }
 
-    private void handleInternally(CachingHandler cachingHandler, String calendarFolderId) {
-        //FIXME this handling might be dependent on the occurring error
+    private void handleInternally(CachingHandler cachingHandler, String calendarFolderId, OXException e) {
+        if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
+            return;
+        }
         long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getExternalRequestTimeout());
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
         cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);

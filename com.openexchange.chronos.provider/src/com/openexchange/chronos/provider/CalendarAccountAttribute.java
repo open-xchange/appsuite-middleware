@@ -47,44 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
-
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos.provider;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link CalendarAccountAttribute}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public enum CalendarAccountAttribute {
+    ID_LITERAL("id"),
+    PROVIDER_LITERAL("provider"),
+    LOGIN_LITERAL("login"),
+    PASSWORD_LITERAL("password"),
+    OAUTH_ACCOUNT_ID_LITERAL("oauthAccountId"),
+    TOKEN_LITERAL("token"), // for instance schedjoules
+    ;
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    private final String attrName;
+
+    private CalendarAccountAttribute(String name) {
+        attrName = name;
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    /**
+     * Gets the attribute name.
+     *
+     * @return The name
+     */
+    public String getName() {
+        return attrName;
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
-    }
-
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
-    }
-
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
-    }
 }

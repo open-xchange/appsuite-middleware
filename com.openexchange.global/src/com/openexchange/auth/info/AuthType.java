@@ -47,44 +47,88 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.auth.info;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import java.util.EnumSet;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.java.Strings;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link AuthType} - The authentication type.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public enum AuthType {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    /**
+     * No authentication required
+     */
+    NONE("none"),
+    /**
+     * The login authentication type.
+     */
+    LOGIN("login"),
+    /**
+     * Token authentication
+     */
+    TOKEN("token"),
+    /**
+     * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
+     */
+    OAUTH("XOAUTH2"),
+    /**
+     * The OAUTHBEARER authentication type; see <a href="https://tools.ietf.org/html/rfc7628">https://tools.ietf.org/html/rfc7628</a>.
+     */
+    OAUTHBEARER("OAUTHBEARER"),
+    ;
+
+    private final String name;
+
+    private AuthType(String name) {
+        this.name = name;
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    private static final Map<String, AuthType> MAP;
+    static {
+        ImmutableMap.Builder<String, AuthType> builder = ImmutableMap.builder();
+        for (AuthType authType : AuthType.values()) {
+            builder.put(Strings.asciiLowerCase(authType.name), authType);
+        }
+        MAP = builder.build();
     }
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
+    /**
+     * Parses specified string into an AuthType.
+     *
+     * @param authTypeStr The string to parse to an AuthType
+     * @return An appropriate AuthType or <code>null</code> if string could not be parsed to an AuthType
+     */
+    public static final AuthType parse(final String authTypeStr) {
+        return null == authTypeStr ? null : MAP.get(Strings.asciiLowerCase(authTypeStr));
     }
 
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    private static final EnumSet<AuthType> OAUTH_TYPES = EnumSet.of(AuthType.OAUTH, AuthType.OAUTHBEARER);
+
+    /**
+     * Checks if given auth type is one of known OAuth-based types; either XOAUTH2 or OAUTHBEARER.
+     *
+     * @param authType The auth type to check
+     * @return <code>true</code> auth type is one of known OAuth-based types; otherwise <code>false</code>
+     */
+    public static boolean isOAuthType(AuthType authType) {
+        return null != authType && OAUTH_TYPES.contains(authType);
     }
+
 }

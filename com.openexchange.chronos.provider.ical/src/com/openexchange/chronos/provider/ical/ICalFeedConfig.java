@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,71 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.ical;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
+import java.util.Map;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link ICalFeedConfig}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class ICalFeedConfig {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    public static final String ETAG = "etag";
+
+    private final String feedUrl;
+    private long allowedMaxSize;
+    private final String etag;
+    private final long lastUpdated;
+
+    private ICalFeedConfig(String feedUrl, String etag, long lastUpdated) {
+        super();
+        this.feedUrl = feedUrl;
+        this.etag = etag;
+        this.lastUpdated = lastUpdated;
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    public String getFeedUrl() {
+        return feedUrl;
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    public long getAllowedMaxSize() {
+        return allowedMaxSize;
     }
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
+    public void setAllowedMaxSize(long allowedMaxSize) {
+        this.allowedMaxSize = allowedMaxSize;
     }
 
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    public String getEtag() {
+        return etag;
+    }
+
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public static class Builder {
+
+        private final String feedUrl;
+        private final String etag;
+        private final long lastUpdated;
+
+        Builder(CalendarAccount account, Map<String, Object> folderConfig) {
+            Map<String, Object> configuration = account.getConfiguration();
+            feedUrl = (String) configuration.get("uri");
+            etag = (String) folderConfig.get(ETAG);
+            Number lLastUpdated = (Number) folderConfig.get(CachingCalendarAccess.LAST_UPDATE);
+            lastUpdated = lLastUpdated == null ? -1 : lLastUpdated.longValue();
+        }
+
+        public ICalFeedConfig build() {
+            return new ICalFeedConfig(feedUrl, etag, lastUpdated);
+        }
     }
 }

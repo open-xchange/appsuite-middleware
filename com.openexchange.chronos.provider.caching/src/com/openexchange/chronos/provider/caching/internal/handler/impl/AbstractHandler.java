@@ -65,6 +65,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
@@ -127,11 +128,12 @@ public abstract class AbstractHandler implements CachingHandler {
         }
     }
 
-    protected List<Event> getAndPrepareExtEvents(String folderId) throws OXException {
-        List<Event> extEventsInFolder = this.cachedCalendarAccess.getEvents(folderId);
+    protected ExternalCalendarResult getAndPrepareExtEvents(String folderId) throws OXException {
+        ExternalCalendarResult externalCalendarResult = this.cachedCalendarAccess.getEvents(folderId);
+        List<Event> extEventsInFolder = externalCalendarResult.getEvents();
         HandlerHelper.setFolderId(extEventsInFolder, folderId);
 
-        return extEventsInFolder;
+        return externalCalendarResult;
     }
 
     protected void create(String folderId, TruncationAwareCalendarStorage calendarStorage, List<Event> externalEvents) throws OXException {

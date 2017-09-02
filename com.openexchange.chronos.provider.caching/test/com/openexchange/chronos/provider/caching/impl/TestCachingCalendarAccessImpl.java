@@ -54,6 +54,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -132,9 +133,8 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
-    public List<Event> getEvents(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public ExternalCalendarResult getEvents(String folderId) throws OXException {
+        return new ExternalCalendarResult();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

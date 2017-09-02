@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,59 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.ical.result;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.StatusLine;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link HeadResult}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class HeadResult {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
+    private final StatusLine statusLine;
+    private final Header[] headers;
+
+    public HeadResult(StatusLine statusLine, Header[] headers) {
+        super();
+        this.statusLine = statusLine;
+        this.headers = headers;
     }
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+    public int getStatusCode() {
+        return statusLine.getStatusCode();
     }
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    public StatusLine getStatusLine() {
+        return statusLine;
     }
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
+    public String getETag() {
+        return getHeader(HttpHeaders.ETAG);
     }
 
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    public String getLastModified() {
+        return getHeader(HttpHeaders.LAST_MODIFIED);
     }
+
+    public String getDate() {
+        return getHeader(HttpHeaders.DATE);
+    }
+
+    private String getHeader(String name) {
+        if (null != headers && 0 < headers.length) {
+            for (Header header : headers) {
+                if (name.equalsIgnoreCase(header.getName())) {
+                    return header.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
 }

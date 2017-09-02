@@ -47,44 +47,33 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler.impl;
+package com.openexchange.chronos.provider.ical.exception;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * The {@link ReadOnlyHandler} will be used for searching persisted events.
+ * 
+ * {@link ICalProviderExceptionMessages}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ReadOnlyHandler extends AbstractHandler {
+public class ICalProviderExceptionMessages implements LocalizableStrings {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
-        super(cachedCalendarAccess);
-    }
+    public static final String MISSING_FEED_URI_MSG = "The feed URI is missing.";
 
-    @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
-    }
+    public static final String BAD_FEED_URI_MSG = "The feed URI does not match the standard.";
 
-    @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
-    }
+    public static final String FEED_URI_NOT_ALLOWED_MSG = "Cannot connect to feed with URL: %1$s. Please change URL and try again.";
 
-    @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
-        // do not persist anything
-    }
+    public static final String NO_FEED_MSG = "The provided URL %1$s does not contain an ICal feed. Please change URL and try again.";
 
-    @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
-        // nothing to update
+    public static final String FEED_SIZE_EXCEEDED_MSG = "Unfortunately your requested feed cannot be used due to size limitations.";
+
+    /**
+     * Initializes a new {@link ICalProviderExceptionMessages}.
+     */
+    private ICalProviderExceptionMessages() {
+        super();
     }
 }
