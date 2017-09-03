@@ -1142,35 +1142,35 @@ public final class MimeMessageUtility {
 
     private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         if (MessageUtility.isBig5(charset)) {
-            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue, true);
-            if (null == decodeWord) {
-                decodeWord = doDecodeEncodedWord("Big5-HKSCS", encoding, encodedValue, false);
+            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = doDecodeEncodedWord("Big5-HKSCS", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isGB2312(charset)) {
-            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue, true);
-            if (null == decodeWord) {
-                decodeWord = doDecodeEncodedWord("GB18030", encoding, encodedValue, false);
+            String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = doDecodeEncodedWord("GB18030", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isShiftJis(charset)) {
-            String decodeWord = doDecodeEncodedWord("MS932", encoding, encodedValue, true);
-            if (null == decodeWord) {
-                decodeWord = CP932EmojiMapping.getInstance().replaceIn(doDecodeEncodedWord("MS932", encoding, encodedValue, false));
+            String decodeWord = doDecodeEncodedWord("MS932", encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = CP932EmojiMapping.getInstance().replaceIn(doDecodeEncodedWord("MS932", encoding, encodedValue));
             }
             return decodeWord;
         } else if (MessageUtility.isISO2022JP(charset)) {
-            String decodeWord = doDecodeEncodedWord("ISO-2022-JP", encoding, encodedValue, true);
-            if (null == decodeWord) {
-                decodeWord = doDecodeEncodedWord("x-windows-iso2022jp", encoding, encodedValue, false);
+            String decodeWord = doDecodeEncodedWord("ISO-2022-JP", encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = doDecodeEncodedWord("x-windows-iso2022jp", encoding, encodedValue);
             }
             return decodeWord;
         } else {
-            return doDecodeEncodedWord(charset, encoding, encodedValue, false);
+            return doDecodeEncodedWord(charset, encoding, encodedValue);
         }
     }
 
-    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue, boolean tryDecode) throws ParseException, UnsupportedTransferEncodingException {
+    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         String charset = MimeUtility.javaCharset(charset2);
         if (encodedValue.length() <= 0) {
             return "";
@@ -1209,12 +1209,8 @@ public final class MimeMessageUtility {
 
         // Return decoded value
         try {
-            return tryDecode ? MessageUtility.tryDecode(bytes, 0, count, charset) : new String(bytes, 0, count, charset);
-        } catch (UnsupportedCharsetException uec) {
-            LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, uec);
-            String decoded = detectCharsetAndDecodeElseNull(bytes, count);
-            return null == decoded ? encodedValue : decoded;
-        } catch (UnsupportedEncodingException uec) {
+            return new String(bytes, 0, count, charset);
+        } catch (java.io.UnsupportedEncodingException uec) {
             LOG.debug("Unsupported character-encoding in encoded-word: {}", encodedValue, uec);
             String decoded = detectCharsetAndDecodeElseNull(bytes, count);
             return null == decoded ? encodedValue : decoded;
