@@ -78,8 +78,8 @@ public final class ChangeIPTest extends AbstractAJAXSession {
         final RefreshSecretResponse response2 = getClient().execute(request2);
         assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
         final OXException e = response2.getException();
-        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getPrefix(), e.getPrefix());
-        assertEquals("Wrong exception message.", Category.CATEGORY_PERMISSION_DENIED, e.getCategory());
-        assertEquals("Wrong exception message.", SessionExceptionCodes.WRONG_CLIENT_IP.getNumber(), e.getCode());
+        assertEquals("Wrong exception message.", SessionExceptionCodes.SESSION_EXPIRED.getPrefix(), e.getPrefix());
+        assertEquals("Wrong exception message.", Category.CATEGORY_TRY_AGAIN, e.getCategory());
+        assertEquals("Wrong exception message.", SessionExceptionCodes.SESSION_EXPIRED.getNumber(), e.getCode());
     }
 }

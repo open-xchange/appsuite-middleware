@@ -20,12 +20,15 @@ Such a listener the Open-Xchange Middleware ships with is a tracing listener, wh
 
 If ``com.openexchange.monitoring.sockets.enabled`` is set to ``true``, any logged message is enriched with the following properties per socket connection:
 
- - ``com.openexchange.monitoring.sockets.[{SOCKET}].{ID}.accumulatedWaitMillis``
- - ``com.openexchange.monitoring.sockets.[{SOCKET}].{ID}.status``
+ - ``com.openexchange.monitoring.sockets.{ID}.accumulatedWaitMillis``
+ - ``com.openexchange.monitoring.sockets.{ID}.host``
+ - ``com.openexchange.monitoring.sockets.{ID}.port``
+ - ``com.openexchange.monitoring.sockets.{ID}.status``
 
-{SOCKET} is replaced with socket's remote end-point and {ID} is replaced with socket's internal ID in Java stack (to differentiate between two sockets to the same end-point).
+{ID} is replaced with socket's internal unique ID (to differentiate between two sockets to the same end-point).
 
-``accumulatedWaitMillis`` is the accumulated amount of time in milliseconds the current thread spent waiting in total for reads from a certain socket. ``status`` signals in what status the last read attemt terminated (``OK``, ``TIMED_OUT``, ``CONNECT_ERROR``, ``READ_ERROR``, etc.)
+
+``host`` and ``port`` are self-explanatory. ``accumulatedWaitMillis`` is the accumulated amount of time in milliseconds the current thread spent waiting in total for reads from a certain socket. ``status`` signals in what status the last read attemt terminated (``OK``, ``TIMED_OUT``, ``CONNECT_ERROR``, ``READ_ERROR``, etc.)
 
 Example for a long-running IMAP operation (copying many mails from a GMail account to primary one):
 
@@ -39,10 +42,14 @@ Request with age 172,163ms (2m 52s 164ms) exceeds max. age of 5,000ms (5s). Requ
   com.openexchange.mail.host=mail.devel.open-xchange.com:143
   com.openexchange.mail.login=thorben
   com.openexchange.mail.session=a3065807aa10433cbc3f75425ee0c546-17-1337-2WvxFw94Qsk4
-  com.openexchange.monitoring.sockets.[imap.gmail.com:993].605310613.accumulatedWaitMillis=144725
-  com.openexchange.monitoring.sockets.[imap.gmail.com:993].605310613.status=OK
-  com.openexchange.monitoring.sockets.[mail.devel.open-xchange.com:143].1028946037.accumulatedWaitMillis=21214
-  com.openexchange.monitoring.sockets.[mail.devel.open-xchange.com:143].1028946037.status=OK
+  com.openexchange.monitoring.sockets.605310613.accumulatedWaitMillis=144725
+  com.openexchange.monitoring.sockets.605310613.host=imap.gmail.com
+  com.openexchange.monitoring.sockets.605310613.port=993
+  com.openexchange.monitoring.sockets.605310613.status=OK
+  com.openexchange.monitoring.sockets.1028946037.accumulatedWaitMillis=21214
+  com.openexchange.monitoring.sockets.1028946037.host=mail.devel.open-xchange.com
+  com.openexchange.monitoring.sockets.1028946037.port=143
+  com.openexchange.monitoring.sockets.1028946037.status=OK
   com.openexchange.request.trackingId=1599856545-799928348
   ...
 com.openexchange.http.requestwatcher.osgi.services.RequestTrace: tracked request

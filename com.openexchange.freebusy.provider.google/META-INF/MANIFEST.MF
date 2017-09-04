@@ -4,7 +4,7 @@ Bundle-Name: Free/Busy provider accessing the Google Calendar API
 Bundle-SymbolicName: com.openexchange.freebusy.provider.google
 Bundle-Version: 7.0.2
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,

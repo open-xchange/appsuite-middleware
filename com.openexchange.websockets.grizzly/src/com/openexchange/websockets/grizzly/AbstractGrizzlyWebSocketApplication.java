@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,6 +70,7 @@ import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.HttpResponsePacket;
 import org.glassfish.grizzly.http.Protocol;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
@@ -93,6 +95,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
 
@@ -184,6 +187,21 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         defaultAuthenticator = new DefaultGrizzlyWebSocketAuthenticator(hashSource, services, LOGGER);
     }
 
+    private void doSendSessionInvalidation(S sessionBoundSocket) {
+        try {
+            SendControl sendControl = SendUtility.sendMessage("session:invalid", sessionBoundSocket);
+            sendControl.awaitDone(100, TimeUnit.MILLISECONDS);
+        } catch (OXException e) {
+            // Ignore unconnected socket
+            LOGGER.debug("Web Socket not connected", e);
+        } catch (InterruptedException e) {
+            // Interrupted
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // Expected. Ignore.
+        }
+    }
+
     /**
      * Shuts-down this application.
      */
@@ -191,7 +209,9 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<ConcurrentMap<ConnectionId, S>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<S> iter = i.next().values().iterator(); iter.hasNext();) {
                 S sessionBoundSocket = iter.next();
-                sessionBoundSocket.send("session:invalid");
+
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 iter.remove();
             }
@@ -252,7 +272,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
             return false;
         }
 
-        sessionBoundSocket.send("session:invalid");
+        doSendSessionInvalidation(sessionBoundSocket);
+
         closeSocketSafe(sessionBoundSocket);
         LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
         return true;
@@ -276,7 +297,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                sessionBoundSocket.send("session:invalid");
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
@@ -304,7 +326,8 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
         for (Iterator<S> it = userSockets.values().iterator(); it.hasNext();) {
             S sessionBoundSocket = it.next();
             if (sessionId.equals(sessionBoundSocket.getSessionId())) {
-                sessionBoundSocket.send("session:invalid");
+                doSendSessionInvalidation(sessionBoundSocket);
+
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
                 LOGGER.debug("Closed Web Socket ({}) with path \"{}\" bound to dropped/removed session {} for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), sessionId, I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
@@ -386,23 +409,31 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     }
 
     /**
-     * Handles the specified <code>HandshakeException</code>.
+     * Handles the specified <code>HandshakeException</code>, which describes the error, occurred during the WebSocket handshake phase
      *
      * @param e The exception to handle
      * @param handler The associated protocol handler
      * @param requestPacket The request package
      */
     protected void handleHandshakeException(HandshakeException e, ProtocolHandler handler, HttpRequestPacket requestPacket) {
+        LOGGER.debug("Failed to establish Web Socket connection", e);
         FilterChainContext ctx = handler.getFilterChainContext();
         HttpResponsePacket response = requestPacket.getResponse();
         response.setProtocol(Protocol.HTTP_1_1);
-        response.setStatus(401);
-        response.setReasonPhrase("Authorization Required");
+
+        HttpStatus httpStatus = HttpStatus.getHttpStatus(e.getCode());
+        if (null == httpStatus) {
+            // No such HTTP status known...
+            httpStatus = HttpStatus.BAD_REQUEST_400;
+        }
+        response.setStatus(httpStatus.getStatusCode());
+        response.setReasonPhrase(httpStatus.getReasonPhrase());
+
         ctx.write(HttpContent.builder(response).build());
     }
 
     /**
-     * Handles the specified <code>HandshakeException</code>.
+     * Handles the specified <code>WebSocketException</code>.
      *
      * @param e The exception to handle
      * @param handler The associated protocol handler

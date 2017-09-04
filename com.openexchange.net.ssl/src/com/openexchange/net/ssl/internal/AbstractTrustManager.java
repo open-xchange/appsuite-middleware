@@ -291,12 +291,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, getHostFromSocket(socket)));
         }
 
-        /*
-         * The following check is disabled until 7.10. Instead we throw the originating CertificateException
-         */
         // Check if the user trusts it
-        //checkUserTrustsServer(user, context, chain, socket);
-        throw e;
+        checkUserTrustsServer(user, context, chain, socket);
     }
 
     /**

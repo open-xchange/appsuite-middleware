@@ -52,6 +52,7 @@ package com.openexchange.websockets.grizzly;
 import java.lang.reflect.UndeclaredThrowableException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.slf4j.Logger;
@@ -102,17 +103,17 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
         if (null == sessiond) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
             logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
-            throw new HandshakeException("Missing parameter Sessiond service.");
+            throw new SessionValidationHandshakeException("Missing Sessiond service.");
         }
 
         // Look-up appropriate session
         Session session = sessiond instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiond).getSession(sessionId, false) : sessiond.getSession(sessionId);
         if (null == session) {
-            throw new HandshakeException("No such session: " + sessionId);
+            throw new NoSuchSessionHandshakeException(sessionId);
         }
         if (!sessionId.equals(session.getSessionID())) {
             logger.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
-            throw new HandshakeException("Wrong session: " + sessionId);
+            throw new SessionValidationHandshakeException("Wrong session: " + sessionId);
         }
 
         // Check context
@@ -120,14 +121,14 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
         if (!context.isEnabled()) {
             sessiond.removeSession(sessionId);
             logger.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
-            throw new HandshakeException("Context locked: " + session.getContextId());
+            throw new HandshakeException(HttpStatus.FORBIDDEN_403.getStatusCode(), "Context locked: " + session.getContextId());
         }
 
         // Check user
         User user = getUserFrom(session, context, sessiond);
         if (!user.isMailEnabled()) {
             logger.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
-            throw new HandshakeException("Session expired: " + sessionId);
+            throw new SessionValidationHandshakeException("Session expired: " + sessionId);
         }
 
         // Check cookies/secret
@@ -135,20 +136,20 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
             Cookie[] cookies = request.getCookies();
             if (cookies == null) {
                 // No cookies available. Hence, no need to check secret.
-                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
 
             // Check secret...
             SessionUtility.checkSecret(hashSource, request, session);
         } catch (OXException e) {
-            throw new HandshakeException(e.getPlainLogMessage());
+            throw new SessionValidationHandshakeException(e.getPlainLogMessage());
         }
 
         // Check IP address
         try {
             SessionUtility.checkIP(session, request.getRemoteAddr());
         } catch (OXException e) {
-            throw new HandshakeException(e.getPlainLogMessage());
+            throw new SessionValidationHandshakeException(e.getPlainLogMessage());
         }
 
         // All fine...
@@ -159,7 +160,10 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
         try {
             return services.getService(ContextService.class).getContext(session.getContextId());
         } catch (OXException e) {
-            throw new HandshakeException("No such context: " + session.getContextId());
+            if (e.equalsCode(2, "CTX")) {
+                throw new HandshakeException(HttpStatus.FORBIDDEN_403.getStatusCode(), "No such context: " + session.getContextId());
+            }
+            throw new HandshakeException(HttpStatus.INTERNAL_SERVER_ERROR_500.getStatusCode(), e.getSoleMessage());
         }
     }
 
@@ -172,7 +176,7 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
                 logger.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                throw new HandshakeException("Session expired: " + sessionId);
+                throw new SessionValidationHandshakeException("Session expired: " + sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
                 int code = e.getCode();
@@ -180,10 +184,10 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
                     logger.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                    throw new HandshakeException("Session expired: " + sessionId);
+                    throw new SessionValidationHandshakeException("Session expired: " + sessionId);
                 }
             }
-            throw new WebSocketException(e);
+            throw new HandshakeException(HttpStatus.INTERNAL_SERVER_ERROR_500.getStatusCode(), e.getSoleMessage());
         } catch (UndeclaredThrowableException e) {
             throw new WebSocketException(e);
         }

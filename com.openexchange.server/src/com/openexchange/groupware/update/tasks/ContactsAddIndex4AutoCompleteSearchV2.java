@@ -49,15 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -66,6 +63,7 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactsAddIndex4AutoCompleteSearchV2}
@@ -97,28 +95,31 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(ContactsAddIndex4AutoCompleteSearchV2.class);
         log.info("Performing update task {}", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean committed = false;
+
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
+
             createIndexIfNeeded(log, connection, new String[] { "cid", "field03" }, "givenname");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field02" }, "surname");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field01" }, "displayname");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field65" }, "email1");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field66" }, "email2");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field67" }, "email3");
+
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (false == committed) {
-                rollback(connection);
+            if (rollback) {
+                DBUtils.rollback(connection);
             }
-            autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            DBUtils.autocommit(connection);
         }
         log.info("{} successfully performed.", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
     }

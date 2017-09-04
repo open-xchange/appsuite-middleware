@@ -1237,7 +1237,7 @@ public class MimeMessageFiller {
         final List<String> cidList = MimeMessageUtility.getContentIDs(wellFormedHTMLContent);
         final StringBuilder tmp = new StringBuilder(32);
         NextImg: for (final String cid : cidList) {
-            final BodyPart relatedImageBodyPart;
+            final MimeBodyPart relatedImageBodyPart;
             final SourcedImage image = images.get(cid);
             if (null == image) {
                 /*
@@ -1252,9 +1252,13 @@ public class MimeMessageFiller {
                  */
                 relatedImageBodyPart = new MimeBodyPart();
                 relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
-                for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
-                    final Map.Entry<String, String> e = iter.next();
-                    relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+                tmp.setLength(0);
+                relatedImageBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+                for (Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
+                    Map.Entry<String, String> e = iter.next();
+                    if (false == MessageHeaders.HDR_CONTENT_ID.equalsIgnoreCase(e.getKey())) {
+                        relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+                    }
                 }
             } else {
                 final DataSource dataSource;
@@ -1727,7 +1731,7 @@ public class MimeMessageFiller {
                             }
                             for (int i = size; null == tmp && i-- > 0;) {
                                 MailPart part = mail.getEnclosedMailPart(i);
-                                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
+                                if ((part instanceof ComposedMailPart) && ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
                                     String contentId = part.getContentId();
                                     if (null != contentId && contentId.startsWith(prefix, 0)) {
                                         tmp = new ReferencedPartImageProvider(part);

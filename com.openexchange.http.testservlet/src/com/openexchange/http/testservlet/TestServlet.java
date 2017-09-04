@@ -79,13 +79,6 @@ public class TestServlet extends HttpServlet {
         super();
     }
 
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -201,7 +194,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        
+
         page.append("</p><p>The content: ").append(StringEscapeUtils.escapeHtml4(saneScriptTags(this.getBody(req))));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");

@@ -55,8 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,12 +82,12 @@ public class DriveEventSubscriptionsMakeUuidPrimaryTask extends UpdateTaskAdapte
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = SubscribeServiceLookup.getService(DatabaseService.class, true);
-        Connection connection = dbService.getForUpdateTask(contextID);
-        boolean committed = false;
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
+
             if (false == Tools.columnExists(connection, "driveEventSubscriptions", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid", "driveEventSubscriptions");
             }
@@ -100,21 +98,18 @@ public class DriveEventSubscriptionsMakeUuidPrimaryTask extends UpdateTaskAdapte
             Tools.modifyColumns(connection, "driveEventSubscriptions", new Column("uuid", "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(connection, "driveEventSubscriptions", new String[] { "cid", "uuid" });
             Tools.createIndex(connection, "driveEventSubscriptions", new String[] { "cid", "service", "token" });
+
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            if (committed) {
-                dbService.backForUpdateTask(contextID, connection);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            if (rollback) {
+                rollback(connection);
             }
+            autocommit(connection);
         }
     }
 

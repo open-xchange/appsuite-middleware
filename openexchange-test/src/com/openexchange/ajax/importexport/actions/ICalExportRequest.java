@@ -53,14 +53,17 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
+import com.openexchange.java.Strings;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ICalExportRequest extends AbstractExportRequest<ICalExportResponse> {
+public class ICalExportRequest extends AbstractExportRequest<ICalExportResponse> {
 
     private final int type;
+    private final String body;
 
     public ICalExportRequest(final int folderId) {
         this(folderId, -1);
@@ -68,19 +71,27 @@ public final class ICalExportRequest extends AbstractExportRequest<ICalExportRes
     
     public ICalExportRequest(final int folderId, final int type) {
         super(Action.ICal, folderId);
-        this.type = type;
-        
+        this.type = type;     
+        this.body = "";
+    }            
+    
+    public ICalExportRequest(final int folderId, final int type, String body) {
+        super(Action.ICal, folderId);
+        this.type = type;   
+        this.body = body;
     }
     
     @Override
     public Parameter[] getParameters() {
         com.openexchange.ajax.framework.AJAXRequest.Parameter[] parameters = super.getParameters();
         if (type != -1) {
-            List<com.openexchange.ajax.framework.AJAXRequest.Parameter> arrayList = new ArrayList<Parameter>(parameters.length);
-            for (Parameter param : parameters) {
-                arrayList.add(param);
-            }
-            arrayList.add(new Parameter(AJAXServlet.PARAMETER_TYPE, this.type));
+            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_TYPE, this.type), parameters);
+        }
+        if (this.getFolderId() < 0) {
+            parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);
+        }
+        if (!Strings.isEmpty(body)) {
+            parameters = parametersToAdd(new Parameter("body", body), parameters);
         }
         return parameters;
     }
@@ -88,5 +99,23 @@ public final class ICalExportRequest extends AbstractExportRequest<ICalExportRes
     @Override
     public ICalExportParser getParser() {
         return new ICalExportParser(true);
+    }
+    
+    private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToAdd(Parameter parameter, Parameter[] parameters) {
+        Parameter[] newParameters = new Parameter[parameters.length + 1];
+        System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
+        newParameters[newParameters.length - 1] = parameter;
+        return newParameters;
+    }
+    
+    private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToRemove(String parameter, Parameter[] parameters) {
+        List<Parameter> list = Arrays.asList(parameters);
+        List<Parameter> newList = new ArrayList<Parameter>();
+        for(Parameter param : list){
+            if(!param.getName().equals(parameter)){
+                newList.add(param);
+            }
+        }
+        return newList.toArray(new Parameter[newList.size()]);
     }
 }

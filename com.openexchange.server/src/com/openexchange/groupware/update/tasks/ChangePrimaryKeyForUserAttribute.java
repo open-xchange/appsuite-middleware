@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
@@ -100,17 +98,12 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        // Get required service
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
         // Initialize connection
-        int contextId = params.getContextId();
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
 
         // Start task processing
         boolean restoreAutocommit = false;
         boolean rollback = false;
-        boolean modified = false;
         try {
             if (Tools.existsPrimaryKey(con, "user_attribute", new String[] {"cid", "id", "name"})) {
                 // PRIMARY KEY already changed
@@ -122,7 +115,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             rollback = true;
 
             doPerform(con);
-            modified = true;
 
             con.commit();
             rollback = false;
@@ -136,11 +128,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
             if (restoreAutocommit) {
                 autocommit(con);
-            }
-            if (modified) {
-                dbService.backForUpdateTask(contextId, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, con);
             }
         }
     }
@@ -272,7 +259,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         List<Value> values = dupValues.values;
         if (1 == dupValues.numOfDifferentValues()) {
             // All duplicate entries have the same value
-            deleteAllButOne(duplicate, values, con);
+            deleteAllExceptLast(duplicate, values, con);
         } else {
             // Keep highest
             keepHighestValue(duplicate, values, con);
@@ -280,40 +267,32 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
     }
 
     private void keepHighestValue(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
-        List<String> vals = new ArrayList<>(values.size());
-        for (Value value : values) {
-            vals.add(value.value);
-        }
-        Collections.sort(vals);
-        String highest = vals.get(vals.size() - 1);
+        // Sort values
+        Collections.sort(values);
 
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value<>?");
-            int pos = 1;
-            stmt.setInt(pos++, duplicate.contextId);
-            stmt.setInt(pos++, duplicate.userId);
-            stmt.setString(pos++, duplicate.name);
-            stmt.setString(pos++, highest);
-            stmt.executeUpdate();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            stmt = null;
-        }
+        // Delete all, except last one
+        deleteAllExceptLast(duplicate, values, con);
     }
 
-    private void deleteAllButOne(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
+    private void deleteAllExceptLast(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
+        // Remove last element
+        values.remove(values.size() - 1);
+
+        // Delete rest
+        delete(duplicate, values, con);
+    }
+
+    private void delete(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(DBUtils.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size() - 1));
+            stmt = con.prepareStatement(DBUtils.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size()));
             int pos = 1;
             stmt.setInt(pos++, duplicate.contextId);
             stmt.setInt(pos++, duplicate.userId);
             stmt.setString(pos++, duplicate.name);
-            Iterator<Value> iter = values.iterator();
-            iter.next(); // pass by first
-            while (iter.hasNext()) {
-                stmt.setBytes(pos++, UUIDs.toByteArray(iter.next().uuid));
+            for (Iterator<Value> iter = values.iterator(); iter.hasNext();) {
+                Value valueToRemove = iter.next();
+                stmt.setBytes(pos++, UUIDs.toByteArray(valueToRemove.uuid));
             }
             stmt.executeUpdate();
         } finally {
@@ -448,7 +427,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         }
     }
 
-    private static class Value {
+    private static class Value implements Comparable<Value> {
 
         final String value;
         final UUID uuid;
@@ -457,6 +436,11 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             super();
             this.value = value;
             this.uuid = uuid;
+        }
+
+        @Override
+        public int compareTo(Value o) {
+            return this.value.compareTo(o.value);
         }
     }
 

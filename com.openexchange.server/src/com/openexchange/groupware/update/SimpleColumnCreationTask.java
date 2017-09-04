@@ -49,13 +49,10 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
@@ -71,13 +68,15 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con.setAutoCommit(false);
             if (columnExists(con)) {
                 return;
             }
+            con.setAutoCommit(false);
+            rollback = true;
+
             Statement stmt = null;
             try {
                 stmt = con.createStatement();
@@ -85,13 +84,16 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
     }
 

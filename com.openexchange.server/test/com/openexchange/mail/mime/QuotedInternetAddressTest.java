@@ -52,9 +52,6 @@ package com.openexchange.mail.mime;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
@@ -69,6 +66,12 @@ public class QuotedInternetAddressTest {
      */
     public QuotedInternetAddressTest() {
         super();
+    }
+    
+    @Test
+    public void testBug54879() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"atest\"@example.com");
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
     }
 
          @Test
@@ -168,4 +171,15 @@ public class QuotedInternetAddressTest {
         assertEquals("Unexpected personal", "Jochum, Christel; Sch\u00f6ndorf, Werner", addrs[1].getPersonal());
         assertEquals("Unexpected address", "boeser.recipient@example.com", addrs[1].getAddress());
     }
+
+         @Test
+         public void testProperToString() {
+             try {
+                QuotedInternetAddress adr = new QuotedInternetAddress("bar@foo.org", "Doe, Jane", "UTF-8");
+
+                assertEquals("Unexpected toString() representation", "\"Doe, Jane\" <bar@foo.org>", adr.toString());
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+         }
 }

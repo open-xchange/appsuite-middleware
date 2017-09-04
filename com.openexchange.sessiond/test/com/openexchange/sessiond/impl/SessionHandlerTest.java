@@ -264,7 +264,7 @@ public class SessionHandlerTest {
 
     private static SessionImpl addSession(final String... props) throws OXException {
         if (props == null) {
-            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null);
+            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, "default-user-agent");
         }
 
         return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, new SessionEnhancement() {
@@ -274,7 +274,7 @@ public class SessionHandlerTest {
                     session.setParameter(PROP_NAMES[i], props[i]);
                 }
             }
-        });
+        }, "default-user-agent");
     }
 
 }

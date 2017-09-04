@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -108,7 +109,7 @@ public abstract class AbstractQuotaAwareComposeContext extends AbstractComposeCo
 
     @Override
     protected void onPartAdd(MailPart part, ComposedMailPart info) throws OXException {
-        if (doAction) {
+        if (doAction && ComposedPartType.FILE == info.getType()) {
             long size = part.getSize();
             if (size <= 0) {
                 LOG.debug("Missing size: {}", Long.valueOf(size), new Throwable());

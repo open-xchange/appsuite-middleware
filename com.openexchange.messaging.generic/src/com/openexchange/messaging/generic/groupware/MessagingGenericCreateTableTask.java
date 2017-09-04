@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -108,8 +107,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        createTable("messagingAccount", getMessagingAccountTable(), contextId);
+        createTable("messagingAccount", getMessagingAccountTable(), params.getConnectionProvider().getConnection());
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MessagingGenericCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", MessagingGenericCreateTableTask.class.getSimpleName());
     }
@@ -124,40 +122,31 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         return new String[] { "messagingAccount" };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon;
-        try {
-            writeCon = ds.getWritable(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+    private void createTable(String tablename, String sqlCreate, Connection connection) throws OXException {
         PreparedStatement stmt = null;
         try {
-            if (tableExists(writeCon, tablename)) {
+            if (tableExists(connection, tablename)) {
                 return;
             }
-            stmt = writeCon.prepareStatement(sqlCreate);
+
+            stmt = connection.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
         }
     }
 
     private boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
             DBUtils.closeSQLStuff(rs);
         }
-        return retval;
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

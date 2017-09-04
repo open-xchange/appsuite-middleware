@@ -51,6 +51,7 @@ package com.openexchange.userfeedback;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,6 +81,17 @@ public interface FeedbackType {
      * @throws OXException
      */
     public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con) throws OXException;
+
+    /**
+     * Retrieves the requested feedbacks wrapped in an {@link ExportResultConverter}.
+     *
+     * @param metaDataList The feedback metadata to retrieve
+     * @param con A read connection to the global db
+     * @param configuration A read connection to the global db
+     * @return A list of feedback objects
+     * @throws OXException
+     */
+    public ExportResultConverter getFeedbacks(List<FeedbackMetaData> metaDataList, Connection con, Map<String, String> configuration) throws OXException;
 
     /**
      * Deletes multiple feedback entries

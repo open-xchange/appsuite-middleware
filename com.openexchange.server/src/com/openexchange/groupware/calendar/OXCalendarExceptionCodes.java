@@ -53,9 +53,9 @@ import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 
 /**
@@ -525,6 +525,10 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Sequence number is outdated.
      */
     OUTDATED_SEQUENCE(OXCalendarExceptionMessage.OUTDATED_SEQUENCE, OXCalendarExceptionMessage.OUTDATED_SEQUENCE, 111, Category.CATEGORY_USER_INPUT),
+    /**
+     * The calendar is currently under maintenance. Please try again later.
+     */
+    CALENDAR_MAINTENANCE(OXCalendarExceptionMessage.CALENDAR_MAINTENANCE_MSG, OXCalendarExceptionMessage.CALENDAR_MAINTENANCE_MSG, 112, Category.CATEGORY_SERVICE_DOWN),
 
     ;
 

@@ -199,7 +199,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         .append("END:VCALENDAR\r\n")
                     .toString();
                     String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
-                    List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                    List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
                     if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
                         throw protocolException(getUrl(), OXException.notFound(recurrenceID), HttpServletResponse.SC_NOT_FOUND);
                     }
@@ -690,7 +690,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             applyReminderProperties(appointment);
             applyPrivateComments(appointment);
             applyAttachments(appointment);
-            if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+            if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent()) && false == DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(getUserAgent())) {
                 appointment.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
             }
             changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
@@ -720,7 +720,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
                     applyAttachments(changeException);
                 }
-                if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent())) {
+                if (false == DAVUserAgent.EM_CLIENT.equals(getUserAgent()) && false == DAVUserAgent.EM_CLIENT_FOR_APPSUITE.equals(getUserAgent())) {
                     changeException.setProperty("com.openexchange.data.conversion.ical.useXMicrosoftCDOAllDayEvent", Boolean.FALSE);
                 }
                 icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
@@ -801,7 +801,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 body = Streams.newByteArrayInputStream(iCal);
             }
             return factory.getIcalParser().parseAppointments(
-                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
         } finally {
             Streams.close(body);
         }

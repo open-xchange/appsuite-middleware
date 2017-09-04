@@ -54,6 +54,7 @@ import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link MonitoringSocketFactory}
@@ -63,15 +64,37 @@ import java.net.SocketImplFactory;
  */
 public class MonitoringSocketFactory implements SocketImplFactory {
 
+    private static final AtomicBoolean ENABLED = new AtomicBoolean(false);
+
+    /**
+     * Checks if <code>MonitoringSocketFactory</code> is currently enabled.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean isEnabled() {
+        return ENABLED.get();
+    }
+
+    /**
+     * Checks if <code>MonitoringSocketFactory</code> is currently disabled.
+     *
+     * @return <code>true</code> if disabled; otherwise <code>false</code>
+     */
+    public static boolean isDisabled() {
+        return !ENABLED.get();
+    }
+
     /**
      * Initializes the monitoring socket factory.
      *
      * @throws IOException If initialization fails
      */
     public static void initMonitoringSocketFactory() throws IOException {
-        SocketImplFactory socketImplFactory = new MonitoringSocketFactory();
-        Socket.setSocketImplFactory(socketImplFactory);
-        // ServerSocket.setSocketFactory(socketImplFactory);
+        if (ENABLED.compareAndSet(false, true)) {
+            SocketImplFactory socketImplFactory = new MonitoringSocketFactory();
+            Socket.setSocketImplFactory(socketImplFactory);
+            // ServerSocket.setSocketFactory(socketImplFactory);
+        }
     }
 
     /**
@@ -80,24 +103,26 @@ public class MonitoringSocketFactory implements SocketImplFactory {
      * @throws IOException If stopping fails
      */
     public static void stopMonitoringSocketFactory() {
-        // Acquire field that references the socket factory
-        Field addressCacheField;
-        try {
-            addressCacheField = Socket.class.getDeclaredField("factory");
-            addressCacheField.setAccessible(true);
-        } catch (Exception e) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MonitoringSocketFactory.class);
-            logger.error("Failed to drop socket factory", e);
-            return;
-        }
-
-        // Set it to null while holding lock for Socket.class
-        synchronized (Socket.class) {
+        if (ENABLED.compareAndSet(true, false)) {
+            // Acquire field that references the socket factory
+            Field addressCacheField;
             try {
-                addressCacheField.set(null, null);
+                addressCacheField = Socket.class.getDeclaredField("factory");
+                addressCacheField.setAccessible(true);
             } catch (Exception e) {
                 org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MonitoringSocketFactory.class);
                 logger.error("Failed to drop socket factory", e);
+                return;
+            }
+
+            // Set it to null while holding lock for Socket.class
+            synchronized (Socket.class) {
+                try {
+                    addressCacheField.set(null, null);
+                } catch (Exception e) {
+                    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MonitoringSocketFactory.class);
+                    logger.error("Failed to drop socket factory", e);
+                }
             }
         }
     }

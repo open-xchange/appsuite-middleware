@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -1084,7 +1085,11 @@ public final class IMAPException extends OXException {
         /**
          * Update of folder %1$s failed. Owner is required to keep administrative rights.
          */
-        OWNER_MUST_BE_ADMIN("Update of folder %1$s failed. Owner is required to keep administrative rights.", Category.CATEGORY_USER_INPUT, 2059, IMAPExceptionMessages.OWNER_MUST_BE_ADMIN_MSG)
+        OWNER_MUST_BE_ADMIN("Update of folder %1$s failed. Owner is required to keep administrative rights.", Category.CATEGORY_USER_INPUT, 2059, IMAPExceptionMessages.OWNER_MUST_BE_ADMIN_MSG),
+        /**
+         * Unexpected error: %1$s
+         */
+        UNEXPECTED_ERROR("Unexpected error: %1$s", Category.CATEGORY_ERROR, 11, MESSAGE),
         ;
 
         private final String message;

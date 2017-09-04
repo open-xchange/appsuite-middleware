@@ -49,7 +49,7 @@
 
 package com.openexchange.database.provider;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -82,7 +82,7 @@ public class DatabaseServiceDBProvider implements DBProvider {
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if (con != null) {
-            databaseService.backReadOnly(ctx,con);
+            databaseService.backReadOnly(ctx, con);
         }
     }
 
@@ -97,7 +97,7 @@ public class DatabaseServiceDBProvider implements DBProvider {
             return;
         }
         autocommit(con);
-        databaseService.backWritable(ctx,con);
+        databaseService.backWritable(ctx, con);
     }
 
     @Override

@@ -51,6 +51,7 @@ package com.openexchange.startup;
 
 import java.util.Collection;
 import java.util.Collections;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ThreadControlService} - The thread control to register interruptable threads on shut-down.
@@ -58,6 +59,7 @@ import java.util.Collections;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface ThreadControlService {
 
     /**

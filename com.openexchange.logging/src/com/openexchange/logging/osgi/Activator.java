@@ -65,6 +65,8 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.logging.LogLevelService;
+import com.openexchange.logging.filter.MDCEnablerTurboFilter;
+import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
@@ -137,7 +139,11 @@ public class Activator implements BundleActivator, Reloadable {
         installJulLevelChangePropagator(loggerContext);
 
         // The ranking-aware turbo filter list - itself acting as a turbo filter
-        initialiseRankingAwareTurboFilterList(loggerContext);
+        RankingAwareTurboFilterList rankingAwareTurboFilterList = initialiseRankingAwareTurboFilterList(loggerContext);
+
+        // Add static turbo filters
+        rankingAwareTurboFilterList.addTurboFilter(new MDCEnablerTurboFilter());
+        rankingAwareTurboFilterList.addTurboFilter(new ParamsCheckingTurboFilter());
 
         // Register services
         final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
@@ -256,10 +262,11 @@ public class Activator implements BundleActivator, Reloadable {
      *
      * @param loggerContext The {@link LoggerContext}
      */
-    private void initialiseRankingAwareTurboFilterList(LoggerContext loggerContext) {
+    private RankingAwareTurboFilterList initialiseRankingAwareTurboFilterList(LoggerContext loggerContext) {
         final RankingAwareTurboFilterList rankingAwareTurboFilterList = new RankingAwareTurboFilterList();
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
         loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+        return rankingAwareTurboFilterList;
     }
 
     /**

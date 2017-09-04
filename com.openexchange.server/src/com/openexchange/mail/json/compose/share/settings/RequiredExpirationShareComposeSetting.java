@@ -75,7 +75,7 @@ public class RequiredExpirationShareComposeSetting extends AbstractShareComposeS
 
     @Override
     protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.requiredExpiration", false, session));
+        return Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_REQUIRED_EXPIRATION, false, session));
     }
 
 }

@@ -146,4 +146,12 @@ public interface ContextService {
      */
     List<Integer> getAllContextIds() throws OXException;
 
+    /**
+     * Gets a listing of exactly one context per database schema
+     *
+     * @return A listing of distinct contexts per schema
+     * @throws OXException If contexts cannot be returned
+     */
+    List<Integer> getDistinctContextsPerSchema() throws OXException;
+
 }

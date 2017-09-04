@@ -1,0 +1,12 @@
+requests:
+  - LoginRequest.yaml
+  - FormLoginRequest.yaml
+  - TokenLoginRequest.yaml
+  - TokensRequest.yaml
+  - LogoutRequest.yaml
+  - RefreshSecretRequest.yaml
+  - StoreRequest.yaml
+  - RedirectRequest.yaml
+  - ChangeIPRequest.yaml
+  - RedeemTokenRequest.yaml
+  - AutoLoginRequest.yaml

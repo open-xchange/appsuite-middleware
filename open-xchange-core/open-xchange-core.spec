@@ -3,7 +3,6 @@
 
 Name:          open-xchange-core
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -11,14 +10,10 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 3
@@ -32,7 +27,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
-Requires:      open-xchange-system
+Requires(pre): open-xchange-system
 Provides:      open-xchange-cache = %{version}
 Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
@@ -188,7 +183,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -Dant.java.version.override=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
@@ -1579,6 +1574,16 @@ do
   ox_remove_property ${property} ${pfile}
 done
 
+# SoftwareChange_Request-4249
+set -e
+TMPFILE=$(mktemp)
+/opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
+if [ -e $TMPFILE ]; then
+  cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+  rm -f $TMPFILE
+fi
+set +e
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1599,7 +1604,10 @@ exit 0
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
-%dir /opt/open-xchange/etc/
+%dir /opt/open-xchange/etc
+%dir /opt/open-xchange/etc/contextSets
+%dir /opt/open-xchange/etc/meta
+%dir /opt/open-xchange/etc/settings
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
@@ -1614,6 +1622,7 @@ exit 0
 %dir /opt/open-xchange/etc/hazelcast/
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
+%dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples

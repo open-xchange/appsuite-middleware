@@ -1075,6 +1075,9 @@ public final class MimeMessageUtility {
                                 }
                                 doEncode = false;
                             }
+                        } else if (prev!=null){
+                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
+                            prev=null;
                         }
                     } else {
                         if (null != prev) {
@@ -1140,20 +1143,26 @@ public final class MimeMessageUtility {
     private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         if (MessageUtility.isBig5(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = doDecodeEncodedWord("Big5-HKSCS", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isGB2312(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = doDecodeEncodedWord("GB18030", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isShiftJis(charset)) {
             String decodeWord = doDecodeEncodedWord("MS932", encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = CP932EmojiMapping.getInstance().replaceIn(doDecodeEncodedWord("MS932", encoding, encodedValue));
+            }
+            return decodeWord;
+        } else if (MessageUtility.isISO2022JP(charset)) {
+            String decodeWord = doDecodeEncodedWord("ISO-2022-JP", encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = doDecodeEncodedWord("x-windows-iso2022jp", encoding, encodedValue);
             }
             return decodeWord;
         } else {
@@ -1356,11 +1365,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
+                    LOG.debug("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }

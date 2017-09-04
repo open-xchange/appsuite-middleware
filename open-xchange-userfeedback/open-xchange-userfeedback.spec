@@ -2,7 +2,6 @@
 
 Name:          open-xchange-userfeedback
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -10,10 +9,10 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-rest >= @OXVERSION@
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-BuildRequires: java-devel >= 1.7.0
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 3

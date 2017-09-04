@@ -58,6 +58,7 @@ import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -89,14 +90,14 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
-        Connection connection = get(assign, write, noTimeout);
         setSchemaLogProperty(assign.getSchema());
+        Connection connection = get(assign, write, noTimeout);
         return connection;
     }
 
     private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
-        Connection connection = monitor.checkActualAndFallback(pools, assign, noTimeout, write);
         setSchemaLogProperty(assign.getSchema());
+        Connection connection = monitor.checkActualAndFallback(pools, assign, noTimeout, write);
         return connection;
     }
 
@@ -192,8 +193,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public int[] listContexts(final int poolId) throws OXException {
-        return configDatabaseService.listContexts(poolId);
+    public int[] listContexts(int poolId, int offset, int length) throws OXException {
+        return configDatabaseService.listContexts(poolId, offset, length);
     }
 
     @Override
@@ -214,6 +215,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public String getSchemaName(int contextId) throws OXException {
         return configDatabaseService.getSchemaName(contextId);
+    }
+
+    @Override
+    public SchemaInfo getSchemaInfo(int contextId) throws OXException {
+        return configDatabaseService.getSchemaInfo(contextId);
     }
 
     @Override
@@ -360,6 +366,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection get(final int poolId, final String schema) throws OXException {
+        setSchemaLogProperty(schema);
         final Connection con;
         try {
             con = pools.getPool(poolId).get();
@@ -369,7 +376,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
-                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {
@@ -385,6 +391,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
+        setSchemaLogProperty(schema);
         final Connection con;
         try {
             con = pools.getPool(poolId).getWithoutTimeout();
@@ -394,7 +401,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
-                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {

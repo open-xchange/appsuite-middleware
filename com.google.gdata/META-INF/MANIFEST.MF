@@ -4,11 +4,10 @@ Bundle-Name: Google Data Java Client Library
 Bundle-SymbolicName: com.google.gdata
 Bundle-Version: 1.47.1
 Bundle-Vendor: Google Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.common.annotations,
  com.google.common.base,
- com.google.common.base.internal,
  com.google.common.cache,
  com.google.common.collect,
  com.google.common.escape,

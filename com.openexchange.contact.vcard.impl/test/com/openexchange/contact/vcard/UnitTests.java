@@ -77,6 +77,7 @@ import org.junit.runners.Suite;
     Bug15241Test.class,
     Bug18226Test.class,
     Bug21656Test.class,
+    Bug55090Test.class,
     Bug6823Test.class,
     Bug6962Test.class,
     Bug7106Test.class,

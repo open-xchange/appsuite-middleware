@@ -49,17 +49,29 @@
 
 package com.openexchange.importexport.json;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * Encapsulates a request for exporting data.
+ */
 public class ExportRequest {
+
+    private static final String PARAMETER_FOLDER_ID = "folder_id";
 
 	private ServerSession session;
 	private AJAXRequestData request;
@@ -67,57 +79,82 @@ public class ExportRequest {
 	private List<Integer> columns;
 	private Map<String, List<String>> batchIds;
 
-	public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
-		this.setSession(session);
-		this.setRequest(request);
+    /**
+     * Initializes a new {@link ExportRequest}.
+     *
+     * @param request The AJAX request
+     * @param session The associated session
+     * @throws OXException If initialization fails
+     */
+    public ExportRequest(AJAXRequestData request, ServerSession session) throws OXException {
+        super();
+        this.setSession(session);
+        this.setRequest(request);
 
-		String vcardStr = request.getParameter(AJAXServlet.PARAMETER_IDS);
-        if(vcardStr != null && vcardStr.length() > 0) {            
-            String[] split = vcardStr.split(",");
-            batchIds = new HashMap<String, List<String>>();
-            for(String s: split){
-                try {
-                    String[] nextSplit = s.split("\\.");
-                    String key = nextSplit[0];
-                    String valueEntry = nextSplit[1];
-                    if(!batchIds.containsKey(nextSplit[0])){
-                        List<String> valueList = new LinkedList<String>();
-                        valueList.add(valueEntry);
-                        batchIds.put(key, valueList);
-                    } else{
-                        List<String> list = batchIds.get(key);
-                        list.add(valueEntry);
-                        batchIds.put(key, list);
-                    }          
-                }catch (IndexOutOfBoundsException e){
-                    throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create();
-                }
+        Object data = request.getData();
+        if (data instanceof JSONArray) {
+            try {
+                batchIds = extractBatchArrayFromRequest((JSONArray) data);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e);
             }
         } else {
-            if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
-                throw ImportExportExceptionCodes.NEED_FOLDER.create();
+            String value = request.getParameter("body");
+            if (!Strings.isEmpty(value)) {
+                String ids = value;
+                try{
+                    batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
+                }
+            } else {
+                batchIds = null;
+                if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null) {
+                    throw ImportExportExceptionCodes.NEED_FOLDER.create();
+                }
             }
         }
-		
-		String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
-		if(colStr != null){
-			String[] split = colStr.split(",");
-			setColumns(new LinkedList<Integer>());
-			for(String s: split){
-				try {
-					getColumns().add(Integer.valueOf(s));
-				} catch (NumberFormatException e) {
-					throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(e, s);
-				}
-			}
-		}
-		this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-	}
-    
+
+        String colStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+        if (colStr != null) {
+            String[] split = Strings.splitByComma(colStr);
+            setColumns(new LinkedList<Integer>());
+            for (String s : split) {
+                try {
+                    getColumns().add(Integer.valueOf(s));
+                } catch (NumberFormatException e) {
+                    throw ImportExportExceptionCodes.IRREGULAR_COLUMN_ID.create(e, s);
+                }
+            }
+        }
+        this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+    }
+
+    private Map<String, List<String>> extractBatchArrayFromRequest(JSONArray jPairs) throws JSONException {
+        int length = jPairs.length();
+        if (length <= 0) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, List<String>> batchIds = new LinkedHashMap<String, List<String>>(length);
+        for (int i = 0; i < length; i++) {
+            JSONObject tuple = jPairs.getJSONObject(i);
+            String folderId = tuple.getString(PARAMETER_FOLDER_ID);
+            String objectId = tuple.getString(AJAXServlet.PARAMETER_ID);
+            List<String> valueList = batchIds.get(folderId);
+            if (null == valueList) {
+                valueList = new ArrayList<String>();
+                batchIds.put(folderId, valueList);
+            }
+            valueList.add(objectId);
+        }
+        return batchIds;
+    }
+
     public Map<String, List<String>> getBatchIds() {
         return batchIds;
     }
-    
+
     public void setBatchIds(Map<String, List<String>> batchIds) {
         this.batchIds = batchIds;
     }
@@ -153,9 +190,8 @@ public class ExportRequest {
 	public void setColumns(List<Integer> columns) {
 		this.columns = columns;
 	}
-	
+
 	public String getObjectId() {
-	    final String contactID = request.getParameter(AJAXServlet.PARAMETER_ID);
-	    return contactID;
+	    return request.getParameter(AJAXServlet.PARAMETER_ID);
 	}
 }

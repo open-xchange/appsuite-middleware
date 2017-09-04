@@ -17,7 +17,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Declipse.ignoreApp=true -Dosgi.noShutdown=true&#13;&#10;-Dopenexchange.propdir=${workspace_loc:/open-xchange-development/tmp}&#10;-server&#13;&#10;-Djava.awt.headless=true&#10;-Dosgi.compatibility.bootdelegation=false&#10;-Xmx512M&#10;-XX:MaxPermSize=256M&#10;-XX:+CMSClassUnloadingEnabled&#10;-XX:+UseConcMarkSweepGC&#10;-XX:+UseParNewGC&#10;-XX:CMSInitiatingOccupancyFraction=75&#10;-XX:+UseCMSInitiatingOccupancyOnly&#10;-XX:NewRatio=3&#10;-XX:+UseTLAB&#10;-XX:+DisableExplicitGC"/>

@@ -103,4 +103,6 @@ public class ConversionWarningMessage implements LocalizableStrings {
 
     public final static String NO_FOLDER_FOR_TASKS = "The conversion yields some objects which could not be stored due to missing folder for tasks.";
 
+    public static final String TRUNCATED_ITEMS = "The object could not be stored due to a configured limitation";
+
 }

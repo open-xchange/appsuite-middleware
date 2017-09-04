@@ -83,6 +83,17 @@ public interface FeedbackService {
     ExportResultConverter export(String ctxGroup, FeedbackFilter filter) throws OXException;
 
     /**
+     * Exports feedback data within an {@link ExportResultConverter}. The export data becomes generated/formatted based on the {@link ExportType} defined for {@link ExportResultConverter#get(ExportType)}
+     * 
+     * @param ctxGroup The context group to export for
+     * @param filter The filter (containing the type of report) to limit the results
+     * @param configuration The configuration that provides information about the export preparation
+     * @return {@link ExportResultConverter} wrapping the data
+     * @throws OXException if an export isn't possible due to errors
+     */
+    ExportResultConverter export(String ctxGroup, FeedbackFilter filter, Map<String, String> configuration) throws OXException;
+
+    /**
      * Delete feedback data
      * 
      * @param ctxGroup The context group

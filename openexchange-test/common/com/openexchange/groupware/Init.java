@@ -82,7 +82,7 @@ import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
 import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
-import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
+import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;

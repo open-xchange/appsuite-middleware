@@ -9,14 +9,10 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 3
@@ -63,8 +59,14 @@ if [ ${1:-0} -eq 2 ]; then
     ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" $PFILE
 
     # SoftwareChange_Request-3843
+    prefer_gssapi=$(ox_read_property com.openexchange.mail.filter.preferGSSAPI ${PFILE})
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
-    ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    if [ "${prefer_gssapi}" = "true" ]
+    then
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech GSSAPI $PFILE
+    else
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    fi
 
     # SoftwareChange_Request-3987
     OLDNAMES=( SIEVE_LOGIN_TYPE SIEVE_CREDSRC SIEVE_SERVER SIEVE_PORT SCRIPT_NAME SIEVE_AUTH_ENC NON_RFC_COMPLIANT_TLS_REGEX TLS VACATION_DOMAINS )

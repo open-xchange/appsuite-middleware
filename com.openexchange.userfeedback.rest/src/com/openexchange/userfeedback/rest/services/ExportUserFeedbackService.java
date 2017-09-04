@@ -49,6 +49,9 @@
 
 package com.openexchange.userfeedback.rest.services;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -60,6 +63,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
@@ -90,8 +94,12 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
     @GET
     @Path("/{context-group}/{type}")
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
-    public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup) {
-        Response response = export(start, end, type, contextGroup, ExportType.CSV);
+    public Response export(@QueryParam("start") final long start, @QueryParam("end") final long end, @PathParam("type") final String type, @PathParam("context-group") final String contextGroup, @QueryParam("delimiter") final String delimiter) {
+        Map<String, String> config = new HashMap<>();
+        if (Strings.isNotEmpty(delimiter)) {
+            config.put("delimiter", delimiter);
+        }
+        Response response = export(start, end, type, contextGroup, ExportType.CSV, config);
         return response;
     }
 
@@ -104,11 +112,15 @@ public class ExportUserFeedbackService extends AbstractUserFeedbackService {
     }
 
     private Response export(final long start, final long end, final String type, final String contextGroup, ExportType exportType) {
+        return export(start, end, type, contextGroup, exportType, Collections.<String, String> emptyMap());
+    }
+
+    private Response export(final long start, final long end, final String type, final String contextGroup, ExportType exportType, Map<String, String> configuration) {
         FeedbackService feedbackService = this.getService(FeedbackService.class);
 
         try {
             validateParams(start, end);
-            ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end));
+            ExportResultConverter converter = feedbackService.export(contextGroup, new DateOnlyFilter(type, start, end), configuration);
             ExportResult export = converter.get(exportType);
             ResponseBuilder builder = Response.ok(export.getResult(), new MediaType(exportType.getMediaType(), exportType.getMediaSubType()));
             builder.encoding("UTF-8");

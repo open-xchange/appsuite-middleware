@@ -4,7 +4,7 @@ Bundle-Name: Apache Felix EventAdmin
 Bundle-SymbolicName: org.apache.felix.eventadmin
 Bundle-Version: 1.4.2
 Bundle-Vendor: The Apache Software Foundation
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Description: This bundle provides an implementation of the OSGi R4 EventAdmin service
 Bundle-DocURL: http://www.apache.org/
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt

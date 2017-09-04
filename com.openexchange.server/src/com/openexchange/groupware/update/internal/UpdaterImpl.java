@@ -126,13 +126,17 @@ public class UpdaterImpl extends Updater {
             public Date backgroundUpdatesRunningSince() {
                 return schema.backgroundUpdatesRunningSince();
             }
+            @Override
+            public boolean isExecutedSuccessfully(String taskName) {
+                return schema.isExecutedSuccessfully(taskName);
+            }
         };
     }
 
     @Override
     public void unblock(String schemaName, int poolId, int contextId) throws OXException {
         SchemaUpdateState schema = SchemaStore.getInstance().getSchema(poolId, schemaName);
-        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
+        SchemaStore.getInstance().unlockSchema(schema, false);
     }
 
     @Override

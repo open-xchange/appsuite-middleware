@@ -55,26 +55,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements UndoableAction {
 
-	static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDBAction.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDBAction.class);
 
-	private DBProvider provider = null;
-	private Context context = null;
+    private DBProvider provider = null;
+    private Context context = null;
 
-	/**
-	 * Initializes a new {@link AbstractDBAction}.
-	 */
-	protected AbstractDBAction() {
-	    super();
-	}
+    /**
+     * Initializes a new {@link AbstractDBAction}.
+     */
+    protected AbstractDBAction() {
+        super();
+    }
 
     /**
      * Performs given update blocks.
@@ -116,82 +116,85 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
     }
 
     public void setContext(final Context context) {
-		this.context = context;
-	}
+        this.context = context;
+    }
 
-	public Context getContext(){
-		return this.context;
-	}
+    public Context getContext() {
+        return this.context;
+    }
 
-	public void setProvider(final DBProvider provider) {
-		this.provider = provider;
-	}
+    public void setProvider(final DBProvider provider) {
+        this.provider = provider;
+    }
 
-	public DBProvider getProvider() {
-		return provider;
-	}
+    public DBProvider getProvider() {
+        return provider;
+    }
 
-	protected interface UpdateBlock {
-		public int performUpdate(Connection writeCon) throws SQLException;
-		public String getStatement();
-		public void close();
-	}
+    protected interface UpdateBlock {
 
-	protected abstract class Update implements UpdateBlock{
+        public int performUpdate(Connection writeCon) throws SQLException;
 
-		protected PreparedStatement stmt;
-		protected ResultSet rs;
-		protected final String sql;
-		protected String statementString;
+        public String getStatement();
 
-		public Update(final String sql) {
-			this.sql = sql;
-		}
+        public void close();
+    }
 
-		@Override
+    protected abstract class Update implements UpdateBlock {
+
+        protected PreparedStatement stmt;
+        protected ResultSet rs;
+        protected final String sql;
+        protected String statementString;
+
+        public Update(final String sql) {
+            this.sql = sql;
+        }
+
+        @Override
         public void close() {
-			DBUtils.closeSQLStuff(rs, stmt);
-		}
+            Databases.closeSQLStuff(rs, stmt);
+        }
 
-		@Override
+        @Override
         public int performUpdate(final Connection writeCon) throws SQLException {
-			stmt = writeCon.prepareStatement(sql);
-			fillStatement();
-			LOG.trace("{}", stmt);
-			return stmt.executeUpdate();
-		}
+            stmt = writeCon.prepareStatement(sql);
+            fillStatement();
+            LOG.trace("{}", stmt);
+            return stmt.executeUpdate();
+        }
 
-		public abstract void fillStatement() throws SQLException;
+        public abstract void fillStatement() throws SQLException;
 
-		@Override
+        @Override
         public String getStatement() {
-			return statementString == null ? sql : statementString;
-		}
+            return statementString == null ? sql : statementString;
+        }
 
-	}
+    }
 
-	protected static class OXExceptionRenamed extends Exception {
+    protected static class OXExceptionRenamed extends Exception {
 
-		private static final long serialVersionUID = -3823990951502455901L;
-		private final UpdateBlock update;
-		private final SQLException sqle;
+        private static final long serialVersionUID = -3823990951502455901L;
+        private final UpdateBlock update;
+        private final SQLException sqle;
 
-		public OXExceptionRenamed(final SQLException sqle, final UpdateBlock update) {
-			super(sqle);
-			this.sqle = sqle;
-			this.update = update;
-		}
+        public OXExceptionRenamed(final SQLException sqle, final UpdateBlock update) {
+            super(sqle);
+            this.sqle = sqle;
+            this.update = update;
+        }
 
-		public SQLException getSQLException(){
-			return sqle;
-		}
+        public SQLException getSQLException() {
+            return sqle;
+        }
 
-		public UpdateBlock getUpdate(){
-			return update;
-		}
+        public UpdateBlock getUpdate() {
+            return update;
+        }
 
-		public String getStatement(){
-			return update.getStatement();
-		}
-	}
+        public String getStatement() {
+            return update.getStatement();
+        }
+    }
 }

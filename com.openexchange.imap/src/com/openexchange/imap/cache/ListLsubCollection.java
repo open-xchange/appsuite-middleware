@@ -597,6 +597,9 @@ final class ListLsubCollection implements Serializable {
             checkConsistency(imapStore);
         }
 
+        // Drop leftover single namespace folders
+        dropSingleNamespaceFolders();
+
         if (debug) {
             long dur = System.currentTimeMillis() - st;
             LOG.debug("LIST/LSUB cache built in {}msec", dur);
@@ -608,15 +611,40 @@ final class ListLsubCollection implements Serializable {
         deprecated.set(State.INITIALIZED);
     }
 
+    private void dropSingleNamespaceFolders() {
+        for (String sharedNamespace : shared) {
+            ListLsubEntryImpl lsubEntry = lsubMap.get(sharedNamespace);
+            if (null != lsubEntry && false == lsubEntry.hasChildren()) {
+                lsubMap.remove(sharedNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
+            }
+        }
+        for (String userNamespace : user) {
+            ListLsubEntryImpl lsubEntry = lsubMap.get(userNamespace);
+            if (null != lsubEntry && false == lsubEntry.hasChildren()) {
+                lsubMap.remove(userNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
+            }
+        }
+    }
+
     private void checkConsistency(final IMAPStore imapStore) {
         final ListLsubEntryImpl rootEntry = listMap.get(ROOT_FULL_NAME);
         /*
          * Ensure every LSUB'ed entry occurs in LIST'ed entries
          */
-        for (final Entry<String, ListLsubEntryImpl> entry : new TreeMap<String, ListLsubEntryImpl>(lsubMap).entrySet()) {
-            final String fullName = entry.getKey();
+        for (Map.Entry<String, ListLsubEntryImpl> entry : new TreeMap<String, ListLsubEntryImpl>(lsubMap).entrySet()) {
+            String fullName = entry.getKey();
             if (!listMap.containsKey(fullName)) {
-                /*
+                /*-
+                 * An LSUB entry is not contained in LISTed ones...
+                 *
                  * Distinguish between personal and other namespace
                  */
                 if (isNamespace(fullName)) {
@@ -628,14 +656,14 @@ final class ListLsubCollection implements Serializable {
                     } else {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                         final ListLsubEntryImpl lle = entry.getValue();
-                        dropEntryFrom(lle, listMap);
+                        dropEntryFrom(lle, lsubMap);
                     }
                 } else {
                     /*
                      * A personal full name: Drop LSUB'ed entries which do not occur in LIST'ed entries.
                      */
                     final ListLsubEntryImpl lle = entry.getValue();
-                    dropEntryFrom(lle, listMap);
+                    dropEntryFrom(lle, lsubMap);
                 }
             }
         }
@@ -824,11 +852,17 @@ final class ListLsubCollection implements Serializable {
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecualUse) throws ProtocolException {
+    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecialUse) throws ProtocolException {
         String command = "LIST";
-        String sCmd = new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
+        String sCmd = new StringBuilder(command).append(usingSpecialUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
         Response[] r = performCommand(protocol, sCmd);
         Response response = r[r.length - 1];
+        if (usingSpecialUse && response.isBAD()) {
+            // Retry w/o SPECIAL-USE
+            sCmd = "LIST \"\" \"*\"";
+            r = performCommand(protocol, sCmd);
+            response = r[r.length - 1];
+        }
         if (response.isOK()) {
             for (int i = 0, len = r.length - 1; i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
@@ -1159,7 +1193,7 @@ final class ListLsubCollection implements Serializable {
                     final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
                     if (null == oldEntry) {
                         listMap.put(ROOT_FULL_NAME, listLsubEntry);
-                        lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
+                        lsubMap.put(ROOT_FULL_NAME, new ListLsubEntryImpl(listLsubEntry, true));
                     } else {
                         oldEntry.clearChildren();
                         oldEntry.copyFrom(listLsubEntry);
@@ -2283,6 +2317,27 @@ final class ListLsubCollection implements Serializable {
                 return;
             }
             children.remove(child);
+        }
+
+        /**
+         * Removes specified LIST/LSUB entry from this LIST/LSUB entry's children
+         *
+         * @param childFullName The child full-name
+         */
+        protected void removeChildByFullName(final String childFullName) {
+            if (null == childFullName) {
+                return;
+            }
+            if (null == children) {
+                return;
+            }
+            for (Iterator<ListLsubEntryImpl> iter = children.iterator(); iter.hasNext(); ) {
+                ListLsubEntryImpl child = iter.next();
+                if (childFullName.equals(child.getFullName())) {
+                    iter.remove();
+                    return;
+                }
+            }
         }
 
         /**

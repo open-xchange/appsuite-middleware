@@ -9,14 +9,10 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 3
@@ -119,6 +115,12 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-3556
     ox_add_property com.openexchange.oauth.yahoo.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/yahoooauth.properties
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
+
+    # SoftwareChange_Request-4196
+    VALUE=$(ox_read_property com.openexchange.oauth.twitter /opt/open-xchange/etc/twitteroauth.properties)
+    if [ "true" == "$VALUE" ]; then
+        ox_set_property com.openexchange.oauth.twitter false /opt/open-xchange/etc/twitteroauth.properties
+    fi
 fi
 
 %clean

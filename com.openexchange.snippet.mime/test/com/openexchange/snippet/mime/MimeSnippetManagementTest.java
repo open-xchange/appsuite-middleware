@@ -171,8 +171,8 @@ public class MimeSnippetManagementTest {
     @Test
     public void testCreateSnippet_bug52100_ensureCreatedBySetToOriginUser() throws OXException, MessagingException, IOException {
         DefaultSnippet snippet = MimeSnippetManagement.createSnippet(identifier, creator, "Signature", "io.ox/mail", "signature", false, mimeMessage);
-        
+
         assertEquals(creator, snippet.getCreatedBy());
     }
-    
+
 }

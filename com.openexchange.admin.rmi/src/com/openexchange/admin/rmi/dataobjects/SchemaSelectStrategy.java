@@ -53,11 +53,11 @@ import java.io.Serializable;
 
 /**
  * Defines a strategy where to create contexts.
- * The default strategy should be automatic where the server decides on the current schema load, which willl be determined on every call.
+ * The default strategy should be automatic where the server decides on the current schema load, which will be determined on every call.
  * In memory just loads the schema load once and handles/updates the information in memory. This might be more error-prone, but is also more efficient.
  * If a schema is provided, the context will be created in this schema regardless of it's load.
  *
- * Only one strategy can be configured. Setting one strategy automaticalle disables the other strategies.
+ * Only one strategy can be configured. Setting one strategy automatically disables the other strategies.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
@@ -66,10 +66,12 @@ public class SchemaSelectStrategy implements Serializable {
 
     /** The strategy enumeration */
     public static enum Strategy {
-        SCHEMA, AUTOMATIC, IN_MEMORY;
+        SCHEMA, AUTOMATIC;
     }
 
     private static final long serialVersionUID = 2888117829864032432L;
+
+    private static final SchemaSelectStrategy AUTOMATIC_SELECT_STRATEGY = new SchemaSelectStrategy(Strategy.AUTOMATIC);
 
     /**
      * Creates a schema strategy for auto-determining schema name
@@ -77,16 +79,7 @@ public class SchemaSelectStrategy implements Serializable {
      * @return The appropriate schema strategy
      */
     public static SchemaSelectStrategy automatic() {
-        return new SchemaSelectStrategy(Strategy.AUTOMATIC);
-    }
-
-    /**
-     * Creates a schema strategy for fetching the schema name from in-memory cache.
-     *
-     * @return The appropriate schema strategy
-     */
-    public static SchemaSelectStrategy inMemory() {
-        return new SchemaSelectStrategy(Strategy.IN_MEMORY);
+        return AUTOMATIC_SELECT_STRATEGY;
     }
 
     /**

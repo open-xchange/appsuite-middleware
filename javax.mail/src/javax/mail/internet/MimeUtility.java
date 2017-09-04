@@ -45,6 +45,7 @@ import javax.mail.EncodingAware;
 import javax.activation.*;
 import java.util.*;
 import java.io.*;
+import java.nio.charset.Charset;
 import com.sun.mail.util.*;
 
 /**
@@ -926,7 +927,7 @@ public class MimeUtility {
 	    throw uex;
 	} catch (IOException ioex) {
 	    // Shouldn't happen.
-	    throw new ParseException(ioex.toString());
+	    throw new ParseException(ioex.toString(), ioex);
 	} catch (IllegalArgumentException iex) {
 	    /* An unknown charset of the form ISO-XXX-XXX, will cause
 	     * the JDK to throw an IllegalArgumentException ... Since the
@@ -1265,8 +1266,26 @@ public class MimeUtility {
 	return alias == null ? charset : alias;
     }
 
+    private static Charset defaultJavaCharsetInstance;
     private static String defaultJavaCharset;
     private static String defaultMIMECharset;
+
+    /**
+     * Get the default charset instance corresponding to the system's current 
+     * default locale.  If the System property <code>mail.mime.charset</code>
+     * is set, a system charset corresponding to this MIME charset will be
+     * returned. <p>
+     * 
+     * @return  the default charset instance of the system's default locale, 
+     *      as a Java charset. (NOT a MIME charset)
+     * @since   JavaMail 1.1
+     */
+    public static Charset getDefaultJavaCharsetInstance() {
+        if (defaultJavaCharsetInstance == null) {
+            defaultJavaCharsetInstance = Charset.forName(getDefaultJavaCharset());
+        }
+        return defaultJavaCharsetInstance;
+    }
 
     /**
      * Get the default charset corresponding to the system's current 

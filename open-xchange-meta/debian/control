@@ -3,7 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Carsten Hoeger <choeger@open-xchange.com>
 Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1)
-Standards-Version: 3.8.4
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-meta-oxucs

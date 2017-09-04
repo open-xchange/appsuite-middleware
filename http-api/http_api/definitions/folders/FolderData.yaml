@@ -6,21 +6,26 @@ properties:
   created_by:
     type: string
     description: User ID of the user who created this object.
+    readOnly: true
   modified_by:
     type: string
     description: User ID of the user who last modified this object.
+    readOnly: true
   creation_date:
     type: integer
     format: int64
     description: Date and time of creation.
+    readOnly: true
   last_modified:
     type: integer
     format: int64
     description: Date and time of the last modification.
+    readOnly: true
   last_modified_utc:
     type: integer
     format: int64
     description: Timestamp of the last modification. Note that the type is Timestamp, not Time.
+    readOnly: true
   folder_id:
     type: string
     description: Object ID of the parent folder.
@@ -36,6 +41,7 @@ properties:
   subfolders:
     type: boolean
     description: 'Set `true` if this folder has subfolders.'
+    readOnly: true
   own_rights:
     type: integer
     description: Permissions which apply to the current user, as described either in [Permission flags](#permission-flags) or in [RFC2086](http://tools.ietf.org/html/rfc2086).
@@ -52,18 +58,23 @@ properties:
   total:
     type: integer
     description: The number of objects in this Folder.
+    readOnly: true
   new:
     type: integer
     description: The number of new objects in this Folder.
+    readOnly: true
   unread:
     type: integer
     description: The number of unread objects in this Folder.
+    readOnly: true
   deleted:
     type: integer
     description: The number of deleted objects in this Folder.
+    readOnly: true
   capabilities:
     type: integer
     description: 'Bit mask containing information about mailing system capabilites.'
+    readOnly: true
     enum:
       - bit 0 (mailing system supports permissions)
       - bit 1 (mailing system supports ordering mails by their thread reference)
@@ -93,6 +104,7 @@ properties:
   supported_capabilities:
     type: array
     description: Can contain "permissions", "publication", "quota", "sort", "subscription".
+    readOnly: true
     items:
       type: string
   account_id:
@@ -101,12 +113,15 @@ properties:
   com.openexchange.publish.publicationFlag:
     type: boolean
     description: Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin.
+    readOnly: true
   com.openexchange.subscribe.subscriptionFlag:
     type: boolean
     description: Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin.
+    readOnly: true
   com.openexchange.folderstorage.displayName:
     type: string
     description: Provides the read only display name of the folder's owner.
+    readOnly: true
   com.openexchange.share.extendedPermissions:
     type: array
     items:

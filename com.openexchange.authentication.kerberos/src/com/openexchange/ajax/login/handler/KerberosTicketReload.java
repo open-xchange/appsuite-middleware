@@ -108,7 +108,12 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         try {
             doAuthHeaderTicketReload(req, resp);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (SessionExceptionCodes.hasPrefix(e)) {
+                // Is a session exception
+                LOG.debug(e.getMessage(), e);
+            } else {
+                LOG.error(e.getMessage(), e);
+            }
             notAuthorized(resp, e.getMessage());
         }
     }

@@ -1,0 +1,73 @@
+/userfeedback/v1/export/{context-group}/{type}:
+  get:
+    security:
+      - basicAuth: []
+    operationId: exportCSV
+    tags:
+      - Userfeedback
+    summary: Exports user feedback as CSV
+    produces:
+      - application/octet-stream
+    parameters:
+
+      - in: path
+        name: context-group
+        description: The context group identifying the global DB where the feedback is stored.
+        required: true
+        type: string
+        default: default
+
+      - in: path
+        name: type
+        description: The feedback type to send.
+        required: true
+        type: string
+        default: star-rating-v1
+
+      - name: start
+        in: query
+        description: Start time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.
+        required: false
+        type: integer
+        format: int64
+
+      - name: end
+        in: query
+        description: End time in milliseconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.
+        required: false
+        type: integer
+        format: int64
+
+      - name: delimiter
+        in: query
+        description: "The column delimiter used. Default: ';'"
+        required: false
+        type: string
+    responses:
+      200:
+        description: Export data into a CSV file
+        schema:
+          type: file
+        headers:
+          Content-type:
+            type: string
+            description: text/csv; charset=utf-8
+      400:
+        description: Bad request, response contains error message.
+        schema:
+          type: string
+      401:
+        description: Not authorized  
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
+
+    x-ox-examples:
+      Example:
+        description: Export user feedback from 2016-01-01 to 2016-12-31 as CSV
+        example: GET http://localhost:8009/userfeedback/v1/export/default/star-rating-v1?start=1451606400&end=1483228799

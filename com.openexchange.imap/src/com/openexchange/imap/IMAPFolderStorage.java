@@ -524,6 +524,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 {
                     // Detect if spam option is enabled
                     UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                    if (usm == null) {
+                        throw IMAPException.IMAPCode.UNEXPECTED_ERROR.create("Unable to load mail settings.");
+                    }
                     len = usm.isSpamOptionEnabled() ? 6 : 4;
                 }
                 for (int index = 0; index < len; index++) {
