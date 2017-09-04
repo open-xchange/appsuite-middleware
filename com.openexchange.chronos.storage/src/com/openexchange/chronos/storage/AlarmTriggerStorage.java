@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +57,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.exception.OXException;
 
 /**
@@ -112,14 +112,14 @@ public interface AlarmTriggerStorage {
     void deleteTriggers(List<String> eventIds, int userId) throws OXException;
 
     /**
-     * Lists all alarm triggers for the given user which will trigger within the given {@link RangeOption}
+     * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
      *
      * @param userId The user id
-     * @param option The {@link RangeOption}
+     * @param until The upper limit
      * @return A list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException;
+    List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException;
 
     /**
      * Recalculates the trigger time for floating events. E.g. to adapt to a timezone change of the user.

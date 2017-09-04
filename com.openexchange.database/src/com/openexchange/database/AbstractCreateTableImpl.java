@@ -116,7 +116,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         }
     }
 
-    private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? +\\(");
+    private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? *\\(");
     private static final Pattern PATTERN_CREATE_PROCEDURE = Pattern.compile("CREATE +PROCEDURE +`?(\\w+)`?");
 
     private static String extractTableName(final String create) {

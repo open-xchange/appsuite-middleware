@@ -66,8 +66,8 @@ abstract class AbstractAccountAction implements AJAXActionService {
     private ServiceLookup services;
 
     /**
-     * Initialises a new {@link AbstractAccountAction}.
-     * 
+     * Initializes a new {@link AbstractAccountAction}.
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public AbstractAccountAction(ServiceLookup services) {

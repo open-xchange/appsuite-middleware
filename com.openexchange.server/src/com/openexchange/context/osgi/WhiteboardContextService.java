@@ -104,6 +104,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return getDelegate().getDistinctContextsPerSchema();
+    }
+
+    @Override
     public void setAttribute(String name, String value, int contextId) throws OXException {
         getDelegate().setAttribute(name, value, contextId);
     }

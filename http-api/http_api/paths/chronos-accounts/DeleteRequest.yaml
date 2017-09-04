@@ -9,11 +9,6 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: providerId
-        type: string
-        description: Calendar provider identifier
-        required: true
-      - in: query
         name: timestamp
         type: integer
         format: int64

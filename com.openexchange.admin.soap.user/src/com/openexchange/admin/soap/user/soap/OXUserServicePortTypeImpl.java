@@ -56,8 +56,8 @@ import com.openexchange.tools.net.URIParser;
  */
 
 @javax.jws.WebService(serviceName = "OXUserService", portName = "OXUserServiceHttpsEndpoint", targetNamespace = "http://soap.admin.openexchange.com",
-// wsdlLocation = "null",
-endpointInterface = "com.openexchange.admin.soap.user.soap.OXUserServicePortType")
+    // wsdlLocation = "null",
+    endpointInterface = "com.openexchange.admin.soap.user.soap.OXUserServicePortType")
 public class OXUserServicePortTypeImpl implements OXUserServicePortType {
 
     public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<>();
@@ -761,11 +761,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void changeByModuleAccessName(final ChangeByModuleAccessName parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.changeModuleAccess(
-                soap2Context(parameters.ctx),
-                soap2User(parameters.user),
-                parameters.accessCombinationName,
-                soap2Credentials(parameters.auth));
+            userInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.accessCombinationName, soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -851,7 +847,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
     }
 
-
     @Override
     public void deleteMultiple(final DeleteMultiple parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
@@ -906,11 +901,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void changeByModuleAccess(final ChangeByModuleAccess parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.changeModuleAccess(
-                soap2Context(parameters.ctx),
-                soap2User(parameters.user),
-                soap2ModuleAccess(parameters.moduleAccess),
-                soap2Credentials(parameters.auth));
+            userInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2User(parameters.user), soap2ModuleAccess(parameters.moduleAccess), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -959,10 +950,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             for (int i = 0; i < users.length; i++) {
                 users[i] = soap2User(list.get(i));
             }
-            final com.openexchange.admin.rmi.dataobjects.User[] retUsers = userInterface.getData(
-                soap2Context(ctx),
-                users,
-                soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] retUsers = userInterface.getData(soap2Context(ctx), users, soap2Credentials(auth));
             if (null == retUsers) {
                 return Collections.emptyList();
             }
@@ -1110,12 +1098,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
 
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.list(
-                soap2Context(ctx),
-                com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
-                soap2Credentials(auth),
-                includeGuests,
-                excludeUsers);
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests, excludeUsers);
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -1163,10 +1146,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public java.util.List<User> listCaseInsensitive(final Context ctx, final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listCaseInsensitive(
-                soap2Context(ctx),
-                com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
-                soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -1214,11 +1194,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void changeModuleAccessGlobal(final ChangeModuleAccessGlobal parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.changeModuleAccessGlobal(
-                parameters.filter,
-                soap2ModuleAccess(parameters.addAccess),
-                soap2ModuleAccess(parameters.removeAccess),
-                soap2Credentials(parameters.auth));
+            userInterface.changeModuleAccessGlobal(parameters.filter, soap2ModuleAccess(parameters.addAccess), soap2ModuleAccess(parameters.removeAccess), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -1512,7 +1488,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setDefaultSenderAddress(tmp);
         }
-        
+
         tmp = soapUser.getDriveUserFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
@@ -1618,19 +1594,18 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                                {
+                                case 1: {
                                     final String schema = matcher.group(1);
                                     if (null != schema) {
                                         sb.append(schema);
                                     }
                                 }
-                                break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1819,19 +1794,18 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                            {
-                                final String schema = matcher.group(1);
-                                if (null != schema) {
-                                    sb.append(schema);
+                                case 1: {
+                                    final String schema = matcher.group(1);
+                                    if (null != schema) {
+                                        sb.append(schema);
+                                    }
                                 }
-                            }
-                            break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -2105,7 +2079,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setPrimaryAccountName(tmp);
         }
-        
+
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
             user.setConvertDriveUserFolders(bool_tmp);
@@ -2606,11 +2580,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             moduleAccess.setWebdav(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isWebdavXml();
-        if (tmp != null) {
-            moduleAccess.setWebdavXml(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isWebmail();
         if (tmp != null) {
             moduleAccess.setWebmail(booleanValue(tmp));
@@ -2651,7 +2620,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapModuleAccess.setUSM(Boolean.valueOf(moduleAccess.isUSM()));
         soapModuleAccess.setVcard(Boolean.valueOf(moduleAccess.getVcard()));
         soapModuleAccess.setWebdav(Boolean.valueOf(moduleAccess.getWebdav()));
-        soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }

@@ -51,10 +51,10 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import com.openexchange.ajax.appointment.AppointmentTools;
+import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.AppointmentTest;
-import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalExportTest extends AbstractICalTest {
 
@@ -69,7 +69,7 @@ public class ICalExportTest extends AbstractICalTest {
         appointmentObj.setShownAs(Appointment.RESERVED);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        
+
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
         final Appointment[] appointmentArray = exportAppointment(appointmentFolderId, null);
@@ -80,7 +80,7 @@ public class ICalExportTest extends AbstractICalTest {
                 found = true;
                 appointmentObj.setUntil(appointmentArray[a].getUntil());
                 appointmentArray[a].setParentFolderID(appointmentFolderId);
-                AppointmentTest.compareObject(appointmentObj, appointmentArray[a]);
+                AppointmentTools.compareObject(appointmentObj, appointmentArray[a]);
             }
         }
 
@@ -95,7 +95,7 @@ public class ICalExportTest extends AbstractICalTest {
         taskObj.setStartDate(startTime);
         taskObj.setEndDate(endTime);
         taskObj.setParentFolderID(taskFolderId);
-        
+
         final int objectId = ttm.insertTaskOnServer(taskObj).getObjectID();
         final Task[] taskArray = exportTask(timeZone, null);
         boolean found = false;
@@ -104,7 +104,7 @@ public class ICalExportTest extends AbstractICalTest {
                 found = true;
                 taskObj.setStartDate(taskArray[a].getStartDate());
                 taskArray[a].setParentFolderID(taskFolderId);
-                TaskTest.compareObject(taskObj, taskArray[a]);
+                TaskTools.compareObject(taskObj, taskArray[a]);
             }
         }
         assertTrue("task with id: " + objectId + " not found", found);

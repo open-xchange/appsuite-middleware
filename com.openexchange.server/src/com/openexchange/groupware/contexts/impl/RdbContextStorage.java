@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -347,6 +348,31 @@ public class RdbContextStorage extends ContextStorage {
             while (result.next()) {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
+            return retval;
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(con);
+        }
+    }
+
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        Connection con = DBPool.pickup();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT MIN(cid) FROM context_server2db_pool GROUP BY db_schema");
+            result = stmt.executeQuery();
+            if (false == result.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Integer> retval = new LinkedList<>();
+            do {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());

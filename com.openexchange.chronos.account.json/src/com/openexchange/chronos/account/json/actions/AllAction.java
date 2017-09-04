@@ -58,10 +58,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.chronos.account.json.CalendarAccountFields;
+import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -70,14 +72,16 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AllAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
+@OAuthAction(ChronosAccountActionFactory.OAUTH_READ_SCOPE)
 public class AllAction extends AbstractAccountAction implements CalendarAccountFields{
 
     /**
-     * Initialises a new {@link AllAction}.
+     * Initializes a new {@link AllAction}.
      *
-     * @param services
+     * @param services The service look-up
      */
     public AllAction(ServiceLookup services) {
         super(services);
@@ -87,7 +91,7 @@ public class AllAction extends AbstractAccountAction implements CalendarAccountF
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
         CalendarAccountService service = getService(CalendarAccountService.class);
-        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        List<CalendarAccount> accounts = new ArrayList<>();
         if (!Strings.isEmpty(providerId)) {
             accounts.addAll(service.getAccounts(session, providerId));
         } else {
@@ -97,11 +101,9 @@ public class AllAction extends AbstractAccountAction implements CalendarAccountF
         try {
             for (CalendarAccount account : accounts) {
                 JSONObject obj = new JSONObject();
-                obj.put(ID, JSONCoercion.coerceToJSON(account.getAccountId()));
-                obj.put(PROVIDER, JSONCoercion.coerceToJSON(account.getProviderId()));
-                if (null != account.getLastModified()) {
-                    obj.put(LAST_MODIFIED, JSONCoercion.coerceToJSON(account.getLastModified().getTime()));
-                }
+                obj.put(ID, account.getAccountId());
+                obj.put(PROVIDER, account.getProviderId());
+                obj.put(TIMESTAMP, account.getLastModified().getTime());
                 obj.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
                 response.add(0, obj);
             }

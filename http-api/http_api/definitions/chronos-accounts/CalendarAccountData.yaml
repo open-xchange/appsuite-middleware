@@ -6,7 +6,7 @@ properties:
   provider:
     type: string
     description: The provider for the calendar account.
-  lastModified:
+  timestamp:
     type: integer
     format: int64
     description: The last modification date.

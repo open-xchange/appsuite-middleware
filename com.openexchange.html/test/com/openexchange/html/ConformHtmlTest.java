@@ -69,7 +69,7 @@ public class ConformHtmlTest extends AbstractSanitizing {
 
         String test = getHtmlService().getConformHTML(content, "us-ascii");
 
-        Assert.assertTrue("Missing DOCTYPE declaration", test.startsWith("<!DOCTYPE html"));
+        Assert.assertTrue("Missing DOCTYPE declaration", test.startsWith("<!doctype html"));
         Assert.assertTrue("Missing <head> section.", test.indexOf("<head>") >= 0);
         Assert.assertTrue("Missing <meta> tag.", test.indexOf("<meta") >= 0);
         Assert.assertTrue("Missing <meta> tag.", test.indexOf("?") < 0);

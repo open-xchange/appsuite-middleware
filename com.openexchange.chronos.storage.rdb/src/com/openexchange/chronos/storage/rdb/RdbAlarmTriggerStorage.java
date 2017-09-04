@@ -75,7 +75,6 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -203,33 +202,37 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     /**
-     * Lists alarm triggers for the given user from now until the given time in ascending order
+     * Lists alarm triggers for the given user until the given time in ascending order
      *
      * @param user The user id
-     * @param options The range options
+     * @param until The upper limit
      * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    private List<AlarmTrigger> getAlarmTriggers(int user, RangeOption options) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int user, Date until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(user, options.getFrom() != null ? options.getFrom().getTime() : System.currentTimeMillis(), options.getUntil().getTime(), con);
+            return getAlarmTriggers(user, until.getTime(), con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
     }
 
-    private List<AlarmTrigger> getAlarmTriggers(int user, Long from, Long until, Connection con) throws OXException {
+    private List<AlarmTrigger> getAlarmTriggers(int user, Long until, Connection con) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND user=? AND triggerDate>? AND triggerDate<? ORDER BY triggerDate");
+            StringBuilder stringBuilder = new StringBuilder()
+                .append("SELECT account,cid,")
+                .append(MAPPER.getColumns(mappedFields))
+                .append(" FROM ")
+                .append("calendar_alarm_trigger")
+                .append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, user);
-                stmt.setLong(parameterIndex++, from);
                 stmt.setLong(parameterIndex++, until);
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
@@ -414,8 +417,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException {
-        return getAlarmTriggers(userId, option);
+    public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
+        return getAlarmTriggers(userId, until);
     }
 
     @Override
@@ -593,19 +596,19 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
 
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-            long triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, exceptionSet).getTime();
-            if(triggerTime <= System.currentTimeMillis()){
+            Date triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService, exceptionSet);
+            if(triggerTime == null || triggerTime.before(new Date())){
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
             trigger.setRecurrence(recurrenceId);
-            trigger.setTime(triggerTime);
+            trigger.setTime(triggerTime.getTime());
         } else {
-            long triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz).getTime();
-            if(triggerTime <= System.currentTimeMillis()){
+            Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
+            if(triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
-            trigger.setTime(triggerTime);
+            trigger.setTime(triggerTime.getTime());
             if (event.getRecurrenceId() != null) {
                 trigger.setRecurrence(event.getRecurrenceId());
             }

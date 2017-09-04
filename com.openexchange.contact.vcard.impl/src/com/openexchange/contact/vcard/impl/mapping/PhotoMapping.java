@@ -468,37 +468,44 @@ public class PhotoMapping extends AbstractMapping {
          */
         ThresholdFileHolder fileHolder = null;
         String mimeType = null;
-        InputStream inputStream = null;
-        try {
-            URLConnection urlConnnection = url.openConnection();
-            urlConnnection.setConnectTimeout(2500);
-            urlConnnection.setReadTimeout(2500);
-            urlConnnection.connect();
+        {
+            boolean error = true;
+            InputStream inputStream = null;
+            try {
+                URLConnection urlConnnection = url.openConnection();
+                urlConnnection.setConnectTimeout(2500);
+                urlConnnection.setReadTimeout(2500);
+                urlConnnection.connect();
 
-            // Follow & check redirects recursively
-            if (urlConnnection instanceof HttpURLConnection) {
-                HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
-                int responseCode = httpURLConnection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                    String redirectUrl = urlConnnection.getHeaderField("Location");
-                    httpURLConnection.disconnect();
-                    return new LoadedImage(redirectUrl);
+                // Follow & check redirects recursively
+                if (urlConnnection instanceof HttpURLConnection) {
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+                    int responseCode = httpURLConnection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                        String redirectUrl = urlConnnection.getHeaderField("Location");
+                        httpURLConnection.disconnect();
+                        return new LoadedImage(redirectUrl);
+                    }
+                    if (responseCode >= 400) {
+                        addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                        return NULL_RESULT;
+                    }
                 }
-                if (responseCode >= 400) {
-                    addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                    return NULL_RESULT;
+
+                mimeType = urlConnnection.getContentType();
+                inputStream = urlConnnection.getInputStream();
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(inputStream);
+                error = false;
+            } catch (SocketTimeoutException e) {
+                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                return NULL_RESULT;
+            } finally {
+                Streams.close(inputStream);
+                if (error) {
+                    Streams.close(fileHolder);
                 }
             }
-
-            mimeType = urlConnnection.getContentType();
-            inputStream = urlConnnection.getInputStream();
-            fileHolder = new ThresholdFileHolder();
-            fileHolder.write(inputStream);
-        } catch (SocketTimeoutException e) {
-            addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            return NULL_RESULT;
-        } finally {
-            Streams.close(inputStream);
         }
         /*
          * check image validity
