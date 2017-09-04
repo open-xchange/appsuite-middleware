@@ -49,12 +49,8 @@
 
 package com.openexchange.http.grizzly.servletfilter;
 
-import static com.openexchange.http.grizzly.util.IPTools.COMMA_SEPARATOR;
-import static com.openexchange.http.grizzly.util.IPTools.splitAndTrim;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 import com.openexchange.http.grizzly.util.IPTools;
 
@@ -66,70 +62,94 @@ import com.openexchange.http.grizzly.util.IPTools;
 public class RemoteIPFinderTest {
 
     // extra spaces for trim() test
-    private final static String validIPv4Remotes = " 192.168.32.49 , 192.168.32.50 , 192.168.33.225, 192.168.33.224";
-
+    private final static String validIPv4Remotes   = " 192.168.32.49 , 192.168.32.50 , 192.168.33.225, 192.168.33.224";
     private final static String invalidIPv4Remotes = "192.168.32.49, 192.168.32.555, 192.168.33.225, 192.168.33.224";
+    private final static String knownIPv4          = " 192.168.33.225 , 192.168.33.224 ";
 
-    private final static List<String> knownIPv4 = splitAndTrim(" 192.168.33.225 , 192.168.33.224 ", COMMA_SEPARATOR);
-
-    private final static String validIPv6Remotes = "2001:db8:0:8d3:0:8a2e:70:7341, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
-
+    private final static String validIPv6Remotes   = "2001:db8:0:8d3:0:8a2e:70:7341, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
     private final static String invalidIPv6Remotes = "2001:db8:0:8d3:0:8a2e:70:, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
-
-    private final static List<String> knownIPv6 = IPTools.splitAndTrim(
-        "2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344",
-        COMMA_SEPARATOR);
+    private final static String knownIPv6          = "2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
 
     private final String emptyRemote = "";
 
-    private final List<String> emptyKnown = Collections.emptyList();
-
-     @Test
-     public void testValidIPv4() {
-        String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, knownIPv4);
-        assertEquals("192.168.32.50", remoteIP);
+    @Test
+    public void testValidIPv4() {
+        evaluate(knownIPv4, validIPv4Remotes, "192.168.32.50");
     }
 
-     @Test
-     public void testEmptyKnownIPv4() {
-        String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, emptyKnown);
-        assertEquals("192.168.33.224", remoteIP);
+    @Test
+    public void testEmptyKnownIPv4() {
+        evaluate(emptyRemote, validIPv4Remotes, "192.168.33.224");
     }
 
-     @Test
-     public void testEmptyRemoteIPv4() {
-        String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv4);
+    @Test
+    public void testEmptyRemoteIPv4() {
+        String remoteIP = IPTools.getRemoteIP(emptyRemote, IPTools.filterIP(knownIPv4));
         assertNull(remoteIP);
     }
 
-     @Test
-     public void testInvalidRemoteIPv4() {
-        String remoteIP = IPTools.getRemoteIP(invalidIPv4Remotes, knownIPv4);
+    @Test
+    public void testInvalidRemoteIPv4() {
+        String remoteIP = IPTools.getRemoteIP(invalidIPv4Remotes, IPTools.filterIP(knownIPv4));
         assertNull(remoteIP);
     }
 
-     @Test
-     public void testValidIPv6() {
-        String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, knownIPv6);
-        assertEquals("2001:db8:0:8d3:0:8a2e:70:7341", remoteIP);
+    @Test
+    public void testValidIPv6() {
+        evaluate(knownIPv6, validIPv6Remotes, "2001:db8:0:8d3:0:8a2e:70:7341");
     }
 
-     @Test
-     public void testEmptyKnownIPv6() {
-        String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, emptyKnown);
-        assertEquals("2001:db8:0:8d3:0:8a2e:70:7344", remoteIP);
+    @Test
+    public void testEmptyKnownIPv6() {
+        evaluate(emptyRemote, validIPv6Remotes, "2001:db8:0:8d3:0:8a2e:70:7344");
     }
 
-     @Test
-     public void testEmptyRemoteIPv6() {
-        String remoteIP = IPTools.getRemoteIP(emptyRemote, knownIPv6);
+    @Test
+    public void testEmptyRemoteIPv6() {
+        String remoteIP = IPTools.getRemoteIP(emptyRemote, IPTools.filterIP(knownIPv6));
         assertNull(remoteIP);
     }
 
-     @Test
-     public void testInvalidRemoteIPv6() {
-        String remoteIP = IPTools.getRemoteIP(invalidIPv6Remotes, knownIPv6);
+    @Test
+    public void testInvalidRemoteIPv6() {
+        String remoteIP = IPTools.getRemoteIP(invalidIPv6Remotes, IPTools.filterIP(knownIPv6));
         assertNull(remoteIP);
     }
 
+    public void testAllProxiesMatchingIPv4() {
+        String knownProxies = "192.168.32.0/24, 192.168.33.36";
+        String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
+        String expectedIP = "206.36.25.126";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    public void testFirstProxyNotMatchingIPv4() {
+        String knownProxies = "192.168.32.0/24";
+        String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
+        String expectedIP = "192.168.33.36";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    public void testAllProxiesMatchingIPv6() {
+        String knownProxies = "2001:db8:0:8d3:0:8a2e:70::/112";
+        String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+        String expectedIP = "2001:db8:1:8d3:0:ce6:0:1337";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    public void testFirtsProxyNotMatchingIPv6() {
+        String knownProxies = "2001:db8:0:8d3:0:8a2e:70::/112";
+        String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:80:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+        String expectedIP = "2001:db8:0:8d3:0:8a2e:80:7342";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    private void evaluate(String knownProxies, String xForwardFor, String expectedIP) {
+        String remoteIP = IPTools.getRemoteIP(xForwardFor, IPTools.filterIP(knownProxies));
+        assertEquals(expectedIP, remoteIP);
+    }
 }
