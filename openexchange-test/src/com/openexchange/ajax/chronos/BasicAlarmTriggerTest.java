@@ -102,13 +102,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
-        getAndCheckAlarmTrigger(currentTime, TimeUnit.HOURS, 1, null, 0); // No triggers
+        getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
 
         // 2. Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
         assertTrue(triggers.get(0).getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
-        getAndCheckAlarmTrigger(currentTime, TimeUnit.DAYS, 2, "MAIL", 0); // No triggers
+        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
 
     }
 
@@ -128,7 +128,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         today.setTime(new Date());
 
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(today.getTimeInMillis(), 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
         cal.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), cal.getTimeInMillis());
     }
@@ -147,7 +147,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         today.setTime(new Date());
 
         // Check if next trigger is at correct time
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(today.getTimeInMillis(), 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
         Calendar trigger1 = (Calendar) cal.clone();
         trigger1.add(Calendar.MINUTE, -15);
         checkAlarmTime(triggers.get(0), event.getId(), trigger1.getTimeInMillis());
@@ -156,7 +156,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         shiftEvent(event.getId(), null, event, cal, TimeUnit.HOURS, 1, getLastTimestamp());
 
         // Check if trigger time changed accordingly
-        triggers = getAndCheckAlarmTrigger(cal.getTimeInMillis(), 1); // No triggers
+        triggers = getAndCheckAlarmTrigger(1); // No triggers
         Calendar trigger2 = (Calendar) cal.clone();
         trigger2.add(Calendar.HOUR, 1);
         trigger2.add(Calendar.MINUTE, -15);
@@ -176,7 +176,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
         AlarmTrigger alarmTrigger = triggers.get(0);
         if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
@@ -207,7 +207,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // The created alarm
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
         AlarmTrigger alarmTrigger = triggers.get(0);
         assertTrue(alarmTrigger.getEventId().equals(event.getId()));
         Calendar eventTime = Calendar.getInstance(UTC);
@@ -233,7 +233,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventData exceptionEvent = updateResult.getCreated().get(0);
 
         // Check if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
@@ -258,7 +258,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        triggers = getAndCheckAlarmTrigger(currentTime, 1); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         /*
@@ -272,7 +272,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        getAndCheckAlarmTrigger(currentTime, 0); // No upcoming triggers
+        getAndCheckAlarmTrigger(0); // No upcoming triggers
     }
 
     @SuppressWarnings("unchecked")
@@ -312,7 +312,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTime, 1); // The created alarm
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
         AlarmTrigger alarmTrigger = triggers.get(0);
         Calendar eventTime = Calendar.getInstance(UTC);
         eventTime.setTimeInMillis(cal.getTimeInMillis());
@@ -329,7 +329,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis());
 
         // User 2 shouldn't have any triggers
-        getAndCheckAlarmTrigger(currentTime, 0, user2.getApi(), user2.getSession()); // No alarms
+        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 0, user2.getApi(), user2.getSession()); // No alarms
 
         /*
          * 2. Accept the event with user 2
@@ -344,7 +344,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         setLastTimestamp(updateAttendee.getTimestamp());
 
         // Now user 2 should have a trigger
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession());
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 1, user2.getApi(), user2.getSession());
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
 
@@ -357,7 +357,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventData exceptionEvent = updateResult.getCreated().get(0);
 
         // Check if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
@@ -372,7 +372,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 2, user2.getApi(), user2.getSession()); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 2, user2.getApi(), user2.getSession()); // The alarm of the series and the alarm for the exception
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
@@ -391,7 +391,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         setLastTimestamp(updateEventResponse.getTimestamp());
 
         // Check again if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
@@ -400,7 +400,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
@@ -412,7 +412,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         setLastTimestamp(updateEventResponse.getTimestamp());
 
         // Check again if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(currentTime, 2); // The alarm of the series and the alarm for the exception
+        triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
 
         // Check the exception
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
@@ -421,7 +421,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // Check user 2 too
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Still one alarm
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 1, user2.getApi(), user2.getSession()); // Still one alarm
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
@@ -437,7 +437,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         setLastTimestamp(updateAttendee.getTimestamp());
 
         // Now user 2 should have a trigger again
-        triggers = getAndCheckAlarmTrigger(currentTime, 2, user2.getApi(), user2.getSession());
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 2, user2.getApi(), user2.getSession());
         checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
         checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
@@ -452,11 +452,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        triggers = getAndCheckAlarmTrigger(currentTime, 1); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis());
 
         // check user 2
-        triggers = getAndCheckAlarmTrigger(currentTime, 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 1, user2.getApi(), user2.getSession()); // Only the alarm of the series
         checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
         /*
@@ -470,10 +470,10 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
-        getAndCheckAlarmTrigger(currentTime, 0); // No upcoming triggers
+        getAndCheckAlarmTrigger(0); // No upcoming triggers
 
         // check user 2
-        getAndCheckAlarmTrigger(currentTime, 0, user2.getApi(), user2.getSession()); // No upcoming triggers
+        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 0, user2.getApi(), user2.getSession()); // No upcoming triggers
     }
 
     @Test
@@ -501,13 +501,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             from.setTimeInMillis(cal.getTimeInMillis());
             from.add(Calendar.DAY_OF_MONTH, -5);
 
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
             long triggerTime = cal.getTimeInMillis() - TimeUnit.DAYS.toMillis(3) - offset;
             checkAlarmTime(triggers.get(0), event.getId(), triggerTime);
 
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
-            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis(), TimeUnit.DAYS, 10, null, 1);
+            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
             Date parse = ZULU_FORMATER.get().parse(triggers2.get(0).getTime());
             assertNotEquals(triggerTime, parse.getTime());
 
@@ -534,7 +534,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndCheckEvent(event, 1);
 
         // Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
         AlarmTrigger alarmTrigger = triggers.get(0);
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
     }
@@ -552,7 +552,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndCheckEvent(event, 1);
 
         // Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
         AlarmTrigger alarmTrigger = triggers.get(0);
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(1) - TimeUnit.MINUTES.toMillis(10));
     }
