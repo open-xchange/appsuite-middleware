@@ -122,6 +122,9 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         if (headResult.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             throw CalendarExceptionCodes.AUTH_FAILED.create(uri);
         }
+        if (headResult.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            throw ICalProviderExceptionCodes.NO_FEED.create(uri);
+        }
         if (headResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
             ((etag != null) && (headResult.getETag().equals(etag)))) { // same etag
             return new ExternalCalendarResult();

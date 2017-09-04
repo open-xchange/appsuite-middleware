@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.chronos.calendar.account.service.impl.parser;
+package com.openexchange.chronos.provider.auth;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,6 @@ import com.openexchange.auth.info.AuthInfo.Builder;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccountAttribute;
-import com.openexchange.chronos.provider.auth.PasswordUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -99,7 +99,7 @@ public class CalendarAuthParser {
      * @return Set of {@link CalendarAccountAttribute}s contained within the configuration map
      * @throws OXException
      */
-    public Set<CalendarAccountAttribute> parse(final Map<String, Object> configuration, Session session) throws OXException {
+    private Set<CalendarAccountAttribute> parse(final Map<String, Object> configuration, Session session) throws OXException {
         final Set<CalendarAccountAttribute> attributes = new HashSet<CalendarAccountAttribute>();
 
         String login = CalendarAccountAttribute.LOGIN_LITERAL.getName();
@@ -132,7 +132,7 @@ public class CalendarAuthParser {
         return attributes;
     }
 
-    public Set<CalendarAccountAttribute> validate(Set<CalendarAccountAttribute> attributes) throws OXException {
+    private Set<CalendarAccountAttribute> validate(Set<CalendarAccountAttribute> attributes) throws OXException {
         Set<CalendarAccountAttribute> copy = new HashSet<>(attributes);
         copy.remove(CalendarAccountAttribute.LOGIN_LITERAL);
         copy.remove(CalendarAccountAttribute.ID_LITERAL);
@@ -154,7 +154,15 @@ public class CalendarAuthParser {
         return retval;
     }
 
-    public AuthInfo getAuthType(Session session, Map<String, Object> configuration) throws OXException {
+    /**
+     * Returns the {@link AuthInfo} based on the configuration provided by the client (unstructured).
+     * 
+     * @param session - The user session used to encrypt the given password
+     * @param configuration - The configuration provided by the client
+     * @return {@link AuthInfo} that is valid for the given URI
+     * @throws OXException
+     */
+    public AuthInfo getAuthInfoFromUnstructured(Session session, Map<String, Object> configuration) throws OXException {
         Set<CalendarAccountAttribute> availableAttributes = parse(configuration, session);
         Set<CalendarAccountAttribute> authAttributes = validate(availableAttributes);
 
@@ -186,6 +194,14 @@ public class CalendarAuthParser {
         return authInfo;
     }
 
+    /**
+     * Updates the configuration map to hold the authentication information in a structured way based on the given {@link AuthInfo} object. All previously contained auth information will be removed from configuration map and replaced by those from
+     * {@link AuthInfo}.
+     * 
+     * @param authInfo {@link AuthInfo} that will be added to the configuration
+     * @param configuration {@link Map} that will be enhanced (and cleaned up)
+     * @throws OXException
+     */
     public void updateConfiguration(AuthInfo authInfo, Map<String, Object> configuration) throws OXException {
         configuration.remove(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName());
         configuration.remove(CalendarAccountAttribute.TOKEN_LITERAL.getName());
@@ -196,6 +212,25 @@ public class CalendarAuthParser {
             String auth = mapper.writeValueAsString(authInfo);
             configuration.put("auth", auth);
         } catch (JsonProcessingException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns the {@link AuthInfo} based on structured (earlier processed/read from database) data
+     * 
+     * @param configuration The structured {@link AuthInfo} in a map
+     * @return {@link AuthInfo} if "auth" is available in configuration; otherwise <code>com.openexchange.auth.info.AuthInfo.NONE</code>
+     * @throws OXException
+     */
+    public AuthInfo getAuthInfo(Map<String, Object> configuration) throws OXException {
+        Object auth = configuration.get("auth");
+        if (auth == null) {
+            return AuthInfo.NONE;
+        }
+        try {
+            return mapper.readValue((String) auth, AuthInfo.class);
+        } catch (IOException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         }
     }

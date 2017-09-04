@@ -54,11 +54,11 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
-import com.openexchange.chronos.calendar.account.service.impl.parser.CalendarAuthParser;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarAccountAttribute;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.auth.CalendarAuthParser;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.context.ContextService;
@@ -95,9 +95,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
 
     @Override
     public CalendarAccount createAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException {
-        CalendarAuthParser authParser = CalendarAuthParser.getInstance();
-        AuthInfo authInfo = authParser.getAuthType(session, configuration);
-        authParser.updateConfiguration(authInfo, configuration);
+        AuthInfo authInfo = CalendarAuthParser.getInstance().getAuthInfo(configuration);
 
         if (authInfo.getAuthType().equals(AuthType.OAUTH) || authInfo.getAuthType().equals(AuthType.OAUTHBEARER)) {
             validateOAuthAccount(session, Integer.parseInt((String) configuration.get(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName())));
@@ -133,9 +131,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService {
     public CalendarAccount updateAccount(Session session, int id, Map<String, Object> configuration, long timestamp) throws OXException {
         verifyAccountAction(session, loadCalendarAccount(id, session), timestamp, false);
 
-        CalendarAuthParser authParser = CalendarAuthParser.getInstance();
-        AuthInfo authInfo = authParser.getAuthType(session, configuration);
-        authParser.updateConfiguration(authInfo, configuration);
+        AuthInfo authInfo = CalendarAuthParser.getInstance().getAuthInfo(configuration);
+        if (authInfo.getAuthType().equals(AuthType.OAUTH) || authInfo.getAuthType().equals(AuthType.OAUTHBEARER)) {
+            validateOAuthAccount(session, Integer.parseInt((String) configuration.get(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName())));
+        }
 
         getCalendarAccountStorage(session).updateAccount(id, configuration, timestamp);
         return loadCalendarAccount(id, session);
