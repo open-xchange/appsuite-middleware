@@ -74,6 +74,7 @@ import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.net.IPRange;
 import com.openexchange.version.Version;
 
 /**
@@ -110,7 +111,7 @@ public class WrappingFilter implements Filter {
     private final AtomicLong counter;
     private final int serverId;
     private final String forHeader;
-    private final Set<String> knownProxies;
+    private final Set<IPRange> knownProxies;
     private final String protocolHeader;
     private final boolean isConsiderXForwards;
     private final String echoHeaderName;
