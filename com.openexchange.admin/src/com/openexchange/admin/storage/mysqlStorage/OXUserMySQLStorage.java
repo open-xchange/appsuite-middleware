@@ -3357,7 +3357,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setTasks(user.hasPermission(UserConfiguration.TASKS));
             acc.setVcard(user.hasPermission(UserConfiguration.VCARD));
             acc.setWebdav(user.hasPermission(UserConfiguration.WEBDAV));
-            acc.setWebdavXml(user.hasPermission(UserConfiguration.WEBDAV_XML));
             acc.setWebmail(user.hasPermission(UserConfiguration.WEBMAIL));
             acc.setDelegateTask(user.hasPermission(UserConfiguration.DELEGATE_TASKS));
             acc.setEditGroup(user.hasPermission(UserConfiguration.EDIT_GROUP));
@@ -3576,7 +3575,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setTask(access.getTasks());
             user.setVCard(access.getVcard());
             user.setWebDAV(access.getWebdav());
-            user.setWebDAVXML(access.getWebdavXml());
             user.setWebMail(access.getWebmail());
             user.setDelegateTasks(access.getDelegateTask());
             user.setEditGroup(access.getEditGroup());
@@ -3614,9 +3612,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getReadCreateSharedFolders()) {
-                throw new StorageException("Global address book can not be disabled for non-PIM users.");
-            }
-            if (access.getWebdavXml()) {
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getDelegateTask()) {

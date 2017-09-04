@@ -49,8 +49,6 @@
 
 package com.openexchange.filestore.impl;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
@@ -241,31 +239,6 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
     }
 
     /**
-     * Fetches all context identifiers from the config database
-     *
-     * @param configDBCon The config database connection
-     * @return An array with all context identifiers
-     * @throws OXException
-     */
-    protected int[] getAllContextIds(Connection configDBCon) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = configDBCon.prepareStatement("SELECT cid FROM context");
-            rs = stmt.executeQuery();
-            TIntList cids = new TIntLinkedList();
-            while (rs.next()) {
-                cids.add(rs.getInt(1));
-            }
-            return cids.toArray();
-        } catch (SQLException e) {
-            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    /**
      * Adds to the specified set all context identifiers that are using the specified file storage
      *
      * @param fileStorageId The file storage identifier
@@ -375,31 +348,14 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
     public Map<Integer, List<Integer>> getIdsOfUsersUsing(int fileStorageId) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
         Map<Integer, List<Integer>> users = new HashMap<Integer, List<Integer>>();
-        TIntSet usingContexts = new TIntHashSet(256);
 
-        // Get all contexts and find out which ones are using the specified file storage
-        int[] contextIds;
+        // Get all users using the specified file storage
         {
             Connection configDBConnection = databaseService.getReadOnly();
             try {
-                contextIds = getAllContextIds(configDBConnection);
-                addContextsUsing(fileStorageId, usingContexts, configDBConnection);
+                addUsersUsing(fileStorageId, users, configDBConnection);
             } finally {
                 databaseService.backReadOnly(configDBConnection);
-            }
-        }
-
-        // Find out which users are using the specified file storage
-        TIntSet processed = new TIntHashSet(256);
-        for (Integer ctxId : contextIds) {
-            if (processed.add(ctxId)) {
-                Connection schemaConnection = databaseService.getReadOnly(ctxId);
-                try {
-                    addUsersUsing(fileStorageId, users, schemaConnection);
-                } finally {
-                    databaseService.backReadOnly(schemaConnection);
-                }
-                processed.addAll(databaseService.getContextsInSameSchema(ctxId));
             }
         }
 
@@ -436,21 +392,24 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
      *
      * @param fileStorageId The file storage identifier
      * @param users A map with all users using that file storage
-     * @param schemaCon The schema connection
+     * @param configDBConnection The ConfigDB connection
      * @throws OXException
      */
-    private void addUsersUsing(int fileStorageId, Map<Integer, List<Integer>> users, Connection schemaCon) throws OXException {
+    private void addUsersUsing(int fileStorageId, Map<Integer, List<Integer>> users, Connection configDBConnection) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = schemaCon.prepareStatement("SELECT cid, id FROM user WHERE filestore_id=? ORDER BY cid ASC");
+            stmt = configDBConnection.prepareStatement("SELECT cid, user FROM filestore2user WHERE filestore_id=? ORDER BY cid ASC");
             stmt.setInt(1, fileStorageId);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int ctxId = rs.getInt(1);
-                List<Integer> list = users.containsKey(ctxId) ? users.get(ctxId) : new ArrayList<Integer>();
+                List<Integer> list = users.get(ctxId);
+                if (null == list) {
+                    list = new ArrayList<Integer>();
+                    users.put(ctxId, list);
+                }
                 list.add(rs.getInt(2));
-                users.put(ctxId, list);
             }
         } catch (SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);

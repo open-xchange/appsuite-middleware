@@ -2231,7 +2231,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getReadConnectionForConfigDB();
 
             String my_search_pattern = search_pattern.replace('*', '%');
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);
@@ -2333,36 +2333,39 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             Map<Integer, Database> id2db = new HashMap<>(); // Ensures that there is only one Database instance associated with a counter
             Map<Database, Counter> counters = new LinkedHashMap<>();
             do {
-                String schemaName = rs.getString("s.schemaname");
-                if (null != schemaName && false == rs.wasNull()) {
-                    int id = rs.getInt("d.db_pool_id");
-                    Database db = id2db.get(I(id));
-                    if (null == db) {
-                        db = new Database();
-                        int nrcontexts = rs.getInt("p.count");
-                        db.setClusterWeight(I(rs.getInt("c.weight")));
-                        db.setName(rs.getString("d.name"));
-                        db.setDriver(rs.getString("d.driver"));
-                        db.setId(I(id));
-                        db.setLogin(rs.getString("d.login"));
-                        db.setMaster(Boolean.TRUE);
-                        db.setMasterId(I(0));
-                        db.setMaxUnits(I(rs.getInt("c.max_units")));
-                        db.setPassword(rs.getString("d.password"));
-                        db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
-                        db.setPoolInitial(I(rs.getInt("d.initial")));
-                        db.setPoolMax(I(rs.getInt("d.max")));
-                        db.setUrl(rs.getString("d.url"));
-                        db.setCurrentUnits(I(nrcontexts));
-                        id2db.put(I(id), db);
-                    }
+                int maxUnits = rs.getInt("c.max_units");
+                if (maxUnits != 0) {
+                    String schemaName = rs.getString("s.schemaname");
+                    if (null != schemaName && false == rs.wasNull()) {
+                        int id = rs.getInt("d.db_pool_id");
+                        Database db = id2db.get(I(id));
+                        if (null == db) {
+                            db = new Database();
+                            int nrcontexts = rs.getInt("p.count");
+                            db.setClusterWeight(I(rs.getInt("c.weight")));
+                            db.setName(rs.getString("d.name"));
+                            db.setDriver(rs.getString("d.driver"));
+                            db.setId(I(id));
+                            db.setLogin(rs.getString("d.login"));
+                            db.setMaster(Boolean.TRUE);
+                            db.setMasterId(I(0));
+                            db.setMaxUnits(I(maxUnits));
+                            db.setPassword(rs.getString("d.password"));
+                            db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
+                            db.setPoolInitial(I(rs.getInt("d.initial")));
+                            db.setPoolMax(I(rs.getInt("d.max")));
+                            db.setUrl(rs.getString("d.url"));
+                            db.setCurrentUnits(I(nrcontexts));
+                            id2db.put(I(id), db);
+                        }
 
-                    Counter counter = counters.get(db);
-                    if (null == counter) {
-                        counter = new Counter(0);
-                        counters.put(db, counter);
+                        Counter counter = counters.get(db);
+                        if (null == counter) {
+                            counter = new Counter(0);
+                            counters.put(db, counter);
+                        }
+                        counter.increment();
                     }
-                    counter.increment();
                 }
             } while (rs.next());
 
@@ -2398,7 +2401,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getReadConnectionForConfigDB();
             final String my_search_pattern = search_pattern.replace('*', '%');
 
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
+            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);

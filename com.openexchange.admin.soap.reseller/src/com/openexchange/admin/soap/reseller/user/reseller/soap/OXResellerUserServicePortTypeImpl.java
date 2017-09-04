@@ -49,12 +49,9 @@ import com.openexchange.tools.net.URIParser;
  *
  */
 
-@javax.jws.WebService(
-                      serviceName = "OXResellerUserService",
-                      portName = "OXResellerUserServiceHttpSoap12Endpoint",
-                      targetNamespace = "http://soap.reseller.admin.openexchange.com",
+@javax.jws.WebService(serviceName = "OXResellerUserService", portName = "OXResellerUserServiceHttpSoap12Endpoint", targetNamespace = "http://soap.reseller.admin.openexchange.com",
 
-                      endpointInterface = "com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType")
+    endpointInterface = "com.openexchange.admin.soap.reseller.user.reseller.soap.OXResellerUserServicePortType")
 
 public class OXResellerUserServicePortTypeImpl implements OXResellerUserServicePortType {
 
@@ -321,7 +318,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public void change(final Change parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception , InvalidDataException_Exception    {
+    public void change(final Change parameters) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             iface.change(soap2Context(parameters.ctx), soap2User(parameters.usrdata), soap2Credentials(parameters.auth));
@@ -365,7 +362,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public void delete(final Delete parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception , InvalidDataException_Exception    {
+    public void delete(final Delete parameters) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             iface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.getReassign(), soap2Credentials(parameters.auth));
@@ -409,7 +406,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getContextAdmin(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.DuplicateExtensionException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception , com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getContextAdmin(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.DuplicateExtensionException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.StorageException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.RemoteException_Exception, com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.User contextAdmin = iface.getContextAdmin(soap2Context(ctx), soap2Credentials(auth));
@@ -493,7 +490,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public void changeByModuleAccessName(final ChangeByModuleAccessName parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void changeByModuleAccessName(final ChangeByModuleAccessName parameters) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             iface.changeModuleAccess(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.accessCombinationName, soap2Credentials(parameters.auth));
@@ -535,7 +532,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             throw new com.openexchange.admin.soap.reseller.user.reseller.soap.NoSuchUserException_Exception(e.getMessage(), faultDetail, e);
         }
     }
-
 
     @Override
     public void changeMailAddressPersonal(ChangeMailAddressPersonal parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
@@ -582,7 +578,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess access, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2ModuleAccess(access), soap2Credentials(auth));
@@ -622,7 +618,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess getModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAccess getModuleAccess(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.UserModuleAccess moduleAccess = iface.getModuleAccess(soap2Context(ctx), soap2User(user), soap2Credentials(auth));
@@ -667,7 +663,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User create(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User create(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User user = iface.create(soap2Context(ctx), soap2User(usrdata), soap2Credentials(auth));
@@ -807,7 +803,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> getMultipleData(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> users,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> getMultipleData(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> users, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User[] userArr = new User[users.size()];
@@ -861,7 +857,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getData(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User getData(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User data = iface.getData(soap2Context(ctx), soap2User(user), soap2Credentials(auth));
@@ -906,7 +902,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public void deleteMultiple(final DeleteMultiple parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void deleteMultiple(final DeleteMultiple parameters) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> users = parameters.users;
@@ -956,7 +952,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.lang.Boolean exists(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.lang.Boolean exists(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final boolean exists = iface.exists(soap2Context(ctx), soap2User(user), soap2Credentials(auth));
@@ -996,7 +992,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final java.lang.String searchPattern, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -1040,7 +1036,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public java.lang.String getAccessCombinationName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.lang.String getAccessCombinationName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User user, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             return iface.getAccessCombinationName(soap2Context(ctx), soap2User(user), soap2Credentials(auth));
@@ -1084,7 +1080,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public void changeByModuleAccess(final ChangeByModuleAccess parameters) throws DatabaseUpdateException_Exception , NoSuchUserException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void changeByModuleAccess(final ChangeByModuleAccess parameters) throws DatabaseUpdateException_Exception, NoSuchUserException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             iface.changeModuleAccess(soap2Context(parameters.ctx), soap2User(parameters.user), soap2ModuleAccess(parameters.moduleAccess), soap2Credentials(parameters.auth));
@@ -1128,7 +1124,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccessName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata,final java.lang.String accessCombinationName,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.user.soap.dataobjects.User createByModuleAccessName(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx, final com.openexchange.admin.soap.reseller.user.soap.dataobjects.User usrdata, final java.lang.String accessCombinationName, final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXUserInterface iface = getUserInterface();
         try {
             final User create = iface.create(soap2Context(ctx), soap2User(usrdata), accessCombinationName, soap2Credentials(auth));
@@ -1535,17 +1531,17 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (tmp != null) {
             user.setDefaultSenderAddress(tmp);
         }
-        
+
         tmp = soapUser.getDriveUserFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
         }
-        
+
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
             user.setConvertDriveUserFolders(bool_tmp);
         }
-        
+
         tmp = soapUser.getDepartment();
         if (tmp != null) {
             user.setDepartment(tmp);
@@ -1646,19 +1642,18 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                                {
+                                case 1: {
                                     final String schema = matcher.group(1);
                                     if (null != schema) {
                                         sb.append(schema);
                                     }
                                 }
-                                break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1847,19 +1842,18 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                            {
-                                final String schema = matcher.group(1);
-                                if (null != schema) {
-                                    sb.append(schema);
+                                case 1: {
+                                    final String schema = matcher.group(1);
+                                    if (null != schema) {
+                                        sb.append(schema);
+                                    }
                                 }
-                            }
-                            break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -2480,11 +2474,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             moduleAccess.setWebdav(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isWebdavXml();
-        if (tmp != null) {
-            moduleAccess.setWebdavXml(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isWebmail();
         if (tmp != null) {
             moduleAccess.setWebmail(booleanValue(tmp));
@@ -2525,7 +2514,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapModuleAccess.setUSM(Boolean.valueOf(moduleAccess.isUSM()));
         soapModuleAccess.setVcard(Boolean.valueOf(moduleAccess.getVcard()));
         soapModuleAccess.setWebdav(Boolean.valueOf(moduleAccess.getWebdav()));
-        soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }

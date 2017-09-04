@@ -24,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Cluster wide file distribution
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-grizzly >= @OXVERSION@
 
 %description
 This package installs bundles taking care to distribute files in the cluster. This is especially used for collaborative work on documents
