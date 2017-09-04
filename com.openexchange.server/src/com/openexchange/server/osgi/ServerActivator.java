@@ -942,18 +942,8 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
-        http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
-        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
-        http.registerServlet("/servlet/webdav.folders", new com.openexchange.webdav.folders(), null, null);
-        http.registerServlet("/servlet/webdav.calendar", new com.openexchange.webdav.calendar(), null, null);
-        http.registerServlet("/servlet/webdav.contacts", new com.openexchange.webdav.contacts(), null, null);
-        http.registerServlet("/servlet/webdav.tasks", new com.openexchange.webdav.tasks(), null, null);
-        http.registerServlet("/servlet/webdav.groupuser", new com.openexchange.webdav.groupuser(), null, null);
-        http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

@@ -53,6 +53,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
@@ -60,7 +61,6 @@ import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * {@link GetResponse}

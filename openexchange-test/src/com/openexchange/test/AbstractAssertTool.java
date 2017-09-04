@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,31 @@
  *
  */
 
-package com.openexchange.webdav.xml.folder.actions;
+package com.openexchange.test;
 
-import org.jdom2.Document;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
-import com.openexchange.webdav.xml.types.Response;
+import org.junit.Assert;
 
 /**
+ * {@link AbstractAssertTool} - Base help class for assertion tools
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class ListParser extends AbstractWebDAVParser<ListResponse> {
+public abstract class AbstractAssertTool extends Assert {
 
     /**
-     * Default constructor.
+     * Asserts the expected and actual objects
+     * 
+     * @param message The message if the assertion fails
+     * @param expect The expected object
+     * @param value The actual object
+     * @throws Exception if an error is occurred
      */
-    ListParser() {
-        super();
-    }
-
-    @Override
-    protected int getType() {
-        return Types.FOLDER;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected ListResponse createResponse(final Document document, final Response[] responses) throws OXException, OXException {
-        final ListResponse retval = new ListResponse(document, responses);
-        final FolderObject[] folders = new FolderObject[responses.length];
-        for (int a = 0; a < folders.length; a++) {
-            if (responses[a].hasError()) {
-                fail(responses[a].getErrorMessage());
-            }
-            folders[a] = (FolderObject) responses[a].getDataObject();
+    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
+        if (expect == null) {
+            return;
         }
-        retval.setFolders(folders);
-        return retval;
+
+        assertNotNull(message + " is null", value);
+        assertEquals(message, expect, value);
     }
 }
