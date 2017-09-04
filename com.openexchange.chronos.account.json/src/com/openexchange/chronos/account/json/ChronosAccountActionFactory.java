@@ -60,6 +60,7 @@ import com.openexchange.chronos.account.json.actions.GetAction;
 import com.openexchange.chronos.account.json.actions.NewAction;
 import com.openexchange.chronos.account.json.actions.UpdateAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -68,14 +69,19 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
+@OAuthModule
 public class ChronosAccountActionFactory implements AJAXActionServiceFactory {
+
+    public static final String OAUTH_READ_SCOPE = "read_calendar_account";
+
+    public static final String OAUTH_WRITE_SCOPE = "write_calendar_account";
 
     private final Map<String, AJAXActionService> actions;
 
     /**
-     * Initialises a new {@link ChronosAccountActionFactory}.
-     * 
-     * @param services
+     * Initializes a new {@link ChronosAccountActionFactory}.
+     *
+     * @param services The service look up class
      */
     public ChronosAccountActionFactory(ServiceLookup services) {
         super();

@@ -54,9 +54,11 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -65,14 +67,16 @@ import com.openexchange.tools.session.ServerSession;
  * {@link DeleteAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
+@OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
 public class DeleteAction extends AbstractAccountAction {
 
     /**
-     * Initialises a new {@link DeleteAction}.
+     * Initializes a new {@link DeleteAction}.
      *
-     * @param services
+     * @param services The service look-up
      */
     public DeleteAction(ServiceLookup services) {
         super(services);
@@ -80,10 +84,6 @@ public class DeleteAction extends AbstractAccountAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        if (Strings.isEmpty(providerId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
-        }
         String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         if (Strings.isEmpty(timestamp)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_TIMESTAMP);

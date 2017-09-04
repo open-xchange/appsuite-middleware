@@ -64,7 +64,7 @@ public interface CalendarAccountFields {
 
     public static final String PROVIDER = "provider";
 
-    public static final String LAST_MODIFIED = "lastModified";
+    public static final String TIMESTAMP = "timestamp";
 
     public static final String CONFIGURATION = "configuration";
 

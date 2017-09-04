@@ -49,16 +49,19 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.chronos.account.json.CalendarAccountFields;
+import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -68,14 +71,16 @@ import com.openexchange.tools.session.ServerSession;
  * {@link NewAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
+@OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
 public class NewAction extends AbstractAccountAction implements CalendarAccountFields{
 
     /**
-     * Initialises a new {@link NewAction}.
+     * Initializes a new {@link NewAction}.
      *
-     * @param services
+     * @param services The service look-up
      */
     public NewAction(ServiceLookup services) {
         super(services);
@@ -88,10 +93,11 @@ public class NewAction extends AbstractAccountAction implements CalendarAccountF
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
         CalendarAccountService service = getService(CalendarAccountService.class);
-        JSONObject data = requestData.getData(JSONObject.class);
-        CalendarAccount account = service.createAccount(session, providerId, data.asMap());
         try {
-            return new AJAXRequestResult(new JSONObject(1).put(ID, JSONCoercion.coerceToJSON(account.getAccountId())), FORMAT);
+            @SuppressWarnings("unchecked") 
+            Map<String, Object> data = (Map<String, Object>) JSONCoercion.coerceToNative(requestData.getData(JSONObject.class));
+            CalendarAccount account = service.createAccount(session, providerId, data);
+            return new AJAXRequestResult(new JSONObject(1).put(ID, account.getAccountId()), FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
