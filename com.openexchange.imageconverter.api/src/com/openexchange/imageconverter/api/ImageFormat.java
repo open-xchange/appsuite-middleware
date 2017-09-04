@@ -156,24 +156,18 @@ public class ImageFormat implements Comparable<ImageFormat> {
      */
     @Override
     public int compareTo(ImageFormat other) {
-        int ret = m_imageType.compareTo(other.m_imageType);
+        int ret = 1;
 
-        // imageType, scaleType, autoRotate and shrinkOnly
-        // must match to  check;
+        // imageType, scaleType, autoRotate and shrinkOnly must match to  check;
         // sort order based on: used area => quality
-
-        if ((0 == (ret = Boolean.compare(m_autoRotate, other.m_autoRotate))) &&
+        if ((null != other) &&
+            (0 == (ret = m_imageType.compareTo(other.m_imageType))) &&
+            (0 == (ret = Boolean.compare(m_autoRotate, other.m_autoRotate))) &&
             (0 == (ret = Boolean.compare(m_shrinkOnly, other.m_shrinkOnly))) &&
-            (0 == (ret = m_scaleType.compareTo(other.m_scaleType)))) {
+            (0 == (ret = m_scaleType.compareTo(other.m_scaleType))) &&
+            (0 == (ret = Long.compare(Math.abs((long) getWidth() * getHeight()), Math.abs((long) other.getWidth() * other.getHeight()))))) {
 
-            final long areaThis = Math.abs((long) getWidth() * getHeight());
-            final long areaOther = Math.abs((long) other.getWidth() * other.getHeight());
-
-            if (areaThis == areaOther) {
-                ret = getQuality() < other.getQuality() ? -1 : (getQuality() > other.getQuality() ? 1 : 0);
-            } else {
-                ret = (areaThis < areaOther) ? -1 :  1;
-            }
+            ret = Integer.compare(getQuality(), other.getQuality());
         }
 
         return ret;
