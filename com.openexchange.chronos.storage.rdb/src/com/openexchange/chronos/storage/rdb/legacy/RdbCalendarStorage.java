@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,6 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
@@ -167,7 +167,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
 
             @Override
-            public List<AlarmTrigger> loadTriggers(int userId, RangeOption option) throws OXException {
+            public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
                 return Collections.emptyList();
             }
 

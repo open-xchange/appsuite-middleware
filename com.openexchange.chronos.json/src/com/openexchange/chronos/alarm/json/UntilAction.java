@@ -72,7 +72,7 @@ public class UntilAction extends ChronosAction {
 
     private static final String ACTIONS_PARAM = "actions";
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeEnd");
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("rangeStart", ACTIONS_PARAM);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(ACTIONS_PARAM);
 
     private static final Set<String> DEFAULT_ACTIONS = unmodifiableSet("DISPLAY", "AUDIO");
 
