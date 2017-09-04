@@ -88,7 +88,7 @@ public interface QuotaProvider {
      *  never <code>null</code>.
      * @return The quota and usage, never <code>null</code>.
      * @throws OXException If no account was found for the given id, {@link QuotaExceptionCodes.UNKNOWN_ACCOUNT}
-     * is thrown. Other exception codes denote ocurred errors while calculating quota and usage.
+     * is thrown. Other exception codes denote occurred errors while calculating quota and usage.
      */
     AccountQuota getFor(Session session, String accountID) throws OXException;
 
