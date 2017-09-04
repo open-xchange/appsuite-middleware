@@ -92,6 +92,9 @@ case "${BNAME}" in
     "enableallcontext")
     ACTION="context.EnableAll"
     ;;
+    "checkcountsconsistency")
+    ACTION="context.CheckCountsConsistency"
+    ;;
     "deleteinvisible")
     ACTION="context.DeleteInvisible"
     ;;
@@ -116,6 +119,9 @@ case "${BNAME}" in
     "listdatabase")
     ACTION="util.database.ListDatabase"
     ;;
+    "recalculatefilestoreusage")
+    ACTION="util.filestore.RecalculateFilestoreUsage"
+    ;;
     "listfilestore")
     ACTION="util.filestore.ListFilestore"
     ;;
@@ -124,6 +130,12 @@ case "${BNAME}" in
     ;;
     "registerdatabase")
     ACTION="util.database.RegisterDatabase"
+    ;;
+    "createschemas")
+    ACTION="util.database.CreateSchemas"
+    ;;
+    "deleteemptyschemas")
+    ACTION="util.database.DeleteEmptySchemas"
     ;;
     "registerfilestore")
     ACTION="util.filestore.RegisterFilestore"

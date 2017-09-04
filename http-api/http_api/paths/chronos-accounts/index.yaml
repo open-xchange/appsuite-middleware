@@ -3,3 +3,4 @@ requests:
   - DeleteRequest.yaml
   - GetRequest.yaml
   - UpdateRequest.yaml
+  - NewRequest.yaml

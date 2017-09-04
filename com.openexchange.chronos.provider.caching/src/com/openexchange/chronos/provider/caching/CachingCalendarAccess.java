@@ -48,18 +48,32 @@
 
 package com.openexchange.chronos.provider.caching;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.SerializationUtils;
+import org.joda.time.Hours;
+import org.joda.time.Weeks;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
-import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
-import com.openexchange.chronos.provider.caching.internal.handler.CachingHandlerFactory;
-import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
+import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
@@ -70,85 +84,184 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * A caching {@link CalendarAccess} implementation that provides generic caching (based on the database) for external events.<br>
+ * A caching {@link CalendarAccess} implementation that provides generic database caching for external events.<br>
  * <br>
  * Some abstract methods have to be implemented from the underlying implementation to retrieve data and some configurations (for instance the refresh interval to define after which period the external provider should be contacted)
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class CachingCalendarAccess implements CalendarAccess {
+public abstract class CachingCalendarAccess implements WarningsAware {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarAccess.class);
+
+    /**
+     * The general key for persisting the caching information
+     */
+    public static final String CACHING = "folderCaching";
+
+    /**
+     * The key for persisting the folders last update information
+     */
     public static final String LAST_UPDATE = "lastUpdate";
 
-    public static final String PREVIOUS_LAST_UPDATE = "previousLastUpdate";
+    /**
+     * The key for persisting the used refresh interval (if provided by the external folder). The interval should be persisted in minutes
+     */
+    public static final String REFRESH_INTERVAL = "refreshInterval";
 
     private final ServerSession session;
     private final CalendarAccount account;
     private final CalendarParameters parameters;
+    private List<OXException> warnings = new ArrayList<>();
 
-    public CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    private Map<String, Object> originConfiguration;
+
+    /**
+     * Initializes a new {@link CachingCalendarAccess}.
+     * 
+     * @param session The user session
+     * @param account The user calendar account
+     * @param parameters The calendar parameters (for the given request)
+     * @throws OXException
+     */
+    protected CachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
+        this.originConfiguration = SerializationUtils.clone((HashMap<String, Object>) this.getAccount().getConfiguration());
     }
 
     /**
-     * Defines the refresh interval in minutes
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
+     * <br>
+     * If the value is <=0 the default of one day will be used.
      * 
-     * @return The interval to update imported {@link Event}s in {@link TimeUnit#MINUTES}
+     * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
-    public abstract int getRefreshInterval();
+    protected abstract long getRefreshInterval();
 
     /**
-     * Returns the requested list of {@link Event}s by querying the underlying calendar.
+     * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
+     * 
+     * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
+     */
+    public abstract long getExternalRequestTimeout();
+
+    /**
+     * Returns an {@link ExternalCalendarResult} containing the external {@link Event}s by querying the underlying calendar for the given folder id and additional information.
      * 
      * @param folderId The identifier of the folder to get the events from
-     * @return The events
+     * @return {@link ExternalCalendarResult}
      */
-    public abstract List<Event> getEvents(String folderId) throws OXException;
+    public abstract ExternalCalendarResult getEvents(String folderId) throws OXException;
+
+    /**
+     * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
+     * 
+     * @param folderId The identifier of the folder the error occurred for
+     * @param e The {@link OXException} occurred
+     */
+    public abstract void handleExceptions(String calendarFolderId, OXException e);
 
     @Override
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        ProcessingType updateType = getType();
+        Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
-        try {
-            List<Event> doIt = new CachingExecutor(this, cachingHandler).doIt(folderId, eventId, recurrenceId);
-            if (doIt != null && !doIt.isEmpty()) {
-                return doIt.get(0);
-            }
-            return new Event(); //FIXME how to handle empty search results?
-        } catch (OXException e) {
-            cachingHandler.handleExceptions(e);
-            throw e;
-        }
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(folderId, eventId, recurrenceId);
     }
 
     @Override
     public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        ProcessingType updateType = getType();
+        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
 
-        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
-        try {
-            return new CachingExecutor(this, cachingHandler).doIt(eventIDs);
-        } catch (OXException e) {
-            cachingHandler.handleExceptions(e);
-            throw e;
-        }
+        Set<FolderUpdateState> executionList = generateExecutionList(sortEventIDsPerFolderId.keySet().toArray(new String[sortEventIDsPerFolderId.size()]));
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(eventIDs);
     }
 
     @Override
     public final List<Event> getEventsInFolder(String folderId) throws OXException {
-        ProcessingType updateType = getType();
+        Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(updateType, this);
-        try {
-            return new CachingExecutor(this, cachingHandler).doIt(folderId);
-        } catch (OXException e) {
-            cachingHandler.handleExceptions(e);
-            throw e;
+        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return resultCollector.get(folderId);
+    }
+
+    private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {
+        List<CalendarFolder> externalFolders = new ArrayList<>(this.getVisibleFolders()); // retrieves external folders
+        List<FolderUpdateState> persistedUpdateStates = getLatestUpdateStates(); // retrieves folder states of last update
+
+        Set<FolderUpdateState> executionList = merge(persistedUpdateStates, externalFolders);
+        cleanup(executionList, folderIds);
+        return executionList;
+    }
+
+    /**
+     * Cleans up the execution list to only have the really desired instructions left. This means each {@link FolderProcessingType#DELETE}, {@link FolderProcessingType#READ_DB}, {@link FolderProcessingType#INITIAL_INSERT} instruction and
+     * {@link FolderProcessingType#UPDATE} for requested folders will be left over.
+     * 
+     * @param executionList Instructions retrieved from merging current state and external folders
+     * @param folderIds The folders that should be updated
+     */
+    protected void cleanup(Set<FolderUpdateState> executionList, String... folderIds) {
+        for (Iterator<FolderUpdateState> iterator = executionList.iterator(); iterator.hasNext();) {
+            FolderUpdateState folderUpdateState = iterator.next();
+            if (!folderUpdateState.getType().equals(FolderProcessingType.UPDATE)) {
+                continue;
+            }
+            if (!Arrays.asList(folderIds).contains(folderUpdateState.getFolderId())) {
+                iterator.remove();
+            }
         }
+    }
+
+    protected Set<FolderUpdateState> merge(List<FolderUpdateState> persistedUpdateStates, List<CalendarFolder> externalFolders) {
+        if (persistedUpdateStates == null) {
+            persistedUpdateStates = Collections.emptyList();
+        }
+        if (externalFolders == null) {
+            externalFolders = Collections.emptyList();
+        }
+
+        Set<FolderUpdateState> executionList = new HashSet<>();
+
+        for (Iterator<CalendarFolder> iterator = externalFolders.iterator(); iterator.hasNext();) {
+            CalendarFolder externalFolder = iterator.next();
+            String folderId = externalFolder.getId();
+            FolderUpdateState found = findExistingFolder(persistedUpdateStates, folderId);
+            if (found == null) {
+                executionList.add(new FolderUpdateState(folderId, 0, 0, FolderProcessingType.INITIAL_INSERT));
+                iterator.remove();
+                continue;
+            }
+            executionList.add(found);
+            persistedUpdateStates.remove(found);
+        }
+
+        if (!persistedUpdateStates.isEmpty()) {
+            for (FolderUpdateState folderUpdateState : persistedUpdateStates) {
+                executionList.add(new FolderUpdateState(folderUpdateState.getFolderId(), folderUpdateState.getLastUpdated(), folderUpdateState.getRefreshInterval(), FolderProcessingType.DELETE));
+            }
+        }
+
+        return executionList;
+    }
+
+    protected static FolderUpdateState findExistingFolder(List<FolderUpdateState> updateStates, String folderId) {
+        for (FolderUpdateState updateState : updateStates) {
+            if (updateState.getFolderId().equals(folderId)) {
+                return updateState;
+            }
+        }
+        return null;
     }
 
     public ServerSession getSession() {
@@ -164,46 +277,86 @@ public abstract class CachingCalendarAccess implements CalendarAccess {
     }
 
     /**
-     * Returns the type of processing that should be executed for the current request
+     * Returns the last persisted update state for each currently known folder (under consideration of the provided refresh interval).
      * 
      * @return {@link ProcessingType} that indicates the following steps of processing
      * @throws OXException
      */
-    protected final ProcessingType getType() throws OXException {
-        Number lastUpdate = (Number) getConfiguration(LAST_UPDATE);
-        if (lastUpdate == null || lastUpdate.longValue() <= 0) {
-            return ProcessingType.INITIAL_INSERT;
+    protected final List<FolderUpdateState> getLatestUpdateStates() throws OXException {
+        Map<String, Map<String, Object>> lastUpdates = (Map<String, Map<String, Object>>) getAccount().getConfiguration().get(CACHING);
+
+        if (lastUpdates == null) {
+            return Collections.emptyList();
+        }
+        List<FolderUpdateState> currentStates = new ArrayList<>();
+
+        for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
+            String folderId = folderUpdateState.getKey();
+            Map<String, Object> folderConfig = folderUpdateState.getValue();
+            Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
+            long refreshInterval = getCascadedRefreshInterval(folderConfig);
+
+            if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
+                currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
+                continue;
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            if (TimeUnit.MINUTES.toMillis(refreshInterval) < currentTimeMillis - lastFolderUpdate.longValue()) {
+                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.UPDATE));
+                continue;
+            }
+            currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.READ_DB));
         }
 
-        long currentTimeMillis = System.currentTimeMillis();
-        int refreshInterval = getRefreshInterval();
-        if (refreshInterval * 1000 * 60 < currentTimeMillis - lastUpdate.longValue()) {
-            return ProcessingType.UPDATE;
+        return currentStates;
+    }
+
+    protected long getCascadedRefreshInterval(Map<String, Object> folderConfig) {
+        if (folderConfig != null && !folderConfig.isEmpty()) {
+            Number calendarProviderInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
+            if (calendarProviderInterval != null) {
+                return calendarProviderInterval.longValue();
+            }
         }
-        return ProcessingType.READ_DB;
+        long providerRefreshInterval = getRefreshInterval();
+        if (providerRefreshInterval > Hours.ONE.toStandardMinutes().getMinutes()) {
+            return providerRefreshInterval;
+        }
+        return Weeks.ONE.toStandardMinutes().getMinutes();
     }
 
     /**
-     * Returns the persisted account configuration for the given key.
-     * 
-     * @param key The configuration key
-     * @return {@link Object} With the set configuration
-     * @throws OXException
+     * Saves the current configuration for the account if it has been changed while processing
      */
-    protected Object getConfiguration(String key) throws OXException {
-        return getAccount().getConfiguration().get(key);
+    protected void saveConfig() {
+        if (this.originConfiguration.equals(this.getAccount().getConfiguration())) {
+            return;
+        }
+        try {
+            CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
+            accountStorage.updateAccount(this.account.getAccountId(), this.getAccount().getConfiguration(), this.getAccount().getLastModified().getTime());
+        } catch (OXException e) {
+            LOG.error("Unable to save configuration: {}", e.getMessage(), e);
+        }
     }
 
-    /**
-     * Saves the current configuration for the account.<br>
-     * <br>
-     * This might be overridden to enhance the configuration by parameters of the underlying implementation.
-     * 
-     * @param configuration - The configuration to persist
-     * @throws OXException
-     */
-    public void saveConfig(Map<String, Object> configuration) throws OXException {
-        CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
-        accountStorage.updateAccount(this.account.getAccountId(), configuration, this.getAccount().getLastModified().getTime());
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    public Map<String, Object> getFolderConfiguration(String folderId) {
+        Map<String, Object> configuration = getAccount().getConfiguration();
+        Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CACHING);
+        if (caching == null) {
+            caching = new HashMap<>();
+            configuration.put(CACHING, caching);
+        }
+        Map<String, Object> folderConfig = caching.get(folderId);
+        if (folderConfig == null) {
+            folderConfig = new HashMap<>();
+            caching.put(folderId, folderConfig);
+        }
+        return folderConfig;
     }
 }

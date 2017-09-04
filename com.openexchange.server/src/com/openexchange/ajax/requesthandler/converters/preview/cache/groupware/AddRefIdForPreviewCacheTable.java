@@ -54,7 +54,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -76,8 +75,7 @@ public class AddRefIdForPreviewCacheTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int ctxId = params.getContextId();
-        final Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
@@ -96,7 +94,6 @@ public class AddRefIdForPreviewCacheTable extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 

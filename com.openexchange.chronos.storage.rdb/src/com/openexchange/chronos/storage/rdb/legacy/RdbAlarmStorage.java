@@ -216,7 +216,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
+            ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
+            if (null == originalReminder) {
+                updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
+            } else {
+                ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);
+                if (null == updatedReminder) {
+                    updated += deleteReminderMinutes(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                    updated += deleteReminderTriggers(connection, context.getContextId(), asInt(event.getId()), new int[] { userID });
+                } else {
+                    updated += updateReminderMinutes(connection, context.getContextId(), event, userID, updatedReminder.reminderMinutes);
+                    updated += updateReminderTrigger(connection, context.getContextId(), event, userID, updatedReminder.nextTriggerTime);
+                }
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -281,13 +293,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void deleteAlarms(String eventID) throws OXException {
+        deleteAlarms(Collections.singletonList(eventID));
+    }
+
+    @Override
+    public void deleteAlarms(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += deleteReminderMinutes(connection, context.getContextId(), asInt(eventID));
-            updated += deleteReminderTriggers(connection, context.getContextId(), asInt(eventID));
+            updated += deleteReminderMinutes(connection, context.getContextId(), eventIds);
+            updated += deleteReminderTriggers(connection, context.getContextId(), eventIds);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -299,6 +316,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     @Override
     public void deleteAlarms(String eventId, int userId, int[] alarmIds) throws OXException {
         deleteAlarms(eventId, userId);
+    }
+
+    @Override
+    public void deleteAlarms(int userId) throws OXException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -385,18 +407,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return null;
         }
         /*
-         * distinguish between 'snooze' & regular alarms (via RELTYPE=SNOOZE)
+         * distinguish between 'snooze' & regular alarms (via RELTYPE=SNOOZE),
+         * only considering regular alarms with a non-positive duration relative to event's the start date (reminder minutes >= 0)
          */
+        TimeZone timeZone = entityResolver.getTimeZone(userID);
         List<Alarm> regularAlarms = new ArrayList<Alarm>();
         List<Alarm> snoozeAlarms = new ArrayList<Alarm>();
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
                 snoozeAlarms.add(alarm);
-            } else {
+            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
                 regularAlarms.add(alarm);
             }
         }
-        TimeZone timeZone = entityResolver.getTimeZone(userID);
         Alarm snoozeAlarm = chooseNextAlarm(event, originalReminder, snoozeAlarms, timeZone);
         if (null != snoozeAlarm) {
             /*
@@ -588,11 +611,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int deleteReminderTriggers(Connection connection, int contextID, int eventID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM reminder WHERE cid=? AND target_id=? AND module=?;")) {
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, eventID);
-            stmt.setInt(3, REMINDER_MODULE);
+    private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id")
+            .append(getPlaceholders(eventIds.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, REMINDER_MODULE);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
@@ -614,11 +644,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private static int deleteReminderMinutes(Connection connection, int contextID, int eventID) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id=?;")) {
-            stmt.setNull(1, java.sql.Types.INTEGER);
-            stmt.setInt(2, contextID);
-            stmt.setInt(3, eventID);
+    private static int deleteReminderMinutes(Connection connection, int contextID, List<String> eventIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id")
+            .append(getPlaceholders(eventIds.size())).append(';');
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            stmt.setInt(parameterIndex++, contextID);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
@@ -709,7 +746,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
      * @return The next alarm, or <code>null</code> if there is none
      */
-    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) {
+    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
         if (null == alarms || 0 == alarms.size()) {
             return null;
         }

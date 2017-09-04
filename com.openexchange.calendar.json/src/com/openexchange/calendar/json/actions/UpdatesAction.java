@@ -267,7 +267,7 @@ public final class UpdatesAction extends ChronosAction {
     }
 
     private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
-        AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_TIMESTAMP
+        AJAXServlet.PARAMETER_COLUMNS
     );
 
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(

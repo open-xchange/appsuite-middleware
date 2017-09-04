@@ -1,5 +1,5 @@
 /chronos/accounts?action=update:
-  get:
+  put:
     operationId: updateAccount
     tags:
       - Chronos
@@ -30,3 +30,5 @@
         description: |
           A JSON object containing the configuration of updated calendar account. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CalendarAccountResponse"

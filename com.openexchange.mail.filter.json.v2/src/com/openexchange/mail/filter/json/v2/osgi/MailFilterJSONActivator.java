@@ -88,6 +88,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.CurrentDateT
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.DateTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.EnvelopeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.ExistsTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.FalseTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
@@ -124,6 +125,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerTestCommandParserRegistry();
         registerActionCommandParserRegistry();
+        openTrackers();
 
         getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
@@ -154,6 +156,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser(this));
         registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser(this));
         registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser(this));
+        registry.register(Commands.FALSE.getCommandName(), new FalseTestCommandParser(this));
         registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser(this));
 
         registry.register(SimplifiedHeaderTest.From.getCommandName(), simplifiedHeaderTestParser);
@@ -163,7 +166,9 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(SimplifiedHeaderTest.AnyRecipient.getCommandName(), simplifiedHeaderTestParser);
         registry.register(SimplifiedHeaderTest.MailingList.getCommandName(), simplifiedHeaderTestParser);
 
-        addService(TestCommandParserRegistry.class, registry);
+        registerService(TestCommandParserRegistry.class, registry);
+        trackService(TestCommandParserRegistry.class);
+
     }
 
     /**
@@ -186,6 +191,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
 
         registry.register(SimplifiedActions.Copy.getCommandName(), new FileIntoActionCommandParser(this));
 
-        addService(ActionCommandParserRegistry.class, registry);
+        registerService(ActionCommandParserRegistry.class, registry);
+        trackService(ActionCommandParserRegistry.class);
     }
 }

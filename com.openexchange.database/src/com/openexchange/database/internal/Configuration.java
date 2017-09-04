@@ -57,6 +57,7 @@ import com.openexchange.pooling.ExhaustedActions;
 
 /**
  * Contains the settings to connect to the configuration database.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Configuration {
@@ -98,6 +99,7 @@ public final class Configuration {
     }
 
     private interface Convert<T> {
+
         T convert(String toConvert);
     }
 
@@ -113,6 +115,7 @@ public final class Configuration {
 
     String getProperty(final Property property, final String def) {
         return getUniversal(property, def, new Convert<String>() {
+
             @Override
             public String convert(final String toConvert) {
                 return toConvert;
@@ -122,6 +125,7 @@ public final class Configuration {
 
     int getInt(final Property property, final int def) {
         return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
+
             @Override
             public Integer convert(final String toConvert) {
                 return Integer.valueOf(toConvert);
@@ -131,6 +135,7 @@ public final class Configuration {
 
     long getLong(final Property property, final long def) {
         return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
+
             @Override
             public Long convert(final String toConvert) {
                 return Long.valueOf(toConvert);
@@ -140,6 +145,7 @@ public final class Configuration {
 
     boolean getBoolean(final Property property, final boolean def) {
         return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
+
             @Override
             public Boolean convert(final String toConvert) {
                 return Boolean.valueOf(toConvert);
@@ -169,8 +175,7 @@ public final class Configuration {
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
                 readProps.put(readKey, readValue);
-            } else
-            if (key.startsWith("writeProperty.")) {
+            } else if (key.startsWith("writeProperty.")) {
                 final String value = props.getProperty(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
@@ -268,9 +273,11 @@ public final class Configuration {
         /** Allows to disable the replication monitor. */
         REPLICATION_MONITOR("com.openexchange.database.replicationMonitor"),
         /** Allows to write a warning into the logs if a connection to the master is only used to read data. */
-        CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons");
+        CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons"),
+        /** Specifies the lock mechanism to use. */
+        LOCK_MECH("com.openexchange.database.lockMech");
 
-        private String propertyName;
+        private final String propertyName;
 
         private Property(String propertyName) {
             this.propertyName = propertyName;

@@ -53,19 +53,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.service.EventID;
 
 /**
- * {@link HandlerHelper}
+ * {@link HandlerHelper} contains utility methods used by the {@link CachingHandler} implementation
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 public class HandlerHelper {
 
+    /**
+     * Enriches the list of {@link Event}s with its related folder identifier if not existing. If no corresponding {@link EventID} can be found the {@link Event} won't get a folder identifier.
+     * 
+     * @param events The list to add folder ids
+     * @param eventIDs The list containing the folder id
+     */
     public static void setFolderId(List<Event> events, final List<EventID> eventIDs) {
         for (Event event : events) {
+            if (event.containsFolderId()) {
+                continue;
+            }
             EventID eventID = getEventIdForEvent(eventIDs, event);
             if (eventID != null) {
                 event.setFolderId(eventID.getFolderID());
@@ -75,13 +86,20 @@ public class HandlerHelper {
 
     protected static EventID getEventIdForEvent(List<EventID> eventIDs, Event event) {
         for (EventID eventID : eventIDs) {
-            if (eventID.getObjectID().equals(event.getId()) || eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
+            if (eventID.getObjectID().equals(event.getId()) && eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
                 return eventID;
             }
         }
+        LoggerFactory.getLogger(HandlerHelper.class).debug("Unable to find an EventID matching the event with object id {} and recurrence id {}", event.getId(), event.getRecurrenceId().toString());
         return null;
     }
 
+    /**
+     * Enriches the list of {@link Event}s with the provided folder identifier. If there is already a folder identifier set it will not be overwritten.
+     * 
+     * @param events The list to add the folder identifier
+     * @param folderId The folder identifier to set
+     */
     public static void setFolderId(List<Event> events, String folderId) {
         for (Event event : events) {
             if (!event.containsFolderId()) {
@@ -90,6 +108,12 @@ public class HandlerHelper {
         }
     }
 
+    /**
+     * Sorts the given list of {@link EventID}s based on their folder identifier.
+     * 
+     * @param events The {@link EventID}s to sort
+     * @return Map containing the {@link EventID}s sorted by their folder identifier
+     */
     public static Map<String, List<EventID>> sortEventIDsPerFolderId(List<EventID> events) {
         Map<String, List<EventID>> sortedList = new HashMap<String, List<EventID>>();
 

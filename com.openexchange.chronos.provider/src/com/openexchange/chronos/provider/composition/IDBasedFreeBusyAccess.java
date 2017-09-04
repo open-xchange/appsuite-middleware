@@ -55,8 +55,10 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
+import com.openexchange.tx.TransactionAware;
 
 /**
  * {@link IDBasedFreeBusyAccess}
@@ -64,7 +66,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface IDBasedFreeBusyAccess extends IDBasedCalendarAccess {
+public interface IDBasedFreeBusyAccess extends TransactionAware, CalendarParameters {
 
     /**
      * Gets an array of <code>boolean</code> values representing the days where the current session's user has events at.

@@ -50,7 +50,6 @@
 package com.openexchange.calendar.json.actions;
 
 import java.util.Date;
-import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -149,13 +148,6 @@ public final class ConfirmAction extends ChronosAction {
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMESTAMP);
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
-
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         if (false == session.contains(CalendarParameters.PARAMETER_IGNORE_CONFLICTS)) {
@@ -170,13 +162,14 @@ public final class ConfirmAction extends ChronosAction {
         } else {
             eventID = getEventConverter(session).getEventID(folderId, objectId, recurrencePosition);
         }
+        long clientTimestamp = optClientTimestamp(request, DISTANT_FUTURE);
         JSONObject jsonObject = request.getData();
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
         Attendee attendee = EventConverter.getAttendee(participant);
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
             attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUserId());
         }
-        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee);
+        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
         return new AJAXRequestResult(new JSONObject(0), new Date(result.getTimestamp()), "json");
     }
 

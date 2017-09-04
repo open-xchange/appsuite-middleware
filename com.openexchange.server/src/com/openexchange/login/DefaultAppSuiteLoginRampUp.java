@@ -243,7 +243,6 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     private static final Set<String> RESERVED;
     static {
         RampUpKey[] values = RampUpKey.values();
-        int len = values.length;
         ImmutableList.Builder<RampUpKey> keys = ImmutableList.builder();
         ImmutableSet.Builder<String> reserved = ImmutableSet.builder();
         for (RampUpKey rampUpKey : values) {

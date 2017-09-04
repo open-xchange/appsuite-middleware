@@ -237,7 +237,7 @@ public class FindRequest {
             if (json.has(PARAM_START)) {
                 off = json.getInt(PARAM_START);
             }
-            if (json.has(PARAM_SIZE)) {
+            if (json.hasAndNotNull(PARAM_SIZE)) {
                 len = json.getInt(PARAM_SIZE);
             }
         } catch (JSONException e) {

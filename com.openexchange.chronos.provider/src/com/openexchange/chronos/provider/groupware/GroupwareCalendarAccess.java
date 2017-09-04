@@ -50,6 +50,8 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.List;
+import java.util.Set;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -79,29 +81,21 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
 
     /**
      * Updates an existing folder.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param folderId The identifier of the folder to update
      * @param folder The folder data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The (possibly changed) identifier of the updated folder
      */
-    String updateFolder(String folderId, CalendarFolder folder) throws OXException;
+    String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing folder.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param folderId The identifier of the folder to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      */
-    void deleteFolder(String folderId) throws OXException;
+    void deleteFolder(String folderId, long clientTimestamp) throws OXException;
 
     /**
      * Gets a list of all visible calendar folders.
@@ -175,14 +169,14 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
      * @param event The event data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateEvent(EventID eventID, Event event) throws OXException;
+    CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException;
 
     /**
      * Moves an existing event into another folder.
@@ -191,40 +185,47 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
      * @param folderId The identifier of the folder to move the event to
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The move result
      */
-    CalendarResult moveEvent(EventID eventID, String folderId) throws OXException;
+    CalendarResult moveEvent(EventID eventID, String folderId, long clientTimestamp) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param eventID The identifier of the event to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The delete result
      */
-    CalendarResult deleteEvent(EventID eventID) throws OXException;
+    CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Retrieves upcoming alarm trigger.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     *
+     * @param actions The actions to retrieve
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
 
 }

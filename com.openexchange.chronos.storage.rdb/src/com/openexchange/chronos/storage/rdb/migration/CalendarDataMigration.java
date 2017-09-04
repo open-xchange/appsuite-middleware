@@ -62,17 +62,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
@@ -122,8 +127,9 @@ public class CalendarDataMigration {
      * @param config The migration config to use
      * @param context The context being migrated
      * @param connection The database connection
+     * @throws OXException
      */
-    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, Connection connection) {
+    public CalendarDataMigration(MigrationProgress progress, MigrationConfig config, Context context, Connection connection) throws OXException {
         super();
         this.progress = progress;
         this.config = config;
@@ -260,10 +266,43 @@ public class CalendarDataMigration {
         copiedAttendees += attendeeCount;
         destinationStorage.getAlarmStorage().insertAlarms(prepareAlarms(destinationStorage.getAlarmStorage(), alarms));
         copiedAlarms += alarmCount;
+
+        /*
+         * prepare alarm trigger
+         */
+        Map<String, Set<RecurrenceId>> exceptionMap = new HashMap<>(events.size());
+
+        for (Event event : events) {
+            List<Attendee> atts = attendees.get(event.getId());
+            if (atts != null) {
+                event.setAttendees(atts);
+            }
+            Map<Integer, List<Alarm>> alarmsPerAttendee = alarms.get(event.getId());
+            if (alarmsPerAttendee == null) {
+                continue;
+            }
+
+            Set<RecurrenceId> exceptions = new TreeSet<>();
+            if (CalendarUtils.isSeriesMaster(event)) {
+                exceptions.addAll(getChangeExceptionDates(event.getSeriesId()));
+                if (event.getDeleteExceptionDates() != null) {
+                    exceptions.addAll(event.getDeleteExceptionDates());
+                }
+            }
+            exceptionMap.put(event.getId(), exceptions);
+        }
+        destinationStorage.getAlarmTriggerStorage().insertTriggers(alarms, events, exceptionMap);
+
         int nextLastObjectId = Integer.parseInt(events.get(events.size() - 1).getId());
         LOG.trace("Successfully copied {} events, {} attendees and {} alarms; next last object id evaluated to {}.",
             I(events.size()), I(attendeeCount), I(alarmCount), I(nextLastObjectId));
         return nextLastObjectId;
+    }
+
+    private SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
+        EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
+        List<Event> changeExceptions = destinationStorage.getEventStorage().loadExceptions(seriesId, fields);
+        return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
     private long copyTombstoneData(long lastTimestamp, int length) throws OXException {

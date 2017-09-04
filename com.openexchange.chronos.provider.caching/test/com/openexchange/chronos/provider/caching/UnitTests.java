@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.caching;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutorTest;
 
 /**
  * 
@@ -61,7 +62,10 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since v7.10.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ CachingCalendarAccessTest.class,
+@SuiteClasses({
+    //@formatter:off
+    CachingExecutorTest.class
+    //@formatter:on
 })
 public class UnitTests {
 

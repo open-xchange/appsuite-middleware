@@ -4,10 +4,13 @@ Bundle-Name: The API bundle for the chronos storage
 Bundle-SymbolicName: com.openexchange.chronos.storage
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.service,
+ com.openexchange.context,
+ com.openexchange.database,
  com.openexchange.database.provider,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
@@ -20,9 +23,11 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.osgi.util,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
+ com.openexchange.server,
  com.openexchange.session,
  javax.mail.internet,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
-Export-Package: com.openexchange.chronos.storage
+Export-Package: com.openexchange.chronos.storage,
+ com.openexchange.chronos.storage.operation

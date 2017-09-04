@@ -61,6 +61,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String EVENT_NOT_FOUND_MSG = "The requested event was not found.";
 
+    public static final String FOLDER_NOT_FOUND_MSG = "The requested folder was not found.";
+
     public static final String ATTENDEE_NOT_FOUND_MSG = "The requested attendee was not found.";
 
     public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";
@@ -116,6 +118,10 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
 
     public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The attendee '%1$s' is either not an internal user or does not exist.";
+
+    public static final String AUTH_FAILED_MSG = "Authentication failed.";
+
+    public static final String BAD_AUTH_CONFIGURATION_MSG = "Unable to create account. There have been issues with the provided authentication.";
 
     /**
      * Initializes a new {@link CalendarExceptionMessages}.

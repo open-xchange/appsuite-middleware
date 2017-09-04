@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.service.EntityResolver;
@@ -79,6 +80,7 @@ import com.openexchange.tools.arrays.Collections;
 public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static final int INSERT_CHUNK_SIZE = 200;
+    private static final int DELETE_CHUNK_SIZE = 200;
     private static final AttendeeMapper MAPPER = AttendeeMapper.getInstance();
 
     private final int accountId;
@@ -149,15 +151,22 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     @Override
     public void deleteAttendees(String eventId) throws OXException {
+        deleteAttendees(java.util.Collections.singletonList(eventId));
+    }
+
+    @Override
+    public void deleteAttendees(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated += deleteAttendees(connection, eventId);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteAttendees(connection, chunk);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e);
+            throw asOXException(e, MAPPER, (Attendee) null, connection, "calendar_attendee");
         } finally {
             release(connection, updated);
         }
@@ -236,7 +245,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e);
+            throw asOXException(e, MAPPER, Lists.newArrayList(Iterables.concat(attendeesByEventId.values())), connection, "calendar_attendee");
         } finally {
             release(connection, updated);
         }
@@ -266,11 +275,21 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return updated;
     }
 
-    private int deleteAttendees(Connection connection, String eventId) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event=?;")) {
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, accountId);
-            stmt.setInt(3, asInt(eventId));
+    private int deleteAttendees(Connection connection, List<String> eventIds) throws SQLException {
+        if (null == eventIds || 0 == eventIds.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event")
+            .append(getPlaceholders(eventIds.size())).append(';');
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
@@ -356,13 +375,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM ").append(tombstones ? "calendar_attendee_tombstone" : "calendar_attendee")
-            .append(" WHERE cid=? AND account=?")
+            .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
         ;
-        if (1 == eventIds.length) {
-            stringBuilder.append(" AND event=?");
-        } else {
-            stringBuilder.append(" AND event IN (").append(getParameters(eventIds.length)).append(')');
-        }
         if (null != internal) {
             stringBuilder.append(" AND entity IS ").append(internal.booleanValue() ? " NOT NULL" : "NULL");
         }

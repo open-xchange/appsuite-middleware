@@ -4,11 +4,17 @@ Bundle-Name: Chronos calendar provider service defintions
 Bundle-SymbolicName: com.openexchange.chronos.provider
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="19.0.0",
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
+ com.fasterxml.jackson.databind,
+ com.google.common.io,
+ com.openexchange.auth.info,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
+ com.openexchange.crypto,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.java,
@@ -16,14 +22,21 @@ Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.osgi.util,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.id,
  com.openexchange.tx,
+ javax.crypto,
+ javax.crypto.spec,
+ org.apache.commons.codec.binary,
  org.dmfs.rfc5545,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.provider.auth,
  com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.groupware
+Bundle-Activator: com.openexchange.chronos.provider.osgi.ProviderActivator

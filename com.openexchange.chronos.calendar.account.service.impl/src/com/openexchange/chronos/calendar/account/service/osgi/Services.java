@@ -50,18 +50,16 @@
 package com.openexchange.chronos.calendar.account.service.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.chronos.calendar.account.service.osgi.Services;
 
 /**
+ * 
  * {@link Services}
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class Services {
+public final class Services {
 
     /**
      * Initializes a new {@link Services}.
@@ -70,44 +68,38 @@ public class Services {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Gets the service look-up
+     * Sets the service lookup.
      *
-     * @return The service look-up or <code>null</code>
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public static ServiceLookup get() {
-        return ref.get();
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Sets the service look-up
+     * Gets the service lookup.
      *
-     * @param serviceLookup The service look-up or <code>null</code>
+     * @return The service lookup or <code>null</code>
      */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    public static <S extends Object> S getService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        return service;
-    }
-
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        S service = getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
         }
-        return service;
+        return serviceLookup.getService(clazz);
     }
-
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
-
 }

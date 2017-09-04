@@ -4,7 +4,7 @@ Bundle-Name: The chronos iCal iCal4j bundle
 Bundle-SymbolicName: com.openexchange.chronos.ical.ical4j
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,

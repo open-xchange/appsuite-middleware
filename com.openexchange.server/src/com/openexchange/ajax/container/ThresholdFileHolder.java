@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -202,6 +203,25 @@ public final class ThresholdFileHolder implements IFileHolder {
         if (null != baos) {
             baos.reset();
         }
+    }
+
+    /**
+     * Lets this file holder be auto-managed by calling thread.
+     *
+     * @return <code>true</code> if this file holder could be made auto-managed by calling thread; otherwise <code>false</code>
+     */
+    public boolean automanaged() {
+        if (autoManaged) {
+            return false;
+        }
+
+        File tempFile = this.tempFile;
+        if (null == tempFile) {
+            return false;
+        }
+
+        LogProperties.addTempFile(tempFile);
+        return true;
     }
 
     /**

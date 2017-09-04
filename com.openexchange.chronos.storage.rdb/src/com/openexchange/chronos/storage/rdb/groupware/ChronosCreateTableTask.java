@@ -56,12 +56,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ChronosCreateTableTask}
@@ -73,16 +72,11 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ChronosCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link ChronosCreateTableTask}.
-     *
-     * @param services A service lookup reference
      */
-    public ChronosCreateTableTask(ServiceLookup services) {
+    public ChronosCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -92,19 +86,27 @@ public class ChronosCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        Connection connection = null;
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
-            connection = dbService.getForUpdateTask(params.getContextId());
+            connection.setAutoCommit(false);
+            rollback = true;
             for (Map.Entry<String, String> entry : ChronosCreateTableService.getTablesByName().entrySet()) {
                 createTable(connection, entry.getKey(), entry.getValue());
             }
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            dbService.backForUpdateTask(params.getContextId(), connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
     }
 
-    private static void createTable(Connection connection, String tableName, String createStatement) throws OXException {
+    private static void createTable(Connection connection, String tableName, String createStatement) throws OXException, SQLException {
         PreparedStatement stmt = null;
         try {
             if (tableExists(connection, tableName)) {
@@ -113,8 +115,6 @@ public class ChronosCreateTableTask extends UpdateTaskAdapter {
             }
             stmt = connection.prepareStatement(createStatement);
             stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }

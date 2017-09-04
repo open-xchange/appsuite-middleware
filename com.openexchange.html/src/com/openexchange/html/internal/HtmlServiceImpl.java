@@ -647,6 +647,13 @@ public final class HtmlServiceImpl implements HtmlService {
                         html = hasBody ? document.outerHtml() : document.body().html();
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                     }
+
+                    boolean[] sanitized = new boolean[] { true };
+                    while (sanitized[0]) {
+                        sanitized[0] = false;
+                        // Start sanitizing round
+                        html = SaneScriptTags.saneScriptTags(html, sanitized);
+                    }
                 } else {
                     CssOnlyCleaningJsoupHandler handler = new CssOnlyCleaningJsoupHandler();
                     handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());

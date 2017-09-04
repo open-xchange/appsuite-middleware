@@ -61,48 +61,6 @@ import java.util.Map;
  */
 class FilestoreContextBlock {
 
-    private static final class IntPair {
-
-        private final int i1;
-        private final int i2;
-        private final int hash;
-
-        IntPair(int i1, int i2) {
-            super();
-            this.i1 = i1;
-            this.i2 = i2;
-
-            int result = 31 * 1 + i1;
-            result = 31 * result + i2;
-            this.hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof IntPair)) {
-                return false;
-            }
-            IntPair other = (IntPair) obj;
-            if (i1 != other.i1) {
-                return false;
-            }
-            if (i2 != other.i2) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-
     public final int writeDBPoolID;
     public final String schema;
     public final int filestoreID;

@@ -4,7 +4,7 @@ Bundle-Name: Java Simon - Simple Monitoring API
 Bundle-SymbolicName: org.javasimon
 Bundle-Version: 3.3.0
 Bundle-Vendor: Richard "Virgo" Richter
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/h2-1.3.169.jar,
  lib/javasimon-console-embed-3.5.1.jar,
  lib/javasimon-core-3.5.1.jar,

@@ -52,6 +52,7 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
@@ -114,7 +115,11 @@ public class ListAction extends ChronosAction {
                 eventIDs.add(getEventID(jsonObject.getString(FOLDER_ID_FIELD), jsonObject.getString(ID_FIELD), jsonObject.optString(RECURENCE_ID_FIELD, null)));
             }
             List<Event> events = calendarAccess.getEvents(eventIDs);
-            return new AJAXRequestResult(events, EventResultConverter.INPUT_FORMAT);
+            long timestamp = 0l;
+            for(Event eve: events){
+                timestamp = Math.max(timestamp, eve.getTimestamp());
+            }
+            return new AJAXRequestResult(events, new Date(timestamp), EventResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }

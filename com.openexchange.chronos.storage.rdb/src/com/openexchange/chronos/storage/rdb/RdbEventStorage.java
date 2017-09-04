@@ -66,6 +66,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -93,6 +94,7 @@ import com.openexchange.search.SearchTerm;
 public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private static final int INSERT_CHUNK_SIZE = 100;
+    private static final int DELETE_CHUNK_SIZE = 200;
     private static final EventMapper MAPPER = EventMapper.getInstance();
 
     private final int accountId;
@@ -208,19 +210,21 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public void insertEvent(Event event) throws OXException {
-        int updated = 0;
+    public List<Event> loadExceptions(String seriesId, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            updated = insertEvent(connection, event);
-            txPolicy.commit(connection);
+            connection = dbProvider.getReadConnection(context);
+            return selectExceptions(connection, seriesId, fields);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, event, connection, "calendar_event");
+            throw asOXException(e);
         } finally {
-            release(connection, updated);
+            dbProvider.releaseReadConnection(context, connection);
         }
+    }
+
+    @Override
+    public void insertEvent(Event event) throws OXException {
+        insertEvents(Collections.singletonList(event));
     }
 
     @Override
@@ -230,23 +234,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            for (int i = 0; i < events.size(); i += INSERT_CHUNK_SIZE) {
-                /*
-                 * prepare chunk
-                 */
-                int length = Math.min(events.size(), i + INSERT_CHUNK_SIZE) - i;
-                Event[] chunk = new Event[length];
-                for (int j = 0; j < length; j++) {
-                    chunk[j] = events.get(i + j);
-                }
-                /*
-                 * insert chunk
-                 */
+            for (List<Event> chunk : Lists.partition(events, INSERT_CHUNK_SIZE)) {
                 updated += insertEvents(connection, chunk);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event");
+            throw asOXException(e, MAPPER, events, connection, "calendar_event");
         } finally {
             release(connection, updated);
         }
@@ -282,7 +275,26 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             updated = deleteEvent(connection, eventId);
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event");
+            throw asOXException(e, MAPPER, (Event) null, connection, "calendar_event");
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+
+    @Override
+    public void deleteEvents(List<String> eventIds) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteEvents(connection, chunk);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e, MAPPER, (Event) null, connection, "calendar_event");
         } finally {
             release(connection, updated);
         }
@@ -325,18 +337,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public void insertEventTombstone(Event event) throws OXException {
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            updated = replaceTombstoneEvent(connection, event);
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e, MAPPER, event, connection, "calendar_event_tombstone");
-        } finally {
-            release(connection, updated);
-        }
+        insertEventTombstones(Collections.singletonList(event));
     }
 
     @Override
@@ -349,23 +350,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            for (int i = 0; i < events.size(); i += INSERT_CHUNK_SIZE) {
-                /*
-                 * prepare chunk
-                 */
-                int length = Math.min(events.size(), i + INSERT_CHUNK_SIZE) - i;
-                Event[] chunk = new Event[length];
-                for (int j = 0; j < length; j++) {
-                    chunk[j] = events.get(i + j);
-                }
-                /*
-                 * insert chunk
-                 */
+            for (List<Event> chunk : Lists.partition(events, INSERT_CHUNK_SIZE)) {
                 updated += replaceTombstoneEvents(connection, chunk);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
-            throw asOXException(e, MAPPER, null, connection, "calendar_event_tombstone");
+            throw asOXException(e, MAPPER, events, connection, "calendar_event_tombstone");
         } finally {
             release(connection, updated);
         }
@@ -380,26 +370,27 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private int insertEvent(Connection connection, Event event) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder()
-            .append("INSERT INTO calendar_event ")
-            .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
-            .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?);")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+    private int deleteEvents(Connection connection, List<String> ids) throws SQLException {
+        if (null == ids || 0 == ids.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_event WHERE cid=? AND account=? AND id")
+            .append(getPlaceholders(ids.size())).append(';')
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
-            stmt.setLong(parameterIndex++, getRangeFrom(event));
-            stmt.setLong(parameterIndex++, getRangeUntil(event));
+            for (String id : ids) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             return logExecuteUpdate(stmt);
         }
     }
 
-    private int insertEvents(Connection connection, Event[] events) throws SQLException, OXException {
-        if (null == events || 0 == events.length) {
+    private int insertEvents(Connection connection, List<Event> events) throws SQLException, OXException {
+        if (null == events || 0 == events.size()) {
             return 0;
         }
         EventField[] mappedFields = MAPPER.getMappedFields();
@@ -408,7 +399,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
             .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)")
         ;
-        for (int i = 1; i < events.length; i++) {
+        for (int i = 1; i < events.size(); i++) {
             stringBuilder.append(",(?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)");
         }
         stringBuilder.append(';');
@@ -425,26 +416,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private int replaceTombstoneEvent(Connection connection, Event event) throws SQLException, OXException {
-        EventField[] mappedFields = MAPPER.getMappedFields();
-        String sql = new StringBuilder()
-            .append("REPLACE INTO calendar_event_tombstone ")
-            .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
-            .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?);")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, accountId);
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
-            stmt.setLong(parameterIndex++, getRangeFrom(event));
-            stmt.setLong(parameterIndex++, getRangeUntil(event));
-            return logExecuteUpdate(stmt);
-        }
-    }
-
-    private int replaceTombstoneEvents(Connection connection, Event[] events) throws SQLException, OXException {
-        if (null == events || 0 == events.length) {
+    private int replaceTombstoneEvents(Connection connection, List<Event> events) throws SQLException, OXException {
+        if (null == events || 0 == events.size()) {
             return 0;
         }
         EventField[] mappedFields = MAPPER.getMappedFields();
@@ -453,7 +426,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("(cid,account,").append(MAPPER.getColumns(mappedFields)).append(",rangeFrom,rangeUntil) ")
             .append("VALUES (?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)")
         ;
-        for (int i = 1; i < events.length; i++) {
+        for (int i = 1; i < events.size(); i++) {
             stringBuilder.append(",(?,?,").append(MAPPER.getParameters(mappedFields)).append(",?,?)");
         }
         stringBuilder.append(';');
@@ -535,6 +508,26 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
             }
         }
+    }
+
+    private List<Event> selectExceptions(Connection connection, String seriesId, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = MAPPER.getMappedFields(fields);
+        String sql = new StringBuilder()
+            .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM calendar_event ")
+            .append("WHERE cid=? AND account=? AND series=? AND id<>series;")
+        .toString();
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            stmt.setInt(3, asInt(seriesId));
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, null));
+                }
+            }
+        }
+        return events;
     }
 
     private List<Event> selectEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm, List<SearchFilter> filters, SearchOptions searchOptions, EventField[] fields) throws SQLException, OXException {

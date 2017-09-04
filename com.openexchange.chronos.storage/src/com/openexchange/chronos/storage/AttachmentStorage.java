@@ -118,4 +118,15 @@ public interface AttachmentStorage {
      */
     void deleteAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException;
 
+    /**
+     * Deletes certain attachments of a multiple events.
+     * <p/>
+     * Permissions may be re-checked under the hood, therefore a valid session and parent folder needs to passed.
+     *
+     * @param session The session of the acting user
+     * @param attachmentsByEventPerFolderId The attachments to delete for each event, mapped to the folder identifiers where an event
+     *            appears for the acting user
+     */
+    void deleteAttachments(Session session, Map<String, Map<String, List<Attachment>>> attachmentsByEventPerFolderId) throws OXException;
+
 }

@@ -70,6 +70,7 @@ public final class PasswordChangeEvent {
     private final String oldPassword;
     private final Map<String, List<String>> headers;
     private final Cookie[] cookies;
+    private final String ip;
 
     /**
      * Initializes a new {@link PasswordChangeEvent}
@@ -80,10 +81,10 @@ public final class PasswordChangeEvent {
      * @param oldPassword The old password (needed for verification)
      */
     public PasswordChangeEvent(final Session session, final Context ctx, final String newPassword, final String oldPassword) {
-        this(session, ctx, newPassword, oldPassword, null, null);
+        this(session, ctx, newPassword, oldPassword, null, null, null);
     }
 
-    public PasswordChangeEvent(Session session, Context ctx, String newPassword, String oldPassword, Map<String, List<String>> headers, Cookie[] cookies) {
+    public PasswordChangeEvent(Session session, Context ctx, String newPassword, String oldPassword, Map<String, List<String>> headers, Cookie[] cookies, String ip) {
         super();
         this.session = session;
         this.ctx = ctx;
@@ -91,6 +92,7 @@ public final class PasswordChangeEvent {
         this.oldPassword = oldPassword;
         this.headers = headers;
         this.cookies = cookies;
+        this.ip = ip;
     }
 
     /**
@@ -137,5 +139,14 @@ public final class PasswordChangeEvent {
      */
     public String getOldPassword() {
         return oldPassword;
+    }
+    
+    /**
+     * Get the IP address of the client changing the password
+     * 
+     * @return The IP address or <code>null</code>
+     */
+    public String getIpAddress() {
+        return ip;
     }
 }

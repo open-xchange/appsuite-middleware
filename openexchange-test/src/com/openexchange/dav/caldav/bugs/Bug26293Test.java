@@ -71,7 +71,7 @@ import com.openexchange.test.CalendarTestManager;
 /**
  * {@link Bug26293Test}
  *
- * CalDav Sync not possible: „403“ an Vorgang CalDAVWriteEntityQueueableOperation
+ * CalDav Sync not possible: '403' an Vorgang CalDAVWriteEntityQueueableOperation
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0

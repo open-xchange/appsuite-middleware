@@ -50,7 +50,6 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_TIMESTAMP;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
@@ -61,7 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
-import com.openexchange.chronos.json.converter.EventMapper;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
@@ -80,7 +79,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications",PARAMETER_IGNORE_CONFLICTS, PARAMETER_TIMESTAMP);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", PARAMETER_IGNORE_CONFLICTS);
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -98,7 +97,7 @@ public class UpdateAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
+        long clientTimestamp = parseClientTimestamp(requestData);
         Object data = requestData.getData();
         if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
@@ -112,7 +111,7 @@ public class UpdateAction extends ChronosAction {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
         try {
-            CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event);
+            CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             if (isConflict(e)) {

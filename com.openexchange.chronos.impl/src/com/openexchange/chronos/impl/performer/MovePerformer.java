@@ -52,12 +52,12 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -76,6 +76,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -121,7 +122,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * load original event & check current session user's permissions
          */
-        Event originalEvent = loadEventData(objectId, false);
+        Event originalEvent = loadEventData(objectId);
         Check.eventIsInFolder(originalEvent, folder);
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         if (session.getUserId() == originalEvent.getCreatedBy()) {
@@ -156,13 +157,12 @@ public class MovePerformer extends AbstractUpdatePerformer {
         /*
          * track & return results
          */
-        Event updatedEvent = loadEventData(originalEvent.getId(), false);
+        Event updatedEvent = loadEventData(originalEvent.getId());
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
+        result.addAffectedFolderIds(targetFolder.getID(), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
-        if (isAttendee(updatedEvent, calendarUserId)) {
-            result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
-        } else {
-            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
-        }
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+        result.addUserizedCreation(userize(updatedEvent, getCalendarUserId(targetFolder)));
         return result;
     }
 
@@ -352,15 +352,21 @@ public class MovePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateAttendeeAlarms(Event originalEvent, List<Alarm> originalAlarms, int userId, String folderId) throws OXException {
+    private void updateAttendeeAlarms(Event originalEvent, List<Alarm> originalAlarms, int userId, final String folderId) throws OXException {
         if (null != originalAlarms && 0 < originalAlarms.size()) {
-            String oldFolderId = originalEvent.getFolderId();
-            try {
-                originalEvent.setFolderId(folderId);
-                storage.getAlarmStorage().updateAlarms(originalEvent, userId, originalAlarms);
-            } finally {
-                originalEvent.setFolderId(oldFolderId);
-            }
+            Event userizedEvent = new DelegatingEvent(originalEvent) {
+
+                @Override
+                public String getFolderId() {
+                    return folderId;
+                }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
+            };
+            storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
         }
     }
 

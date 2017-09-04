@@ -56,21 +56,27 @@ import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
@@ -79,12 +85,14 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.TimestampedResult;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
@@ -98,8 +106,11 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -108,6 +119,9 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -117,6 +131,9 @@ import com.openexchange.user.UserService;
  * @since v7.10.0
  */
 public class Utils {
+
+    /** The fixed identifier for the internal calendar provider */
+    public static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
@@ -401,30 +418,6 @@ public class Utils {
     }
 
     /**
-     * Gets the identifier of the folder representing a specific calendar user's view on an event. For events in <i>public</i> folders or
-     * not <i>group-scheduled</i> events, this is always the common folder identifier of the event. Otherwise, the corresponding
-     * attendee's parent folder identifier is returned.
-     *
-     * @param storage A reference to the calendar storage to query the event's attendees not set
-     * @param event The event to get the folder view for
-     * @param calendarUser The identifier of the user to get the folder view for
-     * @return The folder identifier
-     * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
-     */
-    public static String getFolderView(CalendarStorage storage, Event event, int calendarUser) throws OXException {
-        if (null != event.getFolderId() || false == isGroupScheduled(event)) {
-            return event.getFolderId();
-        } else {
-            Attendee userAttendee = CalendarUtils.find(
-                event.containsAttendees() ? event.getAttendees() : storage.getAttendeeStorage().loadAttendees(event.getId()), calendarUser);
-            if (null == userAttendee || null == userAttendee.getFolderID()) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
-            }
-            return userAttendee.getFolderID();
-        }
-    }
-
-    /**
      * Gets a user.
      *
      * @param session The calendar session
@@ -557,6 +550,11 @@ public class Utils {
             public SortedSet<RecurrenceId> getDeleteExceptionDates() {
                 return userizedExceptionDates;
             }
+
+            @Override
+            public boolean containsDeleteExceptionDates() {
+                return true;
+            }
         };
     }
 
@@ -572,22 +570,6 @@ public class Utils {
             list.add(itrerator.next());
         }
         return list;
-    }
-
-    /**
-     * Gets the maximum timestamp in a list of timestamped results.
-     *
-     * @param results The results to determine the maximum timestamp for
-     * @return The maximum timestamp, or <code>0</code> if the supplied list is <code>null</code> or empty
-     */
-    public static long getMaximumTimestamp(List<? extends TimestampedResult> results) {
-        long timestamp = 0L;
-        if (null != results) {
-            for (TimestampedResult result : results) {
-                timestamp = Math.max(timestamp, result.getTimestamp());
-            }
-        }
-        return timestamp;
     }
 
     /**
@@ -639,15 +621,133 @@ public class Utils {
         return visibleFolders;
     }
 
+    /**
+     * Calculates a map holding the identifiers of all folders a user is able to access, based on the supplied collection of folder
+     * identifiers.
+     *
+     * @param session The calendar session
+     * @param folderIds The identifiers of all folders to determine the users with access for
+     * @return The identifiers of the affected folders for each user
+     */
+    public static Map<Integer, List<String>> getAffectedFoldersPerUser(CalendarSession session, Set<String> folderIds) {
+        Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
+        OXFolderAccess folderAccess;
+        try {
+            Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
+            Connection connection = optConnection(session);
+            folderAccess = null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
+        } catch (OXException e) {
+            LoggerFactory.getLogger(Utils.class).warn("Error collecting affected folders", e);
+            return affectedFoldersPerUser;
+        }
+        for (String folderId : folderIds) {
+            try {
+                FolderObject folder = folderAccess.getFolderObject(Event2Appointment.asInt(folderId));
+                for (Integer userId : getAffectedUsers(folder, session.getEntityResolver())) {
+                    com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
+                }
+            } catch (Exception e) {
+                LoggerFactory.getLogger(Utils.class).warn("Error collecting affected users for folder {}; skipping.", folderId, e);
+            }
+        }
+        return affectedFoldersPerUser;
+    }
+
+    /**
+     * Gets a list of the personal folder identifiers representing all internal user attendee's view for the supplied collection of
+     * attendees.
+     *
+     * @param attendees The attendees to collect the folder identifiers for
+     * @return The personal folder identifiers of the internal user attendees, or an empty list if there are none
+     */
+    public static List<String> getPersonalFolderIds(List<Attendee> attendees) {
+        List<String> folderIds = new ArrayList<String>();
+        for (Attendee attendee : CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+            String folderId = attendee.getFolderID();
+            if (Strings.isNotEmpty(folderId) && false == AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID.equals(attendee.getFolderID())) {
+                folderIds.add(folderId);
+            }
+        }
+        return folderIds;
+    }
+
+    /**
+     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected
+     * by a change in this folder.
+     *
+     * @param folder The folder to get the affected user identifiers for
+     * @param entityResolver The entity resolver to use
+     * @return The identifiers of the affected folders for each user
+     */
+    public static Set<Integer> getAffectedUsers(FolderObject folder, EntityResolver entityResolver) {
+        List<OCLPermission> permissions = folder.getPermissions();
+        if (null == permissions || 0 == permissions.size()) {
+            return Collections.emptySet();
+        }
+        Set<Integer> affectedUsers = new HashSet<Integer>();
+        for (OCLPermission permission : permissions) {
+            if (permission.isFolderVisible()) {
+                if (permission.isGroupPermission()) {
+                    try {
+                        int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
+                        affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
+                    } catch (OXException e) {
+                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
+                            I(permission.getEntity()), I(folder.getObjectID()), e);
+                    }
+                } else {
+                    affectedUsers.add(I(permission.getEntity()));
+                }
+            }
+        }
+        return affectedUsers;
+    }
+
+    /**
+     * Gets a collection of all user identifiers for whom a specific folder is visible, i.e. a list of user identifiers who'd be affected
+     * by a change in this folder.
+     *
+     * @param folder The folder to get the affected user identifiers for
+     * @param entityResolver The entity resolver to use
+     * @return The identifiers of the affected folders for each user
+     */
+    public static Set<Integer> getAffectedUsers(UserizedFolder folder, EntityResolver entityResolver) {
+        Permission[] permissions = folder.getPermissions();
+        if (null == permissions || 0 == permissions.length) {
+            return Collections.emptySet();
+        }
+        Set<Integer> affectedUsers = new HashSet<Integer>();
+        for (Permission permission : permissions) {
+            if (permission.isVisible()) {
+                if (permission.isGroup()) {
+                    try {
+                        int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
+                        affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
+                    } catch (OXException e) {
+                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
+                            I(permission.getEntity()), folder.getID(), e);
+                    }
+                } else {
+                    affectedUsers.add(I(permission.getEntity()));
+                }
+            }
+        }
+        return affectedUsers;
+    }
+
     private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
-        Connection connection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+        Connection connection = optConnection(session);
         if (null != connection) {
             decorator.put(Connection.class.getName(), connection);
         }
         decorator.setLocale(session.getEntityResolver().getLocale(session.getUserId()));
         decorator.setTimeZone(Utils.getTimeZone(session));
         return decorator;
+    }
+
+    public static Connection optConnection(CalendarSession session) {
+        return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
     }
 
 }

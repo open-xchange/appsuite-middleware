@@ -13,6 +13,12 @@
         type: string
         description: Calendar provider identifier
         required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: The last modification date
+        required: true
       - in: body
         name: body
         description: A JSON array of ids from the calendar accounts to delete.

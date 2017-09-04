@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -72,6 +73,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
@@ -90,7 +92,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -162,6 +163,11 @@ public abstract class AbstractQueryPerformer {
             public SortedSet<RecurrenceId> getDeleteExceptionDates() {
                 return recurrenceIds;
             }
+
+            @Override
+            public boolean containsDeleteExceptionDates() {
+                return true;
+            }
         };
         //        return session.getRecurrenceService().iterateEventOccurrences(masterEvent, from, until);
         return session.getRecurrenceService().iterateEventOccurrences(adjustedSeriesMaster, from, until);
@@ -224,7 +230,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SearchOptions(session));
+        return sortEvents(processedEvents);
     }
 
     /**
@@ -248,7 +254,7 @@ public abstract class AbstractQueryPerformer {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
-            event.setFolderId(Utils.getFolderView(storage, event, forUser));
+            event.setFolderId(getFolderView(event, forUser));
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
@@ -260,7 +266,7 @@ public abstract class AbstractQueryPerformer {
                 processedEvents.add(event);
             }
         }
-        return sortEvents(processedEvents, new SearchOptions(session));
+        return sortEvents(processedEvents);
     }
 
     /**
@@ -271,6 +277,7 @@ public abstract class AbstractQueryPerformer {
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance</li>
+     * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
      * @param event The event to userize
@@ -283,13 +290,29 @@ public abstract class AbstractQueryPerformer {
         if (isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, forUser);
         }
-        final String folderView = Utils.getFolderView(storage, event, forUser);
-        if (false == folderView.equals(event.getFolderId())) {
+        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
+        final String folderView = getFolderView(event, forUser);
+        if (null != alarms || false == folderView.equals(event.getFolderId())) {
             event = new DelegatingEvent(event) {
 
                 @Override
                 public String getFolderId() {
                     return folderView;
+                }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
+
+                @Override
+                public List<Alarm> getAlarms() {
+                    return alarms;
+                }
+
+                @Override
+                public boolean containsAlarms() {
+                    return true;
                 }
             };
         }
@@ -297,19 +320,13 @@ public abstract class AbstractQueryPerformer {
     }
 
     /**
-     * Sorts a list of events.
+     * Sorts a list of events if requested, based on the search options set in the underlying calendar parameters.
      *
      * @param events The events to sort
-     * @param sortOptions The sort options to use
      * @return The sorted events
      */
-    protected List<Event> sortEvents(List<Event> events, SearchOptions sortOptions) throws OXException {
-        if (null == events || 2 > events.size() || null == sortOptions || SearchOptions.EMPTY.equals(sortOptions) ||
-            null == sortOptions.getSortOrders() || 0 == sortOptions.getSortOrders().length) {
-            return events;
-        }
-        Collections.sort(events, session.getUtilities().getComparator(sortOptions.getSortOrders(), Utils.getTimeZone(session)));
-        return events;
+    protected List<Event> sortEvents(List<Event> events) throws OXException {
+        return CalendarUtils.sortEvents(events, new SearchOptions(session).getSortOrders(), Utils.getTimeZone(session));
     }
 
     /**
@@ -319,12 +336,8 @@ public abstract class AbstractQueryPerformer {
      * @return The recurrence identifiers in a sorted set, or an empty set if there are none
      */
     protected SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId))
-            .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-        ;
         EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
-        List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesId, fields);
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 

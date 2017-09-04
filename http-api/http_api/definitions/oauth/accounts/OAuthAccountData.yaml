@@ -23,5 +23,6 @@ properties:
   availableScopes:
     type: array
     description: The available scopes for the OAuth provider of this OAuth account
+    readOnly: true
     items:
       type: string

@@ -87,4 +87,10 @@ public interface ICalService {
      */
     ICalParameters initParameters();
 
+    /**
+     * Provides access to additional iCal utilities.
+     *
+     * @return The iCal utilities
+     */
+    ICalUtilities getUtilities();
 }

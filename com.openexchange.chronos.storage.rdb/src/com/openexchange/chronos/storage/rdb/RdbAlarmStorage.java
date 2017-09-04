@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -97,6 +98,7 @@ import com.openexchange.java.Strings;
 public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     private static final int INSERT_CHUNK_SIZE = 200;
+    private static final int DELETE_CHUNK_SIZE = 200;
     private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
 
     private final int accountId;
@@ -246,7 +248,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             for (Alarm alarm : alarms) {
-                updated += updateAlarm(connection, context.getContextId(), accountId, alarm.getId(), alarm);
+                updated += updateAlarm(connection, context.getContextId(), accountId, alarm.getId(), alarm, event.getId());
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -282,12 +284,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void deleteAlarms(String eventId) throws OXException {
+        deleteAlarms(Collections.singletonList(eventId));
+    }
+
+    @Override
+    public void deleteAlarms(List<String> eventIds) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAlarms(connection, context.getContextId(), accountId, eventId);
+            for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
+                updated += deleteAlarms(connection, context.getContextId(), accountId, chunk);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -315,6 +324,22 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
+    @Override
+    public void deleteAlarms(int userId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAlarms(connection, context.getContextId(), accountId, userId);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
@@ -326,7 +351,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
-            stmt.setInt(parameterIndex++, asInt(eventId));
+            stmt.setString(parameterIndex++, eventId);
             stmt.setInt(parameterIndex++, userId);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(eventId, alarm), mappedFields);
             return logExecuteUpdate(stmt);
@@ -355,13 +380,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             for (Entry<String, Map<Integer, List<Alarm>>> entry : alarmsByUserByEventId.entrySet()) {
-                int eventId = asInt(entry.getKey());
+                String eventId = entry.getKey();
                 for (Entry<Integer, List<Alarm>> alarmsByUser : entry.getValue().entrySet()) {
                     int userId = i(alarmsByUser.getKey());
                     for (Alarm alarm : alarmsByUser.getValue()) {
                         stmt.setInt(parameterIndex++, cid);
                         stmt.setInt(parameterIndex++, account);
-                        stmt.setInt(parameterIndex++, eventId);
+                        stmt.setString(parameterIndex++, eventId);
                         stmt.setInt(parameterIndex++, userId);
                         parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(entry.getKey(), alarm), mappedFields);
                     }
@@ -371,7 +396,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private int updateAlarm(Connection connection, int cid, int account, int id, Alarm alarm) throws SQLException, OXException {
+    private int updateAlarm(Connection connection, int cid, int account, int id, Alarm alarm, String eventId) throws SQLException, OXException {
         AlarmField[] assignedfields = MAPPER.getAssignedFields(alarm);
         String sql = new StringBuilder()
             .append("UPDATE calendar_alarm SET ").append(MAPPER.getAssignments(assignedfields))
@@ -379,7 +404,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(asString(id), alarm), assignedfields);
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, adjustPriorSave(eventId, alarm), assignedfields);
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             stmt.setInt(parameterIndex++, id);
@@ -398,7 +423,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
-            stmt.setInt(parameterIndex++, asInt(eventId));
+            stmt.setString(parameterIndex++, eventId);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
                     int userId = resultSet.getInt("user");
@@ -428,7 +453,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, account);
             stmt.setInt(parameterIndex++, user);
             for (String eventId : eventIds) {
-                stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
+                stmt.setString(parameterIndex++, eventId);
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -458,7 +483,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             for (String eventId : eventIds) {
-                stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
+                stmt.setString(parameterIndex++, eventId);
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
@@ -476,11 +501,30 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return alarmsByUserById;
     }
 
-    private static int deleteAlarms(Connection connection, int cid, int account, String eventId) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event=?;")) {
+    private static int deleteAlarms(Connection connection, int cid, int account, List<String> eventIds) throws SQLException {
+        if (null == eventIds || 0 == eventIds.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event")
+            .append(getPlaceholders(eventIds.size())).append(';');
+        ;
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, account);
+            for (String id : eventIds) {
+                stmt.setString(parameterIndex++, id);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteAlarms(Connection connection, int cid, int account, int user) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND user=?;")) {
             stmt.setInt(1, cid);
             stmt.setInt(2, account);
-            stmt.setInt(3, asInt(eventId));
+            stmt.setInt(3, user);
             return logExecuteUpdate(stmt);
         }
     }
@@ -494,7 +538,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
-            stmt.setInt(parameterIndex++, asInt(eventId));
+            stmt.setString(parameterIndex++, eventId);
             for (Integer userId : userIds) {
                 stmt.setInt(parameterIndex++, i(userId));
             }
@@ -566,7 +610,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     /**
      * Adjusts certain properties of an alarm prior inserting it into the database.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */

@@ -143,7 +143,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                 }
             }
         }
-        return sortEvents(events, new SearchOptions(session));
+        return sortEvents(events);
     }
 
     private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {

@@ -4,7 +4,7 @@ Bundle-Name: The compositing calendar provider implementation
 Bundle-SymbolicName: com.openexchange.chronos.provider.composition.impl
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.chronos,
  com.openexchange.chronos.common,
@@ -12,10 +12,12 @@ Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
  com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.groupware,
  com.openexchange.chronos.service,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.i18n,
  com.openexchange.java,

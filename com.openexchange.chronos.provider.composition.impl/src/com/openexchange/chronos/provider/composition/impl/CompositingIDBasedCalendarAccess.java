@@ -49,59 +49,54 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withRelativeID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.I;
-import java.security.InvalidParameterException;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.TimeZone;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.FreeBusyUtils;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
-import com.openexchange.chronos.provider.DefaultCalendarAccount;
-import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
-import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CompositingIDBasedCalendarAccess}
@@ -109,18 +104,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, IDBasedFreeBusyAccess {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositingIDBasedCalendarAccess.class);
-
-    /** The default <i>internal</i> calendar provider account */
-    private static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, Collections.<String, Object> emptyMap(), null);
-
-    private final ServiceLookup services;
-    private final Session session;
-    private final CalendarProviderRegistry providerRegistry;
-    private final Map<String, Object> parameters;
-    private final ConcurrentMap<Integer, CalendarAccess> connectedAccesses;
+public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
 
     /**
      * Initializes a new {@link CompositingIDBasedCalendarAccess}.
@@ -130,68 +114,12 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
      * @param services A service lookup reference
      */
     public CompositingIDBasedCalendarAccess(Session session, CalendarProviderRegistry providerRegistry, ServiceLookup services) throws OXException {
-        super();
-        this.services = services;
-        this.providerRegistry = providerRegistry;
-        this.session = session;
-        this.parameters = new HashMap<String, Object>();
-        this.connectedAccesses = new ConcurrentHashMap<Integer, CalendarAccess>();
+        super(session, providerRegistry, services);
     }
 
     @Override
     public Session getSession() {
         return session;
-    }
-
-    @Override
-    public void startTransaction() throws OXException {
-        ConcurrentMap<Integer, CalendarAccess> connectedAccesses = this.connectedAccesses;
-        if (false == connectedAccesses.isEmpty()) {
-            for (CalendarAccess access : connectedAccesses.values()) {
-                LOG.warn("Access already connected: {}", access);
-            }
-        }
-        connectedAccesses.clear();
-    }
-
-    @Override
-    public void finish() throws OXException {
-        /*
-         * close any connected calendar accesses
-         */
-        ConcurrentMap<Integer, CalendarAccess> connectedAccesses = this.connectedAccesses;
-        for (Iterator<Entry<Integer, CalendarAccess>> iterator = connectedAccesses.entrySet().iterator(); iterator.hasNext();) {
-            Entry<Integer, CalendarAccess> entry = iterator.next();
-            CalendarAccess access = entry.getValue();
-            LOG.debug("Closing calendar access {} for account {}.", access, entry.getKey());
-            access.close();
-            iterator.remove();
-        }
-    }
-
-    @Override
-    public void commit() throws OXException {
-        //
-    }
-
-    @Override
-    public void rollback() throws OXException {
-        //
-    }
-
-    @Override
-    public void setTransactional(boolean transactional) {
-        //
-    }
-
-    @Override
-    public void setRequestTransactional(boolean transactional) {
-        //
-    }
-
-    @Override
-    public void setCommitsTransaction(boolean commits) {
-        //
     }
 
     @Override
@@ -211,7 +139,7 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
         /*
          * get events from each account
          */
-        Map<Integer, List<EventID>> idsPerAccountId = getIDsPerAccountId(eventIDs);
+        Map<Integer, List<EventID>> idsPerAccountId = getRelativeIdsPerAccountId(eventIDs);
         Map<Integer, List<Event>> eventsPerAccountId = new HashMap<Integer, List<Event>>(idsPerAccountId.size());
         for (Entry<Integer, List<EventID>> entry : idsPerAccountId.entrySet()) {
             int accountId = entry.getKey().intValue();
@@ -260,17 +188,53 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     @Override
     public List<Event> getEventsOfUser() throws OXException {
         try {
-        return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
+            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }
     }
 
     @Override
+    public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        if (null == folderIds) {
+            return searchEvents(filters, queries);
+        }
+        List<Event> events = new ArrayList<Event>();
+        Map<Integer, List<String>> foldersPerAccountId = getRelativeFolderIdsPerAccountId(folderIds);
+        for (Map.Entry<Integer, List<String>> entry : foldersPerAccountId.entrySet()) {
+            String[] relativeFolderIds = entry.getValue().toArray(new String[entry.getValue().size()]);
+            int accountId = i(entry.getKey());
+            try {
+                List<Event> eventsInAccount = getAccess(accountId, SearchAware.class).searchEvents(relativeFolderIds, filters, queries);
+                events.addAll(withUniqueIDs(eventsInAccount, accountId));
+            } catch (OXException e) {
+                throw withUniqueIDs(e, accountId);
+            }
+        }
+        return 1 < foldersPerAccountId.size() ? sort(events) : events;
+    }
+
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
+        List<Event> events = new ArrayList<Event>();
+        for (CalendarAccount account : getAccounts()) {
+            CalendarAccess access = getAccess(account);
+            if (SearchAware.class.isInstance(access)) {
+                try {
+                    List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
+                    events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
+                } catch (OXException e) {
+                    throw withUniqueIDs(e, account.getAccountId());
+                }
+            }
+        }
+        return sort(events);
+    }
+
+    @Override
     public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-            UpdatesResult updatesResult = getAccess(accountId).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
+            UpdatesResult updatesResult = getAccess(accountId, SyncAware.class).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
             return new IDManglingUpdatesResult(updatesResult, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -340,11 +304,11 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public CalendarResult updateEvent(EventID eventID, Event event) throws OXException {
+    public CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateEvent(getRelativeId(eventID), withRelativeID(event));
+            CalendarResult result = calendarAccess.updateEvent(getRelativeId(eventID), withRelativeID(event), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -352,11 +316,11 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public CalendarResult moveEvent(EventID eventID, String targetFolderId) throws OXException {
+    public CalendarResult moveEvent(EventID eventID, String targetFolderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.moveEvent(getRelativeId(eventID), getRelativeFolderId(targetFolderId));
+            CalendarResult result = calendarAccess.moveEvent(getRelativeId(eventID), getRelativeFolderId(targetFolderId), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -364,11 +328,11 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee);
+            CalendarResult result = calendarAccess.updateAttendee(getRelativeId(eventID), attendee, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -376,11 +340,11 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public CalendarResult deleteEvent(EventID eventID) throws OXException {
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
-            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID));
+            PersonalAlarmAware calendarAccess = getAccess(accountId, PersonalAlarmAware.class);
+            CalendarResult result = calendarAccess.updateAlarms(getRelativeId(eventID), alarms, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
@@ -388,23 +352,35 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     }
 
     @Override
-    public void deleteFolder(String folderId) throws OXException {
+    public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID), clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        calendarAccess.deleteFolder(getRelativeFolderId(folderId));
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            calendarAccess.deleteFolder(getRelativeFolderId(folderId), clientTimestamp);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder) throws OXException {
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder));
-        return getUniqueFolderId(accountId, folderId);
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
+            return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
@@ -414,247 +390,42 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
     public String createFolder(String parentFolderId, CalendarFolder folder) throws OXException {
         int accountId = getAccountId(parentFolderId);
         try {
-        GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-        String folderId = calendarAccess.createFolder(getRelativeFolderId(parentFolderId), withRelativeID(folder));
-        return getUniqueFolderId(accountId, folderId);
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            String folderId = calendarAccess.createFolder(getRelativeFolderId(parentFolderId), withRelativeID(folder));
+            return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
     }
 
     @Override
-    public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
-    }
-
-    @Override
-    public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
-    }
-
-    @Override
-    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
-    }
-
-    @Override
-    public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
-    }
-
-    @Override
-    public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(parameters.entrySet());
-    }
-
-    /**
-     * Gets the groupware calendar access for a specific account. The account is connected implicitly and remembered to be closed during
-     * {@link #finish()} implicitly, if not already done.
-     *
-     * @param accountId The identifier to get the calendar access for
-     * @return The groupware calendar access for the specified account
-     */
-    private GroupwareCalendarAccess getGroupwareAccess(int accountId) throws OXException {
-        CalendarAccess access = getAccess(accountId);
-        if (false == GroupwareCalendarAccess.class.isInstance(access)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getAccount(accountId).getProviderId());
-        }
-        return (GroupwareCalendarAccess) access;
-    }
-
-    /**
-     * Gets the calendar access for a specific account. The account is connected implicitly and remembered to be closed during
-     * {@link #finish()} implicitly, if not already done.
-     *
-     * @param accountId The identifier to get the calendar access for
-     * @return The calendar access for the specified account
-     */
-    private CalendarAccess getAccess(int accountId) throws OXException {
-        CalendarAccess access = connectedAccesses.get(I(accountId));
-        return null != access ? access : getAccess(getAccount(accountId));
-    }
-
-    /**
-     * Gets the groupware calendar access for a specific account. The account is connected implicitly and remembered to be closed during
-     * {@link #finish()} implicitly, if not already done.
-     *
-     * @param account The account to get the calendar access for
-     * @return The groupware calendar access for the specified account
-     */
-    private GroupwareCalendarAccess getGroupwareAccess(CalendarAccount account) throws OXException {
-        CalendarAccess access = getAccess(account);
-        if (false == GroupwareCalendarAccess.class.isInstance(access)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getAccount(account.getAccountId()).getProviderId());
-        }
-        return (GroupwareCalendarAccess) access;
-    }
-
-    /**
-     * Gets the calendar access for a specific account. The account is connected implicitly and remembered to be closed during
-     * {@link #finish()} implicitly, if not already done.
-     *
-     * @param account The account to get the calendar access for
-     * @return The calendar access for the specified account
-     */
-    private CalendarAccess getAccess(CalendarAccount account) throws OXException {
-        ConcurrentMap<Integer, CalendarAccess> connectedAccesses = this.connectedAccesses;
-        CalendarAccess access = connectedAccesses.get(I(account.getAccountId()));
-        if (null == access) {
-            CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
-            if (null == provider) {
-                throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId());
-            }
-            access = provider.connect(session, account, this);
-            CalendarAccess existingAccess = connectedAccesses.put(I(account.getAccountId()), access);
-            if (null != existingAccess) {
-                access.close();
-                access = existingAccess;
-            }
-        }
-        return access;
-    }
-
-    /**
-     * Gets all calendar accounts of the current session's user.
-     *
-     * @return The calendar accounts
-     */
-    private List<CalendarAccount> getAccounts() throws OXException {
-        CalendarAccountServiceFactory serviceFactory = services.getOptionalService(CalendarAccountServiceFactory.class);
-        if (null != serviceFactory) {
-            CalendarAccountService accountService = serviceFactory.create(session.getUserId(), ServerSessionAdapter.valueOf(session).getContext());
-            return accountService.loadAccounts(session.getUserId()); 
-        } else {
-            List<CalendarAccount> accounts = new ArrayList<CalendarAccount>(1);
-            accounts.add(DEFAULT_ACCOUNT);
-            return accounts;
-        }
-    }
-
-    /**
-     * Gets a specific calendar account.
-     *
-     * @param accountId The identifier of the account to get
-     * @return The calendar account
-     */
-    private CalendarAccount getAccount(int accountId) throws OXException {
-        CalendarAccountServiceFactory serviceFactory = services.getOptionalService(CalendarAccountServiceFactory.class);
-        if (null == serviceFactory) {
-            throw ServiceExceptionCode.absentService(CalendarAccountServiceFactory.class);
-        }
-        return serviceFactory.create(session.getUserId(), ServerSessionAdapter.valueOf(session).getContext()).loadAccount(accountId);
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("IDBasedCalendarAccess ")
-            .append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId())
-            .append(", connectedAccesses=").append(connectedAccesses.keySet()).append(']')
-        .toString();
-    }
-
-    @Override
-    public boolean[] hasEventsBetween(Date from, Date until) throws OXException {
-
-        boolean [] result=null;
-        for(CalendarAccount account: getAccounts()){
-            CalendarAccess access = getAccess(account);
-            if(access instanceof FreeBusyAwareCalendarAccess){
-                boolean[] hasEventsBetween = ((FreeBusyAwareCalendarAccess) access).hasEventsBetween(from, until);
-                if(result==null){
-                    result=hasEventsBetween;
-                } else {
-                    mergeEventsBetween(result, hasEventsBetween);
-                }
-            }
+    public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
+        List<CalendarAccount> accounts = getAccounts();
+        List<AlarmTrigger> result = new ArrayList<>();
+        for (CalendarAccount account : accounts) {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(account.getAccountId());
+            result.addAll(calendarAccess.getAlarmTrigger(actions));
         }
 
+        for (AlarmTrigger trigger : result) {
+            trigger.setFolder(getUniqueFolderId(trigger.getAccount(), trigger.getFolder()));
+        }
         return result;
     }
 
-    private void mergeEventsBetween(boolean [] result, boolean [] newValues) throws OXException{
-        if(result.length != newValues.length){
-            // Should never occur
-           throw new OXException(new InvalidParameterException("The two boolean arrays must not have different sizes!"));
-        }
-
-        for(int x=0; x<result.length; x++){
-            result[x]|=newValues[x];
-        }
-    }
-
-    @Override
-    public Map<Attendee, List<Event>> getFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<Event>> result = null;
-        for (CalendarAccount account : getAccounts()) {
-            CalendarAccess access = getAccess(account);
-            if (access instanceof FreeBusyAwareCalendarAccess) {
-                Map<Attendee, List<Event>> eventsPerAttendee = ((FreeBusyAwareCalendarAccess) access).getFreeBusy(attendees, from, until);
-                if (result == null) {
-                    result = eventsPerAttendee;
-                    for (Attendee att : result.keySet()) {
-                        result.put(att, withUniqueIDs(result.get(att), account.getAccountId()));
-                    }
-                } else {
-                    for (Attendee att : eventsPerAttendee.keySet()) {
-                        result.get(att).addAll(withUniqueIDs(eventsPerAttendee.get(att), account.getAccountId()));
-                    }
-                }
+    private List<Event> sort(List<Event> events) throws OXException {
+        if (null != events && 0 < events.size()) {
+            SortOrder[] sortOrders = new SearchOptions(this).getSortOrders();
+            if (null != sortOrders && 0 < sortOrders.length) {
+                TimeZone timeZone = CalendarUtils.optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
+                CalendarUtils.sortEvents(events, sortOrders, timeZone);
             }
         }
-
-        //TODO properly sort events or remove sorting?
-
-        return result;
+        return events;
     }
 
-    @Override
-    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<FreeBusyTime>> result=null;
-        for(CalendarAccount account: getAccounts()){
-            CalendarAccess access = getAccess(account);
-            if(access instanceof FreeBusyAwareCalendarAccess){
-                Map<Attendee, List<FreeBusyTime>> freeBusyTimesPerAttendee = ((FreeBusyAwareCalendarAccess) access).getMergedFreeBusy(attendees, from, until);
-                if(result==null){
-                    result=freeBusyTimesPerAttendee;
-                } else {
-                    for(Attendee att: freeBusyTimesPerAttendee.keySet()){
-                        result.get(att).addAll(freeBusyTimesPerAttendee.get(att));
-                    }
-                }
-            }
-        }
-
-        // Merge results
-        for(Attendee att: result.keySet()){
-            List<FreeBusyTime> freeBusyTimes = result.get(att);
-            result.put(att, FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
-        }
-
-        return result;
-    }
-
-    @Override
-    public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
-        List<EventConflict> result=null;
-        for(CalendarAccount account: getAccounts()){
-            CalendarAccess access = getAccess(account);
-            if (access instanceof FreeBusyAwareCalendarAccess) {
-                List<EventConflict> eventConflicts = ((FreeBusyAwareCalendarAccess) access).checkForConflicts(event, attendees);
-                if (result == null) {
-                    result = new ArrayList<>(eventConflicts.size());
-                }
-                for (EventConflict conflict : eventConflicts) {
-                    result.add(new IDManglingEventConflict(conflict, account.getAccountId()));
-                }
-            }
-        }
-
-        //TODO sort results?
-
-        return result;
+    private static Event find(List<Event> events, EventID eventID) {
+        return find(events, eventID.getFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
     }
 
     private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
@@ -668,20 +439,6 @@ public class CompositingIDBasedCalendarAccess implements IDBasedCalendarAccess, 
             }
         }
         return null;
-    }
-
-    private static Event find(List<Event> events, EventID eventID) {
-        return find(events, eventID.getFolderID(), eventID.getObjectID(), eventID.getRecurrenceID());
-    }
-
-    private static Map<Integer, List<EventID>> getIDsPerAccountId(List<EventID> eventIDs) throws OXException {
-        Map<Integer, List<EventID>> idsPerAccountId = new HashMap<Integer, List<EventID>>();
-        for (EventID eventID : eventIDs) {
-            Integer accountId = I(getAccountId(eventID.getFolderID()));
-            EventID relativeEventId = getRelativeId(eventID);
-            com.openexchange.tools.arrays.Collections.put(idsPerAccountId, accountId, relativeEventId);
-        }
-        return idsPerAccountId;
     }
 
 }

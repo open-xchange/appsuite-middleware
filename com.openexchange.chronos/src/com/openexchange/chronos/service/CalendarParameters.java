@@ -159,13 +159,6 @@ public interface CalendarParameters {
     static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
 
     /**
-     * {@link Long}
-     * <p/>
-     * The client timestamp / sequence number to catch concurrent updates, i.e. the latest modification time known by the client.
-     */
-    static final String PARAMETER_TIMESTAMP = "timestamp";
-
-    /**
      * {@link String[]}
      * <p/>
      * A collection of values that should be "ignored" when retrieving results, currently known values are <code>deleted</code> and

@@ -85,11 +85,9 @@ public class TouchPerformer extends AbstractUpdatePerformer {
         /*
          * 'touch' event & track results
          */
-        Event originalEvent = loadEventData(id, false);
+        Event originalEvent = loadEventData(id);
         touch(id);
-        Event updatedEvent = loadEventData(id, false);
-        result.addPlainUpdate(originalEvent, updatedEvent);
-        result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+        trackUpdate(originalEvent, loadEventData(id));
         return result;
     }
 

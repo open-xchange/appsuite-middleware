@@ -49,6 +49,7 @@
 
 package com.openexchange.find.calendar;
 
+import com.openexchange.chronos.ParticipationStatus;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -69,12 +70,12 @@ public class CalendarFacetValues {
     public static final String RANGE_ONE_YEAR = "one_year";
 
     // Status
-    public static final String STATUS_ACCEPTED = "accepted";
+    public static final String STATUS_ACCEPTED = ParticipationStatus.ACCEPTED.getValue();
 
-    public static final String STATUS_DECLINED = "declined";
+    public static final String STATUS_DECLINED = ParticipationStatus.DECLINED.getValue();
 
-    public static final String STATUS_TENTATIVE = "tentative";
+    public static final String STATUS_TENTATIVE = ParticipationStatus.TENTATIVE.getValue();
 
-    public static final String STATUS_NONE = "none";
+    public static final String STATUS_NONE = ParticipationStatus.NEEDS_ACTION.getValue();
 
 }

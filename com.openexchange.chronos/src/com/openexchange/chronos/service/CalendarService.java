@@ -50,6 +50,9 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import java.util.Set;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -304,15 +307,15 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param event The event data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event) throws OXException;
+    CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event, long clientTimestamp) throws OXException;
 
     /**
      * <i>Touches</i> an existing event by setting a new, current last modification timestamp.
@@ -330,43 +333,73 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param folderId The identifier of the folder to move the event to
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The move result
      */
-    CalendarResult moveEvent(CalendarSession session, EventID eventID, String folderId) throws OXException;
+    CalendarResult moveEvent(CalendarSession session, EventID eventID, String folderId, long clientTimestamp) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to update
      * @param attendee The attendee to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
 
     /**
-     * Delete a existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
+     * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding
+     * event.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update the alarms for
+     * @param alarms The updated list of alarms to apply, or <code>null</code> to remove any previously stored alarms
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
+     */
+    CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
+
+    /**
+     * Delete an existing event.
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The delete result
      */
-    CalendarResult deleteEvent(CalendarSession session, EventID eventID) throws OXException;
+    CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Clears a folder's contents by deleting all contained events.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to clear
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The delete result
+     */
+    CalendarResult clearEvents(CalendarSession session, String folderId, long clientTimestamp) throws OXException;
+
+    /**
+     * Retrieves upcoming alarm triggers.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param actions The actions to retrieve
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
 
 }

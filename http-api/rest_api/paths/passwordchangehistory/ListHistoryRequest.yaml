@@ -1,0 +1,59 @@
+/admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes:
+  get:
+    security:
+      - basicAuth: []
+    operationId: passwd-changes
+    tags:
+      - Passwordchangehistory
+    summary: List the history of password changes for a specific user. The API can be accessed via BasicAuth for configured users. For details visit the configuration site.
+    produces:
+      - application/json
+    parameters:
+      - in: path
+        name: context-id
+        description: The context the user is in
+        required: true
+        type: integer
+        format: int64
+      - in: path
+        name: user-id
+        description: The ID representing the user
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: limit
+        description: Limit the output to a specific length of entries. Entries are sorted from oldest first to newest last. So limitation will cut off newest changes.
+        required: false
+        type: integer
+        format: int64
+      - in: query
+        name: sort
+        description: Comma sperated list of fields to sort the output for. Field names that begin with "-" will be sorted descanding else the fields get sorted ascanding. For valid field names see responses.
+        required: false
+        type: string
+    responses:
+      200:
+        description: | 
+            An JSONArray containing the data. Returnd fields will be "date" and "client_id". "date" defines the time of the change and "client_id" the identifier the changeing client transmitted.
+            In case the IP address is known "client_address" will also be returned. If the field "client_id" is well known an optional parameter "client_name" is returned with a more human readable description.
+        schema:
+          type: string
+      400:
+        description: Bad request, response contains error message.
+        schema:
+          type: string
+      401:
+        description: Not authorized  
+      404:
+        description: Not found, if path is wrong (unknown context group or feedback type). Response contains error message.
+        schema:
+          type: string
+      500:
+        description: Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.
+        schema:
+          type: string
+    x-ox-examples:
+      Example:
+        description: List the latest two recorded password changes for user 5 in context 10 
+        example: GET http://localhost:8009/admin/v1/contexts/10/users/5/passwd-changes?limit=2

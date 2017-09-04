@@ -52,6 +52,7 @@ package com.openexchange.chronos.compat.impl.cache;
 import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarResult;
 
@@ -78,12 +79,12 @@ public class CacheCalendarHandler implements CalendarHandler {
     }
 
     @Override
-    public void handle(CalendarResult result) {
+    public void handle(CalendarEvent event) {
         try {
-            if (needsInvalidation(result)) {
+            if (needsInvalidation(event)) {
                 Cache cache = cacheService.getCache(REGION);
                 if (null != cache) {
-                    cache.invalidateGroup(String.valueOf(result.getSession().getContextId()));
+                    cache.invalidateGroup(String.valueOf(event.getContextId()));
                 }
             }
         } catch (Exception e) {
@@ -91,11 +92,11 @@ public class CacheCalendarHandler implements CalendarHandler {
         }
     }
 
-    private static boolean needsInvalidation(CalendarResult result) {
-        if (null != result) {
-            return null != result.getCreations() && 0 < result.getCreations().size() ||
-                null != result.getUpdates() && 0 < result.getUpdates().size() ||
-                null != result.getDeletions() && 0 < result.getDeletions().size()
+    private static boolean needsInvalidation(CalendarEvent event) {
+        if (null != event) {
+            return null != event.getCreations() && 0 < event.getCreations().size() ||
+                null != event.getUpdates() && 0 < event.getUpdates().size() ||
+                null != event.getDeletions() && 0 < event.getDeletions().size()
             ;
         }
         return false;

@@ -4,13 +4,14 @@ Bundle-Name: The provider for the internal calendar account
 Bundle-SymbolicName: com.openexchange.chronos.provider.internal
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.caching,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,
+ com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.groupware,
  com.openexchange.chronos.service,
  com.openexchange.exception,
@@ -28,6 +29,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.oxfolder.property,
  com.openexchange.tools.session,
  javax.mail.internet,
  javax.mail.internet.idn,

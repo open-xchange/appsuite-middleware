@@ -84,7 +84,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 final String tableName = extractTableName(create);
                 if (null != tableName) {
                     if (tableExists(con, tableName)) {
-                        LOG.info("A table with name \"{}\" already exists. Aborting table creation.", tableName);
+                        LOG.debug("A table with name \"{}\" already exists. Aborting table creation.", tableName);
                     } else {
                         try {
                             stmt.execute(create);
@@ -97,7 +97,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 final String procedureName = extractProcedureName(create);
                 if (null != procedureName) {
                     if (procedureExists(con, procedureName)) {
-                        LOG.info("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
+                        LOG.debug("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
                     } else {
                         try {
                             stmt.execute(create);

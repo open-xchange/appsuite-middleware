@@ -50,11 +50,21 @@
 package com.openexchange.chronos.provider.birthdays.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider;
-import com.openexchange.chronos.provider.birthdays.Services;
+import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -74,19 +84,24 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, RecurrenceService.class };
+        return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, ICalService.class, 
+            CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarAccountStorageFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             getLogger(BirthdaysCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
-            Services.setServiceLookup(this);
             /*
              * register calendar provider
              */
-            registerService(CalendarProvider.class, new BirthdaysCalendarProvider());
-
+            registerService(CalendarProvider.class, new BirthdaysCalendarProvider(this));
+            /*
+             * register event handler
+             */
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, ContactEventHandler.TOPICS);
+            registerService(EventHandler.class, new ContactEventHandler(this), serviceProperties);
         } catch (Exception e) {
             getLogger(BirthdaysCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
@@ -96,7 +111,6 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         getLogger(BirthdaysCalendarProviderActivator.class).info("stopping bundle {}", context.getBundle());
-        Services.setServiceLookup(null);
         super.stopBundle();
     }
 

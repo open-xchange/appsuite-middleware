@@ -197,42 +197,52 @@ public class Event2Appointment {
             return 0;
         }
         switch (color) {
+            case "#CEE7FF":
             case "lightblue":
             case "#ADD8E6":
             case "#9bceff":
                 return 1;
+            case "#96BBE8":
             case "darkblue":
             case "#6ca0df":
             case "#00008B":
                 return 2;
+            case "#C4AFE3":
             case "purple":
             case "#a889d6":
             case "#800080":
                 return 3;
+            case "#F0D8F0":
             case "pink":
             case "#e2b3e2":
             case "#FFC0CB":
                 return 4;
+            case "#F2D1D2":
             case "red":
             case "#e7a9ab":
             case "#FF0000":
                 return 5;
+            case "#FFD1A3":
             case "orange":
             case "#ffb870":
             case "#FFA500":
                 return 6;
+            case "#F7EBB6":
             case "yellow":
             case "#f2de88":
             case "#FFFF00":
                 return 7;
+            case "#D4DEA7":
             case "lightgreen":
             case "#c2d082":
             case "#90EE90":
                 return 8;
+            case "#99AF6E":
             case "darkgreen":
             case "#809753":
             case "#006400":
                 return 9;
+            case "#666666":
             case "gray":
             case "#4d4d4d":
             case "#808080":
@@ -262,7 +272,8 @@ public class Event2Appointment {
     }
 
     /**
-     * Gets the "reminder" value based on the supplied alarm list.
+     * Gets the "reminder" value based on the supplied list of alarms, in case an alarm is contained whose trigger is of type
+     * {@link AlarmAction#DISPLAY}, and has a non-positive duration relative to the start date.
      *
      * @param alarms The alarms
      * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
@@ -270,13 +281,30 @@ public class Event2Appointment {
     public static Integer getReminder(List<Alarm> alarms) {
         if (null != alarms && 0 < alarms.size()) {
             for (Alarm alarm : alarms) {
-                if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
-                    Trigger trigger = alarm.getTrigger();
-                    if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
-                        if (Strings.isNotEmpty(trigger.getDuration())) {
-                            long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
-                            return Autoboxing.I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
-                        }
+                Integer reminder = getReminder(alarm);
+                if (null != reminder) {
+                    return reminder;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the "reminder" value based on the supplied alarm, in case the alarm's trigger is of type {@link AlarmAction#DISPLAY}, and has
+     * a non-positive duration relative to the start date.
+     *
+     * @param alarm The alarm
+     * @return The legacy reminder value, or <code>null</code> if no suitable reminder found
+     */
+    public static Integer getReminder(Alarm alarm) {
+        if (null != alarm && AlarmAction.DISPLAY.equals(alarm.getAction())) {
+            Trigger trigger = alarm.getTrigger();
+            if (null != trigger && (null == trigger.getRelated() || Related.START.equals(trigger.getRelated()))) {
+                if (Strings.isNotEmpty(trigger.getDuration())) {
+                    long triggerDuration = AlarmUtils.getTriggerDuration(trigger.getDuration());
+                    if (0L >= triggerDuration) {
+                        return Autoboxing.I((int) TimeUnit.MILLISECONDS.toMinutes(triggerDuration * -1));
                     }
                 }
             }

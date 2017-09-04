@@ -100,7 +100,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public int insertAccount(String providerId, int userId, Map<String, Object> data) throws OXException {
+    public int createAccount(String providerId, int userId, Map<String, Object> data) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
@@ -118,7 +118,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public CalendarAccount loadAccount(int id) throws OXException {
+    public CalendarAccount getAccount(int id) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
@@ -185,11 +185,24 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public List<CalendarAccount> loadAccounts(int userId) throws OXException {
+    public List<CalendarAccount> getAccounts(int userId) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
             return selectAccounts(connection, context.getContextId(), userId);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public List<CalendarAccount> getAccounts(int userId, String providerId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAccounts(connection, context.getContextId(), userId, providerId);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -262,6 +275,33 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                         Streams.close(inputStream);
                     }
                     accounts.add(new DefaultCalendarAccount(providerId, id, user, data, new Date(lastModified)));
+                }
+            }
+        }
+        return accounts;
+    }
+
+    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user, String providerId) throws SQLException, OXException {
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        String sql = "SELECT id,provider,modified,data FROM calendar_account WHERE cid=? AND user=? AND provider=?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            stmt.setString(3, providerId);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    int id = resultSet.getInt(1);
+                    String provider = resultSet.getString(2);
+                    long lastModified = resultSet.getLong(3);
+                    Map<String, Object> data;
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = resultSet.getBinaryStream(4);
+                        data = deserializeMap(inputStream);
+                    } finally {
+                        Streams.close(inputStream);
+                    }
+                    accounts.add(new DefaultCalendarAccount(provider, id, user, data, new Date(lastModified)));
                 }
             }
         }

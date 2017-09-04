@@ -138,9 +138,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
-        Event createdEvent = loadEventData(newEvent.getId(), false);
-        result.addPlainCreation(createdEvent);
-        result.addUserizedCreation(userize(createdEvent));
+        /*
+         * track creation, insert alarm triggers & return result
+         */
+        Event createdEvent = loadEventData(newEvent.getId());
+        trackCreation(createdEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(newEvent, newEvent.getDeleteExceptionDates());
         return result;
     }
 

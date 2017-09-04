@@ -160,11 +160,4 @@ public interface CalendarConfig {
      */
     boolean isSkipExternalAttendeeURIChecks();
 
-    /**
-     * Gets a value indicating whether collection of e-mail addresses is enabled or not.
-     *
-     * @return <code>true</code> if collecting e-mail address is enabled, <code>false</code>, otherwise
-     */
-    boolean isCollectEmailAddresses();
-
 }

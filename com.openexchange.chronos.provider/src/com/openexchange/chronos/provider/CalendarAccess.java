@@ -54,7 +54,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -146,24 +145,5 @@ public interface CalendarAccess {
      * @return The events
      */
     List<Event> getEventsInFolder(String folderId) throws OXException;
-
-    /**
-     * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
-     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
-     * </ul>
-     *
-     * @param folderId The identifier of the folder to get the updated events from
-     * @param updatedSince The timestamp since when the updates should be retrieved
-     * @return The updates result yielding lists of new/modified and deleted events
-     */
-    UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
 
 }

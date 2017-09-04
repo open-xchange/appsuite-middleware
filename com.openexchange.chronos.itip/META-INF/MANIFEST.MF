@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.chronos.itip
 Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.chronos.itip.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.requesthandler,

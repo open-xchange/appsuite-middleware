@@ -331,7 +331,6 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
                 final int uid = (result != null) ? result.getId() : 0;
                 cdao.setOrganizerId(uid);
             } catch (final OXException e) {
-                LOG.debug("Error while getting user.");
             }
         }
 

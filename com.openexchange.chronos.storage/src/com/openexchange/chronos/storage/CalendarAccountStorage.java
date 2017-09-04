@@ -63,14 +63,14 @@ import com.openexchange.exception.OXException;
 public interface CalendarAccountStorage {
 
     /**
-     * Inserts a new calendar account.
+     * Creates a new calendar account.
      *
      * @param providerId The identifier of the corresponding calendar provider
      * @param userId The identifier of the user the account is added for
      * @param configuration The provider-specific configuration data for the calendar account
      * @return The identifier of the newly inserted calendar account
      */
-    int insertAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException;
+    int createAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException;
 
     /**
      * Updates an existing calendar account.
@@ -89,19 +89,29 @@ public interface CalendarAccountStorage {
     void deleteAccount(int id) throws OXException;
 
     /**
-     * Loads an existing calendar account.
+     * Gets an existing calendar account.
      *
      * @param id The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
      */
-    CalendarAccount loadAccount(int id) throws OXException;
+    CalendarAccount getAccount(int id) throws OXException;
 
     /**
-     * Loads a list of all calendar accounts stored for a specific user.
+     * Gets a list of all calendar accounts stored for a specific user.
      *
      * @param userId The identifier of the user to get the accounts for
      * @return The accounts, or an empty list if none were found
      */
-    List<CalendarAccount> loadAccounts(int userId) throws OXException;
+    List<CalendarAccount> getAccounts(int userId) throws OXException;
+
+    /**
+     * Gets a list of all calendar accounts stored for a specific user and provider.
+     * 
+     * @param userId The identifier of the user to get the accounts for
+     * @param providerId The identifier of the provider to get the accounts with
+     * @return The accounts, or an empty list if none were found
+     * @throws OXException if a database error occurs
+     */
+    List<CalendarAccount> getAccounts(int userId, String providerId) throws OXException;
 
 }

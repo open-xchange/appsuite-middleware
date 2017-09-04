@@ -61,22 +61,28 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.FreeBusyService;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -88,6 +94,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -96,7 +103,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware {
+
+    /** The logger */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InternalCalendarAccess.class);
 
     private final CalendarSession session;
 
@@ -117,14 +127,13 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public GroupwareCalendarFolder getDefaultFolder() throws OXException {
-        return getCalendarFolder(getFolderService().getDefaultFolder(
-            ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator()));
+        Folder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), false));
     }
 
     @Override
     public List<GroupwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        return getCalendarFolders(getFolderService().getVisibleFolders(
-            TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
+        return getCalendarFolders(getFolderService().getVisibleFolders(TREE_ID, CONTENT_TYPE, getStorageType(type), true, session.getSession(), initDecorator()));
     }
 
     @Override
@@ -138,20 +147,19 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
-        return getCalendarFolder(getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator()));
+        Folder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), true));
     }
 
     @Override
-    public void deleteFolder(String folderId) throws OXException {
-        Date timestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Date.class);
-        getFolderService().deleteFolder(TREE_ID, folderId, timestamp, session.getSession(), initDecorator());
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        getFolderService().deleteFolder(TREE_ID, folderId, new Date(clientTimestamp), session.getSession(), initDecorator());
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder) throws OXException {
-        Date timestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Date.class);
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         Folder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
-        getFolderService().updateFolder(storageFolder, timestamp, session.getSession(), initDecorator());
+        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
@@ -161,6 +169,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         folderToCreate.setParentID(parentFolderId);
         FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
         return response.getResponse();
+    }
+
+    @Override
+    public long getSequenceNumber(String folderId) throws OXException {
+        return getCalendarService().getSequenceNumber(session, folderId);
     }
 
     @Override
@@ -199,28 +212,38 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
+    public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        return getCalendarService().searchEvents(session, folderIds, filters, queries);
+    }
+
+    @Override
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
         return getCalendarService().createEvent(session, folderId, event);
     }
 
     @Override
-    public CalendarResult updateEvent(EventID eventID, Event event) throws OXException {
-        return getCalendarService().updateEvent(session, eventID, event);
+    public CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException {
+        return getCalendarService().updateEvent(session, eventID, event, clientTimestamp);
     }
 
     @Override
-    public CalendarResult moveEvent(EventID eventID, String folderId) throws OXException {
-        return getCalendarService().moveEvent(session, eventID, folderId);
+    public CalendarResult moveEvent(EventID eventID, String folderId, long clientTimestamp) throws OXException {
+        return getCalendarService().moveEvent(session, eventID, folderId, clientTimestamp);
     }
 
     @Override
-    public CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException {
-        return getCalendarService().updateAttendee(session, eventID, attendee);
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAttendee(session, eventID, attendee, clientTimestamp);
     }
 
     @Override
-    public CalendarResult deleteEvent(EventID eventID) throws OXException {
-        return getCalendarService().deleteEvent(session, eventID);
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return getCalendarService().updateAlarms(session, eventID, alarms, clientTimestamp);
+    }
+
+    @Override
+    public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
+        return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
     }
 
     /**
@@ -286,7 +309,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.length);
         for (UserizedFolder userizedFolder : folders) {
-            calendarFolders.add(getCalendarFolder(userizedFolder));
+            calendarFolders.add(getCalendarFolder(userizedFolder, getFolderProperties(userizedFolder.getContext().getContextId(), userizedFolder, userizedFolder.getUser().getId(), true)));
         }
         return calendarFolders;
     }
@@ -309,6 +332,45 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
         return getFreeBusyService().checkForConflicts(session, event, attendees);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
+        return getCalendarService().getAlarmTrigger(session, actions);
+    }
+
+    /**
+     * Get user specific properties for the folder
+     *
+     * @param folder The {@link Folder}
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user the folder belongs to
+     * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
+     * @return {@link Collections#emptyMap()} or a {@link Map} with user-specific properties
+     */
+    private static Map<String, String> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
+        Map<String, String> properties;
+        FolderUserPropertyStorage fps = Services.optService(FolderUserPropertyStorage.class);
+        if (null != fps) {
+            try {
+                properties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), userId);
+                // Check if we can fall-back to owner properties
+                if (loadOwner && folder.getCreatedBy() != userId) {
+                    // Try to load owner properties
+                    Map<String, String> ownerProperties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), folder.getCreatedBy());
+                    for (String key : ownerProperties.keySet()) {
+                        if (false == properties.containsKey(key)) {
+                            properties.put(key, ownerProperties.get(key));
+                        }
+                    }
+                }
+                return properties;
+            } catch (OXException e) {
+                LOGGER.error("Could not get user properties for folder {}", folder.getID(), e);
+            }
+        }
+        properties = Collections.emptyMap();
+        return properties;
     }
 
 }

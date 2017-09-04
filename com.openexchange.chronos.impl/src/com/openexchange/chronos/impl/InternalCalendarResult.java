@@ -50,8 +50,19 @@
 package com.openexchange.chronos.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CreateResultImpl;
+import com.openexchange.chronos.common.DefaultCalendarResult;
+import com.openexchange.chronos.common.DeleteResultImpl;
+import com.openexchange.chronos.common.UpdateResultImpl;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
@@ -59,6 +70,7 @@ import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link InternalCalendarResult}
@@ -70,7 +82,8 @@ public class InternalCalendarResult {
 
     private final CalendarSession session;
     private final int calendarUserId;
-    private final String folderId;
+    private final Set<String> affectedFolderIds;
+    private final UserizedFolder folder;
 
     private List<CreateResult> creations;
     private List<CreateResult> userizedCreations;
@@ -84,13 +97,43 @@ public class InternalCalendarResult {
      *
      * @param session The calendar session
      * @param calendarUserId The actual calendar user
-     * @param folderId The identifier of the targeted calendar folder
+     * @param folder The calendar folder representing the current view on the events
      */
-    public InternalCalendarResult(CalendarSession session, int calendarUserId, String folderId) {
+    public InternalCalendarResult(CalendarSession session, int calendarUserId, UserizedFolder folder) {
         super();
         this.session = session;
         this.calendarUserId = calendarUserId;
-        this.folderId = folderId;
+        this.folder = folder;
+        this.affectedFolderIds = new HashSet<String>();
+    }
+
+    /**
+     * Adds identifiers of folders that are affected by the result.
+     *
+     * @param folderId A single folder identifier to add, or <code>null</code> to ignore
+     * @param folderIds A collection of folder identifiers to add, or <code>null</code> to ignore
+     */
+    public void addAffectedFolderIds(String folderId, Collection<? extends String> folderIds) {
+        addAffectedFolderIds(folderId, folderIds, null);
+    }
+
+    /**
+     * Adds identifiers of folders that are affected by the result.
+     *
+     * @param folderId A single folder identifier to add, or <code>null</code> to ignore
+     * @param folderIds A collection of folder identifiers to add, or <code>null</code> to ignore
+     * @param otherFolderIds A collection of folder identifiers to add, or <code>null</code> to ignore
+     */
+    public void addAffectedFolderIds(String folderId, Collection<? extends String> folderIds, Collection<? extends String> otherFolderIds) {
+        if (null != folderId) {
+            affectedFolderIds.add(folderId);
+        }
+        if (null != folderIds) {
+            affectedFolderIds.addAll(folderIds);
+        }
+        if (null != otherFolderIds) {
+            affectedFolderIds.addAll(otherFolderIds);
+        }
     }
 
     /**
@@ -242,12 +285,12 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Gets the plain/vanilla calendar result.
+     * Gets the calendar event representing the system-wide view on the performed calendar changes.
      *
-     * @return The calendar result
+     * @return The calendar event
      */
-    public CalendarResult getPlainResult() {
-        return new DefaultCalendarResult(session, calendarUserId, folderId, creations, updates, deletions);
+    public CalendarEvent getCalendarEvent() {
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
     }
 
     /**
@@ -256,7 +299,21 @@ public class InternalCalendarResult {
      * @return The calendar result
      */
     public CalendarResult getUserizedResult() {
-        return new DefaultCalendarResult(session, calendarUserId, folderId, userizedCreations, userizedUpdates, userizedDeletions);
+        return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getID(), userizedCreations, userizedUpdates, userizedDeletions);
+    }
+
+    private Map<Integer, List<String>> getAffectedFoldersPerUser() {
+        if (null == affectedFolderIds || 0 == affectedFolderIds.size()) {
+            return Collections.emptyMap();
+        }
+        if (1 == affectedFolderIds.size() && null != folder && folder.getID().equals(affectedFolderIds.iterator().next())) {
+            Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
+            for (Integer userId : Utils.getAffectedUsers(folder, session.getEntityResolver())) {
+                affectedFoldersPerUser.put(userId, Collections.singletonList(folder.getID()));
+            }
+            return affectedFoldersPerUser;
+        }
+        return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
     }
 
 }

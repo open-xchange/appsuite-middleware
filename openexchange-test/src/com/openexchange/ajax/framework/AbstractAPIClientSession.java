@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.framework;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +62,6 @@ import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
-import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.LoginApi;
 
 /**
@@ -83,6 +84,8 @@ public abstract class AbstractAPIClientSession {
     protected LoginApi loginApi;
     protected ApiClient apiClient;
 
+    private Set<ApiClient> apiClients;
+
 
     /**
      * Default constructor.
@@ -91,14 +94,6 @@ public abstract class AbstractAPIClientSession {
      */
     protected AbstractAPIClientSession() {
         super();
-    }
-
-    protected LoginResponse login(TestUser user, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(user.getLogin(), user.getPassword(), null, null, null, null, null);
-        if (doLogin.getError() == null) {
-            return doLogin;
-        }
-        throw new Exception("Error during login: " + doLogin.getError());
     }
 
 
@@ -125,13 +120,22 @@ public abstract class AbstractAPIClientSession {
         testUser2 = testContext.acquireUser();
         admin = testContext.getAdmin();
         apiClient = generateClient(testUser);
-        loginApi = new LoginApi(apiClient);
+        rememberClient(apiClient);
 
+    }
+
+    protected void rememberClient(ApiClient client){
+        if(apiClients==null){
+            apiClients = new HashSet<>(1);
+        }
+        apiClients.add(client);
     }
 
     @After
     public void tearDown() throws Exception {
-        logoutClient(apiClient);
+        for(ApiClient client: apiClients){
+            logoutClient(client);
+        }
         TestContextPool.backContext(testContext);
     }
 

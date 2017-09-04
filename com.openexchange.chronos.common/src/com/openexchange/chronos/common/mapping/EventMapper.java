@@ -844,6 +844,11 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.ORGANIZER, new DefaultMapping<Organizer, Event>() {
 
             @Override
+            public boolean equals(Event event1, Event event2) {
+                return CalendarUtils.equals(event1.getOrganizer(), event2.getOrganizer());
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsOrganizer();
             }

@@ -96,6 +96,13 @@ public interface AttendeeStorage {
     void deleteAttendees(String eventId) throws OXException;
 
     /**
+     * Deletes all attendees for multiple events.
+     *
+     * @param eventIds The identifiers of the events to delete the attendees for
+     */
+    void deleteAttendees(List<String> eventIds) throws OXException;
+
+    /**
      * Deletes multiple attendees for a specific event.
      *
      * @param eventId The identifier of the event to delete the attendees for

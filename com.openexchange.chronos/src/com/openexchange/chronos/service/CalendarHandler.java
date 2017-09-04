@@ -58,10 +58,10 @@ package com.openexchange.chronos.service;
 public interface CalendarHandler {
 
     /**
-     * Handles the result of a calendar operation.
+     * Handles a calendar event resulting from a performed calendar operation.
      *
-     * @param result The calendar result
+     * @param event The calendar event
      */
-    void handle(CalendarResult result);
+    void handle(CalendarEvent event);
 
 }

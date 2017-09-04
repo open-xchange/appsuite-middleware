@@ -50,7 +50,10 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.internal.AbstractConnectionProvider;
+import com.openexchange.groupware.update.internal.ContextConnectionProvider;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
+import com.openexchange.groupware.update.internal.PoolAndSchemaConnectionProvider;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
 
 /**
@@ -65,9 +68,13 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     }
 
     public static final void perform(final UpdateTaskV2 task, final Schema schema, final int contextId) throws OXException {
-        final ProgressState logger = new ProgressStatusImpl(task.getClass().getName(), schema.getSchema());
-        final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
-        task.perform(params);
+        AbstractConnectionProvider connectionProvider = contextId > 0 ? new ContextConnectionProvider(contextId) : new PoolAndSchemaConnectionProvider(schema.getPoolId(), schema.getSchema());
+        try {
+            ProgressState logger = new ProgressStatusImpl(task.getClass().getName(), schema.getSchema());
+            task.perform(new PerformParametersImpl(schema, connectionProvider, contextId, logger));
+        } finally {
+            connectionProvider.close();
+        }
     }
 
     @Override

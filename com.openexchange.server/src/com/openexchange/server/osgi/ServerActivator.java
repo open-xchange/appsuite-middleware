@@ -91,6 +91,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -250,6 +251,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
@@ -631,6 +633,11 @@ public final class ServerActivator extends HousekeepingActivator {
         track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
 
         /*
+         * Track QuotaAwareSnippetService
+         */
+        track(QuotaAwareSnippetService.class, new RankingAwareRegistryCustomizer<QuotaAwareSnippetService>(context, QuotaAwareSnippetService.class));
+
+        /*
          * User Alias Service
          */
         UserAliasStorage aliasStorage;
@@ -666,6 +673,7 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
+        track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
 
         // Start up server the usual way
         starter.start();

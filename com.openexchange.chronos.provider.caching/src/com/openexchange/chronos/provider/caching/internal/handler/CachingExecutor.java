@@ -49,106 +49,108 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
-import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CachingExecutor}
+ * The {@link CachingExecutor} ensures a generic execution of the caching process based on the provided {@link CachingHandler}.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 public class CachingExecutor {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingExecutor.class);
+
     private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
     private static final EventField[] EQUALS_IDENTIFIER = new EventField[] { EventField.UID, EventField.RECURRENCE_ID };
 
-    private CachingHandler cachingHandler;
-    private CachingCalendarAccess cachingCalendarAccess;
+    private final Set<FolderUpdateState> executionList;
+    private final CachingCalendarAccess cachingCalendarAccess;
 
-    public CachingExecutor(CachingCalendarAccess cachingCalendarAccess, CachingHandler cachingHandler) {
+    public CachingExecutor(CachingCalendarAccess cachingCalendarAccess, Set<FolderUpdateState> executionList) {
         this.cachingCalendarAccess = cachingCalendarAccess;
-        this.cachingHandler = cachingHandler;
-
+        this.executionList = executionList;
     }
 
-    public List<Event> doIt(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
-        List<Event> externalEvents = cachingHandler.getExternalEvents(folderId);
-        List<Event> persistedEvents = cachingHandler.getPersistedEvents(folderId);
+    public ResultCollector cache(List<OXException> warnings) {
+        ResultCollector resultCollector = new ResultCollector(this.cachingCalendarAccess);
 
-        EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            Event search = cachingHandler.search(folderId, eventId, recurrenceId);
-            if (search == null) {
-                return Collections.emptyList();
-            }
-            return Collections.singletonList(search);
+        if (executionList == null) {
+            LOG.warn("Nothing to cache as the provided execution list is null.");
+            return resultCollector;
         }
+        for (FolderUpdateState folderUpdateState : executionList) {
+            CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(folderUpdateState.getType(), cachingCalendarAccess);
+            String calendarFolderId = folderUpdateState.getFolderId();
 
-        cachingHandler.persist(diff);
-        cachingHandler.updateLastUpdated();
+            try {
+                ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents(calendarFolderId);
+                if (!externalCalendarResult.isUpToDate()) {
+                    List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
+                    List<Event> externalEvents = externalCalendarResult.getEvents();
 
-        Event search = cachingHandler.search(folderId, eventId, recurrenceId);
-        if (search == null) {
-            return Collections.emptyList();
-        }
-        return Collections.singletonList(search);
-    }
+                    EventUpdates diff = null;
+                    boolean containsUID = containsUid(externalEvents);
+                    if (containsUID) {
+                        diff = generateEventDiff(existingEvents, externalEvents);
+                    } else {
+                        //FIXME generate reproducible UID for upcoming refreshes
+                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
+                    }
 
-    public List<Event> doIt(String folderId) throws OXException {
-        List<Event> externalEvents = cachingHandler.getExternalEvents(folderId);
-        List<Event> persistedEvents = cachingHandler.getPersistedEvents(folderId);
+                    if (!diff.isEmpty()) {
+                        cachingHandler.persist(calendarFolderId, diff);
+                    }
+                }
+                cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis());
+            } catch (OXException e) {
+                LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
+                warnings.add(e);
 
-        EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            return cachingHandler.search(folderId);
-        }
-
-        cachingHandler.persist(diff);
-        cachingHandler.updateLastUpdated();
-
-        return cachingHandler.search(folderId);
-    }
-
-    public List<Event> doIt(List<EventID> eventIds) throws OXException {
-        Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIds);
-
-        List<Event> externalEvents = new ArrayList<>();
-        for (String folderId : sortEventIDsPerFolderId.keySet()) {
-            List<Event> externalEventsForFolder = cachingHandler.getExternalEvents(folderId);
-            if (externalEventsForFolder != null && !externalEventsForFolder.isEmpty()) {
-                externalEvents.addAll(externalEventsForFolder);
+                handleInternally(cachingHandler, calendarFolderId, e);
+                this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
             }
         }
+        return resultCollector;
+    }
 
-        List<Event> persistedEvents = cachingHandler.getPersistedEvents(eventIds);
-
-        EventUpdates diff = generateEventDiff(persistedEvents, externalEvents);
-        if (diff.isEmpty()) {
-            cachingHandler.updateLastUpdated();
-            return cachingHandler.search(eventIds);
+    private void handleInternally(CachingHandler cachingHandler, String calendarFolderId, OXException e) {
+        if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
+            return;
         }
+        long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getExternalRequestTimeout());
+        long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
+        cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
+    }
 
-        cachingHandler.persist(diff);
-        cachingHandler.updateLastUpdated();
-
-        return cachingHandler.search(eventIds);
+    /**
+     * Returns if all provided {@link Event}s do contain a UID
+     * 
+     * @param events A list of {@link Event}s to check for the UID
+     * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
+     */
+    private boolean containsUid(List<Event> events) {
+        for (Event event : events) {
+            if (!event.containsUid()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private EventUpdates generateEventDiff(List<Event> persistedEvents, List<Event> updatedEvents) throws OXException {
-        return CalendarUtils.getEventUpdates(persistedEvents, updatedEvents, false, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
+        return CalendarUtils.getEventUpdates(persistedEvents, updatedEvents, true, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
     }
 }

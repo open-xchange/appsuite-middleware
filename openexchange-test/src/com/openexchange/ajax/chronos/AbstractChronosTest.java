@@ -49,23 +49,36 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import java.rmi.server.UID;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderPermission;
+import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
-import com.openexchange.testing.httpclient.models.LoginResponse;
-import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
 /**
@@ -76,63 +89,131 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
 
-    protected static SimpleDateFormat BASIC_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    protected static SimpleDateFormat ZULU_FORMATER = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-    static {
-        ZULU_FORMATER.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
+    /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> BASIC_FORMATER = new ThreadLocal<SimpleDateFormat>() {
 
-    protected ChronosApi api;
-    private FoldersApi foldersApi;
-    protected String session;
-    List<EventId> eventIds;
-    protected int calUser;
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
+
+    /**
+     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss'Z'</code> as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> ZULU_FORMATER = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
+
+    Map<UserApi, List<EventId>> eventIds;
+    Map<UserApi,List<String>> folderToDelete;
     private long lastTimeStamp;
+
+    protected UserApi defaultUserApi;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        api = new ChronosApi(getClient());
-        foldersApi = new FoldersApi(getClient());
-        LoginResponse login = login(this.testUser, this.apiClient);
-        calUser = login.getUserId();
-        session = login.getSession();
+        defaultUserApi = new UserApi(getClient(), testUser);
     }
 
-    protected void rememberEventId(EventId eventId) {
+    public void rememberEventId(UserApi userApi, EventId eventId) {
         if (eventIds == null) {
-            eventIds = new ArrayList<>();
+            eventIds = new HashMap<>();
         }
-        eventIds.add(eventId);
+        if(!eventIds.containsKey(userApi)){
+            eventIds.put(userApi, new ArrayList<>(1));
+        }
+        eventIds.get(userApi).add(eventId);
+    }
+
+    public void rememberFolder(UserApi userApi, String folder) {
+        if (folderToDelete == null) {
+            folderToDelete = new HashMap<>();
+        }
+        if(!folderToDelete.containsKey(userApi)){
+            folderToDelete.put(userApi, new ArrayList<>(1));
+        }
+        folderToDelete.get(userApi).add(folder);
     }
 
     @Override
     public void tearDown() throws Exception {
+        Exception exception = null;
+        try {
+            if (eventIds != null) {
+                for(UserApi api: eventIds.keySet()){
+                    api.getApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api));
+                }
+            }
+        } catch (Exception e) {
+            exception = e;
+        }
+        if (folderToDelete != null) {
+            for(UserApi api: folderToDelete.keySet()){
+                api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
+            }
+        }
+
         super.tearDown();
-        if (eventIds != null) {
-            api.deleteEvent(session, System.currentTimeMillis(), eventIds);
+
+        if(exception!=null){
+            throw exception;
         }
     }
 
     @SuppressWarnings("unchecked")
     protected String getDefaultFolder() throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "event", "1,308", "0");
+        FoldersVisibilityResponse visibleFolders = defaultUserApi.getFoldersApi().getVisibleFolders(defaultUserApi.getSession(), "event", "1,308", "0");
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
 
         Object privateFolders = visibleFolders.getData().getPrivate();
+
         ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         } else {
             for (ArrayList<?> folder : privateList) {
-                if ((boolean) folder.get(1)) {
+                if ((Boolean) folder.get(1)) {
                     return (String) folder.get(0);
                 }
             }
         }
         throw new Exception("Unable to find default calendar folder!");
+    }
+
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException{
+        FolderBody body = new FolderBody();
+        FolderData folderData = new FolderData();
+        folderData.setModule("event");
+        folderData.setSubscribed(true);
+        folderData.setTitle("chronos_test_"+new UID().toString());
+        List<FolderPermission> permissions = new ArrayList<>();
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(entity);
+        perm.setGroup(false);
+        perm.setBits(403710016);
+        permissions.add(perm);
+        folderData.setPermissions(permissions);
+        body.setFolder(folderData);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
+        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
+        String result = createFolder.getData();
+        rememberFolder(api, result);
+        return result;
+
     }
 
     @SuppressWarnings("unchecked")
@@ -148,7 +229,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             return (String) privateList.get(0).get(0);
         } else {
             for (ArrayList<?> folder : privateList) {
-                if ((boolean) folder.get(1)) {
+                if ((Boolean) folder.get(1)) {
                     return (String) folder.get(0);
                 }
             }
@@ -170,7 +251,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         DateTimeData result = new DateTimeData();
         result.setTzid("UTC");
         Date date = new Date(millis);
-        result.setValue(ZULU_FORMATER.format(date));
+        result.setValue(ZULU_FORMATER.get().format(date));
         return result;
     }
 
@@ -178,22 +259,26 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return getDateTime(TimeZone.getDefault().getID(), millis);
     }
 
+    protected DateTimeData getDateTime(Calendar cal) {
+        return getDateTime(cal.getTimeZone().getID(), cal.getTimeInMillis());
+    }
+
     protected DateTimeData getDateTime(String timezoneId, long millis) {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);
         Date date = new Date(millis);
-        result.setValue(BASIC_FORMATER.format(date));
+        result.setValue(BASIC_FORMATER.get().format(date));
         return result;
     }
 
 
     protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
-        Date date = BASIC_FORMATER.parse(data.getValue());
+        Date date = BASIC_FORMATER.get().parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime()+millis);
     }
 
     protected Date getTime(DateTimeData time) throws ParseException {
-        return BASIC_FORMATER.parse(time.getValue());
+        return BASIC_FORMATER.get().parse(time.getValue());
     }
 
     protected void setLastTimestamp(long timestamp){
@@ -202,6 +287,50 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected long getLastTimestamp(){
     	return lastTimeStamp;
+    }
+
+    /**
+     * Changes the timezone of the default user to the given value
+     *
+     * @param tz The new timezone
+     * @throws ApiException
+     */
+    protected void changeTimezone(TimeZone tz) throws ApiException {
+        String body = "{timezone: \"" + tz.getID() + "\"}";
+        CommonResponse updateJSlob = defaultUserApi.getJslob().updateJSlob(defaultUserApi.getSession(), body, "io.ox/core", null);
+        assertNull(updateJSlob.getErrorDesc(), updateJSlob.getError());
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param data The data element of the response
+     * @return The data
+     */
+    protected <T> T checkResponse(String error, String errorDesc, T data) {
+        assertNull(errorDesc, error);
+        assertNotNull(data);
+        return data;
+    }
+
+    /**
+     * Handles the result response of an event creation
+     *
+     * @param createEvent The result
+     * @return The created event
+     */
+    protected EventData handleCreation(ChronosCalendarResultResponse createEvent) {
+        CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
+        assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
+        EventData event = result.getCreated().get(0);
+        EventId eventId = new EventId();
+        eventId.setId(event.getId());
+        eventId.setFolderId(event.getFolder());
+        rememberEventId(defaultUserApi, eventId);
+        this.setLastTimestamp(createEvent.getTimestamp());
+        return event;
     }
 }
 

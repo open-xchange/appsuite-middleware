@@ -50,16 +50,30 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getFolderView;
+import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.isInFolder;
+import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -72,6 +86,8 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -81,12 +97,18 @@ import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -113,7 +135,65 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.folder = folder;
         this.calendarUserId = getCalendarUserId(folder);
         this.timestamp = new Date();
-        this.result = new InternalCalendarResult(session, calendarUserId, folder.getID());
+        this.result = new InternalCalendarResult(session, calendarUserId, folder);
+    }
+
+    /**
+     * Tracks suitable results for a created event in the current internal calendar result, which includes adding a <i>plain</i> creation
+     * for the new event data, as well as an appropriate creation from the acting user's point of view.
+     *
+     * @param createdEvent The created event
+     */
+    protected void trackCreation(Event createdEvent) throws OXException {
+        /*
+         * track affected folders and add 'plain' and 'userized' event creations
+         */
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
+        result.addPlainCreation(createdEvent);
+        result.addUserizedCreation(userize(createdEvent));
+    }
+
+    /**
+     * Tracks suitable results for an updated event in the current internal calendar result, which includes adding a <i>plain</i> update
+     * for the modified event data, as well as an update, deletion or creation from the acting user's point of view.
+     *
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    protected void trackUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        /*
+         * track affected folders and add a 'plain' event update
+         */
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
+        result.addPlainUpdate(originalEvent, updatedEvent);
+        /*
+         * check whether original and updated event are visible in actual folder view & add corresponding result
+         */
+        if (isInFolder(originalEvent, folder)) {
+            if (isInFolder(updatedEvent, folder)) {
+                result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+            } else {
+                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+            }
+        } else if (isInFolder(updatedEvent, folder)) {
+            /*
+             * possible for attendee being added to an existing event, so that it shows up in the new attendee's folder
+             * afterwards (after #needsExistenceCheckInTargetFolder() was false)
+             */
+            result.addUserizedCreation(updatedEvent);
+        }
+    }
+
+    /**
+     * Tracks suitable results for a deleted event in the current internal calendar result, which includes adding a <i>plain</i> deletion
+     * for the removed event data, as well as an appropriate deletion from the acting user's point of view.
+     *
+     * @param deletedEvent The deleted event
+     */
+    protected void trackDeletion(Event deletedEvent) {
+        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
+        result.addPlainDeletion(timestamp.getTime(), getEventID(deletedEvent));
+        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
     }
 
     /**
@@ -156,12 +236,12 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <p/>
      * The deletion includes:
      * <ul>
-     * <li>insertion of a <i>tombstone</i> record for the original event</li>
-     * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
-     * <li>deletion of any alarms associated with the event</li>
-     * <li>deletion of any attachments associated with the event</li>
-     * <li>deletion of the event</li>
-     * <li>deletion of the event's attendees</li>
+     * <ul>insertion of a <i>tombstone</i> record for the original event</ul>
+     * <ul>insertion of <i>tombstone</i> records for the original event's attendees</ul>
+     * <ul>deletion of any alarms associated with the event</ul>
+     * <ul>deletion of any attachments associated with the event</ul>
+     * <ul>deletion of the event</ul>
+     * <ul>deletion of the event's attendees</ul>
      * </ul>
      *
      * @param originalEvent The original event to delete
@@ -170,9 +250,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions
          */
-        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()));
+            for (Event changeException : loadExceptionData(originalEvent.getSeriesId())) {
+                delete(changeException);
+            }
         }
         /*
          * delete event data from storage
@@ -186,11 +267,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
+        storage.getAlarmTriggerStorage().deleteTriggers(id);
         /*
-         * add appropriate delete results
+         * track deletion in result
          */
-        result.addPlainDeletion(timestamp.getTime(), getEventID(originalEvent));
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
+        trackDeletion(originalEvent);
     }
 
     /**
@@ -214,7 +295,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
-        String folderView = getFolderView(storage, originalEvent, calendarUserId);
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
             deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userId);
@@ -229,13 +309,24 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttendeeStorage().insertAttendeeTombstones(id, originalEvent.getAttendees());
         storage.getAttendeeStorage().deleteAttendees(id, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(id, userId);
+
         /*
          * 'touch' event & track calendar results
          */
         touch(id);
-        Event updatedEvent = loadEventData(id, false);
-        result.addPlainUpdate(originalEvent, updatedEvent);
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalEvent.getId(), originalEvent.getRecurrenceId()));
+        Event updatedEvent = loadEventData(id);
+        trackUpdate(originalEvent, updatedEvent);
+
+        // Update alarm trigger
+        storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
+        Set<RecurrenceId> exceptions = null;
+        if (isSeriesMaster(originalEvent)) {
+            exceptions = getChangeExceptionDates(originalEvent.getSeriesId());
+            if (originalEvent.getDeleteExceptionDates() != null) {
+                exceptions.addAll(originalEvent.getDeleteExceptionDates());
+            }
+        }
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, exceptions);
     }
 
     /**
@@ -284,7 +375,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * prepare & insert a new plain exception
          */
-        String folderView = getFolderView(storage, originalMasterEvent, calendarUserId);
+        String folderView = getFolderView(originalMasterEvent, calendarUserId);
         Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
         storage.getEventStorage().insertEvent(exceptionEvent);
         /*
@@ -313,12 +404,26 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * track results
          */
-        Event createdException = loadEventData(exceptionEvent.getId(), false);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId(), false);
+        Event createdException = loadEventData(exceptionEvent.getId());
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+        removeAlarmTrigger(createdException, updatedMasterEvent);
         result.addPlainCreation(createdException);
         result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalMasterEvent.getId(), recurrenceId));
         result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
+    }
+
+    private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
+
+        storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
+
+
+        Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
+        if (updatedMasterEvent.getDeleteExceptionDates() != null) {
+            exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
+        }
+        storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }
 
     /**
@@ -344,7 +449,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
             newAlarms.add(newAlarm);
         }
-        final String folderView = Utils.getFolderView(storage, event, userId);
+        final String folderView = getFolderView(event, userId);
         if (false == folderView.equals(event.getFolderId())) {
             event = new DelegatingEvent(event) {
 
@@ -352,46 +457,173 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 public String getFolderId() {
                     return folderView;
                 }
+
+                @Override
+                public boolean containsFolderId() {
+                    return true;
+                }
             };
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
     }
 
     /**
-     * Loads all data for a specific event, including attendees, attachments and alarms.
+     * Updates a calendar user's alarms for a specific event.
+     *
+     * @param event The event to update the alarms in
+     * @param userId The identifier of the calendar user whose alarms are updated
+     * @param originalAlarms The original alarms, or <code>null</code> if there are none
+     * @param updatedAlarms The updated alarms
+     * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
+     */
+    protected boolean updateAlarms(Event event, int userId, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
+        if (alarmUpdates.isEmpty()) {
+            return false;
+        }
+        //        requireWritePermissions(event);
+        /*
+         * delete removed alarms
+         */
+        List<Alarm> removedItems = alarmUpdates.getRemovedItems();
+        if (0 < removedItems.size()) {
+            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, getAlarmIDs(removedItems));
+        }
+        /*
+         * save updated alarms
+         */
+        List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
+        if (0 < updatedItems.size()) {
+            List<Alarm> alarms = new ArrayList<Alarm>(updatedItems.size());
+            for (ItemUpdate<Alarm, AlarmField> itemUpdate : updatedItems) {
+                Alarm alarm = AlarmMapper.getInstance().copy(itemUpdate.getOriginal(), null, (AlarmField[]) null);
+                AlarmMapper.getInstance().copy(itemUpdate.getUpdate(), alarm, AlarmField.values());
+                alarm.setId(itemUpdate.getOriginal().getId());
+                alarm.setUid(itemUpdate.getOriginal().getUid());
+                alarms.add(Check.alarmIsValid(alarm));
+            }
+            final String folderView = getFolderView(event, userId);
+            if (false == folderView.equals(event.getFolderId())) {
+                Event userizedEvent = new DelegatingEvent(event) {
+
+                    @Override
+                    public String getFolderId() {
+                        return folderView;
+                    }
+
+                    @Override
+                    public boolean containsFolderId() {
+                        return true;
+                    }
+                };
+                storage.getAlarmStorage().updateAlarms(userizedEvent, userId, alarms);
+            } else {
+                storage.getAlarmStorage().updateAlarms(event, userId, alarms);
+            }
+        }
+        /*
+         * insert new alarms
+         */
+        insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
+        Set<RecurrenceId> exceptions = null;
+        if (isSeriesMaster(event)) {
+            exceptions = getChangeExceptionDates(event.getSeriesId());
+            if (event.getDeleteExceptionDates() != null) {
+                exceptions.addAll(event.getDeleteExceptionDates());
+            }
+        }
+        storage.getAlarmTriggerStorage().insertTriggers(event, exceptions);
+
+        return true;
+    }
+
+    /**
+     * Loads all non user-specific data for a specific event, including attendees and attachments.
      * <p/>
-     * The parent folder identifier is set based on {@link AbstractUpdatePerformer#folder}
+     * No <i>userization</i> of the event is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
+     * event data is loaded from the storage.
      *
      * @param id The identifier of the event to load
      * @return The event data
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
      */
     protected Event loadEventData(String id) throws OXException {
-        return loadEventData(id, true);
-    }
-
-    /**
-     * Loads all data for a specific event, including attendees, attachments and alarms.
-     * <p/>
-     * The parent folder identifier is optionally set based on {@link AbstractUpdatePerformer#folder}
-     *
-     * @param id The identifier of the event to load
-     * @param applyFolderId <code>true</code> to take over the parent folder identifier representing the view on the event, <code>false</code>, otherwise
-     * @return The event data
-     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
-     */
-    protected Event loadEventData(String id, boolean applyFolderId) throws OXException {
         Event event = storage.getEventStorage().loadEvent(id, null);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
-        event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, EventField.values());
-        if (applyFolderId) {
-            event.setFolderId(folder.getID());
-        }
-        return event;
+        return new UnmodifiableEvent(storage.getUtilities().loadAdditionalEventData(-1, event, null));
     }
 
+    /**
+     * Loads all non user-specific data for multiple events, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the events is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
+     * event data is loaded from the storage.
+     *
+     * @param ids The identifiers of the event to load
+     * @return The event data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
+     */
+    protected List<Event> loadEventData(List<String> ids) throws OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
+        }
+        if (1 == ids.size()) {
+            return Collections.singletonList(loadEventData(ids.get(0)));
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (String id : ids) {
+            searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, id));
+        }
+
+        List<Event> foundEvents = storage.getEventStorage().searchEvents(searchTerm, null, null);
+        foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, null);
+        List<Event> events = new ArrayList<Event>(ids.size());
+        for (String id : ids) {
+            Event event = find(foundEvents, id);
+            if (null == event) {
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
+            }
+            events.add(new UnmodifiableEvent(event));
+        }
+        return events;
+    }
+
+    /**
+     * Loads all non user-specific data for a all exceptions of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exceptions from
+     * @return The event exception data
+     */
+    protected List<Event> loadExceptionData(String seriesId) throws OXException {
+        List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
+        if (0 < exceptions.size()) {
+            exceptions = storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
+            List<Event> unmodifiableExceptions = new ArrayList<Event>(exceptions.size());
+            for (Event exception : exceptions) {
+                unmodifiableExceptions.add(new UnmodifiableEvent(exception));
+            }
+            exceptions = unmodifiableExceptions;
+        }
+        return exceptions;
+    }
+
+    /**
+     * Loads all non user-specific data for a collection of exceptions of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exceptions from
+     * @param recurrenceIds The recurrence identifiers of the exceptions to load
+     * @return The event exception data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_RECURRENCE_NOT_FOUND}
+     */
     protected List<Event> loadExceptionData(String seriesId, Collection<RecurrenceId> recurrenceIds) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIds && 0 < recurrenceIds.size()) {
@@ -403,21 +635,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 exceptions.add(exception);
             }
         }
-        return storage.getUtilities().loadAdditionalEventData(calendarUserId, exceptions, EventField.values());
+        return storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
     }
 
-    protected Event loadExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
-        Event changeException = optExceptionData(seriesId, recurrenceId);
-        if (null == changeException) {
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, String.valueOf(recurrenceId));
-        }
-        return changeException;
-    }
-
+    /**
+     * Optionally loads all non user-specific data for a specific exception of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exception from
+     * @param recurrenceId The recurrence identifier of the exception to load
+     * @return The event exception data, or <code>null</code> if not found
+     */
     protected Event optExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
         Event changeException = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
         if (null != changeException) {
-            changeException = storage.getUtilities().loadAdditionalEventData(calendarUserId, changeException, null);
+            changeException = storage.getUtilities().loadAdditionalEventData(-1, changeException, null);
         }
         return changeException;
     }
@@ -479,6 +713,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance</li>
+     * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
      * @param event The event to userize from the current calendar user's point of view
@@ -489,4 +724,87 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected Event userize(Event event) throws OXException {
         return userize(event, calendarUserId);
     }
+
+    /**
+     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
+     * via {@link #calendarUserId}. This includes
+     * <ul>
+     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
+     * current session's user is neither creator, nor attendee of the event.</li>
+     * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
+     * attendance</li>
+     * <li>taking over the user's personal list of alarm for the event</li>
+     * </ul>
+     *
+     * @param event The event to userize from the current calendar user's point of view
+     * @param alarms The alarms to take over
+     * @return The <i>userized</i> event
+     * @see Utils#applyExceptionDates
+     * @see Utils#anonymizeIfNeeded
+     */
+    protected Event userize(Event event, List<Alarm> alarms) throws OXException {
+        event = userize(event, calendarUserId);
+        if (null == alarms && null != event.getAlarms() || null != alarms && null == event.getAlarms()) {
+            final List<Alarm> userizedAlarms = alarms;
+            event = new DelegatingEvent(event) {
+
+                @Override
+                public List<Alarm> getAlarms() {
+                    return userizedAlarms;
+                }
+
+                @Override
+                public boolean containsAlarms() {
+                    return true;
+                }
+            };
+        }
+        return event;
+    }
+
+    /**
+     * Checks that the current session's user is able to delete a specific event, by either requiring delete access for <i>own</i> or
+     * <i>all</i> objects, based on the user being the creator of the event or not.
+     * <p/>
+     * Additionally, the event's classification is checked.
+     *
+     * @param originalEvent The event to check the user's delete permissions for
+     * @throws OXException {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}, {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     * @see Check#requireCalendarPermission
+     * @see Check#classificationAllowsUpdate
+     */
+    protected void requireDeletePermissions(Event originalEvent) throws OXException {
+        if (session.getUserId() == originalEvent.getCreatedBy()) {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
+        }
+        classificationAllowsUpdate(folder, originalEvent);
+    }
+
+    /**
+     * Gets a value indicating whether a delete operation performed in the current folder from the calendar user's perspective would lead
+     * to a <i>real</i> deletion of the event from the storage, or if only the calendar user is removed from the attendee list, hence
+     * rather an update is performed.
+     * <p/>
+     * A deletion leads to a complete removal if
+     * <ul>
+     * <li>the event is located in a <i>public folder</i></li>
+     * <li>or the event is not <i>group-scheduled</i></li>
+     * <li>or the calendar user is the organizer of the event</li>
+     * <li>or the calendar user is the last internal user attendee in the event</li>
+     * </ul>
+     *
+     * @param originalEvent The original event to check
+     * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
+     */
+    protected boolean deleteRemovesEvent(Event originalEvent) {
+        return PublicType.getInstance().equals(folder.getType()) ||
+            false == isGroupScheduled(originalEvent) ||
+            isOrganizer(originalEvent, calendarUserId) ||
+            isLastUserAttendee(originalEvent.getAttendees(), calendarUserId)
+        ;
+    }
+
 }

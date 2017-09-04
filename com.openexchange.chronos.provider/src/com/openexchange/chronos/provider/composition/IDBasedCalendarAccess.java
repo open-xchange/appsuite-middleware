@@ -50,13 +50,21 @@
 package com.openexchange.chronos.provider.composition;
 
 import java.util.List;
+import java.util.Set;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SearchAware;
+import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -111,29 +119,20 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Updates a calendar folder.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param folderId The fully qualified identifier of the folder to update
      * @param folder The updated calendar folder data
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The (possibly changed) fully qualified identifier of the updated folder
      */
-    String updateFolder(String folderId, CalendarFolder folder) throws OXException;
+    String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
 
     /**
      * Deletes a calendar folder.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param folderId The fully qualified identifier of the folder to delete
      */
-    void deleteFolder(String folderId) throws OXException;
+    void deleteFolder(String folderId, long clientTimestamp) throws OXException;
 
     //
 
@@ -176,7 +175,34 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     List<Event> getEventsOfUser() throws OXException;
 
     /**
+     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * Additional, storage-specific search filters can be applied.
+     * <p/>
+     * <b>Note:</b> Only available for {@link SearchAware} calendar providers.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     *            of the user's {@link SearchAware} calendar accounts
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param queries The queries to search for, or <code>null</code> if not specified
+     * @return The found events, or an empty list if there are none
+     */
+    List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+
+    /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
+     * <p/>
+     * <b>Note:</b> Only available for {@link SyncAware} calendar providers.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
@@ -275,14 +301,14 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update
      * @param event The event data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateEvent(EventID eventID, Event event) throws OXException;
+    CalendarResult updateEvent(EventID eventID, Event event, long clientTimestamp) throws OXException;
 
     /**
      * Moves an existing event into another folder.
@@ -291,40 +317,60 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to move
      * @param targetFolderId The fully qualified identifier of the destination folder to move the event into
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The move result
      */
-    CalendarResult moveEvent(EventID eventID, String targetFolderId) throws OXException;
+    CalendarResult moveEvent(EventID eventID, String targetFolderId, long clientTimestamp) throws OXException;
 
     /**
      * Updates a specific attendee of an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param eventID The identifier of the event to get
      * @param attendee The attendee to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The update result
      */
-    CalendarResult updateAttendee(EventID eventID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(EventID eventID, Attendee attendee, long clientTimestamp) throws OXException;
+
+    /**
+     * Updates the user's personal alarms of a specific event, independently of the user's write access permissions for the corresponding
+     * event.
+     * <p/>
+     * <b>Note:</b> Only available for {@link PersonalAlarmAware} calendar providers.
+     * <p/>
+     *
+     * @param eventID The identifier of the event to update the alarms for
+     * @param alarms The updated list of alarms to apply, or <code>null</code> to remove any previously stored alarms
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
+     */
+    CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.
-     * <p/>
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_TIMESTAMP}</li>
-     * </ul>
      *
      * @param eventID The identifier of the event to delete
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The delete result
      */
-    CalendarResult deleteEvent(EventID eventID) throws OXException;
+    CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Retrieves all upcoming alarm triggers until the given time.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     * @param actions The actions to retrieve
+     * @return A list of upcoming alarm triggers
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
 
 }

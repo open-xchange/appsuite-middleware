@@ -19,7 +19,7 @@
  *    Please make sure that third-party modules and libraries are used
  *    according to their respective licenses.
  *
- *    Any modifications to this package must retain all copyright notices
+ *    Any modifications to e1 package must retain all copyright notices
  *    of the original copyright holder(s) for the original code used.
  *
  *    After any such modifications, the original and derivative code shall remain
@@ -32,24 +32,26 @@
  *     Mail: info@open-xchange.com
  *
  *
- *     This program is free software; you can redistribute it and/or modify it
+ *     e1 program is free software; you can redistribute it and/or modify it
  *     under the terms of the GNU General Public License, Version 2 as published
  *     by the Free Software Foundation.
  *
- *     This program is distributed in the hope that it will be useful, but
+ *     e1 program is distributed in the hope that it will be useful, but
  *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  *     for more details.
  *
  *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     with e1 program; if not, write to the Free Software Foundation, Inc., 59
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.util.Objects;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**
@@ -62,10 +64,46 @@ public class EventUtil {
 
     public static void compare(EventData e1, EventData e2, boolean assertTrue) {
         if(assertTrue){
-            assertTrue("The events aren't equal!", e1.equals(e2));
+            assertTrue("The events aren't equal!", isEqual(e1, e2));
         } else {
-            assertTrue("The events are equal, but they shouldn't!", !e1.equals(e2));
+            assertFalse("The events are equal, but they shouldn't!", isEqual(e1, e2));
         }
+    }
+
+    private static boolean isEqual(EventData e1, EventData e2){
+        if (e1 == e2) {
+            return true;
+          }
+          if (e1 == null || e1.getClass() != e2.getClass()) {
+            return false;
+          }
+          return Objects.equals(e1.getStartDate(), e2.getStartDate()) &&
+              Objects.equals(e1.getEndDate(), e2.getEndDate()) &&
+              Objects.equals(e1.getCreated(), e2.getCreated()) &&
+              Objects.equals(e1.getUid(), e2.getUid()) &&
+              Objects.equals(e1.getDescription(), e2.getDescription()) &&
+              Objects.equals(e1.getAttendees(), e2.getAttendees()) &&
+              Objects.equals(e1.getAlarms(), e2.getAlarms()) &&
+              Objects.equals(e1.getLastModified(), e2.getLastModified()) &&
+              Objects.equals(e1.getModifiedBy(), e2.getModifiedBy()) &&
+              Objects.equals(e1.getSummary(), e2.getSummary()) &&
+              Objects.equals(e1.getSequence(), e2.getSequence()) &&
+              Objects.equals(e1.getId(), e2.getId()) &&
+              Objects.equals(e1.getPropertyClass(), e2.getPropertyClass()) &&
+              Objects.equals(e1.getOrganizer(), e2.getOrganizer()) &&
+              Objects.equals(e1.getTransp(), e2.getTransp()) &&
+              Objects.equals(e1.getAllDay(), e2.getAllDay()) &&
+              Objects.equals(e1.getColor(), e2.getColor()) &&
+              Objects.equals(e1.getFolder(), e2.getFolder()) &&
+              Objects.equals(e1.getCreatedBy(), e2.getCreatedBy()) &&
+              Objects.equals(e1.getDeleteExceptionDates(), e2.getDeleteExceptionDates()) &&
+              Objects.equals(e1.getRecurrenceId(), e2.getRecurrenceId()) &&
+              Objects.equals(e1.getCalendarUser(), e2.getCalendarUser()) &&
+              Objects.equals(e1.getRrule(), e2.getRrule()) &&
+              Objects.equals(e1.getAttachments(), e2.getAttachments()) &&
+              Objects.equals(e1.getExtendedProperties(), e2.getExtendedProperties()) &&
+              Objects.equals(e1.getGeo(), e2.getGeo()) &&
+              Objects.equals(e1.getUrl(), e2.getUrl());
     }
 
 }

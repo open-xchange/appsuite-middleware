@@ -50,9 +50,17 @@
 package com.openexchange.chronos.provider.caching;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.joda.time.Weeks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,15 +72,17 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.impl.CachingCalendarAccessImpl;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -87,19 +97,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @PrepareForTest({ ServerSessionAdapter.class, Services.class })
 public class CachingCalendarAccessTest {
 
-    private CachingCalendarAccessImpl cachingCalendarAccess;
+    protected TestCachingCalendarAccessImpl cachingCalendarAccess;
 
     @Mock
-    private Session session;
+    protected Session session;
 
     @Mock
     private ServerSession serverSession;
 
     @Mock
-    private CalendarAccount account;
+    protected CalendarAccount account;
 
     @Mock
-    private CalendarParameters parameters;
+    protected CalendarParameters parameters;
 
     @Mock
     private CalendarStorageFactory calendarStorageFactory;
@@ -110,7 +120,7 @@ public class CachingCalendarAccessTest {
     @Mock
     private Connection connection;
 
-    private Map<String, Object> calendarConfig = new HashMap<String, Object>();
+    private Map<String, Object> cachingConfig = new HashMap<String, Object>();
 
     @Before
     public void setUp() throws Exception {
@@ -122,54 +132,252 @@ public class CachingCalendarAccessTest {
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(CalendarStorageFactory.class)).thenReturn(calendarStorageFactory);
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
-        PowerMockito.when(databaseService.getWritable((Context)Matchers.any())).thenReturn(connection);
+        PowerMockito.when(databaseService.getWritable((Context) Matchers.any())).thenReturn(connection);
 
-        cachingCalendarAccess = new CachingCalendarAccessImpl(session, account, parameters);
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
-        Mockito.when(account.getConfiguration()).thenReturn(calendarConfig);
+        Mockito.when(account.getConfiguration()).thenReturn(cachingConfig);
     }
 
     @Test
-    public void testGetType_noEntryForLastUpdateFound_returnInitialInsert() throws OXException {
-        ProcessingType type = cachingCalendarAccess.getType();
+    public void testMerge_persistedStateNull_throwException() {
+        Set<FolderUpdateState> type = cachingCalendarAccess.merge(null, Collections.<CalendarFolder> emptyList());
 
-        assertEquals(ProcessingType.INITIAL_INSERT, type);
+        assertTrue(type.isEmpty());
     }
 
     @Test
-    public void testGetType_lastUpdateToSmall_returnInitialInsert() throws OXException {
-        calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(0));
+    public void testMerge_visibleFoldersNull_throwException() {
+        Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), null);
 
-        ProcessingType type = cachingCalendarAccess.getType();
-
-        assertEquals(ProcessingType.INITIAL_INSERT, type);
+        assertTrue(processingInstructions.isEmpty());
     }
 
     @Test
-    public void testGetType_lastUpdateToSmall2_returnInitialInsert() throws OXException {
-        calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(-111111111));
+    public void testMerge_emtpyListsNothingToCompare_returnEmptySet() {
+        Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), Collections.<CalendarFolder> emptyList());
 
-        ProcessingType type = cachingCalendarAccess.getType();
-
-        assertEquals(ProcessingType.INITIAL_INSERT, type);
+        assertTrue(processingInstructions.isEmpty());
     }
 
     @Test
-    public void testGetType_lastUpdateFarAway_returnUpdate() throws OXException {
-        calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(111111111));
+    public void testMerge_multipleNewVisibleFolders_returnInstructionsToInsert() {
+        List<CalendarFolder> visibleFolders = new ArrayList<>();
+        visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
+        visibleFolders.add(new DefaultCalendarFolder("mySecondFolderId", "The SECOND ONE"));
 
-        ProcessingType type = cachingCalendarAccess.getType();
+        Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), visibleFolders);
 
-        assertEquals(ProcessingType.UPDATE, type);
+        assertEquals(2, processingInstructions.size());
+        for (FolderUpdateState folderUpdateState : processingInstructions) {
+            assertEquals(FolderProcessingType.INITIAL_INSERT, folderUpdateState.getType());
+        }
     }
 
     @Test
-    public void testGetType_lastInDefinedRange_returnReadDB() throws OXException {
-        long currentTimeMillis = System.currentTimeMillis();
-        calendarConfig.put(CachingCalendarAccess.LAST_UPDATE, Autoboxing.L(currentTimeMillis));
+    public void testMerge_persistedButNoMoreAvailableFolders_returnInstructionsToRemove() {
+        List<FolderUpdateState> lastFolders = new ArrayList<>();
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
 
-        ProcessingType type = cachingCalendarAccess.getType();
+        Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(lastFolders, Collections.<CalendarFolder> emptyList());
 
-        assertEquals(ProcessingType.READ_DB, type);
+        assertEquals(2, processingInstructions.size());
+        for (FolderUpdateState folderUpdateState : processingInstructions) {
+            assertEquals(FolderProcessingType.DELETE, folderUpdateState.getType());
+        }
     }
+
+    @Test
+    public void testMerge_mixedMode() {
+        List<FolderUpdateState> lastFolders = new ArrayList<>();
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
+
+        List<CalendarFolder> visibleFolders = new ArrayList<>();
+        visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
+        visibleFolders.add(new DefaultCalendarFolder("a new Folder", "The NEW ONE"));
+
+        Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(lastFolders, visibleFolders);
+
+        assertEquals(3, processingInstructions.size());
+        for (FolderUpdateState folderUpdateState : processingInstructions) {
+            if (folderUpdateState.getFolderId().equals("myFolderId")) {
+                assertEquals(FolderProcessingType.UPDATE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("mySecondFolderId")) {
+                assertEquals(FolderProcessingType.DELETE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("a new Folder")) {
+                assertEquals(FolderProcessingType.INITIAL_INSERT, folderUpdateState.getType());
+            }
+        }
+    }
+
+    @Test
+    public void testCleanup_removeUndesiredInstructions() {
+        Set<FolderUpdateState> lastFolders = new HashSet<>();
+        lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("a new Folder", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("mySecondFolderId-goaway2", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
+        lastFolders.add(new FolderUpdateState("deleteMeFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.DELETE));
+        lastFolders.add(new FolderUpdateState("DeleteMeToo", new Long(System.currentTimeMillis()), 1, FolderProcessingType.DELETE));
+        lastFolders.add(new FolderUpdateState("InitialInsertId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.INITIAL_INSERT));
+
+        cachingCalendarAccess.cleanup(lastFolders, new String[] { "myFolderId", "a new Folder" });
+
+        assertEquals(5, lastFolders.size());
+        for (FolderUpdateState folderUpdateState : lastFolders) {
+            if (folderUpdateState.getFolderId().equals("myFolderId")) {
+                assertEquals(FolderProcessingType.UPDATE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("deleteMeFolderId")) {
+                assertEquals(FolderProcessingType.DELETE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("InitialInsertId")) {
+                assertEquals(FolderProcessingType.INITIAL_INSERT, folderUpdateState.getType());
+            }
+        }
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_emptyConfiguration_noFolderCachingState() throws OXException {
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertTrue(latestUpdateStates.isEmpty());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertTrue(latestUpdateStates.isEmpty());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_oneFolderCachedButRequestedInReadTime_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.READ_DB, latestUpdateStates.get(0).getType());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_oneFolderCachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Weeks.TWO.toStandardMinutes().getMinutes()));
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.UPDATE, latestUpdateStates.get(0).getType());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_multipleFolderCached_returnUpdateState() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Weeks.TWO.toStandardMinutes().getMinutes()));
+        folderCachingConfig.put("0", latestUpdate);
+
+        Map<String, Object> latestUpdate2 = new HashMap<>();
+        latestUpdate2.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        folderCachingConfig.put("2", latestUpdate2);
+
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(2, latestUpdateStates.size());
+        for (FolderUpdateState folderUpdateState : latestUpdateStates) {
+            if (folderUpdateState.getFolderId().equals("0")) {
+                assertEquals(FolderProcessingType.UPDATE, folderUpdateState.getType());
+            }
+            if (folderUpdateState.getFolderId().equals("2")) {
+                assertEquals(FolderProcessingType.READ_DB, folderUpdateState.getType());
+            }
+        }
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderKnownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException {
+        Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
+        Map<String, Object> latestUpdate = new HashMap<>();
+        folderCachingConfig.put("0", latestUpdate);
+        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+
+        List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
+
+        assertEquals(1, latestUpdateStates.size());
+        assertEquals(FolderProcessingType.INITIAL_INSERT, latestUpdateStates.get(0).getType());
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderConfigNullAndProviderIntervalTooSmall_useDefaultOneWeek() {
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(null);
+
+        assertEquals(Weeks.ONE.toStandardMinutes().getMinutes(), cascadedRefreshInterval);
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderConfigEmptyAndProviderIntervalTooSmall_useDefaultOneWeek() {
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfig);
+
+        assertEquals(Weeks.ONE.toStandardMinutes().getMinutes(), cascadedRefreshInterval);
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderConfigNullAndProviderIntervalBiggerThanOneHouer_useFromProvider() throws OXException {
+        final long refreshInterval = 600;
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
+
+            @Override
+            public long getRefreshInterval() {
+                return refreshInterval;
+            }
+        };
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(null);
+
+        assertEquals(refreshInterval, cascadedRefreshInterval);
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderConfigEmptyAndProviderIntervalBiggerThanOneHouer_useFromProvider() throws OXException {
+        final long refreshInterval = 600;
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
+
+            @Override
+            public long getRefreshInterval() {
+                return refreshInterval;
+            }
+        };
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfig);
+
+        assertEquals(refreshInterval, cascadedRefreshInterval);
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_folderConfigWithRefreshAvailable_useFromFolderConfig() {
+        Map<String, Object> folderConfig = new HashMap<>();
+        long refreshIntervalFromFeed = 10L;
+        folderConfig.put(CachingCalendarAccess.REFRESH_INTERVAL, refreshIntervalFromFeed);
+
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(folderConfig);
+
+        assertEquals(refreshIntervalFromFeed, cascadedRefreshInterval);
+    }
+
 }

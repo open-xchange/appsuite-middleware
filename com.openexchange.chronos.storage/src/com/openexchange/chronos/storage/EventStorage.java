@@ -123,6 +123,15 @@ public interface EventStorage {
     Event loadException(String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws OXException;
 
     /**
+     * Loads all overridden occurrences (<i>change exceptions</i>) from a recurring event series.
+     *
+     * @param seriesId The identifier of the event series to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The event exceptions, or an empty list if there are none
+     */
+    List<Event> loadExceptions(String seriesId, EventField[] fields) throws OXException;
+
+    /**
      * Searches for events.
      *
      * @param searchTerm The search term to use
@@ -191,6 +200,13 @@ public interface EventStorage {
      * @param eventId The identifier of the event to delete
      */
     void deleteEvent(String eventId) throws OXException;
+
+    /**
+     * Deletes multiple existing events.
+     *
+     * @param eventIds The identifiers of the events to delete
+     */
+    void deleteEvents(List<String> eventIds) throws OXException;
 
     /**
      * Inserts a new (or overwrites a previously existing) <i>tombstone</i> record for a specific event into the database.

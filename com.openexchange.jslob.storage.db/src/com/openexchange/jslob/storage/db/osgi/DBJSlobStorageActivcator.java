@@ -117,7 +117,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
              * Register services for table creation
              */
             registerService(CreateTableService.class, new DBJSlobCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(this), new DBJSlobIncreaseBlobSizeTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(), new DBJSlobIncreaseBlobSizeTask()));
             /*
              * Register delete listener
              */

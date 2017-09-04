@@ -50,7 +50,6 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
-import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -69,10 +68,10 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -220,7 +219,7 @@ public class SearchAdapter {
             case "users":
                 appendUsers(queries);
                 break;
-            case "participants":
+            case "participant":
                 appendExternalParticipants(queries);
                 break;
             case "attachment":
@@ -262,42 +261,29 @@ public class SearchAdapter {
     }
 
     private void appendRangeFilter(List<String> queries) throws OXException {
-        Calendar calendar = initCalendar(TimeZones.UTC, (Date) null);
+        Date now = new Date();
         for (String query : queries) {
+            Date from;
+            Date until;
             switch (query) {
                 case "one_month":
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.MONTH, -1);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.MONTH, 1);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    from = CalendarUtils.add(now, Calendar.MONTH, -1);
+                    until = CalendarUtils.add(now, Calendar.MONTH, +1);
                     break;
                 case "three_months":
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.MONTH, -3);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.MONTH, 3);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    from = CalendarUtils.add(now, Calendar.MONTH, -3);
+                    until = CalendarUtils.add(now, Calendar.MONTH, +3);
                     break;
                 case "one_year":
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, -1);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.END_DATE, SingleOperation.GREATER_OR_EQUAL, calendar.getTime()));
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.YEAR, 1);
-                    stringBuilder.append(" AND ");
-                    append(getSearchTerm(EventField.START_DATE, SingleOperation.LESS_THAN, calendar.getTime()));
+                    from = CalendarUtils.add(now, Calendar.YEAR, -1);
+                    until = CalendarUtils.add(now, Calendar.YEAR, +1);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported filter query: " + query);
             }
+            stringBuilder.append(" AND ").append(prefixEvents).append("rangeUntil>? AND ").append(prefixEvents).append("rangeFrom<?");
+            parameters.add(Long.valueOf(from.getTime()));
+            parameters.add(Long.valueOf(until.getTime()));
         }
     }
 

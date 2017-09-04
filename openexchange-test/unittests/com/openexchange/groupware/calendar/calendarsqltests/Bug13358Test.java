@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import org.junit.Test;
 import com.openexchange.calendar.CalendarAdministration;
@@ -72,7 +70,7 @@ public class Bug13358Test extends CalendarSqlTest {
         final int objectId = appointment.getObjectID();
         clean.add(appointment);
 
-        final DeleteEvent deleteEvent = new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctx);
+        final DeleteEvent deleteEvent = DeleteEvent.createDeleteEventForGroupDeletion(this, groupId, ctx);
         final Connection readcon = DBPool.pickup(ctx);
         final Connection writecon = DBPool.pickupWriteable(ctx);
         final CalendarAdministration ca = new CalendarAdministration();

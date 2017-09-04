@@ -78,6 +78,16 @@ public interface CalendarProvider {
     String getDisplayName(Locale locale);
 
     /**
+     * (Re-)initializes a specific calendar account.
+     * <p/>
+     * Initialization is performed when a new account is added or an existing account is reconfigured or forcibly reseted.
+     *
+     * @param session The user's session
+     * @param account The calendar account to connect to
+     */
+    void initialize(Session session, CalendarAccount account) throws OXException;
+
+    /**
      * Initializes the connection to a specific calendar account.
      *
      * @param session The user's session

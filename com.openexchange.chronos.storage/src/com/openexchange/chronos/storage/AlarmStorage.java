@@ -108,6 +108,20 @@ public interface AlarmStorage {
     void deleteAlarms(String eventId) throws OXException;
 
     /**
+     * Deletes all alarms stored for multiple events.
+     *
+     * @param eventIds The identifiers of the events to remove the alarms for
+     */
+    void deleteAlarms(List<String> eventIds) throws OXException;
+
+    /**
+     * Deletes all alarms stored for a specific user.
+     *
+     * @param userId The identifier of the user to delete the alarms for
+     */
+    void deleteAlarms(int userId) throws OXException;
+
+    /**
      * Deletes all alarms of a user stored for a specific event.
      *
      * @param eventId The identifier of the event to remove the alarms for

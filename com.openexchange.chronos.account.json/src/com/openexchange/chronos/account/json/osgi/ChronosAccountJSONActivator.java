@@ -51,7 +51,7 @@ package com.openexchange.chronos.account.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 
 /**
  * {@link ChronosAccountJSONActivator}
@@ -63,7 +63,12 @@ public class ChronosAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CalendarAccountServiceFactory.class };
+        return new Class<?>[] { CalendarAccountService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override

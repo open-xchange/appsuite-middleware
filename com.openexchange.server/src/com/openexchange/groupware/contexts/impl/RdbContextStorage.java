@@ -61,17 +61,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
  * This class implements a storage for contexts in a relational database.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -80,7 +82,12 @@ public class RdbContextStorage extends ContextStorage {
     /**
      * SQL select statement for loading a context.
      */
-    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
+    private static final String SELECT_CONTEXT = "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max,server_id FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid WHERE context.cid=?";
+
+    /**
+     * SQL select statement for retrieving the server identifier for the specified context
+     */
+    private static final String FIND_SERVER_OF_CONTEXT = "SELECT server_id FROM context_server2db_pool WHERE cid = ?";
 
     /**
      * SQL select statement for resolving the login info to the context
@@ -133,15 +140,14 @@ public class RdbContextStorage extends ContextStorage {
         return contextId;
     }
 
-    private static int getAdmin(final Context ctx) throws OXException {
-        final Connection con = DBPool.pickup(ctx);
-        try {
-            return getAdmin(con, ctx.getContextId());
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
-        }
-    }
-
+    /**
+     * Gets the identifier of the context administrator
+     *
+     * @param con The connection to use
+     * @param ctxId The context identifier
+     * @return The identifier of the context administrator
+     * @throws OXException If no context administrator could be found
+     */
     public static final int getAdmin(final Connection con, final int ctxId) throws OXException {
         int identifier = -1;
         PreparedStatement stmt = null;
@@ -150,11 +156,11 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement(GET_MAILADMIN);
             stmt.setInt(1, ctxId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                identifier = result.getInt(1);
-            } else {
+            if (!result.next()) {
                 throw ContextExceptionCodes.NO_MAILADMIN.create(Integer.valueOf(ctxId));
             }
+
+            identifier = result.getInt(1);
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -163,43 +169,98 @@ public class RdbContextStorage extends ContextStorage {
         return identifier;
     }
 
-    private String[] getLoginInfos(final Context ctx) throws OXException {
-        final Connection con = DBPool.pickup();
+    private String[] getLoginInfos(final Connection con, final Context ctx) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<String> loginInfo = new ArrayList<String>();
         try {
             stmt = con.prepareStatement(GET_LOGININFOS);
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
-            while (result.next()) {
-                loginInfo.add(result.getString(1));
+            if (false == result.next()) {
+                return new String[0];
             }
+
+            List<String> loginInfo = new LinkedList<String>();
+            do {
+                loginInfo.add(result.getString(1));
+            } while (result.next());
+            return loginInfo.toArray(new String[loginInfo.size()]);
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(con);
         }
-        return loginInfo.toArray(new String[loginInfo.size()]);
     }
 
     @Override
     public ContextExtended loadContext(final int contextId) throws OXException {
-        final ContextImpl context = loadContextData(contextId);
-        context.setLoginInfo(getLoginInfos(context));
-        context.setMailadmin(getAdmin(context));
-        loadAttributes(context);
+        DatabaseService databaseService = Database.getDatabaseService();
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        // Load context data from ConfigDB
+        ContextImpl context;
+        try {
+            Connection con = databaseService.getReadOnly();
+            try {
+                context = loadContext(con, contextId);
+            } finally {
+                databaseService.backReadOnly(con);
+            }
+        } catch (OXException e) {
+            if (false == ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            // Context not found. Retry with read-write connection
+            Connection con = databaseService.getWritable();
+            try {
+                context = loadContext(con, contextId);
+            } finally {
+                databaseService.backWritableAfterReading(con);
+            }
+        }
+
+        // Load context data from UserDB
+        try {
+            Connection con = databaseService.getReadOnly(contextId);
+            try {
+                setMailAdminAndAttributes(con, context);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
+        } catch (OXException e) {
+            if (false == ContextExceptionCodes.NO_MAILADMIN.equals(e)) {
+                throw e;
+            }
+
+            Connection con = databaseService.getWritable(contextId);
+            try {
+                setMailAdminAndAttributes(con, context);
+            } finally {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
+        }
+
         return context;
     }
 
-    private void loadAttributes(final ContextImpl ctx) throws OXException {
-        Connection con = null;
+    private ContextImpl loadContext(Connection con, int contextId) throws OXException {
+        ContextImpl context = loadContextData(con, contextId);
+        context.setLoginInfo(getLoginInfos(con, context));
+        return context;
+    }
+
+    private void setMailAdminAndAttributes(Connection con, ContextImpl context) throws OXException {
+        context.setMailadmin(getAdmin(con, context.getContextId()));
+        loadAndSetAttributes(con, context);
+    }
+
+    private void loadAndSetAttributes(Connection con, ContextImpl ctx) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = DBPool.pickup(ctx);
-
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
@@ -221,9 +282,6 @@ public class RdbContextStorage extends ContextStorage {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            if (null != con) {
-                DBPool.closeReaderSilent(ctx, con);
-            }
         }
     }
 
@@ -237,34 +295,41 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     public ContextImpl loadContextData(final Connection con, final int contextId) throws OXException {
-        ContextImpl context = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(SELECT_CONTEXT);
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                context = new ContextImpl(contextId);
-                int pos = 1;
-                context.setName(result.getString(pos++));
-                context.setEnabled(result.getBoolean(pos++));
-                context.setFilestoreId(result.getInt(pos++));
-                context.setFilestoreName(result.getString(pos++));
-                final String[] auth = new String[2];
-                auth[0] = result.getString(pos++);
-                auth[1] = result.getString(pos++);
-                context.setFilestoreAuth(auth);
-                context.setFileStorageQuota(result.getLong(pos++));
-            } else {
+
+            // Check if such a context exists
+            if (false == result.next()) {
                 throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
             }
+
+            // Check if context-associated server matches this node's one
+            int serverId = result.getInt(8);
+            if (serverId != DBPool.getServerId()) {
+                throw ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.create(I(contextId), I(serverId));
+            }
+
+            ContextImpl context = new ContextImpl(contextId);
+            int pos = 1;
+            context.setName(result.getString(pos++));
+            context.setEnabled(result.getBoolean(pos++));
+            context.setFilestoreId(result.getInt(pos++));
+            context.setFilestoreName(result.getString(pos++));
+            final String[] auth = new String[2];
+            auth[0] = result.getString(pos++);
+            auth[1] = result.getString(pos++);
+            context.setFilestoreAuth(auth);
+            context.setFileStorageQuota(result.getLong(pos++));
+            return context;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return context;
     }
 
     /**

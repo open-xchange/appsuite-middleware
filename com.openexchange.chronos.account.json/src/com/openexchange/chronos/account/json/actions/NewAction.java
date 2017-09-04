@@ -49,15 +49,19 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.chronos.account.json.CalendarAccountFields;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,11 +70,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class NewAction extends AbstractAccountAction {
+public class NewAction extends AbstractAccountAction implements CalendarAccountFields{
 
     /**
      * Initialises a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(ServiceLookup services) {
@@ -79,15 +83,18 @@ public class NewAction extends AbstractAccountAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject data = requestData.getData(JSONObject.class);
         String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
         if (Strings.isEmpty(providerId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_PROVIDER_ID);
         }
-        CalendarAccountServiceFactory factory = getService(CalendarAccountServiceFactory.class);
-        CalendarAccountService service = factory.create(session.getUserId(), session.getContext());
-        int createdId = service.insertAccount(providerId, session.getUserId(), data.asMap());
-        return new AJAXRequestResult(createdId);
+        CalendarAccountService service = getService(CalendarAccountService.class);
+        JSONObject data = requestData.getData(JSONObject.class);
+        CalendarAccount account = service.createAccount(session, providerId, data.asMap());
+        try {
+            return new AJAXRequestResult(new JSONObject(1).put(ID, JSONCoercion.coerceToJSON(account.getAccountId())), FORMAT);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
     }
 
 }

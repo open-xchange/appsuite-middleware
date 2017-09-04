@@ -50,13 +50,17 @@
 package com.openexchange.chronos.provider.birthdays;
 
 import java.util.Locale;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link BirthdaysCalendarProvider}
@@ -66,13 +70,18 @@ import com.openexchange.session.Session;
  */
 public class BirthdaysCalendarProvider implements CalendarProvider {
 
-    private static final String PROVIDER_ID = "birthdays";
+    static final String PROVIDER_ID = "birthdays";
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link BirthdaysCalendarProvider}.
+     *
+     * @param services A service lookup reference
      */
-    public BirthdaysCalendarProvider() {
+    public BirthdaysCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -87,7 +96,20 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
 
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new BirthdaysCalendarAccess(session, account, parameters);
+        return getAccess(session, account, parameters);
+    }
+
+    @Override
+    public void initialize(Session session, CalendarAccount account) throws OXException {
+        getAccess(session, account, null).initialize();
+    }
+
+    private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == serverSession.getUserConfiguration().hasContact()) {
+            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+        }
+        return new BirthdaysCalendarAccess(services, serverSession, account, parameters);
     }
 
 }

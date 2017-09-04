@@ -5,12 +5,13 @@ Bundle-SymbolicName: com.openexchange.find.basic
 Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.davekoelle,
  com.openexchange.api2,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.compat,
+ com.openexchange.chronos.provider.composition,
  com.openexchange.chronos.service,
  com.openexchange.config,
  com.openexchange.config.cascade,
@@ -34,11 +35,11 @@ Import-Package: com.davekoelle,
  com.openexchange.find.tasks,
  com.openexchange.find.util,
  com.openexchange.folderstorage,
+ com.openexchange.folderstorage.calendar.contentType,
  com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.mail,
  com.openexchange.folderstorage.mail.contentType,
  com.openexchange.folderstorage.type,
- com.openexchange.groupware.calendar,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,

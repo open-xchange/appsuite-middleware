@@ -53,7 +53,6 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
-import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -87,8 +86,8 @@ public class CompositingIDBasedCalendarAccessFactory implements IDBasedCalendarA
     }
 
     @Override
-    public IDBasedFreeBusyAccess createFreebusyAccess(Session session) throws OXException {
-        return new CompositingIDBasedCalendarAccess(session, providerRegistry, services);
+    public IDBasedFreeBusyAccess createFreeBusyAccess(Session session) throws OXException {
+        return new CompositingIDBasedFreeBusyAccess(session, providerRegistry, services);
     }
 
 }

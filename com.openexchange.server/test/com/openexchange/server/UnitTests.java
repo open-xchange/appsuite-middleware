@@ -75,7 +75,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
     com.openexchange.mail.api.MailConfigTest.class,

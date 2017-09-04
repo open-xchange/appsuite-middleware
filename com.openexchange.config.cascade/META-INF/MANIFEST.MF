@@ -4,7 +4,7 @@ Bundle-Name: A Cascading Configuration System
 Bundle-SymbolicName: com.openexchange.config.cascade
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
