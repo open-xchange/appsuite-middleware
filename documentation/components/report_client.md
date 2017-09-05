@@ -468,6 +468,8 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 
 - number of client logins for the last month
 
+**Additional Information:** Both login count values respect only the last client login of a user with a distinct client like olox2 or appsuite. If a user logs in with olox2 and appsuite during the last 30 days, he will be considered in both counts for the clients and also in both timeframes (clientlogincountyear & clientlogincount). If his last login with a client is further away in the past but still in the timeframe of the last year (365 days in the past), he will only be considered in the yearly counter (clientlogincountyear) and not in the last monthly counter (clientlogincount).
+
 **uuid:**
 
 - a unique id for the report
