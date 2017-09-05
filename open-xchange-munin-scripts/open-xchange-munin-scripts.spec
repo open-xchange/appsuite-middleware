@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:	   @OXVERSION@
-%define        ox_release 43
+%define        ox_release 44
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -76,6 +76,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Tue Sep 05 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-09-07 (4343)
 * Thu Jan 26 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-01-26 (3926)
 * Thu Jan 19 2017 Carsten Hoeger <choeger@open-xchange.com>
@@ -153,7 +155,7 @@ Build for patch 2015-10-26 (2812)
 * Fri Oct 02 2015 Carsten Hoeger <choeger@open-xchange.com>
 Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Carsten Hoeger <choeger@open-xchange.com>
@@ -613,7 +615,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -652,14 +654,10 @@ Third candidate for 7.2.1 release
 Build for patch 2013-05-22
 * Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-22
-* Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-05-22
 * Wed May 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.1 release
 * Wed May 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-10
-* Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-05-09
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -682,8 +680,6 @@ Third candidate for 7.2.0 release
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
-* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-04-04
 * Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.2.0
 * Fri Mar 15 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -698,45 +694,7 @@ Fourth release candidate for 6.22.2/7.0.2
 Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
-* Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-03-07
 * Wed Feb 27 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Fourth release candidate for 7.0.1
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Third release candidate for 7.0.1
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.0.2 release
-* Thu Feb 14 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second release candidate for 7.0.1
-* Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
-First release candidate for 7.0.1
-* Mon Jan 17 2011 Carsten Hoeger <choeger@open-xchange.com>
-bugfix release
-
-
-open-xchange-munin-scripts (0.1-7) unstable; urgency=low
-
-  * bugfix release
-
-
-open-xchange-munin-scripts (0.1-6) unstable; urgency=low
-
-  * bugfix release
-
-
-open-xchange-munin-scripts (0.1-5) unstable; urgency=low
-
-  * New build
-
-
-open-xchange-munin-scripts (0.1-4) unstable; urgency=low
-
-  * new build including latest changes
-* Fri Oct 08 2010 Carsten Hoeger <choeger@open-xchange.com>
-new build with fix for rpm packages
-* Wed Oct 06 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
-initial public build
-* Wed Aug 04 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
-initial packaging structure

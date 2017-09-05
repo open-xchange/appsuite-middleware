@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 43
+%define         ox_release 44
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -62,6 +62,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
+* Tue Sep 05 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-09-07 (4343)
 * Thu Jan 26 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-01-26 (3926)
 * Thu Jan 19 2017 Carsten Hoeger <choeger@open-xchange.com>
@@ -139,7 +141,7 @@ Build for patch 2015-10-26 (2812)
 * Fri Oct 02 2015 Carsten Hoeger <choeger@open-xchange.com>
 Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2015-09-28  (2767)
+Build for patch 2015-09-28 (2767)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Carsten Hoeger <choeger@open-xchange.com>
@@ -601,7 +603,7 @@ First release candidate for 7.4.0
 * Tue Jul 16 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second build for patch  2013-07-18
+Second build for patch 2013-07-18
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Carsten Hoeger <choeger@open-xchange.com>
