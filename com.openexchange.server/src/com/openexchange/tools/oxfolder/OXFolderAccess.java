@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,9 +58,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.contact.ContactService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -82,8 +86,8 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXFolderAccess} - Provides access to database folders.
@@ -517,7 +521,7 @@ public class OXFolderAccess {
             if (user.isGuest()) {
                 throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            return folderId;
+            return createAndGetFolderId(userId, module, type, user);
         } catch (OXException e) {
             throw e;
         } catch (SQLException e) {
@@ -525,6 +529,52 @@ public class OXFolderAccess {
         } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
+    }
+    
+    private int createAndGetFolderId(int userId, int module, int type, User user) throws OXException, SQLException {
+        int folderId = -1;
+        Connection wc = DBPool.pickupWriteable(ctx);
+        boolean rollback = true;
+        boolean created = false;
+        int contextId = ctx.getContextId();
+        Locale userLocale = user.getLocale();
+        try {
+            wc.setAutoCommit(false);
+            /*
+            * Check existence again within this transaction to avoid race conditions
+            */
+            folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) : OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
+            if (-1 == folderId) {
+                /*
+                * Not found, create default folder, either trash or public
+                */
+                int folderType = -1 == type ? FolderObject.PUBLIC : type;
+                if (folderType == FolderObject.TRASH) {
+                    ConditionTreeMapManagement.dropFor(contextId);
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, folderType, userLocale);
+                } else if (folderType == FolderObject.PUBLIC){
+                    ConditionTreeMapManagement.dropFor(contextId);
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, contextId, userId, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folderType, userLocale);
+                }
+                created = true;
+            }
+            wc.commit();
+            rollback = false;
+        } finally {
+            if (rollback) {
+                Databases.rollback(wc);
+            }
+            Databases.autocommit(wc);
+            if (created) {
+                DBPool.closeWriterSilent(ctx, wc);
+            } else {
+                DBPool.closeWriterAfterReading(ctx, wc);
+            }
+        }
+        if (folderId == -1) {
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(FolderObject.getFolderString(type, userLocale), contextId);
+        }
+        return folderId;
     }
 
     /**
