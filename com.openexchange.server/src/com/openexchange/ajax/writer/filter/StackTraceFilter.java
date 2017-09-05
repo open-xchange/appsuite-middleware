@@ -47,25 +47,79 @@
  *
  */
 
-package com.openexchange.exception.filter;
+package com.openexchange.ajax.writer.filter;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
- * {@link ExceptionFilter} - Filters for allowed exceptions
+ * {@link StackTraceFilter} - Implementation of {@link WriterFilter}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface ExceptionFilter {
+public class StackTraceFilter {
+
+    /** The logger */
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceFilter.class);
+
+    /** The property defining the blacklisted exceptions */
+    public final static String PROPETY_NAME = "com.openexchange.ajax.response.stacktrace";
+
+    // Blacklisted exceptions
+    private Set<String> prefixes;
+    private Set<String> codes;
+
+    /**
+     * Initializes a new {@link StackTraceFilter}.
+     */
+    public StackTraceFilter(String blacklist) {
+        super();
+        prefixes = new ConcurrentSkipListSet<>();
+        codes = new ConcurrentSkipListSet<>();
+
+        // Read data
+        if (Strings.isEmpty(blacklist)) {
+            LOGGER.debug("There are no exceptions configured to be blacklisted. Using default instead.");
+            prefixes.add("SES");
+            return;
+        }
+
+        // Parse
+        for (String entry : Strings.splitByComma(blacklist)) {
+            if (entry.matches("[A-Z]{3}-[0-9]*")) {
+                // Complete error code like 'SES-200'
+                codes.add(entry);
+            } else if (entry.matches("[A-Z]{3}(-|-\\*|\\*)?")) {
+                // Prefix like 'SES', 'SES*' or 'SES-*'
+                prefixes.add(entry.substring(0, 3));
+            } else {
+                // Not supported
+                LOGGER.warn("{} does not match any typical exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
+            }
+        }
+
+    }
 
     /**
      * Check if given {@link OXException} is allowed to be added in a response
      * 
-     * @param exception The {@link OXException}
-     * @return <code>true</code> If the stack trace can be added in a response
-     *         <code>false</code> If the stack trace is not allowed to be a part of the response
+     * @param exception The {@link OXException} to check
+     * @return <code>true</code> If the exception can be added in a response
+     *         <code>false</code> If the exception is not allowed to be a part of the response
      */
-    public boolean isStackTraceAllowed(OXException exception);
-
+    public boolean isIncludeAllowed(OXException exception) {
+        // Check
+        if (prefixes.contains(exception.getPrefix())) {
+            // Prefix is blacklisted
+            return false;
+        }
+        if (codes.contains(exception.getErrorCode())) {
+            // Error is blacklisted
+            return false;
+        }
+        return true;
+    }
 }

@@ -91,6 +91,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.ajax.writer.filter.StackTraceFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyEvent.Type;
@@ -101,7 +102,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
-import com.openexchange.exception.filter.ExceptionFilter;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Localizable;
@@ -125,6 +125,7 @@ public final class ResponseWriter {
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
 
     private static volatile Locale defaultLocale;
+
     /**
      * The default locale.
      */
@@ -167,6 +168,7 @@ public final class ResponseWriter {
     }
 
     static volatile Boolean includeStackTraceOnError;
+
     private static boolean includeStackTraceOnError() {
         // First consult IncludeStackTraceService
         {
@@ -216,6 +218,7 @@ public final class ResponseWriter {
     }
 
     static volatile Boolean includeArguments;
+
     private static boolean includeArguments() {
         Boolean b = includeArguments;
         if (null == b) {
@@ -602,12 +605,7 @@ public final class ResponseWriter {
         /*
          * Stack trace
          */
-        boolean allow = true;
-        ExceptionFilter filter = ServerServiceRegistry.getInstance().getService(ExceptionFilter.class);
-        if (null != filter) {
-            allow = filter.isStackTraceAllowed(exception);
-        }
-        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError()) && allow) {
+        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception)) {
             // Write exception
             StackTraceElement[] traceElements = exception.getStackTrace();
             final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
@@ -829,7 +827,7 @@ public final class ResponseWriter {
             final OXException warning = warnings.get(0);
             writer.object();
             try {
-                writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
+                writeException(warning/* .setCategory(Category.CATEGORY_WARNING) */, writer, locale);
             } finally {
                 writer.endObject();
             }
@@ -848,7 +846,7 @@ public final class ResponseWriter {
                 for (final OXException warning : warnings) {
                     writer.object();
                     try {
-                        writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
+                        writeException(warning/* .setCategory(Category.CATEGORY_WARNING) */, writer, locale);
                     } finally {
                         writer.endObject();
                     }
@@ -970,7 +968,7 @@ public final class ResponseWriter {
             writeArguments(exc, writer);
         }
         // Write stack trace
-        if (includeStackTraceOnError || includeStackTraceOnError()) {
+        if ((includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exc)) {
             writer.key(ERROR_STACK);
             writer.array();
             try {
@@ -1045,6 +1043,46 @@ public final class ResponseWriter {
         }
     }
 
+    private static volatile StackTraceFilter filter;
+
+    /**
+     * Check if the given {@link OXException} is allowed to be included into a response
+     * 
+     * @param exception The {@link OXException} to check
+     * @return <code>true</code> if the exception and its stacktrace can be included into the response
+     *         <code>false</code> otherwise
+     */
+    private static boolean isIncludeAllowed(OXException exception) {
+        StackTraceFilter f = filter;
+        if (null == f) {
+            synchronized (ResponseWriter.class) {
+                f = filter;
+                if (null == f) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Trigger default
+                        f = new StackTraceFilter(null);
+                    }
+                    f = new StackTraceFilter(service.getProperty(StackTraceFilter.PROPETY_NAME, new PropertyListener() {
+
+                        @Override
+                        public void onPropertyChange(PropertyEvent event) {
+                            final Type type = event.getType();
+                            if (Type.DELETED == type) {
+                                filter = new StackTraceFilter(null);
+                            } else if (Type.CHANGED == type) {
+                                filter = new StackTraceFilter(service.getProperty(StackTraceFilter.PROPETY_NAME));
+                            }
+
+                        }
+                    }));
+                    filter = f;
+                }
+            }
+        }
+        return f.isIncludeAllowed(exception);
+    }
+
     /**
      * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
      *
@@ -1078,7 +1116,7 @@ public final class ResponseWriter {
      */
     public static final class WriteExceptionProps {
 
-        String errorKey;
+        String  errorKey;
         boolean checkIncludeStackTraceOnError;
         boolean includeStackTraceOnError;
         boolean checkProblematic;

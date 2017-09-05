@@ -124,8 +124,6 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.filter.ExceptionFilter;
-import com.openexchange.exception.filter.impl.ExceptionFilterImpl;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -695,18 +693,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-        
-        ConfigurationService configService = getService(ConfigurationService.class);
-        if (null != configService) {
-            // Get and register new Filter
-            ExceptionFilterImpl filter = new ExceptionFilterImpl();
-            filter.reloadConfiguration(configService);
-            registerService(ExceptionFilter.class, filter);
-            registerService(Reloadable.class, filter);
-            ServerServiceRegistry.getInstance().addService(ExceptionFilter.class, filter);
-        }
-
-
+      
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
