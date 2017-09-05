@@ -131,6 +131,9 @@ case "${BNAME}" in
     "listserver")
     ACTION="util.server.ListServer"
     ;;
+    "changeserver")
+    ACTION="util.server.ChangeServer"
+    ;;
     "registerdatabase")
     ACTION="util.database.RegisterDatabase"
     ;;

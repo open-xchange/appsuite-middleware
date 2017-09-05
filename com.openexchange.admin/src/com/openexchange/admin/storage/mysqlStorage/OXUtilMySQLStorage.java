@@ -57,7 +57,6 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
-import com.google.common.collect.Lists;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -88,6 +87,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.collections.keyvalue.MultiKey;
+import com.google.common.collect.Lists;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -1798,7 +1798,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     /**
      * Performs a wait according to exponential back-off strategy.
      * <pre>
-     *  (retry-count * base-millis)  +  random-millis
+     * (retry-count * base-millis) + random-millis
      * </pre>
      *
      * @param retryCount The current number of retries
@@ -2222,6 +2222,56 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#changeServer(int, java.lang.String)
+     */
+    @Override
+    public void changeServer(int serverId, String schemaName) throws StorageException {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        boolean rollback = false;
+        try {
+            connection = cache.getWriteConnectionForConfigDB();
+            connection.setAutoCommit(false);
+            rollback = true;
+
+            int parameterIndex = 1;
+            statement = connection.prepareStatement("UPDATE context_server2db_pool SET server_id=? WHERE db_schema=?");
+            statement.setInt(parameterIndex++, serverId);
+            statement.setString(parameterIndex++, schemaName);
+
+            int rows = statement.executeUpdate();
+            if (rows <= 0) {
+                throw new StorageException("Unable to change to server '" + serverId + "' for the specified schema '" + schemaName + "'");
+            }
+
+            connection.commit();
+            rollback = false;
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            closeSQLStuff(resultSet, statement);
+
+            if (connection != null) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(connection);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
+
     @Override
     public Database[] searchForDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
         Connection con = null;
@@ -2314,6 +2364,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             class Counter {
+
                 int count = 0;
 
                 Counter(int initial) {
