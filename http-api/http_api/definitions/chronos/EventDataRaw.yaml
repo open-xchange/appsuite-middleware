@@ -101,6 +101,7 @@ extendedProperties:
     $ref: "#/definitions/ChronosExtendedProperty"
 geo:
   type: object
+  title: geo
   description: The geolocation of the event.
   properties:
     lat: 

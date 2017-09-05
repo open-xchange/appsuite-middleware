@@ -61,7 +61,6 @@ import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
 import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
 import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
 import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.DETAILS;
 import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
 import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
 import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
@@ -91,8 +90,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
-import com.openexchange.ajax.requesthandler.DetailParser;
-import com.openexchange.ajax.requesthandler.DetailParserService;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
@@ -100,7 +97,6 @@ import com.openexchange.config.PropertyEvent.Type;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.Detail;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -592,12 +588,6 @@ public final class ResponseWriter {
         json.put(ERROR_DESC, exception.getSoleMessage());
 
         /*
-         * Details
-         */
-        toJSON(json, exception.getDetails(), locale);
-
-
-        /*
          * Problematics
          */
         if (properties.checkProblematic) {
@@ -681,39 +671,6 @@ public final class ResponseWriter {
                 sb.append(')');
             }
         }
-    }
-
-    private static void toJSON(final JSONObject json, final List<Detail> details, Locale locale) throws JSONException {
-        final JSONArray array = new JSONArray(details.size());
-
-
-        for (final Detail detail : details) {
-            array.put(toJSON(detail, locale));
-        }
-        if (array.length() > 0) {
-            json.put(DETAILS, array);
-        }
-    }
-
-    public static JSONObject toJSON(final Detail detail, Locale locale) throws JSONException {
-
-        List<DetailParser> parsers = DetailParserService.getInstance().getParser();
-        if(parsers==null || parsers.isEmpty()){
-            final Logger logger = org.slf4j.LoggerFactory.getLogger(ResponseWriter.class);
-            logger.error("No DetailParser available! Returning empty json.");
-            return new JSONObject();
-        }
-
-        for(DetailParser parser : parsers){
-            if(parser.isApplicable(detail)){
-                return parser.toJSON(detail, locale);
-            }
-        }
-
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(ResponseWriter.class);
-        logger.error("No applicable DetailParser found! Returning empty json.");
-        return new JSONObject();
-
     }
 
     private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {

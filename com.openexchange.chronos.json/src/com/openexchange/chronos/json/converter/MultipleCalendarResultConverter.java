@@ -50,7 +50,9 @@
 package com.openexchange.chronos.json.converter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +60,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.action.DeleteAction.ErrorAwareCalendarResult;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
@@ -117,14 +121,19 @@ public class MultipleCalendarResultConverter implements ResultConverter {
         result.setResultObject(resultObject, "json");
     }
 
-    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, Session session) throws OXException {
+    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, ServerSession session) throws OXException {
         JSONObject result = new JSONObject(1);
         try {
             List<Event> creates = new ArrayList<Event>();
             List<Event> updates = new ArrayList<Event>();
             List<Event> deletes = new ArrayList<Event>();
+            List<CalendarResult> errors = new ArrayList<CalendarResult>();
 
             for (CalendarResult calendarResult : calendarResults) {
+                if(calendarResult instanceof ErrorAwareCalendarResult){
+                    errors.add(calendarResult);
+                    continue;
+                }
 
                 for (CreateResult createResult : calendarResult.getCreations()) {
                     creates.add(createResult.getCreatedEvent());
@@ -166,6 +175,10 @@ public class MultipleCalendarResultConverter implements ResultConverter {
             result.put("created", convertEvents(creates, timeZoneID, session));
             result.put("updated", convertEvents(updates, timeZoneID, session));
             result.put("deleted", convertEvents(deletes, timeZoneID, session));
+
+            if(errors != null && !errors.isEmpty()){
+                parseErrors(result, errors, session.getUser().getLocale());
+            }
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
@@ -187,5 +200,36 @@ public class MultipleCalendarResultConverter implements ResultConverter {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
+
+    private static final String ID = "id";
+    private static final String FOLDER_ID = "folderId";
+    private static final String ERROR = "error";
+
+    public static JSONObject toJSON(ErrorAwareCalendarResult result, Locale locale) throws JSONException {
+        JSONObject json = new JSONObject();
+        OXException exception = result.getError();
+        json.put(FOLDER_ID, result.getFolderID());
+        json.put(ID, result.getId().getObjectID());
+        JSONObject jsonException = new JSONObject();
+        ResponseWriter.addException(jsonException, exception, locale);
+        json.put(ERROR, jsonException);
+
+        return json;
+    }
+
+    public static void parseErrors(JSONObject json, Collection<CalendarResult> results, Locale locale) throws JSONException {
+
+        JSONArray array = new JSONArray();
+
+        for(CalendarResult result: results){
+
+            if(result instanceof ErrorAwareCalendarResult){
+                array.put(toJSON((ErrorAwareCalendarResult) result, locale));
+            }
+        }
+
+        json.put("failed", array);
+    }
+
 
 }

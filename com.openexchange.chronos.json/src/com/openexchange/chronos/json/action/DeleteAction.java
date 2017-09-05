@@ -50,25 +50,26 @@
 package com.openexchange.chronos.json.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.json.exception.CalendarExceptionDetail;
+import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -109,35 +110,83 @@ public class DeleteAction extends ChronosAction {
                 eventIDs.add(getEventID(jsonObject.getString(FOLDER_ID_FIELD), jsonObject.getString(ID_FIELD), jsonObject.optString(RECURENCE_ID_FIELD, null)));
             }
 
-            Map<EventID, OXException> errors = null;
-            CalendarResult deleteEvent = null;
+            List<CalendarResult> results = new ArrayList<>();
             for (EventID id : eventIDs) {
                 try {
-                    deleteEvent = calendarAccess.deleteEvent(id, clientTimestamp);
+                    results.add(calendarAccess.deleteEvent(id, clientTimestamp));
                 } catch (OXException e) {
-                    if (errors == null) {
-                        errors = new HashMap<>();
-                    }
-                    errors.put(id, e);
+                    results.add(new ErrorAwareCalendarResult(e, requestData.getSession().getUserId(), id, requestData.getSession()));
                 }
             }
 
-            if (errors != null && !errors.isEmpty()) {
-                if (errors.size() == 1) {
-                    EventID errorId = errors.keySet().iterator().next();
-                    throw CalendarExceptionCodes.ERROR_DELETING_EVENT.create(errorId, errors.get(errorId).getDisplayMessage(requestData.getSession().getUser().getLocale()));
-                } else {
-                    OXException ex = CalendarExceptionCodes.ERROR_DELETING_EVENTS.create();
-                    for (EventID id : errors.keySet()) {
-                        ex.addDetail(new CalendarExceptionDetail(errors.get(id), id));
-                    }
-                    throw ex;
-                }
+            long timestamp = 0L;
+            for (CalendarResult result : results) {
+                timestamp = Math.max(timestamp, result.getTimestamp());
             }
-            return new AJAXRequestResult(deleteEvent, new Date(deleteEvent.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
+            return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
+    }
+
+    public class ErrorAwareCalendarResult implements CalendarResult {
+
+        private final OXException error;
+        private final EventID id;
+        private final Session session;
+        private final int user;
+
+        public ErrorAwareCalendarResult(OXException error, int calUser, EventID id, Session session){
+            this.error = error;
+            this.id = id;
+            this.session = session;
+            user = calUser;
+        }
+
+        public OXException getError() {
+            return error;
+        }
+
+        public EventID getId() {
+            return id;
+        }
+
+        @Override
+        public long getTimestamp() {
+            return 0l;
+        }
+
+        @Override
+        public Session getSession() {
+            return session;
+        }
+
+        @Override
+        public int getCalendarUser() {
+           return user;
+        }
+
+        @Override
+        public String getFolderID() {
+            return id.getFolderID();
+        }
+
+        @Override
+        public List<DeleteResult> getDeletions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<UpdateResult> getUpdates() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<CreateResult> getCreations() {
+            return Collections.emptyList();
+        }
+
+
     }
 
 }

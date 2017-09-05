@@ -50,7 +50,6 @@
 package com.openexchange.chronos.json.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.ajax.requesthandler.DetailParser;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
@@ -58,7 +57,6 @@ import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.freebusy.json.ChronosFreeBusyActionFactory;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
-import com.openexchange.chronos.json.converter.CalendarExceptionDetailParser;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
@@ -124,7 +122,6 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new CalendarResultConverter());
             registerService(ResultConverter.class, new MultipleCalendarResultConverter());
             registerService(ResultConverter.class, new AlarmTriggerConverter());
-            registerService(DetailParser.class, new CalendarExceptionDetailParser());
 
             services=this;
         } catch (Exception e) {
