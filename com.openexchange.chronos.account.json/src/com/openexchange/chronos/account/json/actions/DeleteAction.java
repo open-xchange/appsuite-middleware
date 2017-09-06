@@ -89,6 +89,9 @@ public class DeleteAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_TIMESTAMP);
         }
         JSONArray data = requestData.getData(JSONArray.class);
+        if (null == data) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         CalendarAccountService service = getService(CalendarAccountService.class);
         try {
             for (int i = 0; i < data.length(); i++) {
