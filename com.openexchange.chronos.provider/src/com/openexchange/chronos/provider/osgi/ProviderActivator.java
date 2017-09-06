@@ -52,8 +52,13 @@ package com.openexchange.chronos.provider.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.provider.internal.Services;
+import com.openexchange.chronos.provider.quota.ChronosQuotaProvider;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaProvider;
 
 /**
  * 
@@ -68,13 +73,15 @@ public class ProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CryptoService.class };
+        return new Class<?>[] { CryptoService.class, DatabaseService.class, ConfigViewFactory.class, ContextService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.chronos.provider\"");
         Services.setServiceLookup(this);
+
+        registerService(QuotaProvider.class, new ChronosQuotaProvider());
     }
 
     @Override

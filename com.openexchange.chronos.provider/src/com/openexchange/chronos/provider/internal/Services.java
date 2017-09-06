@@ -50,6 +50,8 @@
 package com.openexchange.chronos.provider.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -101,5 +103,26 @@ public final class Services {
             throw new IllegalStateException("Missing ServiceLookup instance.");
         }
         return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @param failOnError <code>true</code> to thrown an {@link OXException} if the service is missing, <code>false</code> otherwise
+     * @return The service
+     * @throws OXException In case of missing service and failOnError <code>true</code>
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz, boolean failOnError) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance.");
+        }
+        S service = serviceLookup.getService(clazz);
+        if (failOnError && null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
+        return service;
     }
 }

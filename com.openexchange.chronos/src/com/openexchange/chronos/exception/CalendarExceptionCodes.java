@@ -72,6 +72,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUOTA_EXCEEDED;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
@@ -312,6 +313,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
+    
+    /**
+     * <li>The quota for context '%1$s' exceeded the limit</li>
+     * <li>There is no more quota available for new events in context %1$s.</li>
+     */
+    INSUFFICIENT_QUOTA("There is no more quota available for new events in context %1$s.", QUOTA_EXCEEDED, Category.CATEGORY_ERROR, 5007),
 
     ;
 

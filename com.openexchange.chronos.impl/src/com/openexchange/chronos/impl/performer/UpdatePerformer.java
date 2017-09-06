@@ -191,6 +191,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
                 }
             } else {
+                checkQuota();
                 /*
                  * update for new change exception, prepare & insert a plain exception first
                  */

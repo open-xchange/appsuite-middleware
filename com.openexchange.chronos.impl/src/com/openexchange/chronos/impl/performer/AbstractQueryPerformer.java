@@ -82,16 +82,24 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.RecurrenceIdComparator;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -339,6 +347,33 @@ public abstract class AbstractQueryPerformer {
         EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
         List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesId, fields);
         return CalendarUtils.getRecurrenceIds(changeExceptions);
+    }
+
+    /**
+     * Check if quota exceeded the limit
+     * 
+     * @throws OXException In case of missing service or quota exceeded
+     */
+    protected void checkQuota() throws OXException {
+        // Name from com.openexchange.chronos.provider.quota.ChronosQuotaProvider.MODULE_NAME
+        QuotaProvider provider = Services.getService(QuotaService.class, true).getProvider("calendar.chronos");
+        if (null == provider) {
+            // Service missing
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaProvider.class.getName());
+        }
+        List<AccountQuota> list = provider.getFor(session.getSession());
+        for (AccountQuota accountQuota : list) {
+            if (accountQuota.hasQuota(QuotaType.AMOUNT)) {
+                Quota quota = accountQuota.getQuota(QuotaType.AMOUNT);
+                if (quota.isExceeded()) {
+                    // Exceeded
+                    throw CalendarExceptionCodes.INSUFFICIENT_QUOTA.create(session.getContextId());
+                }
+            } else {
+                // Should never happen
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("QuotaProvoder doesn't support QuotaType.AMOUNT. Can't check quota!");
+            }
+        }
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
