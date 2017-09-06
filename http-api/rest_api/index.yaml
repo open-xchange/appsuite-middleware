@@ -14,6 +14,8 @@ tags:
     description: The user feedback module
   - name: Advertisement
     description: The advertisement module
+  - name: Admin
+    description: Interface for provisioning and other administrative operations.
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml
@@ -23,5 +25,9 @@ securityDefinitions:
   basicAuth:
     type: basic
     description: HTTP Basic Authentication.
+  contextAdminAuth:
+    description: The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled.
+    type: basic
 paths:
   source: ./paths/
+  

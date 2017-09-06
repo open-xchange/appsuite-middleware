@@ -137,6 +137,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.objectusecount.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oxscripts.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.passwordchange.history"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.passwordchange.history.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pgp.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pgp.keys"/>
@@ -187,6 +189,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.mime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.socketio"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.startup.impl"/>

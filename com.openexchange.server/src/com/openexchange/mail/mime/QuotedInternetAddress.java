@@ -122,12 +122,36 @@ public final class QuotedInternetAddress extends InternetAddress {
         return tmp.booleanValue();
     }
 
+    private static volatile Boolean keepQuotesInEncodedPersonal;
+    private static boolean keepQuotesInEncodedPersonal() {
+        Boolean tmp = keepQuotesInEncodedPersonal;
+        if (null == tmp) {
+            synchronized (QuotedInternetAddress.class) {
+                tmp = keepQuotesInEncodedPersonal;
+                if (null == tmp) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    // Therefore assuming 'false' as default here
+                    boolean defaultValue = false;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.keepQuotesInEncodedPersonal", defaultValue));
+                    keepQuotesInEncodedPersonal = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     static {
         MailReloadable.getInstance().addReloadable(new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 preferSimpleAddressParsing = null;
+                keepQuotesInEncodedPersonal = null;
             }
 
             @Override
@@ -1177,20 +1201,33 @@ public final class QuotedInternetAddress extends InternetAddress {
                     }
                 }
 
-                if (needQuoting(personal, true)) {
-                    try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                    } catch (final UnsupportedEncodingException e) {
-                        LOG.error("", e);
+                if (keepQuotesInEncodedPersonal()) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    if (needQuoting(personal, true)) {
+                        // Personal phrase needs to be quoted
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
+                    } else if (!isAscii(personal)) {
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
                     }
-                } else if (!isAscii(personal)) {
+                    return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                }
+
+                if (!isAscii(personal)) {
                     try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
                         LOG.error("", e);
                     }
                 }
-                return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                return new StringBuilder(32).append(quotePhrase(encodedPersonal, false)).append(" <").append(address).append('>').toString();
             } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
                 return new StringBuilder().append('<').append(address).append('>').toString();
             } else if (isGroup() || isSimple()) {
@@ -1256,7 +1293,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
+        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT_NO_QUOTE) < 0;
     }
 
     /**
@@ -1280,29 +1317,35 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final String SPECIALS_NO_DOT_NO_AT = "()<>,;:\\\"[]";
+    private static final String SPECIALS_NO_DOT_NO_AT_NO_QUOTE = "()<>,;:\\[]";
 
     private static final String SPECIALS_NO_DOT = "()<>@,;:\\\"[]";
 
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
     private static String quotePhrase(final String phrase, final boolean allowNonAscii) {
-        final int len = phrase.length();
+        int len = phrase.length();
         boolean needQuoting = false;
 
         for (int i = 0; i < len; i++) {
-            final char c = phrase.charAt(i);
+            char c = phrase.charAt(i);
             if (c == '"' || c == '\\') {
-                // need to escape them and then quote the whole string
-                final StringBuilder sb = new StringBuilder(len + 3);
+                // Need to escape that character and then quote the whole string
+                StringBuilder sb = new StringBuilder(len + 8);
                 sb.append('"');
-                for (int j = 0; j < len; j++) {
-                    final char cc = phrase.charAt(j);
-                    if (cc == '"' || cc == '\\') {
+                if (i > 0) {
+                    sb.append(phrase, 0, i);
+                }
+                sb.append('\\').append(c);
+
+                // Check remainder, too
+                for (int j = i + 1; j < len; j++) {
+                    c = phrase.charAt(j);
+                    if (c == '"' || c == '\\') {
                         // Escape the character
                         sb.append('\\');
                     }
-                    sb.append(cc);
+                    sb.append(c);
                 }
                 sb.append('"');
                 return sb.toString();
@@ -1312,12 +1355,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
 
-        if (needQuoting) {
-            final StringBuilder sb = new StringBuilder(len + 2);
-            sb.append('"').append(phrase).append('"');
-            return sb.toString();
-        }
-        return phrase;
+        return needQuoting ? new StringBuilder(len + 2).append('"').append(phrase).append('"').toString() : phrase;
     }
 
     private static boolean needQuoting(final String phrase, final boolean allowNonAscii) {
@@ -1421,7 +1459,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
             final char c = str.charAt(i);
-            ret = (c > 32 && c <= 127);
+            ret = (c >= 32 && c <= 127);
         }
         return ret;
     }

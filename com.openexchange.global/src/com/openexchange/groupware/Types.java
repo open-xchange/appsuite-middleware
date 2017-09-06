@@ -156,4 +156,6 @@ public interface Types {
     public static final int GENERIC_CONFIGURATION = 1200;
 
     public static final int EAV_NODE = 666;
+    
+    public static final int PASSWORD_CHANGE = 140;
 }

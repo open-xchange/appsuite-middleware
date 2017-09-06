@@ -64,5 +64,5 @@ public enum QuotaType {
     /**
      * The quota for size of items.
      */
-    SIZE,
+    SIZE
 }

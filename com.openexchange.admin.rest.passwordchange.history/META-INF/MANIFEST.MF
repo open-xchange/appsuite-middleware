@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Password Change History REST API
+Bundle-SymbolicName: com.openexchange.admin.rest.passwordchange.history
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Description: The Open-Xchange password change history REST API
+Import-Package: com.openexchange.admin.tools,
+ com.openexchange.ajax,
+ com.openexchange.auth,
+ com.openexchange.authorization,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.config.lean,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.passwordchange.history,
+ com.openexchange.server,
+ com.openexchange.tools.servlet.http,
+ com.openexchange.user,
+ javax.annotation.security,
+ javax.ws.rs,
+ javax.ws.rs.core,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.admin.rest.passwordchange.history.osgi.PasswordChangeRestActivator
