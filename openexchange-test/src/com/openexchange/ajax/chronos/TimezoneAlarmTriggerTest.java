@@ -100,7 +100,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndCheckEvent(event, 1);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -120,7 +120,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndCheckEvent(event, 1);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             int offset = endTimeZone.getOffset(end.getTimeInMillis());
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - offset - TimeUnit.MINUTES.toMillis(10));
@@ -151,7 +151,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndCheckEvent(event, 1);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -171,7 +171,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndCheckEvent(event, 1);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(System.currentTimeMillis(), 1); // one trigger
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
             int offset = endTimeZone.getOffset(end.getTimeInMillis());
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - offset + TimeUnit.MINUTES.toMillis(10));
@@ -179,7 +179,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
     }
 
     @SuppressWarnings("unchecked")
-    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, DateTimeData endDate, String duration, RelatedEnum related) throws ParseException {
+    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, DateTimeData endDate, String duration, RelatedEnum related) {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();

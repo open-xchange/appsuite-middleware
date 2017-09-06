@@ -181,15 +181,13 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     /**
      * Simple wrapper to return alarm triggers
      *
-     * @param from The lower limit
-     * @param unit The unit for the upper limit calculation
-     * @param value The amount for the upper limit calculation
+     * @param until The upper limit
      * @param actions The alarm actions to retrieve or null to retrieve the basic ones
      * @return The {@link AlarmTriggerResponse}
      * @throws ApiException
      */
-    private AlarmTriggerResponse getAlarmTrigger(long from, TimeUnit unit, int value, String actions, ChronosApi chronosApi, String session) throws ApiException {
-        return chronosApi.getAlarmTrigger(session, getZuluDateTime(from + unit.toMillis(value)).getValue(), getZuluDateTime(from).getValue(), actions);
+    private AlarmTriggerResponse getAlarmTrigger(long until, String actions, ChronosApi chronosApi, String session) throws ApiException {
+        return chronosApi.getAlarmTrigger(session, getZuluDateTime(until).getValue(), actions);
     }
 
     /**
@@ -236,19 +234,17 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     /**
-     * Retrieves alarm triggers from the given time until the given time (calculated by unit and value) and checks if the response contains the correct amount of alarm trigger objects.
+     * Retrieves alarm triggers with a trigger time lower than the given limit and checks if the response contains the correct amount of alarm trigger objects.
      * Its also possible to filter for specific actions.
      *
-     * @param from The lower limit
-     * @param unit The unit to add to the lower limit
-     * @param value The amount of the unit to add
+     * @param until The upper limit
      * @param actions The actions to retrieve
      * @param expected The expected amount of alarm objects
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(long from, TimeUnit unit, int value, String actions, int expected) throws ApiException {
-        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, unit, value, actions, defaultUserApi.getApi(), defaultUserApi.getSession());
+    protected AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected) throws ApiException {
+        AlarmTriggerResponse triggerResponse = getAlarmTrigger(until, actions, defaultUserApi.getApi(), defaultUserApi.getSession());
         AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
         assertEquals(expected, triggers.size());
         return triggers;
@@ -257,29 +253,30 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     /**
      * Retrieves alarm triggers from the given time until two days and checks if the response contains the correct amount of alarm trigger objects
      *
-     * @param from The lower limit of the request
+     * @param until The upper limit of the request
      * @param expected The amount of expected alarm trigger objects
      * @param api The api client to use
+     * @param session The session of the user
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(long from, int expected, ChronosApi api, String session) throws ApiException {
-        AlarmTriggerResponse triggerResponse = getAlarmTrigger(from, TimeUnit.DAYS, 2, null, api, session);
+    protected AlarmTriggerData getAndCheckAlarmTrigger(long until, int expected, ChronosApi api, String session) throws ApiException {
+        AlarmTriggerResponse triggerResponse = getAlarmTrigger(until, null, api, session);
         AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
         assertEquals(expected, triggers.size());
         return triggers;
     }
 
     /**
-     * Retrieves alarm triggers from the given time until two days and checks if the response contains the correct amount of alarm trigger objects
+     * Retrieves alarm triggers until two days and checks if the response contains the correct amount of alarm trigger objects
      *
      * @param from The lower limit of the request
      * @param expected The amount of expected alarm trigger objects
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(long from, int expected) throws ApiException {
-        return getAndCheckAlarmTrigger(from, expected, defaultUserApi.getApi(), defaultUserApi.getSession());
+    protected AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
+        return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), expected, defaultUserApi.getApi(), defaultUserApi.getSession());
     }
 
     /**

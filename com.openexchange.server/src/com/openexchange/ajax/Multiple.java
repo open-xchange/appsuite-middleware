@@ -424,15 +424,18 @@ public class Multiple extends SessionServlet {
             jsonObj.put(ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
-            final StringBuilder moduleCandidate = new StringBuilder(32);
-            boolean handles = false;
-            for (final String component : SPLIT.split(module, 0)) {
-                moduleCandidate.append(component);
-                handles = dispatcher.handles(moduleCandidate.toString());
-                if (handles) {
-                    break;
+            boolean handles = dispatcher.handles(module);
+            String candidate = module;
+            if(!handles){
+                int index = candidate.lastIndexOf('/');
+                while(index>0){
+                    candidate = candidate.substring(0, index);
+                    handles = dispatcher.handles(candidate.toString());
+                    if (handles) {
+                        break;
+                    }
+                    index = candidate.lastIndexOf('/');
                 }
-                moduleCandidate.append('/');
             }
             if (MODULE_MAIL.equals(module)) {
                 if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
@@ -450,7 +453,7 @@ public class Multiple extends SessionServlet {
                 }
             }
             if (handles) {
-                final AJAXRequestData request = parse(req, moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
+                final AJAXRequestData request = parse(req, candidate, candidate, action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;

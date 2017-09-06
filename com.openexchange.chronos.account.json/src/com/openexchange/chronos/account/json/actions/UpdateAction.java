@@ -49,15 +49,18 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.auth.CalendarAuthParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -74,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 @OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
-public class UpdateAction extends AbstractAccountAction implements CalendarAccountFields{
+public class UpdateAction extends AbstractAccountAction implements CalendarAccountFields {
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -91,10 +94,21 @@ public class UpdateAction extends AbstractAccountAction implements CalendarAccou
         if (Strings.isEmpty(accountId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
         }
+
+        JSONObject data = requestData.getData(JSONObject.class);
+        if (null == data) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        Map<String, Object> configuration = data.asMap();
+        CalendarAuthParser authParser = CalendarAuthParser.getInstance();
+        AuthInfo authInfo = authParser.getAuthInfoFromUnstructured(session, configuration);
+        authParser.updateConfiguration(authInfo, configuration);
+
         CalendarAccountService service = getService(CalendarAccountService.class);
         CalendarAccount account = service.getAccount(session, Integer.parseInt(accountId));
         // Updates
-        account = service.updateAccount(session, Integer.parseInt(accountId), account.getConfiguration(), account.getLastModified().getTime());
+        account = service.updateAccount(session, Integer.parseInt(accountId), configuration, account.getLastModified().getTime());
 
         JSONObject response = new JSONObject();
         try {

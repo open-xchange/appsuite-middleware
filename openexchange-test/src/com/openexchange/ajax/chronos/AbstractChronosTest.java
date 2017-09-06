@@ -124,7 +124,9 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        defaultUserApi = new UserApi(getClient(), testUser);
+        ApiClient client = getClient();
+        rememberClient(client);
+        defaultUserApi = new UserApi(client, testUser);
     }
 
     public void rememberEventId(UserApi userApi, EventId eventId) {

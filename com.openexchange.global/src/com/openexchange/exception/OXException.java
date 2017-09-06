@@ -219,7 +219,6 @@ public class OXException extends Exception implements OXExceptionConstants {
     private final Map<String, String> properties;
     private final List<Category> categories;
     private final List<ProblematicAttribute> problematics;
-    private final List<Detail> details;
     private final Map<String, Object> arguments;
 
     private Object[] displayArgs;
@@ -250,7 +249,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        details = new LinkedList<Detail>();
         lightWeight = false;
     }
 
@@ -272,7 +270,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        details = new LinkedList<Detail>();
         lightWeight = false;
     }
 
@@ -295,7 +292,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.logMessage = cloneMe.logMessage;
         this.prefix = cloneMe.prefix;
         this.problematics = null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(cloneMe.problematics);
-        this.details = null == cloneMe.details ? new LinkedList<Detail>() : new ArrayList<Detail>(cloneMe.details);
         this.properties = null == cloneMe.properties ? new HashMap<String, String>(4) : new HashMap<String, String>(cloneMe.properties);
         this.arguments = null == cloneMe.arguments ? new HashMap<String, Object>(4) : new HashMap<String, Object>(cloneMe.arguments);
         this.lightWeight = cloneMe.lightWeight;
@@ -318,7 +314,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        details = new LinkedList<Detail>();
         lightWeight = false;
     }
 
@@ -341,7 +336,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
         problematics = new LinkedList<ProblematicAttribute>();
-        details = new LinkedList<Detail>();
         lightWeight = false;
     }
 
@@ -365,7 +359,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
         problematics = new ArrayList<ProblematicAttribute>(1);
-        details = new LinkedList<Detail>();
         lightWeight = false;
     }
 
@@ -1220,22 +1213,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         return problematics.isEmpty() ? EMPTY_PROBLEMATICS : problematics.toArray(new ProblematicAttribute[problematics.size()]);
     }
 
-
-    /**
-     * Adds a detail
-     */
-    public void addDetail(Detail detail) {
-        details.add(detail);
-    }
-
-    /**
-     * Gets the details.
-     *
-     * @return The details
-     */
-    public final List<Detail> getDetails() {
-        return details;
-    }
 
     /*-
      * ----------------------------- Arguments related methods -----------------------------

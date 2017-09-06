@@ -49,13 +49,12 @@
 
 package com.openexchange.chronos.provider;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.auth.info.AuthInfo;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.auth.CalendarAuthParser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -121,10 +120,6 @@ public class DefaultCalendarAccount implements CalendarAccount {
 
     @Override
     public AuthInfo getAuthInfo() throws OXException {
-        try {
-            return mapper.readValue((String) configuration.get("auth"), AuthInfo.class);
-        } catch (IOException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
+        return CalendarAuthParser.getInstance().getAuthInfo(configuration);
     }
 }

@@ -125,6 +125,8 @@ public class AuthInfo {
     @JsonProperty("token")
     private final String token;
 
+    public static AuthInfo NONE = new AuthInfo(null, null, null, null, AuthType.NONE);
+
     /**
      * Initializes a new {@link AuthInfo}.
      *
