@@ -1153,8 +1153,8 @@ public class InternetAddress extends Address implements Cloneable {
 	    checkAddress(getAddress(), true, true);
     }
 
-    private static final String specialsNoDotNoAt = "()<>,;:\\\"[]";
-    private static final String specialsNoDot = specialsNoDotNoAt + "@";
+    private static final String specialsNoDotNoAtNoQuote = "()<>,;:\\[]";
+    private static final String specialsNoDot = specialsNoDotNoAtNoQuote + "@\"";
 
     /**
      * Check that the address is a valid "mailbox" per RFC822.
@@ -1337,7 +1337,7 @@ public class InternetAddress extends Address implements Cloneable {
      * or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-	return address == null || indexOfAny(address, specialsNoDotNoAt) < 0;
+	return address == null || indexOfAny(address, specialsNoDotNoAtNoQuote) < 0;
     }
 
     /**
