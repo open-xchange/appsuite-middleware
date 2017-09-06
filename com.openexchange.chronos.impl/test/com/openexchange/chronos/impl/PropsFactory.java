@@ -123,7 +123,7 @@ final class PropsFactory {
      * @param until The ending point in the interval
      * @return The {@link Available}
      */
-    static Available createCalendarFreeSlot(String summary, DateTime from, DateTime until) {
+    static Available createCalendarAvailable(String summary, DateTime from, DateTime until) {
         Available cfs = new Available();
         cfs.setSummary(summary);
         cfs.setStartTime(from);
@@ -141,7 +141,7 @@ final class PropsFactory {
      * @return The recurring {@link Available}
      */
     static Available createRecurringCalendarFreeSlot(String summary, DateTime from, DateTime until, String recurrenceRule) {
-        Available cfs = createCalendarFreeSlot(summary, from, until);
+        Available cfs = createCalendarAvailable(summary, from, until);
         cfs.setRecurrenceRule(recurrenceRule);
         return cfs;
     }
