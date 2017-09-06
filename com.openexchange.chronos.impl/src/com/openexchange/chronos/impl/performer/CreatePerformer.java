@@ -99,6 +99,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     public InternalCalendarResult perform(Event event) throws OXException {
+        checkQuota();
         /*
          * check current session user's permissions
          */
