@@ -632,7 +632,7 @@ public class Available implements FieldAware, Cloneable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CalendarFreeSlot [startTime=").append(startTime);
+        builder.append("Available [startTime=").append(startTime);
         builder.append(", endTime=").append(endTime).append(", description=").append(description);
         builder.append(", summary=").append(summary).append("]");
         return builder.toString();

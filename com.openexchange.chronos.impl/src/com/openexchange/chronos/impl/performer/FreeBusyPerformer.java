@@ -388,25 +388,25 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             return freeBusyTimes;
         }
 
-        Date slotStartTime = startTime;
-        Date slotEndTime = endTime;
+        Date availableStartTime = startTime;
+        Date availableEndTime = endTime;
         java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
-        for (Available calendarFreeSlot : availability.getAvailable()) {
+        for (Available available : availability.getAvailable()) {
             // Get the slot's start/end times
-            slotStartTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getStartTime(), timeZone));
-            slotEndTime = new Date(CalendarUtils.getDateInTimeZone(calendarFreeSlot.getEndTime(), timeZone));
+            availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
+            availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
 
             // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
-            if (!slotStartTime.equals(startTime)) {
+            if (!availableStartTime.equals(startTime)) {
                 // Create a split for the availability component with the equivalent BusyType
-                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, slotStartTime));
+                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, availableStartTime));
             }
             // Start from slot end time on the next iteration
-            startTime = slotEndTime;
+            startTime = availableEndTime;
         }
 
         //Create the last block
-        if (endTime.after(slotEndTime)) {
+        if (endTime.after(availableEndTime)) {
             freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
         }
         return freeBusyTimes;
