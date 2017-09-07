@@ -82,12 +82,12 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
      * @param available The {@link List} with the {@link Available} blocks to prepare
      * @return The {@link Availability} object
      */
-    Availability prepareForDelivery(List<Available> available) {
+    public Availability prepareForDelivery(List<Available> available) {
         Organizer organizer = new Organizer();
-        organizer.setEntity(session.getUserId());
+        organizer.setEntity(getSession().getUserId());
 
         Availability availability = new Availability();
-        availability.setCalendarUser(session.getUserId());
+        availability.setCalendarUser(getSession().getUserId());
         availability.setCreationTimestamp(new Date(System.currentTimeMillis()));
         availability.setOrganizer(organizer);
         availability.setAvailable(available);
@@ -95,5 +95,4 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
 
         return availability;
     }
-
 }

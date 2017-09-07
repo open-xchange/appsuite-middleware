@@ -78,7 +78,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @throws OXException
      */
     public void performByUid(List<String> availableUids) throws OXException {
-        storage.deleteAvailableByUid(availableUids);
+        getStorage().deleteAvailableByUid(availableUids);
     }
 
     /**
@@ -88,6 +88,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @throws OXException
      */
     public void performById(List<Integer> availableIds) throws OXException {
-        storage.deleteAvailableById(availableIds);
+        getStorage().deleteAvailableById(availableIds);
     }
 }

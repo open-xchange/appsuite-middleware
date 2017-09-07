@@ -85,8 +85,8 @@ public class SetPerformer extends AbstractUpdatePerformer {
         CheckUtil.check(availability);
 
         // Prepare for storage
-        List<String> availabilityIds = prepareForStorage(storage, availability);
-        storage.insertAvailable(availability.getAvailable());
+        List<String> availabilityIds = prepareForStorage(getStorage(), availability);
+        getStorage().insertAvailable(availability.getAvailable());
 
         // Set the ids to the result
         result.setIds(availabilityIds);

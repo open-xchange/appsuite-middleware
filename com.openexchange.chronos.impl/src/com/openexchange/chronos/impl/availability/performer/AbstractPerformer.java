@@ -59,8 +59,8 @@ import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
  */
 public class AbstractPerformer {
 
-    protected final CalendarAvailabilityStorage storage;
-    protected final CalendarSession session;
+    private final CalendarAvailabilityStorage storage;
+    private final CalendarSession session;
 
     /**
      * Initialises a new {@link AbstractPerformer}.
@@ -69,6 +69,24 @@ public class AbstractPerformer {
         super();
         this.storage = storage;
         this.session = session;
+    }
+
+    /**
+     * Gets the session
+     *
+     * @return The session
+     */
+    public CalendarSession getSession() {
+        return session;
+    }
+
+    /**
+     * Gets the storage
+     *
+     * @return The storage
+     */
+    public CalendarAvailabilityStorage getStorage() {
+        return storage;
     }
 
 }

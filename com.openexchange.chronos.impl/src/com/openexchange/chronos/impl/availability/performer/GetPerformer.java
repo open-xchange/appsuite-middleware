@@ -91,7 +91,7 @@ public class GetPerformer extends AbstractGetPerformer {
      * @throws OXException if the list cannot be retrieved
      */
     public Availability perform() throws OXException {
-        List<Available> available = storage.loadAvailable(session.getUserId());
+        List<Available> available = getStorage().loadAvailable(getSession().getUserId());
         return prepareForDelivery(available);
     }
 
@@ -106,7 +106,7 @@ public class GetPerformer extends AbstractGetPerformer {
      */
     public Map<Attendee, Availability> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
         // Prepare the attendees
-        attendees = session.getEntityResolver().prepare(attendees);
+        attendees = getSession().getEntityResolver().prepare(attendees);
         // Filter the external ones
         attendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
         if (attendees.size() == 0) {
@@ -151,8 +151,8 @@ public class GetPerformer extends AbstractGetPerformer {
      * @throws OXException if an error is occurred
      */
     public List<Availability> getCombinedAvailableTime() throws OXException {
-        int userId = session.getUserId();
-        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        int userId = getSession().getUserId();
+        List<Availability> calendarAvailabilities = getStorage().loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
     }
 
@@ -165,8 +165,8 @@ public class GetPerformer extends AbstractGetPerformer {
      * @throws OXException
      */
     public List<Availability> getCombinedAvailableTimeInRange(Date from, Date until) throws OXException {
-        int userId = session.getUserId();
-        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        int userId = getSession().getUserId();
+        List<Availability> calendarAvailabilities = getStorage().loadCalendarAvailabilities(userId);
         return combine(calendarAvailabilities);
     }
 
@@ -181,7 +181,12 @@ public class GetPerformer extends AbstractGetPerformer {
      */
     public Map<Attendee, Availability> getCombinedAvailability(List<Attendee> attendees, Date from, Date until) throws OXException {
         Map<Attendee, Availability> availableTimes = new HashMap<>();
-        //TODO: Implement
+        Map<Attendee, Availability> availabilityPerAttendee = performForAttendees(attendees, from, until);
+        for (Attendee attendee : attendees) {
+            Availability availability = availabilityPerAttendee.get(attendee);
+            combine(availability);
+            availableTimes.put(attendee, availability);
+        }
         return availableTimes;
         //        Map<Attendee, List<Availability>> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
         //        for (Attendee attendee : attendees) {
@@ -215,8 +220,8 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return The {@link AvailableTime} slots for the current user
      */
     public AvailableTime getAvailableTime() throws OXException {
-        int userId = session.getUserId();
-        List<Availability> calendarAvailabilities = storage.loadCalendarAvailabilities(userId);
+        int userId = getSession().getUserId();
+        List<Availability> calendarAvailabilities = getStorage().loadCalendarAvailabilities(userId);
         return getAvailableTime(userId, calendarAvailabilities);
     }
 
@@ -251,7 +256,7 @@ public class GetPerformer extends AbstractGetPerformer {
      * @throws OXException if an error is occurred
      */
     private <T extends CalendarUser> Map<T, Availability> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
-        List<Available> available = storage.loadAvailable(new ArrayList<>(reverseLookup.keySet()));
+        List<Available> available = getStorage().loadAvailable(new ArrayList<>(reverseLookup.keySet()));
         Map<T, List<Available>> map = new HashMap<>();
         for (Available a : available) {
             T type = reverseLookup.get(a.getCalendarUser());
@@ -265,10 +270,50 @@ public class GetPerformer extends AbstractGetPerformer {
     }
 
     /**
+     * Combines the {@link Available} blocks from the specified {@link Availability}
+     * 
+     * @param availability The {@link Availability} for which to combine the blocks
+     */
+    private void combine(Availability availability) {
+        List<Available> available = availability.getAvailable();
+        List<Available> availableTime = new ArrayList<>(available.size());
+        Iterator<Available> iteratorA = available.iterator();
+        int index = 0;
+        // Keeps track of the removed objects
+        List<Available> removed = new ArrayList<>();
+        while (iteratorA.hasNext()) {
+            Available a = iteratorA.next();
+            if (removed.contains(a)) {
+                iteratorA.remove();
+                removed.remove(a);
+                continue;
+            }
+
+            List<Available> lookAheadList = available.subList(++index, available.size());
+            Iterator<Available> iteratorB = lookAheadList.iterator();
+            while (iteratorB.hasNext()) {
+                Available b = iteratorB.next();
+                // If it is completely contained then skip it
+                if (AvailabilityUtils.contained(b, a)) {
+                    removed.add(b);
+                    continue;
+                }
+                // If it in intersects, then merge
+                if (AvailabilityUtils.intersect(b, a)) {
+                    a = AvailabilityUtils.merge(b, a);
+                    removed.add(b);
+                }
+            }
+            availableTime.add(a);
+        }
+    }
+
+    /**
      * Combines the specified {@link Availability} blocks and handles any intersects, overlaps and contains
      * 
      * @param calendarAvailabilities The {@link List} of the {@link Availability} blocks to combine
      * @return The combined {@link Availability} blocks
+     * @deprecated Use {@link #combine(Availability)} instead.
      */
     private List<Availability> combine(List<Availability> calendarAvailabilities) {
         // Sort by priority; higher priority will be on top
