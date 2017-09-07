@@ -259,12 +259,11 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
             subject = jwtClaimsSet.getSubject();
         } catch (java.text.ParseException e) {
-            // TODO QS-VS: catch exception
-            e.printStackTrace();
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to get the JWTClaimSet from idToken.");
         }
 
         if (subject.isEmpty()) {
-            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create();
+            throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
         }
         AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
         resultInfo.getProperties().put(AUTH_RESPONSE, tokenResponse.toJSONObject().toJSONString());
@@ -321,15 +320,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         return true;
     }
 
-    //TODO QS-VS: Die Authentifizierung des Client wird öfters gebraucht, sollte ausgelagert werden
     private AccessTokenResponse loadAccessToken(Session session) throws OXException {
         RefreshToken refreshToken = new RefreshToken((String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN));
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
-        ClientID clientID = new ClientID(this.getBackendConfig().getClientID());
-        Secret clientSecret = new Secret(this.getBackendConfig().getClientSecret());
-        ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
+        ClientAuthentication clientAuth = this.getClientAuthentication();
         try {
-            URI tokenEndpoint = new URI(this.getBackendConfig().getTokenEndpoint());
+            URI tokenEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getTokenEndpoint());
 
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
 
@@ -341,8 +337,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                 throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(errorResponse.getErrorObject().getHTTPStatusCode() + " " + errorResponse.getErrorObject().getDescription());
             }
             return (AccessTokenResponse) response;
-        } catch (URISyntaxException e) {
-            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
         } catch (com.nimbusds.oauth2.sdk.ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
         } catch (IOException e) {

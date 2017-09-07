@@ -230,7 +230,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + session.getHash(), uuid);
         oidcAutologinCookie.setPath("/");
         oidcAutologinCookie.setSecure(OIDCTools.considerSecure(request));
-        // TODO QS-VS: Browserlifetime
         oidcAutologinCookie.setMaxAge(-1);
 
         String domain = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
