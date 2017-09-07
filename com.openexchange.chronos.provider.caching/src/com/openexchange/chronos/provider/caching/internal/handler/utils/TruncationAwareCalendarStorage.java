@@ -63,6 +63,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link TruncationAwareCalendarStorage}
@@ -77,9 +78,11 @@ public class TruncationAwareCalendarStorage implements CalendarStorage {
     private static final int MAX_RETRIES = 3;
 
     private final CalendarStorage calendarStorage;
+    private final Session session;
 
-    public TruncationAwareCalendarStorage(CalendarStorage calendarStorage) {
+    public TruncationAwareCalendarStorage(CalendarStorage calendarStorage, Session session) {
         this.calendarStorage = calendarStorage;
+        this.session = session;
     }
 
     public void updateAttendees(String eventId, List<Attendee> attendees) throws OXException {
@@ -106,6 +109,7 @@ public class TruncationAwareCalendarStorage implements CalendarStorage {
         int retryCount = 0;
         do {
             try {
+                calendarStorage.getUtilities().checkQuota(session);
                 calendarStorage.getEventStorage().updateEvent(event);
                 return;
             } catch (OXException e) {

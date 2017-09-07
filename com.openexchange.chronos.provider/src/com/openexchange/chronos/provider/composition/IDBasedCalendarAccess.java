@@ -134,8 +134,6 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      */
     void deleteFolder(String folderId, long clientTimestamp) throws OXException;
 
-    //
-
     /**
      * Gets all events in a specific calendar folder.
      * <p/>
@@ -367,6 +365,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * </ul>
+     * 
      * @param actions The actions to retrieve
      * @return A list of upcoming alarm triggers
      * @throws OXException

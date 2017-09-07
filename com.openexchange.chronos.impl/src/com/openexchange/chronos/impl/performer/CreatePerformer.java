@@ -99,7 +99,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     public InternalCalendarResult perform(Event event) throws OXException {
-        checkQuota();
+        /*
+         * check if quota is exceeded before inserting new events 
+         */
+        storage.getUtilities().checkQuota(session.getSession());
         /*
          * check current session user's permissions
          */

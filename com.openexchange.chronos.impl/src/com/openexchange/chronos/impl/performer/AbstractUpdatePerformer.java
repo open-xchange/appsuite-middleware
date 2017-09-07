@@ -373,6 +373,10 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      */
     protected void deleteFromRecurrence(Event originalMasterEvent, RecurrenceId recurrenceId, Attendee originalAttendee) throws OXException {
         /*
+         * check if quota is exceeded before inserting new events 
+         */
+        storage.getUtilities().checkQuota(session.getSession());
+        /*
          * prepare & insert a new plain exception
          */
         String folderView = getFolderView(originalMasterEvent, calendarUserId);

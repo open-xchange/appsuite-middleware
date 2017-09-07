@@ -191,7 +191,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
                 }
             } else {
-                checkQuota();
+                /*
+                 * check if quota is exceeded before inserting new events 
+                 */
+                storage.getUtilities().checkQuota(session.getSession());
                 /*
                  * update for new change exception, prepare & insert a plain exception first
                  */

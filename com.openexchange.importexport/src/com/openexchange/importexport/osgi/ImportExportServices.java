@@ -50,6 +50,8 @@
 package com.openexchange.importexport.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -66,7 +68,7 @@ import com.openexchange.server.ServiceLookup;
 
 public class ImportExportServices {
 
-    public static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<ServiceLookup>();
+    public static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<>();
 
     public static ContactService getContactService() {
         return LOOKUP.get().getService(ContactService.class);
@@ -107,8 +109,17 @@ public class ImportExportServices {
         }
         return null;
     }
-    
+
     public static FolderService getFolderService() {
         return LOOKUP.get().getService(FolderService.class);
     }
+
+    public static ICalService getICalService() {
+        return LOOKUP.get().getService(ICalService.class);
+    }
+
+    public static IDBasedCalendarAccessFactory getIDBasedCalendarAccessFactory() {
+        return LOOKUP.get().getService(IDBasedCalendarAccessFactory.class);
+    }
+
 }
