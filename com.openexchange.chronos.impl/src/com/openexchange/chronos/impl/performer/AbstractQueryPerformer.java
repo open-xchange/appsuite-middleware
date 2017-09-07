@@ -367,11 +367,11 @@ public abstract class AbstractQueryPerformer {
                 Quota quota = accountQuota.getQuota(QuotaType.AMOUNT);
                 if (quota.isExceeded()) {
                     // Exceeded
-                    throw CalendarExceptionCodes.INSUFFICIENT_QUOTA.create(session.getContextId());
+                    throw CalendarExceptionCodes.INSUFFICIENT_QUOTA.create(String.valueOf(accountQuota.getAccountID()), String.valueOf(session.getContextId()));
                 }
             } else {
                 // Should never happen
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("QuotaProvoder doesn't support QuotaType.AMOUNT. Can't check quota!");
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("QuotaProvoder {} for module {} doesn't support QuotaType.AMOUNT. Can't check quota!", provider.getModuleID(), provider.getDisplayName());
             }
         }
     }

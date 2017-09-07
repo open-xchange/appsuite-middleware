@@ -123,7 +123,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String BAD_AUTH_CONFIGURATION_MSG = "Unable to create account. There have been issues with the provided authentication.";
     
-    public static final String QUOTA_EXCEEDED = "The quota for context '%1$s' exceeded the limit";
+    public static final String QUOTA_EXCEEDED = "The quota for account '%1$s' in context '%2$s' exceeded the limit.";
 
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
