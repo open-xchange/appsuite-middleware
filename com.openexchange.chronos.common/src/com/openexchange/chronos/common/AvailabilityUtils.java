@@ -298,7 +298,7 @@ public final class AvailabilityUtils {
         if (!intersect(startA, endA, startB, endB)) {
             return false;
         }
-        return startA.before(startB) && endA.after(startB);
+        return (startA.before(startB) || startA.equals(startB)) && endA.after(startB);
     }
 
     /**
@@ -315,7 +315,7 @@ public final class AvailabilityUtils {
         if (!intersect(startA, endA, startB, endB)) {
             return false;
         }
-        return startA.before(endB) && endA.after(endB);
+        return startA.before(endB) && (endA.after(endB) || endA.equals(endB));
     }
 
     /**

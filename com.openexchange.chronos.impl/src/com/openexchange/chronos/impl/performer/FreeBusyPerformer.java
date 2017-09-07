@@ -380,15 +380,15 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private List<FreeBusyTime> calculateFreeBusyTimes(Availability availability, TimeZone timeZone) throws OXException {
         List<FreeBusyTime> freeBusyTimes = new ArrayList<>();
         // Get the availability's start/end times
-        Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
+        Date availabilityStartTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
         Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
         // Mark the entire block as busy if there are no available blocks
         if (availability.getAvailable().isEmpty()) {
-            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
+            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), availabilityStartTime, endTime));
             return freeBusyTimes;
         }
 
-        Date availableStartTime = startTime;
+        Date availableStartTime = availabilityStartTime;
         Date availableEndTime = endTime;
         java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
         for (Available available : availability.getAvailable()) {
@@ -397,17 +397,17 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
 
             // Check if the first block is already FREE (i.e. available.startTime == availability.startTime)
-            if (!availableStartTime.equals(startTime)) {
+            if (!availableStartTime.equals(availabilityStartTime)) {
                 // Create a split for the availability component with the equivalent BusyType
-                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, availableStartTime));
+                freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), availabilityStartTime, availableStartTime));
             }
             // Start from available end time on the next iteration
-            startTime = availableEndTime;
+            availabilityStartTime = availableEndTime;
         }
 
         //Create the last block
         if (endTime.after(availableEndTime)) {
-            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
+            freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), availabilityStartTime, endTime));
         }
         return freeBusyTimes;
     }
