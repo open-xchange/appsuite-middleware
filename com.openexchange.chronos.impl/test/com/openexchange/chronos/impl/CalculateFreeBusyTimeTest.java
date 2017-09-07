@@ -68,8 +68,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
-import com.openexchange.chronos.Available;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.FbType;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
@@ -93,7 +91,7 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     /** A map that holds the free busy times per attendee */
     private Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee;
     /** A map that holds the availability blocks per attendee */
-    private Map<Attendee, List<Availability>> availabilitiesPerAttendee;
+    private Map<Attendee, Availability> availabilitiesPerAttendee;
     /** A List with the free/busy times for the attendees */
     private List<FreeBusyTime> freeBusyTimes;
 
@@ -136,9 +134,10 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
 
         // Mock the GetPerformer
         getPerformer = mock(GetPerformer.class);
+        when(getPerformer.getSession()).thenReturn(session);
         // FIXME: The performer should return a single availability per attendee
-        //when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
-        when(getPerformer.getCombinedAvailableTimes(attendees, from, until)).thenCallRealMethod();
+        when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
+        when(getPerformer.getCombinedAvailability(attendees, from, until)).thenCallRealMethod();
     }
 
     /**
@@ -159,11 +158,11 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
     private void finishMocking() throws OXException {
         // Mock the CalendarAvailabilityService...
         calendarAvailabilityService = mock(CalendarAvailabilityService.class);
-        // ...and calculate the combinedAvailableTimes...
-        Map<Attendee, List<Availability>> combinedAvailableTimes = getPerformer.getCombinedAvailableTimes(attendees, from, until);
+        // ...and calculate the combinedAvailability...
+        Map<Attendee, Availability> combinedAvailability = getPerformer.getCombinedAvailability(attendees, from, until);
         // ...so they can be used inside the FreeBusyPerformer
         // We basically bypass the service and all its prerequisites (storage, session, services) and we hook the call directly to GetPerformer
-        when(calendarAvailabilityService.getCombinedAvailableTime(null, attendees, from, until)).thenReturn(combinedAvailableTimes);
+        when(calendarAvailabilityService.getAttendeeAvailability(null, attendees, from, until)).thenReturn(combinedAvailability);
 
         // Mock the Services for the FreeBusyPerformer
         PowerMockito.mockStatic(Services.class);
@@ -185,22 +184,22 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Set the free/busy time for the attendee
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        // Initialise the free slots and availability block
-        List<Available> freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createCalendarAvailable("May 1", new DateTime(2017, 4, 1), new DateTime(2017, 4, 2)));
-        freeSlots.add(PropsFactory.createCalendarAvailable("May 2", new DateTime(2017, 4, 21), new DateTime(2017, 4, 22)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
+        // Initialise the available and availability block
+        //List<Available> available = new ArrayList<>(3);
+        available.add(PropsFactory.createCalendarAvailable("May 1", new DateTime(2017, 4, 1), new DateTime(2017, 4, 2)));
+        available.add(PropsFactory.createCalendarAvailable("May 2", new DateTime(2017, 4, 21), new DateTime(2017, 4, 22)));
         // Set the availability block for the attendee
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(9);
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 25), PropsFactory.createDate(2017, 4, 1)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 26), PropsFactory.createDate(2017, 4, 1)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 2), PropsFactory.createDate(2017, 4, 21)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 22), PropsFactory.createDate(2017, 4, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 22), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -226,19 +225,17 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
         // Initialise the free slots and availability block
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Mid June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 16)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 5, 1), new DateTime(2017, 5, 30)));
+        available.add(PropsFactory.createCalendarAvailable("Mid June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 16)));
         // Set the availability block for the attendee
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(4);
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 0, 5)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 5, 1), PropsFactory.createDate(2017, 5, 15)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 5, 16), PropsFactory.createDate(2017, 5, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 5), PropsFactory.createDate(2017, 5, 15)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 16), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -257,21 +254,19 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlapping with preceding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        available.add(PropsFactory.createCalendarAvailable("Overlapping with preceding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(6);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 25)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 3, 3), PropsFactory.createDate(2017, 3, 10)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(3);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 3), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -290,21 +285,19 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        available.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 27), PropsFactory.createDateTime(2017, 3, 3)));
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(6);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 27)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 3, 10)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(3);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 27)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 29), PropsFactory.createDate(2017, 3, 5)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -323,21 +316,19 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 20), PropsFactory.createDateTime(2017, 3, 5)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        available.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 20), PropsFactory.createDateTime(2017, 3, 5)));
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(7);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 20)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 3, 10)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(3);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -356,21 +347,19 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 3, 5)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 3, 5)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 20), PropsFactory.createDateTime(2017, 3, 5)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 1), new DateTime(2017, 3, 10)));
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        available.add(PropsFactory.createCalendarAvailable("Overlapping with succeding event", PropsFactory.createDateTime(2017, 2, 20), PropsFactory.createDateTime(2017, 3, 5)));
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
         List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 1), PropsFactory.createDate(2017, 2, 20)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 3, 5)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 3, 10)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 3, 5)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 5), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -389,26 +378,21 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Outside of requested range", PropsFactory.createDateTime(2016, 4, 20), PropsFactory.createDateTime(2016, 4, 25)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2016, 0, 1), new DateTime(2017, 1, 1)));
+        available.add(PropsFactory.createCalendarAvailable("Outside of requested range", PropsFactory.createDateTime(2016, 4, 20), PropsFactory.createDateTime(2016, 4, 25)));
+        available.add(PropsFactory.createCalendarAvailable("Outside of requested range", PropsFactory.createDateTime(2017, 10, 1), PropsFactory.createDateTime(2017, 10, 31)));
 
-        freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Outside of requested range", PropsFactory.createDateTime(2017, 10, 1), PropsFactory.createDateTime(2017, 10, 31)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 5, 1), new DateTime(2017, 11, 31)));
-
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 1, 1)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 5, 1), PropsFactory.createDate(2017, 5, 30)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(3);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -427,26 +411,21 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlap A", PropsFactory.createDateTime(2016, 11, 29), PropsFactory.createDateTime(2017, 0, 3)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2016, 0, 1), new DateTime(2017, 1, 1)));
+        available.add(PropsFactory.createCalendarAvailable("Overlap A", PropsFactory.createDateTime(2016, 11, 29), PropsFactory.createDateTime(2017, 0, 3)));
+        available.add(PropsFactory.createCalendarAvailable("Overlap B", PropsFactory.createDateTime(2017, 5, 20), PropsFactory.createDateTime(2017, 6, 5)));
 
-        freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Overlap B", PropsFactory.createDateTime(2017, 5, 20), PropsFactory.createDateTime(2017, 6, 5)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 5, 1), new DateTime(2017, 11, 31)));
-
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(7);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 1, 1)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 5, 1), PropsFactory.createDate(2017, 5, 20)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(3);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 5, 20)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -466,28 +445,25 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         Attendee attendee = PropsFactory.createAttendee("foobar@ox.io");
         attendees.add(attendee);
 
-        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        freeBusyTimes.add(new FreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Starting Edge Overlap A", PropsFactory.createDateTime(2016, 11, 29), PropsFactory.createDateTime(2017, 0, 3)));
-        freeSlots.add(PropsFactory.createCalendarAvailable("Ending Edge Overlap A", PropsFactory.createDateTime(2017, 0, 29), PropsFactory.createDateTime(2017, 1, 1)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2016, 0, 1), new DateTime(2017, 1, 1)));
+        available.add(PropsFactory.createCalendarAvailable("Starting Edge Overlap A", PropsFactory.createDateTime(2016, 11, 29), PropsFactory.createDateTime(2017, 0, 3)));
+        available.add(PropsFactory.createCalendarAvailable("Ending Edge Overlap A", PropsFactory.createDateTime(2017, 0, 29), PropsFactory.createDateTime(2017, 1, 1)));
+        available.add(PropsFactory.createCalendarAvailable("Starting Edge Overlap B", PropsFactory.createDateTime(2017, 5, 1), PropsFactory.createDateTime(2017, 5, 10)));
+        available.add(PropsFactory.createCalendarAvailable("Ending Edge Overlap B", PropsFactory.createDateTime(2017, 5, 20), PropsFactory.createDateTime(2017, 6, 5)));
 
-        freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarAvailable("Starting Edge Overlap B", PropsFactory.createDateTime(2017, 5, 1), PropsFactory.createDateTime(2017, 5, 10)));
-        freeSlots.add(PropsFactory.createCalendarAvailable("Ending Edge Overlap B", PropsFactory.createDateTime(2017, 5, 20), PropsFactory.createDateTime(2017, 6, 5)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 5, 1), new DateTime(2017, 11, 31)));
-
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(9);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 0, 29)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 5, 10), PropsFactory.createDate(2017, 5, 20)));
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 5, 1)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 10), PropsFactory.createDate(2017, 5, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 20), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -513,23 +489,26 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Set the free/busy time for the attendee
         freeBusyPerAttendee.put(attendee, freeBusyTimes);
 
-        // Initialise the free slots and availability block
-        List<Available> freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createRecurringCalendarFreeSlot("May - Recurring every Wednesday", new DateTime(2017, 4, 3), new DateTime(2017, 4, 4), "FREQ=WEEKLY;BYDAY=WE"));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 3, 25), new DateTime(2017, 4, 30)));
+        // Initialise the available and availability block
+        available.add(PropsFactory.createRecurringCalendarFreeSlot("May - Recurring every Wednesday", new DateTime(2017, 4, 3), new DateTime(2017, 4, 4), "FREQ=WEEKLY;BYDAY=WE"));
         // Set the availability block for the attendee
-        availabilitiesPerAttendee.put(attendee, availabilities);
+        availabilitiesPerAttendee.put(attendee, getPerformer.prepareForDelivery(available));
 
         // Finish mocking
         finishMocking();
 
-        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(9);
+        List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(12);
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 25), PropsFactory.createDate(2017, 4, 3)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 4), PropsFactory.createDate(2017, 4, 10)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 11), PropsFactory.createDate(2017, 4, 17)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 18), PropsFactory.createDate(2017, 4, 24)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 25), PropsFactory.createDate(2017, 4, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 31), PropsFactory.createDate(2017, 5, 7)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 8), PropsFactory.createDate(2017, 5, 14)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 15), PropsFactory.createDate(2017, 5, 21)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 22), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
