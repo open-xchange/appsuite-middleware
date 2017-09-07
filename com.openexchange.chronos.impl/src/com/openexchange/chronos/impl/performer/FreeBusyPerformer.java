@@ -259,7 +259,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Iterate over all calendar availability blocks for all attendees
         for (Attendee attendee : attendees) {
             Availability availability = availabilityPerAttendee.get(attendee);
-            // For each availability block and each calendar free slot create an equivalent free busy time slot
+            // For each availability block and each calendar available block create an equivalent free busy time slot
             List<FreeBusyTime> freeBusyTimes = availability == null ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availability, timeZone);
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
@@ -297,14 +297,14 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
             for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {
                 Available available = iterator.next();
-                // No recurring free slot? Skip
+                // No recurring available block? Skip
                 if (!available.contains(AvailableField.rrule)) {
                     continue;
                 }
                 Date availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
                 Date availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
                 RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(available.getRecurrenceRule(), available.getStartTime(), null));
-                // Find out the duration of the "seed" free slot
+                // Find out the duration of the "seed" available block
                 long duration = availableEndTime.getTime() - availableStartTime.getTime();
                 while (recurrenceIterator.hasNext()) {
                     long nextOccurrence = recurrenceIterator.next();
@@ -382,7 +382,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Get the availability's start/end times
         Date startTime = new Date(CalendarUtils.getDateInTimeZone(availability.getStartTime(), timeZone));
         Date endTime = new Date(CalendarUtils.getDateInTimeZone(availability.getEndTime(), timeZone));
-        // Mark the entire block as busy if there are no free slots
+        // Mark the entire block as busy if there are no available blocks
         if (availability.getAvailable().isEmpty()) {
             freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, endTime));
             return freeBusyTimes;
@@ -392,16 +392,16 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Date availableEndTime = endTime;
         java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
         for (Available available : availability.getAvailable()) {
-            // Get the slot's start/end times
+            // Get the available block's start/end times
             availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
             availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
 
-            // Check if the first block is already FREE (i.e. slot.startTime == availability.startTime)
+            // Check if the first block is already FREE (i.e. available.startTime == availability.startTime)
             if (!availableStartTime.equals(startTime)) {
                 // Create a split for the availability component with the equivalent BusyType
                 freeBusyTimes.add(createFreeBusyTime(availability.getBusyType(), startTime, availableStartTime));
             }
-            // Start from slot end time on the next iteration
+            // Start from available end time on the next iteration
             startTime = availableEndTime;
         }
 
@@ -435,7 +435,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             // Check for any intersections
             if (end.after(from) && start.before(until)) {
-                // Intersection detected; adjust the free slots as well
+                // Intersection detected; adjust the availability blocks as well
                 if (start.before(from)) {
                     availability.setStartTime(new DateTime(from.getTime()));
                 }
@@ -517,8 +517,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param endTime The end time of the instance
      * @return The {@link FreeBusyTime}
      */
-    private FreeBusyTime createFreeBusyTime(BusyType busyType, Date startTime, Date slotStartTime) {
-        return createFreeBusyTime(AvailabilityUtils.convertFreeBusyType(busyType), startTime, slotStartTime);
+    private FreeBusyTime createFreeBusyTime(BusyType busyType, Date startTime, Date endTime) {
+        return createFreeBusyTime(AvailabilityUtils.convertFreeBusyType(busyType), startTime, endTime);
     }
 
     /**
