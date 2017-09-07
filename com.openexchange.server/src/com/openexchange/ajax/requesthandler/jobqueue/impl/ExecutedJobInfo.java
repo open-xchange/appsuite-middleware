@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.ajax.requesthandler.jobqueue.impl;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.jobqueue.Job;
+import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link ExecutedJobInfo}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+public class ExecutedJobInfo implements JobInfo {
+
+    private static final UUID EXECUTED_UUID = new UUID(-3199395759027697298L, -8091154291610420059L); //d3997682-1f43-496e-8fb6-720a61aefca5
+
+    private final AJAXRequestResult result;
+    private final Job job;
 
     /**
-     * Gets the default format.
-     *
-     * @return The default format
+     * Initializes a new {@link ExecutedJobInfo}.
      */
-    String defaultFormat() default "apiResponse";
+    public ExecutedJobInfo(AJAXRequestResult result, Job job) {
+        super();
+        this.result = result;
+        this.job = job;
+    }
 
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
+    @Override
+    public UUID getId() {
+        return EXECUTED_UUID;
+    }
 
-    /**
-     * Indicates whether this action allows authentication via public session identifier.
-     * @return Whether to allow authentication via public session identifier or not
-     */
-    boolean publicSessionAuth() default false;
+    @Override
+    public Job getJob() {
+        return job;
+    }
 
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
 
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
+    @Override
+    public boolean isCancelled() {
+        return false;
+    }
 
-	/**
-     * Indicates whether this action prefers reading/parsing request body stream by itself.
-     * @return Whether to prefer reading/parsing request body stream by itself
-     */
-    boolean preferStream() default false;
+    @Override
+    public boolean isDone() {
+        return true;
+    }
 
-    /**
-     * Signals whether the performed action is allowed for being enqueued in job queue in case its processing exceeds the threshold
-     *
-     * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
-     */
-    boolean enqueueable() default false;
+    @Override
+    public AJAXRequestResult get(boolean removeAfterRetrieval) throws InterruptedException, OXException {
+        return result;
+    }
+
+    @Override
+    public AJAXRequestResult get(long timeout, TimeUnit unit, boolean removeAfterRetrieval) throws InterruptedException, OXException, TimeoutException {
+        return result;
+    }
+
 }

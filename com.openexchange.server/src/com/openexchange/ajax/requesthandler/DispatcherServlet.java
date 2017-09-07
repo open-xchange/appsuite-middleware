@@ -460,6 +460,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestResult result = null;
         Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
+        boolean enqueued = false;
         try {
             AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
 
@@ -491,6 +492,10 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * ... and send response
                  */
+                ResultType resultType = result.getType();
+                if (ResultType.ENQUEUED == resultType) {
+                    enqueued = true;
+                }
                 sendResponse(requestData, result, httpRequest, httpResp);
             }
         } catch (UploadException e) {
@@ -529,9 +534,11 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResp, false, false);
         } finally {
-            Dispatchers.signalDone(result, exc);
-            if (null != state) {
-                dispatcher.end(state);
+            if (false == enqueued) {
+                Dispatchers.signalDone(result, exc);
+                if (null != state) {
+                    dispatcher.end(state);
+                }
             }
         }
     }
