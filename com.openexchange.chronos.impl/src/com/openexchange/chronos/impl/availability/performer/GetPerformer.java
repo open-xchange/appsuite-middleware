@@ -58,8 +58,6 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
-import com.openexchange.chronos.AvailableTime;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.common.AvailabilityUtils;
@@ -150,10 +148,11 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return A {@link List} with the combined {@link Availability} blocks for the user
      * @throws OXException if an error is occurred
      */
-    public List<Availability> getCombinedAvailableTime() throws OXException {
+    public Availability getCombinedAvailableTime() throws OXException {
         int userId = getSession().getUserId();
-        List<Availability> calendarAvailabilities = getStorage().loadCalendarAvailabilities(userId);
-        return combine(calendarAvailabilities);
+        Availability availability = prepareForDelivery(getStorage().loadAvailable(userId));
+        combine(availability);
+        return availability;
     }
 
     /**
@@ -210,36 +209,6 @@ public class GetPerformer extends AbstractGetPerformer {
         for (Attendee attendee : attendees) {
             Availability calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
             availableTimes.put(attendee, java.util.Collections.singletonList(calendarAvailabilities));
-        }
-        return availableTimes;
-    }
-
-    /**
-     * Retrieves the {@link AvailableTime} slots for the current user
-     * 
-     * @return The {@link AvailableTime} slots for the current user
-     */
-    public AvailableTime getAvailableTime() throws OXException {
-        int userId = getSession().getUserId();
-        List<Availability> calendarAvailabilities = getStorage().loadCalendarAvailabilities(userId);
-        return getAvailableTime(userId, calendarAvailabilities);
-    }
-
-    /**
-     * Retrieves the {@link AvailableTime} for the specified {@link Attendee}s in the specified time interval
-     * 
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link AvailableTime} for
-     * @param from The start point in the time interval
-     * @param until The end point in the time interval
-     * @return A {@link Map} with {@link AvailableTime} slots for the {@link Attendee}s
-     * @throws OXException if an error is occurred
-     */
-    public Map<Attendee, AvailableTime> getAvailableTime(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, AvailableTime> availableTimes = new HashMap<>();
-        Map<Attendee, Availability> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
-        for (Attendee attendee : attendees) {
-            Availability calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
-            availableTimes.put(attendee, getAvailableTime(attendee.getEntity(), java.util.Collections.singletonList(calendarAvailabilities)));
         }
         return availableTimes;
     }
@@ -474,72 +443,6 @@ public class GetPerformer extends AbstractGetPerformer {
             }
             // Add any splits
             b.getAvailable().addAll(toAdd);
-        }
-    }
-
-    /**
-     * Retrieves the {@link AvailableTime} slots for the specified user
-     * 
-     * @param userId The user identifier
-     * @return The {@link AvailableTime} slots for the current user
-     * @throws OXException if an error is occurred
-     */
-    private AvailableTime getAvailableTime(int userId, List<Availability> calendarAvailabilities) throws OXException {
-        // Sort by priority (see: https://tools.ietf.org/html/rfc7953#section-4 RFC 7953, section 4</a>
-        java.util.Collections.sort(calendarAvailabilities);
-
-        BusyType busyType = BusyType.BUSY_TENTATIVE;
-        List<Available> flattenSlots = new ArrayList<>();
-        for (Availability calendarAvailability : calendarAvailabilities) {
-            busyType = busyType.ordinal() >= calendarAvailability.getBusyType().ordinal() ? busyType : calendarAvailability.getBusyType();
-            flattenSlots.addAll(calendarAvailability.getAvailable());
-        }
-
-        AvailableTime availableTime = new AvailableTime();
-        availableTime.setUserId(userId);
-        availableTime.setBusyType(busyType);
-
-        // Combine
-        combine(flattenSlots, availableTime);
-
-        return availableTime;
-    }
-
-    /**
-     * Combines the specified {@link Available}s to a single {@link AvailableTime}
-     * 
-     * @param freeSlots The {@link Available}s to combine
-     * @param availableTime The {@link AvailableTime} to combine to
-     */
-    private void combine(List<Available> freeSlots, AvailableTime availableTime) {
-        Iterator<Available> iteratorA = freeSlots.iterator();
-        int index = 0;
-        // Keeps track of the removed objects
-        List<Available> removed = new ArrayList<>();
-        while (iteratorA.hasNext()) {
-            Available a = iteratorA.next();
-            if (removed.contains(a)) {
-                iteratorA.remove();
-                removed.remove(a);
-                continue;
-            }
-
-            List<Available> lookAheadList = freeSlots.subList(++index, freeSlots.size());
-            Iterator<Available> iteratorB = lookAheadList.iterator();
-            while (iteratorB.hasNext()) {
-                Available b = iteratorB.next();
-                // If it is completely contained then skip it
-                if (AvailabilityUtils.contained(b, a)) {
-                    removed.add(b);
-                    continue;
-                }
-                // If it in intersects, then merge
-                if (AvailabilityUtils.intersect(b, a)) {
-                    a = AvailabilityUtils.merge(b, a);
-                    removed.add(b);
-                }
-            }
-            availableTime.add(AvailabilityUtils.convert(a));
         }
     }
 
