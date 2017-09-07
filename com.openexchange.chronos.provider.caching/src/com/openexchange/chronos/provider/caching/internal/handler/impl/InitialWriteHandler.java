@@ -98,7 +98,7 @@ public class InitialWriteHandler extends AbstractHandler {
         try {
             writeConnection = dbService.getWritable(context);
             writeConnection.setAutoCommit(false);
-            create(folderId, new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection))), diff.getAddedItems());
+            create(folderId, new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getSession()), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;

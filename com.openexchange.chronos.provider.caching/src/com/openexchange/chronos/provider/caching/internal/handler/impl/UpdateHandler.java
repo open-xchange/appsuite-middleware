@@ -69,8 +69,6 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -86,6 +84,7 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.session.Session;
 
 /**
  * {@link UpdateHandler}
@@ -255,11 +254,12 @@ public class UpdateHandler extends AbstractHandler {
         if (diff.isEmpty()) {
             return;
         }
+        final Session session = this.cachedCalendarAccess.getSession();
         new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                processDiff(folderId, new TruncationAwareCalendarStorage(storage), diff);
+                processDiff(folderId, new TruncationAwareCalendarStorage(storage, session), diff);
 
                 return null;
             }
