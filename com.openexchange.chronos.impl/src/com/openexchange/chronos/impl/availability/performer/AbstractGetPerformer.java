@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.availability.performer;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Organizer;
@@ -92,6 +93,9 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
         availability.setOrganizer(organizer);
         availability.setAvailable(available);
         availability.setUid(UUID.randomUUID().toString());
+        // FIXME: Set start and end to undefined?
+        availability.setStartTime(new DateTime(0));
+        availability.setEndTime(new DateTime(9999, 11, 31));
 
         return availability;
     }
