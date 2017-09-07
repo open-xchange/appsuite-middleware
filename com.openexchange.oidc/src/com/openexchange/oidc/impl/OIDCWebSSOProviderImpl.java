@@ -88,6 +88,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -427,5 +428,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
         OIDCTools.validateSession(session, request);
         return OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
+    }
+    
+    @Override
+    public void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException{
+        Session session = LoginPerformer.getInstance().lookupSession(sessionId);
+        this.backend.logoutCurrentUser(session, request, response, this.loginConfiguration);
     }
 }

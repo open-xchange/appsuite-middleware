@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -99,11 +100,22 @@ public class InitService extends OIDCServlet {
             String redirectURI = this.getRedirectURI(flow, request, response);
             OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
-            //TODO QS-VS: Alle exceptions hier ausgeben und weiteres Vorgehen angeben
             if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
                 LOG.error(e.getLocalizedMessage(), e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            } else if (e.getExceptionCode() == OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN) {
+                LOG.warn("Unable to logout user via oidc roundtrip, because of an invalid IDToken:" + e.getLocalizedMessage());
+                this.exceptionLogout(request, response);
             }
+        }
+    }
+
+    private void exceptionLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            this.provider.logoutInCaseOfError(request.getParameter(LoginServlet.PARAMETER_SESSION), request, response);
+        } catch (OXException e) {
+            exceptionHandler.handleLogoutFailed(request, response, e);
+            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 

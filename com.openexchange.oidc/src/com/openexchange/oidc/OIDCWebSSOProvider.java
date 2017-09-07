@@ -51,6 +51,7 @@ package com.openexchange.oidc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * Provides the web features for OpenID SSO services.
@@ -72,4 +73,6 @@ public interface OIDCWebSSOProvider {
     String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     String logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException;
+    
+    void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
 }
