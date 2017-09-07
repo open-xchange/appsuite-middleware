@@ -47,62 +47,44 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.ajax.requesthandler.jobqueue.json.osgi;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
+import com.openexchange.ajax.requesthandler.jobqueue.json.JobQueueJsonActionFactory;
+import com.openexchange.ajax.requesthandler.jobqueue.json.converter.JobInfoConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link JobQueueJsonActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+public class JobQueueJsonActivator extends AJAXModuleActivator {
 
     /**
-     * Gets the default format.
-     *
-     * @return The default format
+     * Initializes a new {@link JobQueueJsonActivator}.
      */
-    String defaultFormat() default "apiResponse";
+    public JobQueueJsonActivator() {
+        super();
+    }
 
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
-    /**
-     * Indicates whether this action allows authentication via public session identifier.
-     * @return Whether to allow authentication via public session identifier or not
-     */
-    boolean publicSessionAuth() default false;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { JobQueueService.class };
+    }
 
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(ResultConverter.class, new JobInfoConverter());
+        JobQueueJsonActionFactory actionFactory = new JobQueueJsonActionFactory(this);
+        registerModule(actionFactory, actionFactory.getModule());
+    }
 
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
-
-	/**
-     * Indicates whether this action prefers reading/parsing request body stream by itself.
-     * @return Whether to prefer reading/parsing request body stream by itself
-     */
-    boolean preferStream() default false;
-
-    /**
-     * Signals whether the performed action is allowed for being enqueued in job queue in case its processing exceeds the threshold
-     *
-     * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
-     */
-    boolean enqueueable() default false;
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.ajax.requesthandler.jobqueue.json.actions;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.UUID;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link InfoAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+public class InfoAction extends AbstractJobQueueJsonAction {
 
     /**
-     * Gets the default format.
-     *
-     * @return The default format
+     * Initializes a new {@link InfoAction}.
      */
-    String defaultFormat() default "apiResponse";
+    public InfoAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
+    @Override
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        JobQueueService jobQueue = services.getOptionalService(JobQueueService.class);
+        if (null == jobQueue) {
+            throw ServiceExceptionCode.absentService(JobQueueService.class);
+        }
 
-    /**
-     * Indicates whether this action allows authentication via public session identifier.
-     * @return Whether to allow authentication via public session identifier or not
-     */
-    boolean publicSessionAuth() default false;
+        // Get "id" and parse it to UUID
+        String identifier = requestData.requireParameter("id");
+        UUID id;
+        try {
+            id = UUIDs.fromUnformattedString(identifier);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "id", identifier);
+        }
 
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
+        JobInfo jobInfo = jobQueue.require(id, session.getUserId(), session.getContextId());
+        return new AJAXRequestResult(jobInfo, "job");
+    }
 
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
+    @Override
+    public String getAction() {
+        return "info";
+    }
 
-	/**
-     * Indicates whether this action prefers reading/parsing request body stream by itself.
-     * @return Whether to prefer reading/parsing request body stream by itself
-     */
-    boolean preferStream() default false;
-
-    /**
-     * Signals whether the performed action is allowed for being enqueued in job queue in case its processing exceeds the threshold
-     *
-     * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
-     */
-    boolean enqueueable() default false;
 }
