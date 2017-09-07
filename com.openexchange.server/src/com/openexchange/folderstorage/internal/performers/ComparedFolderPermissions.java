@@ -117,7 +117,7 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
 
     @Override
     protected boolean isSystemPermission(Permission p) {
-        return p.getSystem() != 0;
+        return p.getSystem() == 0;
     }
 
     @Override

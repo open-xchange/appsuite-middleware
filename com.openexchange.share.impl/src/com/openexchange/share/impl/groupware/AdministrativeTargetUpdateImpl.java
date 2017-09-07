@@ -50,6 +50,7 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -87,7 +89,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
-	private ServiceListing<FolderHandlerModuleExtension> folderExtensions;
+	private final ServiceListing<FolderHandlerModuleExtension> folderExtensions;
 
     public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleHandlerRegistry handlers, ServiceListing<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
@@ -125,7 +127,18 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             syntheticOwnerSession.setParameter("com.openexchange.share.administrativeUpdate", Boolean.TRUE);
             syntheticOwnerSession.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
-            folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
+            FolderObject folder = folderTargetProxy.getFolder();
+            folderManager.updateFolder(folder, false, System.currentTimeMillis());
+
+            // Add system permission to sub folders
+            List<Integer> subfolderIds = folder.getSubfolderIds();
+            List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
+            List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+            for(FolderObject fol: folderObjects){
+                prepareInheritedPermissions(fol, appliedPermissions);
+                folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
+            }
+
             /*
              * clear some additional caches for all potentially affected users that are not covered when updating through folder manager
              */
@@ -136,6 +149,23 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             }
         }
 
+    }
+
+    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added){
+        List<OCLPermission> originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new ArrayList<OCLPermission>();
+        }
+
+        for(OCLPermission add : added){
+            add.setSystem(2);
+        }
+
+        List<OCLPermission> newPermissions = new ArrayList<>(originalPermissions.size() + added.size());
+        newPermissions.addAll(originalPermissions);
+        newPermissions.addAll(added);
+        folder.setPermissions(newPermissions);
+        return folder;
     }
 
     @Override

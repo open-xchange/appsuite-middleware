@@ -75,6 +75,8 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     private final UserizedFolder folder;
     private final ShareTarget target;
     private final ShareTargetPath targetPath;
+    private List<Permission> appliedPermissions;
+    private List<Permission> removedPermissions;
 
 
     public FolderTargetProxy(int module, UserizedFolder folder) {
@@ -82,6 +84,8 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         this.folder = folder;
         target = new ShareTarget(module, folder.getID(), null);
         targetPath = new ShareTargetPath(module, folder.getID(), null);
+        appliedPermissions = new ArrayList<>();
+        removedPermissions = new ArrayList<>();
     }
 
     @Override
@@ -125,6 +129,9 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         }
         List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(permissions.length);
         for (Permission permission : permissions) {
+            if(permission.getSystem() == 2){
+                continue;
+            }
             targetPermissions.add(CONVERTER.convert(permission));
         }
         return targetPermissions;
@@ -140,6 +147,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
         Collections.addAll(origPermissions, origPermissionArray);
         List<Permission> newPermissions = mergePermissions(origPermissions, permissions, CONVERTER);
+        appliedPermissions = mergePermissions(appliedPermissions, permissions, CONVERTER);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
         setModified();
     }
@@ -154,6 +162,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
         Collections.addAll(origPermissions, origPermissionArray);
         List<Permission> newPermissions = removePermissions(origPermissions, permissions, CONVERTER);
+        removedPermissions = mergePermissions(removedPermissions, permissions, CONVERTER);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
         setModified();
     }
@@ -208,5 +217,13 @@ public class FolderTargetProxy extends AbstractTargetProxy {
             return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
         }
     };
+
+    public List<Permission> getAppliedPermissions(){
+        return appliedPermissions;
+    }
+
+    public List<Permission> getRemovedPermissions(){
+        return removedPermissions;
+    }
 
 }

@@ -492,7 +492,7 @@ public final class OXFolderUtility {
                     /*
                      * added link, check link target, assigned permissions & "share_links" capability
                      */
-                    if (false == matches(guestInfo.getLinkTarget(), folder)) {
+                    if (permission.getSystem() == 0 && false == matches(guestInfo.getLinkTarget(), folder)) {
                         throw ShareExceptionCodes.NO_MULTIPLE_TARGETS_LINK.create();
                     }
                     if (null == capabilities || false == capabilities.contains("share_links")) {

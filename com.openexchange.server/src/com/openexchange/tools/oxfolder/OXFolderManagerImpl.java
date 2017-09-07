@@ -1052,8 +1052,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 public boolean execute(final int subfolderId) {
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
+                        FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
+                        setProperSystemValues(permissions, folderFromMaster.getPermissions());
                         tmp.setPermissions(permissions);
-                        doUpdate(tmp, options, getFolderFromMaster(subfolderId), lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
+                        doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
                         }
@@ -1067,6 +1069,18 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             });
         }
+    }
+
+    private void setProperSystemValues(List<OCLPermission> permissions, List<OCLPermission> original){
+
+        for(OCLPermission perm: permissions){
+            for(OCLPermission originalPerm: original){
+                if(perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity() && originalPerm.getSystem()==2){
+                    perm.setSystem(2);
+                }
+            }
+        }
+
     }
 
     private int getFolderTypeFromMaster(int folderId) throws OXException {

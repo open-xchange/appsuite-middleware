@@ -472,6 +472,7 @@ public final class FolderWriter {
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
+                            jo.put("System", permission.getSystem());
                             ja.put(jo);
                         }
                     }

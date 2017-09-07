@@ -170,7 +170,24 @@ final class MovePerformer extends AbstractPerformer {
         // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
         // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
         // }
+        List<Permission> permissionsToUpdate = removeLinkPermissions(folder);
         folderStorage.updateFolder(folder, storageParameters);
+        if(!permissionsToUpdate.isEmpty()){
+            folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
+            storageParameters.getDecorator().put("permissions", "inherit");
+            folderStorage.updateFolder(folder, storageParameters);
+        }
+    }
+
+    private List<Permission> removeLinkPermissions(Folder folder){
+        Permission[] permissions = folder.getPermissions();
+        List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
+        for(Permission perm : permissions){
+            if(perm.getSystem()!=2){
+                cleanedPermissions.add(perm);
+            }
+        }
+        return cleanedPermissions;
     }
 
     void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
@@ -256,7 +273,14 @@ final class MovePerformer extends AbstractPerformer {
          */
         final String oldParent = storageFolder.getParentID();
         if (virtualStorage.equals(realStorage)) {
+            List<Permission> permissionsToUpdate = removeLinkPermissions(storageFolder);
             virtualStorage.updateFolder(folder, storageParameters);
+            if(!permissionsToUpdate.isEmpty()){
+                folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
+                storageParameters.getDecorator().put("permissions", "inherit");
+                virtualStorage.updateFolder(folder, storageParameters);
+            }
+
         } else {
             final String treeId = folder.getTreeID();
             /*

@@ -1476,7 +1476,7 @@ public final class OXFolderSQL {
     private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, creating_date,"
         + " created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) " + "VALUES (?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) " + "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -1574,6 +1574,7 @@ public final class OXFolderSQL {
                         stmt.setInt(7, ocl.getDeletePermission());
                         stmt.setInt(8, ocl.isFolderAdmin() ? 1 : 0);
                         stmt.setInt(9, ocl.isGroupPermission() ? 1 : 0);
+                        stmt.setInt(10, ocl.getSystem());
                         stmt.addBatch();
                     }
                     executeBatch(stmt);
@@ -1670,7 +1671,7 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
+    private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system != 1";
 
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
@@ -1783,6 +1784,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, oclPerm.getDeletePermission());
                     stmt.setInt(pos++, oclPerm.isFolderAdmin() ? 1 : 0);
                     stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
+                    stmt.setInt(pos++, oclPerm.getSystem());
                     stmt.addBatch();
                 }
                 executeBatch(stmt);

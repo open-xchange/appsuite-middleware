@@ -107,7 +107,7 @@ public final class CalculatePermission {
         TIntIntHashMap toLoad = new TIntIntHashMap(staticPermissions.length);
         for (int index = 0; index < staticPermissions.length; index++) {
             Permission staticPermission = staticPermissions[index];
-            if (0 == staticPermission.getSystem()) {
+            if (1 != staticPermission.getSystem()) {
                 // A non-system permission
                 if (staticPermission.isGroup()) {
                     userizedPermissions[index] = staticPermission;
