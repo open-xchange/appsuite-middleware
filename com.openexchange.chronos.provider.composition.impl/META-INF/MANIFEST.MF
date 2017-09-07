@@ -35,3 +35,4 @@ Import-Package: com.google.common.io;version="19.0.0",
  org.osgi.service.event,
  org.slf4j
 Bundle-Activator: com.openexchange.chronos.provider.composition.impl.osgi.CompositingCalendarProviderActivator
+Export-Package: com.openexchange.chronos.provider.composition.impl.idmangling
