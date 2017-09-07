@@ -117,7 +117,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
     }
 
-    //TODO QS-VS: Struktur der Methode verbessern, make DRY
     private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
         if (Strings.isEmpty(sessionToken)) {
@@ -152,11 +151,9 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             return;
         }
 
-        String autologinCookieValue = null;
-        
-        //TODO QS-VS: Das muss viel besser vereinheitlicht werden, das Chaos mit dem autologin
         boolean autologinEnabled = this.backend.getBackendConfig().isAutologinEnabled();
         
+        String autologinCookieValue = null;
         if (autologinEnabled) {
             if (this.performCookieLogin(request, response, reservation)) {
                 return;
@@ -165,7 +162,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
         
         LoginResult result = loginUser(request, context, user, reservation.getState(), autologinCookieValue);
-
         Session session = performSessionAdditions(result, request, response, idToken);
 
         if (autologinEnabled) {
@@ -250,7 +246,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         Session session = loginResult.getSession();
 
         LoginServlet.addHeadersAndCookies(loginResult, response);
-
+        
         SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
 
         LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
@@ -261,7 +257,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state, final String oidcAutologinCookieValue) throws OXException {
         final LoginRequest loginRequest = backend.getLoginRequest(request, user.getId(), context.getContextId(), loginConfiguration);
 
-        //TODO QS-VS: Wirft eine Exception: Missing parameter in user's mail config: Session password not set.
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
 
             @Override
