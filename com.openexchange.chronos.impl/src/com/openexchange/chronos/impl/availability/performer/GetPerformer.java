@@ -275,6 +275,8 @@ public class GetPerformer extends AbstractGetPerformer {
             }
             availableTime.add(a);
         }
+        
+        availability.setAvailable(availableTime);
     }
 
     /**
