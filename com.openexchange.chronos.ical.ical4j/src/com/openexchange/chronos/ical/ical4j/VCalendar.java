@@ -110,12 +110,12 @@ public class VCalendar extends Component {
     }
 
     /**
-     * Gets the contained <code>VAVAILABILITY</code> components.
+     * Gets the contained <code>VAVAILABILITY</code> component.
      *
-     * @return The availability components
+     * @return The availability component
      */
-    public ComponentList getAvailabilities() {
-        return calendar.getComponents(Component.VAVAILABILITY);
+    public Component getAvailability() {
+        return calendar.getComponent(Component.VAVAILABILITY);
     }
 
     /**

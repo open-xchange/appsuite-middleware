@@ -62,7 +62,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     //@formatter:off
     CombineAvailabilitiesTest.class, 
-    CombineAvailableTimeTest.class,
     CalculateFreeBusyTimeTest.class
     //@formatter:on
 })

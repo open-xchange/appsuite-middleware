@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Before;
-import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
@@ -70,7 +70,7 @@ public abstract class AbstractCombineTest {
 
     protected CalendarAvailabilityStorage storage;
     protected CalendarSession session;
-    protected List<Availability> availabilities;
+    protected List<Available> available;
 
     /**
      * Initialises a new {@link AbstractCombineTest}.
@@ -84,7 +84,7 @@ public abstract class AbstractCombineTest {
      */
     @Before
     public void init() throws OXException {
-        availabilities = new ArrayList<>();
+        available = new ArrayList<>();
 
         // Mock the session
         session = mock(CalendarSession.class);
@@ -93,6 +93,6 @@ public abstract class AbstractCombineTest {
 
         // Mock the storage
         storage = mock(CalendarAvailabilityStorage.class);
-        when(storage.loadCalendarAvailabilities(1)).thenReturn(availabilities);
+        when(storage.loadAvailable(1)).thenReturn(available);
     }
 }

@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static org.junit.Assert.assertEquals;
 import java.util.List;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FreeBusyTime;
 
 /**
@@ -84,5 +85,32 @@ final class AssertUtil {
         assertEquals(expected.getFbType(), actual.getFbType());
         assertEquals(expected.getStartTime(), actual.getStartTime());
         assertEquals(expected.getEndTime(), actual.getEndTime());
+    }
+
+    /**
+     * Asserts that the expected {@link List} of {@link Available}s is equal to the actual {@link List}
+     * of {@link Available}s
+     * 
+     * @param expected The expected list
+     * @param actual The actual list
+     */
+    static void assertAvailableBlocks(List<Available> expected, List<Available> actual) {
+        assertEquals("The amount of the available blocks does not match", expected.size(), actual.size());
+        for (int index = 0; index < actual.size(); index++) {
+            assertAvailable(expected.get(index), actual.get(index));
+        }
+    }
+
+    /**
+     * Asserts that the expected {@link Available} is equal to the actual {@link Available}
+     * 
+     * @param expected The expected {@link Available}
+     * @param actual The actual {@link Available}
+     */
+    static void assertAvailable(Available expected, Available actual) {
+        //assertEquals("The summary does not match", expected.getSummary(), actual.getSummary());
+        assertEquals("The start time does not match", expected.getStartTime(), actual.getStartTime());
+        assertEquals("The end time does not match", expected.getEndTime(), actual.getEndTime());
+
     }
 }

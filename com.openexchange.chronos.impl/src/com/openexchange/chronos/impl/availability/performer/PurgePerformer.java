@@ -76,6 +76,6 @@ public class PurgePerformer extends AbstractUpdatePerformer {
      * @throws OXException
      */
     public void perform() throws OXException {
-        storage.purgeAvailabilities(session.getUserId());
+        getStorage().deleteAvailable(getSession().getUserId());
     }
 }

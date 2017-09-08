@@ -55,9 +55,8 @@ import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
-import com.openexchange.chronos.service.AvailabilityField;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.AvailableField;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
@@ -84,7 +83,6 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
     /**
      * Prepares the specified {@link List} of {@link Availability} blocks for the storage.
      * <ul>
-     * <li>Assigns identifiers for the {@link Availability} blocks (if no identifiers are present)</li>
      * <li>Assigns identifiers for the {@link Available} blocks</li>
      * </ul>
      * 
@@ -94,45 +92,45 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
      * @throws OXException if an error is occurred
      */
     List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<Availability> availabilities) throws OXException {
-        Date timeNow = new Date(System.currentTimeMillis());
-
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (Availability availability : availabilities) {
-            String availabilityId = availability.contains(AvailabilityField.id) ? availability.getId() : storage.nextAvailabilityId();
-            availability.setId(availabilityId);
-            availability.setCalendarUser(session.getUserId());
-            availability.setLastModified(timeNow);
-            // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
-            if (availability.getCreationTimestamp() == null) {
-                availability.setCreationTimestamp(timeNow);
-            }
-            if (availability.getStartTime() == null) {
-                availability.setStartTime(new DateTime(0));
-            }
-            if (availability.getEndTime() == null) {
-                availability.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
-            }
-            caIds.add(availabilityId);
-
-            // Prepare the free slots
-            for (Available freeSlot : availability.getAvailable()) {
-                freeSlot.setId(freeSlot.contains(AvailableField.id) ? freeSlot.getId() : storage.nextAvailableId());
-                freeSlot.setCalendarAvailabilityId(availabilityId);
-                freeSlot.setCalendarUser(session.getUserId());
-                freeSlot.setLastModified(timeNow);
-                // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
-                if (freeSlot.getCreationTimestamp() == null) {
-                    freeSlot.setCreationTimestamp(timeNow);
-                }
-                if (freeSlot.getStartTime() == null) {
-                    freeSlot.setStartTime(new DateTime(0));
-                }
-                if (freeSlot.getEndTime() == null) {
-                    freeSlot.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
-                }
-            }
+            caIds.addAll(prepareForStorage(storage, availability));
         }
         return caIds;
+    }
+
+    /**
+     * Prepares the specified {@link Availability} block for the storage.
+     * <ul>
+     * <li>Assigns identifiers for the {@link Available} blocks</li>
+     * </ul>
+     * 
+     * @param storage The {@link CalendarAvailabilityStorage} instance
+     * @param availability An {@link Availability} block to prepare
+     * @return The {@link List} with the {@link Availability} identifiers
+     * @throws OXException if an error is occurred
+     */
+    List<String> prepareForStorage(CalendarAvailabilityStorage storage, Availability availability) throws OXException {
+        Date timeNow = new Date(System.currentTimeMillis());
+        List<String> availableIds = new ArrayList<>(availability.getAvailable().size());
+        // Prepare the free slots
+        for (Available available : availability.getAvailable()) {
+            available.setId(available.contains(AvailableField.id) ? available.getId() : storage.nextAvailableId());
+            available.setCalendarUser(getSession().getUserId());
+            available.setLastModified(timeNow);
+            // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
+            if (available.getCreationTimestamp() == null) {
+                available.setCreationTimestamp(timeNow);
+            }
+            if (available.getStartTime() == null) {
+                available.setStartTime(new DateTime(0));
+            }
+            if (available.getEndTime() == null) {
+                available.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
+            }
+            availableIds.add(available.getId());
+        }
+        return availableIds;
     }
 
 }

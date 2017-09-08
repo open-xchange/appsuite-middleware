@@ -47,74 +47,25 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.caldav.mixins;
 
-import java.util.ArrayList;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.GroupwareCaldavFactory;
 
 /**
- * {@link AvailableTime} - Defines an available time block with overlaid {@link AvailableTimeSlot}s
+ * {@link CalendarAvailabilityCalendarServerNS}. Defines a calendar availability mixin with the
+ * {@link CaldavProtocol#CALENDARSERVER_NS} namespace
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailableTime extends ArrayList<AvailableTimeSlot> {
-
-    private static final long serialVersionUID = 877905889548084875L;
-
-    private int userId;
-    private BusyType busyType = BusyType.BUSY_UNAVAILABLE;
+public class CalendarAvailabilityCalendarServerNS extends AbstractCalendarAvailability {
 
     /**
-     * Initialises a new {@link AvailableTime}.
-     */
-    public AvailableTime() {
-        super();
-    }
-
-    /**
-     * Gets the userId
-     *
-     * @return The userId
-     */
-    public int getUserId() {
-        return userId;
-    }
-
-    /**
-     * Sets the userId
-     *
-     * @param userId The userId to set
-     */
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Gets the busyType
-     *
-     * @return The busyType
-     */
-    public BusyType getBusyType() {
-        return busyType;
-    }
-
-    /**
-     * Sets the busyType
-     *
-     * @param busyType The busyType to set
-     */
-    public void setBusyType(BusyType busyType) {
-        this.busyType = busyType;
-    }
-
-    /*
-     * (non-Javadoc)
+     * Initialises a new {@link CalendarAvailabilityCalendarServerNS}.
      * 
-     * @see java.lang.Object#toString()
+     * @param factory
      */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("AvailableTime [userId=").append(userId).append(", busyType=").append(busyType).append(", \ntoString()=").append(super.toString()).append("]");
-        return builder.toString();
+    public CalendarAvailabilityCalendarServerNS(GroupwareCaldavFactory factory) {
+        super(factory, CaldavProtocol.CALENDARSERVER_NS, "calendar-availability");
     }
 }

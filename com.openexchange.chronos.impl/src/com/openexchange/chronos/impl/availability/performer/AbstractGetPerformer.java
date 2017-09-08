@@ -47,72 +47,58 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.impl.availability.performer;
 
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 
 /**
- * {@link AvailableTimeSlot} - Defines an available time slot within an {@link AvailableTime} block
+ * {@link AbstractGetPerformer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailableTimeSlot {
-
-    private DateTime from;
-    private DateTime until;
+abstract class AbstractGetPerformer extends AbstractPerformer {
 
     /**
-     * Initialises a new {@link AvailableTimeSlot}.
-     */
-    public AvailableTimeSlot() {
-        super();
-    }
-
-    /**
-     * Gets the from
-     *
-     * @return The from
-     */
-    public DateTime getFrom() {
-        return from;
-    }
-
-    /**
-     * Sets the from
-     *
-     * @param from The from to set
-     */
-    public void setFrom(DateTime from) {
-        this.from = from;
-    }
-
-    /**
-     * Gets the until
-     *
-     * @return The until
-     */
-    public DateTime getUntil() {
-        return until;
-    }
-
-    /**
-     * Sets the until
-     *
-     * @param until The until to set
-     */
-    public void setUntil(DateTime until) {
-        this.until = until;
-    }
-
-    /*
-     * (non-Javadoc)
+     * Initialises a new {@link AbstractGetPerformer}.
      * 
-     * @see java.lang.Object#toString()
+     * @param storage The {@link CalendarAvailabilityStorage}
+     * @param session The groupware {@link CalendarSession}
      */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("AvailableTimeSlot [\n\tfrom=").append(from).append(", \n\tuntil=").append(until).append("\n]");
-        return builder.toString();
+    public AbstractGetPerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
+        super(storage, session);
+    }
+
+    /**
+     * Prepares the specified {@link Available} blocks for delivery by wrapping them
+     * into an {@link Availability} container
+     * 
+     * @param available The {@link List} with the {@link Available} blocks to prepare
+     * @return The {@link Availability} object
+     */
+    public Availability prepareForDelivery(List<Available> available) {
+        Organizer organizer = new Organizer();
+        organizer.setEntity(getSession().getUserId());
+        organizer.setUri(ResourceId.forUser(getSession().getContextId(), getSession().getUserId()));
+
+        Availability availability = new Availability();
+        availability.setCalendarUser(getSession().getUserId());
+        availability.setCreationTimestamp(new Date(System.currentTimeMillis()));
+        availability.setOrganizer(organizer);
+        availability.setAvailable(available);
+        availability.setUid(UUID.randomUUID().toString());
+        // FIXME: Set start and end to undefined?
+        availability.setStartTime(new DateTime(0));
+        availability.setEndTime(new DateTime(9999, 11, 31));
+
+        return availability;
     }
 }

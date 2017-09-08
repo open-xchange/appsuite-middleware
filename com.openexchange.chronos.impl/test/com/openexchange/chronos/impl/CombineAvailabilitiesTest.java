@@ -50,13 +50,14 @@
 package com.openexchange.chronos.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Test;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.impl.availability.performer.GetPerformer;
 import com.openexchange.exception.OXException;
 
@@ -75,247 +76,78 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
     }
 
     /**
-     * Tests the combine logic when the free slots do not overlap.
-     * 
-     * @throws OXException
+     * Tests the combine logic when the available blocks do not overlap.
      */
     @Test
-    public void testSingleAvailabilityNoOverlaps() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
-
-        // Initialise mocks
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots));
+    public void testAvailabilityNoAvailableOverlaps() throws OXException {
+        // Create the available blocks
+        available.add(PropsFactory.createCalendarAvailable("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        available.add(PropsFactory.createCalendarAvailable("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
+        available.add(PropsFactory.createCalendarAvailable("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
+        available.add(PropsFactory.createCalendarAvailable("April", new DateTime(2017, 4, 1), new DateTime(2017, 4, 31)));
+        available.add(PropsFactory.createCalendarAvailable("May", new DateTime(2017, 5, 1), new DateTime(2017, 5, 30)));
+        available.add(PropsFactory.createCalendarAvailable("June", new DateTime(2017, 6, 1), new DateTime(2017, 6, 31)));
 
         // Execute
         GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
+        Availability availability = get.getCombinedAvailableTime();
 
         // Asserts
-        assertEquals("The amount of availability blocks does not match", 1, availableTime.size());
-        assertEquals("The amount of available time slots does not match", 3, availableTime.get(0).getAvailable().size());
-        assertEquals("The busy type does not match", BusyType.BUSY_UNAVAILABLE, availableTime.get(0).getBusyType());
+        assertNotNull("The availability is null", availability);
+        assertEquals("The amount of available time slots does not match", 6, availability.getAvailable().size());
+        assertEquals("The busy type does not match", BusyType.BUSY_UNAVAILABLE, availability.getBusyType());
+        AssertUtil.assertAvailableBlocks(available, availability.getAvailable());
     }
 
     /**
-     * Tests the combine logic for multiple availability blocks
-     * when the free slots are sorted and there are no overlaps
+     * Tests the combine logic for an availability block with available overlaps
      */
     @Test
-    public void testMultipleAvailabilitiesNoOverlaps() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 1), new DateTime(2017, 1, 27)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 2, 1), new DateTime(2017, 2, 31)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2016, 11, 1), new DateTime(2017, 3, 1)));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(3);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("April", new DateTime(2017, 4, 1), new DateTime(2017, 4, 31)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("May", new DateTime(2017, 5, 1), new DateTime(2017, 5, 30)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("June", new DateTime(2017, 6, 1), new DateTime(2017, 6, 31)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 3, 11), new DateTime(2017, 7, 5)));
+    public void testAvailabilityWithAvailableOverlaps() throws OXException {
+        // Create the available blocks
+        available.add(PropsFactory.createCalendarAvailable("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        available.add(PropsFactory.createCalendarAvailable("February", new DateTime(2017, 1, 15), new DateTime(2017, 1, 20)));
+        available.add(PropsFactory.createCalendarAvailable("March completely contains February", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
+        available.add(PropsFactory.createCalendarAvailable("April", new DateTime(2017, 3, 1), new DateTime(2017, 3, 30)));
+        available.add(PropsFactory.createCalendarAvailable("May overlaps with April", new DateTime(2017, 3, 20), new DateTime(2017, 4, 5)));
+        available.add(PropsFactory.createCalendarAvailable("June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 30)));
 
         // Execute
         GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
+        Availability availability = get.getCombinedAvailableTime();
+
+        List<Available> expected = new ArrayList<>(4);
+        expected.add(PropsFactory.createCalendarAvailable("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        expected.add(PropsFactory.createCalendarAvailable("February", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
+        expected.add(PropsFactory.createCalendarAvailable("April", new DateTime(2017, 3, 1), new DateTime(2017, 4, 5)));
+        expected.add(PropsFactory.createCalendarAvailable("June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 30)));
 
         // Asserts
-        assertEquals("The amount of availability blocks does not match", 2, availableTime.size());
-        assertEquals("The amount of available time slots does not match", 3, availableTime.get(0).getAvailable().size());
-        assertEquals("The amount of available time slots does not match", 3, availableTime.get(1).getAvailable().size());
-        assertEquals("The busy type does not match", BusyType.BUSY_UNAVAILABLE, availableTime.get(0).getBusyType());
-        assertEquals("The busy type does not match", BusyType.BUSY_TENTATIVE, availableTime.get(1).getBusyType());
+        assertNotNull("The availability is null", availability);
+        assertEquals("The amount of available time slots does not match", 4, availability.getAvailable().size());
+        AssertUtil.assertAvailableBlocks(expected, availability.getAvailable());
     }
 
     /**
-     * Tests the combine logic for multiple availability blocks
-     * with overlaps
+     * Tests the combine logic for available blocks with multiple overlaps
      */
     @Test
-    public void testMultipleAvailabilitiesWithOverlaps() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 15), new DateTime(2017, 1, 20)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2016, 11, 1), new DateTime(2017, 3, 1), 5));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("March", new DateTime(2017, 1, 21), new DateTime(2017, 2, 10)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("April", new DateTime(2017, 3, 1), new DateTime(2017, 3, 31)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 0, 31), new DateTime(2017, 3, 31), 2));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("May", new DateTime(2017, 4, 1), new DateTime(2017, 4, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 30)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 30), new DateTime(2017, 6, 5), 7));
+    public void testMultipleOverlapsWithPreceedsAndSuceeds() throws OXException {
+        // Create the available blocks
+        available.add(PropsFactory.createCalendarAvailable("January precedes", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        available.add(PropsFactory.createCalendarAvailable("February in the middle", new DateTime(2017, 0, 20), new DateTime(2017, 1, 20)));
+        available.add(PropsFactory.createCalendarAvailable("March succeeds", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
 
         // Execute
         GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
+        Availability availability = get.getCombinedAvailableTime();
+
+        List<Available> expected = new ArrayList<>(1);
+        expected.add(PropsFactory.createCalendarAvailable("Merged", new DateTime(2017, 0, 1), new DateTime(2017, 2, 10)));
 
         // Asserts
-        assertEquals("The amount of availability blocks does not match", 3, availableTime.size());
-        Availability calendarAvailabilityA = availableTime.get(0);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2016, 11, 1), calendarAvailabilityA.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 0, 31), calendarAvailabilityA.getEndTime());
-
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 0, 31), availableTime.get(1).getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 3, 31), availableTime.get(1).getEndTime());
-
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 3, 31), availableTime.get(2).getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 6, 5), availableTime.get(2).getEndTime());
-    }
-
-    /**
-     * Tests the combine logic for multiple availability blocks
-     * with free slot overlaps
-     */
-    @Test
-    public void testMultipleAvailabilitiesWithFreeSlotOverlaps() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(1);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February", new DateTime(2017, 1, 15), new DateTime(2017, 1, 20)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2016, 11, 1), new DateTime(2017, 2, 1), 5));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("March completely contains February", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("April", new DateTime(2017, 3, 1), new DateTime(2017, 3, 30)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 1, 5), new DateTime(2017, 3, 30), 2));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("May overlaps with April", new DateTime(2017, 3, 20), new DateTime(2017, 4, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("June", new DateTime(2017, 5, 15), new DateTime(2017, 5, 30)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY, freeSlots, new DateTime(2017, 2, 30), new DateTime(2017, 6, 5), 7));
-
-        // Execute
-        GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
-
-        // Asserts
-        assertEquals("The amount of availability blocks does not match", 3, availableTime.size());
-        Availability calendarAvailabilityA = availableTime.get(0);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2016, 11, 1), calendarAvailabilityA.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 5), calendarAvailabilityA.getEndTime());
-        assertEquals("The amount of free slots does not match", 1, calendarAvailabilityA.getAvailable().size());
-
-        Availability calendarAvailabilityB = availableTime.get(1);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 5), calendarAvailabilityB.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 3, 30), calendarAvailabilityB.getEndTime());
-        assertEquals("The amount of free slots does not match", 2, calendarAvailabilityB.getAvailable().size());
-
-        Availability calendarAvailabilityC = availableTime.get(2);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 3, 30), calendarAvailabilityC.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 6, 5), calendarAvailabilityC.getEndTime());
-        assertEquals("The amount of free slots does not match", 2, calendarAvailabilityC.getAvailable().size());
-    }
-
-    /**
-     * Tests the combine logic for multiple availability blocks
-     * where the availability with the higher priority, completely contains
-     * the availability with the lower priority.
-     */
-    @Test
-    public void testMultipleAvailabilitiesWithFullContain() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February A.1", new DateTime(2017, 1, 3), new DateTime(2017, 1, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February A.2", new DateTime(2017, 1, 10), new DateTime(2017, 1, 13)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 1, 1), new DateTime(2017, 1, 28), 8));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(4);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 3), new DateTime(2017, 0, 25)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.1", new DateTime(2017, 1, 4), new DateTime(2017, 1, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.2", new DateTime(2017, 1, 8), new DateTime(2017, 1, 11)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.3", new DateTime(2017, 1, 12), new DateTime(2017, 1, 15)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 0, 1), new DateTime(2017, 2, 31), 5));
-
-        // Execute
-        GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
-
-        // Asserts
-        assertEquals("The amount of availability blocks does not match", 1, availableTime.size());
-        Availability calendarAvailabilityA = availableTime.get(0);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 0, 1), calendarAvailabilityA.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 2, 31), calendarAvailabilityA.getEndTime());
-        assertEquals("The amount of free slots does not match", 3, calendarAvailabilityA.getAvailable().size());
-
-        Available freeSlotA = calendarAvailabilityA.getAvailable().get(0);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 0, 3), freeSlotA.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 0, 25), freeSlotA.getEndTime());
-
-        Available freeSlotB = calendarAvailabilityA.getAvailable().get(1);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 3), freeSlotB.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 5), freeSlotB.getEndTime());
-
-        Available freeSlotC = calendarAvailabilityA.getAvailable().get(2);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 8), freeSlotC.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 15), freeSlotC.getEndTime());
-    }
-
-    /**
-     * Tests the combine logic for multiple availability blocks
-     * where the availability with the higher priority, completely contains
-     * the availability with the lower priority.
-     */
-    @Test
-    public void testMultipleAvailabilitiesWithFullContainAndHigherPriority() throws OXException {
-        // Create the free slots
-        List<Available> freeSlots = new ArrayList<>(2);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February A.1", new DateTime(2017, 1, 3), new DateTime(2017, 1, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February A.2", new DateTime(2017, 1, 10), new DateTime(2017, 1, 13)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_UNAVAILABLE, freeSlots, new DateTime(2017, 1, 1), new DateTime(2017, 1, 28), 2));
-
-        // Create the free slots
-        freeSlots = new ArrayList<>(4);
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("January", new DateTime(2017, 0, 3), new DateTime(2017, 0, 25)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.1", new DateTime(2017, 1, 4), new DateTime(2017, 1, 5)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.2", new DateTime(2017, 1, 8), new DateTime(2017, 1, 11)));
-        freeSlots.add(PropsFactory.createCalendarFreeSlot("February B.3", new DateTime(2017, 1, 12), new DateTime(2017, 1, 15)));
-        availabilities.add(PropsFactory.createCalendarAvailability(BusyType.BUSY_TENTATIVE, freeSlots, new DateTime(2017, 0, 1), new DateTime(2017, 2, 31), 5));
-
-        // Execute
-        GetPerformer get = new GetPerformer(storage, session);
-        List<Availability> availableTime = get.getCombinedAvailableTime();
-
-        // Asserts
-        assertEquals("The amount of availability blocks does not match", 3, availableTime.size());
-        Availability calendarAvailabilityA = availableTime.get(0);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 0, 1), calendarAvailabilityA.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 1), calendarAvailabilityA.getEndTime());
-        assertEquals("The amount of free slots does not match", 1, calendarAvailabilityA.getAvailable().size());
-
-        Availability calendarAvailabilityB = availableTime.get(1);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 1), calendarAvailabilityB.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityB.getEndTime());
-        assertEquals("The amount of free slots does not match", 2, calendarAvailabilityB.getAvailable().size());
-
-        Availability calendarAvailabilityC = availableTime.get(2);
-        assertEquals("The 'from' of the availability block does not match", new DateTime(2017, 1, 28), calendarAvailabilityC.getStartTime());
-        assertEquals("The 'until' of the availability block does not match", new DateTime(2017, 2, 31), calendarAvailabilityC.getEndTime());
-        assertEquals("The amount of free slots does not match", 0, calendarAvailabilityC.getAvailable().size());
-
-        Available freeSlotA = calendarAvailabilityA.getAvailable().get(0);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 0, 3), freeSlotA.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 0, 25), freeSlotA.getEndTime());
-
-        Available freeSlotB = calendarAvailabilityB.getAvailable().get(0);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 3), freeSlotB.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 5), freeSlotB.getEndTime());
-
-        Available freeSlotC = calendarAvailabilityB.getAvailable().get(1);
-        assertEquals("The 'from' of the free slot does not match", new DateTime(2017, 1, 8), freeSlotC.getStartTime());
-        assertEquals("The 'until' of the free slot does not match", new DateTime(2017, 1, 15), freeSlotC.getEndTime());
+        assertNotNull("The availability is null", availability);
+        assertEquals("The amount of available time slots does not match", 1, availability.getAvailable().size());
+        AssertUtil.assertAvailableBlocks(expected, availability.getAvailable());
     }
 }

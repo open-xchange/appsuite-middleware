@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,71 @@
  *
  */
 
-package com.openexchange.chronos.availability.json;
+package com.openexchange.caldav.mixins;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Availability;
+import java.io.IOException;
+import java.io.InputStream;
+import org.jdom2.Namespace;
+import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link ListAction}
+ * {@link AbstractCalendarAvailability}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ListAction extends AbstractAction {
+abstract class AbstractCalendarAvailability extends SingleXMLPropertyMixin {
+
+    private final GroupwareCaldavFactory factory;
 
     /**
-     * Initialises a new {@link ListAction}.
+     * Initialises a new {@link AbstractCalendarAvailability}.
      */
-    public ListAction(ServiceLookup services) {
-        super(services);
+    public AbstractCalendarAvailability(GroupwareCaldavFactory factory, Namespace namespace, String name) {
+        super(namespace.getURI(), name);
+        this.factory = factory;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        CalendarSession calendarSession = getSession(session);
-        CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
-        Availability availability = service.getAvailability(calendarSession);
-        return new AJAXRequestResult(availability);
+    protected String getValue() {
+        /*
+         * When no DAV:href element is present, the client MUST substitute
+         * the scheme and authority parts of the attachment URI with the
+         * scheme and authority part of the calendar home collection absolute
+         * URI.
+         */
+        InputStream inputStream = null;
+        try {
+            CalendarService calendarService = factory.getService(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(factory.getSession());
+
+            CalendarAvailabilityService service = factory.getService(CalendarAvailabilityService.class);
+            com.openexchange.chronos.Availability availability = service.getAvailability(calendarSession);
+            // export the availability
+            ICalService iCalService = factory.getService(ICalService.class);
+            CalendarExport exportICal = iCalService.exportICal(iCalService.initParameters());
+            exportICal.add(availability);
+
+            inputStream = exportICal.getClosingStream();
+            return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
+        } catch (OXException e) {
+            //TODO: Exception handling
+            e.printStackTrace();
+        } catch (IOException e) {
+            //TODO: Exception handling
+            e.printStackTrace();
+        } finally {
+            Streams.close(inputStream);
+        }
+        return "";
     }
+
 }

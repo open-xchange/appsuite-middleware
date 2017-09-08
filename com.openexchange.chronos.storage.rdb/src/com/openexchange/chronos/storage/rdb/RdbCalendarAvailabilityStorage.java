@@ -58,7 +58,6 @@ import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.FieldAware;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.database.provider.DBProvider;
@@ -74,9 +73,7 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
  */
 public class RdbCalendarAvailabilityStorage extends RdbStorage implements CalendarAvailabilityStorage {
 
-    private static final AvailabilityMapper AVAILABILITY_MAPPER = AvailabilityMapper.getInstance();
     private static final AvailableMapper AVAILABLE_MAPPER = AvailableMapper.getInstance();
-    private static final String AVAILABILITY_TABLE_NAME = "calendar_availability";
     private static final String AVAILABLE_TABLE_NAME = "calendar_available";
 
     private static final int INSERT_CHUNK_SIZE = 100;
@@ -96,16 +93,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarAvailabilityId()
-     */
-    @Override
-    public String nextAvailabilityId() throws OXException {
-        return nextId("calendar_availability_sequence");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
      */
     @Override
@@ -116,94 +103,19 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailability(com.openexchange.chronos.CalendarAvailability)
-     */
-    @Override
-    public void insertAvailability(Availability availability) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            int availabilityCount = insertAvailabilityItem(availability, AVAILABILITY_TABLE_NAME, AVAILABILITY_MAPPER, connection);
-            int availableCount = 0;
-            for (List<Available> slots : Lists.partition(availability.getAvailable(), INSERT_CHUNK_SIZE)) {
-                availableCount += insertAvailabilityItems(slots, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
-            }
-            txPolicy.commit(connection);
-            updated = availabilityCount + availableCount;
-            LOG.debug("Inserted {} availability block(s) and {} available block(s) for user {} in context {}.", availabilityCount, availableCount, availability.getCalendarUser(), context.getContextId());
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarAvailabilities(java.util.List)
-     */
-    @Override
-    public void insertAvailabilities(List<Availability> calendarAvailabilities) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            for (List<Availability> chunk : Lists.partition(calendarAvailabilities, INSERT_CHUNK_SIZE)) {
-                updated += insertAvailabilityItems(chunk, AVAILABILITY_TABLE_NAME, AVAILABILITY_MAPPER, connection);
-
-                // Insert the free slots chunk-wise
-                for (Availability availability : chunk) {
-                    for (List<Available> slots : Lists.partition(availability.getAvailable(), INSERT_CHUNK_SIZE)) {
-                        updated += insertAvailabilityItems(slots, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
-                    }
-                }
-            }
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailability(java.lang.String)
-     */
-    @Override
-    public void deleteAvailability(String availabilityId) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            updated = deleteAvailabilityItem(availabilityId, connection);
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
-    public void insertAvailable(Available available) throws OXException {
+    public void insertAvailable(List<Available> available) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = insertAvailabilityItem(available, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+            // Insert the available chunk-wise
+            for (List<Available> partition : Lists.partition(available, INSERT_CHUNK_SIZE)) {
+                updated += insertAvailabilityItems(partition, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -215,15 +127,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadUserCalendarAvailability(java.util.List, java.util.Date, java.util.Date)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(int)
      */
     @Override
-    public List<Availability> loadAvailabilities(List<Integer> userIds) throws OXException {
+    public List<Available> loadAvailable(int userId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getReadConnection(context);
-            return loadAvailabilities(connection, userIds);
+            return loadAvailable(connection, userId);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -234,15 +146,15 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailabilities(int)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(java.util.List)
      */
     @Override
-    public List<Availability> loadCalendarAvailabilities(int userId) throws OXException {
+    public List<Available> loadAvailable(List<Integer> userIds) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getReadConnection(context);
-            return loadAvailabilities(connection, userId);
+            return loadAvailable(connection, userIds);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -253,73 +165,16 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarAvailability(java.lang.String)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
      */
     @Override
-    public Availability loadAvailability(String availabilityId) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return loadAvailability(connection, availabilityId);
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlot(java.lang.String, java.lang.String)
-     */
-    @Override
-    public Available loadAvailable(String availabilityId, String availableId) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return loadAvailable(connection, availabilityId, availableId);
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadCalendarFreeSlots(java.lang.String)
-     */
-    @Override
-    public List<Available> loadAvailable(String availabilityId) throws OXException {
-        Connection connection = null;
-        int updated = 0;
-        try {
-            connection = dbProvider.getReadConnection(context);
-            return loadAvailable(connection, availabilityId);
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            release(connection, updated);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteCalendarAvailabilities(java.util.List)
-     */
-    @Override
-    public void deleteAvailabilities(List<String> availabilityIds) throws OXException {
+    public void deleteAvailable(int userId) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteAvailabilityItems(availabilityIds, connection);
+            updated = deleteAvailable(connection, userId);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -331,16 +186,100 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#purgeCalendarAvailabilities(int)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.lang.String)
      */
     @Override
-    public void purgeAvailabilities(int userId) throws OXException {
+    public void deleteAvailable(String availableUid) throws OXException {
         Connection connection = null;
         int updated = 0;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = purgeAvailabilityItems(connection, userId);
+            updated = deleteAvailable(connection, availableUid);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
+     */
+    @Override
+    public void deleteAvailable(int userId, int availableId) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAvailable(connection, userId, availableId);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.util.List)
+     */
+    @Override
+    public void deleteAvailableByUid(List<String> availableIds) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAvailableByUid(connection, availableIds);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableById(java.util.List)
+     */
+    @Override
+    public void deleteAvailableById(List<Integer> availableIds) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAvailableById(connection, availableIds);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableByUserId(java.util.List)
+     */
+    @Override
+    public void deleteAvailableByUserId(List<Integer> userIds) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAvailableByUserId(connection, userIds);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -411,51 +350,165 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link Availability} blocks for the specified user
+     * Loads from the storage all {@link Available} blocks for the specified user
      * 
-     * @param A read-only {@link Connection} to the storage
+     * @param connection The read-only {@link Connection} to the storage
      * @param userId The user identifier
-     * @return A {@link List} with all the {@link Availability} blocks for the specified user
-     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
-     * @throws SQLException if an SQL error is occurred
+     * @return A {@link List} with all {@link Available} blocks
+     * @throws OXException if the blocks cannot be loaded or any other error is occurred
      */
-    private Availability loadAvailability(Connection connection, String availabilityId) throws OXException, SQLException {
-        AvailabilityField[] mappedFields = AVAILABILITY_MAPPER.getMappedFields();
-        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABILITY_TABLE_NAME, AVAILABILITY_MAPPER).append(" AND id=?;");
-
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
-            Availability availability = AVAILABILITY_MAPPER.fromResultSet(logExecuteQuery(stmt), mappedFields);
-            availability.setAvailable(loadAvailable(connection, availability.getId()));
-            return availability;
-        }
-    }
-
-    /**
-     * Loads all {@link Availability} blocks for the specified user
-     * 
-     * @param A read-only {@link Connection} to the storage
-     * @param userId The user identifier
-     * @return A {@link List} with all the {@link Availability} blocks for the specified user
-     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
-     * @throws SQLException if an SQL error is occurred
-     */
-    private List<Availability> loadAvailabilities(Connection connection, int userId) throws OXException, SQLException {
-        AvailabilityField[] mappedFields = AVAILABILITY_MAPPER.getMappedFields();
-        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABILITY_TABLE_NAME, AVAILABILITY_MAPPER).append(" AND user=?;");
+    private List<Available> loadAvailable(Connection connection, int userId) throws OXException, SQLException {
+        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
+        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER);
+        sb.append(" AND user=?;");
 
         int parameterIndex = 1;
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, userId);
-            List<Availability> availabilities = AVAILABILITY_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
 
-            for (Availability availability : availabilities) {
-                availability.setAvailable(loadAvailable(connection, availability.getId()));
+            return AVAILABLE_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+        }
+    }
+
+    /**
+     * Loads all {@link Availability} blocks for the users with the specified identifiers
+     * 
+     * @param connection The read-only {@link Connection} to the storage
+     * @param userIds The {@link List} of user identifiers
+     * @return A {@link List} with the {@link Availability} blocks of the specified users
+     * @throws OXException if an error is occurred
+     */
+    private List<Available> loadAvailable(Connection connection, List<Integer> userIds) throws SQLException, OXException {
+        // 1) Fetch all calendar availability items for the specified users
+        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ").append(AVAILABLE_MAPPER.getColumns(mappedFields));
+        sb.append(" FROM ").append(AVAILABLE_TABLE_NAME);
+        sb.append(" WHERE cid=?");
+        sb.append(" AND user IN (").append(AvailabilityMapper.getParameters(userIds.size())).append(");");
+
+        List<Available> available = null;
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            for (Integer id : userIds) {
+                stmt.setInt(parameterIndex++, id);
             }
-            return availabilities;
+            available = AVAILABLE_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
+        }
+
+        return available;
+    }
+
+    /**
+     * Deletes from the storage all {@link Available} blocks for the specified user
+     * 
+     * @param connection The writeable connection
+     * @param userID The user's identifier
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailable(Connection connection, int userId) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND user=?;").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, userId);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Deletes from the storage the {@link Available} block with the specified unique identifier
+     * 
+     * @param connection The writeable connection
+     * @param availableUid The unique identifier of the {@link Available} block
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailable(Connection connection, String availableUid) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND uid=?;").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setString(parameterIndex++, availableUid);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Deletes from the storage the {@link Available} block with the specified identifier
+     * for the specified user
+     * 
+     * @param connection The writeable connection
+     * @param userId The user identifier
+     * @param availableId The identifier of the {@link Available} block
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailable(Connection connection, int userId, int availableId) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND user=? AND id=?;").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, userId);
+            stmt.setInt(parameterIndex++, availableId);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Deletes from the storage the {@link Available} block with the specified unique identifier
+     * 
+     * @param connection The writeable connection
+     * @param availableUid The unique identifier of the {@link Available} block
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailableByUid(Connection connection, List<String> availableUids) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND uid IN (").append(AvailabilityMapper.getParameters(availableUids.size())).append(");").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            for (String uid : availableUids) {
+                stmt.setString(parameterIndex++, uid);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Deletes from the storage the {@link Available} block with the specified unique identifier
+     * 
+     * @param connection The writeable connection
+     * @param availableUid The unique identifier of the {@link Available} block
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailableById(Connection connection, List<Integer> availableIds) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND id IN (").append(AvailabilityMapper.getParameters(availableIds.size())).append(");").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            for (Integer id : availableIds) {
+                stmt.setInt(parameterIndex++, id);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    /**
+     * Deletes from the storage the {@link Available} block with the specified unique identifier
+     * 
+     * @param connection The writeable connection
+     * @param availableUid The unique identifier of the {@link Available} block
+     * @return The amount of affected rows
+     * @throws SQLException if an error is occurred
+     */
+    private int deleteAvailableByUserId(Connection connection, List<Integer> userIds) throws SQLException {
+        int parameterIndex = 1;
+        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND user IN (").append(AvailabilityMapper.getParameters(userIds.size())).append(");").toString())) {
+            stmt.setInt(parameterIndex++, context.getContextId());
+            for (int userId : userIds) {
+                stmt.setInt(parameterIndex++, userId);
+            }
+            return logExecuteUpdate(stmt);
         }
     }
 
@@ -506,88 +559,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     }
 
     /**
-     * Loads all {@link Availability} blocks for the users with the specified identifiers
-     * 
-     * @param connection The read-only {@link Connection} to the storage
-     * @param userIds The {@link List} of user identifiers
-     * @return A {@link List} with the {@link Availability} blocks of the specified users
-     * @throws OXException if an error is occurred
-     */
-    private List<Availability> loadAvailabilities(Connection connection, List<Integer> userIds) throws SQLException, OXException {
-        // 1) Fetch all calendar availability items for the specified users
-        AvailabilityField[] mappedFields = AVAILABILITY_MAPPER.getMappedFields();
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(AVAILABILITY_MAPPER.getColumns(mappedFields));
-        sb.append(" FROM ").append(AVAILABILITY_TABLE_NAME);
-        sb.append(" WHERE cid=?");
-        sb.append(" AND user IN (").append(AvailabilityMapper.getParameters(userIds.size())).append(");");
-
-        List<Availability> availabilities = null;
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            for (Integer id : userIds) {
-                stmt.setInt(parameterIndex++, id);
-            }
-            availabilities = AVAILABILITY_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
-        }
-
-        // 2) Then fetch all free slots of the calendar availability items
-        for (Availability ca : availabilities) {
-            ca.setAvailable(loadAvailable(ca.getId()));
-        }
-        return availabilities;
-    }
-
-    /**
-     * Deletes from the storage the {@link Availability} item with the specified id and all {@link Available}s assigned to it.
-     * 
-     * @param availabilityId The identifier of the calendar availability item
-     * @param connection The writeable connection
-     * @return The amount of affected rows
-     * @throws SQLException if an error is occurred
-     */
-    private int deleteAvailabilityItem(String availabilityId, Connection connection) throws SQLException {
-        int updated = deleteCalendarFreeSlots(availabilityId, connection);
-
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABILITY_TABLE_NAME).append(" AND id=?;").toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, asInt(availabilityId));
-            return logExecuteUpdate(stmt) + updated;
-        }
-    }
-
-    /**
-     * Deletes from the storage the {@link Availability} item with the specified id and all {@link Available}s assigned to it.
-     * 
-     * @param availabilityId The identifier of the calendar availability item
-     * @param connection The writeable connection
-     * @return The amount of affected rows
-     * @throws SQLException if an error is occurred
-     */
-    private int deleteAvailabilityItems(List<String> availabilityIds, Connection connection) throws SQLException {
-        int affectedRows = 0;
-        StringBuilder deleteCABuilder = SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABILITY_TABLE_NAME).append(" AND id IN (");
-        for (String availabilityId : availabilityIds) {
-            affectedRows += deleteCalendarFreeSlots(availabilityId, connection);
-            deleteCABuilder.append("?,");
-        }
-        deleteCABuilder.setLength(deleteCABuilder.length() - 1);
-        deleteCABuilder.append(");");
-
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(deleteCABuilder.toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            for (String availabilityId : availabilityIds) {
-                stmt.setInt(parameterIndex++, asInt(availabilityId));
-            }
-            affectedRows += logExecuteUpdate(stmt);
-        }
-        return affectedRows;
-    }
-
-    /**
      * Deletes from the storage all {@link Available}s assigned to the {@link Availability} with the specified id.
      * 
      * @param availabilityId The identifier of the calendar availability item
@@ -615,7 +586,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     private int purgeAvailabilityItems(Connection connection, int userId) throws SQLException {
         int updated = 0;
         updated += purgeAvailabilityItems(connection, AVAILABLE_TABLE_NAME, userId);
-        updated += purgeAvailabilityItems(connection, AVAILABILITY_TABLE_NAME, userId);
         return updated;
     }
 
