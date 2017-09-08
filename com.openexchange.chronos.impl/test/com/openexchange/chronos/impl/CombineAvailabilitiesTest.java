@@ -134,8 +134,8 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
     @Test
     public void testMultipleOverlapsWithPreceedsAndSuceeds() throws OXException {
         // Create the available blocks
-        available.add(PropsFactory.createCalendarAvailable("January preceds", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
-        available.add(PropsFactory.createCalendarAvailable("February in the midle", new DateTime(2017, 0, 20), new DateTime(2017, 1, 20)));
+        available.add(PropsFactory.createCalendarAvailable("January precedes", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        available.add(PropsFactory.createCalendarAvailable("February in the middle", new DateTime(2017, 0, 20), new DateTime(2017, 1, 20)));
         available.add(PropsFactory.createCalendarAvailable("March succeeds", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
 
         // Execute
