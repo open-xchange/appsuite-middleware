@@ -1174,7 +1174,6 @@ public final class ResponseWriter {
     public static final class WriteExceptionProps {
 
         String  errorKey;
-        boolean enableStackTraceOnError;
         boolean includeStackTraceOnError;
         boolean checkProblematic;
         boolean checkTruncated;
@@ -1186,7 +1185,6 @@ public final class ResponseWriter {
             super();
             errorKey = ERROR;
             includeStackTraceOnError = false;
-            enableStackTraceOnError = true;
             checkProblematic = true;
             checkTruncated = true;
         }
@@ -1203,20 +1201,7 @@ public final class ResponseWriter {
         }
 
         /**
-         * Sets whether any check to include the exception's stack trace should be performed
-         *
-         * @param enableStackTraceOnError <code>true</code> to check for including exception's stack trace; otherwise <code>false</code>
-         * @return This instance
-         */
-        public WriteExceptionProps enableStackTraceOnError(boolean enableStackTraceOnError) {
-            this.enableStackTraceOnError = enableStackTraceOnError;
-            return this;
-        }
-
-        /**
          * Sets whether to include the exception's stack trace.
-         * <p>
-         * Provided that {@link #enableStackTraceOnError(boolean)} is set to <code>true</code>.
          *
          * @param includeStackTraceOnError <code>true</code> to include the exception's stack trace; otherwise <code>false</code>
          * @return This instance
