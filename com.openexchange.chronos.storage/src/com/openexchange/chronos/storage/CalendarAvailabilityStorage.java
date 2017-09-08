@@ -74,24 +74,6 @@ public interface CalendarAvailabilityStorage {
     String nextAvailableId() throws OXException;
 
     /**
-     * Inserts the specified {@link Availability} block to the storage
-     * 
-     * @param availability The {@link Availability} to insert
-     * @throws OXException if the object cannot be inserted or any other error is occurred
-     * @deprecated Use {@link #insertAvailable(List)} instead
-     */
-    void insertAvailability(Availability availability) throws OXException;
-
-    /**
-     * Inserts the specified {@link List} of {@link Availability} objects to the storage
-     * 
-     * @param availabilities The {@link List} with the {@link Availability} objects
-     * @throws OXException if the objects cannot be inserted or any other error is occurred
-     * @deprecated Use {@link #insertAvailable(List)} instead
-     */
-    void insertAvailabilities(List<Availability> availabilities) throws OXException;
-
-    /**
      * Inserts the specified {@link Available} blocks
      * 
      * @param available The {@link Available} blocks to insert
@@ -116,69 +98,6 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if the blocks cannot be loaded or any other error is occurred
      */
     List<Available> loadAvailable(List<Integer> userIds) throws OXException;
-
-    /**
-     * Loads from the storage the {@link Availability} with the specified identifier
-     * 
-     * @param availabilityId The calendar availability identifier
-     * @return The {@link Availability}
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #loadAvailable(int)} instead
-     */
-    Availability loadAvailability(String availabilityId) throws OXException;
-
-    /**
-     * Loads the {@link Availability} information for the users with the specified identifiers in the specified interval.
-     * 
-     * @param userIds The {@link List} of user identifiers
-     * @return A {@link List} with the {@link Availability} for each user
-     * @throws OXException if the items cannot be retrieved
-     * @deprecated Use {@link #loadAvailable(List)} instead.
-     */
-    List<Availability> loadAvailabilities(List<Integer> userIds) throws OXException;
-
-    /**
-     * Load all {@link Availability} blocks for the specified user
-     * 
-     * @param userId The user identifier
-     * @return A {@link List} with all the {@link Availability} objects for the user
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #loadAvailable(int)} instead.
-     */
-    List<Availability> loadCalendarAvailabilities(int userId) throws OXException;
-
-    /**
-     * Loads from the storage the {@link Available}s for the {@link Availability}
-     * with the specified identifier
-     * 
-     * @param availabilityId The calendar availability identifier
-     * @return A {@link List} with all {@link Available}s bound to the {@link Availability}
-     *         with the specified id
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #loadAvailable(int)} instead
-     */
-    List<Available> loadAvailable(String availabilityId) throws OXException;
-
-    /**
-     * Loads from the storage the {@link Available} with the specified identifier bound
-     * to the {@link Availability} with the specified identifier
-     * 
-     * @param calendarAvailabilityId The calendar availability identifier
-     * @param availableId The {@link Available} identifier
-     * @return The {@link Available}
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #loadAvailable(int)} instead
-     */
-    Available loadAvailable(String availability, String availableId) throws OXException;
-
-    /**
-     * Deletes the {@link Availability} and all {@link Available} blocks associated to it with the specified identifier
-     * 
-     * @param availabilityId The calendar availability identifier
-     * @throws OXException if the object cannot be deleted
-     * @deprecated Use {@link #deleteAvailable(String)} instead.
-     */
-    void deleteAvailability(String availabilityId) throws OXException;
 
     /**
      * Deletes all {@link Available} blocks for the specified user
@@ -227,21 +146,4 @@ public interface CalendarAvailabilityStorage {
      * @throws OXException if the blocks cannot be deleted
      */
     void deleteAvailableByUserId(List<Integer> userIds) throws OXException;
-
-    /**
-     * Deletes the {@link Availability} blocks and all {@link Available} blocks associated to them
-     * 
-     * @param availabilityIds The calendar availability identifiers
-     * @throws OXException if the objects cannot be deleted
-     * @deprecated Use {@link #deleteAvailableByUid(List)}
-     */
-    void deleteAvailabilities(List<String> availabilityIds) throws OXException;
-
-    /**
-     * Purges all {@link Availability} blocks and {@link Available} blocks for the specified user
-     * 
-     * @throws OXException if the objects cannot be purged
-     * @deprecated Use {@link #deleteAvailable(int)} instead.
-     */
-    void purgeAvailabilities(int userId) throws OXException;
 }
