@@ -56,6 +56,7 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 
@@ -86,6 +87,7 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
     public Availability prepareForDelivery(List<Available> available) {
         Organizer organizer = new Organizer();
         organizer.setEntity(getSession().getUserId());
+        organizer.setUri(ResourceId.forUser(getSession().getContextId(), getSession().getUserId()));
 
         Availability availability = new Availability();
         availability.setCalendarUser(getSession().getUserId());
