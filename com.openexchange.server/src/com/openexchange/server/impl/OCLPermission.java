@@ -578,7 +578,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      *         <code>false</code>
      */
     public boolean isSystem() {
-        return (system & SYSTEM_SYSTEM) == SYSTEM_SYSTEM;
+        return system == SYSTEM_SYSTEM;
     }
 
     /**

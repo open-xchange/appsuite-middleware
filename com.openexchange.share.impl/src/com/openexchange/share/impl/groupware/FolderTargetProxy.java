@@ -209,7 +209,9 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public Permission convert(TargetPermission permission) {
-            return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+            DefaultPermission result = new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+            result.setSystem(3);
+            return result;
         }
 
         @Override

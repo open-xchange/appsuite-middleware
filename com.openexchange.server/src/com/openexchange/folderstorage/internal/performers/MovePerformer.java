@@ -170,7 +170,7 @@ final class MovePerformer extends AbstractPerformer {
         // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
         // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
         // }
-        List<Permission> permissionsToUpdate = removeLinkPermissions(folder);
+        List<Permission> permissionsToUpdate = adjustPermission(folder, folder, newRealParentStorage);
         folderStorage.updateFolder(folder, storageParameters);
         if(!permissionsToUpdate.isEmpty()){
             folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
@@ -179,15 +179,35 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private List<Permission> removeLinkPermissions(Folder folder){
-        Permission[] permissions = folder.getPermissions();
+    private List<Permission> adjustPermission(Folder newFolder, Folder originalFolder, FolderStorage newRealParentStorage) throws OXException {
+        Permission[] permissions = originalFolder.getPermissions();
+
+        List<Permission> addParentLinkPermission = addParentLinkPermission(newFolder, newRealParentStorage);
         List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
         for(Permission perm : permissions){
             if(perm.getSystem()!=2){
                 cleanedPermissions.add(perm);
             }
         }
+        cleanedPermissions.addAll(addParentLinkPermission);
         return cleanedPermissions;
+    }
+
+    private List<Permission> addParentLinkPermission(Folder folder, FolderStorage newRealParentStorage) throws OXException {
+        List<Permission> result = new ArrayList<>();
+        Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
+        for (Permission perm : parent.getPermissions()) {
+            if (perm.getSystem() == 3) {
+                Permission cloned = (Permission) perm.clone();
+                cloned.setSystem(2);
+                result.add(cloned);
+            }
+        }
+
+        if (!folder.getParentID().equals("10")) {
+            result.addAll(addParentLinkPermission(parent, newRealParentStorage));
+        }
+        return result;
     }
 
     void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
@@ -273,7 +293,7 @@ final class MovePerformer extends AbstractPerformer {
          */
         final String oldParent = storageFolder.getParentID();
         if (virtualStorage.equals(realStorage)) {
-            List<Permission> permissionsToUpdate = removeLinkPermissions(storageFolder);
+            List<Permission> permissionsToUpdate = adjustPermission(folder, storageFolder, newRealParentStorage);
             virtualStorage.updateFolder(folder, storageParameters);
             if(!permissionsToUpdate.isEmpty()){
                 folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
