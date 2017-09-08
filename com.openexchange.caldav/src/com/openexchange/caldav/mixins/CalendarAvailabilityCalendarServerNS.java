@@ -49,71 +49,23 @@
 
 package com.openexchange.caldav.mixins;
 
-import java.io.IOException;
-import java.io.InputStream;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.service.CalendarAvailabilityService;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CalendarAvailability}. Defines a calendar availability mixin with the
+ * {@link CalendarAvailabilityCalendarServerNS}. Defines a calendar availability mixin with the
  * {@link CaldavProtocol#CALENDARSERVER_NS} namespace
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailability extends SingleXMLPropertyMixin {
-
-    private final GroupwareCaldavFactory factory;
+public class CalendarAvailabilityCalendarServerNS extends AbstractCalendarAvailability {
 
     /**
-     * Initialises a new {@link CalendarAvailability}.
+     * Initialises a new {@link CalendarAvailabilityCalendarServerNS}.
      * 
      * @param factory
      */
-    public CalendarAvailability(GroupwareCaldavFactory factory) {
-        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "calendar-availability");
-        this.factory = factory;
-    }
-
-    @Override
-    protected String getValue() {
-        /*
-         * When no DAV:href element is present, the client MUST substitute
-         * the scheme and authority parts of the attachment URI with the
-         * scheme and authority part of the calendar home collection absolute
-         * URI.
-         */
-        InputStream inputStream = null;
-        try {
-            CalendarService calendarService = factory.getService(CalendarService.class);
-            CalendarSession calendarSession = calendarService.init(factory.getSession());
-
-            CalendarAvailabilityService service = factory.getService(CalendarAvailabilityService.class);
-            com.openexchange.chronos.Availability availability = service.getAvailability(calendarSession);
-            // export the availability
-            ICalService iCalService = factory.getService(ICalService.class);
-            CalendarExport exportICal = iCalService.exportICal(iCalService.initParameters());
-            exportICal.add(availability);
-
-            inputStream = exportICal.getClosingStream();
-            return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
-        } catch (OXException e) {
-            //TODO: Exception handling
-            e.printStackTrace();
-        } catch (IOException e) {
-            //TODO: Exception handling
-            e.printStackTrace();
-        } finally {
-            Streams.close(inputStream);
-        }
-        return "";
+    public CalendarAvailabilityCalendarServerNS(GroupwareCaldavFactory factory) {
+        super(factory, CaldavProtocol.CALENDARSERVER_NS, "calendar-availability");
     }
 }
