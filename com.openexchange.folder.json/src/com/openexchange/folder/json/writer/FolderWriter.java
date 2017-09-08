@@ -468,11 +468,13 @@ public final class FolderWriter {
                     } else {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
+                            if(permission.getSystem() == 2){
+                                continue;
+                            }
                             final JSONObject jo = new JSONObject(4);
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
                             jo.put(FolderField.GROUP.getName(), permission.isGroup());
-                            jo.put("System", permission.getSystem());
                             ja.put(jo);
                         }
                     }
@@ -641,6 +643,7 @@ public final class FolderWriter {
             oclPermission.setFolderAdmin(permission.isAdmin());
             oclPermission.setGroupPermission(permission.isGroup());
             oclPermissions.add(oclPermission);
+            oclPermission.setSystem(permission.getSystem());
         }
         return oclPermissions;
     }
