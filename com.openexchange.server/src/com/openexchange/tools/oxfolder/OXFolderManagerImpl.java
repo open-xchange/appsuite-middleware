@@ -1075,7 +1075,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
         for(OCLPermission perm: permissions){
             for(OCLPermission originalPerm: original){
-                if(perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity() && originalPerm.getSystem()==2){
+                if (perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity() && originalPerm.getSystem() == 2 && perm.getSystem() != 1) {
                     perm.setSystem(2);
                 }
             }
