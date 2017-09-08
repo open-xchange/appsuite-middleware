@@ -51,6 +51,7 @@ package com.openexchange.mail.filter.json.v2.actions;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -145,8 +146,8 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
         boolean property = leanConfigurationService.getBooleanProperty(userId, contextId, OptionsProperty.allowNestedTests);
         result.put(OptionsProperty.allowNestedTests.name(), property);
         if(options != null){
-            for(String key: options.keySet()){
-                result.put(key, options.get(key));
+            for(Entry<String, Object> entry: options.entrySet()){
+                result.put(entry.getKey(), entry.getValue());
             }
         }
         return result;
