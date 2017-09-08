@@ -485,6 +485,9 @@ public final class PGPKeysUtil {
 
                     ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
                 }
+                else {
+                   throw new PGPException("Error while removing public key: key not found in keyring");
+                }
             }
         }
 

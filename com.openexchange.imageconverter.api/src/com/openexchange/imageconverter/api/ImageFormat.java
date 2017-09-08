@@ -176,18 +176,18 @@ public class ImageFormat implements Comparable<ImageFormat> {
     /**
      * @return
      */
-    public String getKey() {
-        final StringBuilder ret = new StringBuilder(m_imageType.toString()).append(':').
+    public String getFormatString() {
+        final StringBuilder ret = new StringBuilder(m_imageType.getShortName()).append(':').
             append(m_width).append('x').
             append(m_height).append('~').
             append(m_scaleType.getKeyword());
 
         if (m_autoRotate) {
-            ret.append('~').append(m_autoRotate);
+            ret.append('~').append("autorotate");
         }
 
         if (m_shrinkOnly) {
-            ret.append('~').append(m_shrinkOnly);
+            ret.append('~').append("shrinkonly");
         }
 
         return ret.append('@').append(m_quality).toString();
@@ -457,14 +457,6 @@ public class ImageFormat implements Comparable<ImageFormat> {
                         shrinkOnly = true;
                     }
 
-                }
-
-                final String readType = curFormatStr.substring(scalePos + 1, qualityPos).trim().toLowerCase();
-
-                if (readType.startsWith("cov")) {
-                    scaleType = readType.contains("crop") ? ScaleType.COVER_AND_CROP : ScaleType.COVER;
-                } else if (readType.contains("force") && readType.contains("dimension")) {
-                    scaleType = ScaleType.CONTAIN_FORCE_DIMENSION;
                 }
             }
 

@@ -119,6 +119,9 @@ case "${BNAME}" in
     "listdatabase")
     ACTION="util.database.ListDatabase"
     ;;
+    "listdatabaseschema")
+    ACTION="util.database.ListDatabaseSchema"
+    ;;
     "recalculatefilestoreusage")
     ACTION="util.filestore.RecalculateFilestoreUsage"
     ;;
@@ -127,6 +130,9 @@ case "${BNAME}" in
     ;;
     "listserver")
     ACTION="util.server.ListServer"
+    ;;
+    "changeserver")
+    ACTION="util.server.ChangeServer"
     ;;
     "registerdatabase")
     ACTION="util.database.RegisterDatabase"
