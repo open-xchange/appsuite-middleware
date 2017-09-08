@@ -52,6 +52,9 @@ import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
 
 import com.sun.mail.imap.GreetingListener;
+import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.ProtocolListener;
+import com.sun.mail.imap.ResponseEvent;
 import com.sun.mail.util.*;
 
 /**
@@ -67,14 +70,15 @@ import com.sun.mail.util.*;
 public class Protocol {
     private final boolean auditLogEnabled;
     protected String greeting;
-    protected String host;
-    protected int port;
+    protected final String host;
+    protected final int port;
+    protected final String user;
     private Socket socket;
     // in case we turn on TLS, we'll need these later
-    protected boolean quote;
-    protected MailLogger logger;
+    protected final boolean quote;
+    protected final MailLogger logger;
     protected MailLogger traceLogger;
-    protected Properties props;
+    protected final Properties props;
     protected String prefix;
 
     private TraceInputStream traceInput;	// the Tracer
@@ -108,7 +112,7 @@ public class Protocol {
      * @exception	IOException	for I/O errors
      * @exception	ProtocolException	for protocol failures
      */
-    public Protocol(String host, int port, 
+    public Protocol(String host, int port, String user,
 		    Properties props, String prefix,
 		    boolean isSSL, MailLogger logger)
 		    throws IOException, ProtocolException {
@@ -117,6 +121,7 @@ public class Protocol {
 	    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
 	    this.host = host;
 	    this.port = port;
+	    this.user = user;
 	    this.props = props;
 	    this.prefix = prefix;
 	    this.logger = logger;
@@ -182,6 +187,7 @@ public class Protocol {
     this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
     this.host = "localhost";
 	this.port = 143;
+	this.user = null;
 	this.props = props;
 	this.quote = false;
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, System.out);
@@ -360,7 +366,9 @@ public class Protocol {
 	Response r = null;
 
 	// write the command
-	long start = auditLogEnabled ? System.currentTimeMillis() : 0L;
+	List<ProtocolListener> protocolListeners = IMAPStore.getProtocolListeners();
+	boolean measure = null != protocolListeners || auditLogEnabled;
+	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
 	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
@@ -408,8 +416,33 @@ public class Protocol {
         timestamp = end;
 	commandEnd();
 
-	if (auditLogEnabled) {
-	    com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(end - start), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
+	if (measure) {	    
+	    long executionMillis = end - start;
+	    if (auditLogEnabled) {
+            com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
+	    }
+	    if (null != protocolListeners) {
+	        ResponseEvent responseEvent = ResponseEvent.builder()
+	            .setArgs(args)
+	            .setCommand(command)
+	            .setExecutionMillis(executionMillis)
+	            .setHost(host)
+	            .setPort(port)
+	            .setResponses(responses)
+	            .setTag(tag)
+	            .setTerminatedTmestamp(end)
+	            .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
+	            .setUser(user)
+	            .build();
+	        
+            for (ProtocolListener protocolListener : protocolListeners) {
+                try {
+                    protocolListener.onResponse(responseEvent);
+                } catch (ProtocolException e) {
+                    logger.log(java.util.logging.Level.FINE, "Failed protocol listener " + protocolListener.getClass().getName(), e);
+                }
+            }
+        }
 	}
 
 	return responses;
