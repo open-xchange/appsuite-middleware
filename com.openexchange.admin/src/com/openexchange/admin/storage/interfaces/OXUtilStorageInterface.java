@@ -83,6 +83,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
+     * 
      * @return an instance implementing the group storage interface.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
@@ -236,6 +237,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * List all registered file stores.
+     * 
      * @param pattern a pattern to search for
      * @return an array of file store objects
      * @throws StorageException
@@ -380,7 +382,7 @@ public abstract class OXUtilStorageInterface {
      * @param db A database object to register
      * @param createSchemas Whether the schemas holding payload data are supposed to be pre-created
      * @param optNumberOfSchemas Given that <code>createSchemas</code> is <code>true</code> that parameter specifies the number of schemas that shall be created;
-     *                           if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     *            if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
      * @return The identifier of the database
      * @throws StorageException
      */
@@ -453,6 +455,15 @@ public abstract class OXUtilStorageInterface {
     public abstract void unregisterServer(final int server_id) throws StorageException;
 
     /**
+     * Changes the server identifier for the specified schema
+     * 
+     * @param serverId The server identifier
+     * @param schemaName The schema name
+     * @throws StorageException
+     */
+    public abstract void changeServer(int serverId, String schemaName) throws StorageException;
+
+    /**
      * Searches for databases matching search_pattern
      *
      * @param search_pattern
@@ -501,7 +512,6 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
-
 
     /**
      * Creates a new schema in the given database if possible. In case the optDBId is null the best suitable DB is selected automatically.
