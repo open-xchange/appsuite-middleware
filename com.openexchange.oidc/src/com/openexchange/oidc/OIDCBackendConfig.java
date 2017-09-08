@@ -50,6 +50,9 @@ package com.openexchange.oidc;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.oidc.http.AuthenticationService;
+import com.openexchange.oidc.http.InitService;
+import com.openexchange.oidc.http.LogoutService;
 
 /**
  * {@link OIDCBackendConfig}
@@ -59,6 +62,16 @@ import java.util.Map;
  */
 public interface OIDCBackendConfig {
     
+    /**
+     * {@link AutologinMode}
+     *
+     * All valid auto-login modes for a given backend. The session information is stored in an
+     * own OIDC-Cookie. Therefore the name of the property is 'com.openexchange.oidc.autologinCookieMode'.
+     * 
+     * off: No auto-login at all
+     * sso_redirect: Means the user is redirected to the OP first and asked for confirmation
+     * ox_direct: The current user session is terminated immediately 
+     */
     public static enum AutologinMode {
         OFF("off"), SSO_REDIRECT("sso_redirect"), OX_DIRECT("ox_direct");
         
@@ -85,45 +98,154 @@ public interface OIDCBackendConfig {
         }
     }
     
+    /**
+     * The id, which the backend client received from the OP on client registration.
+     * 
+     * @return the client id.
+     */
     String getClientID();
 
+    /**
+     * Get the redirect URI that should be used by the frontend to start the authentication
+     * process. Pointing to the init-Servlet. {@link InitService}
+     * 
+     * @return the redirect URI
+     */
     String getRedirectURIInit();
     
+    /**
+     * Get the redirect URI that the OP should redirect to after token generation. Pointing to
+     * the authentication servlet. {@link AuthenticationService}
+     * 
+     * @return the redirect URI
+     */
     String getRedirectURIAuth();
     
+    /**
+     * The path to the authorization endpoint of the OP
+     * 
+     * @return the path to the endpoint
+     */
     String getAuthorizationEndpoint();
 
+    /**
+     * The path to the token endpoint of the OP
+     * 
+     * @return the path to the endpoint
+     */
     String getTokenEndpoint();
 
+    /**
+     * The secret, which the backend client received from the OP on client registration.
+     * 
+     * @return the secret
+     */
     String getClientSecret();
 
-    String getJwkSet();
+    /**
+     * The path to the JWK Set endpoint of the OP.
+     * 
+     * @return the path to the endpoint
+     */
+    String getJwkSetEndpoint();
 
+    /**
+     * The used algorithm to encrypt communication with the OP.
+     * 
+     * @return the used algorithm
+     */
     String getJWSAlgortihm();
     
+    /**
+     * The used OIDC scope.
+     * 
+     * @return the scope
+     */
     String getScope();
     
+    /**
+     * The path to the issuer endpoint of the OP
+     * 
+     * @return the path to the endpoint
+     */
     String getIssuer();
     
+    /**
+     * The response type used by the OP
+     * 
+     * @return the used type
+     */
     String getResponseType();
     
+    /**
+     * The path to the user info endpoint of the OP
+     * 
+     * @return the path to the endpoint
+     */
     String getUserInfoEndpoint();
     
+    /**
+     * The path to the logout endpoint of the OP
+     * 
+     * @return the path to the endpoint
+     */
     String getLogoutEndpoint();
     
+    /**
+     * The path to the post OP logout location that should be used. Pointing to the 
+     * logout servlet. {@link LogoutService}
+     * 
+     * @return the redirect URI
+     */
     String getRedirectURIPostSSOLogout();
 
+    /**
+     * Is SSO logout enabled, triggers the confirmation procedure via OP if enabled.
+     * 
+     * @return true or false
+     */
     boolean isSSOLogout();
 
+    /**
+     * Where is the user supposed to be redirected to, after a successful logout.
+     * 
+     * @return the redirect URI
+     */
     String getRedirectURILogout();
     
+    /**
+     * Which logout mode is selected. Potential content can be found here {@link OIDCBackendConfig.AutologinMode}
+     * 
+     * @return the selected mode.
+     */
     String autologinCookieMode();
 
+    /**
+     * Determines weather OAuth tokens should be stored in a user-session or not.
+     * 
+     * @return true or false
+     */
     boolean isStoreOAuthTokensEnabled();
     
+    /**
+     * Is auto-login at all enabled or not
+     * 
+     * @return true or false
+     */
     boolean isAutologinEnabled();
     
+    /**
+     * How long before an Oauth Access token expires a new token is supposed to be
+     * requested. Time in seconds.
+     * 
+     * @return the time
+     */
     int getOauthRefreshTime();
 
+    /**
+     * Load the web ui web path for this backend.
+     * 
+     * @return the ui web path.
+     */
     String getUIWebpath();
 }

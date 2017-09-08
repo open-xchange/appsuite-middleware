@@ -96,7 +96,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     }
 
     @Override
-    public String getJwkSet() {
+    public String getJwkSetEndpoint() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwkSetEndpoint);
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.oidc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * Provides the web features for OpenID SSO services.
@@ -62,17 +61,54 @@ import com.openexchange.session.Session;
 public interface OIDCWebSSOProvider {
 
     /**
-     * Builds the login request.
+     * Builds the login request for the init service.
      * 
-     * @return
+     * @param request The servlet request
+     * @param response The servlet response
+     * @return the login redirect request
+     * @throws OXException when something fails during the process
      */
     String getLoginRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
+    /**
+     * Authenticate a user by sending a request to the OP and validating its response. Finally sends
+     * a login request to the server to finish the login process and create a valid OX Session.
+     * 
+     * @param request The servlet request
+     * @param response The servlet response
+     * @throws OXException when something fails during the process
+     */
     void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
+    /**
+     * Builds the logout request for the init service.
+     * 
+     * @param request The servlet request
+     * @param response The servlet response
+     * @return the logout redirect request
+     * @throws OXException when something fails during the process
+     */
     String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException;
 
+    /**
+     * Build the request to trigger user logout from OXServer. Validate request information by
+     * inspecting the given state, before.
+     * 
+     * @param request The servlet request
+     * @param response The servlet response
+     * @return the logout redirect request to logout from server
+     * @throws OXException when something fails during the process
+     */
     String logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException;
     
+    /**
+     * Terminate the session with the given sessionId directly, without any OP relevant
+     * validation before.
+     * 
+     * @param sessionId The session id, that should be terminated
+     * @param request The servlet request
+     * @param response The servlet response
+     * @throws OXException when something fails during the process
+     */
     void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
 }

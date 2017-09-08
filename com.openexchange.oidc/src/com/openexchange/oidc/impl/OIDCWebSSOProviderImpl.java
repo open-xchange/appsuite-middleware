@@ -322,7 +322,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
         } else {
-            logoutRequest = this.logoutCurrentUserFromOXServer(session, request, response, null);
+            logoutRequest = this.getRedirectForLogoutFromOXServer(session, request, response, null);
         }
         return logoutRequest;
     }
@@ -359,10 +359,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         String sessionId = logoutRequestInfo.getSessionId();
         //logout user
-        return this.logoutCurrentUserFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
+        return this.getRedirectForLogoutFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
     
-    private String logoutCurrentUserFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
+    private String getRedirectForLogoutFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
         String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         String sessionId = session.getSessionID();
         
