@@ -459,11 +459,11 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         finishMocking();
 
         List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(5);
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 2, 20)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 3), PropsFactory.createDate(2017, 0, 29)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 1, 1), PropsFactory.createDate(2017, 2, 20)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_TENTATIVE, PropsFactory.createDate(2017, 2, 20), PropsFactory.createDate(2017, 2, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 5, 1)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 10), PropsFactory.createDate(2017, 5, 20)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 20), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
@@ -500,15 +500,16 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         List<FreeBusyTime> expectedFreeBusyTimes = new ArrayList<>(12);
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 0, 1), PropsFactory.createDate(2017, 2, 25)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY, PropsFactory.createDate(2017, 2, 25), PropsFactory.createDate(2017, 2, 26)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 3, 25), PropsFactory.createDate(2017, 4, 3)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 2, 26), PropsFactory.createDate(2017, 4, 3)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 4), PropsFactory.createDate(2017, 4, 10)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 11), PropsFactory.createDate(2017, 4, 17)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 18), PropsFactory.createDate(2017, 4, 24)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 25), PropsFactory.createDate(2017, 4, 30)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 31), PropsFactory.createDate(2017, 5, 7)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 4, 25), PropsFactory.createDate(2017, 4, 31)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 1), PropsFactory.createDate(2017, 5, 7)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 8), PropsFactory.createDate(2017, 5, 14)));
         expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 15), PropsFactory.createDate(2017, 5, 21)));
-        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 22), PropsFactory.createDate(2017, 5, 30)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 22), PropsFactory.createDate(2017, 5, 28)));
+        expectedFreeBusyTimes.add(PropsFactory.createFreeBusyTime(FbType.BUSY_UNAVAILABLE, PropsFactory.createDate(2017, 5, 29), PropsFactory.createDate(2017, 5, 30)));
 
         // Perform the calculation
         Map<Attendee, FreeBusyResult> performCalculateFreeBusyTime = freeBusyPerformer.performCalculateFreeBusyTime(attendees, from, until);
