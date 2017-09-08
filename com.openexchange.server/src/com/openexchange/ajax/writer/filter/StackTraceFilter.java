@@ -50,12 +50,13 @@
 package com.openexchange.ajax.writer.filter;
 
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link StackTraceFilter} - Implementation of {@link WriterFilter}
+ * {@link StackTraceFilter}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -66,7 +67,7 @@ public class StackTraceFilter {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceFilter.class);
 
     /** The property defining the blacklisted exceptions */
-    public final static String PROPETY_NAME = "com.openexchange.ajax.response.stacktrace";
+    public final static String PROPERTY_NAME = "com.openexchange.ajax.response.stacktrace.filter";
 
     // Blacklisted exceptions
     private Set<String> prefixes;
@@ -74,33 +75,41 @@ public class StackTraceFilter {
 
     /**
      * Initializes a new {@link StackTraceFilter}.
+     * 
+     * @param blacklist The comma separated list of exception codes and prefix which stacktraces should not be invoked into a response
      */
     public StackTraceFilter(String blacklist) {
         super();
-        prefixes = new ConcurrentSkipListSet<>();
-        codes = new ConcurrentSkipListSet<>();
+        // Prepare sets
+        ImmutableSet.Builder<String> prefixes = ImmutableSet.builder();
+        ImmutableSet.Builder<String> codes = ImmutableSet.builder();
 
         // Read data
         if (Strings.isEmpty(blacklist)) {
             LOGGER.debug("There are no exceptions configured to be blacklisted. Using default instead.");
             prefixes.add("SES");
-            return;
-        }
+        } else {
+            // Prepare pattern
+            Pattern patternCode = Pattern.compile("[A-Z]{3}-[0-9]*");
+            Pattern patternPrefix = Pattern.compile("[A-Z]{3}(-|-\\*|\\*)?");
 
-        // Parse
-        for (String entry : Strings.splitByComma(blacklist)) {
-            if (entry.matches("[A-Z]{3}-[0-9]*")) {
-                // Complete error code like 'SES-200'
-                codes.add(entry);
-            } else if (entry.matches("[A-Z]{3}(-|-\\*|\\*)?")) {
-                // Prefix like 'SES', 'SES*' or 'SES-*'
-                prefixes.add(entry.substring(0, 3));
-            } else {
-                // Not supported
-                LOGGER.warn("{} does not match any typical exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
+            // Parse
+            for (String entry : Strings.splitByComma(blacklist)) {
+                if (patternCode.matcher(entry).matches()) {
+                    // Complete error code like 'SES-200'
+                    codes.add(entry);
+                } else if (patternPrefix.matcher(entry).matches()) {
+                    // Prefix like 'SES', 'SES*' or 'SES-*'
+                    prefixes.add(entry.substring(0, 3));
+                } else {
+                    // Not supported
+                    LOGGER.warn("{} does not match any typical exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
+                }
             }
         }
 
+        this.prefixes = prefixes.build();
+        this.codes = codes.build();
     }
 
     /**
