@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.conversion.simple.osgi.SimpleConverterActivat
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.annotation,
  com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.session,
