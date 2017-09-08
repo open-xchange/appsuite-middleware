@@ -211,6 +211,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      * Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s
      */
     AUTH_TIMEOUT("Timeout while performing authentication against sieve server %1$s at port %2$s: %3$s", CATEGORY_CONNECTIVITY, 32),
+    /**
+     * "The maximum amount of redirect rules is reached. Please delete or deactivate another redirect rule first."
+     */
+    TOO_MANY_REDIRECT(MailFilterExceptionMessages.TOO_MANY_REDIRECT_MSG, MailFilterExceptionMessages.TOO_MANY_REDIRECT_MSG, CATEGORY_USER_INPUT, 33),
     ;
 
     private final String message;

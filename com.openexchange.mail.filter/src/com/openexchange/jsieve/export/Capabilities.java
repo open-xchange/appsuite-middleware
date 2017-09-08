@@ -50,7 +50,9 @@
 package com.openexchange.jsieve.export;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@link Capabilities} - The capabilities provided on connect to sieve server.
@@ -74,6 +76,8 @@ public final class Capabilities {
     private ArrayList<String> sieve = null;
 
     private ArrayList<String> sasl = null;
+
+    private Map<String, Object> extendedProperties = null;
 
     public List<String> getSasl() {
         return sasl;
@@ -123,5 +127,16 @@ public final class Capabilities {
 
     public void setStarttls(final Boolean starttls) {
         this.starttls = starttls;
+    }
+
+    public void addExtendedProperty(String key, Object value){
+        if(extendedProperties == null){
+            extendedProperties = new HashMap<>();
+        }
+        extendedProperties.put(key, value);
+    }
+
+    public Map<String, Object> getExtendedProperties(){
+        return extendedProperties;
     }
 }

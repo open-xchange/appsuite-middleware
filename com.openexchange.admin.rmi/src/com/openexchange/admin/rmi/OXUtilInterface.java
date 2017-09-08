@@ -127,7 +127,6 @@ public interface OXUtilInterface extends Remote {
     public static final long DEFAULT_STORE_SIZE = 1000;
     public final static int DEFAULT_STORE_MAX_CTX = 5000;
 
-
     /**
      * RMI name to be used in the naming lookup.
      */
@@ -175,9 +174,9 @@ public interface OXUtilInterface extends Remote {
      *
      * @return MaintenanceReason[] containing MaintenanceReason objects.
      * @param search_pattern
-     *             A search pattern to list only those reason which match that pattern
+     *            A search pattern to list only those reason which match that pattern
      * @param auth
-     *             Credentials for authenticating against server.
+     *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
@@ -193,7 +192,7 @@ public interface OXUtilInterface extends Remote {
      *
      * @return MaintenanceReason[] containing MaintenanceReason objects.
      * @param auth
-     *             Credentials for authenticating against server.
+     *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
@@ -241,6 +240,19 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public void unregisterServer(final Server serv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Changes the server for all the contexts in the specified schema
+     * 
+     * @param server Server with id set.
+     * @param schemaName The schema name for which to change the server
+     * @param credentials Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     */
+    public void changeServer(Server server, String schemaName, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Creates schemas on given database host.
@@ -323,23 +335,23 @@ public interface OXUtilInterface extends Remote {
      * <blockquote>
      *
      * <pre>
-     *     Database client_db = ...load Database from server via
+     * Database client_db = ...load Database from server via
      * <CODE>
      * searchForDatabase
      * </CODE>
-     *  to make sure that
-     *     the Object contains the correct Database id.
+     * to make sure that
+     * the Object contains the correct Database id.
      *
-     *     client_db.setDisplayname(client_db.getDisplayname()+&quot;changed&quot;);
-     *     client_db.setDriver(client_db.getDriver()+&quot;changed&quot;);
-     *     client_db.setLogin(client_db.getLogin()+&quot;changed&quot;);
-     *     client_db.setMaxUnits(2000);
-     *     client_db.setPassword(client_db.getPassword()+&quot;changed&quot;);
-     *     client_db.setPoolHardLimit(40);
-     *     client_db.setPoolInitial(4);
-     *     client_db.setPoolMax(200);
-     *     client_db.setUrl(client_db.getUrl()+&quot;changed&quot;);
-     *     ....change Database
+     * client_db.setDisplayname(client_db.getDisplayname()+&quot;changed&quot;);
+     * client_db.setDriver(client_db.getDriver()+&quot;changed&quot;);
+     * client_db.setLogin(client_db.getLogin()+&quot;changed&quot;);
+     * client_db.setMaxUnits(2000);
+     * client_db.setPassword(client_db.getPassword()+&quot;changed&quot;);
+     * client_db.setPoolHardLimit(40);
+     * client_db.setPoolInitial(4);
+     * client_db.setPoolMax(200);
+     * client_db.setUrl(client_db.getUrl()+&quot;changed&quot;);
+     * ....change Database
      * </pre>
      *
      * </blockquote>
@@ -597,10 +609,11 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * A method to list file stores matching some search pattern.
+     * 
      * @param searchPattern The search pattern the file store should match to. The pattern "*" will list all file stores.
      * @param credentials must be the master administration credentials to be allowed to list file stores.
      * @param omitUsage <code>true</code> to not load the current file store usage from the database, which is an expensive operation
-     * because it has to load the usage of every context and summarize them up.
+     *            because it has to load the usage of every context and summarize them up.
      * @return an array with all configured file stores.
      * @throws RemoteException if a general RMI problem occurs.
      * @throws StorageException if a problem on the storage layer occurs.
@@ -643,7 +656,6 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
-
 
     /**
      * Creates a new schema in the given database host if possible. In case the optDBId is <code>null</code> the best suitable database host is selected automatically.

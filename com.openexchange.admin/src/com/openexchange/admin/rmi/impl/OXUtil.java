@@ -87,6 +87,7 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.StorageInfo;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.user.UserService;
 
@@ -532,6 +533,39 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.unregisterServer(server.getId());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.OXUtilInterface#changeServer(com.openexchange.admin.rmi.dataobjects.Server, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    @Override
+    public void changeServer(Server server, String schemaName, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(server);
+            doNullCheck(schemaName);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug("Server: {}, Schema Name: {}", server.toString(), schemaName);
+
+        if (Strings.isEmpty(schemaName)) {
+            throw new InvalidDataException("Invalid schema name. The schema name can neither be 'null' nor empty.");
+        }
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, server);
+        } catch (NoSuchObjectException e) {
+            throw new InvalidDataException(e);
+        }
+        if (!tool.existsServer(server.getId())) {
+            throw new InvalidDataException("No such server " + server);
+        }
+         oxutil.changeServer(server.getId(), schemaName);
+    }
+
     @Override
     public Map<Database, Integer> countDatabaseSchema(final String search_pattern, Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
@@ -792,7 +826,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void recalculateFilestoreUsage(Integer contextId, Integer userId, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(contextId);
         } catch (final InvalidDataException e1) {
@@ -888,7 +922,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void recalculateFilestoreUsage(RecalculationScope scope, Integer optContextId, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         basicauth.doAuthentication(auth);
 

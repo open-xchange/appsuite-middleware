@@ -51,11 +51,14 @@ package com.openexchange.http.grizzly.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import com.google.common.net.InetAddresses;
+import com.openexchange.java.ConcurrentLinkedList;
 import com.openexchange.java.Strings;
+import com.openexchange.net.IPRange;
 
 /**
  * {@link IPTools} - Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
@@ -81,16 +84,16 @@ public class IPTools {
      * remote IP as it represents the first IP not known to us. <h4>Example:</h4>
      *
      * <pre>
-     * remotes  = 192.168.32.50, 192.168.33.225, 192.168.33.224
-     * known    = 192.168.33.225, 192.168.33.224
+     * remotes = 192.168.32.50, 192.168.33.225, 192.168.33.224
+     * known = 192.168.33.225, 192.168.33.224
      * remoteIP = 192.168.32.50
      * </pre>
      *
      * @param forwardedIPs A String containing the forwarded ips separated by comma
-     * @param knownProxies A List of Strings containing the known proxies
-     * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found
+     * @param knownProxies A List of {@link IPRange}s containing the known proxies
+     * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found or an IP address is malformed
      */
-    public static String getRemoteIP(String forwardedIPs, Collection<String> knownProxies) {
+    public static String getRemoteIP(String forwardedIPs, Collection<IPRange> knownProxies) {
         if (Strings.isEmpty(forwardedIPs)) {
             return null;
         }
@@ -98,11 +101,31 @@ public class IPTools {
         // Split & iterate in reverse order until first remote IP occurs
         String[] ips = Strings.splitByComma(forwardedIPs);
         String remoteIP = null;
-        for (int i = ips.length; null == remoteIP && i-- > 0;) {
-            String previousIP = ips[i];
-            if (!knownProxies.contains(previousIP)) {
-                remoteIP = previousIP;
+        String previousIP = null;
+        try {
+            for (int i = ips.length; null == remoteIP && i-- > 0;) {
+                previousIP = ips[i];
+                boolean unknownByProxies = true;
+                for (IPRange range : knownProxies) {
+                    if (range.contains(previousIP)) {
+                        // IP is within the range. So it is a known proxy
+                        unknownByProxies = false;
+                        break;
+                    }
+                }
+                if (unknownByProxies) {
+                    // Check if IP passed all known proxies
+                    remoteIP = previousIP;
+                    break;
+                }
             }
+        } catch (IllegalArgumentException e) {
+            /*
+             * If the IP is malformed the underlying framework triggered through range.contains()
+             * will throw an IllegalArgumentException
+             */
+            LOG.debug("{} is not a valid IP. Discarding search for remote IP.", previousIP);
+            return null;
         }
 
         // Don't return invalid IPs
@@ -129,17 +152,42 @@ public class IPTools {
 
     /**
      * Takes a List of Strings representing IP addresses filters out the erroneous ones.
+     * 
      * @param ipList a List of Strings representing IP addresses
      * @return the list of erroneous IPs or the empty list meaning that all IPs are valid
      */
     public static List<String> filterErroneousIPs(List<String> ipList) {
         List<String> erroneousIPs = new ArrayList<String>(ipList.size());
         for (String ip : ipList) {
-            if(!InetAddresses.isInetAddress(ip)) {
+            if (!InetAddresses.isInetAddress(ip)) {
                 erroneousIPs.add(ip);
             }
         }
         return erroneousIPs;
     }
 
+    /**
+     * Takes a {@link String} of comma separated IPs and transforms them into {@link IPRange}s.
+     * In case a IP is malformed a warning is logged and an empty list is returned.
+     * 
+     * @param ips A comma separated {@link String} containing the IPs
+     * @return A {@link List} containing the IPs as {@link IPRange}s or in case of missing or malformed IP {@link Collections#emptyList()}
+     */
+    public static List<IPRange> filterIP(String ips) {
+        if (Strings.isEmpty(ips)) {
+            return Collections.emptyList();
+        } else {
+            List<String> candidates = splitAndTrim(ips, COMMA_SEPARATOR);
+            List<IPRange> proxies = new ConcurrentLinkedList<>();
+            for (String ip : candidates) {
+                IPRange range = IPRange.parseRange(ip);
+                if (null == range) {
+                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IP {}", ip);
+                    return Collections.emptyList();
+                }
+                proxies.add(range);
+            }
+            return proxies;
+        }
+    }
 }
