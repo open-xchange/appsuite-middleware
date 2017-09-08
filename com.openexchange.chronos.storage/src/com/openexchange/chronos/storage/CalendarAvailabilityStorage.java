@@ -50,7 +50,6 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
-import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
