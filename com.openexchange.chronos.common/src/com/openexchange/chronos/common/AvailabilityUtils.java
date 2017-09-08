@@ -51,12 +51,10 @@ package com.openexchange.chronos.common;
 
 import java.util.Date;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.AvailableTimeSlot;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.FbType;
-import com.openexchange.chronos.FreeBusyTime;
 
 /**
  * {@link AvailabilityUtils}
@@ -338,20 +336,6 @@ public final class AvailabilityUtils {
     //////////////////////////////////// Merge /////////////////////////////////////////
 
     /**
-     * Merge the start and end times of the specified {@link Available}s
-     * 
-     * @param a The {@link Available} A
-     * @param b The {@link Available} B
-     * @return An {@link AvailableTimeSlot} with the merged start and end times of the specified {@link Available}
-     */
-    public static AvailableTimeSlot mergeFreeSlots(Available a, Available b) {
-        AvailableTimeSlot ats = new AvailableTimeSlot();
-        ats.setFrom(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
-        ats.setUntil(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
-        return ats;
-    }
-
-    /**
      * Merges the specified {@link Available}s
      * 
      * @param a The {@link Available} A
@@ -359,41 +343,14 @@ public final class AvailabilityUtils {
      * @return a new merged {@link Available} instance
      */
     public static Available merge(Available a, Available b) {
-        Available ats = new Available();
-        ats.setStartTime(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
-        ats.setEndTime(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
-        return ats;
+        Available merged = new Available();
+        merged.setStartTime(a.getStartTime().before(b.getStartTime()) ? a.getStartTime() : b.getStartTime());
+        merged.setEndTime(a.getEndTime().after(b.getEndTime()) ? a.getEndTime() : b.getEndTime());
+        //TOOD: copy all relevant attributes from a and b to the merged available block
+        return merged;
     }
 
     ////////////////////////////////////// Convert ///////////////////////////////////////
-
-    /**
-     * Converts the specified {@link Available} to an {@link AvailableTimeSlot}
-     * 
-     * @param freeSlot The {@link Available} to convert
-     * @return The converted {@link AvailableTimeSlot}
-     */
-    public static AvailableTimeSlot convert(Available freeSlot) {
-        AvailableTimeSlot ats = new AvailableTimeSlot();
-        ats.setFrom(freeSlot.getStartTime());
-        ats.setUntil(freeSlot.getEndTime());
-        return ats;
-    }
-
-    /**
-     * Converts the specified {@link AvailableTimeSlot} to a {@link FreeBusyTime} object
-     * and sets the {@link FbType} to {@link FbType#FREE}.
-     * 
-     * @param availableTimeSlot The {@link AvailableTimeSlot} to convert
-     * @return The converted {@link FreeBusyTime} object
-     */
-    public static FreeBusyTime convert(AvailableTimeSlot availableTimeSlot) {
-        FreeBusyTime freeBusyTime = new FreeBusyTime();
-        freeBusyTime.setStartTime(new Date(availableTimeSlot.getFrom().getTimestamp()));
-        freeBusyTime.setEndTime(new Date(availableTimeSlot.getUntil().getTimestamp()));
-        freeBusyTime.setFbType(FbType.FREE);
-        return freeBusyTime;
-    }
 
     /**
      * Converts the specified {@link BusyType} to its equivalent {@link FbType}
