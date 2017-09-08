@@ -52,6 +52,8 @@ package com.openexchange.caldav.mixins;
 import java.io.IOException;
 import java.io.InputStream;
 import org.jdom2.Namespace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
@@ -69,6 +71,8 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 abstract class AbstractCalendarAvailability extends SingleXMLPropertyMixin {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractCalendarAvailability.class);
 
     private final GroupwareCaldavFactory factory;
 
@@ -102,12 +106,8 @@ abstract class AbstractCalendarAvailability extends SingleXMLPropertyMixin {
 
             inputStream = exportICal.getClosingStream();
             return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
-        } catch (OXException e) {
-            //TODO: Exception handling
-            e.printStackTrace();
-        } catch (IOException e) {
-            //TODO: Exception handling
-            e.printStackTrace();
+        } catch (OXException | IOException e) {
+            LOG.warn("Unable to get the CalendarAvailability for the user '{}' in context '{}'", factory.getSession().getUserId(), factory.getSession().getContextId(), e);
         } finally {
             Streams.close(inputStream);
         }
