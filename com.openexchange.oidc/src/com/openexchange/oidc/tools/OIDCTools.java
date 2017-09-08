@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
@@ -106,7 +107,7 @@ public class OIDCTools {
     public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
     
     public static final String BACKEND_PATH = "__session.oidc.backend.path";
-
+    
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";
@@ -193,5 +194,13 @@ public class OIDCTools {
         if (!Strings.isEmpty(parameter)) {
             session.setParameter(entrySet, parameter);
         }
+    }
+
+    public static String getUIWebPath(LoginConfiguration loginConfiguration, OIDCBackendConfig backendConfig) {
+        String uiWebPath = backendConfig.getUIWebpath();
+        if (Strings.isEmpty(uiWebPath)) {
+            uiWebPath = loginConfiguration.getUiWebPath();
+        }
+        return uiWebPath;
     }
 }

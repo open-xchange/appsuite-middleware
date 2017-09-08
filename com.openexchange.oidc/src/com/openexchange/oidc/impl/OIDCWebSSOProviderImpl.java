@@ -125,8 +125,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final SessionReservationService sessionReservationService;
     private final ServiceLookup services;
     private final LoginConfiguration loginConfiguration;
-    //TODO QS-VS: Load UI-Webpath from where??
-    private String uiWebPath = "/appsuite/ui";
 
 
     public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, ServiceLookup services, LoginConfiguration loginConfiguration) {
@@ -427,7 +425,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
         OIDCTools.validateSession(session, request);
-        return OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
     }
     
     @Override

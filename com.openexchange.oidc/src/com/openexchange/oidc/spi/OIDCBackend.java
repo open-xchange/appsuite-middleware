@@ -96,7 +96,6 @@ public interface OIDCBackend {
     String getPath();
 
     /**
-     * TODO QS-VS kommentieren
      *
      * @return The exception handler
      */

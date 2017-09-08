@@ -50,6 +50,7 @@ package com.openexchange.oidc.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -79,6 +80,7 @@ public class OIDCActivator extends HousekeepingActivator{
         return new Class<?>[]
         {
             LeanConfigurationService.class,
+            ConfigurationService.class,
             HttpService.class,
             DispatcherPrefixService.class,
             HazelcastInstance.class,

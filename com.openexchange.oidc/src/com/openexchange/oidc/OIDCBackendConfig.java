@@ -124,4 +124,6 @@ public interface OIDCBackendConfig {
     boolean isAutologinEnabled();
     
     int getOauthRefreshTime();
+
+    String getUIWebpath();
 }

@@ -101,7 +101,6 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     private ConcurrentHashMap<OIDCBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
     private LoginConfiguration loginConfiguration;
 
-    //TODO QS-VS: comment
     public OIDCBackendRegistry(BundleContext context, ServiceLookup services) {
         super(context, OIDCBackend.class, null);
         this.services = services;
@@ -189,9 +188,9 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     
     /**
      * Helper method to register a servlet
-     * @param servlets the servlets stack of a SAMLBackend
+     * @param servlets the servlets stack of a OIDCBackend
      * @param httpService the HttpService where to register the servlet
-     * @param prefix prefix of this SAMLBackend
+     * @param prefix prefix of this OIDCBackend
      * @param servlet the servlet to be registered
      * @param part additional servlet path information
      * @throws ServletException if the servlet's init method throws an exception, or the given servlet object has already been registered at a different alias.
@@ -209,7 +208,6 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
     
-    //TODO QS-VS: comment
     public void stop() {
         
     }

@@ -97,8 +97,6 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.class);
     private LoginConfiguration loginConfiguration;
     private OIDCBackend backend;
-    //TODO QS-VS: Load UI-Webpath from where??
-    private String uiWebPath = "/appsuite/ui";
     private final ServiceLookup services;
 
     public OIDCLoginRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend backend, ServiceLookup services) {
@@ -152,7 +150,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
 
         boolean autologinEnabled = this.backend.getBackendConfig().isAutologinEnabled();
-        
+
         String autologinCookieValue = null;
         if (autologinEnabled) {
             if (this.performCookieLogin(request, response, reservation)) {
@@ -160,7 +158,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             }
             autologinCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
         }
-        
+
         LoginResult result = loginUser(request, context, user, reservation.getState(), autologinCookieValue);
         Session session = performSessionAdditions(result, request, response, idToken);
 
@@ -173,7 +171,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
     private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation) throws OXException, IOException {
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
-        
+
         boolean ssoCookieLogin = autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT;
         if (ssoCookieLogin) {
             Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
@@ -183,7 +181,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                     response.sendRedirect(cookieRedirectURL);
                     return true;
                 }
-            } 
+            }
         }
         return false;
     }
@@ -211,7 +209,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         OIDCTools.validateSession(session, request);
         String result = null;
         if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
-            result = OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
+            result = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
         }
         return result;
     }
@@ -245,7 +243,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         Session session = loginResult.getSession();
 
         LoginServlet.addHeadersAndCookies(loginResult, response);
-        
+
         SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
 
         LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
@@ -308,9 +306,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     }
 
     private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        //        String uiWebPath = this.loginConfiguration.getUiWebPath();
-
+        String uiWebPath = OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig());
         response.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
     }
-
 }
