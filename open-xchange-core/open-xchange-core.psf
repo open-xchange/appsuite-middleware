@@ -169,6 +169,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.ajax.requesthandler.jobqueue.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.serverconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
