@@ -66,7 +66,6 @@ import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -307,7 +306,8 @@ public class ICalExporter implements ChronosExporter {
 
     private int mangleChronosFolderId(String compositeFolderId) throws OXException {
         try {
-            return Integer.parseInt(IDMangling.getRelativeFolderId(compositeFolderId));
+            //TODO Id mangling
+            return Integer.parseInt(compositeFolderId);
         } catch (NumberFormatException e) {
             throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
         }
