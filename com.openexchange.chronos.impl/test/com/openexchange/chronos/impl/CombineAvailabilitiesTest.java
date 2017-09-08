@@ -127,4 +127,27 @@ public class CombineAvailabilitiesTest extends AbstractCombineTest {
         assertEquals("The amount of available time slots does not match", 4, availability.getAvailable().size());
         AssertUtil.assertAvailableBlocks(expected, availability.getAvailable());
     }
+
+    /**
+     * Tests the combine logic for available blocks with multiple overlaps
+     */
+    @Test
+    public void testMultipleOverlapsWithPreceedsAndSuceeds() throws OXException {
+        // Create the available blocks
+        available.add(PropsFactory.createCalendarAvailable("January preceds", new DateTime(2017, 0, 1), new DateTime(2017, 0, 31)));
+        available.add(PropsFactory.createCalendarAvailable("February in the midle", new DateTime(2017, 0, 20), new DateTime(2017, 1, 20)));
+        available.add(PropsFactory.createCalendarAvailable("March succeeds", new DateTime(2017, 1, 10), new DateTime(2017, 2, 10)));
+
+        // Execute
+        GetPerformer get = new GetPerformer(storage, session);
+        Availability availability = get.getCombinedAvailableTime();
+
+        List<Available> expected = new ArrayList<>(1);
+        expected.add(PropsFactory.createCalendarAvailable("Merged", new DateTime(2017, 0, 1), new DateTime(2017, 2, 10)));
+
+        // Asserts
+        assertNotNull("The availability is null", availability);
+        assertEquals("The amount of available time slots does not match", 1, availability.getAvailable().size());
+        AssertUtil.assertAvailableBlocks(expected, availability.getAvailable());
+    }
 }
