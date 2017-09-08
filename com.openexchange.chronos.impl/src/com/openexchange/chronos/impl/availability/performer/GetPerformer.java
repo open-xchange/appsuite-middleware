@@ -222,14 +222,14 @@ public class GetPerformer extends AbstractGetPerformer {
     /**
      * Combines the specified {@link Available}s
      * 
-     * @param freeSlots The {@link Available}s to combine
+     * @param available The {@link Available}s to combine
      */
-    private List<Available> combine(List<Available> freeSlots) {
+    private List<Available> combine(List<Available> available) {
         // Sort by starting date
-        java.util.Collections.sort(freeSlots, Comparators.availableDateTimeComparator);
+        java.util.Collections.sort(available, Comparators.availableDateTimeComparator);
 
-        List<Available> combined = new ArrayList<>(freeSlots.size());
-        Iterator<Available> iteratorA = freeSlots.iterator();
+        List<Available> combined = new ArrayList<>(available.size());
+        Iterator<Available> iteratorA = available.iterator();
         int index = 0;
         // Keeps track of the removed objects
         List<Available> removed = new ArrayList<>();
@@ -241,7 +241,7 @@ public class GetPerformer extends AbstractGetPerformer {
                 continue;
             }
 
-            List<Available> lookAheadList = freeSlots.subList(++index, freeSlots.size());
+            List<Available> lookAheadList = available.subList(++index, available.size());
             Iterator<Available> iteratorB = lookAheadList.iterator();
             while (iteratorB.hasNext()) {
                 Available b = iteratorB.next();
