@@ -97,7 +97,7 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
         availability.setUid(UUID.randomUUID().toString());
         // Set start and end times to "infinity"
         availability.setStartTime(new DateTime(0));
-        availability.setEndTime(new DateTime(9999, 11, 31));
+        availability.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59));
 
         return availability;
     }
