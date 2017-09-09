@@ -167,13 +167,11 @@ class CheckUtil {
         // If "DTSTART" is not present, then the start time is unbounded.
         if (!availability.contains(AvailabilityField.dtstart)) {
             availability.setStartTime(MIN_DATE_TIME);
-            //availability.setStartTimeZone(startTimeZone); //FIXME: set user's timezone?
         }
 
         // If "DTEND" or "DURATION" are not present, then the end time is unbounded. 
         if (!availability.contains(AvailabilityField.dtend) && !availability.contains(AvailabilityField.duration)) {
             availability.setEndTime(MAX_DATE_TIME);
-            //availability.setEndTimezone(endTimeZone); //FIXME: set user's timezone?
         }
 
         // Within the specified time period, availability defaults to a free-busy type of "BUSY-UNAVAILABLE" 
