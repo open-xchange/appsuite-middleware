@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl.availability.performer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.service.AvailableField;
@@ -123,11 +122,10 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
                 available.setCreationTimestamp(timeNow);
             }
             if (available.getStartTime() == null) {
-                available.setStartTime(new DateTime(0));
+                available.setStartTime(CheckUtil.MIN_DATE_TIME);
             }
             if (available.getEndTime() == null) {
-                // Max value for the DATETIME type: https://dev.mysql.com/doc/refman/5.7/en/datetime.html
-                available.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); 
+                available.setEndTime(CheckUtil.MAX_DATE_TIME);
             }
             availableIds.add(available.getId());
         }

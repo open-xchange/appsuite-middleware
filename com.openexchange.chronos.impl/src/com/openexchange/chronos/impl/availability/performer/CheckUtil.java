@@ -68,6 +68,17 @@ import com.openexchange.exception.OXException;
 class CheckUtil {
 
     /**
+     * Defines the lower time bound or the minimum possible date
+     */
+    static final DateTime MIN_DATE_TIME = new DateTime(0);
+    /**
+     * Defines the upper time bound or the maximum possible date
+     * 
+     * @see <a href link=https://dev.mysql.com/doc/refman/5.7/en/datetime.html">https://dev.mysql.com/doc/refman/5.7/en/datetime.html</a>
+     */
+    static final DateTime MAX_DATE_TIME = new DateTime(9999, 11, 31, 23, 59, 59);
+
+    /**
      * Check the validity of the values of the specified {@link List} with {@link Availability} blocks
      * according to the <a href="https://tools.ietf.org/html/rfc7953">RFC-7953</a>
      * 
@@ -155,13 +166,13 @@ class CheckUtil {
     private static void checkRanges(Availability availability) throws OXException {
         // If "DTSTART" is not present, then the start time is unbounded.
         if (!availability.contains(AvailabilityField.dtstart)) {
-            availability.setStartTime(new DateTime(Long.MAX_VALUE));
+            availability.setStartTime(MIN_DATE_TIME);
             //availability.setStartTimeZone(startTimeZone); //FIXME: set user's timezone?
         }
 
         // If "DTEND" or "DURATION" are not present, then the end time is unbounded. 
         if (!availability.contains(AvailabilityField.dtend) && !availability.contains(AvailabilityField.duration)) {
-            availability.setEndTime(new DateTime(Long.MAX_VALUE));
+            availability.setEndTime(MAX_DATE_TIME);
             //availability.setEndTimezone(endTimeZone); //FIXME: set user's timezone?
         }
 
