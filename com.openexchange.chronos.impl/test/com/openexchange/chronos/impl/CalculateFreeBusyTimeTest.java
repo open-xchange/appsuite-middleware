@@ -135,7 +135,6 @@ public class CalculateFreeBusyTimeTest extends AbstractCombineTest {
         // Mock the GetPerformer
         getPerformer = mock(GetPerformer.class);
         when(getPerformer.getSession()).thenReturn(session);
-        // FIXME: The performer should return a single availability per attendee
         when(getPerformer.performForAttendees(attendees, from, until)).thenReturn(availabilitiesPerAttendee);
         when(getPerformer.getCombinedAvailability(attendees, from, until)).thenCallRealMethod();
     }
