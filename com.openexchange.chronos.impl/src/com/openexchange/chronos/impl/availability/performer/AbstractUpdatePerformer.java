@@ -126,7 +126,8 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
                 available.setStartTime(new DateTime(0));
             }
             if (available.getEndTime() == null) {
-                available.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); //FIXME: Set MySQL's max value for Date 
+                // Max value for the DATETIME type: https://dev.mysql.com/doc/refman/5.7/en/datetime.html
+                available.setEndTime(new DateTime(9999, 11, 31, 23, 59, 59)); 
             }
             availableIds.add(available.getId());
         }

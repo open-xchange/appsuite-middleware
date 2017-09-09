@@ -95,7 +95,7 @@ abstract class AbstractGetPerformer extends AbstractPerformer {
         availability.setOrganizer(organizer);
         availability.setAvailable(available);
         availability.setUid(UUID.randomUUID().toString());
-        // FIXME: Set start and end to undefined?
+        // Set start and end times to "infinity"
         availability.setStartTime(new DateTime(0));
         availability.setEndTime(new DateTime(9999, 11, 31));
 
