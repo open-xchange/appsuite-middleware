@@ -226,7 +226,7 @@ public class GetPerformer extends AbstractGetPerformer {
      */
     private List<Available> combine(List<Available> available) {
         // Sort by starting date
-        java.util.Collections.sort(available, Comparators.availableDateTimeComparator);
+        java.util.Collections.sort(available, Comparators.AVAILABLE_DATE_TIME_COMPARATOR);
 
         List<Available> combined = new ArrayList<>(available.size());
         Iterator<Available> iteratorA = available.iterator();
@@ -259,7 +259,7 @@ public class GetPerformer extends AbstractGetPerformer {
             combined.add(a);
         }
         // Sort by starting date
-        java.util.Collections.sort(combined, Comparators.availableDateTimeComparator);
+        java.util.Collections.sort(combined, Comparators.AVAILABLE_DATE_TIME_COMPARATOR);
         return combined;
     }
 }

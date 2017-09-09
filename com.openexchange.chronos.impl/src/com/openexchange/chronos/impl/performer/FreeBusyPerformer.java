@@ -70,9 +70,9 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -92,10 +92,10 @@ import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
-import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -271,7 +271,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
             adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
             // Sort by starting date
-            Collections.sort(eventsFreeBusyTimes, Comparators.freeBusyTimeDateTimeComparator);
+            Collections.sort(eventsFreeBusyTimes, Comparators.FREE_BUSY_DATE_TIME_COMPARATOR);
 
             // Create result
             FreeBusyResult result = new FreeBusyResult();
@@ -390,7 +390,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
         Date availableStartTime = availabilityStartTime;
         Date availableEndTime = endTime;
-        java.util.Collections.sort(availability.getAvailable(), Comparators.availableDateTimeComparator);
+        java.util.Collections.sort(availability.getAvailable(), Comparators.AVAILABLE_DATE_TIME_COMPARATOR);
         for (Available available : availability.getAvailable()) {
             // Get the available block's start/end times
             availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
