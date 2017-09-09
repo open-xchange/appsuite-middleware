@@ -114,7 +114,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             txPolicy.setAutoCommit(connection, false);
             // Insert the available chunk-wise
             for (List<Available> partition : Lists.partition(available, INSERT_CHUNK_SIZE)) {
-                updated += insertAvailabilityItems(partition, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+                updated += insertAvailableItems(partition, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -291,29 +291,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     ///////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////////
 
     /**
-     * Inserts the specified item to the storage
-     * 
-     * @param item The item to insert
-     * @param mapper The database mapper
-     * @param tableName The table name
-     * @param connection The writeable connection to the storage
-     * @return The amount of affected rows
-     * @throws OXException if an error is occurred
-     * @throws SQLException if an SQL error is occurred
-     */
-    private <O extends FieldAware, E extends Enum<E>> int insertAvailabilityItem(O item, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
-        String sql = SQLStatementBuilder.buildInsertQueryBuilder(tableName, mapper).append(";").toString();
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
-            parameterIndex = mapper.setParameters(stmt, parameterIndex, item, mapper.getMappedFields());
-            return logExecuteUpdate(stmt);
-        }
-    }
-
-    /**
-     * Inserts multiple items to the storage
+     * Inserts multiple {@link Available} items to the storage
      * 
      * @param items The items to insert
      * @param tableName The table name
@@ -323,7 +301,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
      * @throws OXException if an error is occurred
      * @throws SQLException if an SQL error is occurred
      */
-    private <O extends FieldAware, E extends Enum<E>> int insertAvailabilityItems(List<O> items, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
+    private <O extends FieldAware, E extends Enum<E>> int insertAvailableItems(List<O> items, String tableName, DefaultDbMapper<O, E> mapper, Connection connection) throws OXException, SQLException {
         if (items == null || items.size() == 0) {
             return 0;
         }
@@ -508,101 +486,6 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             for (int userId : userIds) {
                 stmt.setInt(parameterIndex++, userId);
             }
-            return logExecuteUpdate(stmt);
-        }
-    }
-
-    /**
-     * Loads the {@link Available} with the specified identifier
-     * 
-     * @param connection The read-only {@link Connection} to the storage
-     * @param availabilityId The calendar availability identifier
-     * @param availableId The free slot identifier
-     * @return The {@link Available
-     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
-     * @throws SQLException if an SQL error is occurred
-     */
-    private Available loadAvailable(Connection connection, String availabilityId, String availableId) throws OXException, SQLException {
-        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
-        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER).append(" AND availability=? AND id=?;");
-
-        int parameterIndex = 0;
-        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
-            stmt.setInt(parameterIndex++, Integer.parseInt(availableId));
-
-            return AVAILABLE_MAPPER.fromResultSet(logExecuteQuery(stmt), mappedFields);
-        }
-    }
-
-    /**
-     * Loads all {@link Available} items bound to the {@link Availability} with the specified identifier
-     * 
-     * @param connection The read-only {@link Connection}
-     * @param availabilityId The {@link Availability} identifier
-     * @return A {@link List} with all {@link Available} items for the specified {@link Availability} identifier
-     * @throws OXException if the items cannot be loaded from the storage or any other error occurs
-     * @throws SQLException
-     */
-    private List<Available> loadAvailable(Connection connection, String availabilityId) throws OXException, SQLException {
-        AvailableField[] mappedFields = AVAILABLE_MAPPER.getMappedFields();
-        StringBuilder sb = SQLStatementBuilder.buildSelectQueryBuilder(AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER).append(" AND availability=?;");
-
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, Integer.parseInt(availabilityId));
-
-            return AVAILABLE_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
-        }
-    }
-
-    /**
-     * Deletes from the storage all {@link Available}s assigned to the {@link Availability} with the specified id.
-     * 
-     * @param availabilityId The identifier of the calendar availability item
-     * @param connection The writeable connection
-     * @return The amount of affected rows
-     * @throws SQLException if an error is occurred
-     */
-    private int deleteCalendarFreeSlots(String availabilityId, Connection connection) throws SQLException {
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND availability=?;").toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, asInt(availabilityId));
-            return logExecuteUpdate(stmt);
-        }
-    }
-
-    /**
-     * Purges all {@link Availability} and {@link Available} items for the specified user
-     * 
-     * @param connection The writeable {@link Connection} to the storage
-     * @param userId The user identifier
-     * @return The amount of rows affected
-     * @throws SQLException if an SQL error is occurred
-     */
-    private int purgeAvailabilityItems(Connection connection, int userId) throws SQLException {
-        int updated = 0;
-        updated += purgeAvailabilityItems(connection, AVAILABLE_TABLE_NAME, userId);
-        return updated;
-    }
-
-    /**
-     * Purges all items in the specified table for the specified user
-     * 
-     * @param connection The writeable {@link Connection} to the storage
-     * @param tableName The table name
-     * @param userId The user identifier
-     * @return The amount of rows affected
-     * @throws SQLException if an SQL error is occurred
-     */
-    private int purgeAvailabilityItems(Connection connection, String tableName, int userId) throws SQLException {
-        int parameterIndex = 1;
-        try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(tableName).append(" AND user=?;").toString())) {
-            stmt.setInt(parameterIndex++, context.getContextId());
-            stmt.setInt(parameterIndex++, userId);
             return logExecuteUpdate(stmt);
         }
     }
