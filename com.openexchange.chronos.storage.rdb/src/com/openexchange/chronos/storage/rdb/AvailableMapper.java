@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ExtendedProperties;
@@ -367,9 +368,28 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
                 object.removeRecurrenceId();
             }
         });
-        /////////////////////////////////
-        // TODO: Add mapper for exDate //
-        /////////////////////////////////
+        mappings.put(AvailableField.exdate, new RecurrenceIdListMapping<Available>("exDate", "Delete exceptions") {
+
+            @Override
+            public boolean isSet(Available available) {
+                return available.contains(AvailableField.exdate);
+            }
+
+            @Override
+            public void remove(Available available) {
+                available.removeDeleteExceptionDates();
+            }
+
+            @Override
+            protected SortedSet<RecurrenceId> getRecurrenceIds(Available available) {
+                return available.getDeleteExceptionDates();
+            }
+
+            @Override
+            protected void setRecurrenceIds(Available available, SortedSet<RecurrenceId> value) {
+                available.setDeleteExceptionDates(value);
+            }
+        });
         mappings.put(AvailableField.rrule, new VarCharMapping<Available>("rrule", "Recurrence Rule") {
 
             @Override

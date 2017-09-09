@@ -52,9 +52,10 @@ package com.openexchange.chronos;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.service.CalendarAvailabilityField;
 import com.openexchange.chronos.service.AvailableField;
+import com.openexchange.chronos.service.CalendarAvailabilityField;
 
 /**
  * {@link Available} - Defines an available time range within a {@link Availability} component
@@ -91,6 +92,8 @@ public class Available implements FieldAware, Cloneable {
     //TODO: iana-props, exdate, rdate, contact
 
     private final EnumSet<AvailableField> fields;
+    /** exdate */
+    private SortedSet<RecurrenceId> deleteExceptionDates;
 
     /**
      * Initialises a new {@link Available}.
@@ -546,6 +549,33 @@ public class Available implements FieldAware, Cloneable {
     public void removeLocation() {
         this.location = null;
         fields.remove(AvailableField.location);
+    }
+
+    /**
+     * Gets the delete exception dates of the event.
+     *
+     * @return The delete exception dates
+     */
+    public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+        return deleteExceptionDates;
+    }
+
+    /**
+     * Sets the delete exception dates of the event.
+     *
+     * @param value The delete exception dates to set
+     */
+    public void setDeleteExceptionDates(SortedSet<RecurrenceId> value) {
+        deleteExceptionDates = value;
+        fields.add(AvailableField.exdate);
+    }
+
+    /**
+     * Removes the delete exception dates of the event.
+     */
+    public void removeDeleteExceptionDates() {
+        deleteExceptionDates = null;
+        fields.remove(AvailableField.exdate);
     }
 
     /*
