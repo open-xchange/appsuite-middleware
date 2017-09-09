@@ -95,16 +95,19 @@ public class PGPKeySignatureVerifier {
                 if (signature.isCertification()) {
                     @SuppressWarnings("unchecked") Iterator<String> userIds = publicKey.getUserIDs();
                     while (userIds.hasNext()) {
-                        //Check if the signature is for the current user-id
                         final String userId = userIds.next();
-                        final ArrayList<PGPSignature> list = new ArrayList<>();
-                        publicKey.getSignaturesForID(userId).forEachRemaining(list::add);
-                        final boolean isForUserId = list.stream().anyMatch(s -> s.getCreationTime().equals(signature.getCreationTime()));
-                        if (isForUserId) {
-                            return new PGPSignatureVerificationResult(signature, signature.verifyCertification(userId, publicKey))
-                                .setUserId(userId)
-                                .setPublicKey(publicKey)
-                                .setIssuerKey(verificationKey);
+                        final Iterator<PGPSignature> signatures = publicKey.getSignaturesForID(userId);
+                        if(signatures != null) {
+                            final ArrayList<PGPSignature> list = new ArrayList<>();
+                            publicKey.getSignaturesForID(userId).forEachRemaining(list::add);
+                            //Check if the signature is for the current user-id
+                            final boolean isForUserId = list.stream().anyMatch(s -> s.getCreationTime().equals(signature.getCreationTime()));
+                            if (isForUserId) {
+                                return new PGPSignatureVerificationResult(signature, signature.verifyCertification(userId, publicKey))
+                                    .setUserId(userId)
+                                    .setPublicKey(publicKey)
+                                    .setIssuerKey(verificationKey);
+                            }
                         }
                     }
                 }

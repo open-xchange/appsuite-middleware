@@ -505,9 +505,8 @@ public class SieveHandler {
         bos_sieve.write(capability.getBytes(com.openexchange.java.Charsets.UTF_8));
         bos_sieve.flush();
 
-        if(capa != null){
-            capa = new Capabilities();
-        }
+        // Forget previous capabilities
+        capa = new Capabilities();
 
         while (true) {
             final String temp = bis_sieve.readLine();
@@ -1397,7 +1396,7 @@ public class SieveHandler {
                         return authXOAUTH2(commandBuilder);
                     default:
                         return false;
-                        
+
                 }
             } catch (SocketTimeoutException e) {
                 // Read timeout while doing auth

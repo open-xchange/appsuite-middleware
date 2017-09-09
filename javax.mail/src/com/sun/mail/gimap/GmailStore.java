@@ -92,9 +92,9 @@ public class GmailStore extends IMAPStore {
 	return super.protocolConnect(host, pport, user, password);
     }
 
-    protected IMAPProtocol newIMAPProtocol(String host, int port)
+    protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password)
 				throws IOException, ProtocolException {
-	return new GmailProtocol(name, host, port, 
+	return new GmailProtocol(name, host, port, user,
 					    session.getProperties(),
 					    isSSL,
 					    logger

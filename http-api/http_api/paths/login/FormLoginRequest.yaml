@@ -12,6 +12,8 @@
     produces:
       - text/html
     parameters:
+      - $ref: "#/parameters/glbQueryParamsRampUp"
+      - $ref: "#/parameters/glbQueryParamsRampUpFor"
       - in: formData
         type: string
         name: login

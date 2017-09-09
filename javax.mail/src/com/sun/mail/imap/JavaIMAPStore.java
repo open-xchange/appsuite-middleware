@@ -151,7 +151,7 @@ public class JavaIMAPStore extends IMAPStore {
     @Override
     protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password) throws IOException, ProtocolException {
         if (count) {
-            return new CountingIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
+            return new CountingIMAPProtocol(name, host, port, user, session.getProperties(), isSSL, logger);
         }
         return super.newIMAPProtocol(host, port, user, password);
     }
