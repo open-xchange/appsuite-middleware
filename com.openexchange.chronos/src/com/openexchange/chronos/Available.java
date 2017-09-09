@@ -74,7 +74,7 @@ public class Available implements FieldAware, Cloneable {
     private DateTime startTime;
 
     private DateTime endTime;
-    private long duration; //FIXME: use another type?
+    private long duration;
 
     private Date created;
     private Date lastModified;
@@ -89,7 +89,7 @@ public class Available implements FieldAware, Cloneable {
     private ExtendedProperties extendedProperties;
     private List<String> comments;
 
-    //TODO: iana-props, exdate, rdate, contact
+    //TODO: iana-props, rdate, contact
 
     private final EnumSet<AvailableField> fields;
     /** exdate */
