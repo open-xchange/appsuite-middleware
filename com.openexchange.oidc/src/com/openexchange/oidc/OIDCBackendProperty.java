@@ -136,7 +136,8 @@ public enum OIDCBackendProperty implements Property {
     storeOAuthTokens(OIDCProperty.PREFIX, false), 
     /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
-     * OAuth {@link AccessToken} a new {@link AccessToken} should be requested
+     * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
+     * grant type must be registered in OP.
      */
     oauthRefreshTime(OIDCProperty.PREFIX, 60000),
     /**

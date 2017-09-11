@@ -61,28 +61,78 @@ import com.openexchange.exception.OXExceptionFactory;
  * @since v7.10.0
  */
 public enum OIDCExceptionCode implements OXExceptionCode {
+    /**
+     * Unable to find a configuration for the given OpenID Backend:  '%1$s'
+     */
     MISSING_BACKEND_CONFIGURATION("Unable to find a configuration for the given OpenID Backend: '%1$s'", Category.CATEGORY_CONFIGURATION, 1),
+    /**
+     * Path contains invalid characters: '%1$s'
+     */
     INVALID_BACKEND_PATH("Path contains invalid characters: '%1$s'", Category.CATEGORY_CONFIGURATION, 2),
+    /**
+     * A provided URI is corrupted: '%1$s', '%2$s'
+     */
     CORRUPTED_URI("A provided URI is corrupted: '%1$s', '%2$s'", Category.CATEGORY_CONFIGURATION, 3),
+    /**
+     * Unable to create the authentication request, please check the provided backend configuration of backend: '%1$s'
+     */
     UNABLE_TO_CREATE_AUTHENTICATION_REQUEST("Unable to create the authentication request, please check the provided backend configuration of backend: '%1$s'", Category.CATEGORY_ERROR, 4),
+    /**
+     * Unable to parse the given JWS algorithm parameter: '%1$s'
+     */
     UNABLE_TO_PARSE_JWS_ALGORITHM("Unable to parse the given JWS algorithm parameter: '%1$s'", Category.CATEGORY_CONFIGURATION, 5), 
-    UNABLE_TO_GET_JWKSET_WITH_URL("Unable to load JWKSet from the given URL: '%1$s'", Category.CATEGORY_CONFIGURATION, 6), 
-    IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 7),
-    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors: '%1$s'", Category.CATEGORY_ERROR, 8), 
-    IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: '%1$s'", Category.CATEGORY_ERROR, 9), 
-    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", Category.CATEGORY_ERROR, 10), 
-    INVALID_IDTOKEN_GENERAL("Unable to extract claims from the given IDToken for unspecified reasons, see the logfiles for more information.", Category.CATEGORY_ERROR, 11), 
-    UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: '%1$s'", Category.CATEGORY_ERROR, 12), 
-    UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to '%1$s'", Category.CATEGORY_ERROR, 13), 
-    UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to '%1$s'", Category.CATEGORY_ERROR, 14), 
-    UNABLE_TO_PARSE_URI("Unable to parse the following URI: '%1$s'", Category.CATEGORY_CONFIGURATION, 15), 
-    UNABLE_TO_PARSE_USER_ADDRESS("The following email address could not be mapped to a user: '%1$s', potential data inconsistency, since this address was responded by the IDP.", Category.CATEGORY_CONFLICT, 16), 
-    LOGOUT_TOKEN_NOT_THERE("The OpenID server did not send a logout_token.", Category.CATEGORY_ERROR, 17),
-    INVALID_LOGOUT_REQUEST("Received an invalid logout request: '%1$s'", Category.CATEGORY_WARNING, 18), 
-    UNABLE_TO_PARSE_SESSIONS_IDTOKEN("Unable to parse the IDToken which was transported with the session.", Category.CATEGORY_WARNING, 19), 
-    BAD_SUBJECT("Subject claim in IDToken is not valid. Subject: '%1$s'", Category.CATEGORY_WARNING, 20), 
-    UNABLE_TO_FIND_BACKEND_FOR_SESSION("Unable to find the needed backend for a given session path: '%1$s'", Category.CATEGORY_WARNING, 21), 
-    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 22);
+    /**
+     * Users IDToken validation failed because of invalid claims or signature
+     */
+    IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 6),
+    /**
+     * Users IDToken validation failed because internal errors: '%1$s'
+     */
+    IDTOKEN_VALIDATON_FAILED("Users IDToken validation failed because internal errors: '%1$s'", Category.CATEGORY_ERROR, 7), 
+    /**
+     * Failed to get IDToken from IDP: '%1$s'
+     */
+    IDTOKEN_GATHERING_ERROR("Failed to get IDToken from IDP: '%1$s'", Category.CATEGORY_ERROR, 8), 
+    /**
+     * No user information available for the give state.
+     */
+    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", Category.CATEGORY_ERROR, 9), 
+    /**
+     * Unable to load user information from IDP after valid authentication: '%1$s'
+     */
+    UNABLE_TO_LOAD_USERINFO("Unable to load user information from IDP after valid authentication: '%1$s'", Category.CATEGORY_ERROR, 10), 
+    /**
+     * Unable to send request to the IDP when trying to '%1$s'
+     */
+    UNABLE_TO_SEND_REQUEST("Unable to send request to the IDP when trying to '%1$s'", Category.CATEGORY_ERROR, 11), 
+    /**
+     * Unable to parse the IDP response, when trying to '%1$s'
+     */
+    UNABLE_TO_PARSE_RESPONSE_FROM_IDP("Unable to parse the IDP response, when trying to '%1$s'", Category.CATEGORY_ERROR, 12), 
+    /**
+     * Unable to parse the following URI: '%1$s'
+     */
+    UNABLE_TO_PARSE_URI("Unable to parse the following URI: '%1$s'", Category.CATEGORY_CONFIGURATION, 13), 
+    /**
+     * Received an invalid logout request: '%1$s'
+     */
+    INVALID_LOGOUT_REQUEST("Received an invalid logout request: '%1$s'", Category.CATEGORY_WARNING, 14), 
+    /**
+     * Unable to parse the IDToken which was transported with the session.
+     */
+    UNABLE_TO_PARSE_SESSIONS_IDTOKEN("Unable to parse the IDToken which was transported with the session.", Category.CATEGORY_WARNING, 15), 
+    /**
+     * Subject claim in IDToken is not valid. Subject: '%1$s'
+     */
+    BAD_SUBJECT("Subject claim in IDToken is not valid. Subject: '%1$s'", Category.CATEGORY_WARNING, 16), 
+    /**
+     * Unable to find the needed backend for a given session path: '%1$s'
+     */
+    UNABLE_TO_FIND_BACKEND_FOR_SESSION("Unable to find the needed backend for a given session path: '%1$s'", Category.CATEGORY_WARNING, 17), 
+    /**
+     * Unable to refresh the access token from IDP, because of: '%1$s'
+     */
+    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 18);
 
     private final String message;
     private final String displayMessage;
