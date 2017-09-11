@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,52 +49,48 @@
 
 package com.openexchange.chronos.availability.json;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.availability.json.mapper.CalendarAvailabilityMapper;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AvailabilityActionFactory}
+ * {@link GetAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AvailabilityActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public class GetAction extends AbstractAction {
 
     /**
-     * Initialises a new {@link AvailabilityActionFactory}.
+     * Initialises a new {@link GetAction}.
+     * 
+     * @param services The {@link ServiceLookup} instance
      */
-    public AvailabilityActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("set", new SetAction(services));
-        actions.put("get", new GetAction(services));
-        this.actions = actions.build();
+    public GetAction(ServiceLookup services) {
+        super(services);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
+            Availability availability = service.getAvailability(getSession(session));
+            JSONObject json = CalendarAvailabilityMapper.getInstance().serialize(availability, CalendarAvailabilityMapper.getInstance().getMappedFields());
+            return new AJAXRequestResult(json);
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
     }
 }
