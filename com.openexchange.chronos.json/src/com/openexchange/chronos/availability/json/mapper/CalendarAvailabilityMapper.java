@@ -50,8 +50,8 @@
 package com.openexchange.chronos.availability.json.mapper;
 
 import java.util.EnumMap;
-import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.BusyType;
 import com.openexchange.chronos.service.AvailabilityField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -182,6 +182,50 @@ public class CalendarAvailabilityMapper extends DefaultJsonMapper<Availability, 
             @Override
             public void remove(Availability object) {
                 object.removeBusyType();
+            }
+        });
+        mappings.put(AvailabilityField.description, new StringMapping<Availability>("description", Appointment.TITLE) {
+
+            @Override
+            public boolean isSet(Availability object) {
+                return object.contains(AvailabilityField.description);
+            }
+
+            @Override
+            public void set(Availability object, String value) throws OXException {
+                object.setDescription(value);
+            }
+
+            @Override
+            public String get(Availability object) {
+                return object.getDescription();
+            }
+
+            @Override
+            public void remove(Availability object) {
+                object.removeDescription();
+            }
+        });
+        mappings.put(AvailabilityField.summary, new StringMapping<Availability>("summary", Appointment.NOTE) {
+
+            @Override
+            public boolean isSet(Availability object) {
+                return object.contains(AvailabilityField.summary);
+            }
+
+            @Override
+            public void set(Availability object, String value) throws OXException {
+                object.setDescription(value);
+            }
+
+            @Override
+            public String get(Availability object) {
+                return object.getDescription();
+            }
+
+            @Override
+            public void remove(Availability object) {
+                object.removeDescription();
             }
         });
         return mappings;
