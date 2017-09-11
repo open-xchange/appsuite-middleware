@@ -132,7 +132,11 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * Unable to refresh the access token from IDP, because of: '%1$s'
      */
-    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 18);
+    UNABLE_TO_RELOAD_ACCESSTOKEN("Unable to refresh the access token from IDP, because of: '%1$s'", Category.CATEGORY_WARNING, 18), 
+    /**
+     * Unable to send login redirect, because of: '%1$s'
+     */
+    UNABLE_TO_SEND_REDIRECT("Unable to send login redirect, because of: '%1$s'", Category.CATEGORY_WARNING, 19);
 
     private final String message;
     private final String displayMessage;

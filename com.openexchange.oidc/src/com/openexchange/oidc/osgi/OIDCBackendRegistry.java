@@ -113,11 +113,13 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     @Override
     public OIDCBackend addingService(ServiceReference<OIDCBackend> reference) {
         final OIDCBackend oidcBackend = this.context.getService(reference);
+        
         final Stack<String> servlets = new Stack<>();
         HttpService httpService = this.services.getService(HttpService.class);
         final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
         if (backends.addIfAbsent(oidcBackend)) {
+            LOG.info("Adding OIDCBackend: " + oidcBackend.getPath());
             try {
                 OIDCConfig config = oidcBackend.getOIDCConfig();
                 String path = oidcBackend.getPath();
@@ -167,6 +169,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     private String getPrefix(final OIDCBackend oidcBackend) {
         StringBuilder prefixBuilder = new StringBuilder();
         prefixBuilder.append(this.services.getService(DispatcherPrefixService.class).getPrefix());
+        //TODO QS-VS: was soll das?? Hard coded ist vermutlich nicht die beste Idee...
         prefixBuilder.append("oidc/");
         String path = oidcBackend.getPath();
         if (!Strings.isEmpty(path)) {
