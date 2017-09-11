@@ -130,6 +130,13 @@ public class OIDCTools {
         return retval;
     }
     
+    /**
+     * Create an {@link URI} object from the given path.
+     * 
+     * @param path The path
+     * @return The {@link URI}
+     * @throws OXException If the path can not be parsed
+     */
     public static URI getURIFromPath(String path) throws OXException{
         try {
             return new URI(path);
@@ -138,6 +145,14 @@ public class OIDCTools {
         }
     }
     
+    /**
+     * Load the domain name from {@link HostnameService} or get the given
+     * {@link HttpServletRequest}s server name if {@link HostnameService} is null
+     * 
+     * @param request The {@link HttpServletRequest}
+     * @param hostnameService The {@link HostnameService}, nullable
+     * @return The domian name
+     */
     public static String getDomainName(HttpServletRequest request, HostnameService hostnameService) {
         if (hostnameService == null) {
             return request.getServerName();
@@ -151,15 +166,29 @@ public class OIDCTools {
         return hostname;
     }
     
+    /**
+     * Is the given {@link HttpServletRequest} secure by configuration or is the option set?
+     * 
+     * @param request The {@link HttpServletRequest}
+     * @return Is the request considered secure or not
+     */
     public static boolean considerSecure(final HttpServletRequest request) {
+        boolean isSecure = request.isSecure();
         final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(request)) {
             // HTTPS is enforced by configuration
-            return true;
+            isSecure = true;
         }
-        return request.isSecure();
+        return isSecure;
     }
     
+    /**
+     * Validate the given {@link Session} by checking its IP, cookies and secret informations.
+     * 
+     * @param session The {@link Session} to validate
+     * @param request The {@link HttpServletRequest} with additional information
+     * @throws OXException If the session is expired
+     */
     public static void validateSession(Session session, HttpServletRequest request) throws OXException {
         SessionUtility.checkIP(session, request.getRemoteAddr());
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
@@ -170,6 +199,16 @@ public class OIDCTools {
         }
     }
     
+    /**
+     * Add the given redirect URI to the given {@link HttpServletResponse}. Either in a JSON object with
+     * the attribute name 'redirect', if respondWithRedirect is 'true' or by a direct redirect.
+     * 
+     * @param response The {@link HttpServletResponse} to use
+     * @param redirectURI The URI where the response should redirect to
+     * @param respondWithRedirect 'true', 'false' or null. Triggers the addition of a JSON body, where an
+     *  attribute is added with the name 'redirect' and the value of the redirect URI.
+     * @throws IOException If the redirect URI can not be added
+     */
     public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
         if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
             response.sendRedirect(redirectURI);
@@ -183,12 +222,28 @@ public class OIDCTools {
         }
     }
     
+    /**
+     * Load the OIDC auto-login cookie with the given {@link HttpServletRequest} informations.
+     * 
+     * @param request The {@link HttpServletRequest} with needed information 
+     * @param loginConfiguration The {@link LoginConfiguration} to get additional information from
+     * @return The auto-login cookie or null
+     * @throws OXException If something fails
+     */
     public static Cookie loadAutologinCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
         String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
     
+    /**
+     * Adds a parameter from a given map to a session.
+     * 
+     * @param session The session, where a parameter should be added
+     * @param map The map, which contains the values
+     * @param entryLoad The key, which find the value in the map
+     * @param entrySet The key, that should be used in the session for the value, loaded from the map
+     */
     public static void addParameterToSession(Session session, Map<String, String> map, String entryLoad, String entrySet) {
         String parameter = map.get(entryLoad);
         if (!Strings.isEmpty(parameter)) {
@@ -196,6 +251,13 @@ public class OIDCTools {
         }
     }
 
+    /**
+     * Load the UI path from the given {@link OIDCBackendConfig} or the {@link LoginConfiguration} instead.
+     * 
+     * @param loginConfiguration The {@link LoginConfiguration} to use as fallback
+     * @param backendConfig The {@link OIDCBackendConfig} to load the path from
+     * @return The UI web path
+     */
     public static String getUIWebPath(LoginConfiguration loginConfiguration, OIDCBackendConfig backendConfig) {
         String uiWebPath = backendConfig.getUIWebpath();
         if (Strings.isEmpty(uiWebPath)) {

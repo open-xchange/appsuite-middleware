@@ -129,19 +129,6 @@ public class InitService extends OIDCServlet {
         return redirectUri;
     }
 
-    public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
-        if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
-            response.sendRedirect(redirectURI);
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setCharacterEncoding(Charsets.UTF_8_NAME);
-            response.setContentType("application/json");
-            PrintWriter writer = response.getWriter();
-            writer.write("{\"redirect\":\"" + redirectURI + "\"}");
-            writer.flush();
-        }
-    }
-
     private boolean validateFlow(String flow) {
         boolean isValid = true;
         if (flow == null) {

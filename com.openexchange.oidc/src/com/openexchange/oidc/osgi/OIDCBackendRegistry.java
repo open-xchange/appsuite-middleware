@@ -208,7 +208,34 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
     
+    /**
+     * Removes all registered OIDC backends from backend container. Unregisters all
+     * servlets for each backend and also all Handlers.
+     */
     public void stop() {
-        
+        for (OIDCBackend oidcBackend : backends) {
+            Stack<String> servlets = backendServlets.remove(oidcBackend);
+            try {
+                if (null != servlets) {
+                    HttpService httpService = services.getService(HttpService.class);
+                    while (!servlets.isEmpty()) {
+                        String pop = servlets.pop();
+                        httpService.unregister(pop);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error while removing path for OIDC Backend", e);
+            }
+            Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(oidcBackend);
+            try {
+                if (null != registrations) {
+                    while (!registrations.isEmpty()) {
+                        registrations.pop().unregister();
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error while removing path for OIDC Backend", e);
+            }
+        }
     }
 }
