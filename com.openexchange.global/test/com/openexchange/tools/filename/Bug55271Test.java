@@ -47,32 +47,34 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.tools.filename;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.exception.interception.Bug50893Test;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
-import com.openexchange.sessiond.SessionFilterTest;
-import com.openexchange.tools.filename.Bug53791Test;
-import com.openexchange.tools.filename.Bug55271Test;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
- * {@link UnitTests}
+ * {@link BugFileNameToolsTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Lost support for umlauts in file names with certain browsers on macOS
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    IDManglerTest.class,
-    MergingSearchIteratorTest.class,
-    OXExceptionInterceptorRegistrationTest.class,
-    SessionFilterTest.class,
-    Bug50893Test.class,
-    Bug53791Test.class,
-    Bug55271Test.class
-})
-public class UnitTests {
+public class Bug55271Test {
+
+    @Test
+    public void testDecomposedString() {
+        String[] strings = new String[] {
+            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
+        };
+        for (String string : strings) {
+            checkSanitizing(string);
+        }
+    }
+
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
+    }
+
 }
