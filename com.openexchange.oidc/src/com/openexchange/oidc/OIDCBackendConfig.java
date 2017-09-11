@@ -73,7 +73,24 @@ public interface OIDCBackendConfig {
      * ox_direct: The current user session is terminated immediately 
      */
     public static enum AutologinMode {
-        OFF("off"), SSO_REDIRECT("sso_redirect"), OX_DIRECT("ox_direct");
+        /**
+         * OFF - No auto-login at all
+         */
+        OFF("off"), 
+        /**
+         * SSO_REDIRECT - Redirect to OP for confirmation of a valid session
+         * Needed properties:
+         * <br>
+         * - autologinCookieMode <br>
+         */
+        SSO_REDIRECT("sso_redirect"), 
+        /**
+         * OX_DIRECT - Directly login into a valid OXSession
+         * Needed properties:
+         * <br>
+         * - autologinCookieMode <br>
+         */
+        OX_DIRECT("ox_direct");
         
         private String value;
         

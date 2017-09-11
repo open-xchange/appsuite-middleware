@@ -119,7 +119,7 @@ public enum OIDCBackendProperty implements Property {
      */
     redirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     /**
-     * ssoLogout - Whether to redirect to the OP on Logout or not
+     * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
     ssoLogout(OIDCProperty.PREFIX, false), 
     /**

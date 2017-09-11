@@ -58,7 +58,13 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.0
  */
 public enum OIDCProperty implements Property {
+    /**
+     * enabled - Is core oidc feature enabled
+     */
     enabled(OIDCProperty.PREFIX, false),
+    /**
+     * startDefaultBackend - Start the default core oidc backend
+     */
     startDefaultBackend(OIDCProperty.PREFIX, false);
     
 
