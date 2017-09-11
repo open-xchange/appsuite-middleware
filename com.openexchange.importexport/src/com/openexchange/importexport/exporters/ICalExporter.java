@@ -66,6 +66,7 @@ import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -171,6 +172,44 @@ public class ICalExporter implements ChronosExporter {
     };
 
     @Override
+    public boolean canExportChronosEvents(IDBasedCalendarAccess calendarAccess, ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException {
+        if(! format.equals(Format.ICAL)){
+            return false;
+        }
+        FolderObject fo;
+        try {
+            fo = getChronosFolder(calendarAccess, session, compositeFolderId);
+
+        } catch (final OXException e) {
+            return false;
+        }
+        //check format of folder
+        final int module = fo.getModule();
+        if (module == FolderObject.CALENDAR) {
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
+                return false;
+            }
+        } else if (module == FolderObject.TASK) {
+            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        //check read access to folder
+        EffectivePermission perm;
+        try {
+            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+        } catch (final OXException e) {
+            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
+        } catch (final RuntimeException e) {
+            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+        return perm.canReadAllObjects();
+    }
+
+    @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if(! format.equals(Format.ICAL)){
             return false;
@@ -227,7 +266,21 @@ public class ICalExporter implements ChronosExporter {
 
     @Override
     public SizedInputStream exportChronosFolderData(IDBasedCalendarAccess calendarAccess, ServerSession session, Format format, String compositeFolderId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        if (canExportChronosEvents(calendarAccess, session, format, compositeFolderId, optionalParams)) {
+        return doExportChronosEvents(calendarAccess, session, format, compositeFolderId, fieldsToBeExported, optionalParams);
+    }
+
+    @Override
+    public SizedInputStream exportFolderData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportData(session, format, folderID, fieldsToBeExported, optionalParams);
+    }
+
+    @Override
+    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportBatchData(session, format, batchIds, fieldsToBeExported, optionalParams);
+    }
+
+    private SizedInputStream doExportChronosEvents(IDBasedCalendarAccess calendarAccess, ServerSession session, Format format, String compositeFolderId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        if (!canExportChronosEvents(calendarAccess, session, format, compositeFolderId, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(compositeFolderId, format);
         }
 
@@ -254,73 +307,42 @@ public class ICalExporter implements ChronosExporter {
         return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
     }
 
-    @Override
-    public FolderObject getChronosFolder(IDBasedCalendarAccess calendarAccess, ServerSession session, String compositeFolderId) throws OXException {
-        //CalendarFolder folder = calendarAccess.getFolder(folderId)
-        //return folder;
-        FolderService folderService = ImportExportServices.getFolderService();
-        try {
-            return folderService.getFolderObject(mangleChronosFolderId(compositeFolderId), session.getContextId());
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
-        }
-    }
+    private SizedInputStream doExportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        FolderObject folder = getFolder(session, folderID);
 
-    @Override
-    public boolean canExportChronosEvents(IDBasedCalendarAccess calendarAccess, ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException {
-        if(! format.equals(Format.ICAL)){
-            return false;
-        }
-        FolderObject fo;
-        try {
-            fo = getChronosFolder(calendarAccess, session, compositeFolderId);
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            // Try to stream
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folderID, Format.ICAL.getExtension())));
+                    requestData.removeCachingHeader();
 
-        } catch (final OXException e) {
-            return false;
+                    if (FolderObject.CALENDAR == folder.getModule()) {
+                        exportAppointments(session, folder.getObjectID(), fieldsToBeExported, out);
+                    } else if (FolderObject.TASK == folder.getModule()) {
+                        exportTasks(session, folder.getObjectID(), fieldsToBeExported, out);
+                    } else {
+                        throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
+                    }
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
         }
-        //check format of folder
-        final int module = fo.getModule();
-        if (module == FolderObject.CALENDAR) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                return false;
-            }
-        } else if (module == FolderObject.TASK) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
-                return false;
-            }
+
+        ThresholdFileHolder sink;
+        if (FolderObject.CALENDAR == folder.getModule()) {
+            sink = exportAppointments(session, folder.getObjectID(), fieldsToBeExported, null);
+        } else if (FolderObject.TASK == folder.getModule()) {
+            sink = exportTasks(session, folder.getObjectID(), fieldsToBeExported, null);
         } else {
-            return false;
+            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
         }
-
-        //check read access to folder
-        EffectivePermission perm;
-        try {
-            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
-            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-        } catch (final RuntimeException e) {
-            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
-        return perm.canReadAllObjects();
-    }
-
-    private int mangleChronosFolderId(String compositeFolderId) throws OXException {
-        try {
-            //TODO Id mangling
-            return Integer.parseInt(compositeFolderId);
-        } catch (NumberFormatException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
-        }
-    }
-
-    @Override
-    public SizedInputStream exportFolderData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return doExportData(session, format, folderID, fieldsToBeExported, optionalParams);
-    }
-
-    @Override
-    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return doExportBatchData(session, format, batchIds, fieldsToBeExported, optionalParams);
+        return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
     }
 
     private SizedInputStream doExportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
@@ -385,64 +407,9 @@ public class ICalExporter implements ChronosExporter {
         }
     }
 
-    private void exportBatchTasks(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException {
-        TasksSQLInterface tasksSql = new TasksSQLImpl(session);
-        for (String object : objectId) {
-            emitter.writeTask(iCalSession, tasksSql.getTaskById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
-        }
-    }
-
-    private void exportBatchAppointments(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException {
-        AppointmentSQLInterface appointmentSql = ImportExportServices.getAppointmentFactoryService().createAppointmentSql(session);
-        for (String object : objectId) {
-            try {
-                emitter.writeAppointment(iCalSession, appointmentSql.getObjectById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
-            } catch (SQLException e) {
-                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            }
-        }
-    }
-
-    private SizedInputStream doExportData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        FolderObject folder = getFolder(session, folderID);
-
-        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-        if (null != requestData) {
-            // Try to stream
-            try {
-                OutputStream out = requestData.optOutputStream();
-                if (null != out) {
-                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folderID, Format.ICAL.getExtension())));
-                    requestData.removeCachingHeader();
-
-                    if (FolderObject.CALENDAR == folder.getModule()) {
-                        exportAppointments(session, folder.getObjectID(), fieldsToBeExported, out);
-                    } else if (FolderObject.TASK == folder.getModule()) {
-                        exportTasks(session, folder.getObjectID(), fieldsToBeExported, out);
-                    } else {
-                        throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
-                    }
-                    return null;
-                }
-            } catch (IOException e) {
-                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
-            }
-        }
-
-        ThresholdFileHolder sink;
-        if (FolderObject.CALENDAR == folder.getModule()) {
-            sink = exportAppointments(session, folder.getObjectID(), fieldsToBeExported, null);
-        } else if (FolderObject.TASK == folder.getModule()) {
-            sink = exportTasks(session, folder.getObjectID(), fieldsToBeExported, null);
-        } else {
-            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
-        }
-        return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
-    }
-
     private ThresholdFileHolder exportChronosEvents(ServerSession session, String folderId, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
-        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
+        IDBasedCalendarAccessFactory factory = ImportExportServices.getIDBasedCalendarAccessFactory();
+        IDBasedCalendarAccess calendarAccess = factory.createAccess(session);
         List<Event> eventList = calendarAccess.getEventsInFolder(folderId);
 
         ICalService iCalService= ImportExportServices.getICalService();
@@ -537,6 +504,24 @@ public class ICalExporter implements ChronosExporter {
         }
     }
 
+    private void exportBatchTasks(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException {
+        TasksSQLInterface tasksSql = new TasksSQLImpl(session);
+        for (String object : objectId) {
+            emitter.writeTask(iCalSession, tasksSql.getTaskById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
+        }
+    }
+
+    private void exportBatchAppointments(ServerSession session, String folderID, List<String> objectId, int[] fieldsToBeExported, ICalEmitter emitter, List<ConversionError> errors, List<ConversionWarning> warnings, ICalSession iCalSession) throws OXException {
+        AppointmentSQLInterface appointmentSql = ImportExportServices.getAppointmentFactoryService().createAppointmentSql(session);
+        for (String object : objectId) {
+            try {
+                emitter.writeAppointment(iCalSession, appointmentSql.getObjectById(Integer.parseInt(object), Integer.parseInt(folderID)), session.getContext(), errors, warnings);
+            } catch (SQLException e) {
+                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }
+        }
+    }
+
     /**
      * Exports one or more tasks from a specific folder to iCal.
      *
@@ -587,6 +572,18 @@ public class ICalExporter implements ChronosExporter {
         }
     }
 
+    @Override
+    public FolderObject getChronosFolder(IDBasedCalendarAccess calendarAccess, ServerSession session, String compositeFolderId) throws OXException {
+        //CalendarFolder folder = calendarAccess.getFolder(folderId)
+        //return folder;
+        FolderService folderService = ImportExportServices.getFolderService();
+        try {
+            return folderService.getFolderObject(mangleChronosFolderId(compositeFolderId), session.getContextId());
+        } catch (OXException e) {
+            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
+        }
+    }
+
     /**
      * Gets a folder by it's identifier.
      *
@@ -603,6 +600,15 @@ public class ICalExporter implements ChronosExporter {
             throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folderID);
         }
 
+    }
+
+    private int mangleChronosFolderId(String compositeFolderId) throws OXException {
+        try {
+            //TODO Id mangling
+            return Integer.parseInt(compositeFolderId);
+        } catch (NumberFormatException e) {
+            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
+        }
     }
 
     private static void log(final List<ConversionError> errors, final List<ConversionWarning> warnings) {
