@@ -136,23 +136,6 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.service.CalendarAvailabilityService#getCombinedAvailableTime(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
-     */
-    @Override
-    public Map<Attendee, List<Availability>> getCombinedAvailableTime(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<Map<Attendee, List<Availability>>>(session) {
-
-            @Override
-            protected Map<Attendee, List<Availability>> execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                return new GetPerformer(storage, session).getCombinedAvailableTimes(attendees, from, until);
-            }
-
-        }.executeQuery();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.chronos.service.CalendarAvailabilityService#getUserAvailability(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
      */
     @Override

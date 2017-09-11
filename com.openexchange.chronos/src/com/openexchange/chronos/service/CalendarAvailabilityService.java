@@ -98,19 +98,6 @@ public interface CalendarAvailabilityService {
     Map<Attendee, Availability> getCombinedAvailability(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
-     * Gets the combined {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval,
-     * 
-     * @param session The calendar session
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} for
-     * @param from The start point in the time interval
-     * @param until The end point in the time interval
-     * @return A {@link Map} with {@link Availability} slots for the {@link Attendee}s
-     * @throws OXException if an error is occurred
-     * @deprecated Use {@link #getCombinedAvailability(CalendarSession, List, Date, Date)} instead.
-     */
-    Map<Attendee, List<Availability>> getCombinedAvailableTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
-
-    /**
      * Gets the {@link Availability} information for the specified {@link CalendarUser}s in the specified
      * interval.
      * 

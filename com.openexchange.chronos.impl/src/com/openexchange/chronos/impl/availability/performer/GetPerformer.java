@@ -175,25 +175,6 @@ public class GetPerformer extends AbstractGetPerformer {
         return availableTimes;
     }
 
-    /**
-     * Retrieves the {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval
-     * 
-     * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} blocks for
-     * @param from The start point in the time interval
-     * @param until The end point in the time interval
-     * @return A {@link Map} with {@link Availability} slots for the {@link Attendee}s
-     * @throws OXException if an error is occurred
-     */
-    public Map<Attendee, List<Availability>> getCombinedAvailableTimes(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<Availability>> availableTimes = new HashMap<>();
-        Map<Attendee, Availability> availabilitiesPerAttendee = performForAttendees(attendees, from, until);
-        for (Attendee attendee : attendees) {
-            Availability calendarAvailabilities = availabilitiesPerAttendee.get(attendee);
-            availableTimes.put(attendee, java.util.Collections.singletonList(calendarAvailabilities));
-        }
-        return availableTimes;
-    }
-
     ///////////////////////////////// HELPERS /////////////////////////////////////
 
     /**
