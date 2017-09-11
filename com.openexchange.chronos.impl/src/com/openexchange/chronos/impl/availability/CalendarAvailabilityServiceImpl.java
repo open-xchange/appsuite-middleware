@@ -61,7 +61,6 @@ import com.openexchange.chronos.impl.availability.performer.PurgePerformer;
 import com.openexchange.chronos.impl.availability.performer.SetPerformer;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SetResult;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -88,14 +87,14 @@ public class CalendarAvailabilityServiceImpl implements CalendarAvailabilityServ
      * @see com.openexchange.chronos.service.CalendarAvailabilityService#setAvailability(com.openexchange.chronos.service.CalendarSession, com.openexchange.chronos.Availability)
      */
     @Override
-    public SetResult setAvailability(CalendarSession session, final Availability availability) throws OXException {
-        return new AbstractCalendarAvailabilityStorageOperation<SetResult>(session) {
+    public void setAvailability(CalendarSession session, final Availability availability) throws OXException {
+        new AbstractCalendarAvailabilityStorageOperation<Void>(session) {
 
             @Override
-            protected SetResult execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
-                return new SetPerformer(storage, session).perform(availability);
+            protected Void execute(CalendarSession session, CalendarAvailabilityStorage storage) throws OXException {
+                new SetPerformer(storage, session).perform(availability);
+                return null;
             }
-
         }.executeUpdate();
     }
 

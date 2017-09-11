@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.impl.availability.performer;
+package com.openexchange.chronos.availability.json;
 
-import java.util.List;
-import com.openexchange.chronos.service.SetResult;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.availability.json.mapper.CalendarAvailabilityMapper;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SetResultImpl}
+ * {@link SetAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SetResultImpl implements SetResult {
-
-    private List<OXException> warnings;
-    private List<String> ids;
+public class SetAction extends AbstractAction {
 
     /**
-     * Initialises a new {@link SetResultImpl}.
+     * Initialises a new {@link SetAction}.
      */
-    public SetResultImpl() {
-        super();
-    }
+    public SetAction(ServiceLookup services) {
+        super(services);
 
-    /**
-     * Sets the warnings that occurred during the set operation
-     * 
-     * @param warnings the warnings to set
-     */
-    public void setWarnings(List<OXException> warnings) {
-        this.warnings = warnings;
-    }
-
-    /**
-     * Sets the identifiers of the created objects
-     * 
-     * @param ids The identifiers to set
-     */
-    public void setIds(List<String> ids) {
-        this.ids = ids;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.service.SetResult#getWarnings()
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
-    public List<OXException> getWarnings() {
-        return warnings;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SetResult#getIds()
-     */
-    @Override
-    public List<String> getIds() {
-        return ids;
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
+        try {
+            Availability availability = CalendarAvailabilityMapper.getInstance().deserialize(requestBody, CalendarAvailabilityMapper.getInstance().getMappedFields());
+            CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
+            CalendarSession calendarSession = getSession(session);
+            service.setAvailability(calendarSession, availability);
+            return new AJAXRequestResult();
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
     }
 }

@@ -73,7 +73,7 @@ public class AvailabilityActionFactory implements AJAXActionServiceFactory {
     public AvailabilityActionFactory(ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("new", new NewAction(services));
+        actions.put("set", new SetAction(services));
         this.actions = actions.build();
     }
 

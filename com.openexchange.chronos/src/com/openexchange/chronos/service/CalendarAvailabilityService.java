@@ -74,7 +74,7 @@ public interface CalendarAvailabilityService {
      *         warnings that occurred during the operation
      * @throws OXException if the availability cannot be set
      */
-    SetResult setAvailability(CalendarSession session, Availability availability) throws OXException;
+    void setAvailability(CalendarSession session, Availability availability) throws OXException;
 
     /**
      * Gets the {@link Availability} for the current user

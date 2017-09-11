@@ -66,11 +66,4 @@ public interface SetResult {
      * @return an unmodifiable {@link List} with {@link OXException}s
      */
     List<OXException> getWarnings();
-
-    /**
-     * Returns an unmodifiable {@link List} with the identifiers of the created availability blocks
-     * 
-     * @return An unmodifiable {@link List} with the identifiers of the created availability blocks
-     */
-    List<String> getIds();
 }

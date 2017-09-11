@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.impl.availability.performer;
 
-import java.util.List;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.SetResult;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.exception.OXException;
 
@@ -80,16 +78,12 @@ public class SetPerformer extends AbstractUpdatePerformer {
      * @return
      * @throws OXException
      */
-    public SetResult perform(Availability availability) throws OXException {
+    public void perform(Availability availability) throws OXException {
         // Pre-conditions check
         CheckUtil.check(availability);
 
         // Prepare for storage
-        List<String> availabilityIds = prepareForStorage(getStorage(), availability);
+        prepareForStorage(getStorage(), availability);
         getStorage().insertAvailable(availability.getAvailable());
-
-        // Set the ids to the result
-        result.setIds(availabilityIds);
-        return result;
     }
 }

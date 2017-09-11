@@ -66,15 +66,11 @@ import com.openexchange.exception.OXException;
  */
 abstract class AbstractUpdatePerformer extends AbstractPerformer {
 
-    final SetResultImpl result;
-
     /**
      * Initialises a new {@link AbstractUpdatePerformer}.
      */
     AbstractUpdatePerformer(CalendarAvailabilityStorage storage, CalendarSession session) {
         super(storage, session);
-
-        result = new SetResultImpl();
     }
 
     ////////////////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
@@ -93,7 +89,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
     List<String> prepareForStorage(CalendarAvailabilityStorage storage, List<Availability> availabilities) throws OXException {
         List<String> caIds = new ArrayList<>(availabilities.size());
         for (Availability availability : availabilities) {
-            caIds.addAll(prepareForStorage(storage, availability));
+            prepareForStorage(storage, availability);
         }
         return caIds;
     }
@@ -106,12 +102,10 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
      * 
      * @param storage The {@link CalendarAvailabilityStorage} instance
      * @param availability An {@link Availability} block to prepare
-     * @return The {@link List} with the {@link Availability} identifiers
      * @throws OXException if an error is occurred
      */
-    List<String> prepareForStorage(CalendarAvailabilityStorage storage, Availability availability) throws OXException {
+    void prepareForStorage(CalendarAvailabilityStorage storage, Availability availability) throws OXException {
         Date timeNow = new Date(System.currentTimeMillis());
-        List<String> availableIds = new ArrayList<>(availability.getAvailable().size());
         // Prepare the free slots
         for (Available available : availability.getAvailable()) {
             available.setId(available.contains(AvailableField.id) ? available.getId() : storage.nextAvailableId());
@@ -127,9 +121,7 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
             if (available.getEndTime() == null) {
                 available.setEndTime(CheckUtil.MAX_DATE_TIME);
             }
-            availableIds.add(available.getId());
         }
-        return availableIds;
     }
 
 }
