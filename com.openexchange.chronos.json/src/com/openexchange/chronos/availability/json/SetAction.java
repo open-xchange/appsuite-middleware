@@ -49,12 +49,17 @@
 
 package com.openexchange.chronos.availability.json;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.availability.json.mapper.AvailabilityMapper;
+import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -86,10 +91,22 @@ public class SetAction extends AbstractAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
         try {
-            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
-            service.setAvailability(calendarSession, availability);
+            
+            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
+            List<Available> availables = new ArrayList<>();
+            if (!requestBody.hasAndNotNull("available")) {
+                JSONArray availableArr = requestBody.getJSONArray("available");
+                for (int index = 0; index < availableArr.length(); index++) {
+                    Available available = AvailableMapper.getInstance().deserialize(availableArr.getJSONObject(index), AvailableMapper.getInstance().getMappedFields());
+                    availables.add(available);
+                }
+                service.setAvailability(calendarSession, availability);
+            } else {
+                service.deleteAvailability(calendarSession);
+            }
+            
             return new AJAXRequestResult();
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
