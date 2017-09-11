@@ -58,6 +58,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -288,7 +289,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // Check if the user is allowed to accept untrusted certificates
         UserAwareSSLConfigurationService sslConfigurationService = Services.optService(UserAwareSSLConfigurationService.class);
         if (null == sslConfigurationService || false == sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
-            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, getHostFromSocket(socket)));
+            X509Certificate certificate = chain[0];
+            String fingerprint = getFingerprint(certificate);
+            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, Collections.singletonMap("fingerprint", fingerprint), getHostFromSocket(socket), fingerprint));
         }
 
         // Check if the user trusts it
@@ -343,12 +346,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             Certificate certificate = certificateManagement.get(userId, contextId, socketHostname, fingerprint);
             if (!certificate.isTrusted()) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.NOT_TRUSTED_BY_USER);
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(fingerprint, userId, contextId));
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap("fingerprint", fingerprint), fingerprint, userId, contextId));
             }
 
             if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.INVALID_COMMON_NAME);
-                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, socketHostname));
+                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap("fingerprint", fingerprint), fingerprint, socketHostname));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
@@ -365,7 +368,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
                 // If the previous checks did not fail, cache it for future reference and throw as last resort
                 String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.UNTRUSTED_CERTIFICATE);
-                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(socketHostname, fingerprint));
+                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(Collections.singletonMap("fingerprint", fingerprint), socketHostname, fingerprint));
             }
             throw new CertificateException(e);
         }
@@ -381,7 +384,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // Self-signed certificates are the only certificates in the chain
         if (chain.length == 1) {
             String fingerprint = cacheCertificate(userId, contextId, chain[0], socketHostname, FailureReason.SELF_SIGNED);
-            throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
+            throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(Collections.singletonMap("fingerprint", fingerprint), fingerprint));
         }
     }
 
@@ -402,7 +405,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
-        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(fingerprint, userId, contextId));
+        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap("fingerprint", fingerprint), fingerprint, userId, contextId));
     }
 
     /**
@@ -433,7 +436,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
-        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, hostname));
+        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap("fingerprint", fingerprint), fingerprint, hostname));
     }
 
     /**
