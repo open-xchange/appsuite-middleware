@@ -61,6 +61,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
@@ -102,7 +103,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
 
     protected final AtomicReference<File> tmpDirRef = new AtomicReference<>();
     private final TransformImageClientAction imageClientAction = new TransformImageClientAction();
-    private final List<IFileResponseRendererAction> registeredActions = new ArrayList<>(8);
+    private final List<IFileResponseRendererAction> registeredActions;
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -111,6 +112,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         super();
 
         // Initialize renderer actions
+        ImmutableList.Builder<IFileResponseRendererAction> registeredActions = ImmutableList.builder();
         registeredActions.add(new CheckParametersAction());
         registeredActions.add(imageClientAction);
         registeredActions.add(new SetBinaryInputStreamAction());
@@ -118,6 +120,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         registeredActions.add(new RemovePragmaHeaderAction());
         registeredActions.add(new UpdateETagHeaderAction());
         registeredActions.add(new OutputBinaryContentAction());
+        this.registeredActions = registeredActions.build();
 
         // Initialize rest
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
