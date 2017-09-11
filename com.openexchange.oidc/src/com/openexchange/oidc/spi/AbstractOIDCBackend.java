@@ -346,7 +346,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public boolean tokensExpired(Session session) throws OXException {
         long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
-        long expiryDate = (long) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
+        long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
         return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
     }
     
