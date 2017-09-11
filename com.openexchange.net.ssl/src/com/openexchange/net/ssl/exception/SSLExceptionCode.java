@@ -209,4 +209,24 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
         }
         return oxe;
     }
+
+    /**
+     * Extracts the fingerprint (if exists) from the specified {@link Throwable}
+     * 
+     * @param t The {@link Throwable}
+     * @return The fingerprint or an empty string if no fingerprint exists in the parameters of the specified {@link Throwable}
+     */
+    public static String extractFingerprint(Throwable t) {
+        Throwable cause = t.getCause();
+        while (cause != null) {
+            if (OXException.class.isInstance(cause)) {
+                OXException oxe = (OXException) cause;
+                if (oxe.getPrefix().equals(SSLExceptionCode.PREFIX)) {
+                    return (String) oxe.getArgument("fingerprint");
+                }
+            }
+            cause = cause.getCause();
+        }
+        return new String();
+    }
 }
