@@ -94,5 +94,10 @@ public interface AuthenticationRequestInfo {
      */
     Map<String, String> getAdditionalClientInformation();
     
+    /**
+     * Load the UI client id.
+     * 
+     * @return The UI client id
+     */
     String getUiClientID();
 }

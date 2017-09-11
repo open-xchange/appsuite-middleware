@@ -66,5 +66,10 @@ public interface LogoutRequestInfo {
      */
     String getDomainName();
     
+    /**
+     * Load the associated session id.
+     * 
+     * @return The session id
+     */
     String getSessionId();
 }

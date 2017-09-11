@@ -353,7 +353,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP");
         }
         //load state
-        LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLoginRequestInfo(state);
+        LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLogoutRequestInfo(state);
         if (logoutRequestInfo == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP");
         }

@@ -87,7 +87,7 @@ public class CoreStateManagement implements StateManagement {
     }
 
     @Override
-    public LogoutRequestInfo getAndRemoveLoginRequestInfo(String state) {
+    public LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) {
         PortableLogoutRequest portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
         return portableLogoutRequest.getDelegate();
     }

@@ -49,6 +49,9 @@
 
 package com.openexchange.oidc.state;
 
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.IMap;
+
 /**
  * Manager of all client states, that try to login with OpenID features.
  *
@@ -65,10 +68,29 @@ public interface StateManagement {
      */
     void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
     
+    /**
+     * Load the {@link AuthenticationRequestInfo} which is identified by the state.
+     * 
+     * @param state The state to identify the {@link AuthenticationRequestInfo}
+     * @return The {@link AuthenticationRequestInfo}
+     */
     AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
     
+    /**
+     * Add the given {@link LogoutRequestInfo} to a {@link IMap}, which is managed
+     * by hazelcast and enables every node in the cluster to handle Logout requests.
+     * 
+     * @param logoutRequestInfo
+     */
     void addLogoutRequest(LogoutRequestInfo logoutRequestInfo);
     
-    LogoutRequestInfo getAndRemoveLoginRequestInfo(String state);
+    /**
+     * Load the stored {@link LogoutRequestInfo} from hazelcasts {@link IMap} by
+     * passing the state, which identifies the {@link LogoutRequestInfo}.
+     * 
+     * @param state The identifier of the {@link LogoutRequestInfo}
+     * @return The {@link LogoutRequestInfo}
+     */
+    LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state);
 
 }
