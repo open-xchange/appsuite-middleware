@@ -180,7 +180,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
      */
     @Override
     public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
-        @SuppressWarnings("resource") IFileHolder file = (IFileHolder) result.getResultObject();
+        IFileHolder file = (IFileHolder) result.getResultObject();
 
         // Check if file is actually supplied by the request URL.
         if ((null == file) || hasNoFileItem(file)) {
