@@ -161,9 +161,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction#call(com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper)
      */
     @Override
-    public void call(@NonNull final IDataWrapper data) throws Exception {
+    public void call(final IDataWrapper data) throws Exception {
         // closing of internal resources will be handled by FileHolder set at DataWrapper
-        @SuppressWarnings("resource") final IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference());
+        final IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference());
 
         if (null == file) {
             // Quit with 404
@@ -202,7 +202,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @return
      * @throws OXException
      */
-    @SuppressWarnings("static-method")
     protected String getCacheKey(@NonNull final ServerSession session, @NonNull final AJAXRequestData request, @NonNull final AJAXRequestResult result, @SuppressWarnings("unused") @NonNull final IFileHolder repetitiveFile, @SuppressWarnings("unused") @NonNull final TransformImageParameters xformParams) throws OXException {
         final ResourceCache cache = ResourceCaches.getResourceCache();
         final String eTag = result.getHeader("ETag");
@@ -273,10 +272,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @throws OXException
      * @throws IOException
      */
-    @SuppressWarnings("static-method")
-    protected void writeCachedResource(@NonNull final ServerSession session,
-        @NonNull final String cacheKey, @NonNull final String targetMimeType, @NonNull final BasicTransformedImage transformedImage,
-        final ThresholdFileHolder transformedFile,  final String fileName, final long size) throws OXException, IOException {
+    protected void writeCachedResource(final ServerSession session, final String cacheKey, final String targetMimeType, final BasicTransformedImage transformedImage, final ThresholdFileHolder transformedFile, final String fileName, final long size) throws OXException, IOException {
 
         final ResourceCache cache = ResourceCaches.getResourceCache();
 

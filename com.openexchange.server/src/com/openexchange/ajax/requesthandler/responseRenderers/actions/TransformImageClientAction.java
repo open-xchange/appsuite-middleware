@@ -176,9 +176,7 @@ public class TransformImageClientAction extends TransformImageAction {
      * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction#writeCachedResource(com.openexchange.tools.session.ServerSession, java.lang.String, java.lang.String, com.openexchange.imagetransformation.BasicTransformedImage, com.openexchange.ajax.container.ThresholdFileHolder, java.lang.String, long)
      */
     @Override
-    protected void writeCachedResource(@NonNull final ServerSession session,
-        @NonNull final String cacheKey, @NonNull final String targetMimeType, @NonNull final BasicTransformedImage transformedImage,
-        final ThresholdFileHolder transformedFile,  final String fileName, final long size) throws OXException, IOException {
+    protected void writeCachedResource(final ServerSession session, final String cacheKey, final String targetMimeType, final BasicTransformedImage transformedImage, final ThresholdFileHolder transformedFile, final String fileName, final long size) throws OXException, IOException {
 
         // method is empty and superclass method mustn't (!) be called
         // if valid, since all caching is done on ImageServer side
