@@ -51,6 +51,8 @@ package com.openexchange.importexport.osgi;
 
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -89,7 +91,9 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			ICalEmitter.class,
 			ConfigViewFactory.class,
 			VCardService.class,
-			FolderService.class
+			FolderService.class,
+			IDBasedCalendarAccessFactory.class,
+			ICalService.class
 		};
 	}
 
