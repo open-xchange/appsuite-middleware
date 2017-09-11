@@ -61,29 +61,29 @@ import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 
 /**
- * {@link CalendarAvailabilityMapper}
+ * {@link AvailabilityMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CalendarAvailabilityMapper extends DefaultJsonMapper<Availability, AvailabilityField> {
+public class AvailabilityMapper extends DefaultJsonMapper<Availability, AvailabilityField> {
 
-    private static final CalendarAvailabilityMapper INSTANCE = new CalendarAvailabilityMapper();
+    private static final AvailabilityMapper INSTANCE = new AvailabilityMapper();
 
     private final AvailabilityField[] mappedFields;
 
     /**
-     * Gets the {@link CalendarAvailabilityMapper} instance.
+     * Gets the {@link AvailabilityMapper} instance.
      *
-     * @return The {@link CalendarAvailabilityMapper} instance.
+     * @return The {@link AvailabilityMapper} instance.
      */
-    public static CalendarAvailabilityMapper getInstance() {
+    public static AvailabilityMapper getInstance() {
         return INSTANCE;
     }
 
     /**
-     * Initialises a new {@link CalendarAvailabilityMapper}.
+     * Initialises a new {@link AvailabilityMapper}.
      */
-    public CalendarAvailabilityMapper() {
+    public AvailabilityMapper() {
         super();
         mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
     }

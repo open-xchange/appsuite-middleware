@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
-import com.openexchange.chronos.availability.json.mapper.CalendarAvailabilityMapper;
+import com.openexchange.chronos.availability.json.mapper.AvailabilityMapper;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -86,7 +86,7 @@ public class SetAction extends AbstractAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
         try {
-            Availability availability = CalendarAvailabilityMapper.getInstance().deserialize(requestBody, CalendarAvailabilityMapper.getInstance().getMappedFields());
+            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
             service.setAvailability(calendarSession, availability);
