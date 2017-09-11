@@ -172,6 +172,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (algorithmString != null && !algorithmString.isEmpty()) {
             algorithm = this.getAlgorithmFromString(algorithmString);
         }
+        LOG.trace("getJWSAlgorithm() result: " + algorithm.getName());
         return algorithm;
     }
 
@@ -190,6 +191,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException {
+        LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nounce: ", idToken.getParsedString(), nounce);
         IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
@@ -215,6 +217,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
         String login = userID + "@" + contextID;
+        LOG.trace("getLoginRequest(...) login: " + login);
         String defaultClient = loginConfiguration.getDefaultClient();
         LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
         return parseLogin;
@@ -227,6 +230,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public String getLogoutFromIDPRequest(Session session) throws OXException {
+        LOG.trace("getLogoutFromIDPRequest(Session session: {})", session.getSessionID());
         URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
 
         JWT idToken = null;
@@ -238,6 +242,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
         URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostSSOLogout());
         LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
+        LOG.trace("final logout request: " + logoutRequest.toURI().toString());
         return logoutRequest.toURI().toString();
     }
 
@@ -270,6 +275,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
+        LOG.trace("loadUserFromServer(String subject: {})", subject);
         ContextService contextService = Services.getService(ContextService.class);
         //String[] userData = subject.split("@");
         //TODO QS-VS: auf die auskommentierte Abhandlung umstellen
@@ -283,6 +289,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
+        LOG.trace("updateSession(Session session: {}, Map<String, String> tokenMap.size(): {})",session.getSessionID(), tokenMap.size());
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (lock == null) {
             lock = Session.EMPTY_LOCK;
@@ -308,6 +315,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public boolean updateOauthTokens(Session session) throws OXException {
+        LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
         AccessTokenResponse accessToken = loadAccessToken(session);
         if (accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
             return false;
@@ -320,6 +328,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private AccessTokenResponse loadAccessToken(Session session) throws OXException {
+        LOG.trace("loadAccessToken(Session session: {})", session.getSessionID());
         RefreshToken refreshToken = new RefreshToken((String) session.getParameter(Session.PARAM_OAUTH_REFRESH_TOKEN));
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
         ClientAuthentication clientAuth = this.getClientAuthentication();
@@ -327,9 +336,10 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             URI tokenEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getTokenEndpoint());
 
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
-
+            HTTPRequest httpRequest = request.toHTTPRequest();
+            LOG.trace("Build TokenRequest to get tokens from OP: " + httpRequest.getURL().toString() + " " +httpRequest.getQuery());
             TokenResponse response = null;
-            response = TokenResponse.parse(request.toHTTPRequest().send());
+            response = TokenResponse.parse(httpRequest.send());
 
             if (!response.indicatesSuccess()) {
                 TokenErrorResponse errorResponse = (TokenErrorResponse) response;
@@ -344,7 +354,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     @Override
-    public boolean tokensExpired(Session session) throws OXException {
+    public boolean isTokenExpired(Session session) throws OXException {
+        LOG.trace("isTokenExpired(Session session: {})", session.getSessionID() );
         long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
         long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
         return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);

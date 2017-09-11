@@ -122,6 +122,7 @@ public class OIDCTools {
      * @param uiWebPath The path to use
      */
     public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
+        LOG.trace("buildFrontendRedirectLocation(Session session: {}, String uiWebPath: {})", session.getSessionID(), uiWebPath);
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
@@ -138,6 +139,7 @@ public class OIDCTools {
      * @throws OXException If the path can not be parsed
      */
     public static URI getURIFromPath(String path) throws OXException{
+        LOG.trace("getURIFromPath("+ path +")");
         try {
             return new URI(path);
         } catch (URISyntaxException e) {
@@ -154,6 +156,7 @@ public class OIDCTools {
      * @return The domian name
      */
     public static String getDomainName(HttpServletRequest request, HostnameService hostnameService) {
+        LOG.trace("getDomainName(HttpServletRequest request: {}, HostnameService hostnameService: {})", request.getRequestURI(), (hostnameService != null ? "HostnameService instance" : "null"));
         if (hostnameService == null) {
             return request.getServerName();
         }
@@ -173,6 +176,7 @@ public class OIDCTools {
      * @return Is the request considered secure or not
      */
     public static boolean considerSecure(final HttpServletRequest request) {
+        LOG.trace("considerSecure(final HttpServletRequest request: {})", request.getRequestURI());
         boolean isSecure = request.isSecure();
         final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(request)) {
@@ -190,6 +194,7 @@ public class OIDCTools {
      * @throws OXException If the session is expired
      */
     public static void validateSession(Session session, HttpServletRequest request) throws OXException {
+        LOG.trace("validateSession(Session session: {}, HttpServletRequest request: {})",session.getSessionID(), request.getRequestURI());
         SessionUtility.checkIP(session, request.getRemoteAddr());
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
@@ -210,6 +215,7 @@ public class OIDCTools {
      * @throws IOException If the redirect URI can not be added
      */
     public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
+        LOG.trace("buildRedirectResponse(HttpServletResponse response, String redirectURI: , String respondWithRedirect: )", redirectURI, (respondWithRedirect != null ? respondWithRedirect : "null"));
         if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
             response.sendRedirect(redirectURI);
         } else {
@@ -231,6 +237,7 @@ public class OIDCTools {
      * @throws OXException If something fails
      */
     public static Cookie loadAutologinCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
+        LOG.trace("loadAutologinCookie(HttpServletRequest request: {}, LoginConfiguration loginConfiguration)", request.getRequestURI());
         String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
@@ -245,6 +252,7 @@ public class OIDCTools {
      * @param entrySet The key, that should be used in the session for the value, loaded from the map
      */
     public static void addParameterToSession(Session session, Map<String, String> map, String entryLoad, String entrySet) {
+        LOG.trace("void addParameterToSession(Session session: {}, Map<String, String> map size: {}, String entryLoad: {}, String entrySet: {})", session.getSessionID(), map.size(), entryLoad, entrySet);
         String parameter = map.get(entryLoad);
         if (!Strings.isEmpty(parameter)) {
             session.setParameter(entrySet, parameter);
@@ -259,6 +267,7 @@ public class OIDCTools {
      * @return The UI web path
      */
     public static String getUIWebPath(LoginConfiguration loginConfiguration, OIDCBackendConfig backendConfig) {
+        LOG.trace("getUIWebPath(LoginConfiguration loginConfiguration,  OIDCBackendConfig backendConfig: {})", backendConfig.getClientID());
         String uiWebPath = backendConfig.getUIWebpath();
         if (Strings.isEmpty(uiWebPath)) {
             uiWebPath = loginConfiguration.getUiWebPath();

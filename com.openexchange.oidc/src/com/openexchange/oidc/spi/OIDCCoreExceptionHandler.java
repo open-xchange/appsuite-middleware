@@ -52,18 +52,24 @@ package com.openexchange.oidc.spi;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 
 
 public class OIDCCoreExceptionHandler implements OIDCExceptionHandler {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCExceptionHandler.class);
 
     @Override
     public void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
+        LOG.trace("handleAuthenticationFailed(request: " + request.getRequestURI() + ", HttpServletResponse response, OXException: " + exception.getExceptionCode() +")");
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override
     public void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
+        LOG.trace("handleLogoutFailed(request: " + request.getRequestURI() + ", HttpServletResponse response, OXException: " + exception.getExceptionCode() +")");
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

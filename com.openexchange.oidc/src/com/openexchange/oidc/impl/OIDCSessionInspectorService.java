@@ -29,7 +29,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         OIDCBackend backend = this.loadBackendForSession(session);
-        if (backend.tokensExpired(session)) {
+        if (backend.isTokenExpired(session)) {
             if(!backend.updateOauthTokens(session)) {
                 backend.logoutCurrentUser(session, request, response, null);
             }

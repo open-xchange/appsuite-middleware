@@ -242,7 +242,7 @@ public interface OIDCBackend {
      * @return true, if the {@link AccessToken} expired. false otherwise
      * @throws OXException If anything fails
      */
-    boolean tokensExpired(Session session) throws OXException;
+    boolean isTokenExpired(Session session) throws OXException;
 
     /**
      * Set this backends {@link LoginConfiguration}.
