@@ -15,7 +15,7 @@ public class ResponseEvent {
     /**
      * An enumeration for known server status responses.
      */
-    public static enum StatusResponse {
+    public static enum Status {
         /** Indicates successful completion of the associated command */
         OK,
         /** Indicates unsuccessful completion of the associated command due to an operational error */
@@ -24,6 +24,12 @@ public class ResponseEvent {
         BAD,
         /** Indicates that the server is about to close the connection */
         BYE;
+    }
+    
+    /**
+     * Represents a server status responses.
+     */
+    public static class StatusResponse {
 
         /**
          * Gets the status response for specified response instance
@@ -33,19 +39,65 @@ public class ResponseEvent {
          */
         public static StatusResponse statusResponseFor(Response response) {
             if (response.isOK()) {
-                return StatusResponse.OK;
+                return new StatusResponse(Status.OK, response);
             }
             if (response.isBAD()) {
-                return StatusResponse.BAD;
+                return new StatusResponse(Status.BAD, response);
             }
             if (response.isBYE()) {
-                return StatusResponse.BYE;
+                return new StatusResponse(Status.BYE, response);
             }
             if (response.isNO()) {
-                return StatusResponse.NO;
+                return new StatusResponse(Status.NO, response);
             }
             return null;
         }
+        
+        private Status status;
+        private Response response;
+        
+        private StatusResponse(Status status, Response response) {
+            super();
+            this.status = status;
+            this.response = response;
+        }
+        
+        /**
+         * Gets the associated status response from IMAP server
+         * 
+         * @return The status response
+         */
+        public Response getResponse() {
+            return response;
+        }
+        
+        /**
+         * Gets the status
+         * 
+         * @return The status
+         */
+        public Status getStatus() {
+            return status;
+        }
+
+        /**
+         * Checks if the associated status response was synthetically created through {@link Response#byeResponse(Exception)} to advertise an I/O error as BYE response.
+         * 
+         * @return <code>true</code> if synthetic; otherwise <code>false</code>
+         */
+        public boolean isSynthetic() {
+            return response.isSynthetic();
+        }
+
+        /**
+         * Gets the exception for which the associated status response was synthetically created through {@link Response#byeResponse(Exception)}.
+         * 
+         * @return The exception or <code>null</code> (if not synthetic)
+         */
+        public Exception getException() {
+            return response.getException();
+        }
+        
     }
 
     /**
