@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
+import com.openexchange.chronos.availability.json.AvailabilityActionFactory;
 import com.openexchange.chronos.freebusy.json.ChronosFreeBusyActionFactory;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
@@ -65,6 +66,8 @@ import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
@@ -83,7 +86,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedCalendarAccessFactory.class, CalendarUtilities.class };
+        return new Class<?>[] { IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarAvailabilityService.class, CalendarService.class };
     }
 
     @Override
@@ -96,6 +99,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerModule(new ChronosActionFactory(this), "chronos");
             registerModule(new ChronosFreeBusyActionFactory(this), "chronos/freebusy");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
+            registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*
              * register oauth provider
              */
