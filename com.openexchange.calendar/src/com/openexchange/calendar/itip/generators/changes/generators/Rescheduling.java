@@ -78,67 +78,20 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         SAME_DAY, DIFFERENT_DAYS
     }
 
-    private final String[] FIELDS = new String[] { "start_date", "end_date" };
+    private final static String[] FIELDS = new String[] { "start_date", "end_date" };
 
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
         String msg = Messages.HAS_RESCHEDULED;
-
-        return Arrays.asList(new Sentence(msg).add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED));
+        return Arrays.asList(new Sentence(msg).add(time(chooseFormat(original, diff, timezone), original, locale, timezone), ArgumentType.ORIGINAL).add(time(chooseFormat(updated, diff, timezone), updated, locale, timezone), ArgumentType.UPDATED));
     }
 
-    private String timeString(Appointment appointment, AppointmentDiff diff, Locale locale, TimeZone timezone) {
-        Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
-            format = Format.DIFFERENT_DAYS;
-        }
-        return time(format, appointment, locale, timezone);
-    }
-
-    private String updatedTimeString(Appointment appointment, AppointmentDiff diff, Locale locale, TimeZone timezone) {
-        Format format = chooseFormat(diff, timezone);
-        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
-            format = Format.DIFFERENT_DAYS;
-        }
-        return updatedTime(format, appointment, locale, timezone);
-    }
-
-    private String updatedTime(Format format, Appointment updated, Locale locale, TimeZone timezone) {
-        Date startDate = updated.getStartDate();
-        Date endDate = updated.getEndDate();
+    private String time(Format format, Appointment appointment, Locale locale, TimeZone timezone) {
+        Date startDate = appointment.getStartDate();
+        Date endDate = appointment.getEndDate();
 
         DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
-        longDate.setTimeZone(timezone);
-        if (updated.getFullTime()) {
-            longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-            endDate = forceCorrectDay(endDate);
-        }
-
-        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
-        time.setTimeZone(timezone);
-        switch (format) {
-            case SAME_DAY:
-                if (updated.getFullTime()) {
-                    return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
-                } else {
-                    return String.format("%s - %s", time.format(startDate), time.format(endDate));
-                }
-            case DIFFERENT_DAYS:
-                if (updated.getFullTime()) {
-                    return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
-                } else {
-                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
-                }
-        }
-        return ""; // Won't happen
-    }
-
-    private String time(Format format, Appointment original, Locale locale, TimeZone timezone) {
-        Date startDate = original.getStartDate();
-        Date endDate = original.getEndDate();
-
-        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
-        if (original.getFullTime()) {
+        if (appointment.getFullTime()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
             endDate = forceCorrectDay(endDate);
         } else {
@@ -150,26 +103,26 @@ public class Rescheduling implements ChangeDescriptionGenerator {
 
         switch (format) {
             case SAME_DAY:
-                if (original.getFullTime()) {
-                    return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
+                if (appointment.getFullTime()) {
+                    return String.format("%s (%s)", longDate.format(startDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
                 } else {
                     return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
                 }
             case DIFFERENT_DAYS:
-                if (original.getFullTime()) {
+            default:
+                if (appointment.getFullTime()) {
                     return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
                 } else {
                     return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
                 }
         }
-        return ""; // Won't happen
     }
 
     private Date forceCorrectDay(Date endDate) {
         return new Date(endDate.getTime() - 1000); // Move this before midnight, so the time formatting routines don't lie
     }
 
-    private Format chooseFormat(AppointmentDiff diff, TimeZone timezone) {
+    private Format chooseFormat(Appointment appointment, AppointmentDiff diff, TimeZone timezone) {
 
         FieldUpdate update = diff.getUpdateFor("start_date");
         if (update != null) {
@@ -179,11 +132,14 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         }
 
         update = diff.getUpdateFor("end_date");
-
         if (update != null) {
             if (differentDays(update.getOriginalValue(), update.getNewValue(), timezone)) {
                 return Format.DIFFERENT_DAYS;
             }
+        }
+
+        if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
+            return Format.DIFFERENT_DAYS;
         }
 
         return Format.SAME_DAY;
