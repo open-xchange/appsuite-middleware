@@ -56,7 +56,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * {@link IImageConverter}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.3
+ * @since v7.10
  */
 @SingletonService
 public interface IImageConverter {

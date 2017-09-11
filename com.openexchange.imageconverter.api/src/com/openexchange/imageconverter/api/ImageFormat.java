@@ -60,13 +60,13 @@ import com.openexchange.imagetransformation.ScaleType;
  * {@link ImageFormat}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.3
+ * @since v7.10
  */
 /**
  * {@link ImageFormat}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.4
+ * @since v7.10
  */
 public class ImageFormat implements Comparable<ImageFormat> {
 
@@ -76,7 +76,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
      * {@link ImageType}
      *
      * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
-     * @since v7.8.3
+     * @since v7.10
      */
     public enum ImageType {
 
