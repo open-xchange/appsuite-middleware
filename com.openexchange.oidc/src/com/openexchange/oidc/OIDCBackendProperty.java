@@ -48,35 +48,100 @@
  */
 package com.openexchange.oidc;
 
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.openexchange.config.lean.Property;
 
 
 /**
- * Backend specific properties.
+ * Backend specific properties. OP = OpenID Provider
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
 public enum OIDCBackendProperty implements Property {
+    /**
+     * clientId - The client id, which was assigned by OP to this client/backend
+     * on registration
+     */
     clientId(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * redirectURIInit - The path to the init servlet of this backend
+     */
     redirectURIInit(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * redirectURIAuth - The path to the authentication servlet of this backend
+     */
     redirectURIAuth(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * authorizationEndpoint - The OPs authorization endpoint
+     */
     authorizationEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * tokenEndpoint - The OPs token endpoint
+     */
     tokenEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * clientSecret - The client secret, which was assigned by the OP to this client/backend
+     * on registration
+     */
     clientSecret(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * jwkSetEndpoint - The OPs JWK Set endpoint
+     */
     jwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    /**
+     * jwsAlgorithm - The used JWS encryption algorithm
+     */
     jwsAlgorithm(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * scope - The used scope
+     */
     scope(OIDCProperty.PREFIX,"openid"),
+    /**
+     * issuer - The OP path
+     */
     issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * responseType - The OPs response type
+     */
     responseType(OIDCProperty.PREFIX, "code"), 
+    /**
+     * userInfoEndpoint - The OPs user information endpoint
+     */
     userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * logoutEndpoint - The OPs logout endpoint
+     */
     logoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    /**
+     * redirectURIPostSSOLogout - The location where the Browser should be redirected after logout
+     * on OP
+     */
     redirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    /**
+     * ssoLogout - Whether to redirect to the OP on Logout or not
+     */
     ssoLogout(OIDCProperty.PREFIX, false), 
+    /**
+     * redirectURILogout - Where to redirect the user after a valid logout
+     */
     redirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    autologinCookieMode(OIDCProperty.PREFIX, "off"),
+    /**
+     * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
+     */
+    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF),
+    /**
+     * storeOAuthTokens - Whether OAuth cookies should be stored or not
+     */
     storeOAuthTokens(OIDCProperty.PREFIX, false), 
+    /**
+     * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
+     * OAuth {@link AccessToken} a new {@link AccessToken} should be requested
+     */
     oauthRefreshTime(OIDCProperty.PREFIX, 60000),
+    /**
+     * uiWebPath - This backends UI path
+     */
     uiWebPath(OIDCProperty.PREFIX, "/appsuite/");
     
     private final String fqn;

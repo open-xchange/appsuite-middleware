@@ -236,7 +236,7 @@ public interface OIDCBackendConfig {
     
     /**
      * How long before an Oauth Access token expires a new token is supposed to be
-     * requested. Time in seconds.
+     * requested. Time in milliseconds.
      * 
      * @return the time
      */

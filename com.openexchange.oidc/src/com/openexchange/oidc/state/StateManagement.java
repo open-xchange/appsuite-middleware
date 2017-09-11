@@ -49,7 +49,6 @@
 
 package com.openexchange.oidc.state;
 
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.IMap;
 
 /**
