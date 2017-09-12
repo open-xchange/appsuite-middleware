@@ -53,6 +53,8 @@ import static com.openexchange.chronos.compat.Appointment2Event.asString;
 import static com.openexchange.chronos.compat.Event2Appointment.asInteger;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.EnumMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -156,6 +158,17 @@ public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
             @Override
             public void set(Attendee attendee, Integer value) {
                 attendee.setFolderId(I(ATTENDEE_PUBLIC_FOLDER_ID).equals(value) ? null : asString(value));
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, Attendee attendee) throws SQLException {
+                Integer value = get(attendee);
+                if (null != value) {
+                    statement.setInt(parameterIndex, i(value));
+                } else {
+                    statement.setNull(parameterIndex, getSqlType());
+                }
+                return 1;
             }
 
             @Override
