@@ -281,7 +281,7 @@ public final class HtmlServices {
      * @return <code>true</code> if the indicated character is a word character; otherwise <code>false</code>
      */
     private static boolean isWordCharacter(char c) {
-        return '-' == c || '_' == c || Strings.isAsciiLetterOrDigit(c);
+        return '.' == c || '-' == c || '_' == c || Strings.isAsciiLetterOrDigit(c);
     }
 
     private static boolean nextAreAsciiLetter(int pos, int count, String s) {
