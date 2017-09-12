@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Available;
+import com.openexchange.chronos.json.converter.mapper.ColumnIDs;
 import com.openexchange.chronos.json.converter.mapper.DateTimeMapping;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.exception.OXException;
@@ -301,7 +302,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeDescription();
             }
         });
-        mappings.put(AvailableField.rrule, new StringMapping<Available>("rrule", 1138) { // FIXME: choose an appropriate column id 
+        mappings.put(AvailableField.rrule, new StringMapping<Available>("rrule", Appointment.RECURRENCE_TYPE) {
 
             @Override
             public boolean isSet(Available object) {
