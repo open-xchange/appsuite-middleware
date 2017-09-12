@@ -84,9 +84,6 @@ import com.openexchange.folderstorage.type.PublicType;
  */
 public class AttendeeHelper {
 
-    /** The constant used to indicate a common "public" parent folder for internal user attendees */
-    public static final String ATTENDEE_PUBLIC_FOLDER_ID = String.valueOf(-2);
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
     private final CalendarSession session;
@@ -333,8 +330,7 @@ public class AttendeeHelper {
                 continue;
             }
             userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
-            userAttendee.setFolderID(inPublicFolder ?
-                ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(userAttendee.getEntity()));
+            userAttendee.setFolderId(inPublicFolder ? null : session.getConfig().getDefaultFolderID(userAttendee.getEntity()));
             if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
                 userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
@@ -361,8 +357,7 @@ public class AttendeeHelper {
                     continue;
                 }
                 Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
-                memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
-                    ATTENDEE_PUBLIC_FOLDER_ID : session.getConfig().getDefaultFolderID(memberID));
+                memberAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : session.getConfig().getDefaultFolderID(memberID));
                 memberAttendee.setPartStat(session.getConfig().getInitialPartStat(memberID, inPublicFolder));
                 if (false == resolveGroupAttendees) {
                     memberAttendee.setMember(Collections.singletonList(groupAttendee.getUri()));
@@ -411,7 +406,7 @@ public class AttendeeHelper {
         int calendarUserId = getCalendarUserId(folder);
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : folder.getID());
+        defaultAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : folder.getID());
         if (session.getUserId() != calendarUserId) {
             defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }

@@ -1058,7 +1058,7 @@ public abstract class EventConverter {
             to.setEntity(from.getEntity());
         }
         if (from.containsFolderID()) {
-            to.setFolderID(from.getFolderID());
+            to.setFolderId(from.getFolderId());
         }
         if (from.containsMember()) {
             to.setMember(from.getMember());

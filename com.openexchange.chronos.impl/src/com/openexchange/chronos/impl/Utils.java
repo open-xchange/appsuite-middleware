@@ -480,7 +480,7 @@ public class Utils {
             return folder.getID().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getID().equals(userAttendee.getFolderID());
+            return null != userAttendee && folder.getID().equals(userAttendee.getFolderId());
         }
     }
 
@@ -663,8 +663,8 @@ public class Utils {
     public static List<String> getPersonalFolderIds(List<Attendee> attendees) {
         List<String> folderIds = new ArrayList<String>();
         for (Attendee attendee : CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            String folderId = attendee.getFolderID();
-            if (Strings.isNotEmpty(folderId) && false == AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID.equals(attendee.getFolderID())) {
+            String folderId = attendee.getFolderId();
+            if (Strings.isNotEmpty(folderId)) {
                 folderIds.add(folderId);
             }
         }

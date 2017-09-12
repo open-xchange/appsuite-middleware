@@ -156,14 +156,14 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
          */
         Attendee ownAttendee = find(event.getAttendees(), session.getUserId());
         if (null != ownAttendee) {
-            return ownAttendee.getFolderID();
+            return ownAttendee.getFolderId();
         }
         /*
          * choose the most appropriate attendee folder, otherwise
          */
         UserizedFolder chosenFolder = null;
         for (Attendee attendee : event.getAttendees()) {
-            UserizedFolder folder = findFolder(getVisibleFolders(), attendee.getFolderID());
+            UserizedFolder folder = findFolder(getVisibleFolders(), attendee.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
                 if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {

@@ -453,7 +453,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         } else if (isGroupScheduled(conflictingEvent)) {
             for (Attendee attendee : conflictingEvent.getAttendees()) {
                 if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
-                    Permission permission = getFolderPermissions().get(attendee.getFolderID());
+                    Permission permission = getFolderPermissions().get(attendee.getFolderId());
                     if (null != permission && Permission.READ_ALL_OBJECTS <= permission.getReadPermission()) {
                         return true;
                     }

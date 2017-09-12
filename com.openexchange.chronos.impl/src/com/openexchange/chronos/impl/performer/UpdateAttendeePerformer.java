@@ -296,7 +296,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         for (AttendeeField field : updatedFields) {
             switch (field) {
                 case FOLDER_ID:
-                    checkFolderUpdate(originalEvent, originalAttendee, attendeeUpdate.getFolderID());
+                    checkFolderUpdate(originalEvent, originalAttendee, attendeeUpdate.getFolderId());
                     break;
                 case CU_TYPE:
                 case ENTITY:
@@ -318,7 +318,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     }
 
     private void checkFolderUpdate(Event originalEvent, Attendee originalAttendee, String updatedFolderID) throws OXException {
-        if (false == originalAttendee.getFolderID().equals(folder.getID())) {
+        if (false == originalAttendee.getFolderId().equals(folder.getID())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         if (isSeriesMaster(originalEvent)) {

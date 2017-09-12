@@ -121,7 +121,7 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
             attendee.setRsvp(from.getBoolean(ChronosJsonFields.Attendee.RSVP));
         }
         if (from.has(ChronosJsonFields.Attendee.FOLDER)) {
-            attendee.setFolderID(from.getString(ChronosJsonFields.Attendee.FOLDER));
+            attendee.setFolderId(from.getString(ChronosJsonFields.Attendee.FOLDER));
         }
         if (from.has(ChronosJsonFields.Attendee.MEMBER)) {
             JSONArray array = from.getJSONArray(ChronosJsonFields.Attendee.MEMBER);
@@ -153,8 +153,8 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
         if (null != from.getRsvp()) {
             jsonObject.put(ChronosJsonFields.Attendee.RSVP, from.getRsvp());
         }
-        if (null != from.getFolderID()) {
-            jsonObject.put(ChronosJsonFields.Attendee.FOLDER, from.getFolderID());
+        if (null != from.getFolderId()) {
+            jsonObject.put(ChronosJsonFields.Attendee.FOLDER, from.getFolderId());
         }
         if (null != from.getMember()) {
             jsonObject.put(ChronosJsonFields.Attendee.MEMBER, from.getMember());

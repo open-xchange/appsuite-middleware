@@ -613,23 +613,23 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
-    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws SQLException, OXException {
+    private static int insertOrReplaceDatesMembers(Connection connection, String tableName, boolean replace, int contextID, int objectID, Attendee attendee) throws OXException {
+        InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
+        AttendeeField[] mappedFields = mapper.getMappedFields();
         String sql = new StringBuilder()
-            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName)
-            .append(" (object_id,member_uid,confirm,reason,pfid,reminder,cid) VALUES (?,?,?,?,?,?,?);")
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
+            .append("(cid,object_id,reminder,").append(mapper.getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,?,?,").append(mapper.getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, objectID);
-            stmt.setInt(parameterIndex++, attendee.getEntity());
-            stmt.setInt(parameterIndex++, Event2Appointment.getConfirm(attendee.getPartStat()));
-            stmt.setString(parameterIndex++, attendee.getComment());
-            stmt.setInt(parameterIndex++, asInt(attendee.getFolderID()));
-            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            mapper.setParameters(stmt, parameterIndex, attendee, mappedFields);
             return logExecuteUpdate(stmt);
         } catch (SQLException e) {
-            throw asOXException(e, InternalAttendeeMapper.getInstance(), attendee, connection, tableName);
+            throw asOXException(e, mapper, attendee, connection, tableName);
         }
     }
 
@@ -724,9 +724,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     private static Map<String, List<Attendee>> selectUserAttendeeData(Connection connection, int contextID, String objectIDs[], boolean tombstones) throws SQLException, OXException {
         Map<String, List<Attendee>> attendeesByObjectId = new HashMap<String, List<Attendee>>(objectIDs.length);
+        InternalAttendeeMapper mapper = InternalAttendeeMapper.getInstance();
+        AttendeeField[] mappedFields = mapper.getMappedFields();
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT object_id,member_uid,confirm,reason,pfid FROM ")
-            .append(tombstones ? "del_dates_members" : "prg_dates_members")
+            .append("SELECT object_id,").append(mapper.getColumns(mappedFields))
+            .append(" FROM ").append(tombstones ? "del_dates_members" : "prg_dates_members")
             .append(" WHERE cid=? AND object_id")
         ;
         if (1 == objectIDs.length) {
@@ -742,13 +744,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    Attendee attendee = new Attendee();
-                    attendee.setEntity(resultSet.getInt("member_uid"));
-                    attendee.setCuType(CalendarUserType.INDIVIDUAL);
-                    attendee.setPartStat(Appointment2Event.getParticipationStatus(resultSet.getInt("confirm")));
-                    attendee.setComment(resultSet.getString("reason"));
-                    attendee.setFolderID(asString(resultSet.getInt("pfid")));
-                    put(attendeesByObjectId, asString(resultSet.getInt("object_id")), attendee);
+                    put(attendeesByObjectId, asString(resultSet.getInt("object_id")), mapper.fromResultSet(resultSet, mappedFields));
                 }
             }
         }

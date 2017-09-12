@@ -311,12 +311,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee object, String value) throws OXException {
-                object.setFolderID(value);
+                object.setFolderId(value);
             }
 
             @Override
             public String get(Attendee object) {
-                return object.getFolderID();
+                return object.getFolderId();
             }
 
             @Override

@@ -71,6 +71,9 @@ import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
  */
 public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
+    /** The constant used to indicate a common "public" parent folder for internal user attendees */
+    private static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
+
     private static final InternalAttendeeMapper INSTANCE = new InternalAttendeeMapper();
 
     /**
@@ -152,7 +155,7 @@ public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public void set(Attendee attendee, Integer value) {
-                attendee.setFolderID(asString(value));
+                attendee.setFolderId(I(ATTENDEE_PUBLIC_FOLDER_ID).equals(value) ? null : asString(value));
             }
 
             @Override
@@ -162,7 +165,8 @@ public class InternalAttendeeMapper extends DefaultDbMapper<Attendee, AttendeeFi
 
             @Override
             public Integer get(Attendee attendee) {
-                return asInteger(attendee.getFolderID());
+                String value = attendee.getFolderId();
+                return null == value ? I(ATTENDEE_PUBLIC_FOLDER_ID) : asInteger(value);
             }
 
             @Override

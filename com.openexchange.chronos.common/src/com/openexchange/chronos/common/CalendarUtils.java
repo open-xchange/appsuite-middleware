@@ -1491,10 +1491,10 @@ public class CalendarUtils {
             return event.getFolderId();
         }
         Attendee userAttendee = find(event.getAttendees(), calendarUser);
-        if (null == userAttendee || null == userAttendee.getFolderID()) {
+        if (null == userAttendee || null == userAttendee.getFolderId()) {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
         }
-        return userAttendee.getFolderID();
+        return userAttendee.getFolderId();
     }
 
 }

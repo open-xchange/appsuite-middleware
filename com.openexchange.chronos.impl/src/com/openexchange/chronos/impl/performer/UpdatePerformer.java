@@ -192,7 +192,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 }
             } else {
                 /*
-                 * check if quota is exceeded before inserting new events 
+                 * check if quota is exceeded before inserting new events
                  */
                 storage.getUtilities().checkQuota(session.getSession());
                 /*
@@ -346,7 +346,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                         List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
                         if (null != alarms && 0 < alarms.size()) {
-                            changedEvent.setFolderId(AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID == attendee.getFolderID() ? changedEvent.getFolderId() : attendee.getFolderID());
+                            changedEvent.setFolderId(null == attendee.getFolderId() ? changedEvent.getFolderId() : attendee.getFolderId());
                             storage.getAlarmStorage().updateAlarms(changedEvent, attendee.getEntity(), alarms);
                         }
                     }

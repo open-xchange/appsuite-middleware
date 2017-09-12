@@ -175,7 +175,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public void set(Attendee attendee, String value) {
-                attendee.setFolderID(value);
+                attendee.setFolderId(value);
             }
 
             @Override
@@ -185,7 +185,7 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
 
             @Override
             public String get(Attendee attendee) {
-                return attendee.getFolderID();
+                return attendee.getFolderId();
             }
 
             @Override

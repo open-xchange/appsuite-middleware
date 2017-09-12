@@ -262,7 +262,7 @@ public class ChronosJsonFields {
          */
         public static final String RSVP = "rsvp";
         /**
-         * The folder id of the attendee. See {@link com.openexchange.chronos.Attendee#getFolderID()}
+         * The folder id of the attendee. See {@link com.openexchange.chronos.Attendee#getFolderId()}
          */
         public static final String FOLDER = "folder";
         /**

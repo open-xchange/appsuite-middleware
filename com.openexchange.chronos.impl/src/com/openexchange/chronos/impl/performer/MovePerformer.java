@@ -172,7 +172,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            updateAttendeeFolderId(originalEvent.getId(), originalAttendee, AttendeeHelper.ATTENDEE_PUBLIC_FOLDER_ID);
+            updateAttendeeFolderId(originalEvent.getId(), originalAttendee, null);
             updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), targetFolder.getID());
         }
         /*
@@ -300,7 +300,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  */
                 List<Attendee> attendees = new ArrayList<Attendee>(2);
                 Attendee previousDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, folder, null);
-                previousDefaultAttendee.setFolderID(getDefaultCalendarID(previousDefaultAttendee.getEntity()));
+                previousDefaultAttendee.setFolderId(getDefaultCalendarID(previousDefaultAttendee.getEntity()));
                 attendees.add(previousDefaultAttendee);
                 attendees.add(AttendeeHelper.getDefaultAttendee(session, targetFolder, null));
                 storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendees);
@@ -321,13 +321,13 @@ public class MovePerformer extends AbstractUpdatePerformer {
         touch(originalEvent.getId());
     }
 
-    private void updateAttendeeFolderId(String eventID, Attendee originalAttendee, String folderId) throws OXException {
-        Attendee attendeeUpdate = new Attendee();
-        AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-        attendeeUpdate.setFolderID(folderId);
-        if (attendeeUpdate.getFolderID() != originalAttendee.getFolderID()) {
-            storage.getAttendeeStorage().insertAttendeeTombstone(eventID, storage.getUtilities().getTombstone(originalAttendee));
-            storage.getAttendeeStorage().updateAttendee(eventID, attendeeUpdate);
+    private void updateAttendeeFolderId(String eventId, Attendee originalAttendee, String folderId) throws OXException {
+        if (null == folderId && null != originalAttendee.getFolderId() || false == folderId.equals(originalAttendee.getFolderId())) {
+            Attendee attendeeUpdate = AttendeeMapper.getInstance().copy(
+                originalAttendee, null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            attendeeUpdate.setFolderId(folderId);
+            storage.getAttendeeStorage().insertAttendeeTombstone(eventId, storage.getUtilities().getTombstone(originalAttendee));
+            storage.getAttendeeStorage().updateAttendee(eventId, attendeeUpdate);
         }
     }
 

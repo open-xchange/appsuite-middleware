@@ -435,7 +435,7 @@ public class Attendee extends CalendarUser {
      *
      * @return The identifier of the folder where the event is located in
      */
-    public String getFolderID() {
+    public String getFolderId() {
         return folderId;
     }
 
@@ -444,7 +444,7 @@ public class Attendee extends CalendarUser {
      *
      * @param value The identifier of the folder where the event is located in to set
      */
-    public void setFolderID(String value) {
+    public void setFolderId(String value) {
         folderId = value;
         setFields.add(AttendeeField.FOLDER_ID);
     }
