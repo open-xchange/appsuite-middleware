@@ -199,25 +199,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private final List<OXException> warnings;
     private final Collection<UpdatedFolderHandler> handlers;
     private OXFolderAccess oxfolderAccess;
-    private AppointmentSQLInterface cSql;
-
-    /**
-     * Getter for testing purposes.
-     *
-     * @return
-     */
-    public AppointmentSQLInterface getCSql() {
-        return cSql;
-    }
-
-    /**
-     * Setter for testing purposes.
-     *
-     * @param sql
-     */
-    public void setCSql(final AppointmentSQLInterface sql) {
-        cSql = sql;
-    }
 
     /**
      * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
@@ -280,12 +261,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
         this.handlers = handlers;
-        final AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-        if (factory != null) {
-            this.cSql = factory.createAppointmentSql(session);
-        } else {
-            this.cSql = null;
-        }
         warnings = new LinkedList<>();
     }
 
