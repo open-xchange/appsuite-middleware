@@ -93,8 +93,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
             sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
             if (exporter instanceof ChronosExporter) {
-                //TODO Initialize IDBasedCalendarAccess, check if it is useful here
-                sis = ((ChronosExporter) exporter).exportChronosFolderData(null, req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
+                sis = ((ChronosExporter) exporter).exportChronosFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
             } else {
                 sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
             }
@@ -133,7 +132,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
         return optionalParams;
     }
 
-    private String getExportFileName(ExportRequest req, String extension) throws OXException{
+    private String getExportFileName(ExportRequest req, String extension) {
         Map<String, List<String>> batchIds = req.getBatchIds();
         if (null == batchIds || batchIds.isEmpty()) {
             return getExporter().getFolderExportFileName(req.getSession(), req.getFolder(), extension);

@@ -47,29 +47,47 @@
  *
  */
 
-package com.openexchange.importexport.chronos.exporter;
+package com.openexchange.importexport.exporters;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link ChronosExporter}
+ * {@link ICalEventCompositeExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public interface ChronosExporter extends Exporter {
+public class ICalEventCompositeExporter extends AbstractICalExporter {
 
-    SizedInputStream exportChronosFolderData(ServerSession session, Format format, String compositeFolderId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+    @Override
+    public boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-    boolean canExportChronosEvents(ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException;
+    @Override
+    public boolean canExportBatch(ServerSession session, Format format, Entry<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-    FolderObject getChronosFolder(ServerSession session, String compositeFolderId) throws OXException;
+    @Override
+    public SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
 }

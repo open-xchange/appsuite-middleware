@@ -47,29 +47,67 @@
  *
  */
 
-package com.openexchange.importexport.chronos.exporter;
+package com.openexchange.importexport.exporters;
 
+import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.importexport.exporters.Exporter;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ChronosExporter}
+ * {@link AbstractICalExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public interface ChronosExporter extends Exporter {
+public abstract class AbstractICalExporter implements Exporter {
 
-    SizedInputStream exportChronosFolderData(ServerSession session, Format format, String compositeFolderId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
+    @Override
+    public String getFolderExportFileName(ServerSession session, String folder, String extension) {
+        return ExportFileNameCreator.createFolderExportFileName(session, folder, extension);
+    }
 
-    boolean canExportChronosEvents(ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException;
+    @Override
+    public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
+        return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
+    }
 
-    FolderObject getChronosFolder(ServerSession session, String compositeFolderId) throws OXException;
+    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
+        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
+    }
+
+    /**
+     * Gets a folder by it's identifier.
+     *
+     * @param session The session
+     * @param folderID The folder identifier
+     * @return The folder
+     */
+    protected static FolderObject getFolder(ServerSession session, String folderID) throws OXException {
+        try {
+            return new OXFolderAccess(session.getContext()).getFolderObject(Integer.parseInt(folderID));
+        } catch (OXException e) {
+            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folderID);
+        } catch (NumberFormatException e) {
+            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folderID);
+        }
+    }
+
+    protected boolean isSaveToDisk(final Map<String, Object> optionalParams) {
+        if (null == optionalParams) {
+            return false;
+        }
+        final Object object = optionalParams.get("__saveToDisk");
+        if (null == object) {
+            return false;
+        }
+        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+    }
 
 }
