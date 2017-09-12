@@ -423,6 +423,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 return this.getRedirectLocationForSession(request, session);
             }
             //No session found, log that
+            LOG.debug("No session found for OIDC Cookie with value: " + oidcAtologinCookie.getValue());
         }
 
         if (oidcAtologinCookie != null) {
