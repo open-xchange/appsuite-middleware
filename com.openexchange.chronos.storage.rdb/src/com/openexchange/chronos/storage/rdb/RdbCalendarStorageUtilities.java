@@ -209,7 +209,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
         } else {
             list = Collections.singletonList(provider.getFor(session, accountId));
         }
-        // Check if any account exceeeded the limit
+        // Check if any account exceeded the limit
         for (AccountQuota accountQuota : list) {
             Quota quota;
             if (accountQuota.hasQuota(QuotaType.AMOUNT)) {

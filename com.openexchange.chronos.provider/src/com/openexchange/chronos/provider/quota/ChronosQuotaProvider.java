@@ -58,13 +58,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.internal.Services;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
@@ -130,9 +128,6 @@ public class ChronosQuotaProvider implements QuotaProvider {
      * Get the Quota for given account
      * 
      * @param session The users {@link Session}
-     * @param context The {@link Context} of the user
-     * @param account The specific {@link CalendarAccount} to get quota for
-     * @param connection A readable {@link Connection} to load quota from DB.
      * @return The {@link Quota}
      * @throws OXException Various reasons
      */

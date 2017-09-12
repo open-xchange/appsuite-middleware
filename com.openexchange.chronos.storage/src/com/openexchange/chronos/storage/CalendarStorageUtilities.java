@@ -70,6 +70,7 @@ public interface CalendarStorageUtilities {
      *
      * @param attendee The attendee to create the <i>tombstone</i> for
      * @return The <i>tombstone</i> attendee
+     * @throws OXException In case of an error
      */
     Attendee getTombstone(Attendee attendee) throws OXException;
 
@@ -78,6 +79,7 @@ public interface CalendarStorageUtilities {
      *
      * @param attendees The attendees to create the <i>tombstone</i> for
      * @return The <i>tombstone</i> attendees
+     * @throws OXException In case of an error
      */
     List<Attendee> getTombstones(List<Attendee> attendees) throws OXException;
 
@@ -88,6 +90,7 @@ public interface CalendarStorageUtilities {
      * @param lastModified The last modification time to take over
      * @param modifiedBy The identifier of the modifying user to take over
      * @return The <i>tombstone</i> event
+     * @throws OXException In case of an error
      */
     Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException;
 
@@ -103,6 +106,7 @@ public interface CalendarStorageUtilities {
      * @param event The event to load additional data for
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The event, enriched by the additionally loaded data
+     * @throws OXException In case of an error
      */
     Event loadAdditionalEventData(int userId, Event event, EventField[] fields) throws OXException;
 
@@ -118,6 +122,7 @@ public interface CalendarStorageUtilities {
      * @param events The events to load additional data for
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The events, enriched by the additionally loaded data
+     * @throws OXException In case of an error
      */
     List<Event> loadAdditionalEventData(int userId, List<Event> events, EventField[] fields) throws OXException;
 
@@ -128,6 +133,7 @@ public interface CalendarStorageUtilities {
      * @param events The events to load additional data for
      * @param fields The requested fields, or <code>null</code> to assume all fields are requested
      * @return The event tombstones, enriched by the additionally loaded data
+     * @throws OXException In case of an error
      */
     List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException;
 
@@ -143,7 +149,7 @@ public interface CalendarStorageUtilities {
      * Check if quota exceeded the limit for a specific account
      * 
      * @param session The {@link Session} to check the quota for
-     * @param accoundId The identifier of the account or <code>null</code> to check every account for given session
+     * @param accountId The identifier of the account or <code>null</code> to check every account for given session
      * @throws OXException In case of missing service or quota exceeded
      */
     void checkQuota(Session session, String accountId) throws OXException;
