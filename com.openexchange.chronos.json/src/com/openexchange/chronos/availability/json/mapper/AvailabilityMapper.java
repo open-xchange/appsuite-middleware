@@ -116,30 +116,6 @@ public class AvailabilityMapper extends DefaultJsonMapper<Availability, Availabi
     @Override
     protected EnumMap<AvailabilityField, ? extends JsonMapping<? extends Object, Availability>> createMappings() {
         EnumMap<AvailabilityField, JsonMapping<? extends Object, Availability>> mappings = new EnumMap<AvailabilityField, JsonMapping<? extends Object, Availability>>(AvailabilityField.class);
-        // TODO: add mappings
-        mappings.put(AvailabilityField.id, new StringMapping<Availability>("id", DataObject.OBJECT_ID) {
-
-            @Override
-            public boolean isSet(Availability object) {
-                return object.contains(AvailabilityField.id);
-            }
-
-            @Override
-            public void set(Availability object, String value) throws OXException {
-                object.setId(value);
-            }
-
-            @Override
-            public String get(Availability object) {
-                return object.getId();
-            }
-
-            @Override
-            public void remove(Availability object) {
-                object.removeId();
-            }
-        });
-
         mappings.put(AvailabilityField.uid, new StringMapping<Availability>("uid", Appointment.UID) {
 
             @Override
@@ -182,50 +158,6 @@ public class AvailabilityMapper extends DefaultJsonMapper<Availability, Availabi
             @Override
             public void remove(Availability object) {
                 object.removeBusyType();
-            }
-        });
-        mappings.put(AvailabilityField.description, new StringMapping<Availability>("description", Appointment.TITLE) {
-
-            @Override
-            public boolean isSet(Availability object) {
-                return object.contains(AvailabilityField.description);
-            }
-
-            @Override
-            public void set(Availability object, String value) throws OXException {
-                object.setDescription(value);
-            }
-
-            @Override
-            public String get(Availability object) {
-                return object.getDescription();
-            }
-
-            @Override
-            public void remove(Availability object) {
-                object.removeDescription();
-            }
-        });
-        mappings.put(AvailabilityField.summary, new StringMapping<Availability>("summary", Appointment.NOTE) {
-
-            @Override
-            public boolean isSet(Availability object) {
-                return object.contains(AvailabilityField.summary);
-            }
-
-            @Override
-            public void set(Availability object, String value) throws OXException {
-                object.setDescription(value);
-            }
-
-            @Override
-            public String get(Availability object) {
-                return object.getDescription();
-            }
-
-            @Override
-            public void remove(Availability object) {
-                object.removeDescription();
             }
         });
         return mappings;
