@@ -47,74 +47,34 @@
  *
  */
 
-package com.openexchange.imageconverter.api;
+package com.openexchange.tools.filename;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
- * {@link MetadataImage}
+ * {@link BugFileNameToolsTest}
  *
- * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.10
+ * Lost support for umlauts in file names with certain browsers on macOS
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class MetadataImage implements Closeable {
+public class Bug55271Test {
 
-    /**
-     * Initializes a new {@link MetadataImage}.
-     */
-    @SuppressWarnings("unused")
-    private MetadataImage() {
-        m_imageStm = null;
-        m_metadata = null;
-    }
-
-    /**
-     * Initializes a new {@link MetadataImage}.
-     */
-    public MetadataImage(final InputStream imageStm, final IMetadata metadata) {
-        super();
-
-        m_imageStm = imageStm;
-        m_metadata = metadata;
-    }
-
-    // - Closeable -------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see java.io.Closeable#close()
-     */
-    @Override
-    public void close() throws IOException {
-        if (null != m_imageStm) {
-            m_imageStm.close();
+    @Test
+    public void testDecomposedString() {
+        String[] strings = new String[] {
+            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
+        };
+        for (String string : strings) {
+            checkSanitizing(string);
         }
     }
 
-    // - API  ------------------------------------------------------------------
-
-    /**
-     * Gets the m_imageStm
-     *
-     * @return The m_imageStm
-     */
-    public InputStream getImageInputStream() {
-        return m_imageStm;
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
     }
 
-    /**
-     * Gets the m_metadata
-     *
-     * @return The m_metadata
-     */
-    public IMetadata getMetadata() {
-        return m_metadata;
-    }
-
-    // - Members ---------------------------------------------------------------
-
-    private final InputStream m_imageStm;
-
-    private final IMetadata m_metadata;
 }

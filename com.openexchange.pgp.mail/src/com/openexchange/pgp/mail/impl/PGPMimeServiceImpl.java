@@ -224,7 +224,7 @@ public class PGPMimeServiceImpl implements PGPMimeService {
             //Sign
             ByteArrayInputStream signingContentStream = new ByteArrayInputStream(signingContent.getBytes("UTF-8"));
             ByteArrayOutputStream signedContentStream = new ByteArrayOutputStream();
-            PGPSignatureCreator signatureCreator = new PGPSignatureCreator(signingKey.getPublicKey().getAlgorithm());
+            PGPSignatureCreator signatureCreator = new PGPSignatureCreator();
             final boolean armored = true;
             signatureCreator.createSignature(signingContentStream, signedContentStream, armored, signingKey, password);
 

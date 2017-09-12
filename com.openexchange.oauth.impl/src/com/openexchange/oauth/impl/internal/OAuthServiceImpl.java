@@ -100,8 +100,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
-import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthEventConstants;
@@ -541,7 +541,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     } catch (URISyntaxException e) {
                         // will not happen here
                     }
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), url);
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(url);
+                    displayArgs.add(SSLExceptionCode.extractFingerprint(x));
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), displayArgs.toArray(new Object[] {}));
                 }
             }
             throw x;

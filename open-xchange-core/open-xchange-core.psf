@@ -109,6 +109,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n.yaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n.yaml.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.imageconverter.api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.imagetransformation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.imagetransformation.java"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.importexport"/>

@@ -83,7 +83,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
