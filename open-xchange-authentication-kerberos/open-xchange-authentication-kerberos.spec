@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 BuildRequires: open-xchange-sessionstorage-hazelcast
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -79,6 +79,8 @@ sed -i 's/debug=true/debug=false/g' /opt/open-xchange/etc/kerberosLogin.conf
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Sep 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-09-18 (4354)
 * Fri Sep 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-09-04 (4328)
 * Mon Aug 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
