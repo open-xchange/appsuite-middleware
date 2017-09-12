@@ -211,18 +211,19 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     }
 
     /**
-     * Extracts the fingerprint (if exists) from the specified {@link Throwable}
+     * Extracts the argument with the specified name (if exists) from the specified {@link Throwable} chain
      * 
-     * @param t The {@link Throwable}
-     * @return The fingerprint or an empty string if no fingerprint exists in the parameters of the specified {@link Throwable}
+     * @param t The {@link Throwable} chain
+     * @param argumentName The argument's name
+     * @return The argument's value or an empty string if no argument with that name exists in the parameters of the specified {@link Throwable} chain
      */
-    public static String extractFingerprint(Throwable t) {
+    public static String extractArgument(Throwable t, String argumentName) {
         Throwable cause = t.getCause();
         while (cause != null) {
             if (OXException.class.isInstance(cause)) {
                 OXException oxe = (OXException) cause;
                 if (oxe.getPrefix().equals(SSLExceptionCode.PREFIX)) {
-                    return (String) oxe.getArgument("fingerprint");
+                    return (String) oxe.getArgument(argumentName);
                 }
             }
             cause = cause.getCause();

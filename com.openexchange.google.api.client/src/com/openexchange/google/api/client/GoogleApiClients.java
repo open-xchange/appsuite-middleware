@@ -313,7 +313,7 @@ public class GoogleApiClients {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             List<Object> displayArgs = new ArrayList<>(2);
             displayArgs.add("www.googleapis.com");
-            displayArgs.add(SSLExceptionCode.extractFingerprint(e));
+            displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
             return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
         }
 

@@ -672,7 +672,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (MimeMailException.isSSLHandshakeException(e)) {
                     List<Object> displayArgs = new ArrayList<>(2);
                     displayArgs.add(config.getServer());
-                    displayArgs.add(SSLExceptionCode.extractFingerprint(e));
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
                     OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                     warnings.add(oxe);
                     throw oxe;
@@ -849,7 +849,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (MimeMailException.isSSLHandshakeException(e)) {
                     List<Object> displayArgs = new ArrayList<>(2);
                     displayArgs.add(server);
-                    displayArgs.add(SSLExceptionCode.extractFingerprint(e));
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
                     throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                 }
                 {

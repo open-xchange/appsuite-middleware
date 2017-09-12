@@ -120,7 +120,7 @@ public class YahooClient {
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
                 List<Object> displayArgs = new ArrayList<>(2);
                 displayArgs.add("social.yahooapis.com");
-                displayArgs.add(SSLExceptionCode.extractFingerprint(e));
+                displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
             }
 
