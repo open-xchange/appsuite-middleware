@@ -53,10 +53,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.tx.TransactionAware;
 
@@ -99,6 +101,18 @@ public interface IDBasedFreeBusyAccess extends TransactionAware, CalendarParamet
      * @return The free/busy times for each of the attendees
      */
     Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException;
+
+    /**
+     * Calculates the free-busy time information for the specified Attendees taken into consideration their {@link Availability} block.
+     * It first retrieves the merged free busy information using the {@link #getMergedFreeBusy(List, Date, Date)} method
+     * and combines those slots with the Availability blocks of their respective users.
+     * 
+     * @param attendees The attendees to get the free/busy data for
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @return The free/busy times for each of the attendees
+     */
+    Map<Attendee, FreeBusyResult> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException;
 
     /**
      * Checks for potential conflicting events of the attendees with another event, typically prior event creation or update.

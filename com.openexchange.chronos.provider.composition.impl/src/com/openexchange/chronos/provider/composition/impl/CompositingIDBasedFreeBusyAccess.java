@@ -53,6 +53,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -92,13 +94,13 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
     @Override
     public boolean[] hasEventsBetween(Date from, Date until) throws OXException {
 
-        boolean [] result=null;
-        for(CalendarAccount account: getAccounts()){
+        boolean[] result = null;
+        for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
-            if(access instanceof FreeBusyAwareCalendarAccess){
+            if (access instanceof FreeBusyAwareCalendarAccess) {
                 boolean[] hasEventsBetween = ((FreeBusyAwareCalendarAccess) access).hasEventsBetween(from, until);
-                if(result==null){
-                    result=hasEventsBetween;
+                if (result == null) {
+                    result = hasEventsBetween;
                 } else {
                     mergeEventsBetween(result, hasEventsBetween);
                 }
@@ -108,14 +110,14 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
         return result;
     }
 
-    private void mergeEventsBetween(boolean [] result, boolean [] newValues) throws OXException{
-        if(result.length != newValues.length){
+    private void mergeEventsBetween(boolean[] result, boolean[] newValues) throws OXException {
+        if (result.length != newValues.length) {
             // Should never occur
-           throw new OXException(new InvalidParameterException("The two boolean arrays must not have different sizes!"));
+            throw new OXException(new InvalidParameterException("The two boolean arrays must not have different sizes!"));
         }
 
-        for(int x=0; x<result.length; x++){
-            result[x]|=newValues[x];
+        for (int x = 0; x < result.length; x++) {
+            result[x] |= newValues[x];
         }
     }
 
@@ -146,23 +148,27 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
 
     @Override
     public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<FreeBusyTime>> result=null;
-        for(CalendarAccount account: getAccounts()){
+        Map<Attendee, List<FreeBusyTime>> result = null;
+        for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
-            if(access instanceof FreeBusyAwareCalendarAccess){
+            if (access instanceof FreeBusyAwareCalendarAccess) {
                 Map<Attendee, List<FreeBusyTime>> freeBusyTimesPerAttendee = ((FreeBusyAwareCalendarAccess) access).getMergedFreeBusy(attendees, from, until);
-                if(result==null){
-                    result=freeBusyTimesPerAttendee;
+                if (result == null) {
+                    result = freeBusyTimesPerAttendee;
                 } else {
-                    for(Attendee att: freeBusyTimesPerAttendee.keySet()){
+                    for (Attendee att : freeBusyTimesPerAttendee.keySet()) {
                         result.get(att).addAll(freeBusyTimesPerAttendee.get(att));
                     }
                 }
             }
         }
 
+        if (result == null) {
+            return new HashMap<>();
+        }
+
         // Merge results
-        for(Attendee att: result.keySet()){
+        for (Attendee att : result.keySet()) {
             List<FreeBusyTime> freeBusyTimes = result.get(att);
             result.put(att, FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
         }
@@ -171,9 +177,37 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
     }
 
     @Override
+    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, FreeBusyResult> result = new HashMap<>(0);
+        for (CalendarAccount account : getAccounts()) {
+            CalendarAccess access = getAccess(account);
+            if (access instanceof FreeBusyAwareCalendarAccess) {
+                Map<Attendee, FreeBusyResult> freeBusyTimesPerAttendee = ((FreeBusyAwareCalendarAccess) access).calculateFreeBusyTime(attendees, from, until);
+                if (result == null) {
+                    result = freeBusyTimesPerAttendee;
+                } else {
+                    for (Attendee att : freeBusyTimesPerAttendee.keySet()) {
+                        result.get(att).getFreeBusyTimes().addAll(freeBusyTimesPerAttendee.get(att).getFreeBusyTimes());
+                    }
+                }
+            }
+        }
+
+        // Merge results
+        for (Attendee att : result.keySet()) {
+            FreeBusyResult freeBusyResult = result.get(att);
+            List<FreeBusyTime> freeBusyTimes = freeBusyResult.getFreeBusyTimes();
+            freeBusyResult.setFreeBusyTimes(FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
+            result.put(att, freeBusyResult);
+        }
+
+        return result;
+    }
+
+    @Override
     public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
-        List<EventConflict> result=null;
-        for(CalendarAccount account: getAccounts()){
+        List<EventConflict> result = null;
+        for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
             if (access instanceof FreeBusyAwareCalendarAccess) {
                 List<EventConflict> eventConflicts = ((FreeBusyAwareCalendarAccess) access).checkForConflicts(event, attendees);

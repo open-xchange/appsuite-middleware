@@ -58,11 +58,11 @@ import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -71,6 +71,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link FreeBusyAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
@@ -79,7 +80,7 @@ public class FreeBusyAction extends AbstractFreeBusyAction {
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
 
     /**
-     * Initializes a new {@link FreeBusyAction}.
+     * Initialises a new {@link FreeBusyAction}.
      *
      * @param services A service lookup reference
      */
@@ -97,13 +98,12 @@ public class FreeBusyAction extends AbstractFreeBusyAction {
         List<Attendee> attendees = parseAttendeesParameter(requestData);
         Date from = parseDate(requestData, "from");
         Date until = parseDate(requestData, "until");
-        Map<Attendee, List<FreeBusyTime>> mergedFreeBusy = freeBusyAccess.getMergedFreeBusy(attendees, from, until);
+        Map<Attendee, FreeBusyResult> mergedFreeBusy = freeBusyAccess.calculateFreeBusyTime(attendees, from, until);
         // Sort in requested order
-        LinkedHashMap<Attendee, List<FreeBusyTime>> result = new LinkedHashMap<>(mergedFreeBusy.keySet().size());
-        for(Attendee att: attendees){
+        LinkedHashMap<Attendee, FreeBusyResult> result = new LinkedHashMap<>(mergedFreeBusy.keySet().size());
+        for (Attendee att : attendees) {
             result.put(att, mergedFreeBusy.get(att));
         }
         return new AJAXRequestResult(result, FreeBusyConverter.INPUT_FORMAT);
     }
-
 }

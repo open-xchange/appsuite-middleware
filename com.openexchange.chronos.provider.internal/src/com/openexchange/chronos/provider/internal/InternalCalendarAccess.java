@@ -81,6 +81,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -327,6 +328,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
         return getFreeBusyService().getMergedFreeBusy(session, attendees, from, until);
+    }
+
+    @Override
+    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
+        return getFreeBusyService().calculateFreeBusyTime(session, attendees, from, until);
     }
 
     @Override
