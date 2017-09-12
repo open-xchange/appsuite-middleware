@@ -93,20 +93,25 @@ public class SetAction extends AbstractAction {
         try {
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
-            
-            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
-            List<Available> availables = new ArrayList<>();
+
+            // Delete the availability for the user
             if (!requestBody.hasAndNotNull("available")) {
-                JSONArray availableArr = requestBody.getJSONArray("available");
-                for (int index = 0; index < availableArr.length(); index++) {
-                    Available available = AvailableMapper.getInstance().deserialize(availableArr.getJSONObject(index), AvailableMapper.getInstance().getMappedFields());
-                    availables.add(available);
-                }
-                service.setAvailability(calendarSession, availability);
-            } else {
                 service.deleteAvailability(calendarSession);
+                return new AJAXRequestResult();
             }
-            
+
+            // Parse the availability and the available blocks
+            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
+            JSONArray availableArr = requestBody.getJSONArray("available");
+            List<Available> availables = new ArrayList<>(availableArr.length());
+            for (int index = 0; index < availableArr.length(); index++) {
+                availables.add(AvailableMapper.getInstance().deserialize(availableArr.getJSONObject(index), AvailableMapper.getInstance().getMappedFields()));
+            }
+
+            // Set the availability for the user and overwrite any existing one
+            availability.setAvailable(availables);
+            service.setAvailability(calendarSession, availability);
+
             return new AJAXRequestResult();
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

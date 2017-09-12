@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.availability.json;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -57,7 +58,10 @@ import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.availability.json.mapper.AvailabilityMapper;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -87,13 +91,29 @@ public class GetAction extends AbstractAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
-            Availability availability = service.getAvailability(getSession(session));
+            CalendarSession calendarSession = getSession(session);
+
+            Availability availability = service.getAvailability(calendarSession);
             JSONObject json = AvailabilityMapper.getInstance().serialize(availability, AvailabilityMapper.getInstance().getMappedFields());
-            json.put("available", AvailableMapper.getInstance().serialize(availability.getAvailable(), AvailableMapper.getInstance().getMappedFields(), "", session));
-            
+            json.put("available", AvailableMapper.getInstance().serialize(availability.getAvailable(), AvailableMapper.getInstance().getMappedFields(), getTimeZone(calendarSession), session));
+
             return new AJAXRequestResult(json);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
+    }
+
+    /**
+     * Gets the timezone valid for the supplied calendar session, which is either the (possibly overridden) timezone defined via
+     * {@link CalendarParameters#PARAMETER_TIMEZONE}, or as fal-back, the session user's default timezone.
+     *
+     * @param session The calendar session to get the timezone for
+     * @return The timezone
+     * @see CalendarParameters#PARAMETER_TIMEZONE
+     * @see User#getTimeZone()
+     */
+    private TimeZone getTimeZone(CalendarSession session) throws OXException {
+        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
+        return null != timeZone ? timeZone : session.getEntityResolver().getTimeZone(session.getUserId());
     }
 }
