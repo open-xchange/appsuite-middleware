@@ -110,8 +110,11 @@ abstract class AbstractUpdatePerformer extends AbstractPerformer {
         for (Available available : availability.getAvailable()) {
             available.setId(available.contains(AvailableField.id) ? available.getId() : storage.nextAvailableId());
             available.setCalendarUser(getSession().getUserId());
-            available.setLastModified(timeNow);
             // Set the creation timestamp (a.k.a. dtstamp) from the last modified if not present
+            available.setLastModified(timeNow);
+            if (available.getCreated() == null) {
+                available.setCreated(timeNow);
+            }
             if (available.getCreationTimestamp() == null) {
                 available.setCreationTimestamp(timeNow);
             }
