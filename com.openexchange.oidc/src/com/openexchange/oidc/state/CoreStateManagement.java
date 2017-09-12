@@ -50,12 +50,13 @@ package com.openexchange.oidc.state;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.oidc.hz.PortableAuthenticationRequest;
 import com.openexchange.oidc.hz.PortableLogoutRequest;
 
 /**
- * Contains and manages all current client states.
+ * Contains and manages all current client states in {@link Hazelcast}
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0

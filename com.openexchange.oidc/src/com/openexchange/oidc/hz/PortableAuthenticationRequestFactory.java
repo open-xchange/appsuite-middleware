@@ -53,6 +53,13 @@ import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
+/**
+ * {@link PortableAuthenticationRequestFactory} Implementation of {@link AbstractCustomPortableFactory} to
+ * create a {@link PortableAuthenticationRequest} with class id {@link CustomPortable}.PORTABLE_OIDC_AUTHN_REQUEST_INFO
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class PortableAuthenticationRequestFactory extends AbstractCustomPortableFactory{
 
     @Override

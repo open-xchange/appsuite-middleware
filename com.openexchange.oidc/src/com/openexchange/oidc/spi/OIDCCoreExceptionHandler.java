@@ -57,6 +57,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 
 
+/**
+ * {@link OIDCCoreExceptionHandler} The core implementation of the {@link OIDCExceptionHandler}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCCoreExceptionHandler implements OIDCExceptionHandler {
     
     private static final Logger LOG = LoggerFactory.getLogger(OIDCExceptionHandler.class);

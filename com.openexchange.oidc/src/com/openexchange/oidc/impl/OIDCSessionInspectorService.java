@@ -16,6 +16,16 @@ import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
 import com.openexchange.session.inspector.SessionInspectorService;
 
+/**
+ * {@link OIDCSessionInspectorService} Is triggered on each Request, that comes
+ * with a {@link Session} parameter. Is used to check on expired OAuth tokens, if storage of 
+ * those is enabled for the current backend.
+ * 
+ * TODO QS-VS: Den Lösungsansatz diskutieren, Beschaffung des Backends auch einfacher, besser möglich?
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCSessionInspectorService implements SessionInspectorService{
     
     private final OIDCBackendRegistry oidcBackends;
@@ -29,7 +39,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         OIDCBackend backend = this.loadBackendForSession(session);
-        if (backend.isTokenExpired(session)) {
+        if (backend.getBackendConfig().isStoreOAuthTokensEnabled() && backend.isTokenExpired(session)) {
             if(!backend.updateOauthTokens(session)) {
                 backend.logoutCurrentUser(session, request, response, null);
             }

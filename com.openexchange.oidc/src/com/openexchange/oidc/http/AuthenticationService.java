@@ -59,6 +59,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 
+/**
+ * {@link AuthenticationService} Servlet to handle authentication requests.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class AuthenticationService extends OIDCServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationService.class);

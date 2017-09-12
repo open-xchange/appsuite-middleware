@@ -61,6 +61,13 @@ import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultAuthenticationRequestInfo.Builder;
 
+/**
+ * {@link PortableAuthenticationRequest} Contains all needed information to load an
+ * {@link AuthenticationRequestInfo} identified by its state.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class PortableAuthenticationRequest extends AbstractCustomPortable {
 
     private static final String STATE = "state";

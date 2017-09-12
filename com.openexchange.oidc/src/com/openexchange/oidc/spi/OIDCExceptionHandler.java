@@ -61,8 +61,24 @@ import com.openexchange.exception.OXException;
  */
 public interface OIDCExceptionHandler {
     
+    /**
+     * What is supposed to happen after a failed user authentication? This method will be executed.
+     * 
+     * @param request The {@link HttpServletRequest} that triggered the authentication
+     * @param response The {@link HttpServletResponse}
+     * @param exception The {@link IOException} that led to the authentication failure
+     * @throws IOException The {@link IOException}
+     */
     void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
 
+    /**
+     * What is supposed to happen after a failed user logout? This method will be executed.
+     * 
+     * @param request The {@link HttpServletRequest} that triggered the logout
+     * @param response The {@link HttpServletResponse}
+     * @param exception The {@link IOException} that led to the logout failure
+     * @throws IOException The {@link IOException}
+     */
     void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
     
 }

@@ -109,6 +109,7 @@ public class InitService extends OIDCServlet {
     }
 
     private void exceptionLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        LOG.trace("exceptionLogout(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         try {
             this.provider.logoutInCaseOfError(request.getParameter(LoginServlet.PARAMETER_SESSION), request, response);
         } catch (OXException e) {
@@ -118,6 +119,7 @@ public class InitService extends OIDCServlet {
     }
 
     private String getRedirectURI(String flow, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        LOG.trace("getRedirectURI(String flow: {}, HttpServletRequest request: {}, HttpServletResponse response)", flow, request.getRequestURI());
         String redirectUri = "";
         if (flow.equals("login")) {
             redirectUri = provider.getLoginRedirectRequest(request, response);
@@ -128,6 +130,7 @@ public class InitService extends OIDCServlet {
     }
 
     private boolean validateFlow(String flow) {
+        LOG.trace("validateFlow(String flow: {})", flow);
         boolean isValid = true;
         if (flow == null) {
             LOG.debug("OpenID flow parameter not set");

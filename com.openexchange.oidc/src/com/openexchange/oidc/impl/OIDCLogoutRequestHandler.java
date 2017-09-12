@@ -62,6 +62,13 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.session.Session;
 
+/**
+ * {@link OIDCLogoutRequestHandler} Handles logout requests which terminate a valid
+ * {@link Session}.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCLogoutRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLogoutRequestHandler.class);

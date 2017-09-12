@@ -55,6 +55,12 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendProperty;
 
+/**
+ * {@link OIDCBackendConfigImpl} Default implementation of {@link OIDCBackendConfig}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     
     private final static Logger LOG = LoggerFactory.getLogger(OIDCBackendConfigImpl.class);

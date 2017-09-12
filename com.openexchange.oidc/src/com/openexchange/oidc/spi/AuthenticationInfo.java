@@ -52,6 +52,13 @@ package com.openexchange.oidc.spi;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * {@link AuthenticationInfo} Contains all needed and additional information, that is 
+ * needed to authenticate a user.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class AuthenticationInfo {
 
     private final Map<String, String> properties = new HashMap<String, String>();

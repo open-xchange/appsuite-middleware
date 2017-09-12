@@ -57,6 +57,13 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.oidc.state.DefaultLogoutRequestInfo;
 import com.openexchange.oidc.state.LogoutRequestInfo;
 
+/**
+ * {@link PortableLogoutRequest} Contains all needed information to load a {@link LogoutRequestInfo}
+ * identified by its state.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class PortableLogoutRequest extends AbstractCustomPortable {
 
     private static final String STATE = "state";

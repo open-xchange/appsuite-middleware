@@ -78,6 +78,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
+import com.openexchange.oidc.OIDCBackendProperty;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.tools.OIDCTools;
@@ -92,6 +93,15 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
+/**
+ * {@link OIDCLoginRequestHandler} Performs a login with a valid {@link Reservation} and
+ * creates a {@link Session} in the process. Also tries to login the user into a valid
+ * {@link Session} directly, if the {@link OIDCBackendProperty}.autologinCookieMode indicates
+ * an enabled auto-login.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.class);

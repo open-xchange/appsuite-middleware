@@ -78,6 +78,14 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
+/**
+ * {@link OIDCTools}
+ * 
+ * Provides multiple static methods and attributes, that are used throughout the OpenID feature.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class OIDCTools {
     
     private static final Logger LOG = LoggerFactory.getLogger(OIDCTools.class);

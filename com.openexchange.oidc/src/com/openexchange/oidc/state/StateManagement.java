@@ -52,7 +52,7 @@ package com.openexchange.oidc.state;
 import com.hazelcast.core.IMap;
 
 /**
- * Manager of all client states, that try to login with OpenID features.
+ * Manager of all client states, that try to login or logout with OpenID features.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0

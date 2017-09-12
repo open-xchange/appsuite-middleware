@@ -111,7 +111,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * Default implementation of the OpenID web SSO provider features
+ * Default implementation of the {@link OIDCWebSSOProvider} features
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0

@@ -49,6 +49,13 @@
 
 package com.openexchange.oidc.state;
 
+/**
+ * {@link DefaultLogoutRequestInfo} Default implementation of {@link LogoutRequestInfo}, used by the core implementation
+ * of the OpenID feature.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     
     private String state;

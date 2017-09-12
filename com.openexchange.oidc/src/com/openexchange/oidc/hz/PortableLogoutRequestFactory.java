@@ -53,6 +53,13 @@ import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 
+/**
+ * {@link PortableLogoutRequestFactory} Implementation of {@link AbstractCustomPortableFactory} to
+ * create a {@link PortableLogoutRequest} with class id {@link CustomPortable}.PORTABLE_OIDC_LOGOUT_REQUEST_INFO
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class PortableLogoutRequestFactory extends AbstractCustomPortableFactory{
 
     @Override

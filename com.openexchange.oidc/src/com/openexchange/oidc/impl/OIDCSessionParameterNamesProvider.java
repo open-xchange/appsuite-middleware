@@ -51,11 +51,15 @@ package com.openexchange.oidc.impl;
 
 import java.util.Collections;
 import java.util.List;
+import com.hazelcast.core.Hazelcast;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.tools.OIDCTools;
+import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
 
 /**
+ * Adds the {@link OIDCTools}.IDTOKEN to potential {@link Session} attributes.
+ * This way those attribute will be synchronized throughout {@link Hazelcast} stored Sessions
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0

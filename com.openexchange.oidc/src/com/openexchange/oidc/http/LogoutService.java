@@ -60,6 +60,12 @@ import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.oidc.tools.OIDCTools;
 
+/**
+ * {@link LogoutService} Servlet, that handle logout requests from client.
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.10.0
+ */
 public class LogoutService extends OIDCServlet{
 
     private static final Logger LOG = LoggerFactory.getLogger(LogoutService.class);
