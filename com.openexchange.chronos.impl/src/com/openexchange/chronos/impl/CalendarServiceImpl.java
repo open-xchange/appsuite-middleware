@@ -94,6 +94,9 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.DefaultAccountQuota;
+import com.openexchange.quota.Quota;
 import com.openexchange.session.Session;
 
 /**
@@ -472,5 +475,11 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
         return result;
+    }
+
+    @Override
+    public AccountQuota getQuota(Session session) throws OXException {
+        // TODO
+        return new DefaultAccountQuota("0", "").addQuota(Quota.UNLIMITED_AMOUNT);
     }
 }

@@ -71,6 +71,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
@@ -94,6 +95,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.quota.AccountQuota;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -104,7 +106,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware {
 
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InternalCalendarAccess.class);
@@ -377,6 +379,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         properties = Collections.emptyMap();
         return properties;
+    }
+
+    @Override
+    public AccountQuota getQuota() throws OXException {
+        return getCalendarService().getQuota(session.getSession());
     }
 
 }

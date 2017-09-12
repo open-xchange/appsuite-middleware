@@ -47,25 +47,62 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.composition.impl.quota;
 
+import java.util.List;
+import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarQuotaProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link QuotaAwareCalendarAccount}
+ * {@link CalendarQuotaProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public interface QuotaAwareCalendarAccount extends CalendarAccount {
+public class CalendarQuotaProvider implements QuotaProvider {
+
+    private final CalendarProviderRegistry registry;
+    private final ServiceLookup            services;
 
     /**
-     * Get the {@link AccountQuota}
      * 
-     * @return The {@link AccountQuota} for this {@link CalendarAccount}
-     * @throws OXException In case of quota can't be fetched
+     * Initializes a new {@link CalendarQuotaProvider}.
+     * 
+     * @param services The {@link ServiceLookup} to get different services from
+     * @param registry The {@link CalendarProviderRegistry} for {@link CompositingIDBasedCalendarQuotaProvider}
+     * @throws OXException In case a service is unavailable
      */
-    AccountQuota getAccountQuota() throws OXException;
+    public CalendarQuotaProvider(ServiceLookup services, CalendarProviderRegistry registry) throws OXException {
+        super();
+        this.services = services;
+        this.registry = registry;
 
+    }
+
+    @Override
+    public String getModuleID() {
+        return "calendar.chronos";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Calendar";
+    }
+
+    @Override
+    public AccountQuota getFor(Session session, String accountID) throws OXException {
+        CompositingIDBasedCalendarQuotaProvider provider = new CompositingIDBasedCalendarQuotaProvider(session, registry, services);
+        return provider.get(accountID);
+    }
+
+    @Override
+    public List<AccountQuota> getFor(Session session) throws OXException {
+        CompositingIDBasedCalendarQuotaProvider provider = new CompositingIDBasedCalendarQuotaProvider(session, registry, services);
+        return provider.get();
+    }
 }

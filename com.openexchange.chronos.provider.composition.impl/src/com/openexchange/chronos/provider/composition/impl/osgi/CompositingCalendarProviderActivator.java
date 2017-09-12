@@ -56,8 +56,10 @@ import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccessFactory;
+import com.openexchange.chronos.provider.composition.impl.quota.CalendarQuotaProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.quota.QuotaProvider;
 
 /**
  * {@link CompositingCalendarProviderActivator}
@@ -100,6 +102,7 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
              */
             registerService(CalendarProviderRegistry.class, providerRegistry);
             registerService(IDBasedCalendarAccessFactory.class, new CompositingIDBasedCalendarAccessFactory(providerRegistry, this));
+            registerService(QuotaProvider.class, new CalendarQuotaProvider(this, providerRegistry));
         } catch (Exception e) {
             getLogger(CompositingCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

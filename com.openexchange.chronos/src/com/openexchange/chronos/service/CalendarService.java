@@ -58,6 +58,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
 
 /**
@@ -420,5 +421,15 @@ public interface CalendarService {
      * @throws OXException
      */
     List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
+    
+    
+    /**
+     * Get the {@link AccountQuota}
+     * 
+     * @param session The session to get quota for
+     * @return The {@link AccountQuota}
+     * @throws OXException In case of quota can't be fetched
+     */
+    AccountQuota getQuota(Session session) throws OXException;
 
 }
