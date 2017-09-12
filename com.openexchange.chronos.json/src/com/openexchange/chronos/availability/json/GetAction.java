@@ -49,11 +49,13 @@
 
 package com.openexchange.chronos.availability.json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.availability.json.mapper.AvailabilityMapper;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -92,7 +94,11 @@ public class GetAction extends AbstractAction {
 
             Availability availability = service.getAvailability(calendarSession);
             JSONObject json = AvailabilityMapper.getInstance().serialize(availability, AvailabilityMapper.getInstance().getMappedFields());
-            json.put("available", AvailableMapper.getInstance().serialize(availability.getAvailable(), AvailableMapper.getInstance().getMappedFields(), getTimeZone(calendarSession), session));
+            JSONArray availableArray = new JSONArray();
+            for (Available available : availability.getAvailable()) {
+                availableArray.put(AvailableMapper.getInstance().serialize(available, AvailableMapper.getInstance().getMappedFields()));
+            }
+            json.put("available", availableArray);
 
             return new AJAXRequestResult(json);
         } catch (JSONException e) {
