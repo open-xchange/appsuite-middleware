@@ -481,13 +481,6 @@ JSlobData:
   $ref: ./jslob/JSlobData.yaml
 JSlobsResponse:
   $ref: ./jslob/JSlobsResponse.yaml
-# Module: freebusy
-FreeBusyData:
-  $ref: ./freebusy/FreeBusyData.yaml
-FreeBusyResponse:
-  $ref: ./freebusy/FreeBusyResponse.yaml
-FreeBusysResponse:
-  $ref: ./freebusy/FreeBusysResponse.yaml
 # Module: messaging
 MessagingFormDescription:
   $ref: ./messaging/service/MessagingFormDescription.yaml

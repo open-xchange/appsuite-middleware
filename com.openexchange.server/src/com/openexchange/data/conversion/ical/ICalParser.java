@@ -67,13 +67,9 @@ public interface ICalParser {
 
     ParseResult<Task> parseTasks(String icalText, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
-    ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
     ParseResult<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     ParseResult<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     /**
      * Parses the first property possibly contained in specified ICal stream.

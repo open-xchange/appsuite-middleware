@@ -69,7 +69,6 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -113,7 +112,7 @@ public class CaldavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class, JDOMParser.class, GroupService.class,
+            UserService.class, ConfigViewFactory.class, HttpService.class, JDOMParser.class, GroupService.class,
             ContactService.class, ResourceService.class, DatabaseService.class, ICalService.class, CalendarService.class, RecurrenceService.class,
             CalendarAvailabilityService.class
         };

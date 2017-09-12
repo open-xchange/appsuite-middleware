@@ -101,16 +101,6 @@ public class SimICalParser implements ICalParser {
     }
 
     @Override
-    public ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        return DefaultParseResult.emptyParseResult();
-    }
-
-    @Override
-    public ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        return DefaultParseResult.emptyParseResult();
-    }
-
-    @Override
     public void setLimit(int amount) {
         // Nothing to do
 

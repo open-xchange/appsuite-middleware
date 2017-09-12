@@ -73,28 +73,14 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VFreeBusy;
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.util.CompatibilityHints;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.DefaultParseResult;
-import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ParseResult;
 import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.FreeBusyConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -107,6 +93,17 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringReader;
 import edu.emory.mathcs.backport.java.util.Arrays;
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**
  * {@link ICal4JParser} - The {@link ICalParser} using <a href="http://ical4j.sourceforge.net/">ICal4j</a> library.
@@ -206,75 +203,6 @@ public class ICal4JParser implements ICalParser {
 
         return DefaultParseResult.emptyParseResult();
     }
-
-	@Override
-	public ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        try {
-            return parseFreeBusy(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (UnsupportedCharsetException e) {
-            LOG.error("", e);
-        }
-        return DefaultParseResult.emptyParseResult();
-	}
-
-	@Override
-    public ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
-            TruncationInfo truncationInfo = null;
-            List<FreeBusyInformation> fbInfos = null;
-            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
-                ComponentList freebusies = calendar.getComponents("VFREEBUSY");
-                int size = freebusies.size();
-                int myLimit;
-                if (limit >= 0 && limit < size) {
-                    myLimit = limit;
-                    if (null == fbInfos) {
-                        fbInfos = new ArrayList<>(myLimit);
-                    }
-                    truncationInfo = new TruncationInfo(myLimit, size);
-                } else {
-                    myLimit = size;
-                    if (null == fbInfos) {
-                        fbInfos = new ArrayList<>(myLimit);
-                    }
-                }
-
-                for (int i = 0; i < myLimit; i++) {
-                    Component vevent = (Component) freebusies.get(i);
-                    try {
-                        fbInfos.add(convertFreeBusy(i, (VFreeBusy) vevent, defaultTZ, ctx, warnings));
-                    } catch (ConversionError conversionError) {
-                        errors.add(conversionError);
-                    }
-                }
-            }
-            return DefaultParseResult.<FreeBusyInformation> builder().importedObjects(fbInfos).truncationInfo(truncationInfo).build();
-        } catch (UnsupportedCharsetException e) {
-            LOG.error("", e);
-            // IGNORE
-        } catch (ConversionError e) {
-            errors.add(e);
-        } finally {
-            closeSafe(reader);
-        }
-
-        return DefaultParseResult.emptyParseResult();
-    }
-
-	private FreeBusyInformation convertFreeBusy(int index, VFreeBusy freeBusy, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        FreeBusyInformation fbInfo = new FreeBusyInformation();
-        TimeZone tz = determineTimeZone(freeBusy, defaultTZ);
-        for (AttributeConverter<VFreeBusy, FreeBusyInformation> converter : FreeBusyConverters.REQUEST) {
-            if (converter.hasProperty(freeBusy)) {
-				converter.parse(index, freeBusy, fbInfo, tz, ctx, warnings);
-            }
-        }
-//        fbInfo.setTimezone(getTimeZoneID(tz));
-        return fbInfo;
-
-	}
 
     @Override
     public String parseProperty(final String propertyName, final InputStream ical) {
