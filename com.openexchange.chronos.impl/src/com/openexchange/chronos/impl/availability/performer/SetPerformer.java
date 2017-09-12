@@ -84,6 +84,6 @@ public class SetPerformer extends AbstractUpdatePerformer {
 
         // Prepare for storage
         prepareForStorage(getStorage(), availability);
-        getStorage().insertAvailable(availability.getAvailable());
+        getStorage().setAvailable(getSession().getUserId(), availability.getAvailable());
     }
 }

@@ -73,6 +73,15 @@ public interface CalendarAvailabilityStorage {
     String nextAvailableId() throws OXException;
 
     /**
+     * Sets the {@link Available} blocks for the current user and removes the old ones.
+     * 
+     * @param available The {@link Available} blocks to set
+     * @throws OXException if the old objects cannot be deleted from the storage and/or if the new objects
+     *             cannot be inserted to the storage, or any other error is occurred
+     */
+    void setAvailable(int userId, List<Available> available) throws OXException;
+
+    /**
      * Inserts the specified {@link Available} blocks
      * 
      * @param available The {@link Available} blocks to insert

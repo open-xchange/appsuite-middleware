@@ -123,6 +123,30 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             release(connection, updated);
         }
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#setAvailable(java.util.List)
+     */
+    @Override
+    public void setAvailable(int userId, List<Available> available) throws OXException {
+        Connection connection = null;
+        int updated = 0;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            // Delete existing ones
+            deleteAvailable(connection, userId);
+            // Insert the available chunk-wise
+            for (List<Available> partition : Lists.partition(available, INSERT_CHUNK_SIZE)) {
+                updated += insertAvailableItems(partition, AVAILABLE_TABLE_NAME, AVAILABLE_MAPPER, connection);
+            }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            release(connection, updated);
+        }
+    }
 
     /*
      * (non-Javadoc)
