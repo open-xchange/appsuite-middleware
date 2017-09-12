@@ -51,6 +51,7 @@ package com.openexchange.chronos.availability.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,11 +111,30 @@ public class SetAction extends AbstractAction {
 
             // Set the availability for the user and overwrite any existing one
             availability.setAvailable(availables);
+
+            checkAndSetUids(availability);
             service.setAvailability(calendarSession, availability);
 
             return new AJAXRequestResult();
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Checks that the specified {@link Availability} and its {@link Available} blocks have
+     * their uids set. If not, they are set accordingly.
+     * 
+     * @param availability the {@link Availability} to check
+     */
+    private void checkAndSetUids(Availability availability) {
+        if (availability.getUid() == null) {
+            availability.setUid(UUID.randomUUID().toString());
+        }
+        for (Available available : availability.getAvailable()) {
+            if (available.getUid() == null) {
+                available.setUid(UUID.randomUUID().toString());
+            }
         }
     }
 }
