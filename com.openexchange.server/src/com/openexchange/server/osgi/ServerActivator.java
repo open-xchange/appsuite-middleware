@@ -81,6 +81,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
@@ -686,6 +687,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
+        registerService(Reloadable.class, ResponseWriter.getReloadables());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);

@@ -66,8 +66,6 @@ public class StackTraceFilter {
     /** The logger */
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceFilter.class);
 
-    /** The property defining the blacklisted exceptions */
-    public final static String PROPERTY_NAME = "com.openexchange.ajax.response.stacktrace.filter";
 
     // Blacklisted exceptions
     private Set<String> prefixes;

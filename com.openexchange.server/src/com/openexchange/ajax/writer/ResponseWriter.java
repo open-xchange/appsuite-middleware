@@ -93,9 +93,12 @@ import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.filter.StackTraceFilter;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyEvent.Type;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -633,7 +636,7 @@ public final class ResponseWriter {
     /**
      * Check if a stacktrace should be included
      * 
-     * @param properties To get configuration from
+     * @param includeStackTraceOnError <code>true</code> if the client wants to add the stacktrace, <code>false</code> otherwise
      * @param exception The {@link OXException} to check
      * @return <code>true</code> If and only if it is supposed to be checked, either client or server configured stacktrace invocation
      *         and if the exception is not blacklisted for stacktrace writing
@@ -1057,6 +1060,8 @@ public final class ResponseWriter {
         }
     }
 
+    /** The property defining the blacklisted exceptions */
+    private final static String STACKTRACE_FILTER = "com.openexchange.ajax.response.stacktrace.filter";
     static volatile StackTraceFilter filter;
 
     /**
@@ -1075,22 +1080,10 @@ public final class ResponseWriter {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", StackTraceFilter.PROPERTY_NAME);
+                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", STACKTRACE_FILTER);
                         f = new StackTraceFilter(null);
                     } else {
-                        f = new StackTraceFilter(service.getProperty(StackTraceFilter.PROPERTY_NAME, new PropertyListener() {
-
-                            @Override
-                            public void onPropertyChange(PropertyEvent event) {
-                                final Type type = event.getType();
-                                if (Type.DELETED == type) {
-                                    filter = new StackTraceFilter(null);
-                                } else if (Type.CHANGED == type) {
-                                    filter = new StackTraceFilter(service.getProperty(StackTraceFilter.PROPERTY_NAME));
-                                }
-
-                            }
-                        }));
+                        f = new StackTraceFilter(service.getProperty(STACKTRACE_FILTER, new String()));
                     }
                     filter = f;
                 }
@@ -1099,6 +1092,8 @@ public final class ResponseWriter {
         return f.isIncludeAllowed(exception);
     }
 
+    /** Property defining if stacktraces should be enabled */
+    private static final String STACKTRACE_ENABLE = "com.openexchange.ajax.response.stacktrace.enable";
     static volatile Boolean enableStackTraceOnError;
 
     /**
@@ -1113,25 +1108,13 @@ public final class ResponseWriter {
             synchronized (ResponseWriter.class) {
                 enable = enableStackTraceOnError;
                 if (null == enable) {
-                    final String propertyName = "com.openexchange.ajax.response.stacktrace.enable";
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", propertyName);
+                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", STACKTRACE_ENABLE);
                         enable = Boolean.TRUE;
                     } else {
-                        enable = Boolean.valueOf(service.getBoolProperty(propertyName, true, new PropertyListener() {
-                            
-                            @Override
-                            public void onPropertyChange(PropertyEvent event) {
-                                final Type type = event.getType();
-                                if (Type.DELETED == type) {
-                                    enableStackTraceOnError = Boolean.TRUE;
-                                } else if (Type.CHANGED == type) {
-                                    enableStackTraceOnError = Boolean.valueOf(service.getBoolProperty(propertyName, true));
-                                }
-                            }
-                        }));
+                        enable = Boolean.valueOf(service.getBoolProperty(STACKTRACE_ENABLE, true));
                     }
                     enableStackTraceOnError = enable;
                 }
@@ -1153,7 +1136,47 @@ public final class ResponseWriter {
         String uc = Strings.toUpperCase(clientId);
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
-
+    // -----------------------------------------------------------------------------------------------------------------------------
+    /**
+     * Get the reloadable class for the {@link ResponseWriter}
+     * 
+     * @return The {@link Reloadable} to handle reloads
+     */
+    public static Reloadable getReloadables() {
+        return new ResponseWriterReloadables();
+    }
+    
+    /**
+     * 
+     * {@link ResponseWriterReloadables}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.0
+     */
+    public static final class ResponseWriterReloadables implements Reloadable {
+        
+        
+        /**
+         * Initializes a new {@link ResponseWriter.ResponseWriterReloadables}.
+         * 
+         */
+        public ResponseWriterReloadables() {
+            super();
+        }
+        
+        @Override
+        public void reloadConfiguration(ConfigurationService configService) {
+            enableStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_ENABLE , true));
+            filter = new StackTraceFilter(configService.getProperty(STACKTRACE_FILTER, new String()));
+        }
+        
+        @Override
+        public Interests getInterests() {
+            return Reloadables.interestsForProperties(STACKTRACE_ENABLE, STACKTRACE_FILTER);
+        }   
+    }
+    
+    
     // -----------------------------------------------------------------------------------------------------------------------------
 
     /**
