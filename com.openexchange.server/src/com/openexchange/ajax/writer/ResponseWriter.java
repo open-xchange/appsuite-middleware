@@ -614,7 +614,7 @@ public final class ResponseWriter {
 
     /**
      * Check if a stacktrace should be included
-     * 
+     *
      * @param includeStackTraceOnError <code>true</code> if the client wants to add the stacktrace, <code>false</code> otherwise
      * @param exception The {@link OXException} to check
      * @return <code>true</code> If and only if it is supposed to be checked, either client or server configured stacktrace invocation
@@ -1045,7 +1045,7 @@ public final class ResponseWriter {
 
     /**
      * Check if the given {@link OXException} is allowed to be included into a response
-     * 
+     *
      * @param exception The {@link OXException} to check
      * @return <code>true</code> if the exception and its stacktrace can be included into the response
      *         <code>false</code> otherwise
@@ -1077,7 +1077,7 @@ public final class ResponseWriter {
 
     /**
      * Check if stacktrace invocation is allowed for responses
-     * 
+     *
      * @return <code>true</code> if stacktraces can be included into the response
      *         <code>false</code> otherwise
      */
@@ -1117,29 +1117,29 @@ public final class ResponseWriter {
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Get the reloadable class for the {@link ResponseWriter}
-     * 
+     *
      * @return The {@link Reloadable} to handle reloads
      */
-    public static Reloadable getReloadables() {
-        return new ResponseWriterReloadables();
+    public static Reloadable getReloadable() {
+        return new ResponseWriterReloadable();
     }
 
     /**
-     * 
-     * {@link ResponseWriterReloadables}
+     *
+     * {@link ResponseWriterReloadable}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
      * @since v7.10.0
      */
-    public static final class ResponseWriterReloadables implements Reloadable {
+    private static final class ResponseWriterReloadable implements Reloadable {
 
         /**
-         * Initializes a new {@link ResponseWriter.ResponseWriterReloadables}.
-         * 
+         * Initializes a new {@link ResponseWriter.ResponseWriterReloadable}.
          */
-        public ResponseWriterReloadables() {
+        ResponseWriterReloadable() {
             super();
         }
 

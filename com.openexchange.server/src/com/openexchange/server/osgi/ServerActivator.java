@@ -687,7 +687,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
-        registerService(Reloadable.class, ResponseWriter.getReloadables());
+        registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);
