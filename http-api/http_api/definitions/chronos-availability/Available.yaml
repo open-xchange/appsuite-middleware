@@ -20,12 +20,6 @@ properties:
   rrule:
     type: string
     description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
-  summary:
-    type: string
-    description: The summary of the available block.
-  description:
-    type: string
-    description: The description of the available block.
   startDate:
     $ref: "#/definitions/DateTimeData"
     description: The starting date of the available block.
