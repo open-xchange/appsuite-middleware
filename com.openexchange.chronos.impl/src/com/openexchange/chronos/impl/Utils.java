@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
@@ -94,6 +95,8 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -109,8 +112,12 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -501,6 +508,36 @@ public class Utils {
             }
             throw e;
         }
+    }
+
+    /**
+     * Get the configured quota and the actual usage of the underlying calendar account.
+     *
+     * @param session The calendar session
+     * @param storage The calendar storage to use
+     * @return The quota
+     */
+    public static Quota getQuota(CalendarSession session, CalendarStorage storage) throws OXException {
+        /*
+         * get configured amount quota limit
+         */
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class, true);
+        Connection connection = session.get(PARAM_CONNECTION, Connection.class);
+        long limit;
+        if (null != connection) {
+            limit = AmountQuotas.getLimit(session.getSession(), Module.CALENDAR.getName(), configViewFactory, connection);
+        } else {
+            DatabaseService databaseService = Services.getService(DatabaseService.class, true);
+            limit = AmountQuotas.getLimit(session.getSession(), Module.CALENDAR.getName(), configViewFactory, databaseService);
+        }
+        if (Quota.UNLIMITED == limit) {
+            return Quota.UNLIMITED_AMOUNT;
+        }
+        /*
+         * get actual usage & wrap in quota structure appropriately
+         */
+        long usage = storage.getEventStorage().countEvents();
+        return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
     /**

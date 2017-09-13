@@ -89,6 +89,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.quota.Quota;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -195,6 +196,15 @@ public abstract class AbstractQueryPerformer {
         }
         RecurrenceData recurrenceData = new DefaultRecurrenceData(masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), getExceptionDates(recurrenceIds));
         return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
+    }
+
+    /**
+     * Get the configured quota and the actual usage of the underlying calendar account.
+     *
+     * @return The quota
+     */
+    protected Quota getQuota() throws OXException {
+        return Utils.getQuota(session, storage);
     }
 
     /**

@@ -1087,7 +1087,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else if (module == FolderObject.CALENDAR) {
             CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
             calendarSession.set(Connection.class.getName(), readCon);
-            return 0 == calendarSession.getCalendarService().countEvents(calendarSession, String.valueOf(folderId));
+            return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folderId));
         } else if (module == FolderObject.CONTACT) {
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
             return contactService.isFolderEmpty(session, String.valueOf(folderId));

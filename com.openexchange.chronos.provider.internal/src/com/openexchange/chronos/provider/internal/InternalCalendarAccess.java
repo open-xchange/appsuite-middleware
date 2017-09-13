@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
@@ -95,8 +96,11 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.DefaultAccountQuota;
+import com.openexchange.quota.Quota;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -250,6 +254,20 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
     }
 
+    @Override
+    public AccountQuota getQuota() throws OXException {
+        Locale locale = session.getEntityResolver().getLocale(session.getUserId());
+        String name = StringHelper.valueOf(locale).getString(InternalCalendarStrings.PROVIDER_NAME);
+        DefaultAccountQuota accountQuota = new DefaultAccountQuota(String.valueOf(ACCOUNT_ID), name);
+        Quota[] quotas = getCalendarService().getUtilities().getQuotas(session);
+        if (null != quotas && 0 < quotas.length) {
+            for (Quota quota : quotas) {
+                accountQuota.addQuota(quota);
+            }
+        }
+        return accountQuota;
+    }
+
     /**
      * Gets the folder service, throwing an appropriate exception in case the service is absent.
      *
@@ -380,11 +398,6 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         properties = Collections.emptyMap();
         return properties;
-    }
-
-    @Override
-    public AccountQuota getQuota() throws OXException {
-        return getCalendarService().getQuota(session.getSession(), ACCOUNT_ID);
     }
 
 }

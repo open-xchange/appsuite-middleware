@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
@@ -62,19 +61,14 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
-import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
-import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
-import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
-import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.TouchPerformer;
@@ -88,23 +82,14 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.ServiceSet;
-import com.openexchange.quota.AccountQuota;
-import com.openexchange.quota.DefaultAccountQuota;
-import com.openexchange.quota.Quota;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
 
 /**
@@ -144,6 +129,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public CalendarServiceUtilities getUtilities() {
+        return CalendarServiceUtilitiesImpl.getInstance();
+    }
+
+    @Override
     public List<Event> getChangeExceptions(CalendarSession session, final String folderID, final String objectID) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
@@ -163,50 +153,6 @@ public class CalendarServiceImpl implements CalendarService {
                 return L(new SequenceNumberPerformer(session, storage).perform(getFolder(session, folderID)));
             }
         }.executeQuery().longValue();
-    }
-
-    @Override
-    public boolean containsForeignEvents(CalendarSession session, final String folderId) throws OXException {
-        return new InternalCalendarStorageOperation<Boolean>(session) {
-
-            @Override
-            protected Boolean execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return B(new ForeignEventsPerformer(session, storage).perform(getFolder(session, folderId)));
-            }
-        }.executeQuery().booleanValue();
-    }
-
-    @Override
-    public long countEvents(CalendarSession session, final String folderId) throws OXException {
-        return new InternalCalendarStorageOperation<Long>(session) {
-
-            @Override
-            protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return L(new CountEventsPerformer(session, storage).perform(getFolder(session, folderId)));
-            }
-        }.executeQuery().intValue();
-    }
-
-    @Override
-    public String resolveByUID(CalendarSession session, final String uid) throws OXException {
-        return new InternalCalendarStorageOperation<String>(session) {
-
-            @Override
-            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveUidPerformer(storage).perform(uid);
-            }
-        }.executeQuery();
-    }
-
-    @Override
-    public String resolveByFilename(CalendarSession session, final String filename) throws OXException {
-        return new InternalCalendarStorageOperation<String>(session) {
-
-            @Override
-            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveFilenamePerformer(storage).perform(filename);
-            }
-        }.executeQuery();
     }
 
     @Override
@@ -482,21 +428,4 @@ public class CalendarServiceImpl implements CalendarService {
         return result;
     }
 
-    @Override
-    public AccountQuota getQuota(Session session, int accountId) throws OXException {
-        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class, true);
-        DatabaseService dbService = Services.getService(DatabaseService.class, true);
-        long limit = AmountQuotas.getLimit(session, "calendar", configViewFactory, dbService);
-        Quota quota;
-        if (limit <= Quota.UNLIMITED) {
-            quota = Quota.UNLIMITED_AMOUNT;
-        } else {
-            Context context = Services.getService(ContextService.class, true).getContext(session.getContextId());
-            CalendarStorageFactory factory = Services.getService(CalendarStorageFactory.class, true);
-            CalendarStorage calendarStorage = factory.create(context, accountId, null);
-            long usage = calendarStorage.getEventStorage().countEvents();
-            quota = new Quota(QuotaType.AMOUNT, limit, usage);
-        }
-        return new DefaultAccountQuota(String.valueOf(accountId), "Calendar").addQuota(quota);
-    }
 }

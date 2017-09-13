@@ -58,7 +58,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.quota.AccountQuota;
 import com.openexchange.session.Session;
 
 /**
@@ -88,26 +87,11 @@ public interface CalendarService {
     CalendarSession init(Session session, CalendarParameters parameters) throws OXException;
 
     /**
-     * Resolves an UID to the identifier of an existing event. The lookup is performed case-sensitive and context-wise, independently of
-     * the current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
-     * <i>master</i> event is returned.
+     * Provides access to additional utilities.
      *
-     * @param session The calendar session
-     * @param uid The UID to resolve
-     * @return The identifier of the resolved event, or <code>null</code> if not found
+     * @return The calendar service utilities
      */
-    String resolveByUID(CalendarSession session, String uid) throws OXException;
-
-    /**
-     * Resolves a resource filename to the identifier of an existing event. The lookup is performed context-wise, independently of the
-     * current session user's access rights. If an event series with change exceptions is matched, the identifier of the recurring
-     * <i>master</i> event is returned.
-     *
-     * @param session The calendar session
-     * @param filename The filename to resolve
-     * @return The identifier of the resolved event, or <code>null</code> if not found
-     */
-    String resolveByFilename(CalendarSession session, String filename) throws OXException;
+    CalendarServiceUtilities getUtilities();
 
     /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
@@ -118,25 +102,6 @@ public interface CalendarService {
      * @return The sequence number
      */
     long getSequenceNumber(CalendarSession session, String folderID) throws OXException;
-
-    /**
-     * Gets a value indicating whether a specific folder contains events that were not created by the current session's user.
-     *
-     * @param session The calendar session
-     * @param folderId The identifier of the folder to check the contained events in
-     * @return <code>true</code> if there's at least one event located in the folder that is not created by the user, <code>false</code>, otherwise
-     */
-    boolean containsForeignEvents(CalendarSession session, String folderId) throws OXException;
-
-    /**
-     * Gets the number of events in a folder, which includes the sum of all non-recurring events, the series master events, and the
-     * overridden exceptional occurrences from event series. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
-     *
-     * @param session The calendar session
-     * @param folderId The identifier of the folder to count the events in
-     * @return The number of events contained in the folder, or <code>0</code> if there are none
-     */
-    long countEvents(CalendarSession session, String folderId) throws OXException;
 
     /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
@@ -421,16 +386,5 @@ public interface CalendarService {
      * @throws OXException
      */
     List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
-    
-    
-    /**
-     * Get the {@link AccountQuota}
-     * 
-     * @param session The session to get quota for
-     * @param accountId The identifier of the calendar account
-     * @return The {@link AccountQuota}
-     * @throws OXException In case of quota can't be fetched
-     */
-    AccountQuota getQuota(Session session, int accountId) throws OXException;
 
 }

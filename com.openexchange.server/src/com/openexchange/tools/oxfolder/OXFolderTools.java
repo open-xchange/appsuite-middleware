@@ -1388,7 +1388,7 @@ public class OXFolderTools {
                     case FolderObject.CALENDAR:
                         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
                         calendarSession.set(Connection.class.getName(), readCon);
-                        return false == calendarSession.getCalendarService().containsForeignEvents(calendarSession, String.valueOf(fo.getObjectID()));
+                        return false == calendarSession.getCalendarService().getUtilities().containsForeignEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                         return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
@@ -1409,7 +1409,7 @@ public class OXFolderTools {
                     case FolderObject.CALENDAR:
                         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
                         calendarSession.set(Connection.class.getName(), readCon);
-                        return 0 == calendarSession.getCalendarService().countEvents(calendarSession, String.valueOf(fo.getObjectID()));
+                        return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                         return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));

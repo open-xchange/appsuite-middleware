@@ -300,9 +300,9 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         /*
          * by default, try to resolve object by UID and filename
          */
-        String objectID = calendarSession.getCalendarService().resolveByUID(calendarSession, resourceName);
+        String objectID = calendarSession.getCalendarService().getUtilities().resolveByUID(calendarSession, resourceName);
         if (null == objectID) {
-            objectID = calendarSession.getCalendarService().resolveByFilename(calendarSession, resourceName);
+            objectID = calendarSession.getCalendarService().getUtilities().resolveByFilename(calendarSession, resourceName);
         }
         if (null != objectID) {
             try {

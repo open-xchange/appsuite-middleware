@@ -598,7 +598,7 @@ public class EventResource extends DAVObjectResource<Event> {
             conflictingId = (String) e.getLogArgs()[1];
         }
         if (null == conflictingId) {
-            conflictingId = calendarSession.getCalendarService().resolveByUID(calendarSession, caldavImport.getUID());
+            conflictingId = calendarSession.getCalendarService().getUtilities().resolveByUID(calendarSession, caldavImport.getUID());
         }
         if (null != conflictingId) {
             /*
