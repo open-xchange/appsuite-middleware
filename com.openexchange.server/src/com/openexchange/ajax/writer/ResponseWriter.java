@@ -613,16 +613,16 @@ public final class ResponseWriter {
     }
 
     /**
-     * Check if a stacktrace should be included
+     * Checks if a stack-trace should be included in the response.
      *
-     * @param includeStackTraceOnError <code>true</code> if the client wants to add the stacktrace, <code>false</code> otherwise
+     * @param includeStackTraceOnError <code>true</code> if the client wants to add the stack-trace, <code>false</code> otherwise
      * @param exception The {@link OXException} to check
-     * @return <code>true</code> If and only if it is supposed to be checked, either client or server configured stacktrace invocation
-     *         and if the exception is not blacklisted for stacktrace writing
+     * @return <code>true</code> If and only if it is supposed to be checked, either client or server configured stack-trace invocation
+     *         and if the exception is not blacklisted for stack-trace writing
      *         <code>false</code> if one condition is not met
      */
     private static boolean includeStacktrace(boolean includeStackTraceOnError, OXException exception) {
-        return enableStackTraceOnError() && (includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception);
+        return (null != exception) && enableStackTraceOnError() && (includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception);
     }
 
     private static List<Category> getCategoriesFrom(OXException exception) {
@@ -1092,9 +1092,9 @@ public final class ResponseWriter {
                         // Trigger default
                         LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_ENABLE);
                         return true;
-                    } else {
-                        enable = Boolean.valueOf(service.getBoolProperty(STACKTRACE_ENABLE, true));
                     }
+
+                    enable = Boolean.valueOf(service.getBoolProperty(STACKTRACE_ENABLE, true));
                     enableStackTraceOnError = enable;
                 }
             }
@@ -1119,16 +1119,15 @@ public final class ResponseWriter {
     // -----------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Get the reloadable class for the {@link ResponseWriter}
+     * Gets the <code>Reloadable</code> instance for the {@link ResponseWriter}
      *
-     * @return The {@link Reloadable} to handle reloads
+     * @return The <code>Reloadable</code> to handle reloads
      */
     public static Reloadable getReloadable() {
         return new ResponseWriterReloadable();
     }
 
     /**
-     *
      * {@link ResponseWriterReloadable}
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
