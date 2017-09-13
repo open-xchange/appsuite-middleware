@@ -57,6 +57,8 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.DefaultAccountQuota;
+import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -92,21 +94,40 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
 
     public AccountQuota get(String accountID) throws OXException {
         try {
-            QuotaAware access = getAccess(Integer.parseInt(accountID), QuotaAware.class);
-            return access.getQuota();
+            // Get account
+            int accountId = Integer.parseInt(accountID);
+            CalendarAccount account = getAccount(accountId);
+
+            return getAccountQuota(account);
         } catch (NumberFormatException e) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
         }
     }
 
     public List<AccountQuota> get() throws OXException {
+        // Get accounts
         List<AccountQuota> accountQuotas = new LinkedList<>();
         for (CalendarAccount account : getAccounts()) {
-            CalendarAccess access = getAccess(account);
-            if (QuotaAware.class.isInstance(access)) {
-                accountQuotas.add(getAccess(account, QuotaAware.class).getQuota());
-            }
+            // Add each quota
+            accountQuotas.add(getAccountQuota(account));
         }
         return accountQuotas;
+    }
+
+    /**
+     * Get the {@link AccountQuota} for the {@link CalendarAccount}
+     * 
+     * @param account The account to get the quota for
+     * @return The {@link AccountQuota}
+     * @throws OXException In case the access is denied or quota is not available
+     */
+    private AccountQuota getAccountQuota(CalendarAccount account) throws OXException {
+        CalendarAccess access = getAccess(account);
+        if (QuotaAware.class.isInstance(access)) {
+            return getAccess(account, QuotaAware.class).getQuota();
+        } else {
+            // Assume unlimited
+            return new DefaultAccountQuota(String.valueOf(account.getAccountId()), account.getProviderId()).addQuota(Quota.UNLIMITED_AMOUNT);
+        }
     }
 }

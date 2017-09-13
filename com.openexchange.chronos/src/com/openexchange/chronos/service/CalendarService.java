@@ -427,9 +427,10 @@ public interface CalendarService {
      * Get the {@link AccountQuota}
      * 
      * @param session The session to get quota for
+     * @param accountId The identifier of the calendar account
      * @return The {@link AccountQuota}
      * @throws OXException In case of quota can't be fetched
      */
-    AccountQuota getQuota(Session session) throws OXException;
+    AccountQuota getQuota(Session session, int accountId) throws OXException;
 
 }

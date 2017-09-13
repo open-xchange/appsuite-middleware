@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.internal;
 
+import static com.openexchange.chronos.provider.internal.Constants.ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
@@ -383,7 +384,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public AccountQuota getQuota() throws OXException {
-        return getCalendarService().getQuota(session.getSession());
+        return getCalendarService().getQuota(session.getSession(), ACCOUNT_ID);
     }
 
 }

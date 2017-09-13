@@ -62,6 +62,7 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
@@ -92,11 +93,18 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.session.Session;
 
 /**
@@ -317,8 +325,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
+                return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
 
         }.executeUpdate();
@@ -358,8 +365,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
+                return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
             }
         }.executeUpdate();
         /*
@@ -378,8 +384,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
+                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, Long.valueOf(clientTimestamp));
 
             }
         }.executeUpdate();
@@ -399,7 +404,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, clientTimestamp);
+                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, Long.valueOf(clientTimestamp));
 
             }
         }.executeUpdate();
@@ -419,8 +424,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID()))
-                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
+                return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
 
             }
         }.executeUpdate();
@@ -462,6 +466,7 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException {
         List<AlarmTrigger> result = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
+
             @Override
             protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return storage.getAlarmTriggerStorage().loadTriggers(session.getUserId(), session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class));
@@ -469,8 +474,8 @@ public class CalendarServiceImpl implements CalendarService {
         }.executeQuery();
 
         Iterator<AlarmTrigger> iter = result.iterator();
-        while(iter.hasNext()){
-            if(!actions.contains(iter.next().getAction().toUpperCase())){
+        while (iter.hasNext()) {
+            if (!actions.contains(iter.next().getAction().toUpperCase())) {
                 iter.remove();
             }
         }
@@ -478,8 +483,20 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public AccountQuota getQuota(Session session) throws OXException {
-        // TODO
-        return new DefaultAccountQuota("0", "").addQuota(Quota.UNLIMITED_AMOUNT);
+    public AccountQuota getQuota(Session session, int accountId) throws OXException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class, true);
+        DatabaseService dbService = Services.getService(DatabaseService.class, true);
+        long limit = AmountQuotas.getLimit(session, "calendar", configViewFactory, dbService);
+        Quota quota;
+        if (limit <= Quota.UNLIMITED) {
+            quota = Quota.UNLIMITED_AMOUNT;
+        } else {
+            Context context = Services.getService(ContextService.class, true).getContext(session.getContextId());
+            CalendarStorageFactory factory = Services.getService(CalendarStorageFactory.class, true);
+            CalendarStorage calendarStorage = factory.create(context, accountId, null);
+            long usage = calendarStorage.getEventStorage().countEvents();
+            quota = new Quota(QuotaType.AMOUNT, limit, usage);
+        }
+        return new DefaultAccountQuota(String.valueOf(accountId), "Calendar").addQuota(quota);
     }
 }
