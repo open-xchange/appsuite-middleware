@@ -278,29 +278,6 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeLastModified();
             }
         });
-        mappings.put(AvailableField.description, new StringMapping<Available>("description", Appointment.NOTE) {
-
-            @Override
-            public boolean isSet(Available object) {
-                return object.contains(AvailableField.description);
-            }
-
-            @Override
-            public void set(Available object, String value) throws OXException {
-                object.setDescription(value);
-                ;
-            }
-
-            @Override
-            public String get(Available object) {
-                return object.getDescription();
-            }
-
-            @Override
-            public void remove(Available object) {
-                object.removeDescription();
-            }
-        });
         mappings.put(AvailableField.rrule, new StringMapping<Available>("rrule", Appointment.RECURRENCE_TYPE) {
 
             @Override
@@ -321,28 +298,6 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
             @Override
             public void remove(Available object) {
                 object.removeRecurrenceRule();
-            }
-        });
-        mappings.put(AvailableField.summary, new StringMapping<Available>("summary", Appointment.NOTE) {
-
-            @Override
-            public boolean isSet(Available object) {
-                return object.contains(AvailableField.summary);
-            }
-
-            @Override
-            public void set(Available object, String value) throws OXException {
-                object.setSummary(value);
-            }
-
-            @Override
-            public String get(Available object) {
-                return object.getSummary();
-            }
-
-            @Override
-            public void remove(Available object) {
-                object.removeSummary();
             }
         });
         return mappings;
