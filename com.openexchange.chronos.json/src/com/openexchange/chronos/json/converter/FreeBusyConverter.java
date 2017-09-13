@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.json.converter;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

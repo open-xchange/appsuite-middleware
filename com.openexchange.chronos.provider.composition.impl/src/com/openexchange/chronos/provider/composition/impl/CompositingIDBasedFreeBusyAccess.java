@@ -177,22 +177,22 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, FreeBusyResult> result = new HashMap<>(0);
+    public Map<Attendee, List<FreeBusyTime>> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, FreeBusyResult> temp = new HashMap<>(0);
         for (CalendarAccount account : getAccounts()) {
             CalendarAccess access = getAccess(account);
             if (access instanceof FreeBusyAwareCalendarAccess) {
                 Map<Attendee, FreeBusyResult> freeBusyTimesPerAttendee = ((FreeBusyAwareCalendarAccess) access).calculateFreeBusyTime(attendees, from, until);
-                if (result == null) {
-                    result = freeBusyTimesPerAttendee;
+                if (temp == null) {
+                    temp = freeBusyTimesPerAttendee;
                 } else {
                     for (Attendee att : freeBusyTimesPerAttendee.keySet()) {
                         List<FreeBusyTime> freeBusyTimes = freeBusyTimesPerAttendee.get(att).getFreeBusyTimes();
-                        FreeBusyResult freeBusyResult = result.get(att);
+                        FreeBusyResult freeBusyResult = temp.get(att);
                         if (freeBusyResult == null) {
                             freeBusyResult = new FreeBusyResult();
                             freeBusyResult.setFreeBusyTimes(freeBusyTimes);
-                            result.put(att, freeBusyResult);
+                            temp.put(att, freeBusyResult);
                         } else {
                             freeBusyResult.getFreeBusyTimes().addAll(freeBusyTimes);
                         }
@@ -202,11 +202,11 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
         }
 
         // Merge results
-        for (Attendee att : result.keySet()) {
-            FreeBusyResult freeBusyResult = result.get(att);
+        Map<Attendee, List<FreeBusyTime>> result = new HashMap<>();
+        for (Attendee att : temp.keySet()) {
+            FreeBusyResult freeBusyResult = temp.get(att);
             List<FreeBusyTime> freeBusyTimes = freeBusyResult.getFreeBusyTimes();
-            freeBusyResult.setFreeBusyTimes(FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
-            result.put(att, freeBusyResult);
+            result.put(att, FreeBusyUtils.mergeFreeBusy(freeBusyTimes));
         }
 
         return result;
