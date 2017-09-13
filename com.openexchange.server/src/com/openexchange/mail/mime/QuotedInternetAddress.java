@@ -256,10 +256,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
         for (String addr : addrs) {
             if (addr.lastIndexOf('<') < 0 && addr.indexOf("=?") >= 0) {
-                addr = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+                addr = init(MimeMessageUtility.decodeMultiEncodedHeader(addr));
             } else if (addr.indexOf("'?= <") > 0) {
                 // Expect something like: =?utf-8?Q?...'?= <jane@doe.org>
-                String tmp = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+                String tmp = init(MimeMessageUtility.decodeMultiEncodedHeader(addr));
 
                 // Check if personal part is surrounded by single-quotes
                 if (tmp.startsWith("'")) {
@@ -284,7 +284,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
-        String s = decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str;
+        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
         int length = s.length();
         boolean ignoreErrors = parseHdr && !strict;
         List<InternetAddress> list = new LinkedList<InternetAddress>();
@@ -709,8 +709,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 pers = tmp;
             }
             if (rfc822 || strict || parseHdr) {
-                String ace = toACE(addr);
-                ace = MimeMessageUtility.decodeMultiEncodedHeader(ace);
+                String ace = toACE(init(MimeMessageUtility.decodeMultiEncodedHeader(addr)));
                 if (!ignoreErrors) {
                     checkAddress(ace, route_addr, false);
                 }
@@ -949,29 +948,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
-        this(init(address, true));
-        if (strict) {
-            if (isGroup()) {
-                getGroup(true); // throw away the result
-            } else {
-                checkAddress(this.address, true, true);
-            }
-        }
-    }
-
-    /**
-     * Initializes a new {@link QuotedInternetAddress}.
-     * <p>
-     * Parse the given string and create an InternetAddress. If strict is <code>false</code>, the detailed syntax of the address isn't
-     * checked. toACE
-     *
-     * @param address The address in RFC822 format
-     * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
-     * @param suppressControlOrWhitespace Whether to suppress control or whitespace characters possibly contained in given address string
-     * @throws AddressException If parsing the address fails
-     */
-    public QuotedInternetAddress(final String address, final boolean strict, final boolean suppressControlOrWhitespace) throws AddressException {
-        this(init(address, suppressControlOrWhitespace));
+        this(address);
         if (strict) {
             if (isGroup()) {
                 getGroup(true); // throw away the result
@@ -983,11 +960,14 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}\\p{L}]");
 
-    private static String init(final String address, final boolean suppressControlOrWhitespace) {
-        if (!suppressControlOrWhitespace) {
-            return address;
-        }
-        return WHITESPACE_OR_CONTROL.matcher(address).replaceAll("");
+    /**
+     * Initializes specified address by dropping possibly contained white-space and control characters.
+     *
+     * @param address The address to initialize
+     * @return The possibly initialized address string
+     */
+    public static String init(String address) {
+        return null == address ? null : WHITESPACE_OR_CONTROL.matcher(address).replaceAll("");
     }
 
     /**
@@ -1015,7 +995,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public QuotedInternetAddress(final String address, final String personal, final String charset) throws AddressException, UnsupportedEncodingException {
         super();
-        this.address = toACE(address);
+        this.address = toACE(init(address));
         if (charset == null) {
             // use default charset
             jcharset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1091,8 +1071,9 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        personal = name;
-        if (name != null) {
+        String n = init(name);
+        personal = n;
+        if (n != null) {
             if (charset == null) {
                 // use default charset
                 jcharset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1104,7 +1085,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 jcharset = javaCharset;
             }
-            encodedPersonal = MimeUtility.encodeWord(name, charset, null);
+            encodedPersonal = MimeUtility.encodeWord(n, charset, null);
         } else {
             encodedPersonal = null;
         }
@@ -1117,11 +1098,12 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     @Override
     public void setAddress(final String address) {
+        String a = init(address);
         try {
-            this.address = toACE(address);
+            this.address = toACE(a);
         } catch (final AddressException e) {
-            LOG.error("ACE string could not be parsed from IDN string: {}", address, e);
-            this.address = address;
+            LOG.error("ACE string could not be parsed from IDN string: {}", a, e);
+            this.address = a;
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.exception;
 
+import java.util.Map;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -179,4 +180,53 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(Map<String, Object> arguments, final Object... args) {
+        OXException oxe = create(args);
+        for (String key : arguments.keySet()) {
+            oxe.setArgument(key, arguments.get(key));
+        }
+        return oxe;
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, Map<String, Object> arguments, final Object... args) {
+        OXException oxe = OXExceptionFactory.getInstance().create(this, cause, args);
+        for (String key : arguments.keySet()) {
+            oxe.setArgument(key, arguments.get(key));
+        }
+        return oxe;
+    }
+
+    /**
+     * Extracts the fingerprint (if exists) from the specified {@link Throwable}
+     * 
+     * @param t The {@link Throwable}
+     * @return The fingerprint or an empty string if no fingerprint exists in the parameters of the specified {@link Throwable}
+     */
+    public static String extractFingerprint(Throwable t) {
+        Throwable cause = t.getCause();
+        while (cause != null) {
+            if (OXException.class.isInstance(cause)) {
+                OXException oxe = (OXException) cause;
+                if (oxe.getPrefix().equals(SSLExceptionCode.PREFIX)) {
+                    return (String) oxe.getArgument("fingerprint");
+                }
+            }
+            cause = cause.getCause();
+        }
+        return new String();
+    }
 }

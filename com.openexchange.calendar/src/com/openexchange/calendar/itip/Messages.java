@@ -264,7 +264,7 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_REMOVED_RESOURCE = "The resource %1$s is no longer reserved for the appointment";
 
-    public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
+    public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date/time: %1$s. New date/time: %2$s";
 
     public static final String ASK_RESCHEDULE = "Reschedule the event. Original date: %1$s. New date: %2$s";
 

@@ -8,6 +8,8 @@
       If the session ID was stored in a cookie before via the store request, 
       the user can reuse his old session by using the autologin request.
     parameters:
+      - $ref: "#/parameters/glbQueryParamsRampUp"
+      - $ref: "#/parameters/glbQueryParamsRampUpFor"
       - in: query
         type: string
         name: authId

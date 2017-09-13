@@ -100,10 +100,10 @@ public class GmailProtocol extends IMAPProtocol {
      * @exception	IOException	for I/O errors
      * @exception	ProtocolException	for protocol failures
      */
-    public GmailProtocol(String name, String host, int port, 
+    public GmailProtocol(String name, String host, int port, String user,
 			Properties props, boolean isSSL, MailLogger logger)
 			throws IOException, ProtocolException {
-	super(name, host, port, props, isSSL, logger);
+	super(name, host, port, user, props, isSSL, logger);
 
 	// check to see if this is really Gmail
 	if (!hasCapability("X-GM-EXT-1")) {

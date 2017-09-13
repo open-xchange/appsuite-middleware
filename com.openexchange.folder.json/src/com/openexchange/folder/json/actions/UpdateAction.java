@@ -49,13 +49,17 @@
 
 package com.openexchange.folder.json.actions;
 
+import static com.openexchange.folder.json.FolderField.FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -80,7 +84,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OAuthAction(OAuthAction.CUSTOM)
-public final class UpdateAction extends AbstractFolderAction {
+@DispatcherNotes(enqueueable = true)
+public final class UpdateAction extends AbstractFolderAction implements EnqueuableAJAXActionService {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
@@ -89,6 +94,17 @@ public final class UpdateAction extends AbstractFolderAction {
      */
     public UpdateAction() {
         super();
+    }
+
+    @Override
+    public boolean isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        JSONObject data = (JSONObject) request.requireData();
+        JSONObject jFolder = data.optJSONObject("folder");
+        if (null == jFolder) {
+            jFolder = data;
+        }
+
+        return jFolder.hasAndNotNull(FOLDER_ID.getName());
     }
 
     @Override

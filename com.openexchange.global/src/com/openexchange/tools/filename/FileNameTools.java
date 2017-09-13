@@ -96,7 +96,7 @@ public class FileNameTools {
                 if (null != sb) {
                     sb.append(ch);
                 }
-            } else if (Character.isLetter(ch)) { // Any letter
+            } else if (Character.isLetterOrDigit(ch)) { // Any letter or digit
                 if (null != sb) {
                     sb.append(ch);
                 }
