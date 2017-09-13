@@ -1,13 +1,4 @@
-type: object
-properties:
-  uid:
-    type: string
-    description: ID of a newly created calendar account.
-  busyType:
-    type: string  
-    description: The default busy type (BUSY-UNAVAILABLE).
-  available:
-    type: array
-    description: The available blocks of the user.
-    items:
-      $ref: "#/definitions/Available"
+  type: array
+  description: The available blocks of the user.
+  items:
+    $ref: "#/definitions/Available"
