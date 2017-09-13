@@ -94,9 +94,6 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.filter.StackTraceFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyEvent.Type;
-import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.Categories;
@@ -172,7 +169,9 @@ public final class ResponseWriter {
         INCL_STACKTRACE_REF.set(includeStackTraceService);
     }
 
-    static volatile Boolean includeStackTraceOnError;
+    /** Server side switch to enable stacktrace invocation on responses */
+    private static final String STACKTRACE_INCLUDE_ERROR = "com.openexchange.ajax.response.includeStackTraceOnError";
+    static volatile Boolean     includeStackTraceOnError;
 
     private static boolean includeStackTraceOnError() {
         // First consult IncludeStackTraceService
@@ -203,18 +202,7 @@ public final class ResponseWriter {
                     if (null == service) {
                         return false;
                     }
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false, new PropertyListener() {
-
-                        @Override
-                        public void onPropertyChange(PropertyEvent event) {
-                            final Type type = event.getType();
-                            if (Type.DELETED == type) {
-                                includeStackTraceOnError = Boolean.FALSE;
-                            } else if (Type.CHANGED == type) {
-                                includeStackTraceOnError = Boolean.valueOf(event.getValue().trim());
-                            }
-                        }
-                    }));
+                    b = Boolean.valueOf(service.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
                     includeStackTraceOnError = b;
                 }
             }
@@ -222,7 +210,9 @@ public final class ResponseWriter {
         return b.booleanValue();
     }
 
-    static volatile Boolean includeArguments;
+    /** Whether the JSON response object in case of an error should include the exception arguments or not */
+    private static final String INCLUDE_ARGUMENTS = "com.openexchange.ajax.response.includeArguments";
+    static volatile Boolean     includeArguments;
 
     private static boolean includeArguments() {
         Boolean b = includeArguments;
@@ -234,18 +224,7 @@ public final class ResponseWriter {
                     if (null == service) {
                         return false;
                     }
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeArguments", false, new PropertyListener() {
-
-                        @Override
-                        public void onPropertyChange(PropertyEvent event) {
-                            final Type type = event.getType();
-                            if (Type.DELETED == type) {
-                                includeArguments = Boolean.FALSE;
-                            } else if (Type.CHANGED == type) {
-                                includeArguments = Boolean.valueOf(event.getValue().trim());
-                            }
-                        }
-                    }));
+                    b = Boolean.valueOf(service.getBoolProperty(INCLUDE_ARGUMENTS, false));
                     includeArguments = b;
                 }
             }
@@ -1080,7 +1059,7 @@ public final class ResponseWriter {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", STACKTRACE_FILTER);
+                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_FILTER);
                         f = new StackTraceFilter(null);
                     } else {
                         f = new StackTraceFilter(service.getProperty(STACKTRACE_FILTER, new String()));
@@ -1111,8 +1090,8 @@ public final class ResponseWriter {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Therefore {} won't be reloadbale. Falling back to default.", STACKTRACE_ENABLE);
-                        enable = Boolean.TRUE;
+                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_ENABLE);
+                        return true;
                     } else {
                         enable = Boolean.valueOf(service.getBoolProperty(STACKTRACE_ENABLE, true));
                     }
@@ -1168,11 +1147,13 @@ public final class ResponseWriter {
         public void reloadConfiguration(ConfigurationService configService) {
             enableStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_ENABLE, true));
             filter = new StackTraceFilter(configService.getProperty(STACKTRACE_FILTER, new String()));
+            includeStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
+            includeArguments = Boolean.valueOf(configService.getBoolProperty(INCLUDE_ARGUMENTS, false));
         }
 
         @Override
         public Interests getInterests() {
-            return Reloadables.interestsForProperties(STACKTRACE_ENABLE, STACKTRACE_FILTER);
+            return Reloadables.interestsForProperties(STACKTRACE_ENABLE, STACKTRACE_FILTER, STACKTRACE_INCLUDE_ERROR, INCLUDE_ARGUMENTS);
         }
     }
 
