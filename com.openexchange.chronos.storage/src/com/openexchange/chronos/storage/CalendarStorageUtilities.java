@@ -55,7 +55,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link CalendarStorageUtilities}
@@ -136,22 +135,5 @@ public interface CalendarStorageUtilities {
      * @throws OXException In case of an error
      */
     List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException;
-
-    /**
-     * Check if quota exceeded the limit
-     * 
-     * @param session The {@link Session} to check the quota for
-     * @throws OXException In case of missing service or quota exceeded
-     */
-    void checkQuota(Session session) throws OXException;
-
-    /**
-     * Check if quota exceeded the limit for a specific account
-     * 
-     * @param session The {@link Session} to check the quota for
-     * @param accountId The identifier of the account or <code>null</code> to check every account for given session
-     * @throws OXException In case of missing service or quota exceeded
-     */
-    void checkQuota(Session session, String accountId) throws OXException;
 
 }

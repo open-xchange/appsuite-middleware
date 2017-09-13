@@ -52,7 +52,6 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,19 +63,9 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.quota.AccountQuota;
-import com.openexchange.quota.Quota;
-import com.openexchange.quota.QuotaProvider;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.Session;
 
 /**
  * {@link CalendarStorage}
@@ -187,40 +176,5 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
             }
         }
         return events;
-    }
-    
-    @Override
-    public void checkQuota(Session session) throws OXException {
-        checkQuota(session, null);
-    }
-
-    @Override
-    public void checkQuota(Session session, String accountId) throws OXException {
-        // Name from com.openexchange.chronos.provider.quota.ChronosQuotaProvider.MODULE_NAME
-        QuotaProvider provider = Services.getService(QuotaService.class, true).getProvider("calendar.chronos");
-        if (null == provider) {
-            // Service missing
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaProvider.class.getName());
-        }
-        // Get quota for account(s)
-        List<AccountQuota> list;
-        if (Strings.isEmpty(accountId)) {
-            list = provider.getFor(session);
-        } else {
-            list = Collections.singletonList(provider.getFor(session, accountId));
-        }
-        // Check if any account exceeded the limit
-        for (AccountQuota accountQuota : list) {
-            Quota quota;
-            if (accountQuota.hasQuota(QuotaType.AMOUNT)) {
-                quota = accountQuota.getQuota(QuotaType.AMOUNT);
-            } else {
-                quota = accountQuota.getQuota(QuotaType.SIZE);
-            }
-            if (quota.isExceeded()) {
-                // Exceeded
-                throw CalendarExceptionCodes.INSUFFICIENT_QUOTA.create(String.valueOf(accountQuota.getAccountID()), String.valueOf(session.getContextId()));
-            }
-        }
     }
 }
