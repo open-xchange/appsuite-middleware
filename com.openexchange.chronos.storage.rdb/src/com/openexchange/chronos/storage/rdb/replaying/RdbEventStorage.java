@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb.replaying;
 
 import java.util.List;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -90,8 +91,24 @@ public class RdbEventStorage implements EventStorage {
         String nextLegacyId = legacyDelegate.nextId();
         String nextId = delegate.nextId();
         if (false == nextId.equals(nextLegacyId)) {
-            org.slf4j.LoggerFactory.getLogger(RdbStorage.class).warn(
-                "Sequential identifiers in legacy storage have diverged: \"{}\" in default vs. \"{}\" in legacy storage.");
+            LoggerFactory.getLogger(RdbStorage.class).warn(
+                "Sequential identifiers in replaying storage have diverged: \"{}\" in default vs. \"{}\" in legacy storage.", nextId, nextLegacyId);
+            try {
+                int numericalLegacyId = Integer.parseInt(nextLegacyId);
+                int numericalId = Integer.parseInt(nextId);
+                while (numericalLegacyId < numericalId) {
+                    nextLegacyId = legacyDelegate.nextId();
+                    numericalLegacyId = Integer.parseInt(nextLegacyId);
+                }
+                while (numericalId < numericalLegacyId) {
+                    nextId = delegate.nextId();
+                    numericalId = Integer.parseInt(nextId);
+                }
+                LoggerFactory.getLogger(RdbStorage.class).info(
+                    "Successfully synchronized sequential identifiers in replaying storage to \"{}\".", nextId);
+            } catch (Exception e) {
+                LoggerFactory.getLogger(RdbStorage.class).error("Unexpected error when synchronizing sequential identifiers in replaying storage", e);
+            }
         }
         return nextId;
     }
