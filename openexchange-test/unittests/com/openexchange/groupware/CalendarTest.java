@@ -529,7 +529,7 @@ public class CalendarTest {
 
         //OXFolderAction ofa = new OXFolderAction(so);
         final CalendarSql csql = new CalendarSql(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -648,7 +648,7 @@ public class CalendarTest {
         final Connection writecon = DBPool.pickupWriteable(context);
 
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -757,7 +757,7 @@ public class CalendarTest {
         final Connection writecon = DBPool.pickupWriteable(context);
 
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1183,7 +1183,7 @@ public class CalendarTest {
         final int fid = getPrivateFolder();
         //OXFolderAction ofa = new OXFolderAction(so);
         final CalendarSql csql = new CalendarSql(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
 
         final OCLPermission oclp1 = new OCLPermission();
@@ -1389,7 +1389,7 @@ public class CalendarTest {
         final Connection writecon = DBPool.pickupWriteable(context);
 
         //OXFolderAction ofa = new OXFolderAction(so);
-        final OXFolderManager oxma = OXFolderManager.getInstance(so, csql, readcon, writecon);
+        final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         final OCLPermission oclp = new OCLPermission();
         oclp.setEntity(userid);
         oclp.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
