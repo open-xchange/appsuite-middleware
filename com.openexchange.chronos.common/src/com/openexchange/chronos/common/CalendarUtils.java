@@ -122,6 +122,9 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  */
 public class CalendarUtils {
 
+    /** A timestamp in the distant future as substitute for the client timestamp when circumventing concurrent modification checks */
+    public static final long DISTANT_FUTURE = Long.MAX_VALUE;
+
     /** A comparator for (usually numerical) string identifiers */
     public static final Comparator<String> ID_COMPARATOR = new Comparator<String>() {
 
