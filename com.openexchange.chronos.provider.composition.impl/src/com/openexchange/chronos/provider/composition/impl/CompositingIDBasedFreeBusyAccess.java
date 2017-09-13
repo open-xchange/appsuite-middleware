@@ -187,7 +187,15 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
                     result = freeBusyTimesPerAttendee;
                 } else {
                     for (Attendee att : freeBusyTimesPerAttendee.keySet()) {
-                        result.get(att).getFreeBusyTimes().addAll(freeBusyTimesPerAttendee.get(att).getFreeBusyTimes());
+                        List<FreeBusyTime> freeBusyTimes = freeBusyTimesPerAttendee.get(att).getFreeBusyTimes();
+                        FreeBusyResult freeBusyResult = result.get(att);
+                        if (freeBusyResult == null) {
+                            freeBusyResult = new FreeBusyResult();
+                            freeBusyResult.setFreeBusyTimes(freeBusyTimes);
+                            result.put(att, freeBusyResult);
+                        } else {
+                            freeBusyResult.getFreeBusyTimes().addAll(freeBusyTimes);
+                        }
                     }
                 }
             }
