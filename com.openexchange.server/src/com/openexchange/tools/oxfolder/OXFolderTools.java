@@ -62,6 +62,8 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -1386,8 +1388,9 @@ public class OXFolderTools {
                         final Tasks tasks = Tasks.getInstance();
                         return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
                     case FolderObject.CALENDAR:
-                        final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                        return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+                        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+                        calendarSession.set(Connection.class.getName(), readCon);
+                        return false == calendarSession.getCalendarService().containsForeignEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                         return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));

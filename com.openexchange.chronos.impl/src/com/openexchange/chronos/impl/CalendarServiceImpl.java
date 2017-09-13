@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
+import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
@@ -86,7 +88,6 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -150,6 +151,17 @@ public class CalendarServiceImpl implements CalendarService {
                 return L(new SequenceNumberPerformer(session, storage).perform(getFolder(session, folderID)));
             }
         }.executeQuery().longValue();
+    }
+
+    @Override
+    public boolean containsForeignEvents(CalendarSession session, final String folderId) throws OXException {
+        return new InternalCalendarStorageOperation<Boolean>(session) {
+
+            @Override
+            protected Boolean execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return B(new ForeignEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+            }
+        }.executeQuery().booleanValue();
     }
 
     @Override

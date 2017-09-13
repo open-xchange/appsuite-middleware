@@ -119,6 +119,15 @@ public interface CalendarService {
     long getSequenceNumber(CalendarSession session, String folderID) throws OXException;
 
     /**
+     * Gets a value indicating whether a specific folder contains events that were not created by the current session's user.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to check the contained events in
+     * @return <code>true</code> if there's at least one event located in the folder that is not created by the user, <code>false</code>, otherwise
+     */
+    boolean containsForeignEvents(CalendarSession session, String folderId) throws OXException;
+
+    /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
      * {@link EventField#CATEGORIES}. The pattern is surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
      * <p/>

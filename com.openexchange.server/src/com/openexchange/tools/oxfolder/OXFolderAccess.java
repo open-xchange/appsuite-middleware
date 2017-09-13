@@ -60,12 +60,13 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.FolderObject;
@@ -85,7 +86,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -637,7 +637,6 @@ public class OXFolderAccess {
      */
     public final boolean containsForeignObjects(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
-            final int userId = session.getUserId();
             final int module = folder.getModule();
             if (module == FolderObject.TASK) {
                 final Tasks tasks = Tasks.getInstance();
@@ -654,11 +653,9 @@ public class OXFolderAccess {
                 }
                 return tasks.containsNotSelfCreatedTasks(session, readCon, folder.getObjectID());
             } else if (module == FolderObject.CALENDAR) {
-                final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                if (readCon == null) {
-                    return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID());
-                }
-                return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID(), readCon);
+                CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+                calendarSession.set(Connection.class.getName(), readCon);
+                return calendarSession.getCalendarService().containsForeignEvents(calendarSession, String.valueOf(folder.getObjectID()));
             } else if (module == FolderObject.CONTACT) {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                 return contactService.containsForeignObjectInFolder(session, String.valueOf(folder.getObjectID()));
@@ -668,8 +665,6 @@ public class OXFolderAccess {
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
