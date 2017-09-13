@@ -89,6 +89,8 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -500,6 +502,20 @@ public class Check {
      */
     public static void noConflicts(CalendarStorage storage, CalendarSession session, Event event, List<Attendee> attendees) throws OXException {
         noConflicts(new ConflictCheckPerformer(session, storage).perform(event, attendees));
+    }
+
+    /**
+     * Checks that the account's quota is not exceeded prior inserting new event data.
+     *
+     * @param storage The underlying calendar storage
+     * @param session The calendar session
+     * @throws OXException {@link QuotaExceptionCodes#QUOTA_EXCEEDED_CALENDAR}
+     */
+    public static void quotaNotExceeded(CalendarStorage storage, CalendarSession session) throws OXException {
+        Quota quota = Utils.getQuota(session, storage);
+        if (null != quota && quota.isExceeded()) {
+            throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(String.valueOf(quota.getUsage()), String.valueOf(quota.getLimit()));
+        }
     }
 
     /**

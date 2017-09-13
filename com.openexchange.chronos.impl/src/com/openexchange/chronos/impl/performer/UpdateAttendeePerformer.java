@@ -227,9 +227,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
                 /*
-                 * check if quota is exceeded before inserting new events 
+                 * check if quota is exceeded before inserting new events
                  */
-                storage.getUtilities().checkQuota(session.getSession());
+                Check.quotaNotExceeded(storage, session);
                 /*
                  * update for new change exception, prepare & insert the exception
                  */

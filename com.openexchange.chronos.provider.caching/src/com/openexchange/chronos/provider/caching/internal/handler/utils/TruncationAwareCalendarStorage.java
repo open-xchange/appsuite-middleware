@@ -109,7 +109,6 @@ public class TruncationAwareCalendarStorage implements CalendarStorage {
         int retryCount = 0;
         do {
             try {
-                calendarStorage.getUtilities().checkQuota(session);
                 calendarStorage.getEventStorage().updateEvent(event);
                 return;
             } catch (OXException e) {

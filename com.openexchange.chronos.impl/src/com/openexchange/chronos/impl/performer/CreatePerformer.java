@@ -100,10 +100,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      */
     public InternalCalendarResult perform(Event event) throws OXException {
         /*
-         * check if quota is exceeded before inserting new events 
-         */
-        storage.getUtilities().checkQuota(session.getSession());
-        /*
          * check current session user's permissions
          */
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
@@ -125,8 +121,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         }
         /*
-         * check for conflicts
+         * check for conflicts & quota restrictions
          */
+        Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newAttendees);
         /*
          * insert event, attendees, attachments & alarms of user
