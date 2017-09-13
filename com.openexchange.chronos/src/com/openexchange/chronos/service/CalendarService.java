@@ -110,7 +110,7 @@ public interface CalendarService {
 
     /**
      * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
-     * contents. Distinct object access permissions (e.g. "read own") are not considered.
+     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
      *
      * @param session The calendar session
      * @param folderID The identifier of the folder to get the sequence number for
@@ -126,6 +126,16 @@ public interface CalendarService {
      * @return <code>true</code> if there's at least one event located in the folder that is not created by the user, <code>false</code>, otherwise
      */
     boolean containsForeignEvents(CalendarSession session, String folderId) throws OXException;
+
+    /**
+     * Gets the number of events in a folder, which includes the sum of all non-recurring events, the series master events, and the
+     * overridden exceptional occurrences from event series. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to count the events in
+     * @return The number of events contained in the folder, or <code>0</code> if there are none
+     */
+    long countEvents(CalendarSession session, String folderId) throws OXException;
 
     /**
      * Searches for events by pattern in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and

@@ -69,7 +69,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.chronos.service.CalendarService;
@@ -89,7 +88,6 @@ import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -1087,20 +1085,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final Tasks tasks = Tasks.getInstance();
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
-            final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
-                session);
-            if (readCon == null) {
-                try {
-                    return calSql.isFolderEmpty(user.getId(), folderId);
-                } catch (final SQLException e) {
-                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                }
-            }
-            try {
-                return calSql.isFolderEmpty(user.getId(), folderId, readCon);
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
+            CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+            calendarSession.set(Connection.class.getName(), readCon);
+            return 0 == calendarSession.getCalendarService().countEvents(calendarSession, String.valueOf(folderId));
         } else if (module == FolderObject.CONTACT) {
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
             return contactService.isFolderEmpty(session, String.valueOf(folderId));

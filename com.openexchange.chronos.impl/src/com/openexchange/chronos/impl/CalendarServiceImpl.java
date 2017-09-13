@@ -65,6 +65,7 @@ import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
+import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
@@ -162,6 +163,17 @@ public class CalendarServiceImpl implements CalendarService {
                 return B(new ForeignEventsPerformer(session, storage).perform(getFolder(session, folderId)));
             }
         }.executeQuery().booleanValue();
+    }
+
+    @Override
+    public long countEvents(CalendarSession session, final String folderId) throws OXException {
+        return new InternalCalendarStorageOperation<Long>(session) {
+
+            @Override
+            protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return L(new CountEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+            }
+        }.executeQuery().intValue();
     }
 
     @Override
