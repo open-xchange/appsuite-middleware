@@ -1,0 +1,34 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The identifier of the available block.
+  user:
+    type: integer
+    description: The user identifier of the available block.
+  uid:
+    type: string
+    description: The unique identifier of the available block.
+  created:
+    type: integer
+    format: int64
+    description: The creation date.
+  modified:
+    type: integer
+    format: int64
+    description: The last modification time.
+  rrule:
+    type: string
+    description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
+  summary:
+    type: string
+    description: The summary of the available block.
+  description:
+    type: string
+    description: The description of the available block.
+  startDate:
+    $ref: "#/definitions/DateTimeData"
+    description: The starting date of the available block.
+  endDate:
+    $ref: "#/definitions/DateTimeData"
+    description: The ending date of the available block.

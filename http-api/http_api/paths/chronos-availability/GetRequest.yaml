@@ -1,0 +1,15 @@
+/chronos/availability?action=get:
+  get:
+    operationId: getAvailability
+    tags:
+      - Chronos
+    summary: Gets the configured availability of the user.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          An object containing all data of the requested availability. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/GetAvailabilityResponse"

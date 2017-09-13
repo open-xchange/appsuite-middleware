@@ -190,6 +190,13 @@ CalendarAccountResponse:
   $ref: ./chronos-accounts/CalendarAccountResponse.yaml
 CalendarAccountsResponse:
   $ref: ./chronos-accounts/CalendarAccountsResponse.yaml
+# Module: chronos-availability
+AvailabilityData:
+  $ref: ./chronos-availability/AvailabilityData.yaml
+Available:
+  $ref: ./chronos-availability/Available.yaml
+GetAvailabilityResponse:
+  $ref: ./chronos-availability/GetAvailabilityResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
