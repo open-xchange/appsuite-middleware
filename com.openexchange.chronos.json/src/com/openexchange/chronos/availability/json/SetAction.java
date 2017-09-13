@@ -54,12 +54,10 @@ import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
-import com.openexchange.chronos.availability.json.mapper.AvailabilityMapper;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -90,29 +88,28 @@ public class SetAction extends AbstractAction {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
+        JSONArray requestBody = getRequestBody(requestData, JSONArray.class);
         try {
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
 
-            // Delete the availability for the user
-            if (!requestBody.hasAndNotNull("available")) {
+            // Delete the user's availability
+            if (requestBody.isEmpty()) {
                 service.deleteAvailability(calendarSession);
                 return new AJAXRequestResult();
             }
 
             // Parse the availability and the available blocks
-            Availability availability = AvailabilityMapper.getInstance().deserialize(requestBody, AvailabilityMapper.getInstance().getMappedFields());
-            JSONArray availableArr = requestBody.getJSONArray("available");
-            List<Available> availables = new ArrayList<>(availableArr.length());
-            for (int index = 0; index < availableArr.length(); index++) {
-                availables.add(AvailableMapper.getInstance().deserialize(availableArr.getJSONObject(index), AvailableMapper.getInstance().getMappedFields()));
+            List<Available> availables = new ArrayList<>(requestBody.length());
+            for (int index = 0; index < requestBody.length(); index++) {
+                availables.add(AvailableMapper.getInstance().deserialize(requestBody.getJSONObject(index), AvailableMapper.getInstance().getMappedFields()));
             }
 
-            // Set the availability for the user and overwrite any existing one
+            Availability availability = new Availability();
             availability.setAvailable(availables);
 
             checkAndSetUids(availability);
+            // Set the availability for the user and overwrite any existing one
             service.setAvailability(calendarSession, availability);
 
             return new AJAXRequestResult();

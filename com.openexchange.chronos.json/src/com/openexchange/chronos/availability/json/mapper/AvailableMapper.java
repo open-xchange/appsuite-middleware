@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Available;
-import com.openexchange.chronos.json.converter.mapper.ColumnIDs;
 import com.openexchange.chronos.json.converter.mapper.DateTimeMapping;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.exception.OXException;
