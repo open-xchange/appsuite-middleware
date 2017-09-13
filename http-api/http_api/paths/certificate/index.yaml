@@ -1,7 +1,8 @@
 requests:
-   - StoreRequest.yaml
-   - GetRequest.yaml
-   - ExamineRequest.yaml
    - AllRequest.yaml
-   - UpdateRequest.yaml
+   - DeleteAllRequest.yaml
    - DeleteRequest.yaml
+   - ExamineRequest.yaml
+   - GetRequest.yaml
+   - StoreRequest.yaml
+   - UpdateRequest.yaml
