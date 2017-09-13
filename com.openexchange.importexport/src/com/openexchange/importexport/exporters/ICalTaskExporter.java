@@ -145,14 +145,9 @@ public class ICalTaskExporter extends AbstractICalExporter {
         } catch (final OXException e) {
             return false;
         }
-        //TODO remove CALENDAR check and add a check to clarify if all folders are TASK folders
         //check format of folder
         final int module = fo.getModule();
-        if (module == FolderObject.CALENDAR) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                return false;
-            }
-        } else if (module == FolderObject.TASK) {
+        if (module == FolderObject.TASK) {
             if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
                 return false;
             }

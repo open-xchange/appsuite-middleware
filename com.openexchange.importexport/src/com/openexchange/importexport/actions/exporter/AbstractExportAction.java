@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.chronos.exporter.ChronosExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
@@ -92,11 +91,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
         if (doBatchExport(batchIds)) {
             sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
         } else {
-            if (exporter instanceof ChronosExporter) {
-                sis = ((ChronosExporter) exporter).exportChronosFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
-            } else {
-                sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
-            }
+            sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
         }
 
         if (null == sis) {

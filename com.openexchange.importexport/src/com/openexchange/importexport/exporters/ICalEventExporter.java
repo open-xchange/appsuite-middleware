@@ -56,12 +56,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -75,7 +74,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ICalEventExporter}
+ * {@link ICalEventExporter} Event exporter for the legacy calendar api
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
@@ -95,15 +94,9 @@ public class ICalEventExporter extends AbstractICalExporter {
         } catch (final OXException e) {
             return false;
         }
-        //remove TASK add check for only calendar folder
-        //check format of folder
         final int module = fo.getModule();
         if (module == FolderObject.CALENDAR) {
             if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                return false;
-            }
-        } else if (module == FolderObject.TASK) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
                 return false;
             }
         } else {
@@ -139,9 +132,23 @@ public class ICalEventExporter extends AbstractICalExporter {
 
     @Override
     public SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportFolderEvents(session, format, folder, optionalParams);
+    }
+
+    @Override
+    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
+        return doExportBatchEvents(session, format, batchIds, optionalParams);
+    }
+
+    private SizedInputStream doExportFolderEvents(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
         if (!canExport(session, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
+        CalendarService calendarService = ImportExportServices.getCalendarService();
+        CalendarSession calendarSession = calendarService.init(session);
+        ICalService iCalService= ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
@@ -152,7 +159,7 @@ public class ICalEventExporter extends AbstractICalExporter {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
                     requestData.removeCachingHeader();
-                    exportChronosEvents(session, folder, out);
+                    exportChronosEvents(calendarService.getEventsInFolder(calendarSession, folder), calendarExport, out);
                     return null;
                 }
             } catch (IOException e) {
@@ -161,40 +168,60 @@ public class ICalEventExporter extends AbstractICalExporter {
         }
 
         ThresholdFileHolder sink;
-        sink = exportChronosEvents(session, folder, null);
+        sink = exportChronosEvents(calendarService.getEventsInFolder(calendarSession, folder), calendarExport, null);
         return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
+
     }
 
-    @Override
-    public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private ThresholdFileHolder exportChronosEvents(ServerSession session, String folderId, OutputStream optOut) throws OXException {
-        IDBasedCalendarAccessFactory factory = ImportExportServices.getIDBasedCalendarAccessFactory();
-        IDBasedCalendarAccess calendarAccess = factory.createAccess(session);
-        List<Event> eventList = calendarAccess.getEventsInFolder(folderId);
-
+    private SizedInputStream doExportBatchEvents(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExportBatch(session, format, batchEntry, optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }
+        }
+        CalendarService calendarService = ImportExportServices.getCalendarService();
+        CalendarSession calendarSession = calendarService.init(session);
         ICalService iCalService= ImportExportServices.getICalService();
         ICalParameters iCalParameters = iCalService.initParameters();
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
 
-        for (Event event : eventList) {
-            calendarExport.add(event);
-        }
-
-        if (null != optOut) {
-            calendarExport.writeVCalendar(optOut);
-            return null;
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
+                    requestData.removeCachingHeader();
+                    for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                        FolderObject folder = getFolder(session, batchEntry.getKey());
+                        if (FolderObject.CALENDAR == folder.getModule()) {
+                            exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds(batchEntry.getKey(), batchEntry.getValue())), calendarExport, out);
+                        } else {
+                            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                        }
+                    }
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
         }
 
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean error = true;
         try {
-            calendarExport.writeVCalendar(sink.asOutputStream());
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                FolderObject folder = getFolder(session, batchEntry.getKey());
+                if (FolderObject.CALENDAR == folder.getModule()) {
+                    sink = exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds(batchEntry.getKey(), batchEntry.getValue())), calendarExport, null);
+                } else {
+                    throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                }
+            }
+            SizedInputStream sizedInputStream = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
             error = false;
-            return sink;
+            return sizedInputStream;
         } finally {
             if (error) {
                 Streams.close(sink);

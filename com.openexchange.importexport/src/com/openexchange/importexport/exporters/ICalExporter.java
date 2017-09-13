@@ -73,7 +73,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.importexport.chronos.exporter.ChronosExporter;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.ExportFileNameCreator;
@@ -100,7 +98,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface; fixes)
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - batch data
  */
-public class ICalExporter implements ChronosExporter {
+public class ICalExporter implements Exporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
 
@@ -143,43 +141,43 @@ public class ICalExporter implements ChronosExporter {
         Task.COLOR_LABEL
     };
 
-    @Override
-    public boolean canExportChronosEvents(ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException {
-        if(! format.equals(Format.ICAL)){
-            return false;
-        }
-        FolderObject fo;
-        try {
-            fo = getChronosFolder(session, compositeFolderId);
-
-        } catch (final OXException e) {
-            return false;
-        }
-        //check format of folder
-        final int module = fo.getModule();
-        if (module == FolderObject.CALENDAR) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
-                return false;
-            }
-        } else if (module == FolderObject.TASK) {
-            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        //check read access to folder
-        EffectivePermission perm;
-        try {
-            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
-        } catch (final OXException e) {
-            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
-        } catch (final RuntimeException e) {
-            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
-        return perm.canReadAllObjects();
-    }
+//    @Override
+//    public boolean canExportChronosEvents(ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException {
+//        if(! format.equals(Format.ICAL)){
+//            return false;
+//        }
+//        FolderObject fo;
+//        try {
+//            fo = getChronosFolder(session, compositeFolderId);
+//
+//        } catch (final OXException e) {
+//            return false;
+//        }
+//        //check format of folder
+//        final int module = fo.getModule();
+//        if (module == FolderObject.CALENDAR) {
+//            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
+//                return false;
+//            }
+//        } else if (module == FolderObject.TASK) {
+//            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasTask()) {
+//                return false;
+//            }
+//        } else {
+//            return false;
+//        }
+//
+//        //check read access to folder
+//        EffectivePermission perm;
+//        try {
+//            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+//        } catch (final OXException e) {
+//            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
+//        } catch (final RuntimeException e) {
+//            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+//        }
+//        return perm.canReadAllObjects();
+//    }
 
     @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
@@ -236,11 +234,6 @@ public class ICalExporter implements ChronosExporter {
     }
 
     @Override
-    public SizedInputStream exportChronosFolderData(ServerSession session, Format format, String compositeFolderId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        return doExportChronosEvents(session, format, compositeFolderId, optionalParams);
-    }
-
-    @Override
     public SizedInputStream exportFolderData(ServerSession session, Format format, String folderID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         return doExportTaskData(session, format, folderID, fieldsToBeExported, optionalParams);
     }
@@ -255,9 +248,9 @@ public class ICalExporter implements ChronosExporter {
     }
 
     private SizedInputStream doExportChronosEvents(ServerSession session, Format format, String compositeFolderId, Map<String, Object> optionalParams) throws OXException {
-        if (!canExportChronosEvents(session, format, compositeFolderId, optionalParams)) {
-            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(compositeFolderId, format);
-        }
+//        if (!canExportChronosEvents(session, format, compositeFolderId, optionalParams)) {
+//            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(compositeFolderId, format);
+//        }
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
         if (null != requestData) {
@@ -543,18 +536,6 @@ public class ICalExporter implements ChronosExporter {
             if (error) {
                 Streams.close(sink);
             }
-        }
-    }
-
-    @Override
-    public FolderObject getChronosFolder(ServerSession session, String compositeFolderId) throws OXException {
-        //CalendarFolder folder = calendarAccess.getFolder(folderId)
-        //return folder;
-        FolderService folderService = ImportExportServices.getFolderService();
-        try {
-            return folderService.getFolderObject(mangleChronosFolderId(compositeFolderId), session.getContextId());
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, compositeFolderId);
         }
     }
 

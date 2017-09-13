@@ -49,12 +49,25 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -67,27 +80,147 @@ public class ICalEventCompositeExporter extends AbstractICalExporter {
 
     @Override
     public boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        if(!format.equals(Format.ICAL)){
+            return false;
+        }
+        //TODO add checks for calendar folder
+        //REMOVE cant parse cal://0/345
+//        final int folderId = Integer.parseInt(folder);
+//        CalendarFolder fo;
+//        try {
+//            fo = getChronosFolder(session, folder);
+//
+//        } catch (final OXException e) {
+//            return false;
+//        }
+//        fo.getPermissions();
+//        final int module = fo.getModule();
+//        if (module == FolderObject.CALENDAR) {
+//            if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasCalendar()) {
+//                return false;
+//            }
+//        } else {
+//            return false;
+//        }
+//
+//        //check read access to folder
+//        EffectivePermission perm;
+//        try {
+//            perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+//        } catch (final OXException e) {
+//            throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
+//        } catch (final RuntimeException e) {
+//            throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+//        }
+//        return perm.canReadAllObjects();
+        return true;
     }
 
     @Override
     public boolean canExportBatch(ServerSession session, Format format, Entry<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        if (!canExport(session, format, batchIds.getKey(), optionalParams)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return doExportFolderEvents(session, format, folder, optionalParams);
     }
 
     @Override
     public SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return doExportBatchEvents(session, format, batchIds, optionalParams);
     }
 
+    private SizedInputStream doExportFolderEvents(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException {
+        if (!canExport(session, format, folder, optionalParams)) {
+            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
+        }
+        IDBasedCalendarAccessFactory factory = ImportExportServices.getIDBasedCalendarAccessFactory();
+        IDBasedCalendarAccess calendarAccess = factory.createAccess(session);
+        ICalService iCalService= ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            // Try to stream
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
+                    requestData.removeCachingHeader();
+                    exportChronosEvents(calendarAccess.getEventsInFolder(folder), calendarExport, out);
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
+        }
+
+        ThresholdFileHolder sink;
+        sink = exportChronosEvents(calendarAccess.getEventsInFolder(folder), calendarExport, null);
+        return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
+
+    }
+
+    private SizedInputStream doExportBatchEvents(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExportBatch(session, format, batchEntry, optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }
+        }
+        IDBasedCalendarAccessFactory factory = ImportExportServices.getIDBasedCalendarAccessFactory();
+        IDBasedCalendarAccess calendarAccess = factory.createAccess(session);
+        ICalService iCalService= ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
+                    requestData.removeCachingHeader();
+                    for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                        FolderObject folder = getFolder(session, batchEntry.getKey());
+                        if (FolderObject.CALENDAR == folder.getModule()) {
+                            exportChronosEvents(calendarAccess.getEvents(convertBatchDataToEventIds(batchEntry.getKey(), batchEntry.getValue())), calendarExport, out);
+                        } else {
+                            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                        }
+                    }
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
+        }
+
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+                FolderObject folder = getFolder(session, batchEntry.getKey());
+                if (FolderObject.CALENDAR == folder.getModule()) {
+                    sink = exportChronosEvents(calendarAccess.getEvents(convertBatchDataToEventIds(batchEntry.getKey(), batchEntry.getValue())), calendarExport, null);
+                } else {
+                    throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+                }
+            }
+            SizedInputStream sizedInputStream = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
+            error = false;
+            return sizedInputStream;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
+    }
 
 }
