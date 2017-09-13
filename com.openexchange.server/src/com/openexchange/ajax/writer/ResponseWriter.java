@@ -121,7 +121,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ResponseWriter {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseWriter.class);
 
     /**
@@ -632,7 +632,7 @@ public final class ResponseWriter {
             json.put(ERROR_STACK, jsonStack);
         }
     }
-    
+
     /**
      * Check if a stacktrace should be included
      * 
@@ -1061,7 +1061,7 @@ public final class ResponseWriter {
     }
 
     /** The property defining the blacklisted exceptions */
-    private final static String STACKTRACE_FILTER = "com.openexchange.ajax.response.stacktrace.filter";
+    private final static String      STACKTRACE_FILTER = "com.openexchange.ajax.response.stacktrace.filter";
     static volatile StackTraceFilter filter;
 
     /**
@@ -1094,7 +1094,7 @@ public final class ResponseWriter {
 
     /** Property defining if stacktraces should be enabled */
     private static final String STACKTRACE_ENABLE = "com.openexchange.ajax.response.stacktrace.enable";
-    static volatile Boolean enableStackTraceOnError;
+    static volatile Boolean     enableStackTraceOnError;
 
     /**
      * Check if stacktrace invocation is allowed for responses
@@ -1136,6 +1136,7 @@ public final class ResponseWriter {
         String uc = Strings.toUpperCase(clientId);
         return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
+
     // -----------------------------------------------------------------------------------------------------------------------------
     /**
      * Get the reloadable class for the {@link ResponseWriter}
@@ -1145,7 +1146,7 @@ public final class ResponseWriter {
     public static Reloadable getReloadables() {
         return new ResponseWriterReloadables();
     }
-    
+
     /**
      * 
      * {@link ResponseWriterReloadables}
@@ -1154,8 +1155,7 @@ public final class ResponseWriter {
      * @since v7.10.0
      */
     public static final class ResponseWriterReloadables implements Reloadable {
-        
-        
+
         /**
          * Initializes a new {@link ResponseWriter.ResponseWriterReloadables}.
          * 
@@ -1163,20 +1163,19 @@ public final class ResponseWriter {
         public ResponseWriterReloadables() {
             super();
         }
-        
+
         @Override
         public void reloadConfiguration(ConfigurationService configService) {
-            enableStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_ENABLE , true));
+            enableStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_ENABLE, true));
             filter = new StackTraceFilter(configService.getProperty(STACKTRACE_FILTER, new String()));
         }
-        
+
         @Override
         public Interests getInterests() {
             return Reloadables.interestsForProperties(STACKTRACE_ENABLE, STACKTRACE_FILTER);
-        }   
+        }
     }
-    
-    
+
     // -----------------------------------------------------------------------------------------------------------------------------
 
     /**
