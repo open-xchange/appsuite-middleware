@@ -56,15 +56,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link StackTraceFilter}
+ * {@link StackTraceBlacklist}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class StackTraceFilter {
+public class StackTraceBlacklist {
 
     /** The logger */
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceFilter.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceBlacklist.class);
 
 
     // Blacklisted exceptions
@@ -72,11 +72,11 @@ public class StackTraceFilter {
     private Set<String> codes;
 
     /**
-     * Initializes a new {@link StackTraceFilter}.
+     * Initializes a new {@link StackTraceBlacklist}.
      * 
-     * @param blacklist The comma separated list of exception codes and prefix which stacktraces should not be invoked into a response
+     * @param blacklist The comma separated list of exception codes and prefix which stack-traces should not be invoked into a response
      */
-    public StackTraceFilter(String blacklist) {
+    public StackTraceBlacklist(String blacklist) {
         super();
         // Prepare sets
         ImmutableSet.Builder<String> prefixes = ImmutableSet.builder();

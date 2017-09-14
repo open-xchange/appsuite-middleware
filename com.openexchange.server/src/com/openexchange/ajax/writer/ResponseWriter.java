@@ -91,7 +91,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.ajax.response.IncludeStackTraceService;
-import com.openexchange.ajax.writer.filter.StackTraceFilter;
+import com.openexchange.ajax.writer.filter.StackTraceBlacklist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -622,7 +622,7 @@ public final class ResponseWriter {
      *         <code>false</code> if one condition is not met
      */
     private static boolean includeStacktrace(boolean includeStackTraceOnError, OXException exception) {
-        return (null != exception) && enableStackTraceOnError() && (includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception);
+        return (null != exception) && (includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception);
     }
 
     private static List<Category> getCategoriesFrom(OXException exception) {
@@ -1040,8 +1040,8 @@ public final class ResponseWriter {
     }
 
     /** The property defining the blacklisted exceptions */
-    private final static String      STACKTRACE_FILTER = "com.openexchange.ajax.response.stacktrace.filter";
-    static volatile StackTraceFilter filter;
+    private final static String         STACKTRACE_BLACKLIST = "com.openexchange.ajax.response.excludeStackTraceFor";
+    static volatile StackTraceBlacklist blacklist;
 
     /**
      * Check if the given {@link OXException} is allowed to be included into a response
@@ -1051,55 +1051,24 @@ public final class ResponseWriter {
      *         <code>false</code> otherwise
      */
     private static boolean isIncludeAllowed(OXException exception) {
-        StackTraceFilter f = filter;
-        if (null == f) {
+        StackTraceBlacklist b = blacklist;
+        if (null == b) {
             synchronized (ResponseWriter.class) {
-                f = filter;
-                if (null == f) {
+                b = blacklist;
+                if (null == b) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (null == service) {
                         // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_FILTER);
-                        f = new StackTraceFilter(null);
+                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_BLACKLIST);
+                        b = new StackTraceBlacklist(null);
                     } else {
-                        f = new StackTraceFilter(service.getProperty(STACKTRACE_FILTER, new String()));
+                        b = new StackTraceBlacklist(service.getProperty(STACKTRACE_BLACKLIST, new String()));
                     }
-                    filter = f;
+                    blacklist = b;
                 }
             }
         }
-        return f.isIncludeAllowed(exception);
-    }
-
-    /** Property defining if stacktraces should be enabled */
-    private static final String STACKTRACE_ENABLE = "com.openexchange.ajax.response.stacktrace.enable";
-    static volatile Boolean     enableStackTraceOnError;
-
-    /**
-     * Check if stacktrace invocation is allowed for responses
-     *
-     * @return <code>true</code> if stacktraces can be included into the response
-     *         <code>false</code> otherwise
-     */
-    private static boolean enableStackTraceOnError() {
-        Boolean enable = enableStackTraceOnError;
-        if (null == enable) {
-            synchronized (ResponseWriter.class) {
-                enable = enableStackTraceOnError;
-                if (null == enable) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        // Trigger default
-                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_ENABLE);
-                        return true;
-                    }
-
-                    enable = Boolean.valueOf(service.getBoolProperty(STACKTRACE_ENABLE, true));
-                    enableStackTraceOnError = enable;
-                }
-            }
-        }
-        return enableStackTraceOnError.booleanValue();
+        return b.isIncludeAllowed(exception);
     }
 
     /**
@@ -1144,15 +1113,14 @@ public final class ResponseWriter {
 
         @Override
         public void reloadConfiguration(ConfigurationService configService) {
-            enableStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_ENABLE, true));
-            filter = new StackTraceFilter(configService.getProperty(STACKTRACE_FILTER, new String()));
+            blacklist = new StackTraceBlacklist(configService.getProperty(STACKTRACE_BLACKLIST, new String()));
             includeStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
             includeArguments = Boolean.valueOf(configService.getBoolProperty(INCLUDE_ARGUMENTS, false));
         }
 
         @Override
         public Interests getInterests() {
-            return Reloadables.interestsForProperties(STACKTRACE_ENABLE, STACKTRACE_FILTER, STACKTRACE_INCLUDE_ERROR, INCLUDE_ARGUMENTS);
+            return Reloadables.interestsForProperties(STACKTRACE_BLACKLIST, STACKTRACE_INCLUDE_ERROR, INCLUDE_ARGUMENTS);
         }
     }
 
