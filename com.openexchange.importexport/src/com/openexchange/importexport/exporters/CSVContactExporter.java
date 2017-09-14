@@ -346,13 +346,18 @@ public class CSVContactExporter implements Exporter {
 
     protected String convertToLine(final List<String> line) {
         StringBuilder bob = new StringBuilder(1024);
+        boolean first = true;
         for (String token : line) {
+            if (first) {
+                first = false;
+            } else {
+                bob.append(CELL_DELIMITER);
+            }
             bob.append('"');
             bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
             bob.append('"');
-            bob.append(CELL_DELIMITER);
         }
-        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
+        bob.append(ROW_DELIMITER);
         return bob.toString();
     }
 
