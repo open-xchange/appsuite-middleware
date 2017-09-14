@@ -47,31 +47,61 @@
  *
  */
 
-package com.openexchange.halo.appointments.osgi;
+package com.openexchange.chronos.common;
 
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.service.SearchFilter;
 
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.appointments.AppointmentContactHalo;
-import com.openexchange.osgi.HousekeepingActivator;
+/**
+ * {@link DefaultSearchFilter}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
+ */
+public class DefaultSearchFilter implements SearchFilter {
 
-public class AppointmentHaloActivator extends HousekeepingActivator {
+    private final String id;
+    private final List<String> fields;
+    private final List<String> queries;
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{AppointmentSqlFactoryService.class};
-	}
+    /**
+     * Initializes a new {@link DefaultSearchFilter}.
+     *
+     * @param id The filter identifier, or <code>null</code> if it is the only filter in the facet
+     * @param fields The fields to filter on
+     * @param queries The queries to search for
+     */
+    public DefaultSearchFilter(String id, List<String> fields, List<String> queries) {
+        super();
+        this.id = id;
+        this.fields = fields;
+        this.queries = queries;
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		registerService(HaloContactDataSource.class, new AppointmentContactHalo(this));
-	}
+    /**
+     * Initializes a new {@link DefaultSearchFilter}.
+     *
+     * @param field The field to filter on
+     * @param queries The queries to search for
+     */
+    public DefaultSearchFilter(String field, List<String> queries) {
+        this(null, Collections.singletonList(field), queries);
+    }
 
-	@Override
-	protected void stopBundle() throws Exception {
-	    unregisterServices();
-	}
+    @Override
+    public String getId() {
+        return id;
+    }
 
+    @Override
+    public List<String> getFields() {
+        return fields;
+    }
 
+    @Override
+    public List<String> getQueries() {
+        return queries;
+    }
 
 }

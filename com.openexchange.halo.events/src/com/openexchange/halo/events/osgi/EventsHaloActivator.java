@@ -47,61 +47,70 @@
  *
  */
 
-package com.openexchange.find.basic.calendar;
+package com.openexchange.halo.events.osgi;
 
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.chronos.service.SearchFilter;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.events.EventsContactHalo;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DefaultSearchFilter}
+ * {@link EventsHaloActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultSearchFilter implements SearchFilter {
-
-    private final String id;
-    private final List<String> fields;
-    private final List<String> queries;
+public class EventsHaloActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link DefaultSearchFilter}.
-     *
-     * @param id The filter identifier, or <code>null</code> if it is the only filter in the facet
-     * @param fields The fields to filter on
-     * @param queries The queries to search for
+     * Initializes a new {@link EventsHaloActivator}.
      */
-    public DefaultSearchFilter(String id, List<String> fields, List<String> queries) {
+    public EventsHaloActivator() {
         super();
-        this.id = id;
-        this.fields = fields;
-        this.queries = queries;
-    }
-
-    /**
-     * Initializes a new {@link DefaultSearchFilter}.
-     *
-     * @param field The field to filter on
-     * @param queries The queries to search for
-     */
-    public DefaultSearchFilter(String field, List<String> queries) {
-        this(null, Collections.singletonList(field), queries);
     }
 
     @Override
-    public String getId() {
-        return id;
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public List<String> getFields() {
-        return fields;
-    }
+    protected void startBundle() throws Exception {
+        /*
+         * register events halo based on availability of id based calendar access factory
+         */
+        final BundleContext context = this.context;
+        track(IDBasedCalendarAccessFactory.class, new ServiceTrackerCustomizer<IDBasedCalendarAccessFactory, IDBasedCalendarAccessFactory>() {
 
-    @Override
-    public List<String> getQueries() {
-        return queries;
+            private volatile ServiceRegistration<HaloContactDataSource> eventsHaloRegistration;
+
+            @Override
+            public IDBasedCalendarAccessFactory addingService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference) {
+                IDBasedCalendarAccessFactory calendarAccessFactory = context.getService(serviceReference);
+                eventsHaloRegistration = context.registerService(HaloContactDataSource.class, new EventsContactHalo(calendarAccessFactory), null);
+                return calendarAccessFactory;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference, IDBasedCalendarAccessFactory service) {
+                // nothing to do
+            }
+
+            @Override
+            public void removedService(ServiceReference<IDBasedCalendarAccessFactory> serviceReference, IDBasedCalendarAccessFactory service) {
+                ServiceRegistration<HaloContactDataSource> eventsHaloRegistration = this.eventsHaloRegistration;
+                if (null != eventsHaloRegistration) {
+                    this.eventsHaloRegistration = null;
+                    eventsHaloRegistration.unregister();
+                }
+                context.ungetService(serviceReference);
+            }
+        });
+        openTrackers();
     }
 
 }
