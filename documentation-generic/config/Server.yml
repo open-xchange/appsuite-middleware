@@ -802,17 +802,7 @@ properties:
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server", "Timezone"] 
-  - key: com.openexchange.ajax.response.stacktrace.enable
-    description: Generally enables stacktrace invocation on responses to a client.
-    defaultValue: true
-    version: 7.10.0
-    reloadable: true
-    configcascadeAware: false
-    related: com.openexchange.ajax.response.includeStackTraceOnError
-    file: Server.properties
-    packageName: open-xchange-core
-    tags: ["Server"]
-  - key: com.openexchange.ajax.response.stacktrace.filter
+  - key: com.openexchange.ajax.response.excludeStackTraceFor
     description: |
       Configures wether the stacktrace of specific exceptions should be included into a response or not. This has to be done as a 
       comma separated list of exceptions codes and prefixes. A wildcard pattern can be used to define the exceptions. 
