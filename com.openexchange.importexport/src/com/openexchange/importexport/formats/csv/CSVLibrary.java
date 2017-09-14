@@ -82,7 +82,7 @@ public final class CSVLibrary {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
-    public static final char ROW_DELIMITER = '\n';
+    public static final String ROW_DELIMITER = "\r\n";
 
     /**
      * Maps {@link ContactField}s to their readable titles. Taken over from previous mapping

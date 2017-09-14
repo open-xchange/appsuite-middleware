@@ -319,14 +319,19 @@ public class CSVContactExporter implements Exporter {
     private static final Pattern PATTERN_QUOTE = Pattern.compile("\"", Pattern.LITERAL);
 
     protected String convertToLine(final List<String> line) {
-        final StringBuilder bob = new StringBuilder(1024);
-        for (final String str : line) {
+        StringBuilder bob = new StringBuilder(1024);
+        boolean first = true;
+        for (String token : line) {
+            if (first) {
+                first = false;
+            } else {
+                bob.append(CELL_DELIMITER);
+            }
             bob.append('"');
-            bob.append(PATTERN_QUOTE.matcher(str).replaceAll("\"\""));
+            bob.append(PATTERN_QUOTE.matcher(token).replaceAll("\"\""));
             bob.append('"');
-            bob.append(CELL_DELIMITER);
         }
-        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
+        bob.append(ROW_DELIMITER);
         return bob.toString();
     }
 
