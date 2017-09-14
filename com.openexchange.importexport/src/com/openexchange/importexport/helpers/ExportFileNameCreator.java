@@ -100,7 +100,12 @@ public class ExportFileNameCreator {
         String prefix;
         try {
             FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
-            prefix = folderObj.getFolderName();
+            String folderString = FolderObject.getFolderString(Integer.parseInt(folder), session.getUser().getLocale());
+            if (!Strings.isEmpty(folderString)) {
+                prefix = folderString;
+            } else {
+                prefix = getLocalizedFileName(session, folderObj.getFolderName());
+            }
         } catch (OXException e) {
             LOG.debug("", e);
             prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
