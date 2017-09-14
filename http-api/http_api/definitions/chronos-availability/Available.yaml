@@ -20,9 +20,9 @@ properties:
   rrule:
     type: string
     description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
-  startDate:
+  start:
     $ref: "#/definitions/DateTimeData"
     description: The starting date of the available block.
-  endDate:
+  end:
     $ref: "#/definitions/DateTimeData"
     description: The ending date of the available block.
