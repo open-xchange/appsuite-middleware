@@ -84,7 +84,7 @@ public class UserApi {
     }
 
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null);
+        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null);
         if (doLogin.getError() == null) {
             return doLogin;
         }
