@@ -49,8 +49,12 @@
 
 package com.openexchange.chronos.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
@@ -66,10 +70,12 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
 import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -77,7 +83,10 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -102,7 +111,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class,
             FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class,
-            ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class, QuotaService.class };
+            ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class, QuotaService.class, CapabilityService.class };
     }
     //@formatter:on
 
@@ -130,7 +139,31 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
+            /*
+             * declare calendar-printing capability & appropriate checker for it
+             * (to avoid explicit declaration of capability in config file)
+             */
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "calendar-printing");
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
 
+                @Override
+                public boolean isEnabled(String capability, Session session) throws OXException {
+                    if ("calendar-printing".equals(capability)) {
+                        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                        if (serverSession.isAnonymous() || false == serverSession.getUserPermissionBits().hasCalendar()) {
+                            return false;
+                        }
+                        /*
+                         * enabled if either absent, or explicitly true
+                         */
+                        ConfigView view = getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                        return view.opt("com.openexchange.capability.calendar-printing", Boolean.class, Boolean.TRUE).booleanValue();
+                    }
+                    return true;
+                }
+            }, properties);
+            getService(CapabilityService.class).declareCapability("calendar-printing");
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
