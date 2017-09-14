@@ -61,6 +61,7 @@ import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -68,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
@@ -86,6 +88,8 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     /**
      * Initializes a new {@link AlarmTriggerServiceInterceptor}.
+     * 
+     * @param services The {@link ServiceLookup}
      */
     public AlarmTriggerServiceInterceptor(ServiceLookup services) {
         super();
@@ -94,13 +98,31 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        CalendarAccountStorage accountStorage = services.getService(CalendarAccountStorageFactory.class).create(context);
+        boolean debug = true;
+        if (debug) {
+            // FIXME Throws error on user change, therefore the debug parameter
+            return;
+        }
+        CalendarAccountStorageFactory accountStorageFactory = services.getService(CalendarAccountStorageFactory.class);
+        if (null == accountStorageFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarAccountStorageFactory.class.getName());
+        }
+        CalendarAccountStorage accountStorage = accountStorageFactory.create(context);
         List<CalendarAccount> accounts = accountStorage.getAccounts(user.getId());
+
         CalendarStorageFactory factory = services.getService(CalendarStorageFactory.class);
-        DBProvider service = services.getService(DBProvider.class);
-        Connection writeConnection = service.getWriteConnection(context);
+        if (null == factory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarStorageFactory.class.getName());
+        }
+
+        DBProvider dbProvider = services.getService(DBProvider.class);
+        if (null == dbProvider) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DBProvider.class.getName());
+        }
+
+        Connection writeConnection = dbProvider.getWriteConnection(context);
         boolean committed = false;
-        int updated=0;
+        int updated = 0;
         try {
             writeConnection.setAutoCommit(false);
             SimpleDBProvider simpleDBProvider = new SimpleDBProvider(null, writeConnection);
@@ -118,39 +140,17 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
         } finally {
             if (null != writeConnection) {
                 if (false == committed) {
-                    rollback(writeConnection);
-                    autocommit(writeConnection);
-                    service.releaseWriteConnectionAfterReading(context, writeConnection);
+                    Databases.rollback(writeConnection);
+                    Databases.autocommit(writeConnection);
+                    dbProvider.releaseWriteConnectionAfterReading(context, writeConnection);
                 } else {
-                    autocommit(writeConnection);
-                    if(updated!=0){
-                        service.releaseWriteConnection(context, writeConnection);
+                    Databases.autocommit(writeConnection);
+                    if (updated != 0) {
+                        dbProvider.releaseWriteConnection(context, writeConnection);
                     } else {
-                        service.releaseWriteConnectionAfterReading(context, writeConnection);
+                        dbProvider.releaseWriteConnectionAfterReading(context, writeConnection);
                     }
                 }
-            }
-        }
-    }
-
-    private static void rollback(Connection connection) {
-        if (null != connection) {
-            try {
-                connection.rollback();
-            } catch (SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void autocommit(Connection connection) {
-        if (null != connection) {
-            try {
-                if (false == connection.isClosed()) {
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                LOG.error("", e);
             }
         }
     }
