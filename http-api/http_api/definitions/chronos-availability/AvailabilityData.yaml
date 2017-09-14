@@ -1,4 +1,7 @@
-  type: array
-  description: The available blocks of the user.
-  items:
-    $ref: "#/definitions/Available"
+type: object
+properties:
+  availableTimes:
+    type: array
+    description: The available blocks of the user.
+    items:
+      $ref: "#/definitions/Available"
