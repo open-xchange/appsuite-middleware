@@ -49,6 +49,7 @@
 
 package com.openexchange.imageconverter.api;
 
+import java.awt.Dimension;
 import java.util.Collection;
 import org.json.JSONObject;
 
@@ -60,9 +61,35 @@ import org.json.JSONObject;
  */
 public interface IMetadata {
 
+    /**
+     * Retrieving the physical extent of the image in pixels.
+     *
+     * @return The width and height of the image in pixels.
+     */
+    public Dimension getImageDimension();
+
+    /**
+     * Retrieving the {@link IMetadataGroup} interface with the given
+     *  {@link MetadataKey}.
+     *
+     * @param metadataGroup The type of the requested {@link IMetadataGroup}.
+     * @return The requested {@link IMetadataGroup} interface.
+     */
     public IMetadataGroup getMetadataGroup(final MetadataGroup metadataGroup);
 
+    /**
+     * Retrieving the {@link Collection} of all {@link IMetadataGroup} interfaces.
+     *
+     * @return The {@link IMetadataGroup} interface {@link Collection}.
+     */
     public Collection<IMetadataGroup> getMetadataGroups();
 
+    /**
+     * Retrieving the content of all {@link IMetadataGroup}s as
+     *  {@link JSONObject}.
+     *
+     * @return The {@link JSONObject}, containing all metadata information
+     *  as textual representation.
+     */
     public JSONObject getJSONObject();
 }
