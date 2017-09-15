@@ -83,6 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AbstractFreeBusyAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
@@ -99,6 +100,11 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         super(services);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         IDBasedFreeBusyAccess freeBusyAccess = initFreeBusyAccess(requestData);
@@ -138,6 +144,13 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         return calendarAccess;
     }
 
+    /**
+     * Parses the request parameter 'attendees' from the specified {@link AJAXRequestData}
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @return A {@link List} with {@link Attendee} objects
+     * @throws OXException if a parsing error occurs
+     */
     protected static List<Attendee> parseAttendeesParameter(AJAXRequestData request) throws OXException {
 
         String parameter = request.getParameter(ATTENDEES, String.class, false);
@@ -190,6 +203,14 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         }
     }
 
+    /**
+     * Parses the specified request parameter from the specified {@link AJAXRequestData} as a {@link Date}
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @param param The parameter's name
+     * @return The parsed {@link Date}
+     * @throws OXException if a parsing error occurs
+     */
     protected static Date parseDate(AJAXRequestData request, String param) throws OXException {
         String parameter = request.getParameter(param, String.class, false);
         return new Date(DateTime.parse(TimeZone.getTimeZone("UTC"), parameter).getTimestamp());
