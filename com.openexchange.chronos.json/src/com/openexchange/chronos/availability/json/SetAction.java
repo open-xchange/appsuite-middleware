@@ -111,7 +111,7 @@ public class SetAction extends AbstractAction {
             checkAndSetUids(availability);
             // Set the availability for the user and overwrite any existing one
             service.setAvailability(calendarSession, availability);
-            
+
             return new AJAXRequestResult();
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
