@@ -51,6 +51,7 @@ package com.openexchange.chronos.availability.json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
@@ -96,7 +97,10 @@ public class GetAction extends AbstractAction {
                 availableArray.put(AvailableMapper.getInstance().serialize(available, AvailableMapper.getInstance().getMappedFields()));
             }
 
-            return new AJAXRequestResult(availableArray);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("availableTimes", availableArray);
+
+            return new AJAXRequestResult(jsonObject);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
