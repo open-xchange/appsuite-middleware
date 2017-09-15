@@ -80,7 +80,6 @@ public class TranslatedTest {
     private static final Class<?>[] I18N_CLASSES = new Class<?>[] {
         com.openexchange.calendar.itip.HRRStrings.class,
         com.openexchange.calendar.itip.Messages.class,
-        com.openexchange.calendar.printing.CalendarPrintingStrings.class,
         com.openexchange.groupware.i18n.FolderStrings.class,
         com.openexchange.groupware.i18n.Groups.class,
         com.openexchange.groupware.i18n.MailStrings.class,
