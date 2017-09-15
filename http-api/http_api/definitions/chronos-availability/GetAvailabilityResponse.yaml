@@ -5,4 +5,4 @@ properties:
     type: array
     description: Array of Available blocks
     items:
-      $ref: "#/definitions/AvailabilityData"
+      $ref: "#/definitions/Available"
