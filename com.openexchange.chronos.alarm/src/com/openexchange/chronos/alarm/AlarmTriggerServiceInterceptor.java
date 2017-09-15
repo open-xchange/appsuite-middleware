@@ -98,11 +98,6 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        boolean debug = true;
-        if (debug) {
-            // FIXME Throws error on user change, therefore the debug parameter
-            return;
-        }
         CalendarAccountStorageFactory accountStorageFactory = services.getService(CalendarAccountStorageFactory.class);
         if (null == accountStorageFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarAccountStorageFactory.class.getName());

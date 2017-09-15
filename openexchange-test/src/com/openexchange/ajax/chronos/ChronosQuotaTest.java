@@ -52,6 +52,8 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
@@ -62,20 +64,27 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.models.QuotasResponse;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.modules.QuotaApi;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
- * {@link ChronosQuotaTest}
+ * {@link ChronosQuotaTest} - For new CalendarQuotaProvider
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ChronosQuotaTest extends AbstractAPIClientSession {
+public class ChronosQuotaTest extends AbstractChronosTest {
 
     // XXX Change to 'calendar' after replacing old calendar
     private static final String MODULE = "calendar.chronos";
@@ -88,12 +97,18 @@ public class ChronosQuotaTest extends AbstractAPIClientSession {
 
         ajaxClient = new AJAXClient(testUser);
         Map<String, String> userAttributes = new HashMap<String, String>(1);
-        userAttributes.put("com.openexchange.quota.calendar", "1");
+        userAttributes.put("com.openexchange.quota.calendar", "0");
         setQuota(userAttributes);
     }
 
+    /**
+     * Checks if the creation of an Event fails if the there is no quota available.
+     * 
+     * @throws Exception In case of mismatching test results
+     */
     @Test
-    public void testGetQuota() throws Exception {
+    public void testExeededQuota() throws Exception {
+        // Get quota info via API
         ApiClient client = getClient();
         client.login(testUser.getLogin(), testUser.getPassword());
         QuotaApi api = new QuotaApi(client);
@@ -107,15 +122,25 @@ public class ChronosQuotaTest extends AbstractAPIClientSession {
         // Suppress since we already checked ..
         @SuppressWarnings("unchecked") Map<String, Object> info = (Map<String, Object>) data;
 
-        // Check output
+        // Check quota info
         assertThat("Account identifier does not match", info.get("account_id"), is("0"));
         assertThat("Account name does not match", info.get("account_name"), is("Internal Calendar"));
-        assertThat("Account quota does not match", info.get("countquota"), is(new Integer(1)));
+        assertThat("Account quota should be null and therefore not be part of the response.", info.get("countquota"), is(nullValue()));
         /*
          * Can't check something like
          * assertThat("Account use does not match", info.get("countuse"), is(new Integer(0)));
-         * cause other test might create event that get not deleted..
+         * --> Other test might create event that get not deleted..
          */
+
+        // Try creating a new event
+        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), client);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE);
+
+        // Check that creation failed
+        assertThat("No response!", resultResponse, is(not(nullValue())));
+        assertThat("Event could be saved out of quota limit", resultResponse.getError(), is(not(nullValue())));
+        String expectedCode = "QUOTA-0003";
+        assertThat("Code does not match. Expected '" + expectedCode + "'.", resultResponse.getCode(), is(expectedCode));
     }
 
     @Override
@@ -146,6 +171,27 @@ public class ChronosQuotaTest extends AbstractAPIClientSession {
         for (UserProperty prop : userConfigurationSource) {
             System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private EventData createSingleEvent(String summary, DateTimeData startDate, DateTimeData endDate) {
+        EventData singleEvent = new EventData();
+        singleEvent.setPropertyClass("PUBLIC");
+        Attendee attendee = new Attendee();
+        attendee.entity(defaultUserApi.getCalUser());
+        attendee.cuType(CuTypeEnum.INDIVIDUAL);
+        attendee.setUri("mailto:" + this.testUser.getLogin());
+        singleEvent.setAttendees(Collections.singletonList(attendee));
+        singleEvent.setStartDate(startDate);
+        singleEvent.setEndDate(endDate);
+        singleEvent.setTransp(TranspEnum.OPAQUE);
+        singleEvent.setAllDay(Boolean.FALSE);
+        singleEvent.setSummary(summary);
+        return singleEvent;
+    }
+
+    private EventData createSingleEvent(String summary) {
+        return createSingleEvent(summary, getDateTime(System.currentTimeMillis()), getDateTime(System.currentTimeMillis() + 5000));
     }
 
 }

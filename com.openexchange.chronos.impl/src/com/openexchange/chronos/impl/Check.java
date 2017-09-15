@@ -109,7 +109,7 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
      */
     public static ServerSession hasCalendar(ServerSession session) throws OXException {
-        if (false == session.getUserConfiguration().hasCalendar()) {
+        if (false == session.getUserPermissionBits().hasCalendar()) {
             throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CALENDAR.getCapabilityName());
         }
         return session;
@@ -123,7 +123,7 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
      */
     public static ServerSession hasFreeBusy(ServerSession session) throws OXException {
-        if (false == session.getUserConfiguration().hasFreeBusy()) {
+        if (false == session.getUserPermissionBits().hasFreeBusy()) {
             throw CalendarExceptionCodes.MISSING_CAPABILITY.create("calendar_freebusy");
         }
         return session;
