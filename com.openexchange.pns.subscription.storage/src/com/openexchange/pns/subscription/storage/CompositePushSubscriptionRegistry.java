@@ -63,6 +63,8 @@ import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscription.Nature;
+import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
@@ -79,15 +81,15 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositePushSubscriptionRegistry.class);
 
     private final List<PushSubscriptionRegistry> registries;
-    private final PushSubscriptionRegistry persistentRegistry;
-    private final PushSubscriptionRegistry volatileRegistry;
+    private final RdbPushSubscriptionRegistry persistentRegistry;
+    private final InMemoryPushSubscriptionRegistry volatileRegistry;
     private final ServiceListing<PushSubscriptionProvider> providers;
     private final ServiceListing<PushSubscriptionListener> listeners;
 
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners, boolean useVolatileRegistry) {
+    public CompositePushSubscriptionRegistry(RdbPushSubscriptionRegistry persistentRegistry, InMemoryPushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners, boolean useVolatileRegistry) {
         super();
         this.persistentRegistry = persistentRegistry;
         this.volatileRegistry = useVolatileRegistry ? volatileRegistry : null;
@@ -231,24 +233,28 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         Nature nature = subscription.getNature();
 
         boolean removed;
+        PushSubscription removedSubscription = null;
         if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
             removed = volatileRegistry.unregisterSubscription(subscription);
         } else if (Nature.PERSISTENT == nature) {
-            removed = persistentRegistry.unregisterSubscription(subscription);
+            removedSubscription = persistentRegistry.removeSubscription(subscription);
+            removed = null != removedSubscription;
         } else {
             // Don't know better
-            removed = persistentRegistry.unregisterSubscription(subscription);
+            removedSubscription = persistentRegistry.removeSubscription(subscription);
+            removed = null != removedSubscription;
             if (null != volatileRegistry) {
                 removed |= volatileRegistry.unregisterSubscription(subscription);
             }
         }
 
         if (removed) {
+            PushSubscription subscriptionToUse = null == removedSubscription ? subscription : removedSubscription;
             for (PushSubscriptionListener listener : listeners) {
                 try {
-                    listener.removedSubscription(subscription);
+                    listener.removedSubscription(subscriptionToUse);
                 } catch (Exception e) {
-                    LOG.info("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                    LOG.info("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscriptionToUse.getTopics(), I(subscriptionToUse.getUserId()), I(subscriptionToUse.getContextId()), e);
                 }
             }
         }

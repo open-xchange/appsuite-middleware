@@ -64,20 +64,20 @@ import com.openexchange.sessiond.SessiondService;
 
 
 /**
- * {@link ListenerStartingSubscriptionListener}
+ * {@link ListenerManagingSubscriptionListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ListenerStartingSubscriptionListener implements PushSubscriptionListener {
+public class ListenerManagingSubscriptionListener implements PushSubscriptionListener {
 
     private final PushListenerService pushListenerService;
     private final SessiondService sessiond;
 
     /**
-     * Initializes a new {@link ListenerStartingSubscriptionListener}.
+     * Initializes a new {@link ListenerManagingSubscriptionListener}.
      */
-    public ListenerStartingSubscriptionListener(PushListenerService pushListenerService, SessiondService sessiond) {
+    public ListenerManagingSubscriptionListener(PushListenerService pushListenerService, SessiondService sessiond) {
         super();
         this.pushListenerService = pushListenerService;
         this.sessiond = sessiond;
@@ -119,7 +119,8 @@ public class ListenerStartingSubscriptionListener implements PushSubscriptionLis
 
     @Override
     public void removedSubscription(PushSubscription subscription) throws OXException {
-        // Ignore
+        // TODO: Check if last subscription for that client was removed
+
     }
 
     // ------------------------------------------------------------------------------------------------------------------------

@@ -58,12 +58,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -386,7 +389,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             autocommit = true;
             rollback = true;
             for (PushSubscription subscription : subscriptions) {
-                modified |= unregisterSubscription(subscription, con);
+                modified |= (null != removeSubscription(subscription, con));
             }
             con.commit();
             rollback = false;
@@ -426,7 +429,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT s.user, s.token, s.client, s.transport, s.last_modified, s.expires, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s")
+            .append("SELECT s.id, s.user, s.token, s.client, s.transport, s.last_modified, s.expires, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s")
             .append(" LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id")
             .append(" LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id")
             .append(" WHERE s.cid=?")
@@ -466,37 +469,52 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
 
             Map<ClientAndTransport, List<PushMatch>> map = new LinkedHashMap<>(6);
+            Set<UUID> processed = new HashSet<>();
             do {
-                int userId = rs.getInt(1);
-                String token = rs.getString(2);
-                String client = rs.getString(3);
-                String transportId = rs.getString(4);
-                Date lastModified = new Date(rs.getLong(5));
-                long expiresValue = rs.getLong(6);
-                Date expires = rs.wasNull() ? null : new Date(expiresValue);
+                UUID id = UUIDs.toUUID(rs.getBytes(1));
 
-                // Determine matching topic
-                String matchingTopic;
-                {
-                    boolean all = rs.getInt(7) > 0;
-                    if (all) {
-                        matchingTopic = KnownTopic.ALL.getName();
-                    } else {
-                        matchingTopic = rs.getString(8);
-                        if (rs.wasNull()) {
-                            // E.g. "ox:mail:new"
-                            matchingTopic = rs.getString(9);
+                // Check if not yet processed
+                if (processed.add(id)) {
+                    int userId = rs.getInt(2);
+                    String token = rs.getString(3);
+                    String client = rs.getString(4);
+                    String transportId = rs.getString(5);
+                    Date lastModified = new Date(rs.getLong(6));
+                    long expiresValue = rs.getLong(7);
+                    Date expires = rs.wasNull() ? null : new Date(expiresValue);
+
+                    // Determine matching topic
+                    String matchingTopic;
+                    {
+                        boolean all = rs.getInt(8) > 0;
+                        if (all) {
+                            matchingTopic = KnownTopic.ALL.getName();
                         } else {
-                            // E.g. "ox:mail:*"
-                            matchingTopic = new StringBuilder(matchingTopic).append('*').toString();
+                            matchingTopic = rs.getString(9);
+                            if (rs.wasNull()) {
+                                matchingTopic = null;
+                            } else {
+                                // E.g. "ox:mail:*"
+                                if (topic.startsWith(matchingTopic)) {
+                                    matchingTopic = new StringBuilder(matchingTopic).append('*').toString();
+                                } else {
+                                    // Unsatisfiable match
+                                    matchingTopic = null;
+                                }
+                            }
+
+                            if (null == matchingTopic) { // Last reason why that row is present in result set
+                                // E.g. "ox:mail:new"
+                                matchingTopic = rs.getString(10);
+                            }
                         }
                     }
-                }
 
-                // Add to appropriate list
-                RdbPushMatch pushMatch = new RdbPushMatch(userId, contextId, client, transportId, token, matchingTopic, lastModified, expires);
-                ClientAndTransport cat = new ClientAndTransport(client, transportId);
-                com.openexchange.tools.arrays.Collections.put(map, cat, pushMatch);
+                    // Add to appropriate list
+                    RdbPushMatch pushMatch = new RdbPushMatch(userId, contextId, client, transportId, token, matchingTopic, lastModified, expires);
+                    ClientAndTransport cat = new ClientAndTransport(client, transportId);
+                    com.openexchange.tools.arrays.Collections.put(map, cat, pushMatch);
+                }
             } while (rs.next());
 
             return map;
@@ -537,7 +555,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -709,15 +727,29 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             return false;
         }
 
+        return null != removeSubscription(subscription);
+    }
+
+    /**
+     * Unregisters specified subscription.
+     *
+     * @param subscription The subscription to unregister
+     * @throws OXException If unregistration fails
+     */
+    public PushSubscription removeSubscription(PushSubscription subscription) throws OXException {
+        if (null == subscription) {
+            return null;
+        }
+
         int contextId = subscription.getContextId();
         Connection con = databaseService.getWritable(contextId);
         boolean rollback = false;
-        boolean deleted = false;
+        PushSubscription deleted = null;
         try {
             Databases.startTransaction(con);
             rollback = true;
 
-            deleted = unregisterSubscription(subscription, con);
+            deleted = removeSubscription(subscription, con);
 
             con.commit();
             rollback = false;
@@ -730,7 +762,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            if (deleted) {
+            if (null != deleted) {
                 databaseService.backWritable(contextId, con);
             } else {
                 databaseService.backWritableAfterReading(contextId, con);
@@ -745,9 +777,9 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @param con The connection to use
      * @throws OXException If unregistration fails
      */
-    public boolean unregisterSubscription(PushSubscription subscription, Connection con) throws OXException {
+    public PushSubscription removeSubscription(PushSubscription subscription, Connection con) throws OXException {
         if (null == con) {
-            return unregisterSubscription(subscription);
+            return removeSubscription(subscription);
         }
 
         PreparedStatement stmt = null;
@@ -768,10 +800,54 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                return false;
+                return null;
             }
 
             byte[] id = rs.getBytes(1);
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            stmt = con.prepareStatement("SELECT s.cid, s.user, s.token, s.client, s.transport, s.last_modified, s.expires, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id WHERE s.id=?");
+            stmt.setBytes(1, id);
+            rs = stmt.executeQuery();
+
+            // Select first row and build subscription instance
+            rs.next();
+            DefaultPushSubscription.Builder removedSubscription = DefaultPushSubscription.builder().contextId(rs.getInt(1)).userId(rs.getInt(2)).token(rs.getString(3)).client(rs.getString(4)).transportId(rs.getString(5));
+            long expires = rs.getLong(7); // expires
+            if (false == rs.wasNull()) {
+                removedSubscription.expires(new Date(expires));
+            }
+
+            // Collect topics
+            {
+                List<String> topics = new LinkedList<>();
+                if (rs.getInt(8) > 0) {
+                    topics.add(KnownTopic.ALL.getName());
+                }
+
+                Set<String> setTopics = new LinkedHashSet<>();
+                Set<String> setWildcards = new LinkedHashSet<>();
+                do {
+                    String wildcard = rs.getString(9); // wildcard
+                    if (false == rs.wasNull()) {
+                        setWildcards.add(wildcard);
+                    }
+
+                    String topic = rs.getString(10); // topic
+                    if (false == rs.wasNull()) {
+                        setTopics.add(topic);
+                    }
+                } while (rs.next());
+                for (String wildcard : setWildcards) {
+                    topics.add(wildcard + "*");
+                }
+                for (String topic : setTopics) {
+                    topics.add(topic);
+                }
+                removedSubscription.topics(topics);
+            }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
@@ -785,7 +861,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 }
             }
 
-            return deleted;
+            return removedSubscription.build();
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
