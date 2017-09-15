@@ -159,7 +159,7 @@ public class TransformImageClientAction extends TransformImageAction {
         if (isNotEmpty(cacheKey)) {
             if (isValid()) {
                 try {
-                    @SuppressWarnings("resource") final InputStream imageInputStm = m_imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
+                    final InputStream imageInputStm = m_imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
                     ret = new FileHolder(imageInputStm, (null != imageInputStm) ? -1 : 0, xformParams.getImageMimeType(), cacheKey);
                 } catch (@SuppressWarnings("unused") ImageConverterException e) {
                     // OK, we just didn't get a result
