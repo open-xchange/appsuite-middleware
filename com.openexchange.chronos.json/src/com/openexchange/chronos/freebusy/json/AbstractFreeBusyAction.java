@@ -57,15 +57,25 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.action.AbstractChronosAction;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -77,6 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
 
+    private static final String ATTENDEES = "attendees";
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFreeBusyAction.class);
 
     /**
@@ -129,7 +140,7 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
 
     protected static List<Attendee> parseAttendeesParameter(AJAXRequestData request) throws OXException {
 
-        String parameter = request.getParameter("attendees", String.class, false);
+        String parameter = request.getParameter(ATTENDEES, String.class, false);
         String[] splitByComma = Strings.splitByComma(parameter);
         List<Attendee> attendees = new ArrayList<>(splitByComma.length);
         for (String attendeeId : splitByComma) {
@@ -139,6 +150,44 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         }
 
         return attendees;
+    }
+
+    /**
+     * Parses the request body of the specified {@link AJAXRequestData} and extracts the {@link Attendee}s
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @return A {@link List} with {@link Attendee} objects
+     * @throws OXException if a JSON parsing error is occurred, or if the request body is not a {@link JSONObject},
+     *             or if the 'attendees' field is missing from the request body.
+     */
+    protected static List<Attendee> parseAttendeesObject(AJAXRequestData requestData) throws OXException {
+        List<Attendee> attendees = new ArrayList<>();
+        Object objectData = requestData.getData();
+        if (!(objectData instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+
+        JSONObject requestBody = (JSONObject) objectData;
+        if (!requestBody.hasAndNotNull(ATTENDEES)) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create(ATTENDEES);
+        }
+
+        try {
+            ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
+            TimeZone timeZone = TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone());
+            JSONArray attendeesArray = requestBody.getJSONArray(ATTENDEES);
+            for (int index = 0; index < attendeesArray.length(); index++) {
+                JSONObject attendeeJSON = attendeesArray.getJSONObject(index);
+                Attendee attendee = mapping.deserialize(attendeeJSON, timeZone);
+                if (!attendee.containsUri() && !attendee.containsEntity()) {
+                    attendee.setEntity(requestData.getSession().getUserId());
+                }
+                attendees.add(attendee);
+            }
+            return attendees;
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+        }
     }
 
     protected static Date parseDate(AJAXRequestData request, String param) throws OXException {

@@ -95,7 +95,7 @@ public class FreeBusyAction extends AbstractFreeBusyAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException {
-        List<Attendee> attendees = parseAttendeesParameter(requestData);
+        List<Attendee> attendees = parseAttendeesObject(requestData);
         Date from = parseDate(requestData, "from");
         Date until = parseDate(requestData, "until");
         Map<Attendee, List<FreeBusyTime>> mergedFreeBusy = freeBusyAccess.calculateFreeBusyTime(attendees, from, until);
