@@ -76,7 +76,7 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
         Available available = new Available();
         available.setStart(getDateTime(System.currentTimeMillis()));
         available.setEnd(getDateTime(System.currentTimeMillis() + 7200));
-        availabilityData.add(available);
+        availabilityData.addAvailableTimesItem(available);
 
         chronosApi = new ChronosApi(defaultUserApi.getClient());
         chronosApi.setAvailability(defaultUserApi.getSession(), availabilityData);
