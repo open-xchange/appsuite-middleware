@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Availability;
@@ -88,21 +89,23 @@ public class SetAction extends AbstractAction {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONArray requestBody = getRequestBody(requestData, JSONArray.class);
+        JSONObject requestBody = getRequestBody(requestData, JSONObject.class);
         try {
             CalendarAvailabilityService service = services.getService(CalendarAvailabilityService.class);
             CalendarSession calendarSession = getSession(session);
 
             // Delete the user's availability
-            if (requestBody.isEmpty()) {
+            if (requestBody.isEmpty() || !requestBody.hasAndNotNull("availableTimes")) {
                 service.deleteAvailability(calendarSession);
                 return new AJAXRequestResult();
             }
 
+            JSONArray availableTimesArray = requestBody.getJSONArray("availableTimes");
+
             // Parse the availability and the available blocks
             List<Available> availables = new ArrayList<>(requestBody.length());
-            for (int index = 0; index < requestBody.length(); index++) {
-                availables.add(AvailableMapper.getInstance().deserialize(requestBody.getJSONObject(index), AvailableMapper.getInstance().getMappedFields()));
+            for (int index = 0; index < availableTimesArray.length(); index++) {
+                availables.add(AvailableMapper.getInstance().deserialize(availableTimesArray.getJSONObject(index), AvailableMapper.getInstance().getMappedFields()));
             }
 
             Availability availability = new Availability();

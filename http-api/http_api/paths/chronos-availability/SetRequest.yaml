@@ -13,6 +13,7 @@
         description: A JSON object containing the availability's data.
         required: true
         schema:
+          type: object
           $ref: "#/definitions/AvailabilityData"
     responses:
       200:
