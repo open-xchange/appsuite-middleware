@@ -6,8 +6,7 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
-Import-Package: com.openexchange.ajax.container,
- com.openexchange.ajax.fileholder,
+Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
  com.openexchange.exception,
  com.openexchange.i18n,
