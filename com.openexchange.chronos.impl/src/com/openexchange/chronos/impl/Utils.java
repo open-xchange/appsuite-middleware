@@ -506,6 +506,10 @@ public class Utils {
                 // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
                 throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderID);
             }
+            if ("FLD-1004".equals(e.getErrorCode())) {
+                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderID, "");
+            }
             throw e;
         }
     }
