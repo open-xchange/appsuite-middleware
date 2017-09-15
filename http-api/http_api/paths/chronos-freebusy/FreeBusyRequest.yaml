@@ -1,5 +1,5 @@
 /chronos/freebusy?action=freeBusy:
-  get:
+  put:
     operationId: freebusy
     tags:
       - Chronos-freebusy
@@ -8,7 +8,18 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/ChronosFromTimeRange"
       - $ref: "#/parameters/ChronosUntilTimeRange"
-      - $ref: "#/parameters/ChronosFreeBusyAttendees"
+      - in: body
+        name: body
+        description: A JSON object containing the attendees' data.
+        required: true
+        schema:
+          type: object
+          properties:
+            attendees:
+              type: array
+              description: A list of attendees
+              items:
+                $ref: "#/definitions/Attendee"
     responses:
       200:
         description: |
