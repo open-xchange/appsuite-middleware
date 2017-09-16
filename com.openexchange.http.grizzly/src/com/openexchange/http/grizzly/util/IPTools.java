@@ -55,8 +55,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
-import com.openexchange.java.ConcurrentLinkedList;
 import com.openexchange.java.Strings;
 import com.openexchange.net.IPRange;
 
@@ -89,7 +89,7 @@ public class IPTools {
      * remoteIP = 192.168.32.50
      * </pre>
      *
-     * @param forwardedIPs A String containing the forwarded ips separated by comma
+     * @param forwardedIPs A String containing the forwarded IPs separated by comma
      * @param knownProxies A List of {@link IPRange}s containing the known proxies
      * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found or an IP address is malformed
      */
@@ -141,10 +141,10 @@ public class IPTools {
      * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
      *
      * @param input String of separated values
-     * @param separator the seperator as regular expression used to split the input around this separator
+     * @param separator the separator as regular expression used to split the input around this separator
      * @return the split and trimmed input as List or an empty list
-     * @throws IllegalArgumentException if input or the seperator are missing
-     * @throws PatternSyntaxException - if the regular expression's syntax of seperator is invalid
+     * @throws IllegalArgumentException if input or the separator are missing
+     * @throws PatternSyntaxException - if the regular expression's syntax of separator is invalid
      */
     public static List<String> splitAndTrim(String input, String separator) {
         return Strings.splitAndTrim(input, separator);
@@ -152,7 +152,7 @@ public class IPTools {
 
     /**
      * Takes a List of Strings representing IP addresses filters out the erroneous ones.
-     * 
+     *
      * @param ipList a List of Strings representing IP addresses
      * @return the list of erroneous IPs or the empty list meaning that all IPs are valid
      */
@@ -169,25 +169,26 @@ public class IPTools {
     /**
      * Takes a {@link String} of comma separated IPs and transforms them into {@link IPRange}s.
      * In case a IP is malformed a warning is logged and an empty list is returned.
-     * 
+     *
      * @param ips A comma separated {@link String} containing the IPs
-     * @return A {@link List} containing the IPs as {@link IPRange}s or in case of missing or malformed IP {@link Collections#emptyList()}
+     * @return An immutable {@link List} containing the IPs as {@link IPRange}s or in case of missing or malformed IP {@link Collections#emptyList()}
      */
     public static List<IPRange> filterIP(String ips) {
         if (Strings.isEmpty(ips)) {
             return Collections.emptyList();
-        } else {
-            List<String> candidates = splitAndTrim(ips, COMMA_SEPARATOR);
-            List<IPRange> proxies = new ConcurrentLinkedList<>();
-            for (String ip : candidates) {
-                IPRange range = IPRange.parseRange(ip);
-                if (null == range) {
-                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IP {}", ip);
-                    return Collections.emptyList();
-                }
-                proxies.add(range);
-            }
-            return proxies;
         }
+
+        List<String> candidates = splitAndTrim(ips, COMMA_SEPARATOR);
+        ImmutableList.Builder<IPRange> proxies = ImmutableList.builder();
+        for (String ip : candidates) {
+            IPRange range = IPRange.parseRange(ip);
+            if (null == range) {
+                LOG.warn("Falling back to empty list as \"com.openexchange.server.knownProxies\" contains malformed IP {}", ip);
+                return Collections.emptyList();
+            }
+            proxies.add(range);
+        }
+        return proxies.build();
     }
+
 }
