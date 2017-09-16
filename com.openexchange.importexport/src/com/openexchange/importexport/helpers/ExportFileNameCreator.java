@@ -64,6 +64,7 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.i18n.tools.StringHelper;
@@ -101,10 +102,31 @@ public class ExportFileNameCreator {
         try {
             FolderObject folderObj = folderService.getFolderObject(Integer.parseInt(folder), session.getContextId());
             String folderString = FolderObject.getFolderString(Integer.parseInt(folder), session.getUser().getLocale());
-            if (!Strings.isEmpty(folderString)) {
-                prefix = folderString;
+            if (Strings.isEmpty(folderString)) {
+                // No specific folder string available, check for standard folder
+                if (folderObj.isDefaultFolder()) {
+                    String localizableName = null;
+                    switch (folderObj.getModule()) {
+                        case FolderObject.TASK:
+                            localizableName = FolderStrings.DEFAULT_TASK_FOLDER_NAME;
+                            break;
+                        case FolderObject.CONTACT:
+                            localizableName = FolderStrings.DEFAULT_CONTACT_FOLDER_NAME;
+                            break;
+                        case FolderObject.CALENDAR:
+                            localizableName = FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME;
+                            break;
+                    }
+                    if (null == localizableName) {
+                        prefix = folderObj.getFolderName();
+                    } else {
+                        prefix = getLocalizedFileName(session, localizableName);
+                    }
+                } else {
+                    prefix = folderObj.getFolderName();
+                }
             } else {
-                prefix = getLocalizedFileName(session, folderObj.getFolderName());
+                prefix = folderString;
             }
         } catch (OXException e) {
             LOG.debug("", e);
