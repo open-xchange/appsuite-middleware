@@ -1062,7 +1062,7 @@ public final class ResponseWriter {
                         LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_BLACKLIST);
                         b = new StackTraceBlacklist(null);
                     } else {
-                        b = new StackTraceBlacklist(service.getProperty(STACKTRACE_BLACKLIST, new String()));
+                        b = new StackTraceBlacklist(service.getProperty(STACKTRACE_BLACKLIST, ""));
                     }
                     blacklist = b;
                 }
@@ -1113,7 +1113,7 @@ public final class ResponseWriter {
 
         @Override
         public void reloadConfiguration(ConfigurationService configService) {
-            blacklist = new StackTraceBlacklist(configService.getProperty(STACKTRACE_BLACKLIST, new String()));
+            blacklist = new StackTraceBlacklist(configService.getProperty(STACKTRACE_BLACKLIST, ""));
             includeStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
             includeArguments = Boolean.valueOf(configService.getBoolProperty(INCLUDE_ARGUMENTS, false));
         }
