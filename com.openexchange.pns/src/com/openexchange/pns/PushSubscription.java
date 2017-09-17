@@ -60,28 +60,6 @@ import java.util.List;
 public interface PushSubscription {
 
     /**
-     * A subscription's nature; either:
-     * <ul>
-     * <li>Volatile nature. Not stored, but only held node-local in memory.</li>
-     * <li>Persistent nature. Permanently stored.</li>
-     * </ul>
-     */
-    public static enum Nature {
-        /**
-         * Volatile nature. Not stored, but only held node-local in memory.
-         * <p>
-         * If JVM shuts-down, volatile subscriptions are gone.
-         */
-        VOLATILE,
-        /**
-         * Persistent nature. Permanently stored.
-         */
-        PERSISTENT;
-    }
-
-    // ---------------------------------------------------------------------------------------------------------
-
-    /**
      * Gets the user identifier
      *
      * @return The user identifier
@@ -130,12 +108,5 @@ public interface PushSubscription {
      * @return The token
      */
     String getToken();
-
-    /**
-     * Gets this subscription's nature; either {@link Nature#PERSISTENT persistent} or {@link Nature#VOLATILE volatile} nature
-     *
-     * @return The nature
-     */
-    Nature getNature();
 
 }
