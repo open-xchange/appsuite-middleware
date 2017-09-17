@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.inmemory;
+package com.openexchange.pns.subscription.storage.rdb.cache;
 
 import com.openexchange.pns.PushMatch;
 

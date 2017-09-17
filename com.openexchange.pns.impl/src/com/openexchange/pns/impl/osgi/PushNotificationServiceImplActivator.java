@@ -207,7 +207,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
         // Register other listener, too
         try {
-            DependentServiceRegisterer<PushSubscriptionListener> registerer = new DependentServiceRegisterer<>(context, PushSubscriptionListener.class, ListenerManagingSubscriptionListener.class, null, PushListenerService.class, SessiondService.class);
+            DependentServiceRegisterer<PushSubscriptionListener> registerer = new DependentServiceRegisterer<>(context, PushSubscriptionListener.class, ListenerManagingSubscriptionListener.class, null, PushSubscriptionRegistry.class, PushListenerService.class, SessiondService.class);
             tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
             this.dependentTracker = tracker;
             tracker.open();
