@@ -50,11 +50,9 @@
 package com.openexchange.pns.subscription.storage;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
@@ -62,8 +60,6 @@ import com.openexchange.pns.Hits;
 import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.PushSubscription.Nature;
-import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
@@ -80,26 +76,16 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositePushSubscriptionRegistry.class);
 
-    private final List<PushSubscriptionRegistry> registries;
     private final RdbPushSubscriptionRegistry persistentRegistry;
-    private final InMemoryPushSubscriptionRegistry volatileRegistry;
     private final ServiceListing<PushSubscriptionProvider> providers;
     private final ServiceListing<PushSubscriptionListener> listeners;
 
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(RdbPushSubscriptionRegistry persistentRegistry, InMemoryPushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners, boolean useVolatileRegistry) {
+    public CompositePushSubscriptionRegistry(RdbPushSubscriptionRegistry persistentRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners) {
         super();
         this.persistentRegistry = persistentRegistry;
-        this.volatileRegistry = useVolatileRegistry ? volatileRegistry : null;
-
-        List<PushSubscriptionRegistry> registries = new ArrayList<>(2);
-        if (useVolatileRegistry) {
-            registries.add(volatileRegistry);
-        }
-        registries.add(persistentRegistry);
-        this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(registries);
         this.providers = providers;
         this.listeners = listeners;
     }
@@ -111,8 +97,8 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
-        for (PushSubscriptionRegistry registry : registries) {
-            boolean hasAny = null == client ? registry.hasInterestedSubscriptions(userId, contextId, topic) : registry.hasInterestedSubscriptions(client, userId, contextId, topic);
+        {
+            boolean hasAny = null == client ? persistentRegistry.hasInterestedSubscriptions(userId, contextId, topic) : persistentRegistry.hasInterestedSubscriptions(client, userId, contextId, topic);
             if (hasAny) {
                 return true;
             }
@@ -137,34 +123,15 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
-        for (PushSubscriptionRegistry registry : registries) {
+        {
             Hits currentHits;
             if (null == client) {
-                currentHits = registry.getInterestedSubscriptions(userIds, contextId, topic);
+                currentHits = persistentRegistry.getInterestedSubscriptions(userIds, contextId, topic);
             } else {
-                currentHits = registry.getInterestedSubscriptions(client, userIds, contextId, topic);
+                currentHits = persistentRegistry.getInterestedSubscriptions(client, userIds, contextId, topic);
             }
             if (false == currentHits.isEmpty()) {
-                Map<ClientAndTransport, List<PushMatch>> currentMap = ((MapBackedHits) currentHits).getMap();
-
-                // Already initialized?
-                if (null == map) {
-                    map = currentMap;
-                } else {
-                    // Merge hits
-                    for (Map.Entry<ClientAndTransport, List<PushMatch>> entry : currentMap.entrySet()) {
-                        List<PushMatch> list = map.get(entry.getKey());
-                        if (null == list) {
-                            list = new LinkedList<>();
-                            map.put(entry.getKey(), list);
-                        }
-                        for (PushMatch newMatch : entry.getValue()) {
-                            if (!list.contains(newMatch)) {
-                                list.add(newMatch);
-                            }
-                        }
-                    }
-                }
+                map = ((MapBackedHits) currentHits).getMap();
             }
         }
 
@@ -212,11 +179,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             }
         }
 
-        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
-            volatileRegistry.registerSubscription(subscription);
-        } else {
-            persistentRegistry.registerSubscription(subscription);
-        }
+        persistentRegistry.registerSubscription(subscription);
 
         for (PushSubscriptionListener listener : listeners) {
             try {
@@ -229,24 +192,8 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public boolean unregisterSubscription(PushSubscription subscription) throws OXException {
-        // Is nature given?
-        Nature nature = subscription.getNature();
-
-        boolean removed;
-        PushSubscription removedSubscription = null;
-        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
-            removed = volatileRegistry.unregisterSubscription(subscription);
-        } else if (Nature.PERSISTENT == nature) {
-            removedSubscription = persistentRegistry.removeSubscription(subscription);
-            removed = null != removedSubscription;
-        } else {
-            // Don't know better
-            removedSubscription = persistentRegistry.removeSubscription(subscription);
-            removed = null != removedSubscription;
-            if (null != volatileRegistry) {
-                removed |= volatileRegistry.unregisterSubscription(subscription);
-            }
-        }
+        PushSubscription removedSubscription = persistentRegistry.removeSubscription(subscription);
+        boolean removed = null != removedSubscription;
 
         if (removed) {
             PushSubscription subscriptionToUse = null == removedSubscription ? subscription : removedSubscription;
@@ -264,20 +211,12 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public int unregisterSubscription(String token, String transportId) throws OXException {
-        int numRemoved = persistentRegistry.unregisterSubscription(token, transportId);
-        if (null != volatileRegistry) {
-            numRemoved += volatileRegistry.unregisterSubscription(token, transportId);
-        }
-        return numRemoved;
+        return persistentRegistry.unregisterSubscription(token, transportId);
     }
 
     @Override
     public boolean updateToken(PushSubscription subscription, String newToken) throws OXException {
-        boolean updated = persistentRegistry.updateToken(subscription, newToken);
-        if (null != volatileRegistry) {
-            updated |= volatileRegistry.updateToken(subscription, newToken);
-        }
-        return updated;
+        return persistentRegistry.updateToken(subscription, newToken);
     }
 
 }

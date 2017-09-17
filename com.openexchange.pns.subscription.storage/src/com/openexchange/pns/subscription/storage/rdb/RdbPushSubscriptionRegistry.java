@@ -80,7 +80,6 @@ import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.PushSubscription.Nature;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
@@ -185,7 +184,6 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                             DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
                                 .contextId(contextId)
                                 .userId(userId)
-                                .nature(Nature.PERSISTENT)
                                 .token(rs.getString(2))
                                 .client(rs.getString(3))
                                 .transportId(rs.getString(4));
