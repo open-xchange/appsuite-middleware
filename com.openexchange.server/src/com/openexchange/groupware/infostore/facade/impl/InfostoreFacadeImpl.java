@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.io.IOException;
 import java.io.InputStream;
@@ -615,7 +616,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     update.setFolderId(folderId);
                     update.setId(id);
                     update.setLastModified(new Date());
-                    Metadata[] columns = null == modifiedColumns ? new Metadata[] { Metadata.LAST_MODIFIED_LITERAL } : addLastModifiedIfNeeded(modifiedColumns);
+                    String existingFilename = existing.getFileName();
+                    String updateFilename = update.getFileName();
+                    Metadata[] columns = null == modifiedColumns ? new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.FILENAME_LITERAL } : addLastModifiedIfNeeded(modifiedColumns);
+                    if (Strings.isNotEmpty(updateFilename) && Strings.isNotEmpty(existingFilename) && existingFilename.equalsIgnoreCase(updateFilename)) {
+                        columns = addFilenameIfNeeded(columns);
+                    }
                     return saveDocument(update, data, existing.getSequenceNumber(), columns, session);
                 } catch (OXException x) {
                     if (x.getCode() == InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.getNumber() && x.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
@@ -975,7 +981,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             boolean isMove = updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId();
-            boolean isRename = updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() && false == document.getFileName().equals(oldDocument.getFileName());
+            boolean isRename = updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() && false == document.getFileName().equalsIgnoreCase(oldDocument.getFileName());
             if (isMove) {
                 // this is a move - reserve in target folder
                 String newFileName = null != document.getFileName() ? document.getFileName() : oldDocument.getFileName();
@@ -2337,6 +2343,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             copy[i++] = metadata;
         }
         copy[i] = Metadata.LAST_MODIFIED_UTC_LITERAL;
+        return copy;
+    }
+
+    private Metadata[] addFilenameIfNeeded(final Metadata[] columns) {
+        for (final Metadata metadata : columns) {
+            if (metadata == Metadata.FILENAME_LITERAL) {
+                return columns;
+            }
+        }
+        final Metadata[] copy = new Metadata[columns.length + 1];
+        int i = 0;
+        for (final Metadata metadata : columns) {
+            copy[i++] = metadata;
+        }
+        copy[i] = Metadata.FILENAME_LITERAL;
         return copy;
     }
 
