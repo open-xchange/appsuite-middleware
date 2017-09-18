@@ -520,6 +520,7 @@ public class Utils {
      * @param session The calendar session
      * @param storage The calendar storage to use
      * @return The quota
+     * @throws OXException In case of an error
      */
     public static Quota getQuota(CalendarSession session, CalendarStorage storage) throws OXException {
         /*

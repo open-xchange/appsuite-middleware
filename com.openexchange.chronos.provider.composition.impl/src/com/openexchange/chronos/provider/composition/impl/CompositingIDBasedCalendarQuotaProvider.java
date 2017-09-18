@@ -85,7 +85,7 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
     }
 
     public String getModuleID() {
-        return "calendar.chronos";
+        return "calendar";
     }
 
     public String getDisplayName() {

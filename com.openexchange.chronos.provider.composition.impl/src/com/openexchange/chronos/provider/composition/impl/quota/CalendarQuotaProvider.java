@@ -81,12 +81,11 @@ public class CalendarQuotaProvider implements QuotaProvider {
         super();
         this.services = services;
         this.registry = registry;
-
     }
 
     @Override
     public String getModuleID() {
-        return "calendar.chronos";
+        return "calendar";
     }
 
     @Override

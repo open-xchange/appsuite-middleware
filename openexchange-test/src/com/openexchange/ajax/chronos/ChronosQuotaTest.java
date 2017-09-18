@@ -86,8 +86,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class ChronosQuotaTest extends AbstractChronosTest {
 
-    // XXX Change to 'calendar' after replacing old calendar
-    private static final String MODULE = "calendar.chronos";
+    private static final String MODULE = "calendar";
 
     private AJAXClient ajaxClient;
 

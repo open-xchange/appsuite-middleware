@@ -314,12 +314,6 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
     
-    /**
-     * <li>The quota for account '%1$s' in context '%2$s' exceeded the limit.</li>
-     * <li>There is no more quota available for account %1$s in context %2$s. Can't create new events..</li>
-     */
-    INSUFFICIENT_QUOTA("There is no more quota available for account %1$s in context %2$s. Can't create new events.", QUOTA_EXCEEDED, Category.CATEGORY_ERROR, 5007),
-
     ;
 
     public static final String PREFIX = "CAL".intern();

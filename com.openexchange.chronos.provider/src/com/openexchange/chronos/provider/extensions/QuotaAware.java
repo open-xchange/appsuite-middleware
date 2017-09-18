@@ -65,8 +65,8 @@ public interface QuotaAware extends CalendarAccess {
     /**
      * Get the configured quotas and their actual usages of the underlying calendar account.
      *
-     * @param session The calendar session
      * @return The configured quotas and the actual usages
+     * @throws OXException In case of an error
      */
     Quota[] getQuotas() throws OXException;
 
