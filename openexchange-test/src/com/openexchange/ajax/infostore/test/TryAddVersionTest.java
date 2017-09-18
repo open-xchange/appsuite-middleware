@@ -84,6 +84,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -97,6 +98,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         ids.add(resp.getID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -147,6 +149,23 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         assertFalse("tryAddVersion".equals(uploaded.getFileName()));
         assertTrue(uploaded.getFileName().endsWith("(1)"));
         ids.add(uploaded.getId());
+    }
+
+    @Test
+    public void testBug55425() throws Exception {
+        File file = new DefaultFile();
+        file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
+        file.setFileName("TryAddVersion");
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
+        NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
+        NewInfostoreResponse resp = getClient().execute(req);
+        assertFalse(resp.hasError());
+        ids.add(resp.getID());
+        GetInfostoreRequest getReq = new GetInfostoreRequest(resp.getID(), COLUMNS);
+        GetInfostoreResponse getResp = getClient().execute(getReq);
+        assertNotNull(getResp);
+        File uploaded = getResp.getDocumentMetadata();
+        assertEquals(2, uploaded.getNumberOfVersions());
     }
 
 }
