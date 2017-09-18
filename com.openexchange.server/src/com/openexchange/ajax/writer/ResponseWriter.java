@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.ajax.Client.USM_EAS;
+import static com.openexchange.ajax.Client.USM_JSON;
 import static com.openexchange.ajax.fields.ResponseFields.ARGUMENTS;
 import static com.openexchange.ajax.fields.ResponseFields.CONTINUATION;
 import static com.openexchange.ajax.fields.ResponseFields.DATA;
@@ -1082,7 +1084,7 @@ public final class ResponseWriter {
             return false;
         }
         String uc = Strings.toUpperCase(clientId);
-        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
+        return uc.startsWith(USM_EAS.getClientId()) || uc.startsWith(USM_JSON.getClientId());
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
