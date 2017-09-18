@@ -51,6 +51,7 @@ package com.openexchange.http.grizzly;
 
 import java.util.Collections;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.util.IPTools;
@@ -464,6 +465,7 @@ public class GrizzlyConfig {
 
     /** A comma separated list of known proxies */
     private final List<IPRange> knownProxies;
+
     /**
      * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
      * proxy or load balancer
@@ -540,7 +542,7 @@ public class GrizzlyConfig {
         this.contentSecurityPolicy = contentSecurityPolicy;
         this.defaultEncoding = defaultEncoding;
         this.isConsiderXForwards = isConsiderXForwards;
-        this.knownProxies = knownProxies;
+        this.knownProxies = null == knownProxies || knownProxies.isEmpty() ? Collections.emptyList() : ImmutableList.copyOf(knownProxies);
         this.forHeader = forHeader;
         this.protocolHeader = protocolHeader;
         this.httpsProtoValue = httpsProtoValue;
@@ -711,8 +713,9 @@ public class GrizzlyConfig {
     }
 
     /**
-     * Returns the known proxies as list of {@link IPRange}s
-     * @return the known proxies as list of {@link IPRange}s or an empty list
+     * Gets the known proxies as an immutable list of {@link IPRange}s
+     *
+     * @return The known proxies as list of {@link IPRange}s or an empty list
      */
     public List<IPRange> getKnownProxies() {
         return knownProxies;

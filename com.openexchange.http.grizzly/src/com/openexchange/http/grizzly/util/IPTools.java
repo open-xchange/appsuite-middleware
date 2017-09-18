@@ -94,7 +94,7 @@ public class IPTools {
      * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found or an IP address is malformed
      */
     public static String getRemoteIP(String forwardedIPs, Collection<IPRange> knownProxies) {
-        if (Strings.isEmpty(forwardedIPs)) {
+        if (Strings.isEmpty(forwardedIPs) || knownProxies.isEmpty()) {
             return null;
         }
 
