@@ -71,6 +71,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
@@ -1993,7 +1994,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private void deleteContainedEvents(int folderId) throws OXException {
         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
         calendarSession.set(Connection.class.getName(), writeCon);
-        calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), Long.MAX_VALUE);
+        calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), CalendarUtils.DISTANT_FUTURE);
     }
 
     private void deleteContainedTasks(final int folderID) throws OXException {
