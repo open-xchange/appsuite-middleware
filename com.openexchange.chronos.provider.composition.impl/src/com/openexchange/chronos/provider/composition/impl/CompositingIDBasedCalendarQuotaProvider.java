@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link CompositingIDBasedCalendarQuotaProvider}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -97,8 +97,7 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
             // Get account
             int accountId = Integer.parseInt(accountID);
             CalendarAccount account = getAccount(accountId);
-
-            return getAccountQuota(account);
+            return getAccountQuota(account, getAccess(account, QuotaAware.class).getQuotas());
         } catch (NumberFormatException e) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
         }
@@ -108,26 +107,30 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
         // Get accounts
         List<AccountQuota> accountQuotas = new LinkedList<>();
         for (CalendarAccount account : getAccounts()) {
-            // Add each quota
-            accountQuotas.add(getAccountQuota(account));
+            CalendarAccess access = getAccess(account);
+            if (QuotaAware.class.isInstance(access)) {
+                accountQuotas.add(getAccountQuota(account, getAccess(account, QuotaAware.class).getQuotas()));
+            }
         }
         return accountQuotas;
     }
 
     /**
      * Get the {@link AccountQuota} for the {@link CalendarAccount}
-     * 
+     *
      * @param account The account to get the quota for
+     * @param quotas The account's quotas
      * @return The {@link AccountQuota}
      * @throws OXException In case the access is denied or quota is not available
      */
-    private AccountQuota getAccountQuota(CalendarAccount account) throws OXException {
-        CalendarAccess access = getAccess(account);
-        if (QuotaAware.class.isInstance(access)) {
-            return getAccess(account, QuotaAware.class).getQuota();
-        } else {
-            // Assume unlimited
-            return new DefaultAccountQuota(String.valueOf(account.getAccountId()), account.getProviderId()).addQuota(Quota.UNLIMITED_AMOUNT);
+    private AccountQuota getAccountQuota(CalendarAccount account, Quota[] quotas) throws OXException {
+        DefaultAccountQuota accountQuota = new DefaultAccountQuota(String.valueOf(account.getAccountId()), getProviderName(account));
+        if (null != quotas && 0 < quotas.length) {
+            for (Quota quota : quotas) {
+                accountQuota.addQuota(quota);
+            }
         }
+        return accountQuota;
     }
+
 }

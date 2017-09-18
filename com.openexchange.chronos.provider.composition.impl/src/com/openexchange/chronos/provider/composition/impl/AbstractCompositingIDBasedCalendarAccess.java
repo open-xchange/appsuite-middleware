@@ -233,6 +233,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * If the extension is not provided by the account's calendar access, an appropriate exception is thrown.
      *
      * @param account The account to get the calendar access for
+     * @param extensionClass The targeted extension class
      * @return The calendar access for the specified account
      */
     protected <T extends CalendarAccess> T getAccess(CalendarAccount account, Class<T> extensionClass) throws OXException {

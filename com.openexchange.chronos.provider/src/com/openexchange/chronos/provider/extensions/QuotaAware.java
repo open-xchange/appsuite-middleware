@@ -51,10 +51,10 @@ package com.openexchange.chronos.provider.extensions;
 
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.Quota;
 
 /**
- * 
+ *
  * {@link QuotaAware}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -63,11 +63,11 @@ import com.openexchange.quota.AccountQuota;
 public interface QuotaAware extends CalendarAccess {
 
     /**
-     * Get the {@link AccountQuota}
-     * 
-     * @return The {@link AccountQuota} for this {@link CalendarAccess}
-     * @throws OXException In case of quota can't be fetched
+     * Get the configured quotas and their actual usages of the underlying calendar account.
+     *
+     * @param session The calendar session
+     * @return The configured quotas and the actual usages
      */
-    AccountQuota getQuota() throws OXException;
+    Quota[] getQuotas() throws OXException;
 
 }
