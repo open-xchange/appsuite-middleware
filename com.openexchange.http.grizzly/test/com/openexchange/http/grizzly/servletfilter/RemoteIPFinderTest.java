@@ -116,6 +116,7 @@ public class RemoteIPFinderTest {
         assertNull(remoteIP);
     }
 
+    @Test
     public void testAllProxiesMatchingIPv4() {
         String knownProxies = "192.168.32.0/24, 192.168.33.36";
         String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
@@ -124,6 +125,7 @@ public class RemoteIPFinderTest {
         evaluate(knownProxies, xForwardFor, expectedIP);
     }
 
+    @Test
     public void testFirstProxyNotMatchingIPv4() {
         String knownProxies = "192.168.32.0/24";
         String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
@@ -132,6 +134,7 @@ public class RemoteIPFinderTest {
         evaluate(knownProxies, xForwardFor, expectedIP);
     }
 
+    @Test
     public void testAllProxiesMatchingIPv6() {
         String knownProxies = "2001:db8:0:8d3:0:8a2e:70::/112";
         String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
@@ -140,8 +143,47 @@ public class RemoteIPFinderTest {
         evaluate(knownProxies, xForwardFor, expectedIP);
     }
 
+    @Test
     public void testFirtsProxyNotMatchingIPv6() {
         String knownProxies = "2001:db8:0:8d3:0:8a2e:70::/112";
+        String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:80:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+        String expectedIP = "2001:db8:0:8d3:0:8a2e:80:7342";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    @Test
+    public void testAllProxiesMatchingIPv4Slash() {
+        String knownProxies = "192.168.32.0-192.168.33.36";
+        String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
+        String expectedIP = "206.36.25.126";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    @Test
+    public void testFirstProxieNotMatchingIPv4Slash() {
+        String knownProxies = "192.168.32.0-192.168.33.35";
+        String xForwardFor = "206.36.25.126, 192.168.32.1, 192.168.32.2, 192.168.33.36";
+        String expectedIP = "192.168.33.36";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    @Test
+    public void testAllProxiesMatchingIPv6Slash() {
+        // Equal to "2001:DB8:0:8D3:0:8A2E:70:0-2001:DB8:0:8D3:0:8A2E:70:FFFF";
+        String knownProxies = "2001:0DB8:0000:08D3:0000:8A2E:0070:0000-2001:0DB8:0000:08D3:0000:8A2E:0070:FFFF";
+        String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+        String expectedIP = "2001:db8:1:8d3:0:ce6:0:1337";
+
+        evaluate(knownProxies, xForwardFor, expectedIP);
+    }
+
+    @Test
+    public void testFirtsProxyNotMatchingIPv6Slash() {
+        // Equal to "2001:0DB8:0000:08D3:0000:8A2E:0070:0000-2001:0DB8:0000:08D3:0000:8A2E:0070:FFFF"
+        String knownProxies = "2001:DB8:0:8D3:0:8A2E:70:0-2001:DB8:0:8D3:0:8A2E:70:FFFF";
         String xForwardFor = "2001:db8:1:8d3:0:ce6:0:1337, 2001:db8:0:8d3:0:8a2e:80:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
         String expectedIP = "2001:db8:0:8d3:0:8a2e:80:7342";
 
