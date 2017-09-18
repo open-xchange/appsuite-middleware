@@ -66,14 +66,13 @@ public class StackTraceBlacklist {
     /** The logger */
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StackTraceBlacklist.class);
 
-
     // Blacklisted exceptions
-    private Set<String> prefixes;
-    private Set<String> codes;
+    private final Set<String> prefixes;
+    private final Set<String> codes;
 
     /**
      * Initializes a new {@link StackTraceBlacklist}.
-     * 
+     *
      * @param blacklist The comma separated list of exception codes and prefix which stack-traces should not be invoked into a response
      */
     public StackTraceBlacklist(String blacklist) {
@@ -101,7 +100,7 @@ public class StackTraceBlacklist {
                     prefixes.add(entry.substring(0, 3));
                 } else {
                     // Not supported
-                    LOGGER.warn("{} does not match any typical exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
+                    LOGGER.warn("{} does not match any known format for exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
                 }
             }
         }
@@ -112,7 +111,7 @@ public class StackTraceBlacklist {
 
     /**
      * Check if given {@link OXException} is allowed to be added in a response
-     * 
+     *
      * @param exception The {@link OXException} to check
      * @return <code>true</code> If the exception can be added in a response
      *         <code>false</code> If the exception is not allowed to be a part of the response
