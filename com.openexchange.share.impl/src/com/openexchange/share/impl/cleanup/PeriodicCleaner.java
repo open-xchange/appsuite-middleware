@@ -98,8 +98,9 @@ public class PeriodicCleaner implements Runnable {
             LOG.info("Periodic share cleanup task starting, going to check {} contexts...", I(size));
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
             long lastLogTime = start;
-            for (int i = 0, k = size; k-- > 0; i++) {
-                int contextID = contextIDs.get(i).intValue();
+            int i = 0;
+            for (Integer ctxId : contextIDs) {
+                int contextID = ctxId.intValue();
                 for (int retry = 0; retry < 3; retry++) {
                     if (false == active.get()) {
                         LOG.info("Periodic share cleanup task stopping.");
@@ -126,6 +127,7 @@ public class PeriodicCleaner implements Runnable {
                         }
                     }
                 }
+                i++;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

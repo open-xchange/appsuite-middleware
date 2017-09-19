@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -92,6 +92,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Tue Sep 12 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-09-18 (4354)
 * Fri Sep 01 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-09-04 (4328)
 * Mon Aug 14 2017 Carsten Hoeger <choeger@open-xchange.com>

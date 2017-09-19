@@ -173,12 +173,21 @@ public final class UploadUtility {
         int pos = 0;
         double decSize = size;
         final int base = realSize ? 1024 : 1000;
-        while (decSize > base) {
+        while (decSize >= base) {
             decSize /= base;
             pos++;
         }
-        final int num = (int) Math.pow(10, precision);
-        final StringBuilder sb = new StringBuilder(8).append(((Math.round(decSize * num)) / (double) num)).append(' ');
+
+        StringBuilder sb = new StringBuilder(8);
+        int num = (int) Math.pow(10, precision);
+        double value = (Math.round(decSize * num)) / (double) num;
+        if (precision <= 0) {
+            sb.append((int) value);
+        } else {
+            sb.append(value);
+        }
+        sb.append(' ');
+
         if (longName) {
             sb.append(getSizePrefix(pos)).append("bytes");
         } else {
@@ -476,7 +485,7 @@ public final class UploadUtility {
             if (null == forcedMimeType) {
                 String itemContentType = item.getContentType();
                 ContentType contentType = getContentTypeSafe(itemContentType);
-                if (null == contentId) {
+                if (null == contentId && contentType != null) {
                     contentId = contentType.getParameter("cid");
                     retval.setContentId(contentId);
                 }

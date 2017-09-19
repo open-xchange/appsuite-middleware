@@ -123,10 +123,10 @@ public class IMAPProtocol extends Protocol {
      * @exception	IOException	for I/O errors
      * @exception	ProtocolException	for protocol failures
      */
-    public IMAPProtocol(String name, String host, int port, 
+    public IMAPProtocol(String name, String host, int port, String user,
 			Properties props, boolean isSSL, MailLogger logger)
 			throws IOException, ProtocolException {
-	super(host, port, props, "mail." + name, isSSL, logger);
+	super(host, port, user, props, "mail." + name, isSSL, logger);
 
 	try {
 	    this.name = name;

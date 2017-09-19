@@ -130,12 +130,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
+        
+        checkOwnerShipAndSetSid(ctx, auth);
+
         try {
             oxresell.updateModifyTimestamp(ctx);
         } catch (StorageException e) {
             throw new PluginException(e);
         }
-        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     @Override
@@ -143,12 +145,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
+        
+        checkOwnerShipAndSetSid(ctx, auth);
+
         try {
             oxresell.updateModifyTimestamp(ctx);
         } catch (StorageException e) {
             throw new PluginException(e);
         }
-        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     @Override
@@ -156,12 +160,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
+        
+        checkOwnerShipAndSetSid(ctx, auth);
+
         try {
             oxresell.updateModifyTimestamp(ctx);
         } catch (StorageException e) {
             throw new PluginException(e);
         }
-        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     @Override
@@ -169,12 +175,14 @@ public class OXResellerContextImpl implements OXContextPluginInterface {
         if (cache.isMasterAdmin(auth)) {
             return;
         }
+
+        checkOwnerShipAndSetSid(ctx, auth);
+
         try {
             oxresell.updateModifyTimestamp(ctx);
         } catch (StorageException e) {
             throw new PluginException(e);
         }
-        checkOwnerShipAndSetSid(ctx, auth);
     }
 
     @Override

@@ -50,7 +50,7 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
-
+import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -59,10 +59,7 @@ import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-
-import javapns.json.JSONException;
 import javapns.notification.PushNotificationPayload;
-
 
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
@@ -125,7 +122,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 public com.google.android.gcm.Message getMessage() {
                     return gcmMessage;
                 }
-           };
+            };
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
 
@@ -137,6 +134,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String senderAddress = MessageDataUtil.getSender(messageData);
                 String sender = displayName.length() == 0 ? senderAddress : displayName;
                 String folder = MessageDataUtil.getFolder(messageData);
+                String id = MessageDataUtil.getId(messageData);
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
@@ -156,6 +154,15 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     if (config.isApnSoundEnabled()) {
                         payload.addSound(config.getApnSoundFile());
                     }
+
+                    payload.setContentAvailable(false);
+                } else {
+                    // Silent push
+                    payload.setContentAvailable(true);
+                }
+
+                if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
+                    path = folder + "/" + id;
                 }
 
                 if (path.length() > 0) {

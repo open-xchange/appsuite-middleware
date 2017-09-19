@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,8 +63,14 @@ if [ ${1:-0} -eq 2 ]; then
     ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" $PFILE
 
     # SoftwareChange_Request-3843
+    prefer_gssapi=$(ox_read_property com.openexchange.mail.filter.preferGSSAPI ${PFILE})
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE
-    ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    if [ "${prefer_gssapi}" = "true" ]
+    then
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech GSSAPI $PFILE
+    else
+      ox_add_property com.openexchange.mail.filter.preferredSaslMech "" $PFILE
+    fi
 
     # SoftwareChange_Request-3987
     OLDNAMES=( SIEVE_LOGIN_TYPE SIEVE_CREDSRC SIEVE_SERVER SIEVE_PORT SCRIPT_NAME SIEVE_AUTH_ENC NON_RFC_COMPLIANT_TLS_REGEX TLS VACATION_DOMAINS )
@@ -95,6 +101,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Tue Sep 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2017-09-18 (4354)
 * Fri Sep 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-09-04 (4328)
 * Mon Aug 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
