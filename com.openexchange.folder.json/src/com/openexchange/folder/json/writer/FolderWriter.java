@@ -81,6 +81,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
@@ -413,7 +414,14 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final ContentType obj = folder.getContentType();
-                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, null == obj ? JSONObject.NULL : obj.toString());
+                Object value;
+                if (null == obj) {
+                    value = JSONObject.NULL;
+                } else {
+                    Module module = com.openexchange.groupware.modules.Module.getForFolderConstant(obj.getModule());
+                    value = null != module ? module.getName() : obj.toString();
+                }
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, value);
             }
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
