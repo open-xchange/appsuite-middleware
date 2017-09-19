@@ -133,6 +133,11 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return persistantImpl.getDistinctContextsPerSchema();
+    }
+
+    @Override
     public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
         return persistantImpl.getAllContextIdsForFilestore(filestoreId);
     }

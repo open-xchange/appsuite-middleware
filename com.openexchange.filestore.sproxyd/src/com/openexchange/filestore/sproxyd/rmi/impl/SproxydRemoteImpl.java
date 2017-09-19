@@ -105,22 +105,11 @@ public class SproxydRemoteImpl implements SproxydRemoteManagement {
         }
 
         try {
-            List<Integer> contextIds = contextService.getAllContextIds();
-            Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
-            Set<String> scalityIds = new HashSet<String>(1024, 0.9F);
+            List<Integer> contextIds = contextService.getDistinctContextsPerSchema();
+            Set<String> scalityIds = new HashSet<String>(contextIds.size(), 0.9F);
             for (Integer contextId : contextIds) {
-                if (visited.add(contextId)) {
-                    // Add the Scality identifiers
-                    addAllObjectsURLsInSchema(contextId.intValue(), scalityIds, dbService);
-
-                    // Discard other contexts in that schema
-                    int[] contextsInSameSchema = dbService.getContextsInSameSchema(contextId.intValue());
-                    if (null != contextsInSameSchema) {
-                        for (int i = contextsInSameSchema.length; i-- > 0;) {
-                            visited.add(Integer.valueOf(contextsInSameSchema[i]));
-                        }
-                    }
-                }
+                // Add the Scality identifiers
+                addAllObjectsURLsInSchema(contextId.intValue(), scalityIds, dbService);
             }
 
             List<String> sortedIds = new ArrayList<String>(scalityIds);

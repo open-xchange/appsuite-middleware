@@ -56,13 +56,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -770,11 +768,8 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         }
 
         int removed = 0;
-        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
-        while (false == allContextIDs.isEmpty()) {
-            // Delete for whole schema using connection for first context
-            int contextId = allContextIDs.iterator().next().intValue();
-
+        for (Integer contextId : contextService.getDistinctContextsPerSchema()) {
+            // Delete for whole schema using connection for representative context
             Connection con = databaseService.getWritable(contextId);
             boolean startedTransaction = false;
             boolean rollback = false;
@@ -808,12 +803,6 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 } else {
                     databaseService.backWritableAfterReading(contextId, con);
                 }
-            }
-
-            // Remember processed contexts
-            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
-            for (int cid : contextsInSameSchema) {
-                allContextIDs.remove(Integer.valueOf(cid));
             }
         }
         return removed;
