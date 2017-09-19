@@ -64,6 +64,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
@@ -81,8 +82,8 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -418,8 +419,14 @@ public final class FolderWriter {
                 if (null == obj) {
                     value = JSONObject.NULL;
                 } else {
-                    Module module = com.openexchange.groupware.modules.Module.getForFolderConstant(obj.getModule());
-                    value = null != module ? module.getName() : obj.toString();
+                    int optFolderId;
+                    try {
+                        optFolderId = Integer.parseInt(folder.getID());
+                    } catch (NumberFormatException | NullPointerException e) {
+                        optFolderId = 0;
+                    }
+                    String module = AJAXServlet.getModuleString(obj.getModule(), optFolderId);
+                    value = Strings.isEmpty(module) ? obj.toString() : module;
                 }
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, value);
             }
