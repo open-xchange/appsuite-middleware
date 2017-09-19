@@ -56,11 +56,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
+import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,6 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ExistsTestCommandParser} parses exists sieve tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
 public class ExistsTestCommandParser extends AbstractTestCommandParser {
@@ -91,6 +95,31 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
     @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        jsonObject.put(ExistsTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(0)));
+
+        JSONArray headers = new JSONArray((List<?>) command.getArguments().get(0));
+        boolean simplified = false;
+        for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
+            List<String> simplifiedHeaders = test.getHeaderNames();
+            if (simplifiedHeaders.size() != headers.length()) {
+                continue;
+            }
+            boolean isEqual = true;
+            for (Object header : headers) {
+                if (!simplifiedHeaders.contains(header)) {
+                    isEqual = false;
+                    break;
+                }
+            }
+            if (!isEqual) {
+                continue;
+            }
+            jsonObject.put(GeneralField.id.name(), test.getCommandName());
+            simplified = true;
+            jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
+        }
+
+        if (!simplified) {
+            jsonObject.put(ExistsTestField.headers.name(), headers);
+        }
     }
 }
