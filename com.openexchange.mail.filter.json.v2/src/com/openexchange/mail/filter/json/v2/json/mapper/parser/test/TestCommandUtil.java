@@ -60,6 +60,14 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.S
  */
 public final class TestCommandUtil {
 
+    /**
+     * Tests if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     * 
+     * @param headerTest The {@link SimplifiedHeaderTest}
+     * @param headers The {@link JSONArray} with the headers
+     * @return <code>true</code> if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     *         <code>false</code> otherwise
+     */
     public static boolean isSimplified(SimplifiedHeaderTest headerTest, JSONArray headers) {
         List<String> simplifiedHeaders = headerTest.getHeaderNames();
         if (simplifiedHeaders.size() != headers.length()) {
