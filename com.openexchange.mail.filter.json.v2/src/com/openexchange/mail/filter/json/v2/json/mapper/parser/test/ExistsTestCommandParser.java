@@ -63,7 +63,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.ExistsTestField;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
