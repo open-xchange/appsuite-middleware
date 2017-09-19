@@ -99,23 +99,11 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
         JSONArray headers = new JSONArray((List<?>) command.getArguments().get(0));
         boolean simplified = false;
         for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
-            List<String> simplifiedHeaders = test.getHeaderNames();
-            if (simplifiedHeaders.size() != headers.length()) {
-                continue;
+            if (TestCommandUtil.isSimplified(test, headers)) {
+                jsonObject.put(GeneralField.id.name(), test.getCommandName());
+                simplified = true;
+                jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
             }
-            boolean isEqual = true;
-            for (Object header : headers) {
-                if (!simplifiedHeaders.contains(header)) {
-                    isEqual = false;
-                    break;
-                }
-            }
-            if (!isEqual) {
-                continue;
-            }
-            jsonObject.put(GeneralField.id.name(), test.getCommandName());
-            simplified = true;
-            jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
         }
 
         if (!simplified) {
