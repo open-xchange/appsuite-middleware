@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified;
 
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;

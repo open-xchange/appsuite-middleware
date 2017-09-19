@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.mapper.parser.action.simplified;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified;
 
 /**
  * {@link SimplifiedActions}
