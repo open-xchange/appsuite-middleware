@@ -101,7 +101,7 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String id = jsonObject.getString("id");
         if (Commands.HEADER.getCommandName().equals(id)) {
-            // Fall back to default behavior
+            // Fall back to default behaviour
             return headerParser.parse(jsonObject, session);
         }
         SimplifiedHeaderTest test = SimplifiedHeaderTest.getTestByName(id);

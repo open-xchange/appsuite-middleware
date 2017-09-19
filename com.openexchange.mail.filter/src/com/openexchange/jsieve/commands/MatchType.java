@@ -74,41 +74,40 @@ public enum MatchType {
 
     // simplified matcher
     startswith,
-    endswith
-    ;
+    endswith,
+    exists;
 
     private String argumentName;
     private String require;
     private String notName;
 
-
     /**
      * Initializes a new {@link MatchType}.
      */
     private MatchType() {
-       this.argumentName = ":"+this.name();
-       this.require = "";
-       this.notName = "not "+this.name();
+        this.argumentName = ":" + this.name();
+        this.require = "";
+        this.notName = "not " + this.name();
     }
 
     /**
      * Initializes a new {@link MatchType}.
      */
     private MatchType(String require) {
-       this.argumentName = ":"+this.name();
-       this.require = require;
-       this.notName = "not "+this.name();
+        this.argumentName = ":" + this.name();
+        this.require = require;
+        this.notName = "not " + this.name();
     }
 
-    public String getArgumentName(){
+    public String getArgumentName() {
         return argumentName;
     }
 
-    public String getRequire(){
+    public String getRequire() {
         return require;
     }
 
-    public String getNotName(){
+    public String getNotName() {
         return notName;
     }
 
@@ -118,9 +117,9 @@ public enum MatchType {
      * @param notName The name of the matcher
      * @return The normal name or null
      */
-    public static String getNormalName(String notName){
-        for(MatchType type: MatchType.values()){
-            if(notName.equals(type.getNotName())){
+    public static String getNormalName(String notName) {
+        for (MatchType type : MatchType.values()) {
+            if (notName.equals(type.getNotName())) {
                 return type.name();
             }
         }
@@ -133,7 +132,7 @@ public enum MatchType {
      * @param argumentName The name of the matcher
      * @return The normal name or null
      */
-    public static String getNotNameForArgumentName(String argumentName){
+    public static String getNotNameForArgumentName(String argumentName) {
         return MatchType.valueOf(argumentName.substring(1)).getNotName();
     }
 
