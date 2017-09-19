@@ -103,6 +103,8 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
                 jsonObject.put(GeneralField.id.name(), test.getCommandName());
                 simplified = true;
                 jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
+                jsonObject.put(HeaderTestField.headers.name(), new JSONArray());
+                jsonObject.put(HeaderTestField.values.name(), new JSONArray());
             }
         }
 
