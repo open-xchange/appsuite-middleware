@@ -50,7 +50,6 @@
 package com.openexchange.audit.impl;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +70,6 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -419,60 +417,55 @@ public class AuditEventHandler implements EventHandler {
     /**
      * Handles appointment events.
      *
-     * @param event - the {@link CommonEvent} that was received
+     * @param commonEvent - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param logBuilder - the log to add information
      * @throws OXException
      */
     protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
+        
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
+        
+        // Check if we can access all information
+        boolean isDeletedEvent = commonEvent.getAction() == CommonEvent.DELETE;
+        
+        
+        // Get calendar events
+        final com.openexchange.chronos.Event event = (com.openexchange.chronos.Event) commonEvent.getActionObj();
+        final com.openexchange.chronos.Event oldEvent = (com.openexchange.chronos.Event) commonEvent.getOldObj();
 
-        final Appointment appointment = (Appointment) commonEvent.getActionObj();
-        Appointment oldAppointment = (Appointment) commonEvent.getOldObj();
-
-        logBuilder.append("OBJECT TYPE: APPOINTMENT; ");
+        logBuilder.append("OBJECT TYPE: EVENT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        logBuilder.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
-        {
-            int createdBy = appointment.getCreatedBy();
-            if (createdBy > 0) {
-                try {
-                    logBuilder.append("CREATED BY: ").append(userService.getUser(createdBy, context).getDisplayName()).append("; ");
-                } catch (OXException e) {
-                    logger.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
-                    logBuilder.append("CREATED BY: <unknown>; ");
-                }
-            } else {
-                logBuilder.append("CREATED BY: <unknown>; ");
-            }
+        logBuilder.append("EVENT ID: ").append(event.getId()).append("; ");
+
+        appendBy(event.getCreatedBy(), context, "CREATED", logBuilder);
+        appendBy(event.getModifiedBy(), context, "MODIFIED", logBuilder);
+        
+        try {
+            logBuilder.append("FOLDER: ").append(getPathToRoot(Integer.valueOf(event.getFolderId()).intValue(), commonEvent.getSession())).append("; ");
+        } catch (NumberFormatException e) {
+            logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
+            logBuilder.append("FOLDER: ").append(event.getFolderId()).append("; ");
         }
-        {
-            int modifiedBy = appointment.getModifiedBy();
-            if (modifiedBy > 0) {
-                try {
-                    logBuilder.append("MODIFIED BY: ").append(userService.getUser(modifiedBy, context).getDisplayName()).append("; ");
-                } catch (OXException e) {
-                    logger.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
-                    logBuilder.append("MODIFIED BY: <unknown>; ");
-                }
-            } else {
-                logBuilder.append("MODIFIED BY: <unknown>; ");
-            }
+        
+        if (false == isDeletedEvent) {
+            logBuilder.append("TITLE: ").append(event.getSummary()).append("; ");
+            logBuilder.append("START DATE: ").append(event.getStartDate()).append("; ");
+            logBuilder.append("END DATE: ").append(event.getEndDate()).append("; ");
+            logBuilder.append("ATTENDEES: ").append(event.getAttendees().toString()).append("; ");
         }
-        logBuilder.append("TITLE: ").append(appointment.getTitle()).append("; ");
-        logBuilder.append("START DATE: ").append(appointment.getStartDate()).append("; ");
-        logBuilder.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-        logBuilder.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
-        logBuilder.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
-        if (oldAppointment != null) {
-            logBuilder.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
+        
+        if (oldEvent != null) {
+            logBuilder.append("OLD ATTENDEES: ").append(oldEvent.getAttendees().toString()).append("; ");
         }
         if (commonEvent.getSession() != null) {
             logBuilder.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
         }
     }
+    
+
 
     /**
      * Handles contact events.
@@ -624,6 +617,26 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append(" (").append(userId).append(')');
         }
         logBuilder.append("; ");
+    }
+    
+    /**
+     * Appends a user with given identifierText to the logBuilder
+     * 
+     * @param userId The identifier of the user
+     * @param context The context of the user
+     * @param identifierText The text to identify the users role, e.g. 'CREATED'
+     * @param logBuilder The {@link StringBuilder}
+     */
+    private void appendBy(int userId, Context context, String identifierText, StringBuilder logBuilder) {
+        if (userId > 0) {
+            try {
+                logBuilder.append(identifierText).append(" BY: ").append(userService.getUser(userId, context).getDisplayName()).append("; ");
+                return;
+            } catch (OXException e) {
+                logger.debug("Failed to load user {} in context {}", userId, context.getContextId(), e);
+            }
+            logBuilder.append(identifierText).append(" BY: <unknown>; ");
+        }        
     }
 
 }
