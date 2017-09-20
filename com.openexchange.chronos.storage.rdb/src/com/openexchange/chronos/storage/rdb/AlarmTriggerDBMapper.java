@@ -272,27 +272,27 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
         });
 
 
-        mappings.put(AlarmTriggerField.RECURRENCE, new VarCharMapping<AlarmTrigger>("recurrence", "Recurrence ID") {
+        mappings.put(AlarmTriggerField.RECURRENCE_ID, new VarCharMapping<AlarmTrigger>("recurrence", "Recurrence ID") {
 
             @Override
             public void set(AlarmTrigger alarmTrigger, String value) {
-                alarmTrigger.setRecurrence(null == value ? null : new DefaultRecurrenceId(value));
+                alarmTrigger.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
             public boolean isSet(AlarmTrigger alarmTrigger) {
-                return alarmTrigger.containsRecurrence();
+                return alarmTrigger.containsRecurrenceId();
             }
 
             @Override
             public String get(AlarmTrigger alarmTrigger) {
-                RecurrenceId value = alarmTrigger.getRecurrence();
+                RecurrenceId value = alarmTrigger.getRecurrenceId();
                 return null == value ? null : value.getValue().toString();
             }
 
             @Override
             public void remove(AlarmTrigger alarmTrigger) {
-                alarmTrigger.removeRecurrence();
+                alarmTrigger.removeRecurrenceId();
             }
         });
 

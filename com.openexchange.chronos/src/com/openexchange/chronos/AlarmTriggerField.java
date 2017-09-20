@@ -82,9 +82,9 @@ public enum AlarmTriggerField {
      */
     PUSHED,
     /**
-     * The recurrence id
+     * The recurrence identifier of the targeted event.
      */
-    RECURRENCE,
+    RECURRENCE_ID,
     /**
      * The trigger time
      */

@@ -24,7 +24,7 @@ items:
       type: string
       description: The identifier of the event.
       readOnly: true
-    recurrence:
+    recurrenceId:
       type: string
       description: The identifier of the recurrence this alarm belongs to.
       readOnly: true

@@ -64,7 +64,7 @@ public class AlarmTrigger {
     private Integer alarm;
     private String eventId;
     private String folder;
-    private RecurrenceId recurrence;
+    private RecurrenceId recurrenceId;
     private Long time;
     private Long relatedTime;
     private Integer userId;
@@ -79,7 +79,7 @@ public class AlarmTrigger {
     private boolean isAlarmSet=false;
     private boolean isContextIdSet = false;
     private boolean isEventIdSet=false;
-    private boolean isRecurrenceSet=false;
+    private boolean isRecurrenceIdSet = false;
     private boolean isTimeSet=false;
     private boolean isUserIdSet=false;
     private boolean isPushedSet = false;
@@ -149,8 +149,8 @@ public class AlarmTrigger {
      *
      * @return The isRecurrenceSet
      */
-    public boolean containsRecurrence() {
-        return isRecurrenceSet;
+    public boolean containsRecurrenceId() {
+        return isRecurrenceIdSet;
     }
 
     /**
@@ -244,12 +244,12 @@ public class AlarmTrigger {
     }
 
     /**
-     * Gets the recurrence
+     * Gets the recurrence identifier
      *
-     * @return The recurrence
+     * @return The recurrence identifier
      */
-    public RecurrenceId getRecurrence() {
-        return recurrence;
+    public RecurrenceId getRecurrenceId() {
+        return recurrenceId;
     }
 
     /**
@@ -303,11 +303,11 @@ public class AlarmTrigger {
     }
 
     /**
-     * Removes the recurrence
+     * Removes the recurrence identifier
      */
-    public void removeRecurrence() {
-        this.recurrence=null;
-        this.isRecurrenceSet=false;
+    public void removeRecurrenceId() {
+        this.recurrenceId=null;
+        this.isRecurrenceIdSet = false;
     }
 
     /**
@@ -359,11 +359,11 @@ public class AlarmTrigger {
     /**
      * Sets the recurrence
      *
-     * @param recurrence The recurrence to set
+     * @param recurrenceId The recurrence identifier to set
      */
-    public void setRecurrence(RecurrenceId recurrence) {
-        this.recurrence = recurrence;
-        this.isRecurrenceSet=true;
+    public void setRecurrenceId(RecurrenceId recurrenceId) {
+        this.recurrenceId = recurrenceId;
+        this.isRecurrenceIdSet = true;
     }
 
     /**

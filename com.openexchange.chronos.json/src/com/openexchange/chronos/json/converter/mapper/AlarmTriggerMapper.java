@@ -69,7 +69,7 @@ import com.openexchange.groupware.tools.mappings.json.StringMapping;
 /**
  * {@link AlarmTriggerMapper}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTriggerField> {
@@ -79,9 +79,9 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
     private final AlarmTriggerField[] mappedFields;
 
     /**
-     * Gets the EventMapper instance.
+     * Gets the alarm trigger mapper instance.
      *
-     * @return The EventMapper instance.
+     * @return The alarm trigger mapper instance
      */
     public static AlarmTriggerMapper getInstance() {
         return INSTANCE;
@@ -101,7 +101,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
 
     public AlarmTriggerField[] getAssignedFields(AlarmTrigger trigger, AlarmTriggerField... mandatoryFields) {
         if (null == trigger) {
-            throw new IllegalArgumentException("event");
+            throw new IllegalArgumentException("trigger");
         }
         Set<AlarmTriggerField> setFields = new HashSet<AlarmTriggerField>();
         for (Entry<AlarmTriggerField, ? extends JsonMapping<? extends Object, AlarmTrigger>> entry : getMappings().entrySet()) {
@@ -129,7 +129,8 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
 
     @Override
     protected EnumMap<AlarmTriggerField, ? extends JsonMapping<? extends Object, AlarmTrigger>> createMappings() {
-        EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>> mappings = new EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>>(AlarmTriggerField.class);
+        EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>> mappings = 
+            new EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>>(AlarmTriggerField.class);
         mappings.put(AlarmTriggerField.ACTION, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ACTION, null) {
 
             @Override
@@ -222,27 +223,27 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             }
         });
 
-        mappings.put(AlarmTriggerField.RECURRENCE, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.RECURRENCE, null) {
+        mappings.put(AlarmTriggerField.RECURRENCE_ID, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.RECURRENCE_ID, null) {
 
             @Override
             public boolean isSet(AlarmTrigger object) {
-                return object.containsRecurrence();
+                return object.containsRecurrenceId();
             }
 
             @Override
             public void set(AlarmTrigger object, String value) throws OXException {
-                object.setRecurrence(null == value ? null : new DefaultRecurrenceId(value));
+                object.setRecurrenceId(null == value ? null : new DefaultRecurrenceId(value));
             }
 
             @Override
             public String get(AlarmTrigger object) {
-                RecurrenceId value = object.getRecurrence();
+                RecurrenceId value = object.getRecurrenceId();
                 return null == value ? null : value.getValue().toString();
             }
 
             @Override
             public void remove(AlarmTrigger object) {
-                object.removeRecurrence();
+                object.removeRecurrenceId();
             }
         });
 

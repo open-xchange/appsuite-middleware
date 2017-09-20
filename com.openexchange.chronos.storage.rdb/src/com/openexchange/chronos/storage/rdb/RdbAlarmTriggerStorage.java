@@ -601,7 +601,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
-            trigger.setRecurrence(recurrenceId);
+            trigger.setRecurrenceId(recurrenceId);
             trigger.setTime(triggerTime.getTime());
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
@@ -610,7 +610,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             }
             trigger.setTime(triggerTime.getTime());
             if (event.getRecurrenceId() != null) {
-                trigger.setRecurrence(event.getRecurrenceId());
+                trigger.setRecurrenceId(event.getRecurrenceId());
             }
             addRelatedDate(alarm, event, trigger);
         }

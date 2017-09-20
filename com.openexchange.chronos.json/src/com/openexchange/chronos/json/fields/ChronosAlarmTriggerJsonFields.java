@@ -78,9 +78,9 @@ public class ChronosAlarmTriggerJsonFields {
      */
     public static final String EVENT_ID = "eventId";
     /**
-     * The recurrence id. See {@link AlarmTrigger#getRecurrence()}
+     * The recurrence id. See {@link AlarmTrigger#getRecurrenceId()}
      */
-    public static final String RECURRENCE = "recurrence";
+    public static final String RECURRENCE_ID = "recurrenceId";
     /**
      * The datetime of the alarm. See {@link AlarmTrigger#getTime()}
      */
