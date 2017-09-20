@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.event.CommonEvent;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.Types;
 import com.openexchange.session.Session;
 
 /**
@@ -120,7 +120,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     @Override
     public int getModule() {
-        return FolderObject.CALENDAR;
+        return Types.APPOINTMENT;
     }
 
     @Override
