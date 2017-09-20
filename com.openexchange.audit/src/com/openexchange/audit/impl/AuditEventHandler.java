@@ -447,7 +447,8 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append("FOLDER: ").append(getPathToRoot(Integer.valueOf(event.getFolderId()).intValue(), commonEvent.getSession())).append("; ");
         } catch (NumberFormatException e) {
             logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
-            logBuilder.append("FOLDER: ").append(event.getFolderId()).append("; ");
+            // If the exception occurred the "Folder: " part is already added to the string
+            logBuilder.append(event.getFolderId()).append("; ");
         }
         
         if (false == isDeletedEvent) {
