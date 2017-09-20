@@ -60,6 +60,7 @@ import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.tika.io.IOUtils;
+import com.google.common.base.Throwables;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -162,9 +163,10 @@ public class TransformImageClientAction extends TransformImageAction {
                     final InputStream imageInputStm = m_imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
 
                     if (null != imageInputStm) {
-                        ret = new FileHolder(imageInputStm, (null != imageInputStm) ? -1 : 0, xformParams.getImageMimeType(), cacheKey);
+                        ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
                     }
-                } catch (@SuppressWarnings("unused") ImageConverterException e) {
+                } catch (ImageConverterException e) {
+                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource frrom the Image Server: " + Throwables.getRootCause(e));
                     // OK, we just didn't get a result
                 }
             } else {
