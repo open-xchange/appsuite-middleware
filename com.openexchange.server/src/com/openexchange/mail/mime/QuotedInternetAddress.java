@@ -260,10 +260,46 @@ public final class QuotedInternetAddress extends InternetAddress {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
         String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
-        int length = s.length();
         boolean ignoreErrors = parseHdr && !strict;
-        List<InternetAddress> list = new LinkedList<InternetAddress>();
+        
+        int length = s.length();
+        for (int pos; (pos = s.indexOf('(')) >= 0;) {
+            int i = pos;
+            int nest;
+            for (i++, nest = 1; i < length && nest > 0; i++) {
+                char c = s.charAt(i);
+                switch (c) {
+                case '\\':
+                    i++; // skip both '\' and the escaped char
+                    break;
+                case '(':
+                    nest++;
+                    break;
+                case ')':
+                    nest--;
+                    break;
+                default:
+                    break;
+                }
+            }
+            if (nest > 0) {
+                if (!ignoreErrors) {
+                    throw new AddressException("Missing ')'", s, i);
+                }
+                // pretend the first paren was a regular character and
+                // continue parsing after it
+                i = pos + 1;
+                break;
+            }
+            if (i < s.length()) {                
+                s = s.substring(0, pos) + s.substring(i);
+            } else {
+                s = s.substring(0, pos);
+            }
+        }
 
+        length = s.length();
+        List<InternetAddress> list = new LinkedList<InternetAddress>();
         boolean in_group = false; // we're processing a group term
         boolean route_addr = false; // address came from route-addr term
         boolean rfc822 = false; // looks like an RFC822 address
