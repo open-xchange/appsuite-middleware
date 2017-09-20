@@ -651,11 +651,6 @@ public final class EventQueue {
         toRemoveFrom.remove(event);
     }
 
-    public static void addModernListener(final AppointmentEventInterface listener) {
-        checkEventDispatcher();
-        newEventDispatcher.addListener(listener);
-    }
-
     public static void addModernListener(final TaskEventInterface listener) {
         checkEventDispatcher();
         newEventDispatcher.addListener(listener);
