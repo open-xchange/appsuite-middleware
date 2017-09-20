@@ -93,6 +93,9 @@ public class IDMangling {
         "3"   // com.openexchange.folderstorage.FolderStorage.SHARED_ID
     )));
 
+    /** The prefix indicating a the virtual <i>shared</i> root (com.openexchange.groupware.container.FolderObject.SHARED_PREFIX) */
+    private static final String SHARED_PREFIX = "u:";
+
     /** The pattern to lookup folder placeholders in calendar exception messages */
     private static final Pattern FOLDER_ARGUMENT_PATTERN = Pattern.compile("(?:\\[|, )folder %(\\d)\\$s(?:\\]|,)");
 
@@ -308,14 +311,15 @@ public class IDMangling {
     /**
      * Gets the fully qualified composite representation of a specific relative folder identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly.
      *
      * @param accountId The identifier of the account the folder originates in
      * @param relativeFolderId The relative folder identifier
      * @return The unique folder identifier
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (null == relativeFolderId || CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId && ROOT_FOLDER_IDS.contains(relativeFolderId)) {
+        if (null == relativeFolderId || (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId &&
+            ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX))) {
             return relativeFolderId;
         }
         return mangleFolderId(accountId, relativeFolderId);
