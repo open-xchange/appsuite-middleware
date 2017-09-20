@@ -86,7 +86,6 @@ import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -163,7 +162,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
-public class ParticipantNotify implements AppointmentEventInterface2, TaskEventInterface2 {
+public class ParticipantNotify implements TaskEventInterface2 {
 
     // TODO: Signature?
 
@@ -322,46 +321,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
-    }
-
-    @Override
-    public void appointmentCreated(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentModified(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentWaiting(final Appointment appointmentObj, final Session session) {
-        // Empty method
-    }
-
-    @Override
-    public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
-        // Empty method
     }
 
     @Override
