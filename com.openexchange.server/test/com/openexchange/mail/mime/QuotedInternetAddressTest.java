@@ -49,9 +49,10 @@
 
 package com.openexchange.mail.mime;
 
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import junit.framework.TestCase;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import junit.framework.TestCase;
 
 /**
  * {@link QuotedInternetAddressTest}
@@ -60,7 +61,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
  * @since v7.6.1
  */
 public class QuotedInternetAddressTest extends TestCase {
-
     /**
      * Initializes a new {@link QuotedInternetAddressTest}.
      */
@@ -68,7 +68,52 @@ public class QuotedInternetAddressTest extends TestCase {
         super();
     }
 
-    public void testBug33552() throws Exception {
+    public void testBug55360_2() throws Exception {
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?b?c2VydmljZUBwYXlwYWwuY29tKFBheVBhbClgYGA=?==?utf-8?Q?=0A=00?=@pwnsdx.pw", false);
+            String personal = addr.getPersonal();
+            assertNotNull(personal);
+            assertTrue("Contains null byte, but shouldn't", personal.indexOf('\0') < 0);
+            assertTrue("Contains CR, but shouldn't", personal.indexOf('\r') < 0);
+            assertTrue("Contains LF, but shouldn't", personal.indexOf('\n') < 0);
+        } catch (AddressException e) {
+            // All fine
+            String reference = e.getRef();
+            assertTrue("Contains null byte, but shouldn't", reference.indexOf('\0') < 0);
+            assertTrue("Contains CR, but shouldn't", reference.indexOf('\r') < 0);
+            assertTrue("Contains LF, but shouldn't", reference.indexOf('\n') < 0);
+        }
+    }
+
+    public void testBug55360() throws Exception {
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?Q?=42=45=47=49=4E=20=2F=20=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20=45=4E=44?=@companyemail.com", false);
+            fail("Address hsould not be parseable");
+        } catch (AddressException e) {
+            // All fine
+            String reference = e.getRef();
+            assertTrue("Contains null byte, but shouldn't", reference.indexOf('\0') < 0);
+            assertTrue("Contains CR, but shouldn't", reference.indexOf('\r') < 0);
+            assertTrue("Contains LF, but shouldn't", reference.indexOf('\n') < 0);
+        }
+
+        QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?Q?=42=45=47=49=4E=20=2F=20=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20=45=4E=44?=<your@companyemail.com>", false);
+        String personal = addr.getPersonal();
+        assertNotNull(personal);
+        assertTrue("Contains null byte, but shouldn't", personal.indexOf('\0') < 0);
+        assertTrue("Contains CR, but shouldn't", personal.indexOf('\r') < 0);
+        assertTrue("Contains LF, but shouldn't", personal.indexOf('\n') < 0);
+    }
+
+    public void testBug54879() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"atest\"@example.com");
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
+
+        addr = new QuotedInternetAddress("\"atest\"@example.com", false);
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
+    }
+
+     public void testBug33552() throws Exception {
         String s = "Foo \u00e0 Bar <foo@bar.info>, =?UTF-8?Q?Foo_=C3=A0_Bar_=3Cfoo=40bar=2Einfo=3E?=, \"Foo, Bar\" <foo@bar.info>";
         InternetAddress[] parsed = QuotedInternetAddress.parse(s);
 
@@ -82,7 +127,7 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"foo@bar.info\"", "foo@bar.info", parsed[2].getAddress());
     }
 
-    public void testBug33305() throws Exception {
+     public void testBug33305() throws Exception {
         QuotedInternetAddress a = new QuotedInternetAddress("\u00d6tt\u00f6 <stark@wie-die-wutz.de>");
         assertEquals("Unexpected personal", "\u00d6tt\u00f6", a.getPersonal());
         assertEquals("Unexpected mail-safe form", "=?UTF-8?B?w5Z0dMO2?= <stark@wie-die-wutz.de>", a.toString());
@@ -98,7 +143,7 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Unexpected unicode form", "Foo \u00e0 Bar <foo@bar.info>", parsed[1].toUnicodeString());
     }
 
-    public void testBug34070() throws Exception {
+     public void testBug34070() throws Exception {
         String s = "=?windows-1252?Q?Betz=2C_C=E4cilia?= <caecilia.betz@invalid.org>";
         QuotedInternetAddress addr = new QuotedInternetAddress(s);
 
@@ -107,7 +152,7 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
-    public void testBug34755() throws Exception {
+     public void testBug34755() throws Exception {
         String s = "=?windows-1252?Q?Kr=F6ning=2C_User?= <user4@ox.microdoc.de>";
         QuotedInternetAddress addr = new QuotedInternetAddress(s);
 
@@ -116,7 +161,7 @@ public class QuotedInternetAddressTest extends TestCase {
 
     }
 
-    public void testBug36095() throws Exception {
+     public void testBug36095() throws Exception {
         String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
         InternetAddress[] parsed = MimeMessageConverter.getAddressHeader(s);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
@@ -125,7 +170,7 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"s.foeoooobar@foobar.org\"", "s.foeoooobar@foobar.org", parsed[0].getAddress());
     }
 
-    public void testBug36866() throws Exception {
+     public void testBug36866() throws Exception {
         String s = "=?iso-8859-1?Q?Mustermann=2C_J=F6rg?= <Joerg.Mustermann@musterfirma.org>";
         InternetAddress[] parsed = QuotedInternetAddress.parseHeader(s, true);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
@@ -134,11 +179,37 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"Joerg.Mustermann@musterfirma.org\"", "Joerg.Mustermann@musterfirma.org", parsed[0].getAddress());
     }
 
-    public void testBug38365() throws Exception {
+     public void testBug38365() throws Exception {
         QuotedInternetAddress addr = new QuotedInternetAddress("\"Peter \\\" Lustig\" <bar@foo.org>");
         assertEquals("Display name does not equals \"Peter \" Lustig\"", "Peter \" Lustig", addr.getPersonal());
 
         addr = new QuotedInternetAddress("bar@foo.org", "Peter Lustig \\");
         assertEquals("Display name does not equals \"Peter Lustig \\\"", "Peter Lustig \\", addr.getPersonal());
     }
+
+     public void testBug43709() throws Exception {
+        String addresses = "\"pere6@20101027.de\" <pere6@20101027.de>, =?iso-8859-1?Q?'Jochum=2C_Christel;_Sch=F6ndorf=2C_Werner'?= <boeser.recipient@example.com>, \"pere20@20101027.de\" <pere20@20101027.de>";
+        InternetAddress[] addrs = QuotedInternetAddress.parseHeader(addresses, true);
+
+        assertNotNull("Unexpected parse result", addrs);
+        assertEquals("Unexpected number of addresses", 3, addrs.length);
+
+        // Check first address
+        assertEquals("Unexpected personal", "pere6@20101027.de", addrs[0].getPersonal());
+        assertEquals("Unexpected address", "pere6@20101027.de", addrs[0].getAddress());
+
+        // Check second address
+        assertEquals("Unexpected personal", "Jochum, Christel; Sch\u00f6ndorf, Werner", addrs[1].getPersonal());
+        assertEquals("Unexpected address", "boeser.recipient@example.com", addrs[1].getAddress());
+    }
+
+         public void testProperToString() {
+             try {
+                QuotedInternetAddress adr = new QuotedInternetAddress("bar@foo.org", "Doe, Jane", "UTF-8");
+
+                assertEquals("Unexpected toString() representation", "\"Doe, Jane\" <bar@foo.org>", adr.toString());
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+         }
 }
