@@ -70,7 +70,7 @@ final class InternetAddressUtil {
     @SuppressWarnings("unused")
     static void validateInternetAddress(String address, boolean strict) throws AddressException {
         if (Strings.isEmpty(address)) {
-
+            throw new AddressException("The address can neither be empty nor 'null'");
         }
         new QuotedInternetAddress(address, true);
     }
