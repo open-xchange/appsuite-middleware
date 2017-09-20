@@ -446,7 +446,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Put context identifiers into a list
-            List<Integer> contextIds = new ArrayList<Integer>(CONTEXTS_PER_SCHEMA);
+            List<Integer> contextIds = new ArrayList<Integer>(CONTEXTS_PER_SCHEMA >> 1);
             do {
                 contextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
@@ -538,7 +538,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // Put context identifiers into a list
-            List<Integer> contextIds = new ArrayList<Integer>(CONTEXTS_PER_SCHEMA);
+            List<Integer> contextIds = new ArrayList<Integer>(CONTEXTS_PER_SCHEMA >> 1);
             do {
                 contextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
