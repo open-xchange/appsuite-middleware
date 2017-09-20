@@ -51,7 +51,6 @@ package com.openexchange.chronos.service.impl;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarEvent;
@@ -100,24 +99,21 @@ public class EventCalendarHandler implements CalendarHandler {
 
         // Check for new events
         if (false == event.getCreations().isEmpty()) {
-            List<CreateResult> results = event.getCreations();
-            for (CreateResult result : results) {
+            for (CreateResult result : event.getCreations()) {
                 triggerEvent(new ChronosCommonEvent(event, ChronosOSGiEvent.CREATED.getActionID(), result.getCreatedEvent()), ChronosOSGiEvent.CREATED.getTopic());
             }
         }
 
         // Check for updated events
         if (false == event.getUpdates().isEmpty()) {
-            List<UpdateResult> results = event.getUpdates();
-            for (UpdateResult result : results) {
-                triggerEvent(new ChronosCommonEvent(event, ChronosOSGiEvent.UPDATE.getActionID(), result.getUpdate(), result.getOriginal()), ChronosOSGiEvent.UPDATE.getTopic());
+            for (UpdateResult result : event.getUpdates()) {
+                triggerEvent(new ChronosCommonEvent(event, ChronosOSGiEvent.UPDATED.getActionID(), result.getUpdate(), result.getOriginal()), ChronosOSGiEvent.UPDATED.getTopic());
             }
         }
 
         // Check for deleted events
         if (false == event.getDeletions().isEmpty()) {
-            List<DeleteResult> results = event.getDeletions();
-            for (DeleteResult result : results) {
+            for (DeleteResult result : event.getDeletions()) {
                 // Create an Event instance for the deleted event to propagate
                 Event deletedEvent = new Event();
                 EventID eventID = result.getEventID();

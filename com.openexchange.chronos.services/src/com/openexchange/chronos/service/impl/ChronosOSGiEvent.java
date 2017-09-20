@@ -52,7 +52,7 @@ package com.openexchange.chronos.service.impl;
 import com.openexchange.event.CommonEvent;
 
 /**
- * {@link ChronosOSGiEvent}
+ * {@link ChronosOSGiEvent} - Used OSGi events topic with corresponding action identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -63,7 +63,7 @@ public enum ChronosOSGiEvent {
     CREATED("com/openexchange/groupware/event/insert", CommonEvent.INSERT),
 
     /** The update or formerly known as changed event */
-    UPDATE("com/openexchange/groupware/event/update", CommonEvent.UPDATE),
+    UPDATED("com/openexchange/groupware/event/update", CommonEvent.UPDATE),
 
     /** The delete event */
     DELETED("com/openexchange/groupware/event/delete", CommonEvent.DELETE),
@@ -82,10 +82,20 @@ public enum ChronosOSGiEvent {
         this.actionID = actionID;
     }
 
+    /**
+     * Get the topic for a specific event type
+     * 
+     * @return The topic
+     */
     public String getTopic() {
         return topic;
     }
 
+    /**
+     * Get the action identifier for a specific event type
+     * 
+     * @return The action identifier
+     */
     public int getActionID() {
         return actionID;
     }

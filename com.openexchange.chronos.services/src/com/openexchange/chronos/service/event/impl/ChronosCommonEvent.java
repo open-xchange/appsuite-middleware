@@ -70,24 +70,25 @@ import com.openexchange.session.Session;
  */
 public class ChronosCommonEvent implements CommonEvent {
 
+    /** The logger of this class */
     private final static Logger LOGGER = LoggerFactory.getLogger(ChronosCommonEvent.class);
 
     private final CalendarEvent              event;
-    private final int                        action;
-    private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
-    private final Event                      oldEvent;
+    private final int                        actionID;
     private final Event                      actionEvent;
+    private final Event                      oldEvent;
+    private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
 
     /**
      * 
      * Initializes a new {@link ChronosCommonEvent}.
      * 
      * @param event To get session, user ID and context ID from
-     * @param action The action propagate by this event
+     * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      */
-    public ChronosCommonEvent(CalendarEvent event, int action, Event actionEvent) {
-        this(event, action, actionEvent, null);
+    public ChronosCommonEvent(CalendarEvent event, int actionID, Event actionEvent) {
+        this(event, actionID, actionEvent, null);
     }
 
     /**
@@ -95,13 +96,13 @@ public class ChronosCommonEvent implements CommonEvent {
      * Initializes a new {@link ChronosCommonEvent}.
      * 
      * @param event To get session, user ID and context ID from
-     * @param action The action propagate by this event
+     * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
      * @param oldEvent The old {@link Event} if an update was made, else <code>null</code>
      */
-    public ChronosCommonEvent(CalendarEvent event, int action, Event actionEvent, Event oldEvent) {
+    public ChronosCommonEvent(CalendarEvent event, int actionID, Event actionEvent, Event oldEvent) {
         this.event = event;
-        this.action = action;
+        this.actionID = actionID;
         this.actionEvent = actionEvent;
         this.oldEvent = oldEvent;
         this.affectedUsersWithFolders = getAffected(event.getAffectedFoldersPerUser());
@@ -128,7 +129,7 @@ public class ChronosCommonEvent implements CommonEvent {
     }
 
     /**
-     * Get the action {@link Event}
+     * Get the actionID {@link Event}
      * 
      * @return The event
      */
@@ -152,19 +153,35 @@ public class ChronosCommonEvent implements CommonEvent {
 
     @Override
     public Object getSourceFolder() {
-        // Can be null
         return null == oldEvent ? null : oldEvent.getFolderId();
+    }
+
+    /***
+     * Get the identifier of the source folder
+     * 
+     * @return The identifier or an empty string
+     */
+    public String getSourceFolderID() {
+        return null == oldEvent ? new String() : oldEvent.getFolderId();
     }
 
     @Override
     public Object getDestinationFolder() {
-        // Should not be null. Nevertheless do check ..
         return null == actionEvent ? null : actionEvent.getFolderId();
+    }
+
+    /**
+     * Get the identifier of the destination folder
+     * 
+     * @return The identifier or an empty string
+     */
+    public String getDestinationFolderID() {
+        return null == actionEvent ? new String() : actionEvent.getFolderId();
     }
 
     @Override
     public int getAction() {
-        return action;
+        return actionID;
     }
 
     @Override
@@ -189,14 +206,15 @@ public class ChronosCommonEvent implements CommonEvent {
             // Convert for each user
             Set<Integer> folders = new HashSet<>();
             for (String folder : affectedUsersWithFolders.get(user)) {
-                // Multiple folder get dropped
                 try {
+                    // Multiple folder get silently dropped
                     folders.add(Integer.valueOf(folder));
-                    retval.put(user, folders);
                 } catch (NumberFormatException e) {
-                    LOGGER.error("Can't parese folder ID", e);
+                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folder, e);
                 }
             }
+            // Add the user-folder-pair
+            retval.put(user, folders);
         }
         return retval;
     }
