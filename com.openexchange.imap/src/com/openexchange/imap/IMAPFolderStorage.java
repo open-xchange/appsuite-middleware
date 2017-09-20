@@ -2133,7 +2133,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             // JavaMail routine performs 'IMAPFolder.doCommandIgnoreFailure()', which discards a possible CommandFailedException
             imapFolder.setSubscribed(subscribe);
         }
-        IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
+        //IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
         if (subscribe) {
             // Ensure parent gets subscribed, too
             try {
