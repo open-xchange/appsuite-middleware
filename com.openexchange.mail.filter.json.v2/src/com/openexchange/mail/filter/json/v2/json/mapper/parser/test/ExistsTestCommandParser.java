@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ExistsTestCommandParser extends AbstractTestCommandParser {
 
     /**
-     * Initializes a new {@link ExistsTestCommandParser}.
+     * Initialises a new {@link ExistsTestCommandParser}.
      */
     public ExistsTestCommandParser(ServiceLookup services) {
         super(services, Commands.EXISTS);
@@ -94,15 +94,18 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
 
     @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        // The exists test command only applies to 'header'
+        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.HEADER.getCommandName());
+        jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
 
         JSONArray headers = new JSONArray((List<?>) command.getArguments().get(0));
         boolean simplified = false;
-        for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
-            if (TestCommandUtil.isSimplified(test, headers)) {
-                jsonObject.put(GeneralField.id.name(), test.getCommandName());
+        for (SimplifiedHeaderTest simplifiedTest : SimplifiedHeaderTest.values()) {
+            if (TestCommandUtil.isSimplified(simplifiedTest, headers)) {
+                jsonObject.put(GeneralField.id.name(), simplifiedTest.getCommandName());
                 simplified = true;
-                jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? MatchType.exists.getNotName() : MatchType.exists.name());
+                // The fields 'headers' and 'values' are empty due to the simplified test,
+                // i.e. the 'headers' are implicitly part of the 'id' field.
                 jsonObject.put(HeaderTestField.headers.name(), new JSONArray());
                 jsonObject.put(HeaderTestField.values.name(), new JSONArray());
             }
