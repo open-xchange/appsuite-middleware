@@ -160,7 +160,10 @@ public class TransformImageClientAction extends TransformImageAction {
             if (isValid()) {
                 try {
                     final InputStream imageInputStm = m_imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
-                    ret = new FileHolder(imageInputStm, (null != imageInputStm) ? -1 : 0, xformParams.getImageMimeType(), cacheKey);
+
+                    if (null != imageInputStm) {
+                        ret = new FileHolder(imageInputStm, (null != imageInputStm) ? -1 : 0, xformParams.getImageMimeType(), cacheKey);
+                    }
                 } catch (@SuppressWarnings("unused") ImageConverterException e) {
                     // OK, we just didn't get a result
                 }
@@ -273,7 +276,7 @@ public class TransformImageClientAction extends TransformImageAction {
             }
         }
 
-        return (null != ret) ? ret : super.performTransformImage(session, file, xformParams, cacheKey, fileName);
+        return (null != ret) ? ret : (isValid() ? null : super.performTransformImage(session, file, xformParams, cacheKey, fileName));
     }
 
     // - Implementation --------------------------------------------------------
