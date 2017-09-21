@@ -206,10 +206,9 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     /**
      * Get the value T of specified property and coerce it to the specified type T
      *
-     * @param property The {@link MailFilterProperty}
+     * @param property The {@link Property}
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the {@link ConfigurationService} or the default value
-     * @throws OXException If an error is occurred while getting the property
      */
     private <T> T getProperty(Property property, Class<T> coerceTo) {
         T defaultValue = null;
@@ -237,12 +236,11 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     /**
      * Get the value T of specified property for the specified user in the specified context and coerce it to the specified type T
      *
-     * @param property The {@link MailFilterProperty}
+     * @param property The {@link Property}
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the config cascade or the default value
-     * @throws OXException If an error is occurred while getting the property
      */
     private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo) {
         T defaultValue = null;
