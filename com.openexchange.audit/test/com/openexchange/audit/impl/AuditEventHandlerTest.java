@@ -368,7 +368,7 @@ public class AuditEventHandlerTest {
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT); // TODO test somtething with delete = true
+        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT); 
         Mockito.when(commonEvent.getActionObj()).thenReturn(event);
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
@@ -378,7 +378,9 @@ public class AuditEventHandlerTest {
         Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
         Mockito.when(event.getStartDate()).thenReturn(this.date);
         Mockito.when(event.getEndDate()).thenReturn(this.date);
-        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(new Attendee()));
+        Attendee attendee = new Attendee();
+        attendee.setCn("InvitedTestUser");
+        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(attendee));
 
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
 
@@ -409,7 +411,9 @@ public class AuditEventHandlerTest {
         Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
         Mockito.when(event.getStartDate()).thenReturn(this.date);
         Mockito.when(event.getEndDate()).thenReturn(this.date);
-        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(new Attendee()));
+        Attendee attendee = new Attendee();
+        attendee.setCn("InvitedTestUser");
+        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(attendee));
 
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
 

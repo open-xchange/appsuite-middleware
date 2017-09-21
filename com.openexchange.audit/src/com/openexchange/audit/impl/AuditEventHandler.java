@@ -62,6 +62,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.audit.services.Services;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -78,6 +79,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -420,20 +422,19 @@ public class AuditEventHandler implements EventHandler {
      * @param commonEvent - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param logBuilder - the log to add information
-     * @throws OXException
      */
-    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
-        
+    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) {
+
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
-        
+
         // Check if we can access all information
         boolean isDeletedEvent = commonEvent.getAction() == CommonEvent.DELETE;
-        
-        
+
         // Get calendar events
         final com.openexchange.chronos.Event event = (com.openexchange.chronos.Event) commonEvent.getActionObj();
         final com.openexchange.chronos.Event oldEvent = (com.openexchange.chronos.Event) commonEvent.getOldObj();
+        Validate.notNull(event, "Calendar event is null. Can't write usefull information.");
 
         logBuilder.append("OBJECT TYPE: EVENT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
@@ -442,31 +443,30 @@ public class AuditEventHandler implements EventHandler {
 
         appendBy(event.getCreatedBy(), context, "CREATED", logBuilder);
         appendBy(event.getModifiedBy(), context, "MODIFIED", logBuilder);
-        
+
         try {
-            logBuilder.append("FOLDER: ").append(getPathToRoot(Integer.valueOf(event.getFolderId()).intValue(), commonEvent.getSession())).append("; ");
+            int folderId = Integer.valueOf(event.getFolderId()).intValue();
+            appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()), true);
         } catch (NumberFormatException e) {
             logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
-            // If the exception occurred the "Folder: " part is already added to the string
-            logBuilder.append(event.getFolderId()).append("; ");
+            logBuilder.append("FOLDER: <unkown>; ");
         }
-        
+
         if (false == isDeletedEvent) {
-            logBuilder.append("TITLE: ").append(event.getSummary()).append("; ");
-            logBuilder.append("START DATE: ").append(event.getStartDate()).append("; ");
-            logBuilder.append("END DATE: ").append(event.getEndDate()).append("; ");
-            logBuilder.append("ATTENDEES: ").append(event.getAttendees().toString()).append("; ");
+            appendIfSet(logBuilder, "TITLE: ", event.getSummary(), false);
+            appendIfSet(logBuilder, "START DATE: ", event.getStartDate(), false);
+            appendIfSet(logBuilder, "END DATE: ", event.getEndDate(), false);
+
+            appendAttendees(logBuilder, event.getAttendees(), "ATTENDEES: ");
         }
-        
+
         if (oldEvent != null) {
-            logBuilder.append("OLD ATTENDEES: ").append(oldEvent.getAttendees().toString()).append("; ");
+            appendAttendees(logBuilder, oldEvent.getAttendees(), "OLD ATTENDEES: ");
         }
         if (commonEvent.getSession() != null) {
-            logBuilder.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+            appendIfSet(logBuilder, "CLIENT: ", commonEvent.getSession().getClient(), false);
         }
     }
-    
-
 
     /**
      * Handles contact events.
@@ -486,12 +486,10 @@ public class AuditEventHandler implements EventHandler {
         if (null != contact) {
             logBuilder.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
             if (contact.containsCreatedBy()) {
-                logBuilder.append("CREATED BY: ").append(
-                    userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
+                logBuilder.append("CREATED BY: ").append(userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
             }
             if (contact.containsModifiedBy()) {
-                logBuilder.append("MODIFIED BY: ").append(
-                    userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
+                logBuilder.append("MODIFIED BY: ").append(userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
             }
             logBuilder.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
             logBuilder.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
@@ -507,9 +505,7 @@ public class AuditEventHandler implements EventHandler {
      */
     private Contact extractContact(CommonEvent commonEvent) throws OXException {
         Contact contact = (Contact) commonEvent.getActionObj();
-        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && contact!=null && (
-            false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
-            false == contact.containsModifiedBy()  || false == contact.containsObjectID()  || false == contact.containsParentFolderID())) {
+        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && contact != null && (false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
             /*
              * try and get more details
              */
@@ -518,8 +514,7 @@ public class AuditEventHandler implements EventHandler {
                 ContactField[] requestedFields = {
                     ContactField.DISPLAY_NAME, ContactField.FOLDER_ID, ContactField.CREATED_BY, ContactField.MODIFIED_BY
                 };
-                return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()),
-                    String.valueOf(contact.getObjectID()), requestedFields);
+                return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), requestedFields);
             }
         }
         return contact;
@@ -619,7 +614,7 @@ public class AuditEventHandler implements EventHandler {
         }
         logBuilder.append("; ");
     }
-    
+
     /**
      * Appends a user with given identifierText to the logBuilder
      * 
@@ -637,7 +632,48 @@ public class AuditEventHandler implements EventHandler {
                 logger.debug("Failed to load user {} in context {}", userId, context.getContextId(), e);
             }
             logBuilder.append(identifierText).append(" BY: <unknown>; ");
-        }        
+        }
     }
 
+    /**
+     * Append given attendees to the logBuilder
+     * 
+     * @param logBuilder The {@link StringBuilder}
+     * @param attendees The {@link Attendee}s to add
+     * @param text The key the attendees should be added to
+     */
+    private void appendAttendees(StringBuilder logBuilder, List<Attendee> attendees, String text) {
+        if (null != attendees) {
+            StringBuilder attendeesText = new StringBuilder();
+            for (Iterator<Attendee> iterator = attendees.iterator(); iterator.hasNext();) {
+                Attendee attendee = iterator.next();
+                if (attendee.containsCn()) {
+                    attendeesText.append(attendee.getCn());
+                    if (iterator.hasNext()) {
+                        attendeesText.append(", ");
+                    }
+                }
+            }
+            appendIfSet(logBuilder, text, attendeesText, false);
+        }
+    }
+
+    /**
+     * Append the given object if it is not <code>null</code> or an empty string
+     * 
+     * @param logBuilder The {@link StringBuilder}
+     * @param text The key to add the objecct to
+     * @param objectToAppend The object to add
+     * @param useUnkown <code>true</code> if in case of empty object 'unknown' should be appended, <code>false</code> otherwise
+     */
+    private void appendIfSet(StringBuilder logBuilder, String text, Object objectToAppend, boolean useUnkown) {
+        String value = String.valueOf(objectToAppend);
+        if (Strings.isEmpty(value) || value.equals("null")) {
+            if (useUnkown) {
+                logBuilder.append(text).append("<unkown>;");
+            }
+        } else {
+            logBuilder.append(text).append(value).append("; ");
+        }
+    }
 }
