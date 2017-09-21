@@ -100,7 +100,7 @@ public class NewAction extends ChronosAction {
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
         Object data = requestData.getData();
-        if(data==null || !(data instanceof JSONObject)){
+        if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
         JSONObject jsonEvent = (JSONObject) data;
