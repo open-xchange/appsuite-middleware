@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.core.groupware;
 
 import java.util.ArrayList;
 import java.util.Collection;
