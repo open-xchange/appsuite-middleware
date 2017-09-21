@@ -107,9 +107,6 @@ public class DAVServlet extends OXServlet {
         DAVUserAgent davUserAgent = DAVUserAgent.parse(userAgent);
         LoginRequest loginRequest = new LoginRequestImpl(
             request, credentials.getLogin(), credentials.getPassword(), getInterface(davUserAgent), davUserAgent.getReadableName(), null, userAgent);
-
-        System.out.println("### " + davUserAgent.getReadableName());
-
         return ALLOW_ASTERISK_LOGIN_CUSTOMIZER.modifyLogin(loginRequest);
     }
 
