@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.core;
 
 import java.util.List;
 import com.openexchange.exception.OXException;

@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
-import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -234,11 +233,7 @@ public class ShareUtils {
             String expiryDateValue = String.valueOf(recipient.getExpiryDate().getTime());
             ShareTool.assignUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
         }
-        try {
-            ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());
-        } catch (JSONException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());
         return guestUser;
     }
 

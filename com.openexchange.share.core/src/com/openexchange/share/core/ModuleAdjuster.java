@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.core;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -63,9 +64,16 @@ import com.openexchange.share.ShareTarget;
 public interface ModuleAdjuster {
 
     /**
+     * Gets a collection of modules the adjuster operates on.
+     *
+     * @return The modules
+     */
+    Collection<String> getModules();
+
+    /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param The target from the sharing users point of view
+     * @param target The target from the sharing users point of view
      * @param session The sharing users session
      * @param targetUserId The ID of the user to adjust the target for
      */
@@ -74,7 +82,7 @@ public interface ModuleAdjuster {
     /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param The target from the sharing users point of view
+     * @param target The target from the sharing users point of view
      * @param contextId The context ID
      * @param requestUserId The requesting users ID
      * @param targetUserId The ID of the user to adjust the target for

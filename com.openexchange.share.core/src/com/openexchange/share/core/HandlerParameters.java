@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.core;
 
 import java.sql.Connection;
 import com.openexchange.folderstorage.FolderServiceDecorator;
