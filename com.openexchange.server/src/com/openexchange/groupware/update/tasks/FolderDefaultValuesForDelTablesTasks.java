@@ -54,15 +54,12 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -91,10 +88,7 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        final Connection connection = databaseService.getForUpdateTask(contextID);
+        Connection connection = params.getConnection();
         boolean rollback = false;
         try {
             connection.setAutoCommit(false);
@@ -131,7 +125,6 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(contextID, true, connection);
         }
     }
 

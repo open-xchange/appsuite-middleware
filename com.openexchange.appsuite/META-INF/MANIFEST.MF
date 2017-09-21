@@ -40,6 +40,6 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.appsuite.osgi.AppsuiteActivator
 Export-Package: com.openexchange.appsuite

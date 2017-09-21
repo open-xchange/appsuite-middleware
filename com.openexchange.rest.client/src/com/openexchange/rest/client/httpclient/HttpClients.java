@@ -94,6 +94,8 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
@@ -544,6 +546,8 @@ public final class HttpClients {
 
     private static class IdleConnectionCloser implements Runnable {
 
+        private final static Logger LOGGER = LoggerFactory.getLogger(IdleConnectionCloser.class);
+        
         private final ClientConnectionManager manager;
         private final int idleTimeoutSeconds;
         private volatile ScheduledTimerTask timerTask;
@@ -560,8 +564,13 @@ public final class HttpClients {
                 synchronized (IdleConnectionCloser.class) {
                     tmp = timerTask;
                     if (null == tmp) {
-                        tmp = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(this, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
-                        timerTask = tmp;
+                        TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        if (null == service) {
+                            LOGGER.error("{} is missing. Can't execute run()", TimerService.class.getSimpleName());
+                        } else {
+                            tmp = service.scheduleWithFixedDelay(this, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
+                            timerTask = tmp;
+                        }
                     }
                 }
             }
@@ -574,8 +583,13 @@ public final class HttpClients {
                     tmp = timerTask;
                     if (null != tmp) {
                         tmp.cancel();
-                        ServerServiceRegistry.getInstance().getService(TimerService.class).purge();
-                        timerTask = null;
+                        TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        if (null == service) {
+                            LOGGER.error("{} is missing. Can't remove canceled tasks", TimerService.class.getSimpleName());
+                        } else {
+                            service.purge();
+                            timerTask = null;
+                        }
                     }
                 }
             }

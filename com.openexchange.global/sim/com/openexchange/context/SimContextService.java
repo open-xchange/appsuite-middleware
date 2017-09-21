@@ -70,6 +70,15 @@ public class SimContextService implements ContextService{
     }
 
     /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getDistinctContextsPerSchema()
+     */
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#setAttribute(java.lang.String, java.lang.String, int)
      */
     @Override

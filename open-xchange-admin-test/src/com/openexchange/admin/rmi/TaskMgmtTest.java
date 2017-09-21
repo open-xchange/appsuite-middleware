@@ -96,7 +96,7 @@ public class TaskMgmtTest extends AbstractRMITest {
         if (null == client_db) {
             throw new NullPointerException("Database object is null");
         }
-        client_db.setId(oxu.registerDatabase(client_db, superAdminCredentials).getId());
+        client_db.setId(oxu.registerDatabase(client_db, Boolean.FALSE, Integer.valueOf(0), superAdminCredentials).getId());
     }
 
     @After

@@ -1,0 +1,5 @@
+open-xchange-cluster-upgrade-from-784 (7.8.4-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Sun, 17 Sep 2017 12:56:27 +0200

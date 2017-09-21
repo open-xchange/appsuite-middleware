@@ -122,8 +122,17 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
 
     @Override
     public void doAuthentication(final Credentials authdata, final int contextId) throws OXException {
+        doAuthentication(authdata, contextId, false);
+    }
+
+    @Override
+    public void doAuthentication(final Credentials authdata, final int contextId, boolean plugInAware) throws OXException {
         try {
-            BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
+            if (plugInAware) {
+                BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
+            } else {
+                BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
+            }
         } catch (final InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());

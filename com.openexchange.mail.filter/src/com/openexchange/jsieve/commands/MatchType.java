@@ -49,7 +49,6 @@
 
 package com.openexchange.jsieve.commands;
 
-
 /**
  * {@link MatchType}
  *
@@ -136,6 +135,15 @@ public enum MatchType {
      */
     public static String getNotNameForArgumentName(String argumentName){
         return MatchType.valueOf(argumentName.substring(1)).getNotName();
+    }
+
+    public static boolean containsMatchType(String matchTypeName) {
+        for (MatchType cmd : values()) {
+            if (cmd.name().equals(matchTypeName) || cmd.getNotName().equals(matchTypeName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

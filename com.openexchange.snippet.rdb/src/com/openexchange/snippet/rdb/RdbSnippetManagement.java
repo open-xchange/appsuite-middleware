@@ -49,8 +49,8 @@
 
 package com.openexchange.snippet.rdb;
 
-import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.rdb.Services.getService;
+import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.Closeable;
 import java.io.FilterInputStream;
@@ -103,7 +103,7 @@ import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetUtils;
+import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;

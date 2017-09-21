@@ -246,7 +246,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                         break;
                 }
             }
-            if (SessionUtility.isIpCheckError(e) && null != session) {
+            if (SessionUtility.isSessionExpiredError(e) && null != session) {
                 try {
                     // Drop Open-Xchange cookies
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);

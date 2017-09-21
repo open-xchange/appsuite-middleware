@@ -190,7 +190,7 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
          *
          */
-        DATE("date", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
+        DATE("date", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
         /**
          * <p>The currentdate test is similar to the date test, except that it
          * operates on the current date/time rather than a value extracted from
@@ -198,7 +198,7 @@ public class TestCommand extends Command {
          * <code>currentdate [":zone" &lt;time-zone: string&gt;] [COMPARATOR] [MATCH-TYPE] &lt;date-part: string&gt; ;&ltkey-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-5">RFC-5260: Test currentdate</a></p>
          */
-        CURRENTDATE("currentdate", 3, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", currentDateOtherArguments()),
+        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", currentDateOtherArguments()),
         /**
          * <p>The hasflag test evaluates to true if any of the variables matches any flag name.</p>
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
@@ -229,9 +229,9 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
-            standard_address_part.put(":localpart", "");
-            standard_address_part.put(":domain", "");
-            standard_address_part.put(":all", "");
+            standard_address_part.put(AddressParts.localpart.getSieveArgument(), AddressParts.localpart.getNeededCapabilities());
+            standard_address_part.put(AddressParts.domain.getSieveArgument(), AddressParts.domain.getNeededCapabilities());
+            standard_address_part.put(AddressParts.all.getSieveArgument(), AddressParts.all.getNeededCapabilities());
             // Add further extensions here...
             return standard_address_part;
         }
@@ -253,15 +253,16 @@ public class TestCommand extends Command {
 
         /**
          * <p>Specifies the addressparts ':user' and ':detail' as described
-         * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a>.</p>
+         * in <a href="https://tools.ietf.org/html/rfc5233#section-4">RFC-5233: Subaddress Comparisons</a> in addition to the
+         * standard addressparts (see #{@link TestCommand.Commands#standardAddressPart())}.</p>
          *
          * @return A {@link Hashtable} with the subaddress addressparts
          */
         private static Hashtable<String, String> addressParts() {
             final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
-            standard_address_parts.putAll(standardAddressPart());
-            standard_address_parts.put(":user", "subaddress");
-            standard_address_parts.put(":detail", "subaddress");
+            for(AddressParts part: AddressParts.values()){
+                standard_address_parts.put(part.getSieveArgument(), part.getNeededCapabilities());
+            }
             return standard_address_parts;
         }
 

@@ -61,5 +61,10 @@ package com.openexchange.database;
  */
 public interface AssignmentInsertData extends Assignment {
 
-    // Marker interface
+    /**
+     * Signals whether counters for database/schemas are supposed to be updated.
+     *
+     * @return <code>true</code> to update; otherwise <code>false</code>
+     */
+    boolean updateDatabaseCounters();
 }

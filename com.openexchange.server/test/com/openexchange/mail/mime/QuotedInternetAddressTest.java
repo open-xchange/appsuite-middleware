@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -66,6 +67,36 @@ public class QuotedInternetAddressTest {
      */
     public QuotedInternetAddressTest() {
         super();
+    }
+
+    @Test
+    public void testBug55360() throws Exception {
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?Q?=42=45=47=49=4E=20=2F=20=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20=45=4E=44?=@companyemail.com", false);
+            fail("Address hsould not be parseable");
+        } catch (AddressException e) {
+            // All fine
+            String reference = e.getRef();
+            assertTrue("Contains null byte, but shouldn't", reference.indexOf('\0') < 0);
+            assertTrue("Contains CR, but shouldn't", reference.indexOf('\r') < 0);
+            assertTrue("Contains LF, but shouldn't", reference.indexOf('\n') < 0);
+        }
+
+        QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?Q?=42=45=47=49=4E=20=2F=20=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20=45=4E=44?=<your@companyemail.com>", false);
+        String personal = addr.getPersonal();
+        assertNotNull(personal);
+        assertTrue("Contains null byte, but shouldn't", personal.indexOf('\0') < 0);
+        assertTrue("Contains CR, but shouldn't", personal.indexOf('\r') < 0);
+        assertTrue("Contains LF, but shouldn't", personal.indexOf('\n') < 0);
+    }
+
+    @Test
+    public void testBug54879() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"atest\"@example.com");
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
+
+        addr = new QuotedInternetAddress("\"atest\"@example.com", false);
+        assertEquals("Address does not equals \"\"atest\"@example.com\"", "\"atest\"@example.com", addr.toString());
     }
 
          @Test

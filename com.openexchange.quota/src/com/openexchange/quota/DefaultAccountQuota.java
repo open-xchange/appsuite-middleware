@@ -84,16 +84,19 @@ public class DefaultAccountQuota implements AccountQuota {
     }
 
     /**
-     * Adds the given quota. A quota must only be added once for
-     * every possible {@link QuotaType}.
+     * Adds the given quota; replacing any existing quota possibly previously added for same {@link QuotaType}.
+     * <p>
+     * A quota should only be added once for every possible {@link QuotaType}.
      *
      * @see {@link Quota#UNLIMITED_AMOUNT}
      * @see {@link Quota#UNLIMITED_SIZE}
-     * @param quota The quota, never <code>null</code>.
+     * @param quota The quota (or <code>null</code>, which is ignored).
      * @return This {@link DefaultAccountQuota} instance.
      */
     public DefaultAccountQuota addQuota(Quota quota) {
-        quotas.put(quota.getType(), quota);
+        if (null != quota) {
+            quotas.put(quota.getType(), quota);
+        }
         return this;
     }
 

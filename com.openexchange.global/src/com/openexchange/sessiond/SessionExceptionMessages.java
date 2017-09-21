@@ -62,7 +62,6 @@ public final class SessionExceptionMessages implements LocalizableStrings {
     public static final String PASSWORD_UPDATE_FAILED_MSG = "The password could not be changed in the current session. Please login again.";
     public static final String MAX_SESSION_PER_USER_EXCEPTION_MSG = "The maximum number of sessions is exceeded for your account. Please logout from other clients and try again.";
     public static final String SESSION_EXPIRED_MSG = "Your session expired. Please login again.";
-    public static final String SESSION_INVALIDATED_MSG = "Your session was invalidated. Please login again.";
     public static final String CONTEXT_LOCKED_MSG = "The account \"%2$s\" is currently not enabled. Please try again later.";
     public static final String MAX_SESSION_PER_CLIENT_EXCEPTION_MSG = "The maximum number of sessions is exceeded for client %1$s. Please logout from other clients and try again.";
     public static final String NO_SESSION_FOR_TOKENS_MSG = "The session is no longer available. Please try again.";

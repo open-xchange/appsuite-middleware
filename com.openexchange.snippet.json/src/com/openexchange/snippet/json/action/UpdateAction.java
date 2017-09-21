@@ -61,18 +61,19 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.json.SnippetJsonParser;
+import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetProcessor;
+import com.openexchange.snippet.utils.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetJsonParser;
-import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -122,15 +123,31 @@ public final class UpdateAction extends SnippetAction {
         // Process image in an <img> tag and add it as an attachment
         String contentSubType = getContentSubType(snippet);
         List<Attachment> attachments = Collections.<Attachment> emptyList();
+        List<String> managedFileIds = null;
         if (contentSubType.equals("html")) {
             attachments = new LinkedList<Attachment>();
-            new SnippetProcessor(session).processImages(snippet, attachments);
+            managedFileIds = new SnippetProcessor(session).processImages(snippet, attachments);
         }
 
         // Update
         String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
         Snippet newSnippet = management.getSnippet(newId);
-        return new AJAXRequestResult(newSnippet, "snippet");
+        AJAXRequestResult requestResult = new AJAXRequestResult(newSnippet, "snippet");
+
+        if (null != managedFileIds && false == managedFileIds.isEmpty()) {
+            ManagedFileManagement fileManagement = services.getOptionalService(ManagedFileManagement.class);
+            if (null != fileManagement) {
+                for (String managedFileId : managedFileIds) {
+                    try {
+                        fileManagement.removeByID(managedFileId);
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+
+        return requestResult;
     }
 
     @Override

@@ -134,16 +134,21 @@ public final class LoginConfiguration {
     public boolean isSessiondAutoLogin(String hostName) {
         try {
             ServerConfigService configService = ServerServiceRegistry.getInstance().getService(ServerConfigService.class);
+            if (null == configService) {
+                LOGGER.warn("Missing server configuration service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+                return sessiondAutoLogin;
+            }
+
             ServerConfig config = configService.getServerConfig(hostName, -1, -1);
             Set<Capability> capabilities = config.getCapabilities();
             if (null != capabilities) {
                 return capabilities.contains(CAPABILITY_AUTOLOGIN);
             }
 
-            LOGGER.warn("Retrieved server configuration for host {} misses the capabilities set. Using default '{}' as fall-back (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+            LOGGER.warn("Retrieved server configuration for host {} misses the capabilities set required for checking auto-login capability. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
         } catch (OXException e) {
             // fallback to default
-            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
+            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
         }
         return sessiondAutoLogin;
     }

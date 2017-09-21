@@ -88,13 +88,13 @@ public class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseSe
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(
-                    (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(service),
-                    new EnabledColumn(service),
-                    new FixPublicationTablePrimaryKey(service),
-                    new PublicationWithUsernameAndPasswordUpdateTaskRetry(service),
-                    new PublicationsCreatedAndLastModifiedColumn(service),
-                    new PublicationUsersCreatedAndLastModifiedColumn(service),
-                    new PublicationsAddEntityIndex(service));
+                    (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(),
+                    new EnabledColumn(),
+                    new FixPublicationTablePrimaryKey(),
+                    new PublicationWithUsernameAndPasswordUpdateTaskRetry(),
+                    new PublicationsCreatedAndLastModifiedColumn(),
+                    new PublicationUsersCreatedAndLastModifiedColumn(),
+                    new PublicationsAddEntityIndex());
             }
         }, null);
         return service;

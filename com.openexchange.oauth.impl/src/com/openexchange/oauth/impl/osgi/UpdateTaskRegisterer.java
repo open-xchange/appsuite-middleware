@@ -81,12 +81,12 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
 
     @Override
     public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
-        final DatabaseService dbService = context.getService(reference);
+        DatabaseService dbService = context.getService(reference);
         registration = context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService), new OAuthAddScopeColumnTask(dbService), new RenameMigrateLinkedInServiceIdUpdateTask(dbService));
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(), new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask());
             }
         }, null);
         return dbService;

@@ -55,8 +55,11 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-cluster-upgrade-from-76x"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-cluster-upgrade-from-780-782"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-cluster-upgrade-from-783"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-cluster-upgrade-from-784"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-hostname-ldap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-imageconverter-api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-linkedin"/>

@@ -73,6 +73,8 @@ import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import com.openexchange.exception.OXException;
+import com.openexchange.pgp.keys.exceptions.PGPKeysExceptionCodes;
 
 /**
  * {@link PGPUtil}
@@ -132,8 +134,6 @@ public final class PGPKeysUtil {
         return HashAlgorithmTags.SHA256;
     }
 
-
-
     /**
      * Check if a public key is expired
      *
@@ -177,12 +177,11 @@ public final class PGPKeysUtil {
     public static PGPSecretKeyRing duplicateSecretKeyRing(PGPSecretKeyRing secretKeyRing, String decryptorPasswordHash, String encryptorPasswordHash, int symmetricKeyAlgorithmTag) throws PGPException {
         PGPDigestCalculator sha256Calc = new BcPGPDigestCalculatorProvider().get(getHashAlgorithmTags());
         PBESecretKeyDecryptor oldEncryptor = new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(decryptorPasswordHash.toCharArray());
-        PBESecretKeyEncryptor newEncryptor = new BcPBESecretKeyEncryptorBuilder(symmetricKeyAlgorithmTag, sha256Calc, 0x60).build(encryptorPasswordHash.toCharArray());
+        PBESecretKeyEncryptor newEncryptor = new BcPBESecretKeyEncryptorBuilder(symmetricKeyAlgorithmTag, sha256Calc, 0x60)
+            .build(encryptorPasswordHash.toCharArray());
 
         return PGPSecretKeyRing.copyWithNewPassword(secretKeyRing, oldEncryptor, newEncryptor);
     }
-
-
 
     /**
      * Gets the flags of a given key
@@ -195,7 +194,7 @@ public final class PGPKeysUtil {
         while (signatures.hasNext()) {
             PGPSignature signature = signatures.next();
             PGPSignatureSubpacketVector packet = signature.getHashedSubPackets();
-            if(packet != null) {
+            if (packet != null) {
                 return packet.getKeyFlags();
             }
         }
@@ -245,22 +244,23 @@ public final class PGPKeysUtil {
      * @return True, if the key is meant to be an decryption key, false otherwise
      */
     public static boolean isDecryptionKey(PGPSecretKey key) {
-        if(isEncryptionKey(key.getPublicKey())){
-           if(!key.isPrivateKeyEmpty()) {
-              return true;
-           }
+        if (isEncryptionKey(key.getPublicKey())) {
+            if (!key.isPrivateKeyEmpty()) {
+                return true;
+            }
         }
         return false;
     }
 
     /**
      * Returns the ring's singing key
+     *
      * @param keyRing The key ring
      * @return the ring's signing sub key or the master key, if no sub key is marked for singing
      */
-    public static PGPSecretKey getSigningKey(PGPSecretKeyRing keyRing){
+    public static PGPSecretKey getSigningKey(PGPSecretKeyRing keyRing) {
         PGPSecretKey ret = getSigningSubKey(keyRing);
-        if(ret == null){
+        if (ret == null) {
             //If no signing subkey was found we are using the master key
             ret = keyRing.getSecretKey();
         }
@@ -269,17 +269,18 @@ public final class PGPKeysUtil {
 
     /**
      * Returns a ring's subkey which is meant to be used as signing key
+     *
      * @param keyRing The ring to get the signing sub key for
      * @return the signing sub key, or null if no signing sub key was found
      */
-    public static PGPSecretKey getSigningSubKey(PGPSecretKeyRing keyRing){
+    public static PGPSecretKey getSigningSubKey(PGPSecretKeyRing keyRing) {
         Iterator<PGPSecretKey> iter = keyRing.getSecretKeys();
-        while(iter.hasNext()){
+        while (iter.hasNext()) {
             PGPSecretKey secretKey = iter.next();
-            if(!secretKey.isMasterKey() /*only check sub keys*/){
+            if (!secretKey.isMasterKey() /* only check sub keys */) {
                 PGPPublicKey publicKey = secretKey.getPublicKey();
-                boolean isSigningKey = keyHasFlag(publicKey,KeyFlags.SIGN_DATA);
-                if(isSigningKey && !publicKey.hasRevocation()){
+                boolean isSigningKey = keyHasFlag(publicKey, KeyFlags.SIGN_DATA);
+                if (isSigningKey && !publicKey.hasRevocation()) {
                     return secretKey;
                 }
             }
@@ -336,9 +337,7 @@ public final class PGPKeysUtil {
             Iterator<PGPSecretKey> it = keyRing.getSecretKeys();
             while (it.hasNext()) {
                 PGPSecretKey secretKey = it.next();
-                if (!secretKey.isPrivateKeyEmpty() &&
-                     secretKey.getPublicKey() != null &&
-                     isEncryptionKey(secretKey.getPublicKey())) {
+                if (!secretKey.isPrivateKeyEmpty() && secretKey.getPublicKey() != null && isEncryptionKey(secretKey.getPublicKey())) {
                     return secretKey;
                 }
             }
@@ -371,16 +370,46 @@ public final class PGPKeysUtil {
      * @throws PGPException
      */
     public static PGPPublicKeyRing addUID(PGPPublicKeyRing publicKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
-        PGPPublicKey pub = publicKeyRing.getPublicKey();
-        PGPSignatureGenerator generator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
+        PGPPublicKey publicMasterKey = publicKeyRing.getPublicKey();
+        PGPPublicKey newPublicMasterKey = addUID(publicMasterKey, privateKey, userId);
+        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, publicMasterKey);
+        publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPublicMasterKey);
+        return publicKeyRing;
+    }
+
+    /**
+     * Adds a new User ID to a {@link PGPSecretKeyRing}
+     *
+     * @param secretKeyRing The secret key ring to add the user ID to
+     * @param privateKey The private key used to signing
+     * @param userId The new user ID
+     * @return The secret key ring containing the new user ID
+     * @throws PGPException
+     */
+    public static PGPSecretKeyRing addUID(PGPSecretKeyRing secretKeyRing, PGPPrivateKey privateKey, String userId) throws PGPException {
+        PGPSecretKey secretMasterKey = secretKeyRing.getSecretKey();
+        PGPPublicKey modifiedPublicMasterKey = addUID(secretMasterKey.getPublicKey(), privateKey, userId);
+        PGPSecretKey modifiedSecretMasterKey = PGPSecretKey.replacePublicKey(secretMasterKey, modifiedPublicMasterKey);
+        return PGPSecretKeyRing.insertSecretKey(secretKeyRing, modifiedSecretMasterKey);
+    }
+
+    /**
+     * Adds a new User ID to a {@link PGPPublicKey}
+     *
+     * @param publicKey The public key to add the user ID to
+     * @param privateKey The private key used for singning
+     * @param userId The new user ID
+     * @return The public key containing the new user ID
+     * @throws PGPException
+     */
+    public static PGPPublicKey addUID(PGPPublicKey publicKey, PGPPrivateKey privateKey, String userId) throws PGPException {
+        PGPSignatureGenerator generator = new PGPSignatureGenerator(
+            new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
         PGPSignatureSubpacketGenerator signhashgen = new PGPSignatureSubpacketGenerator();
         generator.setHashedSubpackets(signhashgen.generate());
-        PGPSignature certification = generator.generateCertification(userId, pub);
-        PGPPublicKey newPubKey = PGPPublicKey.addCertification(pub, userId, certification);
-        publicKeyRing = PGPPublicKeyRing.removePublicKey(publicKeyRing, pub);
-        publicKeyRing = PGPPublicKeyRing.insertPublicKey(publicKeyRing, newPubKey);
-        return publicKeyRing;
+        PGPSignature certification = generator.generateCertification(userId, publicKey);
+        return PGPPublicKey.addCertification(publicKey, userId, certification);
     }
 
     /**
@@ -410,42 +439,56 @@ public final class PGPKeysUtil {
      *
      * @param privateKey The private key which is used for revocation.
      * @param publicKeyRing The public key ring to be revoked
+     * @param keyId The id of the key/subkey to be revoked, 0 if all keys
      * @param revocationReason The reason why the key is being revoked.
      * @return The new key ring with the recovation certificate set
      * @throws PGPException
+     * @throws OXException
      */
-    public static PGPPublicKeyRing revokeKey(PGPPrivateKey privateKey, PGPPublicKeyRing publicKeyRing, String revocationReason) throws PGPException {
+    public static PGPPublicKeyRing revokeKey(PGPPrivateKey privateKey, PGPPublicKeyRing publicKeyRing, long keyId, String revocationReason) throws PGPException, OXException {
         privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
         publicKeyRing = Objects.requireNonNull(publicKeyRing, "publicKeyRing must not be null");
         PGPPublicKeyRing ret = publicKeyRing;
         Iterator<PGPPublicKey> pkeys = publicKeyRing.getPublicKeys();
         PGPPublicKey master = getPublicMasterKey(publicKeyRing);
+        if (master == null) {
+            throw PGPKeysExceptionCodes.MASTER_KEY_NOT_FOUND.create();
+        }
+
         while (pkeys.hasNext()) {
             PGPPublicKey pub = pkeys.next();
-            ret = PGPPublicKeyRing.removePublicKey(ret, pub);
-            PGPSignatureSubpacketGenerator subHashGenerator = new PGPSignatureSubpacketGenerator();
-            PGPSignatureSubpacketGenerator subUnHashGenerator = new PGPSignatureSubpacketGenerator();
-            PGPSignatureGenerator generator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(pub.getAlgorithm(), org.bouncycastle.openpgp.PGPUtil.SHA1));
-            if (pub.isMasterKey()) {
-                generator.init(PGPSignature.KEY_REVOCATION, privateKey);
-                master = pub;
-            } else {
-                generator.init(PGPSignature.SUBKEY_REVOCATION, privateKey);
-            }
-            subHashGenerator.setSignatureCreationTime(false, new Date());
-            subHashGenerator.setRevocationReason(false, revokeReason(revocationReason), revocationReason);
-            subUnHashGenerator.setRevocationKey(false, pub.getAlgorithm(), pub.getFingerprint());
-            generator.setHashedSubpackets(subHashGenerator.generate());
-            generator.setUnhashedSubpackets(subUnHashGenerator.generate());
-            if (pub.isMasterKey()) {
-                PGPSignature signature = generator.generateCertification(pub);
-                pub = PGPPublicKey.addCertification(pub, signature);
-            } else {
-                PGPSignature signature = generator.generateCertification(master, pub);
-                pub = PGPPublicKey.addCertification(pub, signature);
-            }
+            if (pub.getKeyID() == keyId || keyId == 0) {
+                ret = PGPPublicKeyRing.removePublicKey(ret, pub);
+                if (ret != null) {
+                    PGPSignatureSubpacketGenerator subHashGenerator = new PGPSignatureSubpacketGenerator();
+                    PGPSignatureSubpacketGenerator subUnHashGenerator = new PGPSignatureSubpacketGenerator();
+                    PGPSignatureGenerator generator = new PGPSignatureGenerator(
+                        new BcPGPContentSignerBuilder(pub.getAlgorithm(), org.bouncycastle.openpgp.PGPUtil.SHA1));
+                    if (pub.isMasterKey()) {
+                        generator.init(PGPSignature.KEY_REVOCATION, privateKey);
+                        master = pub;
+                    } else {
+                        generator.init(PGPSignature.SUBKEY_REVOCATION, privateKey);
+                    }
+                    subHashGenerator.setSignatureCreationTime(false, new Date());
+                    subHashGenerator.setRevocationReason(false, revokeReason(revocationReason), revocationReason);
+                    subUnHashGenerator.setRevocationKey(false, pub.getAlgorithm(), pub.getFingerprint());
+                    generator.setHashedSubpackets(subHashGenerator.generate());
+                    generator.setUnhashedSubpackets(subUnHashGenerator.generate());
+                    if (pub.isMasterKey()) {
+                        PGPSignature signature = generator.generateCertification(pub);
+                        pub = PGPPublicKey.addCertification(pub, signature);
+                    } else {
+                        PGPSignature signature = generator.generateCertification(master, pub);
+                        pub = PGPPublicKey.addCertification(pub, signature);
+                    }
 
-            ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
+                    ret = PGPPublicKeyRing.insertPublicKey(ret, pub);
+                }
+                else {
+                   throw new PGPException("Error while removing public key: key not found in keyring");
+                }
+            }
         }
 
         return ret;

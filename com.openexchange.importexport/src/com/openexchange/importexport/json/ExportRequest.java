@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -89,19 +90,28 @@ public class ExportRequest {
         super();
         this.setSession(session);
         this.setRequest(request);
-        String value = request.getParameter("body");
 
-        if (!Strings.isEmpty(value)) {
-            String ids = value;
-            try{
-                batchIds = extractBatchArrayFromRequest(ids);
+        Object data = request.getData();
+        if (data instanceof JSONArray) {
+            try {
+                batchIds = extractBatchArrayFromRequest((JSONArray) data);
             } catch (JSONException e) {
-                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+                throw AjaxExceptionCodes.JSON_ERROR.create(e);
             }
         } else {
-            batchIds = null;
-            if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null) {
-                throw ImportExportExceptionCodes.NEED_FOLDER.create();
+            String value = request.getParameter("body");
+            if (!Strings.isEmpty(value)) {
+                String ids = value;
+                try{
+                    batchIds = extractBatchArrayFromRequest(new JSONArray(ids));
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e);
+                }
+            } else {
+                batchIds = null;
+                if (request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null) {
+                    throw ImportExportExceptionCodes.NEED_FOLDER.create();
+                }
             }
         }
 
@@ -120,8 +130,7 @@ public class ExportRequest {
         this.setFolder(request.getParameter(AJAXServlet.PARAMETER_FOLDERID));
     }
 
-    private Map<String, List<String>> extractBatchArrayFromRequest(String batchArray) throws JSONException {
-        JSONArray jPairs = new JSONArray(batchArray);
+    private Map<String, List<String>> extractBatchArrayFromRequest(JSONArray jPairs) throws JSONException {
         int length = jPairs.length();
         if (length <= 0) {
             return Collections.emptyMap();

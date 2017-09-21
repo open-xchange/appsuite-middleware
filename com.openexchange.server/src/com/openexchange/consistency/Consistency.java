@@ -54,8 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +92,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration to the environment by implementing the
@@ -303,7 +304,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Deletes the specified schema mapping from the 'context_server2db_pool'
-     * 
+     *
      * @param configCon The configdb writeable {@link Connection}
      * @param schema The schema name
      * @throws SQLException if an SQL error is occurred
@@ -594,14 +595,25 @@ public abstract class Consistency implements ConsistencyMBean {
 
             Set<String> filesToIgnore;
             if (quotaAware) {
-                filesToIgnore = Collections.emptySet();
+                filesToIgnore = new HashSet<>();
             } else {
                 if (entity.getType().equals(EntityType.Context)) {
                     filesToIgnore = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
                 } else {
-                    filesToIgnore = Collections.emptySet();
+                    filesToIgnore = new HashSet<>();
                 }
             }
+
+            /*
+             * Depending on the configuration snippets doesn't count towards the usage too.
+             */
+            QuotaAwareSnippetService service = ServerServiceRegistry.getInstance().getService(QuotaAwareSnippetService.class);
+            if (service != null) {
+                if (service.ignoreQuota()) {
+                    filesToIgnore.addAll(service.getFilesToIgnore(entity.getContext().getContextId()));
+                }
+            }
+
             recalculateUsage(storage, filesToIgnore);
         }
     }

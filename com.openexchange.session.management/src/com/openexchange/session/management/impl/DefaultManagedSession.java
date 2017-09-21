@@ -49,7 +49,6 @@
 
 package com.openexchange.session.management.impl;
 
-import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementStrings;
@@ -82,8 +81,6 @@ public class DefaultManagedSession implements ManagedSession {
      */
     public final static class Builder {
 
-        private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Builder.class);
-
         private String sessionId;
         private String ipAddress;
         private String client;
@@ -103,10 +100,28 @@ public class DefaultManagedSession implements ManagedSession {
             this.ipAddress = session.getLocalIp();
             this.client = session.getClient();
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-            this.loginTime = Long.parseLong((String) session.getParameter(Session.PARAM_LOGIN_TIME));
+            this.loginTime = parseLoginTime(session);
             this.ctxId = session.getContextId();
             this.userId = session.getUserId();
             location = SessionManagementStrings.UNKNOWN_LOCATION;
+        }
+
+        private static long parseLoginTime(Session session) {
+            Object oLoginTime = session.getParameter(Session.PARAM_LOGIN_TIME);
+            if (null == oLoginTime) {
+                return 0L;
+            }
+
+            if (oLoginTime instanceof Number) {
+                return ((Number) oLoginTime).longValue();
+            }
+
+            try {
+                return Long.parseLong(oLoginTime.toString());
+            } catch (NumberFormatException e) {
+                // Cannot be parsed to a long value
+                return 0L;
+            }
         }
 
         public Builder setSessionId(String sessionId) {

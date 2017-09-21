@@ -60,12 +60,9 @@ import com.openexchange.tools.net.URIParser;
  *
  */
 
-@javax.jws.WebService(
-                      serviceName = "OXResellerContextService",
-                      portName = "OXResellerContextServiceHttpSoap11Endpoint",
-                      targetNamespace = "http://soap.reseller.admin.openexchange.com",
+@javax.jws.WebService(serviceName = "OXResellerContextService", portName = "OXResellerContextServiceHttpSoap11Endpoint", targetNamespace = "http://soap.reseller.admin.openexchange.com",
 
-                      endpointInterface = "com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortType")
+    endpointInterface = "com.openexchange.admin.soap.reseller.context.reseller.soap.OXResellerContextServicePortType")
 
 public class OXResellerContextServicePortTypeImpl implements OXResellerContextServicePortType {
 
@@ -74,7 +71,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     private static OXContextInterface getContextInterface() throws RemoteException_Exception {
         final OXContextInterface contextInterface = RMI_REFERENCE.get();
         if (null == contextInterface) {
-            throw new RemoteException_Exception("Missing "+OXContextInterface.class.getName() + " instance.");
+            throw new RemoteException_Exception("Missing " + OXContextInterface.class.getName() + " instance.");
         }
         return contextInterface;
     }
@@ -126,7 +123,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void change(Change parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void change(Change parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.change(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
@@ -166,7 +163,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void delete(Delete parameters) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void delete(Delete parameters) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.delete(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -211,7 +208,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void disable(Disable parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , NoSuchReasonException_Exception , StorageException_Exception , RemoteException_Exception , OXContextException_Exception , InvalidDataException_Exception    {
+    public void disable(Disable parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, NoSuchReasonException_Exception, StorageException_Exception, RemoteException_Exception, OXContextException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disable(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -261,7 +258,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(java.lang.String searchPattern,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(java.lang.String searchPattern, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
@@ -299,7 +296,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void changeModuleAccess(ChangeModuleAccess parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void changeModuleAccess(ChangeModuleAccess parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2ModuleAccess(parameters.access), soap2Credentials(parameters.auth));
@@ -339,7 +336,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void changeModuleAccessByName(ChangeModuleAccessByName parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void changeModuleAccessByName(ChangeModuleAccessByName parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.getCtx()), parameters.getAccessCombinationName(), soap2Credentials(parameters.getAuth()));
@@ -379,7 +376,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void enable(Enable parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void enable(Enable parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enable(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
@@ -419,7 +416,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void downgrade(Downgrade parameters) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void downgrade(Downgrade parameters) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.downgrade(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -464,7 +461,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess getModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess getModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return moduleAccess2Soap(contextInterface.getModuleAccess(soap2Context(ctx), soap2Credentials(auth)));
@@ -504,7 +501,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listAll(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listAll(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listAll(soap2Credentials(auth));
@@ -542,7 +539,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listByFilestore(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore fs,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , NoSuchFilestoreException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listByFilestore(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore fs, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, NoSuchFilestoreException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByFilestore(soap2Filestore(fs), soap2Credentials(auth));
@@ -585,7 +582,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listByDatabase(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database db,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , NoSuchDatabaseException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> listByDatabase(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database db, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, NoSuchDatabaseException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByDatabase(soap2Database(db), soap2Credentials(auth));
@@ -627,9 +624,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
     }
 
-
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext create(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext create(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
@@ -669,7 +665,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess access,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser, com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess access, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
@@ -709,7 +705,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext getData(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext getData(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.getData(soap2Context(ctx), soap2Credentials(auth)));
@@ -749,7 +745,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccessByName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,java.lang.String accessCombinationName,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccessByName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser, java.lang.String accessCombinationName, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
@@ -789,7 +785,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.lang.Boolean exists(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.lang.Boolean exists(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Boolean.valueOf(contextInterface.exists(soap2Context(ctx), soap2Credentials(auth)));
@@ -824,7 +820,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void disableAll(DisableAll parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , NoSuchReasonException_Exception , StorageException_Exception , RemoteException_Exception , OXContextException_Exception , InvalidDataException_Exception    {
+    public void disableAll(DisableAll parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, NoSuchReasonException_Exception, StorageException_Exception, RemoteException_Exception, OXContextException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disableAll(soap2Credentials(parameters.getAuth()));
@@ -859,7 +855,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public void enableAll(EnableAll parameters) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public void enableAll(EnableAll parameters) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enableAll(soap2Credentials(parameters.auth));
@@ -883,7 +879,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public java.lang.String getAccessCombinationName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
+    public java.lang.String getAccessCombinationName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx, com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return contextInterface.getAccessCombinationName(soap2Context(ctx), soap2Credentials(auth));
@@ -953,9 +949,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             if (schemaSelectStrategy.getStrategy().equals("automatic")) {
                 return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
             } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
-                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.inMemory();
+                // Fall-back to "automatic"
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
             } else {
-                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible values: \"automatic\", \"in-memory\"");
+                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible value: \"automatic\"");
             }
         }
 
@@ -1220,19 +1217,18 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                                {
+                                case 1: {
                                     final String schema = matcher.group(1);
                                     if (null != schema) {
                                         sb.append(schema);
                                     }
                                 }
-                                break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1416,19 +1412,18 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                            {
-                                final String schema = matcher.group(1);
-                                if (null != schema) {
-                                    sb.append(schema);
+                                case 1: {
+                                    final String schema = matcher.group(1);
+                                    if (null != schema) {
+                                        sb.append(schema);
+                                    }
                                 }
-                            }
-                            break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1869,7 +1864,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
+        final Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -2017,11 +2012,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             moduleAccess.setWebdav(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isWebdavXml();
-        if (tmp != null) {
-            moduleAccess.setWebdavXml(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isWebmail();
         if (tmp != null) {
             moduleAccess.setWebmail(booleanValue(tmp));
@@ -2062,7 +2052,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapModuleAccess.setUSM(Boolean.valueOf(moduleAccess.isUSM()));
         soapModuleAccess.setVcard(Boolean.valueOf(moduleAccess.getVcard()));
         soapModuleAccess.setWebdav(Boolean.valueOf(moduleAccess.getWebdav()));
-        soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }
@@ -2088,7 +2077,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapContext.setUserAttributes(mapmap2Soap(context.getUserAttributes()));
         soapContext.setWriteDatabase(database2Soap(context.getWriteDatabase()));
 
-        OXContextExtensionImpl oxext  = (OXContextExtensionImpl) context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+        OXContextExtensionImpl oxext = (OXContextExtensionImpl) context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         soapContext.setExtensionError(oxext.getExtensionError());
         soapContext.setCustomid(oxext.getCustomid());
         soapContext.setOwner(resellerAdmin2Soap(oxext.getOwner()));
@@ -2128,7 +2117,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final SOAPStringMapMap soapMapMap = new SOAPStringMapMap();
         final java.util.List<SOAPMapEntry> entries = new ArrayList<SOAPMapEntry>(mapmap.size());
-        for (final Map.Entry<String,Map<String,String>> mapmapEntry : mapmap.entrySet()) {
+        for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
             final SOAPMapEntry mapEntry = new SOAPMapEntry();
             mapEntry.setKey(mapmapEntry.getKey());
             mapEntry.setValue(map2Soap(mapmapEntry.getValue()));
@@ -2144,7 +2133,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final SOAPStringMap soapMap = new SOAPStringMap();
         final java.util.List<Entry> entries = new ArrayList<Entry>(map.size());
-        for (final Map.Entry<String,String> mapEntry : map.entrySet()) {
+        for (final Map.Entry<String, String> mapEntry : map.entrySet()) {
             final Entry entry = new Entry();
             entry.setKey(mapEntry.getKey());
             entry.setValue(mapEntry.getValue());

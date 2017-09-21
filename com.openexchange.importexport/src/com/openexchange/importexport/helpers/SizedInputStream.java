@@ -54,22 +54,28 @@ import java.io.InputStream;
 import com.openexchange.importexport.formats.Format;
 
 /**
- * Defines a wrapper for an InputStream that also contains the size of this
- * InputStream. This is necessary to be able to set the correct size when
- * returning a HTTP-response - else the whole connection might be cancelled
- * either too early (resulting in corrupt data) or to late (resulting in
- * a lot of waiting).
+ * Defines a wrapper for an <code>InputStream</code> that also knows the size of the provided data.
+ * <p>
+ * This is necessary to be able to set the correct size when returning a HTTP-response.<br>
+ * Else the whole connection might be cancelled either too early (resulting in corrupt data) or too late (resulting in a lot of waiting).
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
-public class SizedInputStream extends InputStream{
+public class SizedInputStream extends InputStream {
 
 	private final InputStream in;
 	private final long size;
 	private final Format format;
 
-	public SizedInputStream(final InputStream in, final long size, final Format format){
+	/**
+	 * Initializes a new {@link SizedInputStream}.
+	 *
+	 * @param in The input stream to delegate to
+	 * @param size The size (if known) or <code>-1</code>
+	 * @param format The format identifier
+	 */
+	public SizedInputStream(final InputStream in, final long size, final Format format) {
+	    super();
 		this.size = size;
 		this.in = in;
 		this.format = format;
@@ -77,7 +83,7 @@ public class SizedInputStream extends InputStream{
 
 	/**
 	 * Gets the size (if known)
-	 * 
+	 *
 	 * @return The size or <code>-1</code>
 	 */
 	public long getSize() {
@@ -86,7 +92,7 @@ public class SizedInputStream extends InputStream{
 
 	/**
 	 * Gets the associated format
-	 * 
+	 *
 	 * @return The format
 	 */
 	public Format getFormat(){
@@ -109,10 +115,8 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public void mark(final int readlimit) {
-		synchronized (this) {
-			in.mark(readlimit);
-		}
+	public void mark(int readlimit) {
+		in.mark(readlimit);
 	}
 
 	@Override
@@ -121,24 +125,22 @@ public class SizedInputStream extends InputStream{
 	}
 
 	@Override
-	public int read(final byte[] b, final int off, final int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		return in.read(b, off, len);
 	}
 
 	@Override
-	public int read(final byte[] b) throws IOException {
+	public int read(byte[] b) throws IOException {
 		return in.read(b);
 	}
 
 	@Override
 	public void reset() throws IOException {
-		synchronized (this) {
-			in.reset();
-		}
+		in.reset();
 	}
 
 	@Override
-	public long skip(final long n) throws IOException {
+	public long skip(long n) throws IOException {
 		return in.skip(n);
 	}
 

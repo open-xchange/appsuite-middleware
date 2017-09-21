@@ -61,7 +61,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -69,7 +68,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -96,9 +94,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
@@ -118,7 +114,6 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            dbService.backForUpdateTask(contextID, con);
         }
     }
 

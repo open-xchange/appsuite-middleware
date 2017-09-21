@@ -46,10 +46,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -194,6 +197,56 @@ public class IMAPStore extends Store
     public static final String ID_COMMAND = "command";
     public static final String ID_ARGUMENTS = "arguments";
     public static final String ID_ENVIRONMENT = "environment";
+
+    private static final AtomicReference<List<ProtocolListener>> PROTOCOL_LISTENERS_REF = new AtomicReference<List<ProtocolListener>>(null);
+
+    /**
+     * Adds specified protocol listener
+     * 
+     * @param protocolListener The protocol listener to add
+     */
+    public static synchronized void addProtocolListener(ProtocolListener protocolListener) {
+        if (null == protocolListener) {
+            return;
+        }
+
+        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+        if (null == listeners) {
+            listeners = new CopyOnWriteArrayList<>();
+            PROTOCOL_LISTENERS_REF.set(listeners);
+        }
+        listeners.add(protocolListener);
+    }
+
+    /**
+     * Removes specified protocol listener
+     * 
+     * @param protocolListener The protocol listener to remove
+     */
+    public static synchronized void removeProtocolListener(ProtocolListener protocolListener) {
+        if (null == protocolListener) {
+            return;
+        }
+        
+        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+        if (null == listeners) {
+            return;
+        }
+        
+        listeners.remove(protocolListener);
+        if (listeners.isEmpty()) {
+            PROTOCOL_LISTENERS_REF.set(null);
+        }
+    }
+
+    /**
+     * Gets the currently available protocol listeners.
+     * 
+     * @return The protocol listeners or <code>null</code> if none registered
+     */
+    public static List<ProtocolListener> getProtocolListeners() {
+        return PROTOCOL_LISTENERS_REF.get();
+    }
 
     protected final String name;		// name of this protocol
     protected final int defaultPort;	// default IMAP port
@@ -882,7 +935,7 @@ public class IMAPStore extends Store
      */
     protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password)
 				throws IOException, ProtocolException {
-    return new IMAPProtocol(name, host, port,
+    return new IMAPProtocol(name, host, port, user,
             session.getProperties(),
             isSSL,
             logger

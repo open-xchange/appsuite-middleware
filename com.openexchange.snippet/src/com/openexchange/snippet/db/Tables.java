@@ -91,6 +91,7 @@ public final class Tables {
                " refType TINYINT unsigned NOT NULL," +
                " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " lastModified BIGINT(64) NOT NULL," +
+               " size INT4 unsigned DEFAULT NULL," +
                " PRIMARY KEY (cid, user, id)," +
                " INDEX `indexShared` (cid, shared)," +
                " INDEX `indexRefType` (cid, user, id, refType)" +

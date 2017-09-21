@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -79,10 +78,12 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             String foreignKey = Tools.existsForeignKey(
                 con,
                 DEL_DATES,
@@ -96,16 +97,18 @@ public class DelDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                 Tools.dropPrimaryKey(con, DEL_DATES);
                 Tools.createPrimaryKey(con, DEL_DATES, new String[] { "cid", "intfield01", "fid" });
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 
