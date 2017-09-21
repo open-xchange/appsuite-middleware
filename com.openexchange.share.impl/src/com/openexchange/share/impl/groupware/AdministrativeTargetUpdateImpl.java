@@ -70,6 +70,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.HandlerParameters;
 import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
