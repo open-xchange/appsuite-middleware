@@ -54,8 +54,7 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import javax.servlet.Filter;
@@ -111,7 +110,7 @@ public class WrappingFilter implements Filter {
     private final AtomicLong counter;
     private final int serverId;
     private final String forHeader;
-    private final Set<IPRange> knownProxies;
+    private final List<IPRange> knownProxies;
     private final String protocolHeader;
     private final boolean isConsiderXForwards;
     private final String echoHeaderName;
@@ -131,7 +130,7 @@ public class WrappingFilter implements Filter {
         serverId = Math.abs(OXException.getServerId());
         counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
-        this.knownProxies = new LinkedHashSet<>(config.getKnownProxies());
+        this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();

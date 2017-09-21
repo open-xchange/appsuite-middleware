@@ -168,14 +168,17 @@ public class ShareTool {
      * </code>
      * @param target The target
      * @return The JSON object
-     * @throws JSONException
      */
-    public static JSONObject targetToJSON(ShareTarget target) throws JSONException {
-        JSONObject jTarget = new JSONObject();
-        jTarget.put("m", target.getModule());
-        jTarget.put("f", target.getFolder());
-        jTarget.put("i", target.getItem());
-        return jTarget;
+    public static JSONObject targetToJSON(ShareTarget target) throws OXException {
+        try {
+            JSONObject jTarget = new JSONObject();
+            jTarget.put("m", target.getModule());
+            jTarget.put("f", target.getFolder());
+            jTarget.put("i", target.getItem());
+            return jTarget;
+        } catch (JSONException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**

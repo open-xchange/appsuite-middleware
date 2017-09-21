@@ -51,6 +51,7 @@ package org.glassfish.grizzly.http.server;
 
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,7 +59,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.util.Globals;
-import org.glassfish.grizzly.utils.DataStructures;
 import org.slf4j.Logger;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
@@ -103,7 +103,7 @@ public class OXSessionManager implements SessionManager {
         int max = grizzlyConfig.getMaxNumberOfHttpSessions();
         this.max = max;
         this.considerSessionCount = max > 0;
-        this.sessions = DataStructures.getConcurrentMap();
+        this.sessions = new ConcurrentHashMap<>();
         this.rnd = new Random();
         this.sessionsCount = 0;
         final ReentrantLock lock = new ReentrantLock();

@@ -61,28 +61,6 @@ import java.util.List;
 public interface PushSubscription {
 
     /**
-     * A subscription's nature; either:
-     * <ul>
-     * <li>Volatile nature. Not stored, but only held node-local in memory.</li>
-     * <li>Persistent nature. Permanently stored.</li>
-     * </ul>
-     */
-    public static enum Nature {
-        /**
-         * Volatile nature. Not stored, but only held node-local in memory.
-         * <p>
-         * If JVM shuts-down, volatile subscriptions are gone.
-         */
-        VOLATILE,
-        /**
-         * Persistent nature. Permanently stored.
-         */
-        PERSISTENT;
-    }
-
-    // ---------------------------------------------------------------------------------------------------------
-
-    /**
      * Gets the user identifier
      *
      * @return The user identifier
@@ -133,16 +111,9 @@ public interface PushSubscription {
     String getToken();
 
     /**
-     * Gets this subscription's nature; either {@link Nature#PERSISTENT persistent} or {@link Nature#VOLATILE volatile} nature
-     *
-     * @return The nature
-     */
-    Nature getNature();
-
-    /**
      * Gets this subscription's expiration date, i.e. the date after which this subscription automatically expires unless it is refreshed.
      *
-     * @return The expiration date, or <code>null</code> if not set 
+     * @return The expiration date, or <code>null</code> if not set
      */
     Date getExpires();
 

@@ -74,6 +74,7 @@ public class FutureJobInfo implements JobInfo {
     private final Job job;
     private final Future<AJAXRequestResult> future;
     private final Cache<UUID, FutureJobInfo> userJobs;
+    private final long stamp;
 
     /**
      * Initializes a new {@link FutureJobInfo}.
@@ -84,6 +85,17 @@ public class FutureJobInfo implements JobInfo {
         this.id = id;
         this.future = future;
         this.userJobs = userJobs;
+        this.stamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Checks if this future job info lasts in queue longer than specified number of milliseconds.
+     *
+     * @param maxIdleMillis The max. number of milliseconds, which might be exceeded
+     * @return <code>true</code> if specified number of milliseconds is exceeded; otherwise <code>false</code>
+     */
+    public boolean isExceeded(long maxIdleMillis) {
+        return (System.currentTimeMillis() - stamp) > maxIdleMillis;
     }
 
     @Override
@@ -98,7 +110,9 @@ public class FutureJobInfo implements JobInfo {
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return future.cancel(mayInterruptIfRunning);
+        boolean canceled = future.cancel(mayInterruptIfRunning);
+        userJobs.invalidate(id);
+        return canceled;
     }
 
     @Override

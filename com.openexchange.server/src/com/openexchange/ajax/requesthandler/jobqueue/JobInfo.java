@@ -81,7 +81,7 @@ public interface JobInfo {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Attempts to cancel execution of the associated job.
+     * Attempts to cancel execution of the associated job (and implicitly drops it from job queue).
      * <p>
      * This attempt will fail if the task has already completed, has already been cancelled,
      * or could not be cancelled for some other reason.

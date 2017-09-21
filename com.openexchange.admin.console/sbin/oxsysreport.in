@@ -645,11 +645,13 @@ exclude_secret_entries() {
             sed 's|\[|.|g' | \
             sed 's|\]|.|g' | \
             sed 's|\||.|g' | \
+            sed 's|\*|.|g' | \
             sed "s|'|.|g")
         local _original_line=$(echo "${_original_line}" | \
             sed 's|\[|.|g' | \
             sed 's|\]|.|g' | \
             sed 's|\||.|g' | \
+            sed 's|\*|.|g' | \
             sed "s|'|.|g")
         # com.openexchange.oauth.msn.apiSecret=<REMOVED BY OXSYSREPORT>
         if [ -n "${_secret_part}" ]; then

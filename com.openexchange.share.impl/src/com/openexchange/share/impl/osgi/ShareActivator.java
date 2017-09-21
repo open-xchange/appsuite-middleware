@@ -73,14 +73,21 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.core.ModuleAdjuster;
+import com.openexchange.share.core.ModuleHandler;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.share.impl.groupware.FileStorageHandler;
+import com.openexchange.share.impl.groupware.MailModuleAdjuster;
+import com.openexchange.share.impl.groupware.ModuleAdjusterRegistry;
+import com.openexchange.share.impl.groupware.ModuleHandlerRegistry;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
@@ -167,7 +174,19 @@ public class ShareActivator extends HousekeepingActivator {
         AccessibleModulesExtensionTracker accessibleModulesTracker = new AccessibleModulesExtensionTracker(context);
         rememberTracker(accessibleModulesTracker);
 
-        registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderTracker, accessibleModulesTracker));
+        /*
+         * track module handlers and -adjusters & register default implementations
+         */
+        ServiceSet<ModuleHandler> moduleHandlers = new ServiceSet<ModuleHandler>();
+        ModuleHandlerRegistry handlerRegistry = new ModuleHandlerRegistry(moduleHandlers);
+        track(ModuleHandler.class, moduleHandlers);
+        ServiceSet<ModuleAdjuster> moduleAdjusters = new ServiceSet<ModuleAdjuster>();
+        ModuleAdjusterRegistry adjusterRegistry = new ModuleAdjusterRegistry(moduleAdjusters);
+        track(ModuleAdjuster.class, moduleAdjusters);
+        registerService(ModuleHandler.class, new FileStorageHandler(this));
+        registerService(ModuleAdjuster.class, new MailModuleAdjuster(this));
+
+        registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderTracker, accessibleModulesTracker, handlerRegistry, adjusterRegistry));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 
