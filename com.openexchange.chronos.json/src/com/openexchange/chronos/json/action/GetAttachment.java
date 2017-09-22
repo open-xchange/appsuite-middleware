@@ -83,16 +83,16 @@ public class GetAttachment extends ChronosAction {
      */
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        // Gather the parameters
         EventID eventId = parseIdParameter(requestData);
         String managedId = requestData.getParameter("managedId");
         String folderId = requestData.getParameter("folderId");
         int mid = Integer.parseInt(managedId);
-        Attachment attachment = calendarAccess.getAttachment(eventId, folderId, mid);
-        if (attachment == null) {
-            //TODO: Exception handling
-            throw new OXException(1138, "No attachment found");
-        }
 
+        // Get the attachment
+        Attachment attachment = calendarAccess.getAttachment(eventId, folderId, mid);
+
+        // Prepare the response
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         boolean error = true;
         try {
@@ -122,7 +122,7 @@ public class GetAttachment extends ChronosAction {
      * @param expires The TTL in milliseconds
      * @param result The result to set the etag on
      */
-    void setETag(final String eTag, final long expires, final AJAXRequestResult result) {
+    private void setETag(final String eTag, final long expires, final AJAXRequestResult result) {
         result.setExpires(expires);
         result.setHeader("ETag", eTag);
     }

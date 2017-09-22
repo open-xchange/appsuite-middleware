@@ -436,7 +436,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected Attachment execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), folderId, managedId);
+                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, folderId), managedId);
             }
         }.executeQuery();
     }

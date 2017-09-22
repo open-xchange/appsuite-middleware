@@ -49,12 +49,23 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
+import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.List;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link GetAttachmentPerformer}
@@ -74,14 +85,20 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Performs the get attachment operation.
      * 
-     * @param eventId
-     * @param folderId
-     * @param managedId
-     * @return
-     * @throws OXException
+     * @param eventId The {@link Event} identifier
+     * @param folder The {@link UserizedFolder}
+     * @param managedId The managed identifier of the {@link Attachment}
+     * @return The {@link Attachment} metadata and the actual data
+     * @throws OXException if the attachment is not found, or if the user has no permissions,
+     *             or any other error is occurred
      */
-    public Attachment performGetAttachment(String eventId, String folderId, int managedId) throws OXException {
+    public Attachment performGetAttachment(String eventId, UserizedFolder folder, int managedId) throws OXException {
+        // Check the permissions first
+        checkPermissions(eventId, folder);
+
+        // Search for the attachment with the specified managed id
         List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(eventId);
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
@@ -90,6 +107,35 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
                 return attachment;
             }
         }
-        return null;
+        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(managedId, eventId, folder.getID());
+    }
+
+    /**
+     * Check folder permissions
+     * 
+     * @param eventId The {@link Event} identifier
+     * @param folder The {@link UserizedFolder}
+     * @throws OXException if the permission check fails
+     */
+    private void checkPermissions(String eventId, UserizedFolder folder) throws OXException {
+        // Load the event...
+        EventField[] fields = getFields(session, EventField.ORGANIZER);
+        Event event = storage.getEventStorage().loadEvent(eventId, fields);
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
+        }
+        // ...and check for permissions if necessary
+        requireCalendarPermission(folder, READ_FOLDER, readPermission(event.getCreatedBy()), NO_PERMISSIONS, NO_PERMISSIONS);
+    }
+
+    /**
+     * Read object permission
+     * 
+     * @param createdById The identifier of the user that created the event
+     * @return The {@link Permission#READ_ALL_OBJECTS} permission if the event was not created by the specified user,
+     *         or the {@link Permission#READ_OWN_OBJECTS} otherwise
+     */
+    private int readPermission(int createdById) {
+        return session.getUserId() != createdById ? READ_ALL_OBJECTS : READ_OWN_OBJECTS;
     }
 }

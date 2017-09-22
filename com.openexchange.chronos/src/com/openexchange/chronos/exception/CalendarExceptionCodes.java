@@ -72,7 +72,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUOTA_EXCEEDED;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
@@ -313,7 +312,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
-    
+    /**
+     * <li>The requested attachment was not found.</li>
+     * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
+     */
+    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5074),
+
     ;
 
     public static final String PREFIX = "CAL".intern();
