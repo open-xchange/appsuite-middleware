@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
@@ -285,7 +286,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return Attachments.getInstance(dbProvider, true);
     }
 
-    private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException {
+    private Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException, OXException {
         Map<String, List<Attachment>> attachmentsById = new HashMap<String, List<Attachment>>();
         String sql = new StringBuilder()
             .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
@@ -307,6 +308,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                     attachment.setFilename(resultSet.getString("filename"));
                     //                    attachment.setContentId(resultSet.getString("file_id"));
                     attachment.setCreated(new Date(resultSet.getLong("creation_date")));
+                    
+                    // FIXME: Don't load all data for all attachments
+                    FileHolder fileHolder = new FileHolder(loadAttachmentData(attachment.getManagedId()), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
+                    attachment.setData(fileHolder);
+                    
                     put(attachmentsById, asString(resultSet.getInt("attached")), attachment);
                 }
             }

@@ -58,6 +58,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
+import com.openexchange.chronos.impl.performer.GetAttachmentPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
@@ -426,6 +428,17 @@ public class CalendarServiceImpl implements CalendarService {
             }
         }
         return result;
+    }
+
+    @Override
+    public Attachment getAttachment(CalendarSession session, EventID eventID, String folderId, int managedId) throws OXException {
+        return new InternalCalendarStorageOperation<Attachment>(session) {
+
+            @Override
+            protected Attachment execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), folderId, managedId);
+            }
+        }.executeQuery();
     }
 
 }

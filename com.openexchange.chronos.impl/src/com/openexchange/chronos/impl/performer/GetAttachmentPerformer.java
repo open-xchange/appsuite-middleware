@@ -47,54 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.chronos.impl.performer;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.List;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link GetAttachmentPerformer}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public class GetAttachmentPerformer extends AbstractQueryPerformer {
 
-    private final Map<String, AJAXActionService> actions;
-
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updateAlarms", new UpdateAlarmsAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        this.actions = actions.build();
+    /**
+     * Initialises a new {@link GetAttachmentPerformer}.
+     * 
+     * @param session The calendar session
+     * @param storage The underlying calendar storage
+     */
+    public GetAttachmentPerformer(CalendarSession session, CalendarStorage storage) {
+        super(session, storage);
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
+    /**
+     * 
+     * @param eventId
+     * @param folderId
+     * @param managedId
+     * @return
+     * @throws OXException
+     */
+    public Attachment performGetAttachment(String eventId, String folderId, int managedId) throws OXException {
+        List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(eventId);
+        for (Attachment attachment : attachments) {
+            if (attachment.getManagedId() == managedId) {
+                return attachment;
+            }
+        }
+        return null;
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

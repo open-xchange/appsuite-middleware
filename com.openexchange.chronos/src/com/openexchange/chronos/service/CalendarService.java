@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -64,6 +65,7 @@ import com.openexchange.session.Session;
  * {@link CalendarService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @SingletonService
@@ -386,5 +388,18 @@ public interface CalendarService {
      * @throws OXException
      */
     List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
+
+    /**
+     * Retrieves the {@link Attachment} with the specified managed identifier from the {@link Event}
+     * with the specified {@link EventID} residing in the folder with the specified identifier
+     * 
+     * @param session The {@link CalendarSession}
+     * @param eventID The {@link Event} identifier
+     * @param folderId The folder identifier
+     * @param managedId The managed identifier of the {@link Attachment}
+     * @return The {@link Attachment}
+     * @throws OXException if an error is occurred
+     */
+    Attachment getAttachment(CalendarSession session, EventID eventID, String folderId, int managedId) throws OXException;
 
 }
