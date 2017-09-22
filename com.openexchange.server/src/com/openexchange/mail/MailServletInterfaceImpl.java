@@ -117,6 +117,7 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -1796,8 +1797,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                String msg = Strings.asciiLowerCase(e.getMessage());
-                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                if (IOs.isConnectionReset(e)) {
                     /*-
                      * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                      *
@@ -1932,8 +1932,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                String msg = Strings.asciiLowerCase(e.getMessage());
-                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                if (IOs.isConnectionReset(e)) {
                     /*-
                      * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                      *
