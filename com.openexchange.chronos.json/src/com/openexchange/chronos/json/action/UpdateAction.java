@@ -53,27 +53,23 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNO
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
-import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link UpdateAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
@@ -98,18 +94,7 @@ public class UpdateAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
-        Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONObject)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
-        }
-        JSONObject jsonEvent = (JSONObject) data;
-
-        Event event;
-        try {
-            event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields());
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
-        }
+        Event event = getEvent(requestData);
         try {
             CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
@@ -120,5 +105,4 @@ public class UpdateAction extends ChronosAction {
             throw e;
         }
     }
-
 }

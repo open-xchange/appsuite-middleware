@@ -79,11 +79,8 @@ public enum SessionManagementProperty implements Property {
     }
 
     @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (defaultValue.getClass().isAssignableFrom(clazz)) {
-            return clazz.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }
