@@ -249,7 +249,8 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             attachmentBase.finish();
         }
     }
-
+    
+    @Override
     public InputStream loadAttachmentData(int attachmentID) throws OXException {
         String fileID;
         Connection connection = null;
@@ -286,7 +287,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return Attachments.getInstance(dbProvider, true);
     }
 
-    private Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException, OXException {
+    private static Map<String, List<Attachment>> selectAttachments(Connection connection, int contextID, String[] objectIDs) throws SQLException, OXException {
         Map<String, List<Attachment>> attachmentsById = new HashMap<String, List<Attachment>>();
         String sql = new StringBuilder()
             .append("SELECT attached,id,file_mimetype,file_size,filename,file_id,creation_date FROM prg_attachment ")
@@ -308,11 +309,6 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                     attachment.setFilename(resultSet.getString("filename"));
                     //                    attachment.setContentId(resultSet.getString("file_id"));
                     attachment.setCreated(new Date(resultSet.getLong("creation_date")));
-                    
-                    // FIXME: Don't load all data for all attachments
-                    FileHolder fileHolder = new FileHolder(loadAttachmentData(attachment.getManagedId()), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
-                    attachment.setData(fileHolder);
-                    
                     put(attachmentsById, asString(resultSet.getInt("attached")), attachment);
                 }
             }

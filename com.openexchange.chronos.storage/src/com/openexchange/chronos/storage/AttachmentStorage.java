@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attachment;
@@ -128,5 +129,14 @@ public interface AttachmentStorage {
      *            appears for the acting user
      */
     void deleteAttachments(Session session, Map<String, Map<String, List<Attachment>>> attachmentsByEventPerFolderId) throws OXException;
+
+    /**
+     * Loads the actual data of the {@link Attachment} with the specified managed identifier
+     * 
+     * @param managedId The managed identifier of the {@link Attachment}
+     * @return The actual data of the {@link Attachment} as an {@link InputStream}
+     * @throws OXException if an error is occurred
+     */
+    InputStream loadAttachmentData(int managedId) throws OXException;
 
 }

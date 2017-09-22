@@ -89,6 +89,7 @@ public class GetAttachment extends ChronosAction {
         int mid = Integer.parseInt(managedId);
         Attachment attachment = calendarAccess.getAttachment(eventId, folderId, mid);
         if (attachment == null) {
+            //TODO: Exception handling
             throw new OXException(1138, "No attachment found");
         }
 

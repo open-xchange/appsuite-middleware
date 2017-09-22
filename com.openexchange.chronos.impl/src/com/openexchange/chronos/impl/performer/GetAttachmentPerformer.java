@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import java.util.List;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -84,11 +85,11 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
         List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(eventId);
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
+                FileHolder fileHolder = new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
+                attachment.setData(fileHolder);
                 return attachment;
             }
         }
         return null;
-
     }
-
 }
