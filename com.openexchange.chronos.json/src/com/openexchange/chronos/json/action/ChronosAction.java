@@ -169,13 +169,29 @@ public abstract class ChronosAction extends AbstractChronosAction {
         }
         try {
             Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields());
-            for (Attachment attachment : event.getAttachments()) {
-                Attachment att = attachments.get(attachment.getFilename());
-                attachment.setData(att.getData());
-            }
+            processAttachments(attachments, event);
             return event;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Processes any attachments the {@link Event} might have. It simply sets
+     * the 'data' field of each attachment.
+     * 
+     * @param attachments The uploaded attachments (data + metadata)
+     * @param event The event that contains the metadata of the attachments
+     */
+    private void processAttachments(Map<String, Attachment> attachments, Event event) {
+        if (!event.containsAttachments()) {
+            return;
+        }
+        for (Attachment attachment : event.getAttachments()) {
+            Attachment att = attachments.get(attachment.getFilename());
+            if (att != null) {
+                attachment.setData(att.getData());
+            }
         }
     }
 

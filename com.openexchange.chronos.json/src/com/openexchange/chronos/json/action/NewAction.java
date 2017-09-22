@@ -71,6 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * {@link NewAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
