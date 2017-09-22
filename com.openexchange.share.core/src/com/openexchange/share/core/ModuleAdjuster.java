@@ -49,10 +49,10 @@
 
 package com.openexchange.share.core;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.spi.ModuleExtension;
 
 
 /**
@@ -61,14 +61,7 @@ import com.openexchange.share.ShareTarget;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public interface ModuleAdjuster {
-
-    /**
-     * Gets a collection of modules the adjuster operates on.
-     *
-     * @return The modules
-     */
-    Collection<String> getModules();
+public interface ModuleAdjuster extends ModuleExtension {
 
     /**
      * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).

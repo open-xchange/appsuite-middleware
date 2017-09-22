@@ -85,11 +85,21 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
      * @param folder The underlying folder object
      */
     public AdministrativeFolderTargetProxy(FolderObject folder) {
+        this(folder, new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID())));
+    }
+
+    /**
+     * Initializes a new {@link AdministrativeFolderTargetProxy}.
+     *
+     * @param folder The underlying folder object
+     * @param target The share target
+     */
+    public AdministrativeFolderTargetProxy(FolderObject folder, ShareTarget target) {
         super();
         this.folder = folder;
-        affectedUsers = new HashSet<Integer>();
-        target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()), null);
-        targetPath = new ShareTargetPath(folder.getModule(), Integer.toString(folder.getObjectID()), null);
+        this.affectedUsers = new HashSet<Integer>();
+        this.target = target;
+        this.targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
     }
 
     @Override

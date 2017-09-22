@@ -91,15 +91,8 @@ public class DefaultProperty implements Property {
     }
 
     @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (null == def) {
-            return null;
-        }
-        if (false == def.getClass().isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-        }
-
-        return clazz.cast(def);
+    public Object getDefaultValue() {
+        return def;
     }
 
     @Override

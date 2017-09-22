@@ -147,6 +147,11 @@ public class MailFilterBlacklistProperty implements Property {
     public String getFQPropertyName() {
         return fqn;
     }
+    
+    @Override
+    public Object getDefaultValue() {
+        return null;
+    }
 
     @Override
     public <T> T getDefaultValue(Class<T> cls) {

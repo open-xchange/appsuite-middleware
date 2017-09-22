@@ -47,27 +47,68 @@
  *
  */
 
-package com.openexchange.share.impl.osgi;
+package com.openexchange.share.impl.groupware;
 
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
-
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceSet;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.groupware.spi.ModuleExtension;
 
 /**
- * {@link FolderHandlerModuleExtensionTracker}
+ * {@link ModuleExtensionRegistry}
  *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- * @since 7.8.4
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class FolderHandlerModuleExtensionTracker extends RankingAwareNearRegistryServiceTracker<FolderHandlerModuleExtension> {
+public class ModuleExtensionRegistry<T extends ModuleExtension> {
+
+    private final ServiceSet<T> extensions;
 
     /**
-     * Initializes a new {@link FolderHandlerModuleExtensionTracker}.
+     * Initializes a new {@link ModuleExtensionRegistry}.
      *
-     * @param context The OSGi bundle execution context
+     * @param extensions A service set holding the known module extensions
      */
-    FolderHandlerModuleExtensionTracker(BundleContext context) {
-        super(context, FolderHandlerModuleExtension.class, 0);
+    public ModuleExtensionRegistry(ServiceSet<T> extensions) {
+        super();
+        this.extensions = extensions;
     }
+
+    /**
+     * Gets the extension being responsible for a specific module, throwing an exception if there is none registered.
+     *
+     * @param module The module to get the extension for
+     * @return The module extension
+     */
+    public T get(int module) throws OXException {
+        T handler = opt(module);
+        if (null == handler) {
+            String name = ShareModuleMapping.moduleMapping2String(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(null == name ? Integer.toString(module) : name);
+        }
+        return handler;
+    }
+
+    /**
+     * Optionally gets the extension being responsible for a specific module.
+     *
+     * @param module The module to get the extension for
+     * @return The module extension, or <code>null</code> if there is none registered
+     */
+    public T opt(int module) {
+        for (T moduleExtension : extensions) {
+            if (supports(moduleExtension, module)) {
+                return moduleExtension;
+            }
+        }
+        return null;
+    }
+
+    private boolean supports(T moduleExtension, int module) {
+        Collection<String> modules = moduleExtension.getModules();
+        String name = ShareModuleMapping.moduleMapping2String(module);
+        return null != name && null != modules && modules.contains(name);
+    }
+
 }
