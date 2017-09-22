@@ -180,21 +180,6 @@ public abstract class ChronosAction extends AbstractChronosAction {
     }
 
     /**
-     * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
-     * 
-     * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
-     * @return The extracted {@link JSONObject} payload
-     * @throws OXException if the payload is missing, or a parsing error occurs
-     */
-    private JSONObject extractJsonBody(AJAXRequestData requestData) throws OXException {
-        Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONObject)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
-        }
-        return (JSONObject) data;
-    }
-
-    /**
      * Handles the file uploads
      * 
      * @param requestData The {@link AJAXRequestData}
@@ -233,6 +218,21 @@ public abstract class ChronosAction extends AbstractChronosAction {
     }
 
     /**
+     * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
+     * 
+     * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
+     * @return The extracted {@link JSONObject} payload
+     * @throws OXException if the payload is missing, or a parsing error occurs
+     */
+    private JSONObject extractJsonBody(AJAXRequestData requestData) throws OXException {
+        Object data = requestData.getData();
+        if (data == null || !(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        return (JSONObject) data;
+    }
+
+    /**
      * Extracts the {@link JSONObject} payload from the specified {@link UploadEvent}
      * 
      * @param upload the {@link UploadEvent} to extract the {@link JSONObject} payload from
@@ -249,7 +249,6 @@ public abstract class ChronosAction extends AbstractChronosAction {
             JSONObject json = new JSONObject();
             json.reset();
             json.parseJSONString(obj);
-            // TODO: Check for mandatory fields
             return json;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
