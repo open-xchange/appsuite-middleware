@@ -64,6 +64,7 @@ import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.io.IOUtils;
@@ -220,8 +221,7 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
         } catch (final com.sun.mail.util.MessageRemovedIOException e) {
             sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", data.getResponse());
         } catch (final IOException e) {
-            final String lcm = com.openexchange.java.Strings.toLowerCase(e.getMessage());
-            if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
+            if (IOs.isConnectionReset(e)) {
                 /*-
                  * The client side has abruptly aborted the connection.
                  * That can have many causes which are not controllable by us.
