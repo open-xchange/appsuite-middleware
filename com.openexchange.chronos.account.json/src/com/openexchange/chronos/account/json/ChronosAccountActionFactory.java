@@ -72,9 +72,9 @@ import com.openexchange.server.ServiceLookup;
 @OAuthModule
 public class ChronosAccountActionFactory implements AJAXActionServiceFactory {
 
-    public static final String OAUTH_READ_SCOPE = "read_calendar_account";
+    public static final String OAUTH_READ_SCOPE = "read_calendar";
 
-    public static final String OAUTH_WRITE_SCOPE = "write_calendar_account";
+    public static final String OAUTH_WRITE_SCOPE = "write_calendar";
 
     private final Map<String, AJAXActionService> actions;
 

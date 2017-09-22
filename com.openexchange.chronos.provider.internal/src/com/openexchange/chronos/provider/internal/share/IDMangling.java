@@ -47,42 +47,60 @@
  *
  */
 
-package com.openexchange.chronos.provider.internal;
+package com.openexchange.chronos.provider.internal.share;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
+import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
+import java.util.List;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.id.IDMangler;
 
 /**
- * {@link Constants}
+ * {@link IDMangling}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public enum Constants {
-    ;
+public class IDMangling {
 
-    /** The static identifier of the internal calendar provider */
-    static final String PROVIDER_ID = "chronos";
+    /**
+     * Initializes a new {@link IDMangling}.
+     */
+    private IDMangling() {
+        super();
+    }
 
-    /** The static identifier of the single default account in the internal calendar provider */
-    static final int ACCOUNT_ID = 0;
+    public static String optRelativeFolderId(String folderId) {
+        try {
+            return getRelativeFolderId(folderId);
+        } catch (OXException e) {
+            return null;
+        }
+    }
 
-    /** The static qualified identifier of the single default account in the internal calendar provider */
-    public static final String QUALIFIED_ACCOUNT_ID = "cal://0";
+    public static String getUniqueFolderId(String folderId) {
+        if (folderId.startsWith(QUALIFIED_ACCOUNT_ID)) {
+            return folderId;
+        }
+        return QUALIFIED_ACCOUNT_ID + '/' + folderId;
+    }
 
-    /** The identifier of the folder tree the calendar provider is using */
-    public static final String TREE_ID = "1";
-
-    /** The used folder storage content type */
-    public static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
-
-    /** The identifier of the "private" root folder */
-    static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+    public static String getRelativeFolderId(String folderId) throws OXException {
+        if (null == folderId) {
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(folderId, "");
+        }
+        try {
+            return String.valueOf(Integer.parseInt(folderId));
+        } catch (NumberFormatException e) {
+            if (false == folderId.startsWith(QUALIFIED_ACCOUNT_ID)) {
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
+            }
+            List<String> components = IDMangler.unmangle(folderId);
+            if (3 != components.size()) {
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(folderId, "");
+            }
+            return getRelativeFolderId(components.get(2));
+        }
+    }
 
 }
