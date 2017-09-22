@@ -142,11 +142,14 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.ListInfo;
 
 /**
@@ -2069,24 +2072,32 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
                 if (performSubscription) {
                     /*
-                     * Check read permission
+                     * Try to subscribe & handle possible error
                      */
-                    if (imapConfig.isSupportsACLs()) {
-                        if ((updateMe.getType() & Folder.HOLDS_MESSAGES) > 0) {
-                            try {
-                                if (!imapConfig.getACLExtension().canLookUp(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
-                                    throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullName);
+                    try {
+                        boolean subscribe = toUpdate.isSubscribed();
+                        setSubscribed(subscribe, updateMe, true);
+                        changed = true;                        
+                    } catch (final MessagingException me) {
+                        Exception cause = me.getNextException();
+                        if (cause instanceof CommandFailedException) {
+                            // Encountered NO response for subscribe attempt
+                            if (imapConfig.isSupportsACLs()) {
+                                if ((updateMe.getType() & Folder.HOLDS_MESSAGES) > 0) {
+                                    try {
+                                        if (!imapConfig.getACLExtension().canLookUp(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
+                                            throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, fullName);
+                                        }
+                                    } catch (final MessagingException e) {
+                                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
+                                    }
+                                } else {
+                                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, fullName);
                                 }
-                            } catch (final MessagingException e) {
-                                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
                             }
-                        } else {
-                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, fullName);
                         }
+                        throw handleMessagingException(fullName, me);
                     }
-                    boolean subscribe = toUpdate.isSubscribed();
-                    setSubscribed(subscribe, updateMe);
-                    changed = true;
                 }
                 return updateMe.getFullName();
             }
@@ -2103,16 +2114,32 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private void setSubscribed(boolean subscribe, IMAPFolder imapFolder) throws MessagingException {
-        imapFolder.setSubscribed(subscribe);
-        IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
+    private void setSubscribed(boolean subscribe, IMAPFolder imapFolder, boolean errorOnFailedCommand) throws MessagingException {
+        if (errorOnFailedCommand) {
+            // Quit with an exception in case a "NO" response happens
+            final String fullName = imapFolder.getFullName();
+            imapFolder.doCommand(new ProtocolCommand() {
 
+                @Override
+                public Object doCommand(IMAPProtocol p) throws ProtocolException {
+                    if (subscribe)
+                        p.subscribe(fullName);
+                    else
+                        p.unsubscribe(fullName);
+                    return null;
+                }
+            });
+        } else {
+            // JavaMail routine performs 'IMAPFolder.doCommandIgnoreFailure()', which discards a possible CommandFailedException
+            imapFolder.setSubscribed(subscribe);
+        }
+        //IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
         if (subscribe) {
             // Ensure parent gets subscribed, too
             try {
                 IMAPFolder parent = (IMAPFolder) imapFolder.getParent();
                 if ((null != parent) && (parent.getFullName().length() > 0)) {
-                    setSubscribed(subscribe, parent);
+                    setSubscribed(subscribe, parent, false);
                 }
             } catch (Exception e) {
                 // Ignore

@@ -49,14 +49,11 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleSupport;
-
+import com.openexchange.share.core.ModuleAdjuster;
 
 /**
  * {@link ModuleAdjusterRegistry}
@@ -66,43 +63,52 @@ import com.openexchange.share.groupware.ModuleSupport;
  */
 public class ModuleAdjusterRegistry {
 
-    private final Map<Integer, ModuleAdjuster> adjusters = new HashMap<Integer, ModuleAdjuster>();
-    private final ServiceLookup services;
+    private final ServiceSet<ModuleAdjuster> moduleAdjusters;
 
     /**
      * Initializes a new {@link ModuleAdjusterRegistry}.
      *
-     * @param services A service lookup reference
+     * @param moduleAdjusters The module adjuster registrations
      */
-    public ModuleAdjusterRegistry(ServiceLookup services) {
+    public ModuleAdjusterRegistry(ServiceSet<ModuleAdjuster> moduleAdjusters) {
         super();
-        this.services = services;
-        adjusters.put(Module.MAIL.getFolderConstant(), new MailModuleAdjuster(services));
+        this.moduleAdjusters = moduleAdjusters;
     }
 
     /**
      * Gets the adjuster being responsible for a specific module, throwing an exception if there is none registered.
      *
      * @param module The module to get the adjuster for
-     * @return The adjuster
+     * @return The handler
      */
     public ModuleAdjuster get(int module) throws OXException {
-        ModuleAdjuster adjuster = opt(module);
-        if (adjuster == null) {
-            String m = services.getService(ModuleSupport.class).getShareModule(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
+        ModuleAdjuster handler = opt(module);
+        if (null == handler) {
+            String name = ShareModuleMapping.moduleMapping2String(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(null == name ? Integer.toString(module) : name);
         }
-        return adjuster;
+        return handler;
     }
 
     /**
      * Optionally gets the adjuster being responsible for a specific module.
      *
      * @param module The module to get the adjuster for
-     * @return The adjuster, or <code>null</code> if there is none registered
+     * @return The handler, or <code>null</code> if there is none registered
      */
     public ModuleAdjuster opt(int module) {
-        return adjusters.get(module);
+        for (ModuleAdjuster adjuster : moduleAdjusters) {
+            if (supports(adjuster, module)) {
+                return adjuster;
+            }
+        }
+        return null;
+    }
+
+    private static boolean supports(ModuleAdjuster adjuster, int module) {
+        Collection<String> modules = adjuster.getModules();
+        String name = ShareModuleMapping.moduleMapping2String(module);
+        return null != name && null != modules && modules.contains(name);
     }
 
 }

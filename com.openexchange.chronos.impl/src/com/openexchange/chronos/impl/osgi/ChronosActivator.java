@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -58,6 +59,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
+import com.openexchange.chronos.impl.osgi.event.EventAdminServiceListerner;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -130,7 +132,6 @@ public class ChronosActivator extends HousekeepingActivator {
              */
             ServiceSet<CalendarHandler> calendarHandlers = new ServiceSet<CalendarHandler>();
             track(CalendarHandler.class, calendarHandlers);
-            openTrackers();
             /*
              * register services
              */
@@ -139,6 +140,11 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
+            /*
+             * register calendar handler to propagate OSGi events
+             */
+            track(EventAdmin.class, new EventAdminServiceListerner(context));
+            openTrackers();            
             /*
              * declare calendar-printing capability & appropriate checker for it
              * (to avoid explicit declaration of capability in config file)

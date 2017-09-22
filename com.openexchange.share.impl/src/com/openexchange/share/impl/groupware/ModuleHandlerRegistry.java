@@ -49,13 +49,11 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.core.ModuleHandler;
 
 
 /**
@@ -66,31 +64,29 @@ import com.openexchange.share.groupware.ModuleSupport;
  */
 public class ModuleHandlerRegistry {
 
-    private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
-    private final ServiceLookup services;
+    private final ServiceSet<ModuleHandler> moduleHandlers;
 
     /**
      * Initializes a new {@link ModuleHandlerRegistry}.
      *
-     * @param services A service lookup reference
+     * @param moduleHandlers The module handler registrations
      */
-    public ModuleHandlerRegistry(ServiceLookup services) {
+    public ModuleHandlerRegistry(ServiceSet<ModuleHandler> moduleHandlers) {
         super();
-        this.services = services;
-        handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
+        this.moduleHandlers = moduleHandlers;
     }
 
     /**
-     * Gets the handler being responsible for a specific module, throwing an excpetion if there is none registered.
+     * Gets the handler being responsible for a specific module, throwing an exception if there is none registered.
      *
      * @param module The module to get the handler for
      * @return The handler
      */
     public ModuleHandler get(int module) throws OXException {
         ModuleHandler handler = opt(module);
-        if (handler == null) {
-            String m = services.getService(ModuleSupport.class).getShareModule(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
+        if (null == handler) {
+            String name = ShareModuleMapping.moduleMapping2String(module);
+            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(null == name ? Integer.toString(module) : name);
         }
         return handler;
     }
@@ -102,7 +98,18 @@ public class ModuleHandlerRegistry {
      * @return The handler, or <code>null</code> if there is none registered
      */
     public ModuleHandler opt(int module) {
-        return handlers.get(module);
+        for (ModuleHandler handler : moduleHandlers) {
+            if (supports(handler, module)) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    private static boolean supports(ModuleHandler handler, int module) {
+        Collection<String> modules = handler.getModules();
+        String name = ShareModuleMapping.moduleMapping2String(module);
+        return null != name && null != modules && modules.contains(name);
     }
 
 }

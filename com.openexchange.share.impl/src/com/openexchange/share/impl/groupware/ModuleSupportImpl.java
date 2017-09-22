@@ -75,6 +75,10 @@ import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.ModuleAdjuster;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -106,11 +110,11 @@ public class ModuleSupportImpl implements ModuleSupport {
     /**
      * Initializes a new {@link ModuleSupportImpl}.
      */
-    public ModuleSupportImpl(ServiceLookup services, FolderHandlerModuleExtensionTracker folderExtensions, AccessibleModulesExtensionTracker accessibleModulesExtensions) {
+    public ModuleSupportImpl(ServiceLookup services, FolderHandlerModuleExtensionTracker folderExtensions, AccessibleModulesExtensionTracker accessibleModulesExtensions, ModuleHandlerRegistry handlerRegistry, ModuleAdjusterRegistry adjusterRegistry) {
         super();
         this.services = services;
-        handlers = new ModuleHandlerRegistry(services);
-        adjusters = new ModuleAdjusterRegistry(services);
+        this.handlers = handlerRegistry;
+        this.adjusters = adjusterRegistry;
         this.folderExtensions = folderExtensions;
         this.accessibleModulesExtensions = accessibleModulesExtensions;
     }

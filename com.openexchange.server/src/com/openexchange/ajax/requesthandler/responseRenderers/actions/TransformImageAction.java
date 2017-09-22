@@ -185,7 +185,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
         if (null == ret) {
             // closing of internal resources will be handled by returned FileHolder
-            @SuppressWarnings("resource") final ThresholdFileHolder tmpThresholdFileHolder = new ThresholdFileHolder(fileHolder);
+            final ThresholdFileHolder tmpThresholdFileHolder = new ThresholdFileHolder(fileHolder);
 
             fileHolder.close();
             ret = tmpThresholdFileHolder;
@@ -242,11 +242,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 }
 
                 // if valid. closing of inputStm will be handled by FileHolder
-                @SuppressWarnings("resource") final InputStream inputStm = cachedResource.getInputStream();
+                final InputStream inputStm = cachedResource.getInputStream();
 
                 if (null == inputStm) {
                     // closing of internal resouces is handled by FileHolder, no closing needed for ByteArrayFileHolder
-                    @SuppressWarnings("resource") final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
+                    final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedResource.getBytes());
 
                     responseFileHolder.setContentType(cachedMimeType);
                     responseFileHolder.setName(cachedResource.getFileName());

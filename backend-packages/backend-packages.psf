@@ -25,7 +25,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-ucs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authorization-standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-blackwhitelist"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-calendar-printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cassandra"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-configjump-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-contact-storage-ldap"/>
@@ -49,12 +48,13 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-googledrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-onedrive"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-76x"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-780-782"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-783"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-784"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imageconverter-api"/>

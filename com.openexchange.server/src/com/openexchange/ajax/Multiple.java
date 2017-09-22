@@ -476,7 +476,7 @@ public class Multiple extends SessionServlet {
                     jsonWriter.value(requestResult.getResultObject());
 
                     if (null != requestResult.getException()) {
-                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
+                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
                         ResponseWriter.writeException(requestResult.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
                     }
 
@@ -486,13 +486,13 @@ public class Multiple extends SessionServlet {
                 } catch (OXException e) {
                     exc = e;
                     logError(e.getMessage(), session, e);
-                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request));
                     return state;
                 } catch (RuntimeException rte) {
                     exc = rte;
                     logError(rte.getMessage(), session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
-                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request));
                     return state;
                 } finally {
                 	jsonWriter.endObject();
@@ -500,7 +500,7 @@ public class Multiple extends SessionServlet {
                 }
                 return state;
             }
-            boolean includeStackTraceOnError = jsonObj.optBoolean("includeStackTraceOnError", false);
+            boolean includeStackTraceOnError = jsonObj.optBoolean(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, false);
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
                 try {

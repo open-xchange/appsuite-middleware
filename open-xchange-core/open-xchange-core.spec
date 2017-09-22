@@ -1567,6 +1567,10 @@ EOF
   fi
 fi
 
+# SoftwareChange_Request-4149
+ox_set_property marital_status 'Marital status' /opt/open-xchange/importCSV/open-xchange.properties
+sed -i 's/employee_type=Number of employee/number_of_employees=Employee ID/g' /opt/open-xchange/importCSV/open-xchange.properties
+
 # SoftwareChange_Request-4204
 pfile=/opt/open-xchange/etc/whitelist.properties
 for property in html.style.page-break-{after,before,inside}

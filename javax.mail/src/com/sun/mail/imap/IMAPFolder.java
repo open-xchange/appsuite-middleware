@@ -397,7 +397,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	super(store);
 	if (fullName == null)
 	    throw new NullPointerException("Folder name is null");
-	this.fullName = fullName;
+	String fn = fullName;
 	this.separator = separator;
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession());
@@ -418,12 +418,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */
 	this.isNamespace = false;
 	if (separator != UNKNOWN_SEPARATOR && separator != '\0') {
-	    int i = this.fullName.indexOf(separator);
-	    if (i > 0 && i == this.fullName.length() - 1) {
-		this.fullName = this.fullName.substring(0, i);
+	    int i = fn.indexOf(separator);
+	    if (i > 0 && i == fn.length() - 1) {
+		fn = fn.substring(0, i);
 		this.isNamespace = true;
 	    }
 	}
+	this.fullName = fn;
 
 	// if we were given a value, override default chosen above
 	if (isNamespace != null)
@@ -549,7 +550,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */
 	if (name == null) {
 	    try {
-		name = 	fullName.substring(
+		String fullName = this.fullName;
+        name = 	fullName.substring(
 			    fullName.lastIndexOf(getSeparator()) + 1
 			);
 	    } catch (MessagingException mex) { }
@@ -571,7 +573,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public synchronized Folder getParent() throws MessagingException {
 	char c = getSeparator();
 	int index;
-	if ((index = fullName.lastIndexOf(c)) != -1)
+	String fullName = this.fullName;
+    if ((index = fullName.lastIndexOf(c)) != -1)
 	    return ((IMAPStore)store).newIMAPFolder(
 			    fullName.substring(0, index), c);
 	else
@@ -600,20 +603,22 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	if (li != null) {
 	    int i = findName(li, lname);
-	    fullName = li[i].name;
-	    separator = li[i].separator;
+	    ListInfo listInfo = li[i];
+        String fullName = listInfo.name;
+	    separator = listInfo.separator;
 	    int len = fullName.length();
 	    if (separator != '\0' && len > 0 &&
 		    fullName.charAt(len - 1) == separator) {
 		fullName = fullName.substring(0, len - 1);
 	    }
+	    this.fullName = fullName;
 	    type = 0;
-	    if (li[i].hasInferiors)
+	    if (listInfo.hasInferiors)
 		type |= HOLDS_FOLDERS;
-	    if (li[i].canOpen)
+	    if (listInfo.canOpen)
 		type |= HOLDS_MESSAGES;
 	    exists = true;
-	    attributes = li[i].attrs;
+	    attributes = listInfo.attrs;
 	} else {
 	    exists = opened;
 	    attributes = null;
@@ -632,14 +637,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// if the name contains a wildcard, there might be more than one
 	for (i = 0; i < li.length; i++) {
 	    if (li[i].name.equals(lname))
-		break;
+	        return i;
 	}
-	if (i >= li.length) {	// nothing matched exactly
-	    // XXX - possibly should fail?  But what if server
-	    // is case insensitive and returns the preferred
-	    // case of the name here?
-	    i = 0;		// use first one
-	}
+	// nothing matched exactly
+	// XXX - possibly should fail?  But what if server
+	// is case insensitive and returns the preferred
+	// case of the name here?
+	i = 0;		// use first one
 	return i;
     }
 

@@ -69,6 +69,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
 

@@ -80,6 +80,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlag
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedActions;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AddressTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AllOfTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AnyOfTestCommandParser;
@@ -93,9 +94,8 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagComma
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
-import com.openexchange.mail.filter.json.v2.mapper.parser.action.simplified.SimplifiedActions;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.sessiond.SessiondService;
 

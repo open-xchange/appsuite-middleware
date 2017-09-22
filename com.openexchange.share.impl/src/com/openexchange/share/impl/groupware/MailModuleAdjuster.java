@@ -49,7 +49,10 @@
 
 package com.openexchange.share.impl.groupware;
 
+import java.util.Collection;
+import java.util.Collections;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -60,6 +63,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.groupware.ModuleSupport;
 
 
@@ -84,7 +88,15 @@ public class MailModuleAdjuster implements ModuleAdjuster {
     }
 
     @Override
+    public Collection<String> getModules() {
+        return Collections.singleton(Module.MAIL.getName());
+    }
+
+    @Override
     public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+        if (null != session && session.getUserId() == targetUserId) {
+            return target; // same account
+        }
         if (!target.isFolder()) {
             int module = target.getModule();
             String m = services.getService(ModuleSupport.class).getShareModule(module);
@@ -126,6 +138,9 @@ public class MailModuleAdjuster implements ModuleAdjuster {
 
     @Override
     public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+        if (requestUserId == targetUserId) {
+            return target; // same account
+        }
         if (!target.isFolder()) {
             int module = target.getModule();
             String m = services.getService(ModuleSupport.class).getShareModule(module);

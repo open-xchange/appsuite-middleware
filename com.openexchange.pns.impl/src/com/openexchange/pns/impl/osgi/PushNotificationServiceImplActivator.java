@@ -73,7 +73,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.impl.ListenerStartingSubscriptionListener;
+import com.openexchange.pns.impl.ListenerManagingSubscriptionListener;
 import com.openexchange.pns.impl.PushNotificationServiceImpl;
 import com.openexchange.pns.impl.SubscriptionAwarePushClientChecker;
 import com.openexchange.pns.impl.event.PushEventHandler;
@@ -207,7 +207,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
         // Register other listener, too
         try {
-            DependentServiceRegisterer<PushSubscriptionListener> registerer = new DependentServiceRegisterer<>(context, PushSubscriptionListener.class, ListenerStartingSubscriptionListener.class, null, PushListenerService.class, SessiondService.class);
+            DependentServiceRegisterer<PushSubscriptionListener> registerer = new DependentServiceRegisterer<>(context, PushSubscriptionListener.class, ListenerManagingSubscriptionListener.class, null, PushSubscriptionRegistry.class, PushListenerService.class, SessiondService.class);
             tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
             this.dependentTracker = tracker;
             tracker.open();
