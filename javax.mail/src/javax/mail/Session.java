@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -76,18 +76,24 @@ import com.sun.mail.util.MailLogger;
  * Each <code>javamail.</code><i>X</i> resource file is searched for using
  * three methods in the following order:
  * <ol>
- *  <li> <code>java.home/lib/javamail.</code><i>X</i> </li>
+ *  <li> <code><i>java.home</i>/<i>conf</i>/javamail.</code><i>X</i> </li>
  *  <li> <code>META-INF/javamail.</code><i>X</i> </li>
  *  <li> <code>META-INF/javamail.default.</code><i>X</i> </li>
  * </ol>
  * <p>
+ * (Where <i>java.home</i> is the value of the "java.home" System property
+ * and <i>conf</i> is the directory named "conf" if it exists,
+ * otherwise the directory named "lib"; the "conf" directory was
+ * introduced in JDK 1.9.)
+ * <p>
  * The first method allows the user to include their own version of the
- * resource file by placing it in the <code>lib</code> directory where the
+ * resource file by placing it in the <i>conf</i> directory where the
  * <code>java.home</code> property points.  The second method allows an
  * application that uses the JavaMail APIs to include their own resource
  * files in their application's or jar file's <code>META-INF</code>
  * directory.  The <code>javamail.default.</code><i>X</i> default files
- * are part of the JavaMail <code>mail.jar</code> file. <p>
+ * are part of the JavaMail <code>mail.jar</code> file and should not be
+ * supplied by users. <p>
  *
  * File location depends upon how the <code>ClassLoader</code> method
  * <code>getResource</code> is implemented.  Usually, the
@@ -185,15 +191,15 @@ public final class Session {
     private final Properties props;
     private final Authenticator authenticator;
     private final Hashtable<URLName, PasswordAuthentication> authTable
-	    = new Hashtable<URLName, PasswordAuthentication>();
+	    = new Hashtable<>();
     private boolean debug = false;
     private PrintStream out;			// debug output stream
     private MailLogger logger;
-    private final Vector<Provider> providers = new Vector<Provider>();
+    private final Vector<Provider> providers = new Vector<>();
     private final Hashtable<String, Provider> providersByProtocol
-	    = new Hashtable<String, Provider>();
+	    = new Hashtable<>();
     private final Hashtable<String, Provider> providersByClassName
-	    = new Hashtable<String, Provider>();
+	    = new Hashtable<>();
     private final Properties addressMap = new Properties();
 						// maps type to protocol
     // the queue of events to be delivered, if mail.event.scope===session
@@ -201,6 +207,31 @@ public final class Session {
 
     // The default session.
     private static Session defaultSession = null;
+
+    private static final String confDir;
+
+    static {
+	String dir = null;
+	try {
+	    dir = AccessController.doPrivileged(
+		new PrivilegedAction<String>() {
+		    @Override
+		    public String run() {
+			String home = System.getProperty("java.home");
+			String newdir = home + File.separator + "conf";
+			File conf = new File(newdir);
+			if (conf.exists())
+			    return newdir + File.separator;
+			else
+			    return home + File.separator +
+				    "lib" + File.separator;
+		    }
+		});
+	} catch (Exception ex) {
+	    // ignore any exceptions
+	}
+	confDir = dir;
+    }
 
     // Constructor is not public
     private Session(Properties props, Authenticator authenticator) {
@@ -914,26 +945,24 @@ public final class Session {
      */
     private void loadProviders(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
+	    @Override
 	    public void load(InputStream is) throws IOException {
 		loadProvidersFromStream(is);
 	    }
 	};
 
-	// load system-wide javamail.providers from the <java.home>/lib dir
+	// load system-wide javamail.providers from the
+	// <java.home>/{conf,lib} directory
 	try {
-	    String res = System.getProperty("java.home") + 
-				File.separator + "lib" + 
-				File.separator + "javamail.providers";
-	    loadFile(res, loader);
-	} catch (SecurityException sex) {
-	    logger.log(Level.CONFIG, "can't get java.home", sex);
-	}
+	    if (confDir != null)
+		loadFile(confDir + "javamail.providers", loader);
+	} catch (SecurityException ex) {}
 
 	// load the META-INF/javamail.providers file supplied by an application
 	loadAllResources("META-INF/javamail.providers", cl, loader);
 
 	// load default META-INF/javamail.default.providers from mail.jar file
-	loadResource("/META-INF/javamail.default.providers", cl, loader);
+	loadResource("/META-INF/javamail.default.providers", cl, loader, true);
 
 	if (providers.size() == 0) {
 	    logger.config("failed to load any providers, using defaults");
@@ -979,6 +1008,8 @@ public final class Session {
 
 		if (currLine.startsWith("#"))
 		    continue;
+		if (currLine.trim().length() == 0)
+		    continue;	// skip blank line
 		Provider.Type type = null;
 		String protocol = null, className = null;
 		String vendor = null, version = null;
@@ -1042,26 +1073,24 @@ public final class Session {
     // map is loaded last since its entries will override the previous ones
     private void loadAddressMap(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
+	    @Override
 	    public void load(InputStream is) throws IOException {
 		addressMap.load(is);
 	    }
 	};
 
 	// load default META-INF/javamail.default.address.map from mail.jar
-	loadResource("/META-INF/javamail.default.address.map", cl, loader);
+	loadResource("/META-INF/javamail.default.address.map", cl, loader, true);
 
 	// load the META-INF/javamail.address.map file supplied by an app
 	loadAllResources("META-INF/javamail.address.map", cl, loader);
 
-	// load system-wide javamail.address.map from the <java.home>/lib dir
+	// load system-wide javamail.address.map from the
+	// <java.home>/{conf,lib} directory
 	try {
-	    String res = System.getProperty("java.home") + 
-				File.separator + "lib" + 
-				File.separator + "javamail.address.map";
-	    loadFile(res, loader);
-	} catch (SecurityException sex) {
-	    logger.log(Level.CONFIG, "can't get java.home", sex);
-	}
+	    if (confDir != null)
+		loadFile(confDir + "javamail.address.map", loader);
+	} catch (SecurityException ex) {}
 
 	if (addressMap.isEmpty()) {
 	    logger.config("failed to load address map, using defaults");
@@ -1116,7 +1145,8 @@ public final class Session {
     /**
      * Load from the named resource.
      */
-    private void loadResource(String name, Class<?> cl, StreamLoader loader) {
+    private void loadResource(String name, Class<?> cl, StreamLoader loader,
+				boolean expected) {
 	InputStream clis = null;
 	try {
 	    clis = getResourceAsStream(cl, name);
@@ -1125,9 +1155,9 @@ public final class Session {
 		logger.log(Level.CONFIG, "successfully loaded resource: {0}",
 					    name);
 	    } else {
-		/*
-		logger.log(Level.CONFIG, "not loading resource: {0}", name);
-		*/
+		if (expected)
+		    logger.log(Level.WARNING,
+				    "expected resource not found: {0}", name);
 	    }
 	} catch (IOException e) {
 	    logger.log(Level.CONFIG, "Exception loading resource", e);
@@ -1144,7 +1174,8 @@ public final class Session {
     /**
      * Load all of the named resource.
      */
-    private void loadAllResources(String name, Class<?> cl, StreamLoader loader) {
+    private void loadAllResources(String name, Class<?> cl,
+	    StreamLoader loader) {
 	boolean anyLoaded = false;
 	try {
 	    URL[] urls;
@@ -1198,7 +1229,7 @@ public final class Session {
 	    /*
 	    logger.config("!anyLoaded");
 	    */
-	    loadResource("/" + name, cl, loader);
+	    loadResource("/" + name, cl, loader, false);
 	}
     }
 
@@ -1209,6 +1240,7 @@ public final class Session {
     static ClassLoader getContextClassLoader() {
 	return AccessController.doPrivileged(
 		new PrivilegedAction<ClassLoader>() {
+		    @Override
 		    public ClassLoader run() {
 			ClassLoader cl = null;
 			try {
@@ -1226,6 +1258,7 @@ public final class Session {
 	try {
 	    return AccessController.doPrivileged(
 		    new PrivilegedExceptionAction<InputStream>() {
+			@Override
 			public InputStream run() throws IOException {
 			    try {
 				return c.getResourceAsStream(name);
@@ -1246,6 +1279,7 @@ public final class Session {
 
     private static URL[] getResources(final ClassLoader cl, final String name) {
 	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    @Override
 	    public URL[] run() {
 		URL[] ret = null;
 		try {
@@ -1263,6 +1297,7 @@ public final class Session {
 
     private static URL[] getSystemResources(final String name) {
 	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    @Override
 	    public URL[] run() {
 		URL[] ret = null;
 		try {
@@ -1283,6 +1318,7 @@ public final class Session {
 	try {
 	    return AccessController.doPrivileged(
 		    new PrivilegedExceptionAction<InputStream>() {
+			@Override
 			public InputStream run() throws IOException {
 			    return url.openStream();
 			}

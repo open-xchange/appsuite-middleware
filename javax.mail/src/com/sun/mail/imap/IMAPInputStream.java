@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -164,7 +164,14 @@ public class IMAPInputStream extends InputStream {
 
 	    if (b == null || ((ba = b.getByteArray()) == null)) {
 		forceCheckExpunged();
-		throw new IOException("No content");
+		boolean errorONoContent = false;
+		if (errorONoContent)
+		    throw new IOException("No content");
+	    // nope, the server doesn't think it's expunged.
+		// can't tell the difference between the server returning NIL
+		// and some other error that caused null to be returned above,
+		// so we'll just assume it was empty content.
+		ba = new ByteArray(0);
 	    }
 	}
 
@@ -187,6 +194,7 @@ public class IMAPInputStream extends InputStream {
      * Reads the next byte of data from this buffered input stream.
      * If no byte is available, the value <code>-1</code> is returned.
      */
+    @Override
     public synchronized int read() throws IOException {
 	if (bufpos >= bufcount) {
 	    fill();
@@ -210,6 +218,7 @@ public class IMAPInputStream extends InputStream {
      * the return value to insure that they have obtained the
      * requisite number of bytes.
      */
+    @Override
     public synchronized int read(byte b[], int off, int len)
 		throws IOException {
 
@@ -240,6 +249,7 @@ public class IMAPInputStream extends InputStream {
      * the return value to insure that they have obtained the
      * requisite number of bytes.
      */
+    @Override
     public int read(byte b[]) throws IOException {
 	return read(b, 0, b.length);
     }
@@ -248,6 +258,7 @@ public class IMAPInputStream extends InputStream {
      * Returns the number of bytes that can be read from this input
      * stream without blocking.
      */
+    @Override
     public synchronized int available() throws IOException {
 	return (bufcount - bufpos);
     }
