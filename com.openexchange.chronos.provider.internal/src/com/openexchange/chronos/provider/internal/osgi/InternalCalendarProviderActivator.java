@@ -53,11 +53,16 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
 import com.openexchange.chronos.provider.internal.Services;
+import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
+import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.share.core.ModuleAdjuster;
+import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.user.UserService;
 
 /**
  * {@link InternalCalendarProviderActivator}
@@ -76,7 +81,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class };
+        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class };
     }
 
     @Override
@@ -87,6 +92,8 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
             Services.setServiceLookup(this);
             registerService(CalendarProvider.class, new InternalCalendarProvider());
+            registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
+            registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));
         } catch (Exception e) {
             getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
