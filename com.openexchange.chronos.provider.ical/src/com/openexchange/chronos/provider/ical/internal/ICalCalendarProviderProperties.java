@@ -161,6 +161,11 @@ public enum ICalCalendarProviderProperties implements Property {
         throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
     }
 
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
     private static volatile HostList configuredBlacklistedHosts;
 
     private static HostList blacklistedHosts() {

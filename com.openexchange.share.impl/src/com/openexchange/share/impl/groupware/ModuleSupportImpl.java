@@ -85,7 +85,6 @@ import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.groupware.spi.AccessibleModulesExtension;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.osgi.AccessibleModulesExtensionTracker;
-import com.openexchange.share.impl.osgi.FolderHandlerModuleExtensionTracker;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -102,15 +101,15 @@ import com.openexchange.userconf.UserPermissionService;
 public class ModuleSupportImpl implements ModuleSupport {
 
     private final ServiceLookup services;
-    private final ModuleHandlerRegistry handlers;
-    private final ModuleAdjusterRegistry adjusters;
-    private final ServiceListing<FolderHandlerModuleExtension> folderExtensions;
+    private final ModuleExtensionRegistry<ModuleHandler> handlers;
+    private final ModuleExtensionRegistry<ModuleAdjuster> adjusters;
+    private final ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
     private final ServiceListing<AccessibleModulesExtension> accessibleModulesExtensions;
 
     /**
      * Initializes a new {@link ModuleSupportImpl}.
      */
-    public ModuleSupportImpl(ServiceLookup services, FolderHandlerModuleExtensionTracker folderExtensions, AccessibleModulesExtensionTracker accessibleModulesExtensions, ModuleHandlerRegistry handlerRegistry, ModuleAdjusterRegistry adjusterRegistry) {
+    public ModuleSupportImpl(ServiceLookup services, ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions, AccessibleModulesExtensionTracker accessibleModulesExtensions, ModuleExtensionRegistry<ModuleHandler> handlerRegistry, ModuleExtensionRegistry<ModuleAdjuster> adjusterRegistry) {
         super();
         this.services = services;
         this.handlers = handlerRegistry;
@@ -159,10 +158,9 @@ public class ModuleSupportImpl implements ModuleSupport {
             return true;
         }
 
-        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
-            if (folderHandler.isApplicableFor(folder)) {
-                return folderHandler.isVisible(folder, item, contextID, guestID);
-            }
+        FolderHandlerModuleExtension folderHandler = folderExtensions.opt(module);
+        if (null != folderHandler && folderHandler.isApplicableFor(contextID, folder)) {
+            return folderHandler.isVisible(folder, item, contextID, guestID);
         }
 
         try {
@@ -213,10 +211,9 @@ public class ModuleSupportImpl implements ModuleSupport {
             return true;
         }
 
-        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
-            if (folderHandler.isApplicableFor(folder)) {
-                return folderHandler.exists(folder, item, contextID, guestID);
-            }
+        FolderHandlerModuleExtension folderHandler = folderExtensions.opt(module);
+        if (null != folderHandler && folderHandler.isApplicableFor(contextID, folder)) {
+            return folderHandler.exists(folder, item, contextID, guestID);
         }
 
         try {
@@ -237,12 +234,11 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException {
-        for (FolderHandlerModuleExtension folderHandler : folderExtensions.getServiceList()) {
-            if (folderHandler.isApplicableFor(targetPath.getFolder())) {
-                TargetProxy resolvedTarget = folderHandler.resolveTarget(targetPath, contextId, guestId);
-                if (null != resolvedTarget) {
-                    return resolvedTarget;
-                }
+        FolderHandlerModuleExtension folderHandler = folderExtensions.opt(targetPath.getModule());
+        if (null != folderHandler && folderHandler.isApplicableFor(contextId, targetPath.getFolder())) {
+            TargetProxy resolvedTarget = folderHandler.resolveTarget(targetPath, contextId, guestId);
+            if (null != resolvedTarget) {
+                return resolvedTarget;
             }
         }
         TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId, guestId);

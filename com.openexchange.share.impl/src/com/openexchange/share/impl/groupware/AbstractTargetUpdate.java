@@ -76,7 +76,7 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
 
     protected final ServiceLookup services;
 
-    protected final ModuleHandlerRegistry handlers;
+    protected final ModuleExtensionRegistry<ModuleHandler> handlers;
 
     private Map<ShareTarget, TargetProxy> proxies;
 
@@ -85,7 +85,7 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
     private List<ShareTarget> folderTargets;
 
 
-    protected AbstractTargetUpdate(ServiceLookup services, ModuleHandlerRegistry handlers) {
+    protected AbstractTargetUpdate(ServiceLookup services, ModuleExtensionRegistry<ModuleHandler> handlers) {
         super();
         this.services = services;
         this.handlers = handlers;

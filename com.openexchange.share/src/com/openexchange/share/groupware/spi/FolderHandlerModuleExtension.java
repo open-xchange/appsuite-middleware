@@ -14,15 +14,16 @@ import com.openexchange.share.groupware.TargetProxy;
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since v7.8.4
  */
-public interface FolderHandlerModuleExtension {
+public interface FolderHandlerModuleExtension extends ModuleExtension {
 
     /**
      * Checks if this instance should be used for specified folder
      *
-     * @param folder The folder name
+     * @param contextId The context identifier
+     * @param folder The folder identifier
      * @return <code>true</code> if applicable for this folder; otherwise <code>false</code>
      */
-    boolean isApplicableFor(String folder);
+    boolean isApplicableFor(int contextId, String folder);
 
     /**
      * The call-back for {@link ModuleSupport#isVisible(int, String, String, int, int)}
@@ -75,7 +76,8 @@ public interface FolderHandlerModuleExtension {
      * when no session object is available.
      *
      * @param folderTarget The share target
+     * @param contextId The context identifier
      * @throws OXException If resolving specified target fails
      */
-    TargetProxy resolveTarget(ShareTarget folderTarget) throws OXException;
+    TargetProxy resolveTarget(ShareTarget folderTarget, int contextId) throws OXException;
 }
