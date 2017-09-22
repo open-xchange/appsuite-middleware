@@ -137,7 +137,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         }
 
         // Register service
-        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
+        InMemoryPushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
         registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker, listenerTracker, false));
 
         // Register event handler
