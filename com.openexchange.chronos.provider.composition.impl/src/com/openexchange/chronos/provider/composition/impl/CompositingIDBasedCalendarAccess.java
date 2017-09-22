@@ -416,11 +416,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Attachment getAttachment(EventID eventID, String folderId, int managedId) throws OXException {
+    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             EventID relativeEventID = getRelativeId(eventID);
-            return getGroupwareAccess(accountId).getAttachment(relativeEventID, folderId, managedId);
+            return getGroupwareAccess(accountId).getAttachment(relativeEventID, managedId);
             //TODO: getUniqueId?
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

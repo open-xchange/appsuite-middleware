@@ -391,15 +391,14 @@ public interface CalendarService {
 
     /**
      * Retrieves the {@link Attachment} with the specified managed identifier from the {@link Event}
-     * with the specified {@link EventID} residing in the folder with the specified identifier
+     * with the specified {@link EventID}
      * 
      * @param session The {@link CalendarSession}
      * @param eventID The {@link Event} identifier
-     * @param folderId The folder identifier
      * @param managedId The managed identifier of the {@link Attachment}
      * @return The {@link Attachment}
      * @throws OXException if an error is occurred
      */
-    Attachment getAttachment(CalendarSession session, EventID eventID, String folderId, int managedId) throws OXException;
+    Attachment getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException;
 
 }

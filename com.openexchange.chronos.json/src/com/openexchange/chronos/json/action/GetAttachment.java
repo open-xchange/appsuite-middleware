@@ -86,11 +86,10 @@ public class GetAttachment extends ChronosAction {
         // Gather the parameters
         EventID eventId = parseIdParameter(requestData);
         String managedId = requestData.getParameter("managedId");
-        String folderId = requestData.getParameter("folderId");
         int mid = Integer.parseInt(managedId);
 
         // Get the attachment
-        Attachment attachment = calendarAccess.getAttachment(eventId, folderId, mid);
+        Attachment attachment = calendarAccess.getAttachment(eventId, mid);
 
         // Prepare the response
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();

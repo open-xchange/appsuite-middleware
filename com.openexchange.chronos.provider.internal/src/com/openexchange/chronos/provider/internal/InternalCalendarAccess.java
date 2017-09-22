@@ -355,8 +355,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public Attachment getAttachment(EventID eventID, String folderId, int managedId) throws OXException {
-        return getCalendarService().getAttachment(session, eventID, folderId, managedId);
+    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
+        return getCalendarService().getAttachment(session, eventID, managedId);
     }
 
     /**

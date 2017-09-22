@@ -431,12 +431,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Attachment getAttachment(CalendarSession session, EventID eventID, String folderId, int managedId) throws OXException {
+    public Attachment getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException {
         return new InternalCalendarStorageOperation<Attachment>(session) {
 
             @Override
             protected Attachment execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, folderId), managedId);
+                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, eventID.getFolderID()), managedId);
             }
         }.executeQuery();
     }
