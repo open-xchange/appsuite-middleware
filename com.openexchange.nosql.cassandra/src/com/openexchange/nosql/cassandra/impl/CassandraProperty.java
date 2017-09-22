@@ -225,11 +225,7 @@ public enum CassandraProperty implements Property {
      * @return the default value of this property
      */
     @Override
-    public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (false == defaultValue.getClass().isAssignableFrom(cls)) {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
-        }
-
-        return cls.cast(defaultValue);
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }
