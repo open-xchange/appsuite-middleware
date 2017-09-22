@@ -78,31 +78,38 @@ public interface Property {
      * 
      * @return the fully qualified name of the {@link Property}
      */
-    default String getFQNPropertyName(Map<String, String> optionals) {
+    default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
-        StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < fqn.length(); i++) {
-            char c = fqn.charAt(i);
-            if (c == '[') {
-                // Build key word
-                StringBuilder keyWord = new StringBuilder();
-                while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
-                    keyWord.append(c);
-                }
-                // Search if it is within map
-                if (optionals.containsKey(keyWord.toString())) {
-                    String value = optionals.get(keyWord.toString());
-                    builder.append(value);
+        if (null != optionals && false == optionals.isEmpty() && fqn.contains("[")) {
+            // Contains optional parameters
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < fqn.length(); i++) {
+                char c = fqn.charAt(i);
+                if (c == '[') {
+                    // Build key word
+                    StringBuilder keyWord = new StringBuilder();
+                    while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
+                        keyWord.append(c);
+                    }
+                    // Search if it is within map
+                    if (optionals.containsKey(keyWord.toString())) {
+                        String value = optionals.get(keyWord.toString());
+                        builder.append(value);
+                    } else {
+                        // Add key back as default
+                        builder.append('[').append(keyWord).append(']');
+                    }
                 } else {
-                    // Add key back as default
-                    builder.append('[').append(keyWord).append(']');
+                    builder.append(c);
                 }
-            } else {
-                builder.append(c);
             }
+            return builder.toString();
+
+        } else {
+            // No need to change anything
+            return fqn;
         }
-        return builder.toString();
     }
 
     /**
