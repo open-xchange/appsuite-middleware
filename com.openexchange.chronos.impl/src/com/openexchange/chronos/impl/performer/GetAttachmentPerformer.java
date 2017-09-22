@@ -111,7 +111,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Check folder permissions
+     * Check event/folder permissions
      * 
      * @param eventId The {@link Event} identifier
      * @param folder The {@link UserizedFolder}
