@@ -47,68 +47,24 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.groupware.spi;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.core.ModuleAdjuster;
+
 
 /**
- * {@link ModuleAdjusterRegistry}
+ * {@link ModuleExtension}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class ModuleAdjusterRegistry {
-
-    private final ServiceSet<ModuleAdjuster> moduleAdjusters;
+public interface ModuleExtension {
 
     /**
-     * Initializes a new {@link ModuleAdjusterRegistry}.
+     * Gets a collection of modules the extension operates on.
      *
-     * @param moduleAdjusters The module adjuster registrations
+     * @return The modules
      */
-    public ModuleAdjusterRegistry(ServiceSet<ModuleAdjuster> moduleAdjusters) {
-        super();
-        this.moduleAdjusters = moduleAdjusters;
-    }
-
-    /**
-     * Gets the adjuster being responsible for a specific module, throwing an exception if there is none registered.
-     *
-     * @param module The module to get the adjuster for
-     * @return The handler
-     */
-    public ModuleAdjuster get(int module) throws OXException {
-        ModuleAdjuster handler = opt(module);
-        if (null == handler) {
-            String name = ShareModuleMapping.moduleMapping2String(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(null == name ? Integer.toString(module) : name);
-        }
-        return handler;
-    }
-
-    /**
-     * Optionally gets the adjuster being responsible for a specific module.
-     *
-     * @param module The module to get the adjuster for
-     * @return The handler, or <code>null</code> if there is none registered
-     */
-    public ModuleAdjuster opt(int module) {
-        for (ModuleAdjuster adjuster : moduleAdjusters) {
-            if (supports(adjuster, module)) {
-                return adjuster;
-            }
-        }
-        return null;
-    }
-
-    private static boolean supports(ModuleAdjuster adjuster, int module) {
-        Collection<String> modules = adjuster.getModules();
-        String name = ShareModuleMapping.moduleMapping2String(module);
-        return null != name && null != modules && modules.contains(name);
-    }
+    Collection<String> getModules();
 
 }

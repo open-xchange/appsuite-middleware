@@ -85,7 +85,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private final HandlerParameters parameters;
 
-    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
+    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleExtensionRegistry<ModuleHandler> handlers) throws OXException {
         super(services, handlers);
         parameters = new HandlerParameters();
         parameters.setSession(session);
