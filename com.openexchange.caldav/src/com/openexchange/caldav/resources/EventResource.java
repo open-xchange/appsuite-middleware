@@ -441,9 +441,10 @@ public class EventResource extends DAVObjectResource<Event> {
             CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent(), clientTimestamp);
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
+            } else {
+                clientTimestamp = result.getTimestamp();
+                calendarSession.getEntityResolver().trackAttendeeUsage(result);
             }
-            clientTimestamp = result.getTimestamp();
-            calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
         /*
          * update exceptions
@@ -453,9 +454,10 @@ public class EventResource extends DAVObjectResource<Event> {
             CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException, clientTimestamp);
             if (result.getUpdates().isEmpty()) {
                 LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
+            } else {
+                clientTimestamp = result.getTimestamp();
+                calendarSession.getEntityResolver().trackAttendeeUsage(result);
             }
-            clientTimestamp = result.getTimestamp();
-            calendarSession.getEntityResolver().trackAttendeeUsage(result);
         }
     }
 
