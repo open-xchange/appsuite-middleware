@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
@@ -183,7 +182,7 @@ public class AllRequest extends CommonAllRequest {
 
         params.add(new Parameter(AJAXServlet.PARAMETER_START, start));
         params.add(new Parameter(AJAXServlet.PARAMETER_END, end));
-        params.add(new Parameter(AppointmentRequest.RECURRENCE_MASTER, recurrenceMaster));
+        params.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
         params.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
 
         return params.toArray(new Parameter[] {});
