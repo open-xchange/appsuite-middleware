@@ -524,21 +524,6 @@ public class Protocol {
      */
     public synchronized void startCompression(String cmd)
 				throws IOException, ProtocolException {
-	/*
-	 * The Deflator.SYNC_FLUSH support requires JDK 1.7 so use
-	 * reflection to allow compiling on 1.5 but running on 1.7.
-	 */
-	Class<java.util.zip.DeflaterOutputStream> dc = java.util.zip.DeflaterOutputStream.class;
-	java.lang.reflect.Constructor<java.util.zip.DeflaterOutputStream> cons = null;
-	try {
-	    cons = dc.getConstructor(
-			    OutputStream.class, java.util.zip.Deflater.class, boolean.class);
-	} catch (NoSuchMethodException ex) {
-	    logger.fine("Ignoring COMPRESS; " +
-			"missing JDK 1.7 DeflaterOutputStream constructor");
-	    return;	// ignore request, just as if server doesn't support it
-	}
-
 	// XXX - check whether compression is already enabled?
 	simpleCommand(cmd, null);
 
@@ -570,16 +555,10 @@ public class Protocol {
 	} catch (IllegalArgumentException ex) {
 	    logger.log(Level.FINE, "Ignoring bad compression strategy", ex);
 	}
-	//traceOutput = new TraceOutputStream(new DeflaterOutputStream(
-	//		    socket.getOutputStream(), def, true), traceLogger);
-	try {
-	    traceOutput = new TraceOutputStream(cons.newInstance(
-			    socket.getOutputStream(), def, true), traceLogger);
-	} catch (Exception ex) {
-	    throw new ProtocolException("can't create deflater", ex);
-	}
-	traceOutput.setQuote(quote);
-	output = new DataOutputStream(new BufferedOutputStream(traceOutput));
+    traceOutput = new TraceOutputStream(new java.util.zip.DeflaterOutputStream(
+                socket.getOutputStream(), def, true), traceLogger);
+    traceOutput.setQuote(quote);
+    output = new DataOutputStream(new BufferedOutputStream(traceOutput));
     }
 
     /**
