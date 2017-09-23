@@ -55,7 +55,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.OverridableAttachmentAuthorization;
 import com.openexchange.groupware.attach.impl.OverridableAttachmentListener;
-import com.openexchange.groupware.calendar.CalendarAttachments;
 import com.openexchange.groupware.contact.ContactsAttachment;
 import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
@@ -80,7 +79,6 @@ public abstract class Attachments {
             contactAuth.registerForEverything(new ContactsAttachment(), 0);
 
             final SpecificServiceChooser<AttachmentAuthorization> appointmentAuth = new SpecificServiceChooser<AttachmentAuthorization>();
-            appointmentAuth.registerForEverything(new CalendarAttachments(), 0);
 
             authz.put(Types.TASK, taskAuth);
             authz.put(Types.CONTACT, contactAuth);
@@ -94,7 +92,6 @@ public abstract class Attachments {
             contactListener.registerForEverything(new ContactsAttachment(), 0);
 
             final SpecificServiceChooser<AttachmentListener> appointmentListener = new SpecificServiceChooser<AttachmentListener>();
-            appointmentListener.registerForEverything(new CalendarAttachments(), 0);
 
             listener.put(Types.TASK, taskListener);
             listener.put(Types.CONTACT, contactListener);
