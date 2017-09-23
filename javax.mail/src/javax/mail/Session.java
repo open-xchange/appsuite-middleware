@@ -51,9 +51,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.concurrent.Executor;
-
 import javax.activation.*;
-
+import javax.mail.osgi.BundleResourceLoader;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
 
@@ -187,6 +186,18 @@ import com.sun.mail.util.MailLogger;
  */
 
 public final class Session {
+
+    /** Holds the currently active bundle */
+    static final java.util.concurrent.atomic.AtomicReference<org.osgi.framework.Bundle> BUNDLE_HOLDER = new java.util.concurrent.atomic.AtomicReference<>(null);
+
+    /**
+     * Sets the currently active bundle.
+     * 
+     * @param bundle The bundle to set or <code>null</code>
+     */
+    public static void setActiveBundle(org.osgi.framework.Bundle bundle) {
+        BUNDLE_HOLDER.set(bundle);
+    }
 
     private final Properties props;
     private final Authenticator authenticator;
@@ -1261,7 +1272,12 @@ public final class Session {
 			@Override
 			public InputStream run() throws IOException {
 			    try {
-				return c.getResourceAsStream(name);
+			    org.osgi.framework.Bundle bundle = BUNDLE_HOLDER.get();
+			    if (null == bundle) {
+			        return c.getResourceAsStream(name);
+                }
+			    InputStream in = new BundleResourceLoader(bundle).getResourceAsStream(name.startsWith("/") ? name.substring(1) : name);
+				return null == in ? c.getResourceAsStream(name) : in;
 			    } catch (RuntimeException e) {
 				// gracefully handle ClassLoader bugs (Tomcat)
 				IOException ioex = new IOException(
