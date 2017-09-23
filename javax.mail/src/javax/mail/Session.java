@@ -242,7 +242,7 @@ public final class Session {
 	    debug = true;
 
 	initLogger();
-	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.6");
+	logger.log(Level.CONFIG, "JavaMail version {0}", "1.6.0");
 
 	// get the Class associated with the Authenticator
 	Class<?> cl;
@@ -414,7 +414,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-				    "1.5.6");
+				    "1.6.0");
     }
 
     /**
@@ -969,22 +969,22 @@ public final class Session {
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.0"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
