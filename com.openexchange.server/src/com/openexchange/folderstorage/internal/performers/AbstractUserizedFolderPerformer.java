@@ -51,9 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +63,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -185,7 +184,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /** The PIM content types */
-    protected static final Set<String> PIM_CONTENT_TYPES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(CalendarContentType.getInstance().toString(), ContactContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString())));
+    protected static final Set<String> PIM_CONTENT_TYPES = ImmutableSet.of(CalendarContentType.getInstance().toString(), ContactContentType.getInstance().toString(), TaskContentType.getInstance().toString(), InfostoreContentType.getInstance().toString());
 
     /**
      * Checks if denoted folder is a public PIM folder
@@ -211,12 +210,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     /**
      * Those content type identifiers which are capable to accept folder names containing parenthesis characters.
      */
-    protected static final Set<String> PARENTHESIS_CAPABLE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    protected static final Set<String> PARENTHESIS_CAPABLE = ImmutableSet.of(
         CalendarContentType.getInstance().toString(),
         TaskContentType.getInstance().toString(),
         ContactContentType.getInstance().toString(),
         InfostoreContentType.getInstance().toString(),
-        FileStorageContentType.getInstance().toString())));
+        FileStorageContentType.getInstance().toString());
 
     /**
      * Gets the optional folder service decorator.

@@ -49,9 +49,9 @@
 
 package com.openexchange.snippet;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link Property} - A snippet's properties.
@@ -169,7 +169,7 @@ public enum Property {
         for (final Property property : props) {
             names.add(property.propName);
         }
-        PROP_NAMES = Collections.unmodifiableSet(names);
+        PROP_NAMES = ImmutableSet.copyOf(names);
     }
 
     /**

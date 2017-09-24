@@ -54,7 +54,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,6 +72,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.java.Strings;
@@ -827,15 +827,11 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private static final Set<String> ATTRIBUTES_NON_EXISTING_PARENT = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "\\noselect",
-        "\\haschildren")));
+    private static final Set<String> ATTRIBUTES_NON_EXISTING_PARENT = ImmutableSet.of("\\noselect", "\\haschildren");
 
-    private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "\\noselect",
-        "\\hasnochildren")));
+    private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = ImmutableSet.of("\\noselect", "\\hasnochildren");
 
-    // private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("\\noselect")));
+    // private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = ImmutableSet.of("\\noselect");
 
     private static final String ATTRIBUTE_DRAFTS = "\\drafts";
     private static final String ATTRIBUTE_JUNK = "\\junk";

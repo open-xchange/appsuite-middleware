@@ -52,6 +52,7 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -548,7 +549,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+    private static final Set<String> IGNORABLES = ImmutableSet.of(Snippet.PROP_MISC);
 
     private static String encode(String value) {
         try {
