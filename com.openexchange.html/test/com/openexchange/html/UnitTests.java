@@ -117,6 +117,7 @@ import com.openexchange.html.vulntests.Bug50734VulTest;
 import com.openexchange.html.vulntests.Bug50943VulTest;
 import com.openexchange.html.vulntests.Bug51474VulTest;
 import com.openexchange.html.vulntests.Bug52040VulTest;
+import com.openexchange.html.vulntests.Bug55603VulTest;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.
@@ -189,6 +190,7 @@ import com.openexchange.html.vulntests.Bug52040VulTest;
     Bug50943VulTest.class,
     Bug51474VulTest.class,
     Bug52040VulTest.class,
+    Bug55603VulTest.class,
     Bug55406Test.class,
     CSSMatcherTest.class,
     ConformHtmlTest.class,
