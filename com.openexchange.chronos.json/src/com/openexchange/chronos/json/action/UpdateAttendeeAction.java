@@ -65,7 +65,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
@@ -129,7 +128,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 } else {
                     attendee = mapping.deserialize(attendeeJSON, TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone()));
                 }
-                if(!attendee.containsUri() && !attendee.containsEntity()){
+                if (!attendee.containsUri() && !attendee.containsEntity()) {
                     attendee.setEntity(requestData.getSession().getUserId());
                 }
             } catch (JSONException e) {
@@ -142,10 +141,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
                 clientTimestamp = updateAttendeeResult.getTimestamp();
             } catch (OXException e) {
-                if (isConflict(e)) {
-                    return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
-                }
-                throw e;
+                return handleConflictException(e);
             }
 
             List<OXException> warnings = null;

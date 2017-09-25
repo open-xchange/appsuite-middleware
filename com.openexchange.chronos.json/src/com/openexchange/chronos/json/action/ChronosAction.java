@@ -64,9 +64,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.upload.UploadFile;
@@ -126,6 +128,22 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * @return The request result
      */
     protected abstract AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException;
+
+    /**
+     * Handles the specified {@link OXException} and if it is of type
+     * {@link Category#CATEGORY_CONFLICT}, it returns the correct response.
+     * Otherwise the original exception is re-thrown
+     * 
+     * @param e The {@link OXException} to handle
+     * @return The proper conflict response
+     * @throws OXException The original {@link OXException} if not of type {@link Category#CATEGORY_CONFLICT}
+     */
+    AJAXRequestResult handleConflictException(OXException e) throws OXException {
+        if (isConflict(e)) {
+            return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
+        }
+        throw e;
+    }
 
     /**
      * Initializes the calendar access for a request and parses all known parameters supplied by the client, throwing an appropriate
