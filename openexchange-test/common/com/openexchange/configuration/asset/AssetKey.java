@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,101 @@
  *
  */
 
-package com.openexchange.advertisement.osgi;
-
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.configuration.asset;
 
 /**
- * {@link Services}
+ * {@link AssetKey}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Services {
+public class AssetKey {
+
+    private final AssetType assetType;
+    private final String filename;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initialises a new {@link AssetKey}.
+     * 
+     * @param assetType The asset type
+     * @param filename The filename
      */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<Activator> REF = new AtomicReference<>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final Activator serviceLookup) {
-        REF.set(serviceLookup);
+    public AssetKey(final AssetType assetType, final String filename) {
+        this.assetType = assetType;
+        this.filename = filename;
     }
 
     /**
-     * Gets the service lookup.
+     * Gets the assetType
      *
-     * @return The service lookup or <code>null</code>
+     * @return The assetType
      */
-    public static HousekeepingActivator getServiceLookup() {
-        return REF.get();
+    public AssetType getAssetType() {
+        return assetType;
     }
 
     /**
-     * Gets the service of specified type
+     * Gets the filename
      *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @return The filename
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.advertisement\" not started?");
+    public String getFilename() {
+        return filename;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((assetType == null) ? 0 : assetType.hashCode());
+        result = prime * result + ((filename == null) ? 0 : filename.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-        return serviceLookup.getService(clazz);
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AssetKey other = (AssetKey) obj;
+        if (assetType != other.assetType) {
+            return false;
+        }
+        if (filename == null) {
+            if (other.filename != null) {
+                return false;
+            }
+        } else if (!filename.equals(other.filename)) {
+            return false;
+        }
+        return true;
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
      */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AssetKey [assetType=").append(assetType).append(", filename=").append(filename).append("]");
+        return builder.toString();
     }
 
 }

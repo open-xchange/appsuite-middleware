@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,13 @@
  *
  */
 
-package com.openexchange.advertisement;
-
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.configuration.asset;
 
 /**
- * {@link AdvertisementPackageService}
+ * {@link AssetType}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@SingletonService
-public interface AdvertisementPackageService extends Reloadable {
-
-    public static final String DEFAULT_SCHEME_ID = "Global";
-
-    public static final String DEFAULT_RESELLER = "default";
-
-    /**
-     * Gets the suitable advertisement configuration manager for specified context.
-     *
-     * @param contextId The context identifier
-     * @return The suitable advertisement configuration manager
-     */
-    AdvertisementConfigService getScheme(int contextId);
-
-    /**
-     * Gets the default advertisement configuration manager
-     *
-     * @return The default advertisement configuration manager
-     */
-    AdvertisementConfigService getDefaultScheme();
-
+public enum AssetType {
+    txt, jpg, png, eml, vcf, html, svg, ods, odt, htm, base64, gif, pdf;
 }

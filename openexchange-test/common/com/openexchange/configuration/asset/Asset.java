@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,69 @@
  *
  */
 
-package com.openexchange.advertisement;
-
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.configuration.asset;
 
 /**
- * {@link AdvertisementPackageService}
+ * {@link Asset}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@SingletonService
-public interface AdvertisementPackageService extends Reloadable {
+public class Asset {
 
-    public static final String DEFAULT_SCHEME_ID = "Global";
-
-    public static final String DEFAULT_RESELLER = "default";
-
-    /**
-     * Gets the suitable advertisement configuration manager for specified context.
-     *
-     * @param contextId The context identifier
-     * @return The suitable advertisement configuration manager
-     */
-    AdvertisementConfigService getScheme(int contextId);
+    private final AssetType assetType;
+    private final String absolutePath;
+    private final String filename;
 
     /**
-     * Gets the default advertisement configuration manager
-     *
-     * @return The default advertisement configuration manager
+     * Initialises a new {@link Asset}.
+     * 
+     * @param assetType The asset's type
+     * @param absolutePath The absolute path of the asset
+     * @param filename The filename of the asset
      */
-    AdvertisementConfigService getDefaultScheme();
+    public Asset(AssetType assetType, String absolutePath, String filename) {
+        super();
+        this.assetType = assetType;
+        this.absolutePath = absolutePath;
+        this.filename = filename;
+    }
 
+    /**
+     * Gets the assetType
+     *
+     * @return The assetType
+     */
+    public AssetType getAssetType() {
+        return assetType;
+    }
+
+    /**
+     * Gets the absolutePath
+     *
+     * @return The absolutePath
+     */
+    public String getAbsolutePath() {
+        return absolutePath;
+    }
+
+    /**
+     * Gets the filename
+     *
+     * @return The filename
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Asset [assetType=").append(assetType).append(", absolutePath=").append(absolutePath).append(", filename=").append(filename).append("]");
+        return builder.toString();
+    }
 }
