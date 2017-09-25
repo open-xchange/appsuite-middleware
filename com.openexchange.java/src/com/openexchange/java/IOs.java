@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,71 +47,44 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
+package com.openexchange.java;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.HashSet;
-import java.util.Set;
-import org.json.JSONObject;
+import java.io.IOException;
 
 /**
- * {@link StarRatingV1Fields}
+ * {@link IOs} - A utility class for I/O associated processing.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public enum StarRatingV1Fields {
-    date("Date"), // only for export
-    score("Score"),
-    comment("Comment"),
-    app("App"),
-    entry_point("Entry Point"),
-    operating_system("Operating System"),
-    browser("Browser"),
-    browser_version("Browser Version"),
-    user_agent("User Agent"),
-    screen_resolution("Screen Resolution"),
-    language("Language"),
-    user("User"), // only for export
-    server_version("Server Version"), // only for export
-    client_version("Client Version"),
-    ;
+public class IOs {
 
-    private static final Set<String> INTERNAL_KEYS;
+    /**
+     * Initializes a new {@link IOs}.
+     */
+    private IOs() {
+        super();
+    }
 
-    static {
-        ImmutableSet.Builder<String> keys = ImmutableSet.builder();
-        for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
-            keys.add(field.name().toLowerCase());
+    /**
+     * Checks whether specified I/O exception can be considered as a connection reset.
+     * <p>
+     * A <code>"java.io.IOException: Connection reset by peer"</code> is thrown when the other side has abruptly aborted the connection in midst of a transaction.
+     * <p>
+     * That can have many causes which are not controllable from the Middleware side. E.g. the end-user decided to shutdown the client or change the
+     * server abruptly while still interacting with your server, or the client program has crashed, or the enduser's Internet connection went down,
+     * or the enduser's machine crashed, etc, etc.
+     *
+     * @param e The I/O exception to examine
+     * @return <code>true</code> for a connection reset; otherwise <code>false</code>
+     */
+    public static boolean isConnectionReset(IOException e) {
+        if (null == e) {
+            return false;
         }
-        INTERNAL_KEYS = keys.build();
+
+        String lcm = com.openexchange.java.Strings.toLowerCase(e.getMessage());
+        return ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm) || "connection closed".equals(lcm));
     }
 
-    private String displayName;
-
-    StarRatingV1Fields(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
-     *
-     * @return Set of {@link String} that are required within the {@link JSONObject}
-     */
-    public static Set<String> requiredJsonKeys() {
-        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
-        copy.remove("date");
-        copy.remove("user");
-        copy.remove("server_version");
-        return copy;
-    }
 }

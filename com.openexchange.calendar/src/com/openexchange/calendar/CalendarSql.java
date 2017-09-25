@@ -61,13 +61,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -133,7 +133,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     protected final static int EXCEPTION_NOT_FOUND = -1;
 
-    private static final Set<Integer> EXEMPT = new HashSet<Integer>(Arrays.asList(Appointment.RECURRENCE_START, Appointment.ALARM, Appointment.RECURRENCE_DATE_POSITION, Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.INTERVAL, Appointment.UNTIL, Appointment.NOTIFICATION, Appointment.RECURRENCE_COUNT, Appointment.LAST_MODIFIED_UTC));
+    private static final Set<Integer> EXEMPT = ImmutableSet.of(Appointment.RECURRENCE_START, Appointment.ALARM, Appointment.RECURRENCE_DATE_POSITION, Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.INTERVAL, Appointment.UNTIL, Appointment.NOTIFICATION, Appointment.RECURRENCE_COUNT, Appointment.LAST_MODIFIED_UTC);
 
     public static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
 

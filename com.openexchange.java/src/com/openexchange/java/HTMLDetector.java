@@ -54,10 +54,8 @@ import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
@@ -66,7 +64,7 @@ import java.util.Set;
  */
 public final class HTMLDetector {
 
-    private static final Set<String> JS_EVENT_HANDLER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> JS_EVENT_HANDLER = ImmutableSet.of(
         "onabort",
         "onblur",
         "onchange",
@@ -86,7 +84,7 @@ public final class HTMLDetector {
         "onreset",
         "onselect",
         "onsubmit",
-        "onunload")));
+        "onunload");
 
     /**
      * Initializes a new {@link HTMLDetector}.

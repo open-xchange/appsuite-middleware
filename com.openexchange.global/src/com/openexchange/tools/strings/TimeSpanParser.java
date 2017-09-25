@@ -52,9 +52,9 @@ package com.openexchange.tools.strings;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 
 /**
@@ -137,13 +137,7 @@ public class TimeSpanParser  implements StringParser {
         return Long.valueOf(tally);
     }
 
-    private static final Set<Class<?>> SUPPORTED = new HashSet<Class<?>>() {
-        private static final long serialVersionUID = -551644321593953282L;
-    {
-        add(Long.class);
-        add(long.class);
-        add(Date.class);
-    }};
+    private static final Set<Class<?>> SUPPORTED = ImmutableSet.of(Long.class, long.class, Date.class);
 
     @Override
     public <T> T parse(final String s, final Class<T> t) {
