@@ -95,7 +95,7 @@ public class NewAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        Event event = parseEvent(requestData);
+        Event event = parseEvent(calendarAccess.getSession(), requestData);
         try {
             CalendarResult calendarResult = calendarAccess.createEvent(folderId, event);
             if (calendarResult.getCreations().size() != 1) {

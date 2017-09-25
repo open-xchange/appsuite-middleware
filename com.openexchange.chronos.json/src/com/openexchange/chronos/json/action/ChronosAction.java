@@ -172,11 +172,12 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
      * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
      * 
+     * @param session The groupware {@link Session}
      * @param requestData The {@link AJAXRequestData}
      * @return The parsed {@link Event}
      * @throws OXException if a parsing error occurs
      */
-    protected Event parseEvent(AJAXRequestData requestData) throws OXException {
+    protected Event parseEvent(Session session, AJAXRequestData requestData) throws OXException {
         Map<String, Attachment> attachments = new HashMap<>();
         JSONObject jsonEvent;
         long maxUploadSize = AttachmentConfig.getMaxUploadSize();
@@ -186,7 +187,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             jsonEvent = extractJsonBody(requestData);
         }
         try {
-            Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields());
+            Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(session, requestData));
             processAttachments(attachments, event);
             return event;
         } catch (JSONException e) {
