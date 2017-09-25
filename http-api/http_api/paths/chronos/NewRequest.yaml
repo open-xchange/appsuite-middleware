@@ -56,10 +56,10 @@
     responses:
       200:
         description: |
-          'A JSON object containing the newly created event, if it was created successfully.
+          'A JSON object containing the newly [created event](#/definitions/ChronosCalendarResultResponse), if it was created successfully.
           If the event could not be created due to conflicts, the response body is an object with the
           field `conflicts`, which informations about the conflict. In case of errors the responsible fields
           in the response are filled (see [Error handling](#error-handling)).'
         schema:
-          $ref: "#/definitions/ChronosCalendarResultResponse"
+          type: string
 
