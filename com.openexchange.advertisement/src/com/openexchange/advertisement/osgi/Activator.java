@@ -63,7 +63,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
@@ -79,50 +78,61 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { AdvertisementConfigService.class, CapabilityService.class, ResellerService.class, ConfigViewFactory.class, ConfigurationService.class };
+        return new Class[] { CapabilityService.class, ResellerService.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
     protected void startBundle() throws Exception {
         LoggerFactory.getLogger(Activator.class).info("starting bundle com.openexchange.advertisement");
-        Services.setServiceLookup(this);
 
-        final String sCapability = "ads";
-        Dictionary<String, Object> properties = new Hashtable<>(2);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-        registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
+        final AdvertisementPackageServiceImpl packageService = new AdvertisementPackageServiceImpl(getService(ResellerService.class), getService(ConfigurationService.class));
 
-            @Override
-            public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session session) throws OXException {
-                if (sCapability.equals(capability)) {
-                    AdvertisementConfigService confService = Services.optService(AdvertisementConfigService.class);
-                    if (confService == null) {
+        // Register capability
+        {
+            final String sCapability = "ads";
+            Dictionary<String, Object> properties = new Hashtable<>(2);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+            registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
+
+                @Override
+                public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session session) throws OXException {
+                    if (sCapability.equals(capability)) {
+                        AdvertisementConfigService confService = packageService.getScheme(session.getContextId());
+                        if (confService == null) {
+                            return FailureAwareCapabilityChecker.Result.DISABLED;
+                        }
+                        if (confService.isAvailable(session)) {
+                            return FailureAwareCapabilityChecker.Result.ENABLED;
+                        }
                         return FailureAwareCapabilityChecker.Result.DISABLED;
                     }
-                    if (confService.isAvailable(session)) {
-                        return FailureAwareCapabilityChecker.Result.ENABLED;
-                    } else {
-                        return FailureAwareCapabilityChecker.Result.DISABLED;
-                    }
+
+                    return FailureAwareCapabilityChecker.Result.ENABLED;
                 }
+            }, properties);
+            getService(CapabilityService.class).declareCapability(sCapability);
+        }
 
-                return FailureAwareCapabilityChecker.Result.ENABLED;
-            }
-        }, properties);
-        getService(CapabilityService.class).declareCapability(sCapability);
-
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-        final AdvertisementPackageServiceImpl packageService = new AdvertisementPackageServiceImpl(configService);
         registerService(AdvertisementPackageService.class, packageService);
         registerService(Reloadable.class, packageService);
         final BundleContext context = this.context;
         track(AdvertisementConfigService.class, new ServiceTrackerCustomizer<AdvertisementConfigService, AdvertisementConfigService>() {
 
             @Override
-            public synchronized AdvertisementConfigService addingService(ServiceReference<AdvertisementConfigService> reference) {
+            public AdvertisementConfigService addingService(ServiceReference<AdvertisementConfigService> reference) {
                 AdvertisementConfigService service = context.getService(reference);
-                packageService.addServiceAndReload(service, Services.getService(ConfigurationService.class));
-                return service;
+                boolean added = packageService.addServiceAndReload(service);
+                if (added) {
+                    return service;
+                }
+
+                context.ungetService(reference);
+                return null;
             }
 
             @Override
@@ -131,8 +141,9 @@ public class Activator extends HousekeepingActivator {
             }
 
             @Override
-            public synchronized void removedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
-                packageService.removeServiceAndReload(service, Services.getService(ConfigurationService.class));
+            public void removedService(ServiceReference<AdvertisementConfigService> reference, AdvertisementConfigService service) {
+                packageService.removeServiceAndReload(service);
+                context.ungetService(reference);
             }
 
         });
@@ -144,7 +155,6 @@ public class Activator extends HousekeepingActivator {
         LoggerFactory.getLogger(Activator.class).info("stopping bundle com.openexchange.advertisement");
 
         super.stopBundle();
-        Services.setServiceLookup(null);
     }
 
 }
