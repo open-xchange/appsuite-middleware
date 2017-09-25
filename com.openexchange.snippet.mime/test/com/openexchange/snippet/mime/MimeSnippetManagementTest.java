@@ -90,7 +90,7 @@ public class MimeSnippetManagementTest {
     private MimeMessage mimeMessage;
 
     @Mock
-    private Enumeration headers;
+    private Enumeration<Header> headers;
 
     @Mock
     private Multipart multipart;

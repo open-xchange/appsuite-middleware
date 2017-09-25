@@ -479,8 +479,8 @@ public class MimeMessagingPart implements MessagingPart {
             // No synchronization
             try {
                 tmp = new ConcurrentHashMap<String, Collection<MessagingHeader>>();
-                for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
-                    final Header header = (Header) allHeaders.nextElement();
+                for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                    final Header header = allHeaders.nextElement();
                     final String name = header.getName();
                     Collection<MessagingHeader> collection = tmp.get(name);
                     if (null == collection) {
@@ -764,8 +764,8 @@ public class MimeMessagingPart implements MessagingPart {
          * Drop all existing headers
          */
         try {
-            for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
-                part.removeHeader(((Header) allHeaders.nextElement()).getName());
+            for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                part.removeHeader(allHeaders.nextElement().getName());
             }
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
