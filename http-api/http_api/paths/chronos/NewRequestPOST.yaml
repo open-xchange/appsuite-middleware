@@ -1,4 +1,4 @@
-/chronos?action=new:
+/chronos?action=newWithAttachment:
   post:
     operationId: createEventWithAttachments
     tags:
