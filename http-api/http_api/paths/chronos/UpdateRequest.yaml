@@ -53,6 +53,12 @@
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
       - in: formData
         name: json_0
         type: string
