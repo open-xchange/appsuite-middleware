@@ -63,6 +63,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
@@ -116,7 +118,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     };
 
     Map<UserApi, List<EventId>> eventIds;
-    Map<UserApi,List<String>> folderToDelete;
+    Map<UserApi, List<String>> folderToDelete;
     private long lastTimeStamp;
 
     protected UserApi defaultUserApi;
@@ -133,7 +135,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         if (eventIds == null) {
             eventIds = new HashMap<>();
         }
-        if(!eventIds.containsKey(userApi)){
+        if (!eventIds.containsKey(userApi)) {
             eventIds.put(userApi, new ArrayList<>(1));
         }
         eventIds.get(userApi).add(eventId);
@@ -143,7 +145,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         if (folderToDelete == null) {
             folderToDelete = new HashMap<>();
         }
-        if(!folderToDelete.containsKey(userApi)){
+        if (!folderToDelete.containsKey(userApi)) {
             folderToDelete.put(userApi, new ArrayList<>(1));
         }
         folderToDelete.get(userApi).add(folder);
@@ -154,7 +156,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                for(UserApi api: eventIds.keySet()){
+                for (UserApi api : eventIds.keySet()) {
                     api.getApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api));
                 }
             }
@@ -162,14 +164,14 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             exception = e;
         }
         if (folderToDelete != null) {
-            for(UserApi api: folderToDelete.keySet()){
+            for (UserApi api : folderToDelete.keySet()) {
                 api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
             }
         }
 
         super.tearDown();
 
-        if(exception!=null){
+        if (exception != null) {
             throw exception;
         }
     }
@@ -196,12 +198,12 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
-    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException{
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
         FolderBody body = new FolderBody();
         FolderData folderData = new FolderData();
         folderData.setModule("event");
         folderData.setSubscribed(true);
-        folderData.setTitle("chronos_test_"+new UID().toString());
+        folderData.setTitle("chronos_test_" + new UID().toString());
         List<FolderPermission> permissions = new ArrayList<>();
         FolderPermission perm = new FolderPermission();
         perm.setEntity(entity);
@@ -249,7 +251,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return utcCalendar.getTime();
     }
 
-    protected DateTimeData getZuluDateTime(long millis){
+    protected DateTimeData getZuluDateTime(long millis) {
         DateTimeData result = new DateTimeData();
         result.setTzid("UTC");
         Date date = new Date(millis);
@@ -273,22 +275,21 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return result;
     }
 
-
     protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
         Date date = BASIC_FORMATER.get().parse(data.getValue());
-        return getDateTime(data.getTzid(), date.getTime()+millis);
+        return getDateTime(data.getTzid(), date.getTime() + millis);
     }
 
     protected Date getTime(DateTimeData time) throws ParseException {
         return BASIC_FORMATER.get().parse(time.getValue());
     }
 
-    protected void setLastTimestamp(long timestamp){
-    	this.lastTimeStamp=timestamp;
+    protected void setLastTimestamp(long timestamp) {
+        this.lastTimeStamp = timestamp;
     }
 
-    protected long getLastTimestamp(){
-    	return lastTimeStamp;
+    protected long getLastTimestamp() {
+        return lastTimeStamp;
     }
 
     /**
@@ -335,4 +336,3 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return event;
     }
 }
-

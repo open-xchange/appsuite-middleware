@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -62,8 +63,12 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetManager;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -79,6 +84,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * {@link BasicSingleEventTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
@@ -101,6 +107,21 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
         return singleEvent;
+    }
+
+    private EventData createSingleEventWithAttachment(String summary, DateTimeData startDate, DateTimeData endDate, Asset asset) {
+        EventData eventData = createSingleEvent(summary, startDate, endDate);
+        eventData.addAttachmentsItem(createAttachment(asset));
+        return eventData;
+    }
+
+    private ChronosAttachment createAttachment(Asset asset) {
+        ChronosAttachment attachment = new ChronosAttachment();
+        attachment.setFilename(asset.getFilename());
+        attachment.setFmtType(asset.getAssetType().name());
+        attachment.setUri("file:///");
+
+        return attachment;
     }
 
     private EventData createSingleEvent(String summary) {
@@ -156,13 +177,12 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertNotNull(updateResponse.getData());
 
         List<EventData> updates = updateResponse.getData().getUpdated();
-        assertTrue(updates.size()==1);
+        assertTrue(updates.size() == 1);
         EventUtil.compare(initialEvent, updates.get(0), false);
         event.setLastModified(updates.get(0).getLastModified());
         event.setSequence(updates.get(0).getSequence());
         EventUtil.compare(event, updates.get(0), true);
     }
-
 
     @Test
     public void testGetEvent() throws Exception {
@@ -221,6 +241,30 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testCreateSingle", getDateTime(start), getDateTime(end)), false, false);
+        EventData event = handleCreation(createEvent);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertNotNull(eventResponse.getData());
+        EventUtil.compare(event, eventResponse.getData(), true);
+    }
+
+    /**
+     * Tests the creation of a single event with attachment
+     */
+    @Test
+    public void testCreateSingleWithAttachment() throws Exception {
+        EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
+        
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        start.setTimeInMillis(System.currentTimeMillis());
+
+        Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
+
+        AssetManager assetManager = new AssetManager();
+        Asset asset = assetManager.getRandomAsset(AssetType.jpg);
+        
+        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, createSingleEventWithAttachment("testCreateSingleWithAttachment", getDateTime(start), getDateTime(end), asset).toJson(), new File(asset.getAbsolutePath()), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
