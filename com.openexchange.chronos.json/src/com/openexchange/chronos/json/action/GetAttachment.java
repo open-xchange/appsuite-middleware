@@ -117,7 +117,7 @@ public class GetAttachment extends ChronosAction {
     /**
      * Set the etag for the file
      * 
-     * @param eTag The eTag identiier
+     * @param eTag The eTag identifier
      * @param expires The TTL in milliseconds
      * @param result The result to set the etag on
      */
