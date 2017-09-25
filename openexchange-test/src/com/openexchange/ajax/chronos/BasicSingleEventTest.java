@@ -248,13 +248,15 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
     }
 
+    ////////////////////////////////// Attachment Tests ///////////////////////////////////
+
     /**
      * Tests the creation of a single event with attachment
      */
     @Test
     public void testCreateSingleWithAttachment() throws Exception {
         EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
-        
+
         Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         start.setTimeInMillis(System.currentTimeMillis());
 
@@ -263,12 +265,55 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
-        
+
         ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, createSingleEventWithAttachment("testCreateSingleWithAttachment", getDateTime(start), getDateTime(end), asset).toJson(), new File(asset.getAbsolutePath()), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         EventUtil.compare(event, eventResponse.getData(), true);
+        assertEquals("The amount of attachments is not correct", 1, event.getAttachments().size());
+    }
+
+    /**
+     * Tests the update of a single event with attachment
+     */
+    @Test
+    public void testUpdateSingleWithAttachment() throws Exception {
+        EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
+
+        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        start.setTimeInMillis(System.currentTimeMillis());
+
+        Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
+
+        AssetManager assetManager = new AssetManager();
+        Asset asset = assetManager.getRandomAsset(AssetType.jpg);
+
+        EventData initialEvent = createSingleEventWithAttachment("testCreateSingleWithAttachment", getDateTime(start), getDateTime(end), asset);
+        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, initialEvent.toJson(), new File(asset.getAbsolutePath()), false, false);
+        EventData event = handleCreation(createEvent);
+        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertNotNull(eventResponse.getData());
+        EventUtil.compare(event, eventResponse.getData(), true);
+
+        List<ChronosAttachment> attachments = event.getAttachments();
+        assertEquals("The amount of attachments is not correct", 1, attachments.size());
+
+        asset = assetManager.getRandomAsset(AssetType.png);
+        event.getAttachments().add(createAttachment(asset));
+
+        ChronosCalendarResultResponse updateResponse = eca.updateEventWithAttachments(defaultUserApi.getSession(), folderId, event.getId(), System.currentTimeMillis(), event.toJson(), new File(asset.getAbsolutePath()), null, true, false);
+        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
+        assertNotNull(updateResponse.getData());
+
+        List<EventData> updates = updateResponse.getData().getUpdated();
+        assertTrue(updates.size() == 1);
+        EventUtil.compare(initialEvent, updates.get(0), false);
+        event.setLastModified(updates.get(0).getLastModified());
+        event.setSequence(updates.get(0).getSequence());
+        EventUtil.compare(event, updates.get(0), true);
     }
 }
