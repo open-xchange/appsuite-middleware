@@ -94,7 +94,7 @@ public class UpdateAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         long clientTimestamp = parseClientTimestamp(requestData);
-        Event event = getEvent(requestData);
+        Event event = parseEvent(requestData);
         try {
             CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
