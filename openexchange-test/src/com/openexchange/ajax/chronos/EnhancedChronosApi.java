@@ -62,7 +62,9 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 
 /**
- * {@link EnhancedChronosApi}
+ * {@link EnhancedChronosApi} - This enhanced API class overrides the {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}
+ * to simply decorate the request with the 'plainJson' parameter. This is only used to get a proper JSON response instead of the regular HTML response
+ * and to be able to use the already existing parsers.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -84,10 +86,11 @@ public class EnhancedChronosApi extends ChronosApi {
         super(apiClient);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.testing.httpclient.modules.ChronosApi#createEventWithAttachments(java.lang.String, java.lang.String, java.lang.String, java.io.File, java.lang.Boolean, java.lang.Boolean)
+
+    /**
+     * Copied from the original {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}. The request is enhanced 
+     * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
+     * HTML response.
      */
     @Override
     public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
@@ -123,7 +126,7 @@ public class EnhancedChronosApi extends ChronosApi {
 
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "session", session));
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "folder", folder));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitely to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "ignore_conflicts", ignoreConflicts));
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
 
