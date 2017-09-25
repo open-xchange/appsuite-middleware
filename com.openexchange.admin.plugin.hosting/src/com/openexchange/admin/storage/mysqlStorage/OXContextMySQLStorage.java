@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
