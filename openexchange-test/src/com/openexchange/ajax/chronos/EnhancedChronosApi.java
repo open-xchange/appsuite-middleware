@@ -86,9 +86,8 @@ public class EnhancedChronosApi extends ChronosApi {
         super(apiClient);
     }
 
-
     /**
-     * Copied from the original {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}. The request is enhanced 
+     * Copied from the original {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}. The request is enhanced
      * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
      * HTML response.
      */
@@ -129,6 +128,81 @@ public class EnhancedChronosApi extends ChronosApi {
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "ignore_conflicts", ignoreConflicts));
         localVarQueryParams.addAll(getApiClient().parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
+
+        if (json0 != null) {
+            localVarFormParams.put("json_0", json0);
+        }
+        if (file0 != null) {
+            localVarFormParams.put("file_0", file0);
+        }
+
+        final String[] localVarAccepts = { "application/json" };
+        final String localVarAccept = getApiClient().selectHeaderAccept(localVarAccepts);
+
+        final String[] localVarContentTypes = { "multipart/form-data" };
+        final String localVarContentType = getApiClient().selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[] {};
+
+        GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
+        return getApiClient().invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
+    }
+
+    /**
+     * Copied from the original {@link #updateEventWithAttachments(String, String, String, Long, String, File, String, Boolean, Boolean)}. The request is enhanced
+     * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
+     * HTML response.
+     */
+    @Override
+    public ChronosCalendarResultResponse updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+        Object localVarPostBody = null;
+
+        // verify the required parameter 'session' is set
+        if (session == null) {
+            throw new ApiException(400, "Missing the required parameter 'session' when calling updateEventWithAttachments");
+        }
+
+        // verify the required parameter 'folder' is set
+        if (folder == null) {
+            throw new ApiException(400, "Missing the required parameter 'folder' when calling updateEventWithAttachments");
+        }
+
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException(400, "Missing the required parameter 'id' when calling updateEventWithAttachments");
+        }
+
+        // verify the required parameter 'timestamp' is set
+        if (timestamp == null) {
+            throw new ApiException(400, "Missing the required parameter 'timestamp' when calling updateEventWithAttachments");
+        }
+
+        // verify the required parameter 'json0' is set
+        if (json0 == null) {
+            throw new ApiException(400, "Missing the required parameter 'json0' when calling updateEventWithAttachments");
+        }
+
+        // verify the required parameter 'file0' is set
+        if (file0 == null) {
+            throw new ApiException(400, "Missing the required parameter 'file0' when calling updateEventWithAttachments");
+        }
+
+        // create path and map variables
+        String localVarPath = "/chronos?action=update".replaceAll("\\{format\\}", "json");
+
+        // query params
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "session", session));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "folder", folder));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "id", id));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "recurrenceId", recurrenceId));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "ignore_conflicts", ignoreConflicts));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
+        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "timestamp", timestamp));
 
         if (json0 != null) {
             localVarFormParams.put("json_0", json0);
