@@ -1,6 +1,6 @@
 /chronos?action=new:
   post:
-    operationId: createEvent
+    operationId: createEventWithAttachments
     tags:
       - Chronos
     summary: Creates an event and attaches files.

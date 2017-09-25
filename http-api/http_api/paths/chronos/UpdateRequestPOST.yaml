@@ -1,6 +1,6 @@
 /chronos?action=update:
   post:
-    operationId: updateEvent
+    operationId: updateEventWithAttachments
     tags:
       - Chronos
     summary: Updates an event and its attachments.
