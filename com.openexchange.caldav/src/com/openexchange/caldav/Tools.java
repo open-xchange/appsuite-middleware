@@ -67,7 +67,6 @@ import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
@@ -242,11 +241,11 @@ public class Tools {
     }
 
     public static boolean isDataTruncation(final OXException e) {
-        return OXCalendarExceptionCodes.TRUNCATED_SQL_ERROR.equals(e) || TaskExceptionCode.TRUNCATED.equals(e);
+        return TaskExceptionCode.TRUNCATED.equals(e);
     }
 
     public static boolean isIncorrectString(OXException e) {
-        return OXCalendarExceptionCodes.INVALID_CHARACTER.equals(e) || TaskExceptionCode.INCORRECT_STRING.equals(e);
+        return TaskExceptionCode.INCORRECT_STRING.equals(e);
     }
 
     public static String formatAsUTC(Date date) {
