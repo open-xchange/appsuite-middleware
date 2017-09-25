@@ -124,7 +124,7 @@ public class PushMsHandler implements EventHandler {
         } else {
             parentFolder = null;
         }
-        if (parentFolder == null && module != Types.EMAIL) {
+        if (parentFolder == null && module != Types.EMAIL && module != Types.APPOINTMENT) {
             LOG.warn("folder object in event is null");
             return;
         }
@@ -174,7 +174,7 @@ public class PushMsHandler implements EventHandler {
     private static long getTimestamp(final DataObject object) {
         return null == object ? 0 : getTimestamp(object.getLastModified());
     }
-    
+
     private static long getTimestamp(final com.openexchange.chronos.Event event) {
         return null == event ? 0 : getTimestamp(event.getLastModified());
     }
