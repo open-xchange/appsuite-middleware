@@ -81,12 +81,17 @@ public interface Property {
     default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
 
-        if (null != optionals && false == optionals.isEmpty() && fqn.contains("[")) {
-            // Contains optional parameters
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < fqn.length(); i++) {
-                char c = fqn.charAt(i);
-                if (c == '[') {
+        if (null == optionals || !optionals.isEmpty() || !fqn.contains("[")) {
+            // No need to change anything
+            return fqn;
+        }
+
+        // Contains optional parameters
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < fqn.length(); i++) {
+            char c = fqn.charAt(i);
+            switch (c) {
+                case '[':
                     // Build key word
                     StringBuilder keyWord = new StringBuilder();
                     while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
@@ -100,16 +105,14 @@ public interface Property {
                         // Add key back as default
                         builder.append('[').append(keyWord).append(']');
                     }
-                } else {
+                    break;
+                default:
                     builder.append(c);
-                }
+                    break;
             }
-            return builder.toString();
-
-        } else {
-            // No need to change anything
-            return fqn;
         }
+        return builder.toString();
+
     }
 
     /**
