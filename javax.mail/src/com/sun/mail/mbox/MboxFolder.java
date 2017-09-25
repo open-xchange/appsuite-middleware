@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -82,7 +82,9 @@ public class MboxFolder extends Folder {
      * is null; otherwise the MboxMessage object contains the metadata.
      */
     static final class MessageMetadata {
-	public long end;	// offset in temp file of end of this message
+	public long start;	// offset in temp file of start of this message
+	// public long end;	// offset in temp file of end of this message
+	public long dataend;	// offset of end of message data, <= "end"
 	public MboxMessage message;	// the message itself
 	public boolean recent;	// message is recent?
 	public boolean deleted;	// message is marked deleted?
@@ -292,13 +294,11 @@ public class MboxFolder extends Folder {
     private boolean delete(File f) {
 	File[] files = f.listFiles();
 	boolean ret = true;
-	if (null != files) {
-	  for (int i = 0; ret && i < files.length; i++) {
+	for (int i = 0; ret && i < files.length; i++) {
 	    if (files[i].isDirectory())
 		ret = delete(files[i]);
 	    else
 		ret = files[i].delete();
-	  }
 	}
 	return ret;
     }
@@ -524,7 +524,6 @@ public class MboxFolder extends Folder {
 		folder.touchlock();
 		wr++;
 	    }
-	    file_size = saved_file_size = folder.length();
 	    // If no messages in the mailbox, and we're closing,
 	    // maybe we should remove the mailbox.
 	    if (wr == 0 && closing) {
@@ -544,6 +543,7 @@ e.printStackTrace();
 	    // close the folder, flushing out the data
 	    try {
 		os.close();
+		file_size = saved_file_size = folder.length();
 		if (!keep) {
 		    folder.delete();
 		    file_size = 0;
@@ -613,12 +613,11 @@ e.printStackTrace();
 		NewlineOutputStream nos = new NewlineOutputStream(cos);
 		msg.writeTo(nos);
 		nos.flush();
-		os = new NewlineOutputStream(os);
+		os = new NewlineOutputStream(os, true);
 		os = new ContentLengthUpdater(os, cos.getSize());
 		PrintStream pos = new PrintStream(os, false, "iso-8859-1");
 		pos.println(getUnixFrom(msg));
 		msg.writeTo(pos);
-		pos.println();	// make sure there's a blank line at the end
 		pos.flush();
 	    }
 	} catch (MessagingException me) {
@@ -714,13 +713,8 @@ e.printStackTrace();
 
     private InputStream getMessageStream(int msgno) {
 	int index = messageIndexOf(msgno);
-	long start;
-	if (index == 0)
-	    start = 0;
-	else
-	    start = ((MessageMetadata)messages.get(index - 1)).end;
-	long end = ((MessageMetadata)messages.get(index)).end;
-	return temp.newStream(start, end);
+	MessageMetadata md = (MessageMetadata)messages.get(index);
+	return temp.newStream(md.start, md.dataend);
     }
 
     public synchronized void appendMessages(Message[] msgs)
@@ -754,7 +748,9 @@ e.printStackTrace();
 	    if (os != null)
 		try {
 		    os.close();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+		    // ignored
+		}
 	    folder.unlock();
 	}
 	if (opened)

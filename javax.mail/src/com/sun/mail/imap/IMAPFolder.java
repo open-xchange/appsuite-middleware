@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -277,6 +277,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     					// the server
     private long uidvalidity = -1;	// UIDValidity
     private long uidnext = -1;		// UIDNext
+    private boolean uidNotSticky = false;	// RFC 4315
     private volatile long highestmodseq = -1;	// RFC 4551 - CONDSTORE
     private boolean doExpungeNotification = true; // used in expunge handler
 
@@ -401,7 +402,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	this.separator = separator;
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession());
-	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
+	connectionPoolLogger = store.getConnectionPoolLogger();
 	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
 	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
 
@@ -562,6 +563,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Get the fullname of this folder.
      */
+    @Override
     public String getFullName() {
 	return fullName;	
     }
@@ -1096,12 +1098,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    } catch (ProtocolException pex) {
 		// got a BAD or a BYE; connection may be bad, close it
 		try {
-		    protocol.logout();
-		} catch (ProtocolException pex2) {
-		    // ignore
+		    throw logoutAndThrow(pex.getMessage(), pex);
 		} finally {
 		    releaseProtocol(false);
-		    throw new MessagingException(pex.getMessage(), pex);
 		}
 	    }
 
@@ -1110,24 +1109,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			((IMAPStore)store).allowReadOnlySelect()) {
 		    ;		// all ok, allow it
 		} else {	// otherwise, it's an error
-		    try {
-			// close mailbox and return connection
-			protocol.close();
-			releaseProtocol(true);
-		    } catch (ProtocolException pex) {
-			// something went wrong, close connection
-			try {
-			    protocol.logout();
-			} catch (ProtocolException pex2) {
-			    // ignore
-			} finally {
-			    releaseProtocol(false);
-			}
-		    } finally {
-			throw new ReadOnlyFolderException(this,
-				      "Cannot open in desired mode");
-		    }
-
+		    ReadOnlyFolderException ife = new ReadOnlyFolderException(
+			    this, "Cannot open in desired mode");
+		    throw cleanupAndThrow(ife);
 		}
             }
 
@@ -1141,6 +1125,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    recent = mi.recent;
 	    uidvalidity = mi.uidvalidity;
 	    uidnext = mi.uidnext;
+	    uidNotSticky = mi.uidNotSticky;
 	    highestmodseq = mi.highestmodseq;
 
 	    // Create the message cache of appropriate size
@@ -1183,6 +1168,55 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	notifyConnectionListeners(ConnectionEvent.OPENED);
 
 	return openEvents;
+    }
+
+    private MessagingException cleanupAndThrow(MessagingException ife) {
+	try {
+	    try {
+		// close mailbox and return connection
+		protocol.close();
+		releaseProtocol(true);
+	    } catch (ProtocolException pex) {
+		// something went wrong, close connection
+		try {
+		    addSuppressed(ife, logoutAndThrow(pex.getMessage(), pex));
+		} finally {
+		    releaseProtocol(false);
+		}
+	    }
+	} catch (Throwable thr) {
+	    addSuppressed(ife, thr);
+	}
+	return ife;
+    }
+
+    private MessagingException logoutAndThrow(String why, ProtocolException t) {
+	MessagingException ife = new MessagingException(why, t);
+	try {
+	    protocol.logout();
+	} catch (Throwable thr) {
+	    addSuppressed(ife, thr);
+	}
+	return ife;
+    }
+
+    private void addSuppressed(Throwable ife, Throwable thr) {
+	if (isRecoverable(thr)) {
+	    ife.addSuppressed(thr);
+	} else {
+	    thr.addSuppressed(ife);
+	    if (thr instanceof Error) {
+		throw (Error) thr;
+	    }
+	    if (thr instanceof RuntimeException) {
+		throw (RuntimeException) thr;
+	    }
+	    throw new RuntimeException("unexpected exception", thr);
+	}
+    }
+
+    private boolean isRecoverable(Throwable t) {
+	return (t instanceof Exception) || (t instanceof LinkageError);
     }
 
     /**
@@ -1801,6 +1835,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Get the new message count.
      */
+    @Override
     public synchronized int getNewMessageCount() throws MessagingException {
 	synchronized (messageCacheLock) {
 	    if (opened) {
@@ -1958,6 +1993,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	return messageCache.getMessage(msgnum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized Message[] getMessages() throws MessagingException {
 	/*
@@ -1975,6 +2013,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Append the given messages into this folder.
      */
+    @Override
     public synchronized void appendMessages(Message[] msgs)
 				throws MessagingException {
 	checkExists(); // verify that self exists
@@ -2154,7 +2193,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
-     * Copy the specified messages from this folder, to the
+     * Move the specified messages from this folder, to the
      * specified destination.
      *
      * Depends on the MOVE extension
@@ -2172,14 +2211,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
-     * Copy the specified messages from this folder, to the
+     * Move the specified messages from this folder, to the
      * specified destination.
      * Return array of AppendUID objects containing
      * UIDs of these messages in the destination folder.
      * Each element of the returned array corresponds to
      * an element of the <code>msgs</code> array.  A null
      * element means the server didn't return UID information
-     * for the copied message.  <p>
+     * for the moved message.  <p>
      *
      * Depends on the MOVE extension
      * (<A HREF="http://www.ietf.org/rfc/rfc6851.txt">RFC 6851</A>)
@@ -2187,8 +2226,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * UIDPLUS extension
      * (<A HREF="http://www.ietf.org/rfc/rfc4315.txt">RFC 4315</A>).
      *
-     * @param	msgs	the messages to copy
-     * @param	folder	the folder to copy the messages to
+     * @param	msgs	the messages to move
+     * @param	folder	the folder to move the messages to
      * @return		array of AppendUID objects
      * @exception	MessagingException for failures
      * @since	JavaMail 1.5.4
@@ -2652,6 +2691,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain UIDValidity");
 	return status.uidvalidity;
     }
 
@@ -2673,7 +2714,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @exception	MessagingException for failures
      * @since	JavaMail 1.3.3
      */
-    // Not a UIDFolder method, but still useful
+    @Override
     public synchronized long getUIDNext() throws MessagingException {
 	if (opened) // we already have this information
 	    return uidnext;
@@ -2697,6 +2738,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain UIDNext");
 	return status.uidnext;
     }
 
@@ -2878,6 +2921,24 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Servers that support the UIDPLUS extension
+     * (<A HREF="http://www.ietf.org/rfc/rfc4315.txt">RFC 4315</A>)
+     * may indicate that this folder does not support persistent UIDs;
+     * that is, UIDVALIDITY will be different each time the folder is
+     * opened.  Only valid when the folder is open.
+     *
+     * @return	true if UIDs are not sticky
+     * @exception	MessagingException for failures
+     * @exception	IllegalStateException	if the folder isn't open
+     * @see "RFC 4315"
+     * @since	JavaMail 1.6.0
+     */
+    public synchronized boolean getUIDNotSticky() throws MessagingException {
+	checkOpened();
+	return uidNotSticky;
+    }
+
+    /**
      * Get or create Message objects for the UIDs.
      */
     private Message[] createMessagesForUIDs(long[] uids) {
@@ -2930,6 +2991,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain HIGHESTMODSEQ");
 	return status.highestmodseq;
     }
 
@@ -3284,6 +3347,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    "Folder already being watched by another IdleManager");
 	    Boolean started = (Boolean)doOptionalCommand("IDLE not supported",
 		new ProtocolCommand() {
+		    @Override
 		    public Object doCommand(IMAPProtocol p)
 			    throws ProtocolException {
 			// if the IdleManager is already watching this folder,
@@ -3507,11 +3571,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      *					ID extension
      * @since	JavaMail 1.5.1
      */
+    @SuppressWarnings("unchecked")
     public Map<String, String> id(final Map<String, String> clientParams)
 				throws MessagingException {
 	checkOpened();
 	return (Map<String,String>)doOptionalCommand("ID not supported",
 	    new ProtocolCommand() {
+		@Override
 		public Object doCommand(IMAPProtocol p)
 			throws ProtocolException {
 		    return p.id(clientParams);
@@ -3531,7 +3597,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @exception MessagingException	for errors
      * @since	JavaMail 1.5.2
      */
-    public long getStatusItem(String item) throws MessagingException {
+    public synchronized long getStatusItem(String item)
+				throws MessagingException {
 	if (!opened) {
 	    checkExists();
 
@@ -3541,7 +3608,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		p = getStoreProtocol();	// XXX
 		String[] items = { item };
 		status = p.status(fullName, items);
-		return status.getItem(item);
+		return status != null ? status.getItem(item) : -1;
 	    } catch (BadCommandException bex) {
 		// doesn't support STATUS, probably vanilla IMAP4 ..
 		// Could EXAMINE, SEARCH for UNREAD messages and
@@ -3657,6 +3724,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // EXPUNGE response.
 
 	    int seqnum = ir.getNumber();
+	    if (seqnum > realTotal) {
+		// A message was expunged that we never knew about.
+		// Exchange will do this.  Just ignore the notification.
+		// (Alternatively, we could simulate an EXISTS for the
+		// expunged message before expunging it.)
+		return;
+	    }
 	    Message[] msgs = null;
 	    if (doExpungeNotification && hasMessageCountListener) {
 		// save the Message object first; can't look it

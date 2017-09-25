@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.push.impl
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.hazelcast.config,
+Import-Package: com.google.common.collect,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,

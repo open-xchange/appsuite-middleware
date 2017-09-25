@@ -5,19 +5,19 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
     and Distribution License("CDDL") (collectively, the "License").  You
     may not use this file except in compliance with the License.  You can
     obtain a copy of the License at
-    https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
-    or packager/legal/LICENSE.txt.  See the License for the specific
+    https://oss.oracle.com/licenses/CDDL+GPL-1.1
+    or LICENSE.txt.  See the License for the specific
     language governing permissions and limitations under the License.
 
     When distributing the software, include this License Header Notice in each
-    file and include the License file at packager/legal/LICENSE.txt.
+    file and include the License file at LICENSE.txt.
 
     GPL Classpath Exception:
     Oracle designates this particular file as subject to the "Classpath"
@@ -54,28 +54,25 @@ The <code>javax.mail.internet</code> package defines classes that are specific
 to mail systems based on internet standards such as MIME, SMTP, POP3, and IMAP.
 The JavaMail API includes the <code>javax.mail</code> package and subpackages.
 <P>
-For an overview of the JavaMail API, read the JavaMail specification
-<A HREF="../../../JavaMail-1.4.pdf" TARGET="_top">
-included in the download bundle</A> or
-<A HREF="http://www.oracle.com/technetwork/java/javamail-1-149769.pdf" TARGET="_top">
-available on the JavaMail web site</A>.
+For an overview of the JavaMail API, read the
+<A HREF="http://javamail.java.net/nonav/docs/JavaMail-1.5.pdf" TARGET="_top">
+JavaMail specification</A>.
 <P>
 The code to send a plain text message can be as simple as the following:
 <PRE>
     Properties props = new Properties();
     props.put("mail.smtp.host", "my-mail-server");
-    props.put("mail.from", "me@example.com");
     Session session = Session.getInstance(props, null);
 
     try {
 	MimeMessage msg = new MimeMessage(session);
-	msg.setFrom();
+	msg.setFrom("me@example.com");
 	msg.setRecipients(Message.RecipientType.TO,
 			  "you@example.com");
 	msg.setSubject("JavaMail hello world example");
 	msg.setSentDate(new Date());
 	msg.setText("Hello, world!\n");
-	Transport.send(msg);
+	Transport.send(msg, "me@example.com", "my-password");
     } catch (MessagingException mex) {
 	System.out.println("send failed, exception: " + mex);
     }
@@ -91,6 +88,9 @@ The <A HREF="http://www.oracle.com/technetwork/java/javamail/" TARGET="_top">
 JavaMail web site</A>
 contains many additional resources.
 <P>
+<A NAME="properties">
+<H4>Properties</H4>
+</A>
 The JavaMail API supports the following standard properties,
 which may be set in the <code>Session</code> object, or in the
 <code>Properties</code> object used to create the <code>Session</code> object.
@@ -108,7 +108,8 @@ to set the <code>mail.debug</code> property, which is of type boolean.
 <TH>Description</TH>
 </TR>
 
-<TR>
+<A NAME="mail.debug"></A>
+<TR id="mail.debug">
 <TD>mail.debug</TD>
 <TD>boolean</TD>
 <TD>
@@ -117,7 +118,8 @@ Default is false.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.from"></A>
+<TR id="mail.from">
 <TD>mail.from</TD>
 <TD>String</TD>
 <TD>
@@ -126,7 +128,8 @@ The return email address of the current user, used by the
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.mime.address.strict"></A>
+<TR id="mail.mime.address.strict">
 <TD>mail.mime.address.strict</TD>
 <TD>boolean</TD>
 <TD>
@@ -137,7 +140,8 @@ method.  The default is true.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.host"></A>
+<TR id="mail.host">
 <TD>mail.host</TD>
 <TD>String</TD>
 <TD>
@@ -146,7 +150,8 @@ Used if the <code>mail.<i>protocol</i>.host</code> property isn't set.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.store.protocol"></A>
+<TR id="mail.store.protocol">
 <TD>mail.store.protocol</TD>
 <TD>String</TD>
 <TD>
@@ -157,7 +162,8 @@ provider in the configuration files is returned.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.transport.protocol"></A>
+<TR id="mail.transport.protocol">
 <TD>mail.transport.protocol</TD>
 <TD>String</TD>
 <TD>
@@ -168,7 +174,8 @@ provider in the configuration files is returned.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.user"></A>
+<TR id="mail.user">
 <TD>mail.user</TD>
 <TD>String</TD>
 <TD>
@@ -177,7 +184,8 @@ Used if the <code>mail.<i>protocol</i>.user</code> property isn't set.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.protocol.class"></A>
+<TR id="mail.protocol.class">
 <TD>mail.<i>protocol</i>.class</TD>
 <TD>String</TD>
 <TD>
@@ -189,7 +197,8 @@ in a configuration file.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.protocol.host"></A>
+<TR id="mail.protocol.host">
 <TD>mail.<i>protocol</i>.host</TD>
 <TD>String</TD>
 <TD>
@@ -198,7 +207,8 @@ Overrides the <code>mail.host</code> property.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.protocol.port"></A>
+<TR id="mail.protocol.port">
 <TD>mail.<i>protocol</i>.port</TD>
 <TD>int</TD>
 <TD>
@@ -207,7 +217,8 @@ If not specified the protocol's default port number is used.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.protocol.user"></A>
+<TR id="mail.protocol.user">
 <TD>mail.<i>protocol</i>.user</TD>
 <TD>String</TD>
 <TD>
@@ -220,7 +231,7 @@ Overrides the <code>mail.user</code> property.
 </TABLE>
 
 <P>
-The following properties are supported by Sun's implementation of
+The following properties are supported by the reference implementation (RI) of
 JavaMail, but are not currently a required part of the specification.
 The names, types, defaults, and semantics of these properties may
 change in future releases.
@@ -232,7 +243,8 @@ change in future releases.
 <TH>Description</TH>
 </TR>
 
-<TR>
+<A NAME="mail.debug.auth"></A>
+<TR id="mail.debug.auth">
 <TD>mail.debug.auth</TD>
 <TD>boolean</TD>
 <TD>
@@ -242,7 +254,28 @@ Default is false.
 </TD>
 </TR>
 
-<TR>
+<A NAME="mail.debug.auth.username"></A>
+<TR id="mail.debug.auth.username">
+<TD>mail.debug.auth.username</TD>
+<TD>boolean</TD>
+<TD>
+Include the user name in non-protocol debug output.
+Default is true.
+</TD>
+</TR>
+
+<A NAME="mail.debug.auth.password"></A>
+<TR id="mail.debug.auth.password">
+<TD>mail.debug.auth.password</TD>
+<TD>boolean</TD>
+<TD>
+Include the password in non-protocol debug output.
+Default is false.
+</TD>
+</TR>
+
+<A NAME="mail.transport.protocol.address-type"></A>
+<TR id="mail.transport.protocol.address-type">
 <TD>mail.transport.protocol.<i>address-type</i></TD>
 <TD>String</TD>
 <TD>
@@ -259,6 +292,36 @@ protocol is used instead of the "smtp" protocol by setting the property
 </TD>
 </TR>
 
+<A NAME="mail.event.scope"></A>
+<TR id="mail.event.scope">
+<TD>mail.event.scope</TD>
+<TD>String</TD>
+<TD>
+Controls the scope of events.  (See the javax.mail.event package.)
+By default, a separate event queue and thread is used for events for each
+Store, Transport, or Folder.
+If this property is set to "session", all such events are put in a single
+event queue processed by a single thread for the current session.
+If this property is set to "application", all such events are put in a single
+event queue processed by a single thread for the current application.
+(Applications are distinguished by their context class loader.)
+</TD>
+</TR>
+
+<A NAME="mail.event.executor"></A>
+<TR id="mail.event.executor">
+<TD>mail.event.executor</TD>
+<TD>java.util.concurrent.Executor</TD>
+<TD>
+By default, a new Thread is created for each event queue.
+This thread is used to call the listeners for these events.
+If this property is set to an instance of an Executor, the
+Executor.execute method is used to run the event dispatcher
+for an event queue.  The event dispatcher runs until the
+event queue is no longer in use.
+</TD>
+</TR>
+
 </TABLE>
 
 <P>
@@ -268,21 +331,46 @@ for details.
 
 <P>
 The JavaMail reference
-implementation from Sun includes protocol providers in subpackages of
+implementation includes protocol providers in subpackages of
 <code>com.sun.mail</code>.  Note that the APIs to these protocol
 providers are not part of the standard JavaMail API.  Portable
 programs will not use these APIs.
 <P>
-Nonportable programs may use the APIs of the Sun protocol providers
+Nonportable programs may use the APIs of the protocol providers
 by (for example) casting a returned <code>Folder</code> object to a
 <code>com.sun.mail.imap.IMAPFolder</code> object.  Similarly for
 <code>Store</code> and <code>Message</code> objects returned from the
 standard JavaMail APIs.
 <P>
-The Sun protocol providers also support properties that are specific to
+The protocol providers also support properties that are specific to
 those providers.  The package documentation for the
 {@link com.sun.mail.imap IMAP}, {@link com.sun.mail.pop3 POP3},
 and {@link com.sun.mail.smtp SMTP} packages provide details.
+<P>
+In addition to printing debugging output as controlled by the
+{@link javax.mail.Session Session} configuration, the current
+implementation of classes in this package log the same information using
+{@link java.util.logging.Logger} as described in the following table:
+<P>
+<TABLE BORDER>
+<TR>
+<TH>Logger Name</TH>
+<TH>Logging Level</TH>
+<TH>Purpose</TH>
+</TR>
+
+<TR>
+<TD>javax.mail</TD>
+<TD>CONFIG</TD>
+<TD>Configuration of the Session</TD>
+</TR>
+
+<TR>
+<TD>javax.mail</TD>
+<TD>FINE</TD>
+<TD>General debugging output</TD>
+</TR>
+</TABLE>
 
 </BODY>
 </HTML>

@@ -61,7 +61,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +69,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -91,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
 public class SubscriptionMultipleHandler implements MultipleHandler {
 
     /** The actions that require a request body */
-    public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("new","update","delete","list","fetch")));
+    public static final Set<String> ACTIONS_REQUIRING_BODY = ImmutableSet.of("new","update","delete","list","fetch");
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -306,7 +306,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return dynamicColumns;
     }
 
-    private static final Set<String> KNOWN_PARAMS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("folder","columns","session","action")));
+    private static final Set<String> KNOWN_PARAMS = ImmutableSet.of("folder","columns","session","action");
 
     private List<String> getDynamicColumnOrder(JSONObject request) throws JSONException {
         if (request.has("dynamicColumnPlugins")) {

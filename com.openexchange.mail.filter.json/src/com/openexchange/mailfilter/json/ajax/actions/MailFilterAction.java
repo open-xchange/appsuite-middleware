@@ -49,9 +49,6 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -60,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
@@ -207,7 +205,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return jsonObject;
     }
 
-    private static final Set<String> MUST_NOT_BE_EMPTY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("values")));
+    private static final Set<String> MUST_NOT_BE_EMPTY = ImmutableSet.of("values");
 
     private void checkJsonValue(final JSONValue jValue, final String name, final JSONValue parent) throws OXException {
         if (null != jValue) {

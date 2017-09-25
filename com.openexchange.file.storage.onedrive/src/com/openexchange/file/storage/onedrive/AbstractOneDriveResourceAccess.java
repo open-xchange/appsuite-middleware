@@ -56,9 +56,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -86,6 +83,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -202,7 +200,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
     /** The type constants for a folder */
-    private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM)));
+    private static final Set<String> TYPES_FOLDER = ImmutableSet.of(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM);
 
     /**
      * Checks if specified JSON item is a folder

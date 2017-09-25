@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,71 +47,70 @@
  *
  */
 
-package com.openexchange.userfeedback.starrating.v1;
+package javax.mail.osgi;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.HashSet;
-import java.util.Set;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
- * {@link StarRatingV1Fields}
+ * {@link BundleResourceLoader}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public enum StarRatingV1Fields {
-    date("Date"), // only for export
-    score("Score"),
-    comment("Comment"),
-    app("App"),
-    entry_point("Entry Point"),
-    operating_system("Operating System"),
-    browser("Browser"),
-    browser_version("Browser Version"),
-    user_agent("User Agent"),
-    screen_resolution("Screen Resolution"),
-    language("Language"),
-    user("User"), // only for export
-    server_version("Server Version"), // only for export
-    client_version("Client Version"),
-    ;
+public class BundleResourceLoader {
 
-    private static final Set<String> INTERNAL_KEYS;
+    private final BundleWiring bundleWiring;
 
-    static {
-        ImmutableSet.Builder<String> keys = ImmutableSet.builder();
-        for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
-            keys.add(field.name().toLowerCase());
+    /**
+     * Initializes a new {@link BundleResourceLoader}.
+     */
+    public BundleResourceLoader(Bundle bundle) {
+        super();
+        bundleWiring = bundle.adapt(BundleWiring.class);
+        if (bundleWiring == null) {
+            throw new IllegalArgumentException("The passed bundle cannot be adapted to org.osgi.framework.wiring.BundleWiring!");
         }
-        INTERNAL_KEYS = keys.build();
-    }
-
-    private String displayName;
-
-    StarRatingV1Fields(String displayName) {
-        this.displayName = displayName;
     }
 
     /**
-     * Gets the displayName
+     * Gets an input stream for reading the specified resource.
      *
-     * @return The displayName
+     * @param name The resource name
+     * @return An input stream for reading the resource, or <tt>null</tt> if the resource could not be found
+     * @throws IOException If resource cannot be opened
      */
-    public String getDisplayName() {
-        return displayName;
+    public InputStream getResourceAsStream(String name) throws IOException {
+        if (name == null || name.length() == 0) {
+            return null;
+        }
+
+        String filePattern = name;
+        int i = name.lastIndexOf('/');
+        if (i > 0) {
+            if (i < name.length() - 1) {
+                filePattern = name.substring(i + 1);
+            }
+        }
+
+        URL fileUrl = null;
+        List<URL> entries = bundleWiring.findEntries("/", filePattern, BundleWiring.FINDENTRIES_RECURSE);
+        for (URL entry : entries) {
+            if (entry.toExternalForm().endsWith(name)) {
+                fileUrl = entry;
+                break;
+            }
+        }
+
+        if (fileUrl == null) {
+            return null;
+        }
+
+        return fileUrl.openStream();
     }
 
-    /**
-     * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
-     *
-     * @return Set of {@link String} that are required within the {@link JSONObject}
-     */
-    public static Set<String> requiredJsonKeys() {
-        Set<String> copy = new HashSet<>(INTERNAL_KEYS);
-        copy.remove("date");
-        copy.remove("user");
-        copy.remove("server_version");
-        return copy;
-    }
 }
