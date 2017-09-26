@@ -60,6 +60,7 @@ import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
 /**
  * {@link EventFactory}
@@ -107,6 +108,18 @@ public final class EventFactory {
     public static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
         EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
         eventData.addAttachmentsItem(createAttachment(asset));
+        return eventData;
+    }
+    
+    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, String duration, RelatedEnum related) {
+        EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
+        eventData.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
+        return eventData;
+    }
+
+    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, String duration, RelatedEnum related) {
+        EventData eventData = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
+        eventData.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
         return eventData;
     }
 

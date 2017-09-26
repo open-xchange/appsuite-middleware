@@ -72,6 +72,7 @@ import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
+import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
 /**
@@ -88,6 +89,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     private long lastTimeStamp;
 
     protected UserApi defaultUserApi;
+    protected ChronosApi chronosApi;
 
     /**
      * Initialises a new {@link AbstractChronosTest}.
@@ -107,6 +109,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         ApiClient client = getClient();
         rememberClient(client);
         defaultUserApi = new UserApi(client, testUser);
+        chronosApi = defaultUserApi.getApi();
     }
 
     /*
