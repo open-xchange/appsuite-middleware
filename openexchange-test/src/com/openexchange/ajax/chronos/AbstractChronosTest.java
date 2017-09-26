@@ -54,16 +54,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarResult;
@@ -149,7 +145,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    public void rememberEventId(UserApi userApi, EventId eventId) {
+    protected void rememberEventId(UserApi userApi, EventId eventId) {
         if (eventIds == null) {
             eventIds = new HashMap<>();
         }
@@ -165,7 +161,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
      * @param userApi The {@link UserApi}
      * @param folder The folder
      */
-    public void rememberFolder(UserApi userApi, String folder) {
+    protected void rememberFolder(UserApi userApi, String folder) {
         if (folderToDelete == null) {
             folderToDelete = new HashMap<>();
         }
@@ -173,6 +169,43 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             folderToDelete.put(userApi, new ArrayList<>(1));
         }
         folderToDelete.get(userApi).add(folder);
+    }
+
+    /**
+     * Creates a new folder and remembers it.
+     * 
+     * @param api The {@link UserApi}
+     * @param session The user's session
+     * @param parent The parent folder
+     * @param entity The user id
+     * @return The result of the operation
+     * @throws ApiException if an API error is occurred
+     */
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(entity);
+        perm.setGroup(false);
+        perm.setBits(403710016);
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        permissions.add(perm);
+
+        FolderData folderData = new FolderData();
+        folderData.setModule("event");
+        folderData.setSubscribed(true);
+        folderData.setTitle("chronos_test_" + new UID().toString());
+        folderData.setPermissions(permissions);
+
+        FolderBody body = new FolderBody();
+        body.setFolder(folderData);
+
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
+        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
+
+        String result = createFolder.getData();
+        rememberFolder(api, result);
+
+        return result;
     }
 
     /**
@@ -224,45 +257,6 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
             }
         }
         throw new Exception("Unable to find default calendar folder!");
-    }
-
-    /**
-     * Creates a new folder and remembers it.
-     * 
-     * @param api The {@link UserApi}
-     * @param session The user's session
-     * @param parent The parent folder
-     * @param entity The user id
-     * @return The result of the operation
-     * @throws ApiException if an API error is occurred
-     */
-    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
-        FolderPermission perm = new FolderPermission();
-        perm.setEntity(entity);
-        perm.setGroup(false);
-        perm.setBits(403710016);
-
-        List<FolderPermission> permissions = new ArrayList<>();
-        permissions.add(perm);
-
-        FolderData folderData = new FolderData();
-        folderData.setModule("event");
-        folderData.setSubscribed(true);
-        folderData.setTitle("chronos_test_" + new UID().toString());
-        folderData.setPermissions(permissions);
-
-        FolderBody body = new FolderBody();
-        body.setFolder(folderData);
-
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
-        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
-
-        String result = createFolder.getData();
-
-        rememberFolder(api, result);
-
-        return result;
-
     }
 
     protected void setLastTimestamp(long timestamp) {
