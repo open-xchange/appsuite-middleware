@@ -60,6 +60,7 @@ import java.util.TimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;

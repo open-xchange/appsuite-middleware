@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;

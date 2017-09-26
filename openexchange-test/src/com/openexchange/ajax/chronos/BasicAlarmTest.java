@@ -57,6 +57,8 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;

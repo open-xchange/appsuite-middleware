@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.factory;
 
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -66,7 +66,7 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class EventFactory {
+public final class EventFactory {
 
     /**
      * Creates a single event for the specified user with in the specified interval.
@@ -78,11 +78,8 @@ final class EventFactory {
      * @param endDate The end date
      * @return The {@link EventData}
      */
-    static EventData createSingleEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate) {
-        Attendee attendee = new Attendee();
-        attendee.entity(userId);
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + emailAddress);
+    public static EventData createSingleEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate) {
+        Attendee attendee = AttendeeFactory.createIndividual(userId, emailAddress);
 
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
@@ -107,7 +104,7 @@ final class EventFactory {
      * @param asset The {@link Asset} to attach
      * @return The {@link EventData}
      */
-    static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
+    public static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
         EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
         eventData.addAttachmentsItem(createAttachment(asset));
         return eventData;
@@ -119,7 +116,7 @@ final class EventFactory {
      * @param asset The {@link Asset}
      * @return The {@link ChronosAttachment}
      */
-    static ChronosAttachment createAttachment(Asset asset) {
+    public static ChronosAttachment createAttachment(Asset asset) {
         ChronosAttachment attachment = new ChronosAttachment();
         attachment.setFilename(asset.getFilename());
         attachment.setFmtType(asset.getAssetType().name());
@@ -136,7 +133,7 @@ final class EventFactory {
      * @param summary The event's summary
      * @return The {@link EventData}
      */
-    static EventData createSingleTwoHourEvent(int userId, String emailAddress, String summary) {
+    public static EventData createSingleTwoHourEvent(int userId, String emailAddress, String summary) {
         Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         start.setTimeInMillis(System.currentTimeMillis());
 

@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.CalendarResult;

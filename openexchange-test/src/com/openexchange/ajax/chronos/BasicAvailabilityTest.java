@@ -57,6 +57,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.AvailabilityData;
 import com.openexchange.testing.httpclient.models.Available;
 import com.openexchange.testing.httpclient.models.GetAvailabilityResponse;

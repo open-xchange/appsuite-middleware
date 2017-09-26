@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +65,7 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-final class DateTimeUtil {
+public final class DateTimeUtil {
 
     /**
      * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
@@ -99,7 +99,7 @@ final class DateTimeUtil {
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
-    static DateTimeData getZuluDateTime(long millis) {
+    public static DateTimeData getZuluDateTime(long millis) {
         DateTimeData result = new DateTimeData();
         result.setTzid("UTC");
 
@@ -116,7 +116,7 @@ final class DateTimeUtil {
      * @return The {@link Date}
      * @throws ParseException if a parsing error occurs
      */
-    static Date parseZuluDateTime(String time) throws ParseException {
+    public static Date parseZuluDateTime(String time) throws ParseException {
         return ZULU_FORMATER.get().parse(time);
     }
 
@@ -127,7 +127,7 @@ final class DateTimeUtil {
      * @return The {@link Date} object
      * @throws ParseException if a parsing error occurs
      */
-    static Date parseDateTime(DateTimeData time) throws ParseException {
+    public static Date parseDateTime(DateTimeData time) throws ParseException {
         return BASIC_FORMATER.get().parse(time.getValue());
     }
 
@@ -137,7 +137,7 @@ final class DateTimeUtil {
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
-    static DateTimeData getDateTime(long millis) {
+    public static DateTimeData getDateTime(long millis) {
         return getDateTime(TimeZone.getDefault().getID(), millis);
     }
 
@@ -147,7 +147,7 @@ final class DateTimeUtil {
      * @param cal The {@link Calendar}
      * @return The {@link DateTimeData}
      */
-    static DateTimeData getDateTime(Calendar cal) {
+    public static DateTimeData getDateTime(Calendar cal) {
         return getDateTime(cal.getTimeZone().getID(), cal.getTimeInMillis());
     }
 
@@ -159,7 +159,7 @@ final class DateTimeUtil {
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
-    static DateTimeData getDateTime(String timezoneId, long millis) {
+    public static DateTimeData getDateTime(String timezoneId, long millis) {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);
 
@@ -177,7 +177,7 @@ final class DateTimeUtil {
      * @return The new {@link DateTimeData}
      * @throws ParseException if a parsing error occurs
      */
-    static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
+    public static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
         Date date = BASIC_FORMATER.get().parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime() + millis);
     }
@@ -190,7 +190,7 @@ final class DateTimeUtil {
      * @param datesToAdd The amount of days to add
      * @return The new {@link Date}
      */
-    static Date incrementDateTimeData(TimeZone localtimeZone, Date localDate, int datesToAdd) {
+    public static Date incrementDateTimeData(TimeZone localtimeZone, Date localDate, int datesToAdd) {
         Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
         localCalendar.setTime(localDate);
         localCalendar.add(Calendar.DAY_OF_YEAR, datesToAdd);

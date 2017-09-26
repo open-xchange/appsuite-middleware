@@ -60,6 +60,8 @@ import java.util.TimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
