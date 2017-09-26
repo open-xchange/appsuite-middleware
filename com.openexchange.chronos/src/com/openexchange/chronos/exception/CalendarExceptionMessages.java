@@ -99,6 +99,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_GEO_LOCATION_MSG = "The supplied geographical location is invalid. Please select valid coordinates and try again.";
 
+    public static final String INCOMPATIBLE_DATE_TYPES_MSG = "The supplied types of start and end date are incompatible. Please correct the event times and try again.";
+
     public static final String UNSUPPORTED_RRULE_MSG = "The supplied recurrence rule is not supported. Please use adjust the rule and try again.";
 
     public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";
@@ -122,7 +124,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String AUTH_FAILED_MSG = "Authentication failed.";
 
     public static final String BAD_AUTH_CONFIGURATION_MSG = "Unable to create account. There have been issues with the provided authentication.";
-    
+
     public static final String QUOTA_EXCEEDED = "The quota for account '%1$s' in context '%2$s' exceeded the limit.";
 
     /**

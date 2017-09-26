@@ -60,6 +60,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDER_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
@@ -72,7 +73,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUOTA_EXCEEDED;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
@@ -252,6 +252,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_OPERATION_FOR_PROVIDER("Unsupported operation for calendar provider [provider %1$s]", UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG, Category.CATEGORY_USER_INPUT, 4228),
     /**
+     * <li>The supplied types of start and end date are incompatible. Please correct the event times and try again.</li>
+     * <li>Incompatible date types [start %1$d, end %2$d]</li>
+     */
+    INCOMPATIBLE_DATE_TYPES("Incompatible date types [start %1$d, end %2$d]", INCOMPATIBLE_DATE_TYPES_MSG, Category.CATEGORY_USER_INPUT, 4229),
+    /**
      * <li>The supplied timezone is invalid. Please select a valid timezone and try again.</li>
      * <li>Invalid timezone [timezone id %1$s]</li>
      */
@@ -313,7 +318,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
-    
+
     ;
 
     public static final String PREFIX = "CAL".intern();
