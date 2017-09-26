@@ -1673,6 +1673,8 @@ public class MimeMessageFiller {
 
     private static final String VERSION_NAME = Version.NAME;
 
+    private static final Pattern PATTERN_SRC_ATTR = Pattern.compile("(?i)src=\"[^\"]*\"");
+
     /**
      * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
@@ -1702,15 +1704,9 @@ public class MimeMessageFiller {
                     final String id = m.getManagedFileId();
                     ImageProvider imageProvider;
                     if (null != id) {
-                        if (mfm.contains(id)) {
-                            try {
-                                imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
-                            } catch (final OXException e) {
-                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
-                                // Anyway, replace image tag
-                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
-                                continue;
-                            }
+                        ManagedFile managedFile = mfm.optByID(id);
+                        if (null != managedFile) {
+                            imageProvider = new ManagedFileImageProvider(managedFile);
                         } else {
                             // "ajax/file?..." but no matching file, check in referenced ones
                             int size = mail.getEnclosedCount();
@@ -1843,9 +1839,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst(
-                        "(?i)src=\"[^\"]*\"",
-                        com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
+                    String iTag = PATTERN_SRC_ATTR.matcher(imageTag).replaceFirst(com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
