@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -70,7 +69,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderBody;
@@ -183,26 +181,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
      * @return The default calendar folder of the current user
      * @throws Exception if the default calendar folder cannot be found
      */
-    @SuppressWarnings("unchecked")
     protected String getDefaultFolder() throws Exception {
-        FoldersVisibilityResponse visibleFolders = defaultUserApi.getFoldersApi().getVisibleFolders(defaultUserApi.getSession(), "event", "1,308", "0");
-        if (visibleFolders.getError() != null) {
-            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
-        }
-
-        Object privateFolders = visibleFolders.getData().getPrivate();
-
-        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
-        if (privateList.size() == 1) {
-            return (String) privateList.get(0).get(0);
-        } else {
-            for (ArrayList<?> folder : privateList) {
-                if ((Boolean) folder.get(1)) {
-                    return (String) folder.get(0);
-                }
-            }
-        }
-        throw new Exception("Unable to find default calendar folder!");
+        return getDefaultFolder(defaultUserApi.getSession(), defaultUserApi.getFoldersApi());
     }
 
     /**
@@ -213,9 +193,21 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    @SuppressWarnings("unchecked")
     protected String getDefaultFolder(String session, ApiClient client) throws Exception {
-        FoldersVisibilityResponse visibleFolders = new FoldersApi(client).getVisibleFolders(session, "event", "1,308", "0");
+        return getDefaultFolder(session, new FoldersApi(client));
+    }
+
+    /**
+     * Retrieves the default calendar folder of the user with the specified session
+     * 
+     * @param session The session of the user
+     * @param foldersApi The {@link FoldersApi}
+     * @return The default calendar folder of the user
+     * @throws Exception if the default calendar folder cannot be found
+     */
+    @SuppressWarnings("unchecked")
+    private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "event", "1,308", "0");
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
