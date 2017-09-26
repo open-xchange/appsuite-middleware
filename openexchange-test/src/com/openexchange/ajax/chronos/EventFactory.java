@@ -107,8 +107,8 @@ final class EventFactory {
      * @param asset The {@link Asset} to attach
      * @return The {@link EventData}
      */
-    static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, Asset asset) {
-        EventData eventData = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
+    static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
+        EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
         eventData.addAttachmentsItem(createAttachment(asset));
         return eventData;
     }
@@ -119,7 +119,7 @@ final class EventFactory {
      * @param asset The {@link Asset}
      * @return The {@link ChronosAttachment}
      */
-    private static ChronosAttachment createAttachment(Asset asset) {
+    static ChronosAttachment createAttachment(Asset asset) {
         ChronosAttachment attachment = new ChronosAttachment();
         attachment.setFilename(asset.getFilename());
         attachment.setFmtType(asset.getAssetType().name());

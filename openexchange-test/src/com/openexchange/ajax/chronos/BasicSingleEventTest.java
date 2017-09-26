@@ -67,14 +67,10 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.configuration.asset.AssetType;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
-import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
@@ -92,41 +88,18 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     private String folderId;
 
-    private EventData createSingleEvent(String summary, DateTimeData startDate, DateTimeData endDate) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(startDate);
-        singleEvent.setEndDate(endDate);
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-        singleEvent.setSummary(summary);
-        return singleEvent;
+    /**
+     * Initialises a new {@link BasicSingleEventTest}.
+     */
+    public BasicSingleEventTest() {
+        super();
     }
 
-    private EventData createSingleEventWithAttachment(String summary, DateTimeData startDate, DateTimeData endDate, Asset asset) {
-        EventData eventData = createSingleEvent(summary, startDate, endDate);
-        eventData.addAttachmentsItem(createAttachment(asset));
-        return eventData;
-    }
-
-    private ChronosAttachment createAttachment(Asset asset) {
-        ChronosAttachment attachment = new ChronosAttachment();
-        attachment.setFilename(asset.getFilename());
-        attachment.setFmtType(asset.getAssetType().name());
-        attachment.setUri("file:///");
-
-        return attachment;
-    }
-
-    private EventData createSingleEvent(String summary) {
-        return createSingleEvent(summary, getDateTime(System.currentTimeMillis()), getDateTime(System.currentTimeMillis() + 5000));
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.chronos.AbstractChronosTest#setUp()
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -135,7 +108,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     @Test
     public void testCreateSingle() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testCreateSingle"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
@@ -146,7 +119,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     @Test
     public void testDeleteSingle() throws Exception {
 
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testDeleteSingle"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteSingle"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
@@ -164,7 +137,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     @Test
     public void testUpdateSingle() throws Exception {
-        EventData initialEvent = createSingleEvent("testUpdateSingle");
+        EventData initialEvent = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingle");
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
         EventData event = handleCreation(createEvent);
 
@@ -189,7 +162,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Date tomorrow = getAPIDate(TimeZone.getTimeZone("UTC"), date, 1);
 
         // Create a single event
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testGetEvent"), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testGetEvent"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
@@ -205,7 +178,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
 
         // Get all events
-        EventsResponse eventsResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), getZuluDateTime(today.getTime()).getValue(), getZuluDateTime(tomorrow.getTime()).getValue(), folderId, null, null, null, false, true);
+        EventsResponse eventsResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(today.getTime()).getValue(), DateTimeUtil.getZuluDateTime(tomorrow.getTime()).getValue(), folderId, null, null, null, false, true);
         assertNull(eventsResponse.getErrorDesc(), eventsResponse.getError());
         assertNotNull(eventsResponse.getData());
         assertEquals(1, eventsResponse.getData().size());
@@ -238,7 +211,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent("testCreateSingle", getDateTime(start), getDateTime(end)), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle", getDateTime(start), getDateTime(end)), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
@@ -255,16 +228,10 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testCreateSingleWithAttachment() throws Exception {
         EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
 
-        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        start.setTimeInMillis(System.currentTimeMillis());
-
-        Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
-
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, createSingleEventWithAttachment("testCreateSingleWithAttachment", getDateTime(start), getDateTime(end), asset).toJson(), new File(asset.getAbsolutePath()), false, false);
+        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset).toJson(), new File(asset.getAbsolutePath()), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
@@ -289,7 +256,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        EventData initialEvent = createSingleEventWithAttachment("testCreateSingleWithAttachment", getDateTime(start), getDateTime(end), asset);
+        EventData initialEvent = EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset);
         ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, initialEvent.toJson(), new File(asset.getAbsolutePath()), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
@@ -301,7 +268,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertEquals("The amount of attachments is not correct", 1, attachments.size());
 
         asset = assetManager.getRandomAsset(AssetType.png);
-        event.getAttachments().add(createAttachment(asset));
+        event.getAttachments().add(EventFactory.createAttachment(asset));
 
         ChronosCalendarResultResponse updateResponse = eca.updateEventWithAttachments(defaultUserApi.getSession(), folderId, event.getId(), System.currentTimeMillis(), event.toJson(), new File(asset.getAbsolutePath()), null, true, false);
         assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
