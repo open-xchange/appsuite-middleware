@@ -167,7 +167,10 @@ public enum Property {
         final Property[] props = values();
         final Set<String> names = new LinkedHashSet<String>(props.length);
         for (final Property property : props) {
-            names.add(property.propName);
+            String name = property.propName;
+            if (null != name) {
+                names.add(name);
+            }
         }
         PROP_NAMES = ImmutableSet.copyOf(names);
     }

@@ -109,9 +109,9 @@ public class PGPMimeServiceImpl implements PGPMimeService {
      */
     private HashMap<String, String> getHeadersFrom(MimeMessage mimeMessage) throws MessagingException {
         HashMap<String, String> ret = new HashMap<String, String>();
-        Enumeration headers = mimeMessage.getAllHeaders();
+        Enumeration<Header> headers = mimeMessage.getAllHeaders();
         while (headers.hasMoreElements()) {
-            Header h = (Header) headers.nextElement();
+            Header h = headers.nextElement();
             ret.put(h.getName(), h.getValue());
         }
         return ret;
