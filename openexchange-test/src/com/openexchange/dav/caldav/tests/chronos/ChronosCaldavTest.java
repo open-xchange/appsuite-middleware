@@ -90,7 +90,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = AbstractChronosTest.ZULU_FORMATER.get().format(yesterday);
         String rangeEnd = AbstractChronosTest.ZULU_FORMATER.get().format(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
 
@@ -103,7 +103,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
                     eventId.setRecurrenceId(event.getRecurrenceId());
                     rememberEventId(defaultUserApi, eventId);
                 }
-                return defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
+                return defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
             }
         }
         return null;
@@ -127,13 +127,13 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = AbstractChronosTest.ZULU_FORMATER.get().format(yesterday);
         String rangeEnd = AbstractChronosTest.ZULU_FORMATER.get().format(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         List<EventData> result = new ArrayList<>();
         for(EventData event: allEventResponse.getData()){
             if(seriesId.equals(event.getSeriesId()) && !seriesId.equals(event.getId())){
-                result.add(defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
+                result.add(defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
             }
         }
         return result;

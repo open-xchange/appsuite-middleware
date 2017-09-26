@@ -134,7 +134,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
 
         // Try creating a new event
         LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), client);
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));

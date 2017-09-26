@@ -96,7 +96,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          */
         {
             EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "-PT10M", RelatedEnum.START);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
+            ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
             event = handleCreation(createEvent);
 
             getAndCheckEvent(event, 1);
@@ -109,14 +109,14 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
+            defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
         }
         /*
          * 2. Test alarm related to end
          */
         {
             EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "-PT10M", RelatedEnum.END);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
+            ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
             event = handleCreation(createEvent);
 
             getAndCheckEvent(event, 1);
@@ -147,7 +147,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          */
         {
             EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "PT10M", RelatedEnum.START);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
+            ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
             event = handleCreation(createEvent);
 
             getAndCheckEvent(event, 1);
@@ -160,14 +160,14 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
+            defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
         }
         /*
          * 2. Test alarm related to end
          */
         {
             EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "PT10M", RelatedEnum.END);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
+            ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
             event = handleCreation(createEvent);
 
             getAndCheckEvent(event, 1);

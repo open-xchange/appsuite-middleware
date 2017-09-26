@@ -109,7 +109,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         ApiClient client = getClient();
         rememberClient(client);
         defaultUserApi = new UserApi(client, testUser);
-        chronosApi = defaultUserApi.getApi();
+        chronosApi = defaultUserApi.getChronosApi();
     }
 
     /*
@@ -123,7 +123,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         try {
             if (eventIds != null) {
                 for (UserApi api : eventIds.keySet()) {
-                    api.getApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api));
+                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api));
                 }
             }
         } catch (Exception e) {

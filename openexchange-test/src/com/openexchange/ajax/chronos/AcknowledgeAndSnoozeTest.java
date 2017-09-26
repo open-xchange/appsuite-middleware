@@ -103,7 +103,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData getEvent = getAndCheckEvent(event, 1);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
 
-        ChronosCalendarResultResponse acknowledgeAlarm = defaultUserApi.getApi().acknowledgeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(alarmTrigger.getAlarmId()));
+        ChronosCalendarResultResponse acknowledgeAlarm = defaultUserApi.getChronosApi().acknowledgeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(alarmTrigger.getAlarmId()));
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getData());
         assertEquals(1, checkResponse.getUpdated().size());
         EventData updated = checkResponse.getUpdated().get(0);
@@ -131,7 +131,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
         // Snooze the alarm by 5 minutes
         long expectedTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
-        ChronosCalendarResultResponse snoozeResponse = defaultUserApi.getApi().snoozeAlarm(defaultUserApi.getSession(), event.getId(), folderId, alarmId, TimeUnit.MINUTES.toMillis(5));
+        ChronosCalendarResultResponse snoozeResponse = defaultUserApi.getChronosApi().snoozeAlarm(defaultUserApi.getSession(), event.getId(), folderId, alarmId, TimeUnit.MINUTES.toMillis(5));
         CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         EventData updatedEvent = snoozeResult.getUpdated().get(0);
@@ -146,7 +146,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
         // Snooze the alarm again by 10 minutes
         expectedTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
-        snoozeResponse = defaultUserApi.getApi().snoozeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(snoozeAlarmId), TimeUnit.MINUTES.toMillis(10));
+        snoozeResponse = defaultUserApi.getChronosApi().snoozeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(snoozeAlarmId), TimeUnit.MINUTES.toMillis(10));
         snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getData());
         assertEquals(1, snoozeResult.getUpdated().size());
         updatedEvent = snoozeResult.getUpdated().get(0);

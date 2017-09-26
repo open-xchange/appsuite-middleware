@@ -232,7 +232,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         String secondSession = user2.getSession();
         users[1].setUserId(user2.getCalUser());
 
-        ChronosApi secondUserChronosApi = user2.getApi();
+        ChronosApi secondUserChronosApi = user2.getChronosApi();
         String secondUserFolder = getDefaultFolder(secondSession, user2.getClient());
         // Do a request to get a valid timestamp
         EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, "20170101T000000Z", "20180101T000000Z", secondUserFolder, null, null, null, false, true);
@@ -373,7 +373,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
                 attendees.add(att);
             }
         }
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), true, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), true, false);
         assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);

@@ -186,7 +186,7 @@ public class UserApi {
      *
      * @return The api
      */
-    public ChronosApi getApi() {
+    public ChronosApi getChronosApi() {
         return chronosApi;
     }
 
