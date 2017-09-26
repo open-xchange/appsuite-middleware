@@ -103,7 +103,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ICalExporter extends AbstractExporter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalChronosExporter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
 
     private static final Date DATE_ZERO = new Date(0);
     protected final static int[] _taskFields = {
