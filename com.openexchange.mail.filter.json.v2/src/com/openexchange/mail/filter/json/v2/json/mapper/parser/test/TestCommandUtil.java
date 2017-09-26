@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,102 +47,37 @@
  *
  */
 
-package com.openexchange.jsieve.commands;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
+
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
 
 /**
- * {@link MatchType}
+ * {@link TestCommandUtil}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MatchType {
-    is,
-    contains,
-    matches,
-
-    // regex match type
-    regex("regex"),
-
-    // relational match types
-    value("relational"),
-    ge("relational"),
-    le("relational"),
-
-    // Size match types
-    over,
-    under,
-
-    // simplified matcher
-    startswith,
-    endswith,
-    exists;
-
-    private String argumentName;
-    private String require;
-    private String notName;
+public final class TestCommandUtil {
 
     /**
-     * Initializes a new {@link MatchType}.
+     * Tests if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     * 
+     * @param headerTest The {@link SimplifiedHeaderTest}
+     * @param headers The {@link JSONArray} with the headers
+     * @return <code>true</code> if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     *         <code>false</code> otherwise
      */
-    private MatchType() {
-        this.argumentName = ":" + this.name();
-        this.require = "";
-        this.notName = "not " + this.name();
-    }
-
-    /**
-     * Initializes a new {@link MatchType}.
-     */
-    private MatchType(String require) {
-        this.argumentName = ":" + this.name();
-        this.require = require;
-        this.notName = "not " + this.name();
-    }
-
-    public String getArgumentName() {
-        return argumentName;
-    }
-
-    public String getRequire() {
-        return require;
-    }
-
-    public String getNotName() {
-        return notName;
-    }
-
-    /**
-     * Retrieves the name of the matcher if the given string is a "not name".
-     *
-     * @param notName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNormalName(String notName) {
-        for (MatchType type : MatchType.values()) {
-            if (notName.equals(type.getNotName())) {
-                return type.name();
+    public static boolean isSimplified(SimplifiedHeaderTest headerTest, JSONArray headers) {
+        List<String> simplifiedHeaders = headerTest.getHeaderNames();
+        if (simplifiedHeaders.size() != headers.length()) {
+            return false;
+        }
+        for (Object header : headers) {
+            if (!simplifiedHeaders.contains(header)) {
+                return false;
             }
         }
-        return null;
+        return true;
     }
-
-    /**
-     * Retrieves the not name of the {@link MatchType} with the given argument name
-     *
-     * @param argumentName The name of the matcher
-     * @return The normal name or null
-     */
-    public static String getNotNameForArgumentName(String argumentName) {
-        return MatchType.valueOf(argumentName.substring(1)).getNotName();
-    }
-
-    public static boolean containsMatchType(String matchTypeName) {
-        for (MatchType cmd : values()) {
-            if (cmd.name().equals(matchTypeName) || cmd.getNotName().equals(matchTypeName)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }
