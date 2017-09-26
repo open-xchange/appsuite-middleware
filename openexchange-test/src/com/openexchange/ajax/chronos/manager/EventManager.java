@@ -52,19 +52,25 @@ package com.openexchange.ajax.chronos.manager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
+import com.openexchange.testing.httpclient.models.EventsResponse;
+import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
  * {@link EventManager}
@@ -89,7 +95,7 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Creates an event
+     * Creates an event and does not ignore conflicts
      * 
      * @param eventData The data of the event
      * @return The created {@link EventData}
@@ -133,6 +139,36 @@ public class EventManager extends AbstractManager {
     }
 
     /**
+     * Retrieves all events with in the specified interval
+     * 
+     * @param from The starting date
+     * @param until The ending date
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
+    public List<EventData> getAllEvents(Date from, Date until) throws ApiException {
+        EventsResponse eventsResponse = userApi.getApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, false, true);
+        assertNull(eventsResponse.getErrorDesc(), eventsResponse.getError());
+        assertNotNull(eventsResponse.getData());
+        return eventsResponse.getData();
+    }
+
+    /**
+     * Lists the events with the specified identifiers
+     * 
+     * @param ids The event identifiers
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
+    public List<EventData> listEvents(List<EventId> ids) throws ApiException {
+        EventsResponse listResponse = userApi.getApi().getEventList(userApi.getSession(), ids, null);
+        assertNull(listResponse.getErrorDesc(), listResponse.getError());
+        assertNotNull(listResponse.getData());
+
+        return listResponse.getData();
+    }
+
+    /**
      * Deletes the event with the specified identifier
      * 
      * @param eventId The {@link EventId}
@@ -142,6 +178,35 @@ public class EventManager extends AbstractManager {
         ChronosCalendarResultResponse deleteResponse = userApi.getApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
     }
+
+    /**
+     * Updates the specified event and ignores conflicts
+     * 
+     * @param eventData The data of the event
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData updateEvent(EventData eventData) throws ApiException {
+        ChronosCalendarResultResponse updateResponse = userApi.getApi().updateEvent(userApi.getSession(), defaultFolder, eventData.getId(), eventData, System.currentTimeMillis(), null, true, false);
+        return handleUpdate(updateResponse);
+    }
+
+    /**
+     * Gets all changed events since the given timestamp.
+     * 
+     * @param since The timestamp
+     * @return The {@link UpdatesResult}
+     * @throws ApiException if an API error is occurred
+     */
+    public UpdatesResult getUpdates(Date since) throws ApiException {
+        ChronosUpdatesResponse updatesResponse = userApi.getApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, false, true);
+        assertNull(updatesResponse.getErrorDesc(), updatesResponse.getError());
+        assertNotNull(updatesResponse.getData());
+
+        return updatesResponse.getData();
+    }
+
+    //////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
 
     /**
      * Handles the result response of an event creation
@@ -161,6 +226,16 @@ public class EventManager extends AbstractManager {
         this.setLastTimestamp(createEvent.getTimestamp());
 
         return event;
+    }
+
+    private EventData handleUpdate(ChronosCalendarResultResponse updateEvent) {
+        assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
+        assertNotNull(updateEvent.getData());
+
+        List<EventData> updates = updateEvent.getData().getUpdated();
+        assertTrue(updates.size() == 1);
+
+        return updates.get(0);
     }
 
     /**
