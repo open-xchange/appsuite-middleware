@@ -76,7 +76,7 @@ import com.openexchange.testing.httpclient.models.EventData;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
-    private void checkAlarmTimeRoughly(long expectedTime, long value){
+    private void checkAlarmTimeRoughly(long expectedTime, long value) {
         Calendar exp = Calendar.getInstance();
         exp.setTimeInMillis(expectedTime);
         exp.set(Calendar.SECOND, 0);
@@ -101,7 +101,6 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
         EventData getEvent = getAndCheckEvent(event, 1);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
-
 
         ChronosCalendarResultResponse acknowledgeAlarm = defaultUserApi.getApi().acknowledgeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(alarmTrigger.getAlarmId()));
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getData());
@@ -140,7 +139,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         triggerData = getAndCheckAlarmTrigger(2);
         AlarmTrigger alarmTrigger2 = triggerData.get(0);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
-        Date parsedTime = ZULU_FORMATER.get().parse(alarmTrigger2.getTime());
+        Date parsedTime = DateTimeUtil.parseZuluDateTime(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
         String snoozeAlarmId = alarmTrigger2.getAlarmId();
 
@@ -156,7 +155,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         alarmTrigger2 = triggerData.get(0);
         assertNotEquals(alarmTrigger2.getAlarmId(), alarmTrigger.getAlarmId());
         assertNotEquals(alarmTrigger2.getAlarmId(), snoozeAlarmId);
-        parsedTime = ZULU_FORMATER.get().parse(alarmTrigger2.getTime());
+        parsedTime = DateTimeUtil.parseZuluDateTime(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
 
     }

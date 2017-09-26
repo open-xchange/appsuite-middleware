@@ -141,7 +141,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
         EventData event = handleCreation(createEvent);
 
-        event.setEndDate(addTimeToDateTimeData(event.getEndDate(), 5000));
+        event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), 5000));
 
         ChronosCalendarResultResponse updateResponse = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), event, System.currentTimeMillis(), null, true, false);
         assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
@@ -211,7 +211,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle", getDateTime(start), getDateTime(end)), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)), false, false);
         EventData event = handleCreation(createEvent);
         EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());

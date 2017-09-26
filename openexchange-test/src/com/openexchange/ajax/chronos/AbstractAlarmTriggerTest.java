@@ -106,7 +106,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         singleEvent.setAttendees(Collections.singletonList(attendee));
         singleEvent.setStartDate(startDate);
 
-        singleEvent.setEndDate(addTimeToDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
+        singleEvent.setEndDate(DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
         singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration, related)));
@@ -142,11 +142,11 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         } else {
             seriesEvent.setAttendees(attendees);
         }
-        seriesEvent.setStartDate(getDateTime(startDate));
+        seriesEvent.setStartDate(DateTimeUtil.getDateTime(startDate));
         Calendar endDate = Calendar.getInstance(startDate.getTimeZone());
         endDate.setTimeInMillis(startDate.getTimeInMillis());
         endDate.add(Calendar.HOUR, 1);
-        seriesEvent.setEndDate(getDateTime(endDate));
+        seriesEvent.setEndDate(DateTimeUtil.getDateTime(endDate));
         seriesEvent.setTransp(TranspEnum.OPAQUE);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=4");
         seriesEvent.setAllDay(false);
@@ -187,7 +187,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ApiException
      */
     private AlarmTriggerResponse getAlarmTrigger(long until, String actions, ChronosApi chronosApi, String session) throws ApiException {
-        return chronosApi.getAlarmTrigger(session, getZuluDateTime(until).getValue(), actions);
+        return chronosApi.getAlarmTrigger(session, DateTimeUtil.getZuluDateTime(until).getValue(), actions);
     }
 
     /**
@@ -206,11 +206,11 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     protected CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
         Calendar newStartTime = Calendar.getInstance(startTime.getTimeZone());
         newStartTime.setTimeInMillis(startTime.getTimeInMillis() + unit.toMillis(value));
-        event.setStartDate(getDateTime(newStartTime));
+        event.setStartDate(DateTimeUtil.getDateTime(newStartTime));
         Calendar endTime = Calendar.getInstance(startTime.getTimeZone());
         endTime.setTimeInMillis(startTime.getTimeInMillis());
         endTime.add(Calendar.HOUR, 1);
-        event.setEndDate(getDateTime(endTime));
+        event.setEndDate(DateTimeUtil.getDateTime(endTime));
         ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, eventId, event, timestamp, recurrence, false, false);
         this.setLastTimestamp(updateEvent.getTimestamp());
         return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
@@ -281,6 +281,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
 
     /**
      * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
+     * 
      * @return The calendar
      */
     protected Calendar getUTCCalendar() {
@@ -304,7 +305,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, long startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M", null), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
 
@@ -319,7 +320,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, getDateTime(startTime), "-PT15M", null), false, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false);
         return handleCreation(createEvent);
     }
 
@@ -361,7 +362,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      */
     protected void checkAlarmTime(AlarmTrigger trigger, String eventId, long expectedTime) throws ParseException {
         assertEquals(eventId, trigger.getEventId());
-        Date parsedTime = ZULU_FORMATER.get().parse(trigger.getTime());
+        Date parsedTime = DateTimeUtil.parseZuluDateTime(trigger.getTime());
         assertEquals(expectedTime, parsedTime.getTime());
     }
 

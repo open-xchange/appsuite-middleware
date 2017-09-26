@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +61,8 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
  * {@link DateTimeUtil}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
 final class DateTimeUtil {
 
@@ -106,6 +109,28 @@ final class DateTimeUtil {
     }
 
     /**
+     * Parses the specified time string into a {@link Date} object using the ZULU format
+     * 
+     * @param time The time
+     * @return The {@link Date}
+     * @throws ParseException if a parsing error occurs
+     */
+    static Date parseZuluDateTime(String time) throws ParseException {
+        return ZULU_FORMATER.get().parse(time);
+    }
+
+    /**
+     * Parses the specified {@link DateTimeData} object to a {@link Date} object
+     * 
+     * @param time The {@link DateTimeData} object
+     * @return The {@link Date} object
+     * @throws ParseException if a parsing error occurs
+     */
+    static Date parseDateTime(DateTimeData time) throws ParseException {
+        return BASIC_FORMATER.get().parse(time.getValue());
+    }
+
+    /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} format
      * 
      * @param millis The millisecond timestamp
@@ -141,5 +166,18 @@ final class DateTimeUtil {
         result.setValue(BASIC_FORMATER.get().format(date));
 
         return result;
+    }
+
+    /**
+     * Adds the specified millisecond timestamp to the specified {@link DateTimeData}
+     * 
+     * @param data The {@link DateTimeData}
+     * @param millis The timestamp to add
+     * @return The new {@link DateTimeData}
+     * @throws ParseException if a parsing error occurs
+     */
+    static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
+        Date date = BASIC_FORMATER.get().parse(data.getValue());
+        return getDateTime(data.getTzid(), date.getTime() + millis);
     }
 }

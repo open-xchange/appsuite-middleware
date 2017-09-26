@@ -155,8 +155,8 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
      */
     private Available createAvailable(long from, long until) {
         Available available = new Available();
-        available.setStart(getDateTime(from));
-        available.setEnd(getDateTime(until));
+        available.setStart(DateTimeUtil.getDateTime(from));
+        available.setEnd(DateTimeUtil.getDateTime(until));
         available.setUser(defaultUserApi.getCalUser());
         return available;
     }

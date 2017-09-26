@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -85,35 +84,10 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  * {@link AbstractChronosTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
-
-    /**
-     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss</code> as pattern.
-     */
-    public static final ThreadLocal<SimpleDateFormat> BASIC_FORMATER = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-            dateFormat.setTimeZone(TimeZones.UTC);
-            return dateFormat;
-        }
-    };
-
-    /**
-     * Thread local {@link SimpleDateFormat} using <code>yyyyMMdd'T'HHmmss'Z'</code> as pattern.
-     */
-    public static final ThreadLocal<SimpleDateFormat> ZULU_FORMATER = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-            dateFormat.setTimeZone(TimeZones.UTC);
-            return dateFormat;
-        }
-    };
 
     Map<UserApi, List<EventId>> eventIds;
     Map<UserApi, List<String>> folderToDelete;
@@ -121,6 +95,18 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected UserApi defaultUserApi;
 
+    /**
+     * Initialises a new {@link AbstractChronosTest}.
+     */
+    public AbstractChronosTest() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAPIClientSession#setUp()
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -129,26 +115,11 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         defaultUserApi = new UserApi(client, testUser);
     }
 
-    public void rememberEventId(UserApi userApi, EventId eventId) {
-        if (eventIds == null) {
-            eventIds = new HashMap<>();
-        }
-        if (!eventIds.containsKey(userApi)) {
-            eventIds.put(userApi, new ArrayList<>(1));
-        }
-        eventIds.get(userApi).add(eventId);
-    }
-
-    public void rememberFolder(UserApi userApi, String folder) {
-        if (folderToDelete == null) {
-            folderToDelete = new HashMap<>();
-        }
-        if (!folderToDelete.containsKey(userApi)) {
-            folderToDelete.put(userApi, new ArrayList<>(1));
-        }
-        folderToDelete.get(userApi).add(folder);
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AbstractAPIClientSession#tearDown()
+     */
     @Override
     public void tearDown() throws Exception {
         Exception exception = null;
@@ -174,6 +145,44 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         }
     }
 
+    /**
+     * Keeps track of the specified {@link EventId} for the specified user
+     * 
+     * @param userApi The {@link UserApi}
+     * @param eventId The {@link EventId}
+     */
+    public void rememberEventId(UserApi userApi, EventId eventId) {
+        if (eventIds == null) {
+            eventIds = new HashMap<>();
+        }
+        if (!eventIds.containsKey(userApi)) {
+            eventIds.put(userApi, new ArrayList<>(1));
+        }
+        eventIds.get(userApi).add(eventId);
+    }
+
+    /**
+     * Keeps track of the specified folder for the specified user
+     * 
+     * @param userApi The {@link UserApi}
+     * @param folder The folder
+     */
+    public void rememberFolder(UserApi userApi, String folder) {
+        if (folderToDelete == null) {
+            folderToDelete = new HashMap<>();
+        }
+        if (!folderToDelete.containsKey(userApi)) {
+            folderToDelete.put(userApi, new ArrayList<>(1));
+        }
+        folderToDelete.get(userApi).add(folder);
+    }
+
+    /**
+     * Retrieves the default calendar folder of the current user
+     * 
+     * @return The default calendar folder of the current user
+     * @throws Exception if the default calendar folder cannot be found
+     */
     @SuppressWarnings("unchecked")
     protected String getDefaultFolder() throws Exception {
         FoldersVisibilityResponse visibleFolders = defaultUserApi.getFoldersApi().getVisibleFolders(defaultUserApi.getSession(), "event", "1,308", "0");
@@ -196,28 +205,14 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
-    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
-        FolderBody body = new FolderBody();
-        FolderData folderData = new FolderData();
-        folderData.setModule("event");
-        folderData.setSubscribed(true);
-        folderData.setTitle("chronos_test_" + new UID().toString());
-        List<FolderPermission> permissions = new ArrayList<>();
-        FolderPermission perm = new FolderPermission();
-        perm.setEntity(entity);
-        perm.setGroup(false);
-        perm.setBits(403710016);
-        permissions.add(perm);
-        folderData.setPermissions(permissions);
-        body.setFolder(folderData);
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
-        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
-        String result = createFolder.getData();
-        rememberFolder(api, result);
-        return result;
-
-    }
-
+    /**
+     * Retrieves the default calendar folder of the user with the specified session
+     * 
+     * @param session The session of the user
+     * @param client The {@link ApiClient}
+     * @return The default calendar folder of the user
+     * @throws Exception if the default calendar folder cannot be found
+     */
     @SuppressWarnings("unchecked")
     protected String getDefaultFolder(String session, ApiClient client) throws Exception {
         FoldersVisibilityResponse visibleFolders = new FoldersApi(client).getVisibleFolders(session, "event", "1,308", "0");
@@ -239,6 +234,45 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
+    /**
+     * Creates a new folder and remembers it.
+     * 
+     * @param api The {@link UserApi}
+     * @param session The user's session
+     * @param parent The parent folder
+     * @param entity The user id
+     * @return The result of the operation
+     * @throws ApiException if an API error is occurred
+     */
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(entity);
+        perm.setGroup(false);
+        perm.setBits(403710016);
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        permissions.add(perm);
+
+        FolderData folderData = new FolderData();
+        folderData.setModule("event");
+        folderData.setSubscribed(true);
+        folderData.setTitle("chronos_test_" + new UID().toString());
+        folderData.setPermissions(permissions);
+
+        FolderBody body = new FolderBody();
+        body.setFolder(folderData);
+
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
+        checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
+
+        String result = createFolder.getData();
+
+        rememberFolder(api, result);
+
+        return result;
+
+    }
+
     protected Date getAPIDate(TimeZone localtimeZone, Date localDate, int datesToAdd) {
         Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
         localCalendar.setTime(localDate);
@@ -247,39 +281,6 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         utcCalendar.set(localCalendar.get(Calendar.YEAR), localCalendar.get(Calendar.MONTH), localCalendar.get(Calendar.DATE), 0, 0, 0);
         utcCalendar.set(Calendar.MILLISECOND, 0);
         return utcCalendar.getTime();
-    }
-
-    protected DateTimeData getZuluDateTime(long millis) {
-        DateTimeData result = new DateTimeData();
-        result.setTzid("UTC");
-        Date date = new Date(millis);
-        result.setValue(ZULU_FORMATER.get().format(date));
-        return result;
-    }
-
-    protected DateTimeData getDateTime(long millis) {
-        return getDateTime(TimeZone.getDefault().getID(), millis);
-    }
-
-    protected DateTimeData getDateTime(Calendar cal) {
-        return getDateTime(cal.getTimeZone().getID(), cal.getTimeInMillis());
-    }
-
-    protected DateTimeData getDateTime(String timezoneId, long millis) {
-        DateTimeData result = new DateTimeData();
-        result.setTzid(timezoneId);
-        Date date = new Date(millis);
-        result.setValue(BASIC_FORMATER.get().format(date));
-        return result;
-    }
-
-    protected DateTimeData addTimeToDateTimeData(DateTimeData data, long millis) throws ParseException {
-        Date date = BASIC_FORMATER.get().parse(data.getValue());
-        return getDateTime(data.getTzid(), date.getTime() + millis);
-    }
-
-    protected Date getTime(DateTimeData time) throws ParseException {
-        return BASIC_FORMATER.get().parse(time.getValue());
     }
 
     protected void setLastTimestamp(long timestamp) {

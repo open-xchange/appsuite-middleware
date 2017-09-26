@@ -347,7 +347,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), 1, user2.getApi(), user2.getSession());
         checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
 
-
         /*
          * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
@@ -381,7 +380,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
         List<Attendee> attendees = exceptionEvent.getAttendees();
         Attendee removed;
-        if(attendees.get(0).getEntity() == defaultUserApi.getCalUser()){
+        if (attendees.get(0).getEntity() == defaultUserApi.getCalUser()) {
             removed = attendees.remove(1);
         } else {
             removed = attendees.remove(0);
@@ -491,7 +490,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             long offset = timeZone.getOffset(cal.getTimeInMillis());
 
             // Create an floating event with an alarm 3 days earlier
-            DateTimeData startTime = getDateTime(null, cal.getTimeInMillis());
+            DateTimeData startTime = DateTimeUtil.incrementDateTimeData(null, cal.getTimeInMillis());
             ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D", RelatedEnum.START), false, false);
             EventData event = handleCreation(createEvent);
             getAndCheckEvent(event, 1);
@@ -508,7 +507,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
             AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
-            Date parse = ZULU_FORMATER.get().parse(triggers2.get(0).getTime());
+            Date parse = DateTimeUtil.parseZuluDateTime(triggers2.get(0).getTime());
             assertNotEquals(triggerTime, parse.getTime());
 
             int offsetNew = TimeZone.getTimeZone("America/New_York").getOffset(cal.getTimeInMillis());
@@ -526,7 +525,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event with an alarm with a positive duration
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(cal);
+        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "PT10M", RelatedEnum.START);
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
         event = handleCreation(createEvent);
@@ -544,7 +543,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event with an alarm related to the end date
         Calendar cal = getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(cal);
+        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "-PT10M", RelatedEnum.END);
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
         event = handleCreation(createEvent);
@@ -557,7 +556,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(1) - TimeUnit.MINUTES.toMillis(10));
     }
 
-    private Calendar getDaylightSavingDate( TimeZone tz, int year){
+    private Calendar getDaylightSavingDate(TimeZone tz, int year) {
         Calendar cal = Calendar.getInstance(tz);
         cal.set(year, 1, 1, 0, 0);
         ZoneRules rules = ZoneRulesProvider.getRules(tz.getID(), true);

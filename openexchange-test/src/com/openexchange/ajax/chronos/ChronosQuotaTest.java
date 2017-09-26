@@ -190,7 +190,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     }
 
     private EventData createSingleEvent(String summary) {
-        return createSingleEvent(summary, getDateTime(System.currentTimeMillis()), getDateTime(System.currentTimeMillis() + 5000));
+        return createSingleEvent(summary, DateTimeUtil.getDateTime(System.currentTimeMillis()), DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
     }
 
 }

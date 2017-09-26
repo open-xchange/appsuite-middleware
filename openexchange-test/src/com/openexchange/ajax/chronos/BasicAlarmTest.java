@@ -91,8 +91,8 @@ public class BasicAlarmTest extends AbstractChronosTest {
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(getDateTime(System.currentTimeMillis()+5000));
+        singleEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
+        singleEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
@@ -108,8 +108,8 @@ public class BasicAlarmTest extends AbstractChronosTest {
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(getDateTime(System.currentTimeMillis()+5000));
+        singleEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
+        singleEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
 
@@ -182,7 +182,6 @@ public class BasicAlarmTest extends AbstractChronosTest {
         assertNotNull(updateEvent.getData());
         assertEquals(1, updateEvent.getData().getUpdated().size());
 
-
         EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
         assertNotNull(eventResponse2.getData());
@@ -208,7 +207,6 @@ public class BasicAlarmTest extends AbstractChronosTest {
         assertNotNull(eventResponse.getData().getAlarms());
         assertEquals(1, eventResponse.getData().getAlarms().size());
 
-
         EventData updateData = new EventData();
         Alarm alarm = new Alarm();
         alarm.setAction("display");
@@ -223,7 +221,6 @@ public class BasicAlarmTest extends AbstractChronosTest {
         assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
         assertNotNull(updateEvent.getData());
         assertEquals(1, updateEvent.getData().getUpdated().size());
-
 
         EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());

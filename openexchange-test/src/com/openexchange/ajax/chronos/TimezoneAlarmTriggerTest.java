@@ -58,10 +58,10 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
@@ -81,13 +81,13 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
     public void testTrigger() throws ApiException, ParseException {
         Calendar start = getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(start);
+        DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
         TimeZone endTimeZone = TimeZone.getTimeZone("Europe/Berlin");
         Calendar end = Calendar.getInstance(endTimeZone);
         end.setTimeInMillis(start.getTimeInMillis());
         end.add(Calendar.HOUR, 10);
-        DateTimeData endDate = getDateTime(end);
+        DateTimeData endDate = DateTimeUtil.getDateTime(end);
 
         /*
          * 1. Test alarm related to start
@@ -132,13 +132,13 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
     public void testTriggerWithPositiveDuration() throws ApiException, ParseException {
         Calendar start = getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(start);
+        DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
         TimeZone endTimeZone = TimeZone.getTimeZone("Europe/Berlin");
         Calendar end = Calendar.getInstance(endTimeZone);
         end.setTimeInMillis(start.getTimeInMillis());
         end.add(Calendar.HOUR, 10);
-        DateTimeData endDate = getDateTime(end);
+        DateTimeData endDate = DateTimeUtil.getDateTime(end);
 
         /*
          * 1. Test alarm related to start
