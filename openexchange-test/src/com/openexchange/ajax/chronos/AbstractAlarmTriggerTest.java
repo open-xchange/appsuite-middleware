@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -111,24 +112,9 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         singleEvent.setEndDate(DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration, related)));
+        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
         singleEvent.setSummary(summary);
         return singleEvent;
-    }
-
-    protected Alarm createSingleAlarm(String duration, RelatedEnum related) {
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        if (related == null) {
-            trigger.setRelated(RelatedEnum.START);
-        } else {
-            trigger.setRelated(related);
-        }
-        trigger.setDuration(duration);
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        return alarm;
     }
 
     @SuppressWarnings("unchecked")

@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -193,7 +194,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration, related)));
+        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
         singleEvent.setSummary(summary);
         return singleEvent;
     }

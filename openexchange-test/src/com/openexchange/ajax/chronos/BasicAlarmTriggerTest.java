@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -339,7 +340,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(createSingleAlarm("-PT20M", RelatedEnum.START));
+        body.addAlarmsItem(AlarmFactory.createSingleAlarm("-PT20M", RelatedEnum.START));
         ChronosCalendarResultResponse updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
@@ -431,7 +432,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(createSingleAlarm("-PT20M", RelatedEnum.START));
+        body.addAlarmsItem(AlarmFactory.createSingleAlarm("-PT20M", RelatedEnum.START));
         updateAttendee = user2.getApi().updateAttendee(user2.getSession(), folderId2, exceptionEvent.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
