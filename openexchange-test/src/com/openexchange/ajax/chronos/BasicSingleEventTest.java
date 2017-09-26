@@ -124,6 +124,9 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(expectedEventData, actualEventData, true);
     }
 
+    /**
+     * Tests the deletion of a single event
+     */
     @Test
     public void testDeleteSingle() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteSingle"));
@@ -143,6 +146,9 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         }
     }
 
+    /**
+     * Tests the update of a single event
+     */
     @Test
     public void testUpdateSingle() throws Exception {
         EventData initialEvent = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingle");
@@ -163,6 +169,9 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, updates.get(0), true);
     }
 
+    /**
+     * Tests the retrieval of a single event
+     */
     @Test
     public void testGetEvent() throws Exception {
         Date date = new Date();
@@ -210,6 +219,9 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     }
 
+    /**
+     * Tests the creation of a single event with different timezones
+     */
     @Test
     public void testCreateSingleWithDifferentTimeZones() throws Exception {
         Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
