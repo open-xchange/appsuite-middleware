@@ -255,7 +255,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The supplied types of start and end date are incompatible. Please correct the event times and try again.</li>
      * <li>Incompatible date types [start %1$d, end %2$d]</li>
      */
-    INCOMPATIBLE_DATE_TYPES("Incompatible date types [start %1$d, end %2$d]", INCOMPATIBLE_DATE_TYPES_MSG, Category.CATEGORY_USER_INPUT, 4229),
+    INCOMPATIBLE_DATE_TYPES("Incompatible date types [start %1$s, end %2$s]", INCOMPATIBLE_DATE_TYPES_MSG, Category.CATEGORY_USER_INPUT, 4229),
     /**
      * <li>The supplied timezone is invalid. Please select a valid timezone and try again.</li>
      * <li>Invalid timezone [timezone id %1$s]</li>
