@@ -99,11 +99,15 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     private Map<String, String> computeReseller2SchemeMapping(ConfigurationService configService) throws OXException {
         ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+        StringBuilder propNameBuilder = new StringBuilder(AdvertisementConfigService.CONFIG_PREFIX);
+        int reslen = propNameBuilder.length();
         for (ResellerAdmin res: resellerService.getAll()){
-            String packageScheme = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX);
+            propNameBuilder.setLength(reslen);
+            String packageScheme = configService.getProperty(propNameBuilder.append(res.getName()).append(CONFIG_SUFFIX).toString());
             if (packageScheme == null) {
                 // Fall-back to reseller identifier
-                packageScheme = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX);
+                propNameBuilder.setLength(reslen);
+                packageScheme = configService.getProperty(propNameBuilder.append(res.getId()).append(CONFIG_SUFFIX).toString());
 
                 if (packageScheme == null) {
                     // Fall-back to global as last resort
@@ -117,7 +121,8 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
         // Add 'default' as a default reseller
         String oxall = DEFAULT_RESELLER;
 
-        String packageScheme = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + oxall + CONFIG_SUFFIX);
+        propNameBuilder.setLength(reslen);
+        String packageScheme = configService.getProperty(propNameBuilder.append(oxall).append(CONFIG_SUFFIX).toString());
         if (packageScheme == null) {
             //fallback to global
             packageScheme = DEFAULT_SCHEME_ID;

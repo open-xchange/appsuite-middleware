@@ -55,14 +55,13 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.action.CalDAVPOSTAction;
+import com.openexchange.caldav.action.CalDAVPUTAction;
 import com.openexchange.caldav.action.MKCALENDARAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
 import com.openexchange.dav.actions.ExtendedMKCOLAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
-import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavCopyAction;
 import com.openexchange.webdav.action.WebdavDeleteAction;
@@ -127,9 +126,7 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
-        OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
-        OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-        actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, new WebdavIfMatchAction(), oxWebdavMaxUploadSize));
+        actions.put(WebdavMethod.PUT, prepare(new CalDAVPUTAction(factory), true, true, new WebdavIfMatchAction()));
         makeLockNullTolerant(actions);
         return actions;
     }

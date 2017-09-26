@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.ical.ical4j.mapping.event;
+package com.openexchange.html.vulntests;
 
-import java.util.List;
-import org.dmfs.rfc5545.DateTime;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.DtStart;
-import net.fortuna.ical4j.model.property.Duration;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
 
 /**
- * {@link DurationMapping}
+ * {@link Bug55600VulTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DurationMapping extends AbstractICalMapping<VEvent, Event> {
+public class Bug55600VulTest extends AbstractSanitizing {
 
-    /**
-     * Initializes a new {@link DurationMapping}.
-     */
-	public DurationMapping() {
+    public Bug55600VulTest() {
         super();
-	}
-
-    @Override
-    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
-        removeProperties(component, Property.DURATION); // stick to DTEND for export
     }
 
-    @Override
-    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
-        Duration duration = component.getDuration();
-        if (null == duration || null == duration.getDuration()) {
-            return;
-        }
-        DtStart dtStart = component.getStartDate();
-        if (null != dtStart && null != dtStart.getDate()) {
-            Event event = new Event();
-            new DtStartMapping().importICal(component, event, parameters, warnings);
-            DateTime startDate = event.getStartDate();
-            object.setEndDate(startDate.addDuration(org.dmfs.rfc5545.Duration.parse(duration.getValue())));
-        }
+    @Test
+    public void testCorruptCssUrl() throws Exception {
+        String content = "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<style>\n" +
+            ".a {\n" +
+            "    background: url(</style/>); \n" +
+            "} \n" +
+            ".<iframe/onload=alert(document[\"cookie\"])> { } \n" +
+            "</style>\n" +
+            "</html>";
+
+        String sanitized = getHtmlService().sanitize(content, null, false, null, null);
+        assertTrue("Unexpected content", sanitized.indexOf("</style/>") < 0);
     }
 
 }

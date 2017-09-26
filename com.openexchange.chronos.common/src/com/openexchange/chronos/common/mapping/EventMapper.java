@@ -702,7 +702,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             public boolean equals(Event event1, Event event2) {
                 Transp transp1 = get(event1);
                 Transp transp2 = get(event2);
-                return null == transp1 ? null == transp2 : transp1.getValue().equals(transp2.getValue());
+                return null == transp1 ? null == transp2 : null == transp2 ? false : transp1.getValue().equals(transp2.getValue());
             }
 
             @Override
