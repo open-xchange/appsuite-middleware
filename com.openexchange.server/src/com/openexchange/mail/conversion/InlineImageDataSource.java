@@ -138,9 +138,12 @@ public final class InlineImageDataSource implements ImageDataSource {
             return null;
         }
         ContentType contentType = imagePart.containsContentType() ? imagePart.getContentType() : ContentType.DEFAULT_CONTENT_TYPE;
-        if (!contentType.startsWith("image/") && !MimeType2ExtMap.getContentType(imagePart.getFileName(), "text/plain").startsWith("image/")) {
-            // Does not seem to be an image
-            return null;
+        if (!contentType.startsWith("image/") && !contentType.startsWith("application/octet-stream")) {
+            String contentTypeByFileName = MimeType2ExtMap.getContentType(imagePart.getFileName(), "text/plain");
+            if (!contentTypeByFileName.startsWith("image/")) {
+                // Does not seem to be an image
+                return null;
+            }
         }
         imagePart.loadContent();
         return imagePart;
