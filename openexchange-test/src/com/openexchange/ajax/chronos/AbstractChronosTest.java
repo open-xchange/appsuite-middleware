@@ -63,8 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;

@@ -56,6 +56,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -77,7 +78,6 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
@@ -92,7 +92,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
     private String folderId;
 
-    @SuppressWarnings("unchecked")
     private EventData createSingleEvent(String summary, DateTimeData startDate, DateTimeData endDate) {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
@@ -144,7 +143,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventUtil.compare(event, eventResponse.getData(), true);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteSingle() throws Exception {
 
