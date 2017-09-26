@@ -51,10 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.File;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -72,11 +69,8 @@ import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.configuration.asset.AssetType;
-import com.openexchange.testing.httpclient.models.ChronosAttachment;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
@@ -221,18 +215,14 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSingleWithAttachment() throws Exception {
-        EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
-
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset).toJson(), new File(asset.getAbsolutePath()), false, false);
-        EventData event = handleCreation(createEvent);
-        EventResponse eventResponse = chronosApi.getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertEquals("The amount of attachments is not correct", 1, event.getAttachments().size());
+        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
+
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventUtil.compare(expectedEventData, actualEventData, true);
     }
 
     /**
@@ -240,34 +230,23 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSingleWithAttachment() throws Exception {
-        EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
-
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        EventData initialEvent = EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset);
-        ChronosCalendarResultResponse createEvent = eca.createEventWithAttachments(defaultUserApi.getSession(), folderId, initialEvent.toJson(), new File(asset.getAbsolutePath()), false, false);
-        EventData event = handleCreation(createEvent);
-        EventResponse eventResponse = chronosApi.getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
 
-        List<ChronosAttachment> attachments = event.getAttachments();
-        assertEquals("The amount of attachments is not correct", 1, attachments.size());
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        EventUtil.compare(expectedEventData, actualEventData, true);
 
         asset = assetManager.getRandomAsset(AssetType.png);
-        event.getAttachments().add(EventFactory.createAttachment(asset));
+        expectedEventData.getAttachments().add(EventFactory.createAttachment(asset));
 
-        ChronosCalendarResultResponse updateResponse = eca.updateEventWithAttachments(defaultUserApi.getSession(), folderId, event.getId(), System.currentTimeMillis(), event.toJson(), new File(asset.getAbsolutePath()), null, true, false);
-        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
-        assertNotNull(updateResponse.getData());
+        actualEventData = eventManager.updateEventWithAttachment(expectedEventData, asset);
 
-        List<EventData> updates = updateResponse.getData().getUpdated();
-        assertTrue(updates.size() == 1);
-        EventUtil.compare(initialEvent, updates.get(0), false);
-        event.setLastModified(updates.get(0).getLastModified());
-        event.setSequence(updates.get(0).getSequence());
-        EventUtil.compare(event, updates.get(0), true);
+        EventUtil.compare(expectedEventData, actualEventData, false);
+        expectedEventData.setLastModified(actualEventData.getLastModified());
+        expectedEventData.setSequence(actualEventData.getSequence());
+        EventUtil.compare(expectedEventData, actualEventData, true);
     }
 }

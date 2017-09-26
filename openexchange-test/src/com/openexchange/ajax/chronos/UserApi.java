@@ -71,6 +71,7 @@ public class UserApi {
     private FoldersApi foldersApi;
     private JSlobApi jslob;
     private ChronosApi chronosApi;
+    private EnhancedChronosApi enhancedChronosApi;
     private final ApiClient client;
     private final TestUser user;
 
@@ -87,6 +88,7 @@ public class UserApi {
         chronosApi = new ChronosApi(client);
         jslob = new JSlobApi(client);
         foldersApi = new FoldersApi(client);
+        setEnhancedChronosApi(new EnhancedChronosApi(client));
 
         LoginResponse login = login(user.getLogin(), user.getPassword(), client);
         this.calUser = login.getUserId();
@@ -215,6 +217,24 @@ public class UserApi {
      */
     public TestUser getUser() {
         return user;
+    }
+
+    /**
+     * Gets the enhancedChronosApi
+     *
+     * @return The enhancedChronosApi
+     */
+    public EnhancedChronosApi getEnhancedChronosApi() {
+        return enhancedChronosApi;
+    }
+
+    /**
+     * Sets the enhancedChronosApi
+     *
+     * @param enhancedChronosApi The enhancedChronosApi to set
+     */
+    public void setEnhancedChronosApi(EnhancedChronosApi enhancedChronosApi) {
+        this.enhancedChronosApi = enhancedChronosApi;
     }
 
 }

@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -62,6 +63,7 @@ import java.util.Map;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -105,6 +107,35 @@ public class EventManager extends AbstractManager {
         ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), defaultFolder, EventFactory.createSingleTwoHourEvent(userApi.getCalUser(), userApi.getUser().getLogin(), "testCreateSingle"), false, false);
         EventData event = handleCreation(createEvent);
         return event;
+    }
+
+    /**
+     * Creates an event and attaches the specified {@link Asset}
+     * 
+     * @param eventData The {@link EventData}
+     * @param asset The {@link Asset} to attach
+     * @return The created {@link EventData}
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData createEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
+        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
+        EventData event = handleCreation(createEvent);
+        return event;
+    }
+
+    /**
+     * Update the specified event and attach the specified {@link Asset}
+     * 
+     * @param eventData The event
+     * @param asset The {@link Asset} to attach
+     * @return The updated {@link EventData}
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
+        ChronosCalendarResultResponse updateResponse = userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false);
+        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
+        assertNotNull(updateResponse.getData());
+        return handleUpdate(updateResponse);
     }
 
     /**
