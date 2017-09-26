@@ -247,12 +247,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testUpdateSingleWithAttachment() throws Exception {
         EnhancedChronosApi eca = new EnhancedChronosApi(defaultUserApi.getClient());
 
-        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        start.setTimeInMillis(System.currentTimeMillis());
-
-        Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
-        end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
-
         AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
