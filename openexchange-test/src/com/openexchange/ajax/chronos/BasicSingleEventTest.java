@@ -158,8 +158,8 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     @Test
     public void testGetEvent() throws Exception {
         Date date = new Date();
-        Date today = getAPIDate(TimeZone.getTimeZone("UTC"), date, 0);
-        Date tomorrow = getAPIDate(TimeZone.getTimeZone("UTC"), date, 1);
+        Date today = DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 0);
+        Date tomorrow = DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 1);
 
         // Create a single event
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testGetEvent"), false, false);

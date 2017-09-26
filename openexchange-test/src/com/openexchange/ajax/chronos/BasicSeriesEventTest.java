@@ -153,7 +153,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
         DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEvent("testDeleteSeriesOccurence"), false, false);
         assertNull(createEvent.getError(), createEvent.getError());
@@ -226,7 +226,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
         DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         EventData initialEvent = createSeriesEvent("testUpdateSeriesOccurence");
         ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
@@ -282,7 +282,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
         DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
         EventData eventToCreate = createSeriesEvent("testGetSeries");
@@ -335,7 +335,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
         DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(getAPIDate(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
         EventData eventToCreate = createSeriesEvent("testFloatingSeries");

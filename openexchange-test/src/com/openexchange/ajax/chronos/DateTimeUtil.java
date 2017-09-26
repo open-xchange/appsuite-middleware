@@ -53,6 +53,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -179,5 +180,24 @@ final class DateTimeUtil {
     static DateTimeData incrementDateTimeData(DateTimeData data, long millis) throws ParseException {
         Date date = BASIC_FORMATER.get().parse(data.getValue());
         return getDateTime(data.getTzid(), date.getTime() + millis);
+    }
+
+    /**
+     * Adds the specified amount of days in the specified {@link Date} in the specified {@link TimeZone}
+     * 
+     * @param localtimeZone the {@link TimeZone}
+     * @param localDate The {@link Date}
+     * @param datesToAdd The amount of days to add
+     * @return The new {@link Date}
+     */
+    static Date incrementDateTimeData(TimeZone localtimeZone, Date localDate, int datesToAdd) {
+        Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
+        localCalendar.setTime(localDate);
+        localCalendar.add(Calendar.DAY_OF_YEAR, datesToAdd);
+
+        Calendar utcCalendar = GregorianCalendar.getInstance(TimeZones.UTC);
+        utcCalendar.set(localCalendar.get(Calendar.YEAR), localCalendar.get(Calendar.MONTH), localCalendar.get(Calendar.DATE), 0, 0, 0);
+        utcCalendar.set(Calendar.MILLISECOND, 0);
+        return utcCalendar.getTime();
     }
 }

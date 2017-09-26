@@ -265,16 +265,6 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     }
 
-    protected Date getAPIDate(TimeZone localtimeZone, Date localDate, int datesToAdd) {
-        Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
-        localCalendar.setTime(localDate);
-        localCalendar.add(Calendar.DAY_OF_YEAR, datesToAdd);
-        Calendar utcCalendar = GregorianCalendar.getInstance(TimeZones.UTC);
-        utcCalendar.set(localCalendar.get(Calendar.YEAR), localCalendar.get(Calendar.MONTH), localCalendar.get(Calendar.DATE), 0, 0, 0);
-        utcCalendar.set(Calendar.MILLISECOND, 0);
-        return utcCalendar.getTime();
-    }
-
     protected void setLastTimestamp(long timestamp) {
         this.lastTimeStamp = timestamp;
     }
