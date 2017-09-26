@@ -118,6 +118,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.Status;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
@@ -797,7 +798,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 @Override
                 public Object doCommand(IMAPProtocol p) throws ProtocolException {
                     String[] item = { "UIDNEXT" };
-                    return Long.valueOf(p.status(fullName, item).uidnext);
+                    Status status = p.status(fullName, item);
+                    return Long.valueOf(null == status ? -1 : status.uidnext);
                 }
             })).longValue();
         } catch (MessagingException e) {
