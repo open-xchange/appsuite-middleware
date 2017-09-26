@@ -286,7 +286,7 @@ public abstract class EventConverter {
      *
      * @return The default timezone
      */
-    protected abstract TimeZone getDefaultTimeZone() throws OXException;
+    public abstract TimeZone getDefaultTimeZone() throws OXException;
 
     protected RecurrenceService getRecurrenceService() {
         return services.getService(RecurrenceService.class);

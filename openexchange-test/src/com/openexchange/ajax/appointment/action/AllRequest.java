@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
 
@@ -67,6 +66,10 @@ import com.openexchange.groupware.search.Order;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllRequest extends CommonAllRequest {
+
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 206, 2 };
+
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
 
     public static final int[] GUI_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID };
 
@@ -197,10 +200,10 @@ public class AllRequest extends CommonAllRequest {
             return new AllParser(isFailOnError(), getColumns());
         } else {
             if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_ALL_ALIAS);
+                return new AllParser(isFailOnError(), COLUMNS_ALL_ALIAS);
             }
             if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_LIST_ALIAS);
+                return new AllParser(isFailOnError(), COLUMNS_LIST_ALIAS);
             }
         }
         return null;
