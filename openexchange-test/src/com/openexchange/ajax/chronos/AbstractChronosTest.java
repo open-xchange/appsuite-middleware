@@ -259,10 +259,20 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
+    /**
+     * Sets the last timestamp
+     * 
+     * @param timestamp the last timestamp to set
+     */
     protected void setLastTimestamp(long timestamp) {
         this.lastTimeStamp = timestamp;
     }
 
+    /**
+     * Gets the last timestamp
+     * 
+     * @return the last timestamp
+     */
     protected long getLastTimestamp() {
         return lastTimeStamp;
     }
