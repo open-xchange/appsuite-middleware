@@ -57,8 +57,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
-import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosDeleteListener;
@@ -119,12 +117,10 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
             registerService(CreateTableService.class, new ChronosCreateTableService());
             registerService(DeleteListener.class, new ChronosDeleteListener());
             /*
-             * register storage services
+             * register storage factory services
              */
             DatabaseServiceDBProvider defaultDbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
-            registerService(ReplayingCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorageFactory());
-            registerService(LegacyCalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorageFactory(defaultDbProvider));
-            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(defaultDbProvider));
+            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(this, defaultDbProvider));
             registerService(CalendarAccountStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorageFactory(defaultDbProvider));
             registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
         } catch (Exception e) {

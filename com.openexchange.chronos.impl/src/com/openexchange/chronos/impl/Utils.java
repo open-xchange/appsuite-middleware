@@ -90,7 +90,6 @@ import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
@@ -182,12 +181,10 @@ public class Utils {
      * @param session The calendar session to evaluate
      * @return <code>true</code> the current calendar user should be added as default attendee to events implicitly, <code>false</code>, otherwise
      * @see CalendarParameters#PARAMETER_DEFAULT_ATTENDEE
-     * @see CalendarConfig#isUseLegacyStorage
-     * @see CalendarConfig#isReplayToLegacyStorage
      */
     public static boolean isEnforceDefaultAttendee(CalendarSession session) {
-        return 1 == 1 || session.getConfig().isUseLegacyStorage() || session.getConfig().isReplayToLegacyStorage() ||
-            session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.FALSE).booleanValue();
+        // enabled by default for now (as legacy storage still in use)
+        return session.get(CalendarParameters.PARAMETER_DEFAULT_ATTENDEE, Boolean.class, Boolean.TRUE).booleanValue();
     }
 
     /**

@@ -70,11 +70,13 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.calendar.json.compat.Appointment;
+import com.openexchange.calendar.json.compat.AppointmentWriter;
+import com.openexchange.calendar.json.compat.CalendarDataObject;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -87,9 +89,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -116,9 +116,6 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     /** The columns alias for the columns included in the response of a typical <code>list</code> request */
     public static final int[] COLUMNS_LIST_ALIAS = new int[] { 1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
-
-    /** A client timestamp / sequence number that can be considered larger than all others */
-    protected static final long DISTANT_FUTURE = Long.MAX_VALUE;
 
     protected final ServiceLookup serviceLookup;
 

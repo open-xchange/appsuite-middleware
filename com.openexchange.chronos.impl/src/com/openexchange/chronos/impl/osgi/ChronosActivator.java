@@ -69,8 +69,6 @@ import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.LegacyCalendarStorageFactory;
-import com.openexchange.chronos.storage.ReplayingCalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -113,7 +111,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class,
             FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class,
-            ThreadPoolService.class, LegacyCalendarStorageFactory.class, ReplayingCalendarStorageFactory.class, QuotaService.class, CapabilityService.class };
+            ThreadPoolService.class, QuotaService.class, CapabilityService.class };
     }
     //@formatter:on
 
@@ -144,7 +142,7 @@ public class ChronosActivator extends HousekeepingActivator {
              * register calendar handler to propagate OSGi events
              */
             track(EventAdmin.class, new EventAdminServiceListerner(context));
-            openTrackers();            
+            openTrackers();
             /*
              * declare calendar-printing capability & appropriate checker for it
              * (to avoid explicit declaration of capability in config file)
