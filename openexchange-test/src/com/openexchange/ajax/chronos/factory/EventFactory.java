@@ -55,12 +55,12 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
+import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
 /**
  * {@link EventFactory}
@@ -110,16 +110,16 @@ public final class EventFactory {
         eventData.addAttachmentsItem(createAttachment(asset));
         return eventData;
     }
-    
-    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, String duration, RelatedEnum related) {
+
+    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, Alarm alarm) {
         EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
-        eventData.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
+        eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
 
-    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, String duration, RelatedEnum related) {
+    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, Alarm alarm) {
         EventData eventData = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
-        eventData.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
+        eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
 

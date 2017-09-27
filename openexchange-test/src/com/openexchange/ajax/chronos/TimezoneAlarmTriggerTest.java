@@ -194,7 +194,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
+        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createAlarm(duration, related)));
         singleEvent.setSummary(summary);
         return singleEvent;
     }

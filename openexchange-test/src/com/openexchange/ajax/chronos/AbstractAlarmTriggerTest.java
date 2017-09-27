@@ -112,7 +112,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         singleEvent.setEndDate(DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createSingleAlarm(duration, related)));
+        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createAlarm(duration, related)));
         singleEvent.setSummary(summary);
         return singleEvent;
     }

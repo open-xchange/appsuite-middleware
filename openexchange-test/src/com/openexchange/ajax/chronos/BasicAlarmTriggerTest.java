@@ -340,7 +340,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(AlarmFactory.createSingleAlarm("-PT20M", RelatedEnum.START));
+        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
         ChronosCalendarResultResponse updateAttendee = user2.getChronosApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
@@ -432,7 +432,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         attendee2.setPartStat("ACCEPTED");
         body.attendee(attendee2);
 
-        body.addAlarmsItem(AlarmFactory.createSingleAlarm("-PT20M", RelatedEnum.START));
+        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
         updateAttendee = user2.getChronosApi().updateAttendee(user2.getSession(), folderId2, exceptionEvent.getId(), getLastTimestamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());

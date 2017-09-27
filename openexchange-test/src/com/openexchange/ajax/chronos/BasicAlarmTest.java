@@ -51,18 +51,17 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.Trigger;
@@ -73,26 +72,11 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
  * {@link BasicAlarmTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAlarmTest extends AbstractChronosTest {
-
-    private EventData createSingleEventWithoutAlarms(String summary) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-        singleEvent.setSummary(summary);
-        return singleEvent;
-    }
 
     private EventData createSingleEventWithSingleAlarm(String summary) {
         EventData singleEvent = new EventData();
@@ -130,7 +114,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSingleAlarm() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(createSingleEventWithSingleAlarm("testCreateSingleAlarm"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M")));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         assertNotNull(actualEventData.getAlarms());
@@ -143,24 +127,15 @@ public class BasicAlarmTest extends AbstractChronosTest {
     @Test
     public void testAddSingleAlarm() throws Exception {
         // Create an event without an alarm
-        EventData expectedEventData = eventManager.createEvent(createSingleEventWithoutAlarms("testAddSingleAlarm"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testAddSingleAlarm"));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         assertNotNull(actualEventData.getAlarms());
         assertEquals(0, actualEventData.getAlarms().size());
 
-        // Create the alarm
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT30M");
-
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-
+        // Create the alarm as a delta for the event
         EventData updateData = new EventData();
-        updateData.setAlarms(Collections.singletonList(alarm));
+        updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
         updateData.setId(actualEventData.getId());
 
         // Update the event and add the alarm
@@ -184,17 +159,8 @@ public class BasicAlarmTest extends AbstractChronosTest {
         assertNotNull(actualEventData.getAlarms());
         assertEquals(1, actualEventData.getAlarms().size());
 
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT30M");
-
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-
         EventData updateData = new EventData();
-        updateData.setAlarms(Collections.singletonList(alarm));
+        updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
         updateData.setId(actualEventData.getId());
 
         expectedEventData = eventManager.updateEvent(updateData);
@@ -212,7 +178,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
      */
     @Test
     public void testDifferentAlarmTypes() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(createSingleEventWithoutAlarms("testDifferentAlarmTypes"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDifferentAlarmTypes"));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         assertNotNull(actualEventData.getAlarms());
@@ -220,14 +186,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
         // Test display alarm
         {
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-
-            Alarm alarm = new Alarm();
-            alarm.setAction("display");
-            alarm.setTrigger(trigger);
-            alarm.setDescription("This is the display message!");
+            Alarm alarm = AlarmFactory.createDisplayAlarm("-PT30M");
 
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
@@ -246,23 +205,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
         // Test mail alarm
         {
-
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-
-            List<Attendee> attendees = new ArrayList<>(1);
-            Attendee attendee = new Attendee();
-            attendee.setUri("mailto:test@domain.wrong");
-            attendee.setEmail("test@domain.wrong");
-            attendees.add(attendee);
-
-            Alarm alarm = new Alarm();
-            alarm.setAction("mail");
-            alarm.setTrigger(trigger);
-            alarm.setDescription("This is the mail message!");
-            alarm.setSummary("This is the mail subject");
-            alarm.setAttendees(attendees);
+            Alarm alarm = AlarmFactory.createMailAlarm("-PT30M", "test@domain.wrong", "This is the mail message!", "This is the mail subject");
 
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
@@ -281,22 +224,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
         // Test AUDIO alarm
         {
-
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-
-            List<ChronosAttachment> attachments = new ArrayList<>(1);
-            ChronosAttachment attachment = new ChronosAttachment();
-            attachment.setUri("fpt://some.fake.ftp.server/file.mp3");
-            attachment.setFmtType("audio/mpeg");
-            attachments.add(attachment);
-
-            Alarm alarm = new Alarm();
-            alarm.setTrigger(trigger);
-            alarm.setAction("audio");
-            alarm.setAttachments(attachments);
-
+            Alarm alarm = AlarmFactory.createAudioAlarm("-PT30M", "ftp://some.fake.ftp.server/file.mp3");
             EventData updateData = new EventData();
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());

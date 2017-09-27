@@ -49,7 +49,12 @@
 
 package com.openexchange.ajax.chronos.factory;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.activation.MimetypesFileTypeMap;
 import com.openexchange.testing.httpclient.models.Alarm;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
@@ -60,20 +65,103 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
  */
 public final class AlarmFactory {
 
+    public enum AlarmAction {
+        display, audio, mail;
+    }
+
     /**
-     * Creates a new single {@link Alarm} with the specified duration and {@link RelatedEnum} trigger
+     * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum#START} trigger
+     * 
+     * @param duration The duration of the {@link Alarm}
+     * @return The new {@link Alarm}
+     */
+    public static Alarm createDisplayAlarm(String duration) {
+        return createAlarm(duration, RelatedEnum.START, AlarmAction.display);
+    }
+
+    /**
+     * Creates an audio alarm with the specified duration and {@link RelatedEnum}
+     * 
+     * @param duration The duration of the {@link Alarm}
+     * @param audioFileUri The URI for the audio file to be played when the alarm is triggered
+     * @return The new {@link Alarm}
+     */
+    public static Alarm createAudioAlarm(String duration, String audioFileUri) {
+        List<ChronosAttachment> attachments = new ArrayList<>(1);
+        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+        String mimeType = mimeTypesMap.getContentType(audioFileUri);
+
+        ChronosAttachment attachment = new ChronosAttachment();
+        attachment.setUri(audioFileUri);
+        attachment.setFmtType(mimeType);
+        attachments.add(attachment);
+
+        Alarm audioAlarm = createAlarm(duration, AlarmAction.audio);
+        audioAlarm.setAttachments(attachments);
+
+        return audioAlarm;
+    }
+
+    /**
+     * Creates an e-mail alarm with the specified duration, description and summary
+     * 
+     * @param duration The duration of the {@link Alarm}
+     * @param mailAddress The e-mail address to send the notification
+     * @param description The description of the alarm (used as the body of the mail notification)
+     * @param summary The summary of the alarm (used as the subject in the email notification)
+     * @return the new {@link Alarm}
+     */
+    public static Alarm createMailAlarm(String duration, String mailAddress, String description, String summary) {
+        List<Attendee> attendees = new ArrayList<>(1);
+        Attendee attendee = new Attendee();
+        attendee.setUri("mailto:" + mailAddress);
+        attendee.setEmail(mailAddress);
+        attendees.add(attendee);
+
+        Alarm mailAlarm = createAlarm(duration, AlarmAction.mail);
+        mailAlarm.setDescription(description);
+        mailAlarm.setSummary(summary);
+        mailAlarm.setAttendees(attendees);
+        return mailAlarm;
+    }
+
+    /**
+     * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum} trigger
      * 
      * @param duration The duration of the {@link Alarm}
      * @param related The {@link RelatedEnum} trigger
      * @return The new {@link Alarm}
      */
-    public static Alarm createSingleAlarm(String duration, RelatedEnum related) {
+    public static Alarm createAlarm(String duration, RelatedEnum related) {
+        return createAlarm(duration, related, AlarmAction.display);
+    }
+
+    /**
+     * Creates a new single {@link Alarm} with the specified {@link AlarmAction}, duration and {@link RelatedEnum#START} trigger
+     * 
+     * @param duration The duration of the {@link Alarm}
+     * @param alarmAction The {@link AlarmAction}
+     * @return The new {@link Alarm}
+     */
+    public static Alarm createAlarm(String duration, AlarmAction alarmAction) {
+        return createAlarm(duration, RelatedEnum.START, alarmAction);
+    }
+
+    /**
+     * Creates a new single display {@link Alarm} with the specified duration and {@link RelatedEnum} trigger
+     * 
+     * @param duration The duration of the {@link Alarm}
+     * @param related The {@link RelatedEnum} trigger
+     * @param alarmAction The {@link AlarmAction}
+     * @return The new {@link Alarm}
+     */
+    public static Alarm createAlarm(String duration, RelatedEnum related, AlarmAction alarmAction) {
         Trigger trigger = new Trigger();
         trigger.setRelated(related == null ? RelatedEnum.START : related);
         trigger.setDuration(duration);
 
         Alarm alarm = new Alarm();
-        alarm.setAction("display");
+        alarm.setAction(alarmAction.name());
         alarm.setTrigger(trigger);
         alarm.setDescription("This is the display message!");
         return alarm;
