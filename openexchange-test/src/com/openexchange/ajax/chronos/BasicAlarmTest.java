@@ -50,14 +50,12 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -70,7 +68,7 @@ import com.openexchange.testing.httpclient.models.EventData;
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class BasicAlarmTest extends AbstractChronosTest {
+public class BasicAlarmTest extends AbstractAlarmTest {
 
     /**
      * Initialises a new {@link BasicAlarmTest}.
@@ -96,10 +94,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
     @Test
     public void testCreateSingleAlarm() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M")));
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(1, actualEventData.getAlarms().size());
+        getAndAssertAlarms(expectedEventData, 1);
     }
 
     /**
@@ -109,10 +104,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
     public void testAddSingleAlarm() throws Exception {
         // Create an event without an alarm
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testAddSingleAlarm"));
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(0, actualEventData.getAlarms().size());
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
 
         // Create the alarm as a delta for the event
         EventData updateData = new EventData();
@@ -123,10 +115,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
         expectedEventData = eventManager.updateEvent(updateData);
 
         // Assert that the alarm was successfully added
-        actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(1, actualEventData.getAlarms().size());
+        getAndAssertAlarms(expectedEventData, 1);
     }
 
     /**
@@ -135,10 +124,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
     @Test
     public void testChangeAlarmTime() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M")));
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(1, actualEventData.getAlarms().size());
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
         EventData updateData = new EventData();
         updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
@@ -146,9 +132,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
         expectedEventData = eventManager.updateEvent(updateData);
 
-        actualEventData = eventManager.getEvent(expectedEventData.getId());
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(1, actualEventData.getAlarms().size());
+        actualEventData = getAndAssertAlarms(expectedEventData, 1);
         assertEquals("-PT30M", actualEventData.getAlarms().get(0).getTrigger().getDuration());
     }
 
@@ -160,10 +144,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
     @Test
     public void testDifferentAlarmTypes() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDifferentAlarmTypes"));
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
-        assertNotNull(actualEventData.getAlarms());
-        assertEquals(0, actualEventData.getAlarms().size());
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
 
         // Test display alarm
         {
@@ -175,9 +156,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = eventManager.getEvent(expectedEventData.getId());
-            assertNotNull(actualEventData.getAlarms());
-            assertEquals(1, actualEventData.getAlarms().size());
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
@@ -194,9 +173,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = eventManager.getEvent(expectedEventData.getId());
-            assertNotNull(actualEventData.getAlarms());
-            assertEquals(1, actualEventData.getAlarms().size());
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
@@ -212,9 +189,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
 
             expectedEventData = eventManager.updateEvent(updateData);
 
-            actualEventData = eventManager.getEvent(expectedEventData.getId());
-            assertNotNull(actualEventData.getAlarms());
-            assertEquals(1, actualEventData.getAlarms().size());
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
             Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
