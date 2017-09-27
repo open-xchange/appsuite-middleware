@@ -50,6 +50,7 @@
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -120,7 +121,7 @@ public class TestCommand extends Command {
          * <code>envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] &lt;envelope-part: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.4">RFC-5228: Test envelope</a></p>
          */
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope", null),
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, addressParts(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Collections.singletonList("envelope"), null),
         /**
          * <p>The "exists" test is true if the headers listed in the header-names argument exist within the message. All of the headers must exist or the test is false.
          * <code>exists &lt;header-names: string-list&gt;</code>
@@ -178,7 +179,7 @@ public class TestCommand extends Command {
          * <code>body [COMPARATOR] [MATCH-TYPE] [BODY-TRANSFORM] &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5173#section-4">RFC-5173: Test body</a></p>
          */
-        BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body", null),
+        BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), Collections.singletonList("body"), null),
         /**
          * <p>The date test matches date/time information derived from headers
          * containing [RFC2822] date-time values. The date/time information is
@@ -190,7 +191,7 @@ public class TestCommand extends Command {
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-4">RFC-5260: Date Test</a></p>
          *
          */
-        DATE("date", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", dateOtherArguments()),
+        DATE("date", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), Collections.singletonList("date"), dateOtherArguments()),
         /**
          * <p>The currentdate test is similar to the date test, except that it
          * operates on the current date/time rather than a value extracted from
@@ -198,13 +199,13 @@ public class TestCommand extends Command {
          * <code>currentdate [":zone" &lt;time-zone: string&gt;] [COMPARATOR] [MATCH-TYPE] &lt;date-part: string&gt; ;&ltkey-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5260#section-5">RFC-5260: Test currentdate</a></p>
          */
-        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date", currentDateOtherArguments()),
+        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), Collections.singletonList("date"), currentDateOtherArguments()),
         /**
          * <p>The hasflag test evaluates to true if any of the variables matches any flag name.</p>
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-4">RFC-5232: Test hasflag</a></p>
          */
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "imap4flags", null);
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Arrays.asList("imap4flags", "imapflags"), null);
 
         ////////////////////////////////// MATCH TYPES /////////////////////////////////////////////////
 
@@ -368,7 +369,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mappings for the header match types
-         * 
+         *
          * @return A {@link List} with mappings
          */
         private static List<JSONMatchType> headerJSONMatchTypes() {
@@ -463,7 +464,7 @@ public class TestCommand extends Command {
         /**
          * Defines if this command needs a require or not
          */
-        private String required;
+        private List<String> required;
 
         /**
          * Initializes a new {@link Commands}.
@@ -478,7 +479,7 @@ public class TestCommand extends Command {
          * @param required The 'require'
          * @param otherArguments Other optional arguments
          */
-        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final String required, final Hashtable<String, String> otherArguments) {
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<JSONMatchType> jsonMatchTypes, final List<String> required, final Hashtable<String, String> otherArguments) {
             this.commandName = commandName;
             this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
@@ -521,7 +522,7 @@ public class TestCommand extends Command {
         }
 
         @Override
-        public final String getRequired() {
+        public final List<String> getRequired() {
             return required;
         }
 
@@ -541,7 +542,7 @@ public class TestCommand extends Command {
             this.comparator = comparator;
         }
 
-        public final void setRequire(final String required) {
+        public final void setRequire(final List<String> required) {
             this.required = required;
         }
 
@@ -778,9 +779,9 @@ public class TestCommand extends Command {
     @Override
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();
-        final String required = this.command.getRequired();
-        if (null != required) {
-            retval.add(required);
+        final List<String> required = this.command.getRequired();
+        if (null != required && !required.isEmpty()) {
+            retval.addAll(required);
         }
         // Here we add require for the comparator rule if there are any
         if (-1 != indexOfComparator) {
