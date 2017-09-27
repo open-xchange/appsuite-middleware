@@ -86,6 +86,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -115,7 +116,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess {
 
     private final OneDriveAccountAccess accountAccess;
     final int userId;

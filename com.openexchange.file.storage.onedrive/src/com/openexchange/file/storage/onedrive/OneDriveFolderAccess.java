@@ -68,6 +68,7 @@ import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -84,7 +85,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess {
+public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
 
     private static volatile Boolean optimisticSubfolderCheck;
 
@@ -298,15 +299,21 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                String parentId = toCreate.getParentId();
                 HttpPost request = null;
                 try {
-                    request = new HttpPost(buildUri(toOneDriveFolderId(toCreate.getParentId()), initiateQueryString()));
+                    request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
                     request.setHeader("Content-Type", "application/json");
                     request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
-                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                    return jResponse.getString("id");
+                    try {
+                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                        return jResponse.getString("id");
+                    } catch (DuplicateResourceException e) {
+                        FileStorageFolder parent = getFolder(parentId);
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parent.getName());
+                    }
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(toCreate.getParentId(), account.getId(), e);
+                    throw handleHttpResponseError(parentId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -336,8 +343,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
                     request.setHeader("Content-Type", "application/json");
                     request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(newParentId))));
-                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                    return jResponse.getString("id");
+                    try {
+                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                        return jResponse.getString("id");
+                    } catch (DuplicateResourceException e) {
+                        FileStorageFolder folder = getFolder(folderId);
+                        FileStorageFolder newParent = getFolder(newParentId);
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), newParent.getName());
+                    }
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
@@ -359,8 +372,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                     request = new HttpPut(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
                     request.setHeader("Content-Type", "application/json");
                     request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName)));
-                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                    return jResponse.getString("id");
+                    try {
+                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                        return jResponse.getString("id");
+                    } catch (DuplicateResourceException e) {
+                        FileStorageFolder folder = getFolder(folderId);
+                        FileStorageFolder parent = getFolder(folder.getParentId());
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), parent.getName());
+                    }
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {

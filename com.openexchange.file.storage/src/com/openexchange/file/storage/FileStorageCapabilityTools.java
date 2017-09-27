@@ -115,6 +115,8 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageZippableFolderFileAccess.class.isAssignableFrom(fileAccessClass));
         case COUNT_TOTAL:
             return Boolean.valueOf(FileStorageCountableFolderFileAccess.class.isAssignableFrom(fileAccessClass));
+        case CASE_INSENSITIVE:
+            return Boolean.valueOf(FileStorageCaseInsensitiveAccess.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -170,6 +172,8 @@ public class FileStorageCapabilityTools {
             return FileStorageZippableFolderFileAccess.class.isInstance(fileAccess);
         case COUNT_TOTAL:
             return FileStorageCountableFolderFileAccess.class.isInstance(fileAccess);
+        case CASE_INSENSITIVE:
+            return FileStorageCaseInsensitiveAccess.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;
