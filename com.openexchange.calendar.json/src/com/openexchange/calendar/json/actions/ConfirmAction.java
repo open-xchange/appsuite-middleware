@@ -59,6 +59,7 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -101,7 +102,7 @@ public final class ConfirmAction extends AppointmentAction {
         } else {
             eventID = getEventConverter(session).getEventID(folderId, objectId, recurrencePosition);
         }
-        long clientTimestamp = optClientTimestamp(request, DISTANT_FUTURE);
+        long clientTimestamp = optClientTimestamp(request, CalendarUtils.DISTANT_FUTURE);
         JSONObject jsonObject = request.getData();
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
         Attendee attendee = EventConverter.getAttendee(participant);

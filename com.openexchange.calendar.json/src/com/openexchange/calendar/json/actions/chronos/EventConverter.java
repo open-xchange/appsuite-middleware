@@ -68,7 +68,10 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.calendar.RecurrenceChecker;
+import com.openexchange.calendar.json.compat.Appointment;
+import com.openexchange.calendar.json.compat.CalendarCollection;
+import com.openexchange.calendar.json.compat.CalendarDataObject;
+import com.openexchange.calendar.json.compat.RecurrenceChecker;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -90,10 +93,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -988,7 +988,7 @@ public abstract class EventConverter {
             cdo.setMonth(pattern.getMonth());
         }
         RecurrenceChecker.check(cdo);
-        services.getService(CalendarCollectionService.class).checkRecurring(cdo);
+        new CalendarCollection().checkRecurring(cdo);
         return pattern;
     }
 

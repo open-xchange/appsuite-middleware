@@ -59,12 +59,12 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.calendar.json.compat.Appointment;
+import com.openexchange.calendar.json.compat.CalendarDataObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
