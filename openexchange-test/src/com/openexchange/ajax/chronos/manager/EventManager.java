@@ -62,6 +62,8 @@ import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.AlarmTriggerData;
+import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -140,8 +142,6 @@ public class EventManager extends AbstractManager {
      */
     public EventData updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
         ChronosCalendarResultResponse updateResponse = userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false);
-        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
-        assertNotNull(updateResponse.getData());
         return handleUpdate(updateResponse);
     }
 
@@ -172,9 +172,7 @@ public class EventManager extends AbstractManager {
             assertNotNull(eventResponse.getError());
             throw new ChronosApiException(eventResponse.getCode(), eventResponse.getError());
         }
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        return eventResponse.getData();
+        return checkResponse(eventResponse.getError(), eventResponse.getError(), eventResponse.getData());
     }
 
     /**
@@ -201,9 +199,7 @@ public class EventManager extends AbstractManager {
      */
     public List<EventData> getAllEvents(Date from, Date until) throws ApiException {
         EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, false, true);
-        assertNull(eventsResponse.getErrorDesc(), eventsResponse.getError());
-        assertNotNull(eventsResponse.getData());
-        return eventsResponse.getData();
+        return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
     /**
@@ -215,10 +211,7 @@ public class EventManager extends AbstractManager {
      */
     public List<EventData> listEvents(List<EventId> ids) throws ApiException {
         EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), ids, null);
-        assertNull(listResponse.getErrorDesc(), listResponse.getError());
-        assertNotNull(listResponse.getData());
-
-        return listResponse.getData();
+        return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getData());
     }
 
     /**
@@ -254,10 +247,20 @@ public class EventManager extends AbstractManager {
      */
     public UpdatesResult getUpdates(Date since) throws ApiException {
         ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, false, true);
-        assertNull(updatesResponse.getErrorDesc(), updatesResponse.getError());
-        assertNotNull(updatesResponse.getData());
+        return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
+    }
 
-        return updatesResponse.getData();
+    /**
+     * Retrieves not acknowledged alarm triggers.
+     * 
+     * @param until Upper exclusive limit of the queried range as a utc date-time value as specified
+     *            in RFC 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only events which should trigger before this date are returned.
+     * @return The {@link AlarmTriggerData}
+     * @throws ApiException if an API error is occurred
+     */
+    public AlarmTriggerData getAlarmTrigger(long until) throws ApiException {
+        AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), null);
+        return checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
     }
 
     //////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
@@ -282,11 +285,15 @@ public class EventManager extends AbstractManager {
         return event;
     }
 
+    /**
+     * Handles the result response of an update event
+     * 
+     * @param updateEvent The result
+     * @return The updated event
+     */
     private EventData handleUpdate(ChronosCalendarResultResponse updateEvent) {
-        assertNull(updateEvent.getErrorDesc(), updateEvent.getError());
-        assertNotNull(updateEvent.getData());
-
-        List<EventData> updates = updateEvent.getData().getUpdated();
+        CalendarResult calendarResult = checkResponse(updateEvent.getErrorDesc(), updateEvent.getError(), updateEvent.getData());
+        List<EventData> updates = calendarResult.getUpdated();
         assertTrue(updates.size() == 1);
 
         return updates.get(0);
