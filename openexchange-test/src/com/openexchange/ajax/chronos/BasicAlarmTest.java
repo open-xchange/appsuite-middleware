@@ -58,14 +58,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.AssertUtil;
-import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.Trigger;
-import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
 /**
  *
@@ -78,31 +72,18 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAlarmTest extends AbstractChronosTest {
 
-    private EventData createSingleEventWithSingleAlarm(String summary) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT15M");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        singleEvent.setAlarms(Collections.singletonList(alarm));
-        singleEvent.setSummary(summary);
-        return singleEvent;
+    /**
+     * Initialises a new {@link BasicAlarmTest}.
+     */
+    public BasicAlarmTest() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.chronos.AbstractChronosTest#setUp()
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -153,7 +134,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
      */
     @Test
     public void testChangeAlarmTime() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(createSingleEventWithSingleAlarm("testChangeAlarmTime"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M")));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
         assertNotNull(actualEventData.getAlarms());
