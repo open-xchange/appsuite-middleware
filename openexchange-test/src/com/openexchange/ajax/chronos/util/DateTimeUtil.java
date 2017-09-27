@@ -104,9 +104,19 @@ public final class DateTimeUtil {
         result.setTzid("UTC");
 
         Date date = new Date(millis);
-        result.setValue(ZULU_FORMATER.get().format(date));
+        result.setValue(formatZuluDate(date));
 
         return result;
+    }
+
+    /**
+     * Formats the specified {@link Date} into ZULU format
+     * 
+     * @param date The date to format
+     * @return The string representation of the date
+     */
+    public static String formatZuluDate(Date date) {
+        return ZULU_FORMATER.get().format(date);
     }
 
     /**
