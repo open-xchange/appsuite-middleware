@@ -95,6 +95,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
@@ -118,12 +119,13 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
+    private final String accountDisplayName;
 
     // 8 MB chunks
     private static final int CHUNK_SIZE = 8 * (int) Math.pow(1024, 2);
@@ -138,6 +140,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
+        accountDisplayName = account.getDisplayName();
         userId = session.getUserId();
     }
 
@@ -243,7 +246,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     file.copyFrom(dbxFile, copyFields);
                     return dbxFile.getIDTuple();
                 } catch (RelocationErrorException e) {
-                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId(), accountDisplayName);
                 } catch (DbxException e) {
                     throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                 }
@@ -287,7 +290,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId(), accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -316,7 +319,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId(), accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -865,7 +868,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
-            throw DropboxExceptionHandler.handleUploadErrorException(e, path);
+            throw DropboxExceptionHandler.handleUploadErrorException(e, path, accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {
