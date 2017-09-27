@@ -62,7 +62,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     // @formatter:off
     BasicAlarmTest.class,
-    //BasicAlarmTriggerTest.class,
+    BasicAlarmTriggerTest.class,
     BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
     BasicSeriesEventTest.class,
